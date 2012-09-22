@@ -1,0 +1,33 @@
+
+--- HET Block Header ----------------------------------------------------
+
+Offs   Contains   Meaning
+----   --------   -------
+0000   1a544548   Signature of the block, 'HET\x1A'
+0004   00000001   Version of the HET block, WoW Cataclysm tests it for 1
+0008   0000009b   Uncompressed size of the HET block
+
+--- HET Block Data ------------------------------------------------------
+
+Offs   Contains   Meaning
+----   --------   -------
+0000   0000009B   Size of the entire data in HET block. Must be equal to uncompressed size in the header
+0004   00000035   Number of used entries in the hash table (aka number of files in the MPQ)
+0008   00000046   Total number of entries in the hash table
+000C   00000040   Effective size of the hash entry
+0010   00000006   Size of block index, in bits
+0014   00000000   Stored to pParsedData->field_4
+0018   00000006   Stored to pParsedData->field_8
+001C   00000035   Length, in bytes, of the block table entry
+
+0020   (46 bytes) 00 90 c9 d2 9c 87 00 c7 00 8d b6 de 87 c3 92 85
+                  d1 9f ba d1 00 d0 ad c7 e9 9a f5 e4 f3 fb bc f4
+                  b4 00 bb e3 00 00 88 e4 a0 ef a7 cf ac db 9f 00
+                  b5 98 f2 bc 00 92 90 e3 9e 00 b9 00 8a b1 cb 00 
+                  00 90 00 00 00 00
+
+0066   (35 bytes) ff e7 40 12 f6 8f bf d2 19 70 d4 84 a7 6c b6 bf
+                  20 96 34 b0 3c 55 ea aa cc 3f 93 ff 7f 71 c5 a1
+                  6d c3 9b fd c8 1a 53 3f c8 4e d6 1f fc 44 82 fe
+                  bf f7 ff ff ff
+

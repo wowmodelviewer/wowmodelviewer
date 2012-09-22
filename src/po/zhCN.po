@@ -1,0 +1,958 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-05-16 13:14+0800\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Chuanhsing <chuanhsing@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-Basepath: E:\\桌面\\wowmodelview\\src\\\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: animcontrol.cpp:44
+msgid "Animation"
+msgstr "动画"
+
+#: animcontrol.cpp:45
+#: animcontrol.cpp:50
+msgid "Secondary"
+msgstr "副手"
+
+#: animcontrol.cpp:50
+msgid "Mouth"
+msgstr "嘴"
+
+#: animcontrol.cpp:61
+#: animcontrol.cpp:80
+msgid "Speed: 1.0x"
+msgstr "速度: 1.0x"
+
+#: animcontrol.cpp:66
+msgid "Add"
+msgstr "添加"
+
+#: animcontrol.cpp:68
+msgid "Skin"
+msgstr "皮肤"
+
+#: animcontrol.cpp:73
+msgid "Item set"
+msgstr "套装"
+
+#: animcontrol.cpp:82
+msgid "Frame: 0"
+msgstr "帧数: 0"
+
+#: animcontrol.cpp:86
+msgid "Play"
+msgstr "播放"
+
+#: animcontrol.cpp:87
+msgid "Pause"
+msgstr "暂停"
+
+#: animcontrol.cpp:88
+msgid "Stop"
+msgstr "停止"
+
+#: animcontrol.cpp:90
+msgid "Clear"
+msgstr "清除"
+
+#: animcontrol.cpp:94
+msgid "Lock Animations"
+msgstr "锁定动画"
+
+#: animcontrol.cpp:97
+msgid "Auto Animate"
+msgstr "自动播放"
+
+#: animcontrol.cpp:308
+msgid "This group has been removed from the WMO"
+msgstr "该组已从WMO中移除"
+
+#: arrows.cpp:49
+msgid "Attach"
+msgstr "附着"
+
+#: arrows.cpp:50
+msgid "Clear All"
+msgstr "全部清除"
+
+#: charcontrol.cpp:104
+msgid "Skin color"
+msgstr "肤色"
+
+#: charcontrol.cpp:105
+msgid "Face type"
+msgstr "脸型"
+
+#: charcontrol.cpp:106
+msgid "Hair color"
+msgstr "发色"
+
+#: charcontrol.cpp:107
+msgid "Hair style"
+msgstr "发型"
+
+#: charcontrol.cpp:108
+msgid "Facial feature"
+msgstr "面部特征"
+
+#: charcontrol.cpp:109
+msgid "Facial color"
+msgstr "特征颜色"
+
+#: charcontrol.cpp:121
+msgid "Equipment"
+msgstr "装备"
+
+#: charcontrol.cpp:127
+#: charcontrol.cpp:391
+#: charcontrol.cpp:512
+#: charcontrol.cpp:2050
+#: charcontrol.cpp:2153
+#: charcontrol.cpp:2439
+#: charcontrol.cpp:2445
+#: charcontrol.cpp:2451
+#: charcontrol.cpp:2457
+#: charcontrol.cpp:2463
+#: charcontrol.cpp:2469
+#: charcontrol.cpp:2475
+#: charcontrol.cpp:2481
+#: charcontrol.cpp:2487
+#: charcontrol.cpp:2493
+#: charcontrol.cpp:2499
+#: database.cpp:529
+msgid "---- None ----"
+msgstr "---- 无 ----"
+
+#: charcontrol.cpp:129
+msgid "Head"
+msgstr "头盔"
+
+#: charcontrol.cpp:131
+msgid "Shoulder"
+msgstr "肩甲"
+
+#: charcontrol.cpp:133
+msgid "Shirt"
+msgstr "衬衫"
+
+#: charcontrol.cpp:134
+msgid "Chest"
+msgstr "胸甲"
+
+#: charcontrol.cpp:135
+msgid "Belt"
+msgstr "腰带"
+
+#: charcontrol.cpp:136
+msgid "Legs"
+msgstr "护腿"
+
+#: charcontrol.cpp:137
+msgid "Boots"
+msgstr "靴子"
+
+#: charcontrol.cpp:139
+msgid "Bracers"
+msgstr "护腕"
+
+#: charcontrol.cpp:140
+msgid "Gloves"
+msgstr "护手"
+
+#: charcontrol.cpp:141
+msgid "Cape"
+msgstr "斗篷"
+
+#: charcontrol.cpp:143
+msgid "Right hand"
+msgstr "右手"
+
+#: charcontrol.cpp:144
+msgid "Left hand"
+msgstr "左手"
+
+#: charcontrol.cpp:146
+msgid "Quiver"
+msgstr "箭袋"
+
+#: charcontrol.cpp:147
+msgid "Tabard"
+msgstr "公会徽章"
+
+#: charcontrol.cpp:158
+msgid "Icon"
+msgstr "图标"
+
+#: charcontrol.cpp:159
+msgid "Icon Color"
+msgstr "图标颜色"
+
+#: charcontrol.cpp:160
+msgid "Border"
+msgstr "边框"
+
+#: charcontrol.cpp:161
+msgid "Border Color"
+msgstr "边框颜色"
+
+#: charcontrol.cpp:162
+msgid "Background Color"
+msgstr "背景颜色"
+
+#: charcontrol.cpp:166
+msgid "Tabard details"
+msgstr "徽章细节"
+
+#: charcontrol.cpp:168
+msgid "Choose mount"
+msgstr "选择坐骑"
+
+#: charcontrol.cpp:680
+msgid "Save equipment"
+msgstr "保存装备"
+
+#: charcontrol.cpp:690
+msgid "Load equipment"
+msgstr "载入装备"
+
+#: charcontrol.cpp:2011
+#: charcontrol.cpp:2013
+#, fuzzy
+msgid "Choose an item"
+msgstr "选择套装"
+
+#: charcontrol.cpp:2072
+msgid "Choose an item set"
+msgstr "选择套装"
+
+#: charcontrol.cpp:2072
+msgid "Item sets"
+msgstr "套装"
+
+#: charcontrol.cpp:2119
+msgid "Known ridable models"
+msgstr "已知可骑模型"
+
+#: charcontrol.cpp:2120
+msgid "Other models"
+msgstr "其他模型"
+
+#: charcontrol.cpp:2162
+#: charcontrol.cpp:2163
+#, fuzzy
+msgid "Choose a mount"
+msgstr "选择坐骑"
+
+#: charcontrol.cpp:2162
+#: charcontrol.cpp:2163
+#, fuzzy
+msgid "Creatures"
+msgstr "贴图"
+
+#: effects.cpp:78
+#: effects.cpp:80
+msgid "Select a Weapon"
+msgstr "选择武器"
+
+#: effects.cpp:194
+msgid "OK"
+msgstr "确定"
+
+#: effects.cpp:195
+#: imagecontrol.cpp:41
+msgid "Cancel"
+msgstr "取消"
+
+#: imagecontrol.cpp:38
+msgid "Max Size: "
+msgstr "最大大小："
+
+#: imagecontrol.cpp:40
+msgid "Save"
+msgstr "保存"
+
+#: imagecontrol.cpp:75
+msgid "Save screenshot"
+msgstr "保存截图"
+
+#: itemselection.cpp:167
+msgid "Filter   "
+msgstr "过滤项   "
+
+#: itemselection.cpp:298
+msgid "Double-click to select only one category"
+msgstr "双击只选择一个类别"
+
+#: lightcontrol.cpp:70
+msgid "Enabled"
+msgstr "启用"
+
+#: lightcontrol.cpp:71
+msgid "Relative"
+msgstr "相对"
+
+#: lightcontrol.cpp:73
+msgid "Pos"
+msgstr "坐标"
+
+#: lightcontrol.cpp:74
+msgid "Spot"
+msgstr "点"
+
+#: lightcontrol.cpp:75
+msgid "Dir"
+msgstr "方向"
+
+#: lightcontrol.cpp:87
+msgid "Ambience"
+msgstr "环境"
+
+#: lightcontrol.cpp:90
+msgid "Diffuse"
+msgstr "漫射"
+
+#: lightcontrol.cpp:93
+msgid "Specular"
+msgstr "反射"
+
+#: lightcontrol.cpp:97
+msgid "Position XYZ"
+msgstr "XYZ位置"
+
+#: lightcontrol.cpp:103
+msgid "Target XYZ"
+msgstr "XYZ目标"
+
+#: lightcontrol.cpp:108
+msgid ""
+"Light Attenuation:\n"
+"Constant / Linear / Quadradic"
+msgstr ""
+"光线衰减：\n"
+"恒量 / 线性 / 二次方"
+
+#: lightcontrol.cpp:113
+msgid "Arc:"
+msgstr "弧光："
+
+#: lightcontrol.cpp:117
+msgid "Reset"
+msgstr "重置"
+
+#: modelbankcontrol.cpp:38
+msgid "Name:"
+msgstr "名称："
+
+#: modelbankcontrol.cpp:42
+msgid "Remove"
+msgstr "移除"
+
+#: modelbankcontrol.cpp:43
+msgid "Display"
+msgstr "显示"
+
+#: modelcontrol.cpp:52
+msgid "View"
+msgstr "视角"
+
+#: modelcontrol.cpp:56
+msgid "Alpha"
+msgstr "半透明"
+
+#: modelcontrol.cpp:59
+msgid "Scale"
+msgstr "缩放"
+
+#: modelcontrol.cpp:62
+msgid "Bones"
+msgstr "骨骼"
+
+#: modelcontrol.cpp:63
+msgid "Bounds"
+msgstr "边界"
+
+#: modelcontrol.cpp:64
+msgid "Render"
+msgstr "渲染"
+
+#: modelcontrol.cpp:65
+msgid "Wireframe"
+msgstr "网格线"
+
+#: modelcontrol.cpp:66
+msgid "Texture"
+msgstr "贴图"
+
+#: modelcontrol.cpp:67
+msgid "Particles"
+msgstr "粒子"
+
+#: modelcontrol.cpp:69
+msgid "Show Geosets"
+msgstr "显示Geosets"
+
+#: modelcontrol.cpp:388
+msgid "Opened"
+msgstr "已打开"
+
+#: modelcontrol.cpp:389
+msgid "Export"
+msgstr "导出"
+
+#: modelcontrol.cpp:390
+msgid "Export All"
+msgstr "全部导出"
+
+#: modelcontrol.cpp:391
+msgid "View In PNG"
+msgstr "以PNG格式查看"
+
+#: modelcontrol.cpp:393
+msgid "Export All To PNG"
+msgstr "全部导出至PNG"
+
+#: modelcontrol.cpp:394
+msgid "Export All To TGA"
+msgstr "全部导出至TGA"
+
+#: modelcontrol.cpp:395
+msgid "Path Preserved"
+msgstr "保留路径"
+
+#: modelexportoptions.cpp:57
+msgid "ModelExportOptions_General"
+msgstr ""
+
+#: modelexportoptions.cpp:62
+msgid "Preserve Directory Structure"
+msgstr ""
+
+#: modelexportoptions.cpp:142
+msgid "Build Content Directories"
+msgstr ""
+
+#: modelexportoptions.cpp:144
+#, fuzzy
+msgid "Export Lights"
+msgstr "导出"
+
+#: modelexportoptions.cpp:145
+#, fuzzy
+msgid "Export Doodads"
+msgstr "导出模型"
+
+#: modelexportoptions.cpp:209
+msgid "Export keyframe animation"
+msgstr ""
+
+#: modelexportoptions.cpp:210
+msgid "Add Transform to center model"
+msgstr ""
+
+#: modelviewer.cpp:236
+msgid "DBC Error"
+msgstr "DBC错误"
+
+#: modelviewer.cpp:252
+msgid "View NPC"
+msgstr "查看NPC"
+
+#: modelviewer.cpp:253
+#, fuzzy
+msgid "View Item"
+msgstr "视角"
+
+#: modelviewer.cpp:254
+#: modelviewer.cpp:403
+msgid "Mount a character..."
+msgstr "把角色当坐骑..."
+
+#: modelviewer.cpp:256
+msgid "Save Screenshot\tF12"
+msgstr "保存截图\tF12"
+
+#: modelviewer.cpp:257
+msgid "Save Sized Screenshot\tCTRL+S"
+msgstr "保存裁剪的截图\tCTRL+S"
+
+#: modelviewer.cpp:258
+msgid "Animated Gif"
+msgstr "动画Gif"
+
+#: modelviewer.cpp:259
+msgid "Export AVI"
+msgstr "导出AVI"
+
+#: modelviewer.cpp:267
+#, fuzzy
+msgid "Export Textures..."
+msgstr "导出贴图"
+
+#: modelviewer.cpp:273
+msgid "Initial Pose Only"
+msgstr ""
+
+#: modelviewer.cpp:276
+msgid "Export Options..."
+msgstr ""
+
+#: modelviewer.cpp:279
+msgid "Experimental Lightwave..."
+msgstr ""
+
+#: modelviewer.cpp:281
+msgid "Lightwave..."
+msgstr ""
+
+#: modelviewer.cpp:282
+msgid "Wavefront OBJ..."
+msgstr ""
+
+#: modelviewer.cpp:283
+msgid "Collada..."
+msgstr ""
+
+#: modelviewer.cpp:284
+msgid "Milkshape..."
+msgstr ""
+
+#: modelviewer.cpp:285
+msgid "3DS..."
+msgstr ""
+
+#: modelviewer.cpp:286
+msgid "X3D..."
+msgstr ""
+
+#: modelviewer.cpp:287
+msgid "X3D in XHTML..."
+msgstr ""
+
+#: modelviewer.cpp:295
+msgid "Export Model"
+msgstr "导出模型"
+
+#: modelviewer.cpp:299
+msgid "Discovery Item"
+msgstr "物品探索"
+
+#: modelviewer.cpp:302
+msgid "Discovery NPC"
+msgstr "NPC探索"
+
+#: modelviewer.cpp:304
+msgid "Export ModelInfo.xml"
+msgstr "导出ModelInfo.xml"
+
+#: modelviewer.cpp:307
+msgid "Reset Layout"
+msgstr "重置布局"
+
+#: modelviewer.cpp:309
+msgid "E&xit\tCTRL+X"
+msgstr "退出(&X)\tCTRL+X"
+
+#: modelviewer.cpp:312
+msgid "Show file list"
+msgstr "显示文件列表"
+
+#: modelviewer.cpp:313
+msgid "Show animaton control"
+msgstr "显示动画控制"
+
+#: modelviewer.cpp:314
+msgid "Show character control"
+msgstr "显示人物控制"
+
+#: modelviewer.cpp:315
+msgid "Show light control"
+msgstr "显示光源控制"
+
+#: modelviewer.cpp:316
+msgid "Show model control"
+msgstr "显示模型控制"
+
+#: modelviewer.cpp:317
+msgid "Show model bank"
+msgstr "显示模型组"
+
+#: modelviewer.cpp:320
+msgid "Background Color..."
+msgstr "背景颜色..."
+
+#: modelviewer.cpp:321
+msgid "Load Background\tCTRL+L"
+msgstr "载入背景\tCTRL+L"
+
+#: modelviewer.cpp:323
+msgid "Skybox"
+msgstr "天空盒"
+
+#: modelviewer.cpp:325
+msgid "Show Grid"
+msgstr "显示网格"
+
+#: modelviewer.cpp:328
+msgid "Show Mask"
+msgstr "显示遮罩"
+
+#: modelviewer.cpp:340
+msgid "Use model camera"
+msgstr "使用模型摄影机"
+
+#: modelviewer.cpp:342
+msgid "Front"
+msgstr "前面"
+
+#: modelviewer.cpp:343
+msgid "Back"
+msgstr "后面"
+
+#: modelviewer.cpp:344
+msgid "Side"
+msgstr "侧面"
+
+#: modelviewer.cpp:345
+msgid "Perspective"
+msgstr "透视图"
+
+#: modelviewer.cpp:347
+msgid "Camera"
+msgstr "摄像机"
+
+#: modelviewer.cpp:363
+msgid "Set Canvas Size"
+msgstr "设置画布大小"
+
+#: modelviewer.cpp:368
+#: modelviewer.cpp:1540
+msgid "Save Lighting"
+msgstr "保存光源"
+
+#: modelviewer.cpp:369
+#: modelviewer.cpp:1556
+msgid "Load Lighting"
+msgstr "载入光源"
+
+#: modelviewer.cpp:371
+msgid "Render Light Objects"
+msgstr "渲染光源物件"
+
+#: modelviewer.cpp:373
+msgid "Use true lighting"
+msgstr "使用真实光源"
+
+#: modelviewer.cpp:375
+msgid "Use dynamic light"
+msgstr "使用动态光源"
+
+#: modelviewer.cpp:377
+msgid "Use ambient light"
+msgstr "使用环境光源"
+
+#: modelviewer.cpp:378
+msgid "Model lights only"
+msgstr "只使用模型光"
+
+#: modelviewer.cpp:381
+msgid "Show Underwear"
+msgstr "显示内衣"
+
+#: modelviewer.cpp:383
+msgid "Show Ears\tCTRL+E"
+msgstr "显示耳朵\tCTRL+E"
+
+#: modelviewer.cpp:385
+msgid "Show Hair\tCTRL+H"
+msgstr "显示头发\tCTRL+H"
+
+#: modelviewer.cpp:387
+msgid "Show Facial Hair\tCTRL+F"
+msgstr "显示胡子\tCTRL+F"
+
+#: modelviewer.cpp:389
+msgid "Show Feet"
+msgstr "显示双足"
+
+#: modelviewer.cpp:391
+msgid "Sheathe Weapons\tCTRL+Z"
+msgstr "武器入鞘\tCTRL+Z"
+
+#: modelviewer.cpp:394
+msgid "Save Equipment\tF5"
+msgstr "保存装备\tF5"
+
+#: modelviewer.cpp:395
+msgid "Load Equipment\tF6"
+msgstr "载入装备\tF6"
+
+#: modelviewer.cpp:396
+msgid "Clear Equipment\tF9"
+msgstr "清除装备\tF9"
+
+#: modelviewer.cpp:398
+msgid "Load Item Set"
+msgstr "载入套装"
+
+#: modelviewer.cpp:399
+msgid "Load Start Outfit"
+msgstr "载入新手装"
+
+#: modelviewer.cpp:400
+msgid "Load NPC Outfit"
+msgstr "载入NPC服装"
+
+#: modelviewer.cpp:404
+msgid "Randomise Character\tF10"
+msgstr "随机化角色"
+
+#: modelviewer.cpp:407
+msgid "Apply Enchants"
+msgstr "附加附魔效果"
+
+#: modelviewer.cpp:408
+msgid "Creature Right-Hand"
+msgstr "生物右手"
+
+#: modelviewer.cpp:409
+msgid "Creature Left-Hand"
+msgstr "生物左手"
+
+#: modelviewer.cpp:411
+msgid "Spell Effects"
+msgstr "法术效果"
+
+#: modelviewer.cpp:413
+msgid "Death Effect"
+msgstr "死亡效果"
+
+#: modelviewer.cpp:420
+msgid "Save Character\tF7"
+msgstr "保存角色\tF7"
+
+#: modelviewer.cpp:421
+msgid "Load Character\tF8"
+msgstr "载入角色\tF8"
+
+#: modelviewer.cpp:422
+msgid "Import Armory Character"
+msgstr "导入英雄榜角色"
+
+#: modelviewer.cpp:425
+msgid "Use npc character skins"
+msgstr "使用NPC人物皮肤"
+
+#: modelviewer.cpp:428
+msgid "Always show default doodads in WMOs"
+msgstr "一直在WMO里显示默认物件"
+
+#: modelviewer.cpp:431
+#: modelviewer.cpp:703
+#: modelviewer.cpp:758
+msgid "Settings"
+msgstr "设置"
+
+#: modelviewer.cpp:435
+#: modelviewer.cpp:2104
+msgid "Language"
+msgstr ""
+
+#: modelviewer.cpp:436
+msgid "Help"
+msgstr "帮助"
+
+#: modelviewer.cpp:438
+msgid "About"
+msgstr "关于"
+
+#: modelviewer.cpp:440
+msgid "Check for Update"
+msgstr "检查更新"
+
+#: modelviewer.cpp:444
+msgid "&File"
+msgstr "文件(&F)"
+
+#: modelviewer.cpp:445
+msgid "&View"
+msgstr "查看(&V)"
+
+#: modelviewer.cpp:446
+msgid "&Character"
+msgstr "角色(&C)"
+
+#: modelviewer.cpp:447
+msgid "&Lighting"
+msgstr "光源(&L)"
+
+#: modelviewer.cpp:448
+msgid "&Options"
+msgstr "选项(&O)"
+
+#: modelviewer.cpp:449
+msgid "&Effects"
+msgstr "特效(&E)"
+
+#: modelviewer.cpp:450
+msgid "&About"
+msgstr "关于(&A)"
+
+#: modelviewer.cpp:659
+#: modelviewer.cpp:729
+msgid "OpenGL Canvas"
+msgstr "OpenGL画布"
+
+#: modelviewer.cpp:664
+#: modelviewer.cpp:734
+msgid "File List"
+msgstr "文件列表"
+
+#: modelviewer.cpp:674
+#: modelviewer.cpp:744
+msgid "Character"
+msgstr "角色"
+
+#: modelviewer.cpp:679
+#: modelviewer.cpp:748
+msgid "Lighting"
+msgstr "光源"
+
+#: modelviewer.cpp:685
+#: modelviewer.cpp:753
+msgid "Models"
+msgstr "模型"
+
+#: modelviewer.cpp:691
+msgid "ModelBank"
+msgstr "ModelBank"
+
+#: modelviewer.cpp:697
+msgid "ModelOpened"
+msgstr "ModelOpened"
+
+#: modelviewer.cpp:708
+#: modelviewer.cpp:763
+msgid "Model Export Options"
+msgstr ""
+
+#: modelviewer.cpp:1469
+msgid "Save character"
+msgstr "保存角色"
+
+#: modelviewer.cpp:1477
+msgid "Load character"
+msgstr "载入角色"
+
+#: modelviewer.cpp:1898
+msgid "Screenshot"
+msgstr "截图"
+
+#: modelviewer.cpp:1915
+msgid "Load Background"
+msgstr "载入背景"
+
+#: modelviewer.cpp:1915
+msgid "Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi"
+msgstr "位图图片 (*.bmp)|*.bmp|TGA 图片 (*.tga)|*.tga|Jpeg 图片 (*.jpg)|*.jpg|PNG 图片 (*.png)|*.png|AVI 视频文件 (*.avi)|*.avi"
+
+#: modelviewer.cpp:1996
+#, fuzzy
+msgid "Choose"
+msgstr "选择坐骑"
+
+#: modelviewer.cpp:1996
+#, fuzzy
+msgid "Select a Sky Box"
+msgstr "选择武器"
+
+#: modelviewer.cpp:2104
+msgid "Please select a language:"
+msgstr ""
+
+#: modelviewer.cpp:2171
+msgid "You have the most upto date version."
+msgstr "你的版本是最新的。"
+
+#: modelviewer.cpp:2171
+#: modelviewer.cpp:2176
+msgid "Update Check"
+msgstr "检查更新"
+
+#: modelviewer.cpp:2734
+#: modelviewer.cpp:2758
+#: modelviewer.cpp:2776
+#: modelviewer.cpp:2793
+#: modelviewer.cpp:2810
+#: modelviewer.cpp:2827
+#: modelviewer.cpp:2844
+#: modelviewer.cpp:2861
+#, fuzzy
+msgid "Export Model..."
+msgstr "导出模型"
+
+#: modelviewer.cpp:2743
+#: modelviewer.cpp:2765
+#: modelviewer.cpp:2783
+#: modelviewer.cpp:2800
+#: modelviewer.cpp:2817
+#: modelviewer.cpp:2834
+#: modelviewer.cpp:2851
+#: modelviewer.cpp:2868
+#, fuzzy
+msgid "Export World Model Object..."
+msgstr "导出模型"
+
+#: modelviewer.cpp:2914
+msgid "Arrows"
+msgstr "箭矢"
+
+#: settings.cpp:38
+#, fuzzy
+msgid "Settings_Page1"
+msgstr "设置"
+
+#: settings.cpp:43
+#, fuzzy
+msgid "Show Particle"
+msgstr "粒子"
+
+#: settings.cpp:44
+msgid "Use Local Files"
+msgstr "使用本地文件"
+
+#: settings.cpp:45
+msgid "Random Skins"
+msgstr "随机皮肤"
+
+#: settings.cpp:46
+msgid "Hide Helmet"
+msgstr "隐藏头盔"
+
+#: settings.cpp:47
+msgid "Eye Glow"
+msgstr "眼睛发光"
+
+#: settings.cpp:53
+msgid "MPQ Archives order and files to load"
+msgstr "MPQ归档顺序及要载入的文件"
+
+#: settings.cpp:55
+msgid "Move Up"
+msgstr "上移"
+
+#: settings.cpp:56
+msgid "Move Down"
+msgstr "下移"
+
+#: settings.cpp:186
+msgid "Apply Settings"
+msgstr "应用设置"
+

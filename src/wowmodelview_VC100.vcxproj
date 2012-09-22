@@ -1,0 +1,504 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectName>WowModelViewer</ProjectName>
+    <ProjectGuid>{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}</ProjectGuid>
+    <RootNamespace>WowModelViewer</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseOfAtl>false</UseOfAtl>
+    <CharacterSet>MultiByte</CharacterSet>
+    <CLRSupport>false</CLRSupport>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC71.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" />
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\Clean\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" />
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\Clean\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectName)$(PlatformArchitecture)</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectName)$(PlatformArchitecture)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/D "WotLK"
+/D "PLAY_MUSIC" /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ResourceOutputFileName>$(IntDir)%(Filename)32.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <Version>0.7.0.4</Version>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);D:\wxWidgets-2.8.12\lib\vc_lib\;.\lib\Windows\32bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)wowmodelview32.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)wowmodelview32.map</MapFileName>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\bin_support\Windows\32bit\cximagecrt32d.dll $(OutDir)
+copy ..\bin_support\Windows\32bit\fbxsdk_20113d.dll $(OutDir)
+copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+mkdir $(OutDir)enUS
+copy ..\bin\enUS\* $(OutDir)enUS\
+copy ..\bin\*.csv $(OutDir)
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/D "WotLK"
+/D "PLAY_MUSIC" /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;WIN64;_WIN64;_AMD64_;_M_AMD64;__WINDOWS__;__WXMSW__;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BufferSecurityCheck>true</BufferSecurityCheck>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ResourceOutputFileName>$(IntDir)%(Filename)64.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <Version>0.7.0.4</Version>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);.\lib\Windows\64bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(IntDir)wowmodelview64.pdb</ProgramDatabaseFile>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)wowmodelview64.map</MapFileName>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <CLRThreadAttribute>DefaultThreadingAttribute</CLRThreadAttribute>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy ..\bin_support\Windows\64bit\cximagecrt64d.dll $(OutDir)\
+copy ..\bin_support\Windows\64bit\fbxsdk_20113_amd64d.dll $(OutDir)\
+copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+mkdir $(OutDir)enUS
+copy ..\bin\enUS\* $(OutDir)enUS\
+copy ..\bin\*.csv $(OutDir)
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalOptions>/D "WotLK" /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ResourceOutputFileName>$(IntDir)%(Filename)32.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>LinkVerboseLib</ShowProgress>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <Version>0.7.0.4</Version>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);D:\wxWidgets-2.8.12\lib\vc_lib\;.\lib\Windows\32bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AssemblyDebug>false</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(ProjectName).map</MapFileName>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SetChecksum>true</SetChecksum>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX86</TargetMachine>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+    </Link>
+    <PostBuildEvent>
+      <Command>del $(OutDir)*.lib
+del $(OutDir)*.exp
+copy ..\bin_support\Windows\32bit\cximagecrt32.dll $(OutDir)
+copy ..\bin_support\Windows\32bit\fbxsdk_20113.dll $(OutDir)
+copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+mkdir $(OutDir)enUS
+copy ..\bin\enUS\*.csv $(OutDir)enUS\
+copy ..\bin\*.csv $(OutDir)
+mkdir $(OutDir)mo
+copy po\*.mo $(OutDir)mo\
+mkdir $(OutDir)Export
+mkdir $(OutDir)Import
+copy ..\bin_support\Windows\32bit\msvcr100.dll $(OutDir)
+copy ..\bin_support\Windows\32bit\msvcp100.dll $(OutDir)
+copy ..\doc\ChangeLog.txt $(OutDir)
+copy ..\Installers\License.rtf $(OutDir)
+copy ..\bin\COPYING $(OutDir)
+mkdir $(OutDir)userSettings
+copy ..\bin\userSettings\*.* $(OutDir)userSettings
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <TargetEnvironment>X64</TargetEnvironment>
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/D "WotLK" /J %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;WIN64;_WIN64;_AMD64_;__WINDOWS__;__WXMSW__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
+      <PreprocessKeepComments>false</PreprocessKeepComments>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <ResourceOutputFileName>$(IntDir)%(Filename)64.res</ResourceOutputFileName>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ShowProgress>LinkVerboseLib</ShowProgress>
+      <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
+      <Version>0.7.0.4</Version>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);.\lib\Windows\64bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AssemblyDebug>false</AssemblyDebug>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(IntDir)$(ProjectName).map</MapFileName>
+      <MapExports>true</MapExports>
+      <SubSystem>Windows</SubSystem>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SetChecksum>true</SetChecksum>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
+      <TargetMachine>MachineX64</TargetMachine>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+    </Link>
+    <PostBuildEvent>
+      <Command>del $(OutDir)*.lib
+del $(OutDir)*.exp
+copy ..\bin_support\Windows\64bit\cximagecrt64.dll $(OutDir)
+copy ..\bin_support\Windows\64bit\fbxsdk_20113_amd64.dll $(OutDir)
+copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+mkdir $(OutDir)enUS
+copy ..\bin\enUS\*.csv $(OutDir)enUS\
+copy ..\bin\*.csv $(OutDir)
+mkdir $(OutDir)mo
+copy po\*.mo $(OutDir)mo\
+mkdir $(OutDir)Export
+mkdir $(OutDir)Import
+copy ..\bin_support\Windows\64bit\msvcr100.dll $(OutDir)
+copy ..\bin_support\Windows\64bit\msvcp100.dll $(OutDir)
+copy ..\doc\ChangeLog.txt $(OutDir)
+copy ..\Installers\License.rtf $(OutDir)
+copy ..\bin\COPYING $(OutDir)
+mkdir $(OutDir)userSettings
+copy ..\bin\userSettings\*.* $(OutDir)userSettings
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="animcontrol.cpp" />
+    <ClCompile Include="AnimExporter.cpp" />
+    <ClCompile Include="app.cpp" />
+    <ClCompile Include="arrows.cpp" />
+    <ClCompile Include="AVIGenerator.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="charcontrol.cpp" />
+    <ClCompile Include="database.cpp" />
+    <ClCompile Include="dbcfile.cpp" />
+    <ClCompile Include="ddslib.cpp" />
+    <ClCompile Include="effects.cpp" />
+    <ClCompile Include="filecontrol.cpp" />
+    <ClCompile Include="globalvars.cpp" />
+    <ClCompile Include="imagecontrol.cpp" />
+    <ClCompile Include="itemselection.cpp" />
+    <ClCompile Include="jsonreader.cpp" />
+    <ClCompile Include="jsonval.cpp" />
+    <ClCompile Include="jsonwriter.cpp" />
+    <ClCompile Include="lightcontrol.cpp" />
+    <ClCompile Include="liquid.cpp" />
+    <ClCompile Include="maptile.cpp" />
+    <ClCompile Include="model.cpp" />
+    <ClCompile Include="modelbankcontrol.cpp" />
+    <ClCompile Include="modelcanvas.cpp" />
+    <ClCompile Include="modelcontrol.cpp" />
+    <ClCompile Include="modelexport.cpp" />
+    <ClCompile Include="modelexport_fbx.cpp" />
+    <ClCompile Include="modelexport_lwo.cpp" />
+    <ClCompile Include="modelexport_m3.cpp" />
+    <ClCompile Include="modelexport_ms3d.cpp" />
+    <ClCompile Include="modelexport_obj.cpp" />
+    <ClCompile Include="modelexport_ogre.cpp" />
+    <ClCompile Include="modelexport_x3d.cpp" />
+    <ClCompile Include="modelexportoptions.cpp" />
+    <ClCompile Include="modelviewer.cpp" />
+    <ClCompile Include="mpq_stormlib.cpp" />
+    <ClCompile Include="particle.cpp" />
+    <ClCompile Include="Quantize.cpp" />
+    <ClCompile Include="RenderTexture.cpp" />
+    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="shaders.cpp" />
+    <ClCompile Include="UserSkins.cpp" />
+    <ClCompile Include="util.cpp" />
+    <ClCompile Include="video.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level4</WarningLevel>
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level4</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="wmo.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="animated.h" />
+    <ClInclude Include="animcontrol.h" />
+    <ClInclude Include="AnimExporter.h" />
+    <ClInclude Include="app.h" />
+    <ClInclude Include="arrows.h" />
+    <ClInclude Include="AVIGenerator.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="charcontrol.h" />
+    <ClInclude Include="database.h" />
+    <ClInclude Include="dbcfile.h" />
+    <ClInclude Include="ddslib.h" />
+    <ClInclude Include="displayable.h" />
+    <ClInclude Include="effects.h" />
+    <ClInclude Include="enums.h" />
+    <ClInclude Include="exporters.h" />
+    <ClInclude Include="fbxsdk.h" />
+    <ClInclude Include="filecontrol.h" />
+    <ClInclude Include="globalvars.h" />
+    <ClInclude Include="imagecontrol.h" />
+    <ClInclude Include="itemselection.h" />
+    <ClInclude Include="lightcontrol.h" />
+    <ClInclude Include="liquid.h" />
+    <ClInclude Include="manager.h" />
+    <ClInclude Include="maptile.h" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="modelbankcontrol.h" />
+    <ClInclude Include="modelcanvas.h" />
+    <ClInclude Include="modelcontrol.h" />
+    <ClInclude Include="modelexport.h" />
+    <ClInclude Include="modelexport_lwo.h" />
+    <ClInclude Include="modelexport_m3.h" />
+    <ClInclude Include="modelexport_ms3d.h" />
+    <ClInclude Include="modelexportoptions.h" />
+    <ClInclude Include="modelheaders.h" />
+    <ClInclude Include="modelviewer.h" />
+    <ClInclude Include="mpq.h" />
+    <ClInclude Include="mpq_stormlib.h" />
+    <ClInclude Include="OpenGLHeaders.h" />
+    <ClInclude Include="particle.h" />
+    <ClInclude Include="Quantize.h" />
+    <ClInclude Include="quaternion.h" />
+    <ClInclude Include="RenderTexture.h" />
+    <ClInclude Include="resource1.h" />
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="shaders.h" />
+    <ClInclude Include="UserSkins.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="vec3d.h" />
+    <ClInclude Include="video.h" />
+    <ClInclude Include="wmo.h" />
+    <ClInclude Include="CxImage\xfile.h" />
+    <ClInclude Include="CxImage\ximabmp.h" />
+    <ClInclude Include="CxImage\ximacfg.h" />
+    <ClInclude Include="CxImage\ximadef.h" />
+    <ClInclude Include="CxImage\ximage.h" />
+    <ClInclude Include="CxImage\ximagif.h" />
+    <ClInclude Include="CxImage\ximaico.h" />
+    <ClInclude Include="CxImage\ximaiter.h" />
+    <ClInclude Include="CxImage\ximajas.h" />
+    <ClInclude Include="CxImage\ximajbg.h" />
+    <ClInclude Include="CxImage\ximajpg.h" />
+    <ClInclude Include="CxImage\ximamng.h" />
+    <ClInclude Include="CxImage\ximapcx.h" />
+    <ClInclude Include="CxImage\ximapng.h" />
+    <ClInclude Include="CxImage\ximaraw.h" />
+    <ClInclude Include="CxImage\ximaska.h" />
+    <ClInclude Include="CxImage\ximatga.h" />
+    <ClInclude Include="CxImage\ximath.h" />
+    <ClInclude Include="CxImage\ximatif.h" />
+    <ClInclude Include="CxImage\ximawbmp.h" />
+    <ClInclude Include="CxImage\ximawmf.h" />
+    <ClInclude Include="CxImage\xiofile.h" />
+    <ClInclude Include="CxImage\xmemfile.h" />
+    <ClInclude Include="glew\include\GL\glew.h" />
+    <ClInclude Include="glew\include\GL\glxew.h" />
+    <ClInclude Include="glew\include\GL\wglew.h" />
+    <ClInclude Include="opengl\glext.h" />
+    <ClInclude Include="opengl\glxext.h" />
+    <ClInclude Include="opengl\wglext.h" />
+    <ClInclude Include="wx\jsonreader.h" />
+    <ClInclude Include="wx\jsonval.h" />
+    <ClInclude Include="wx\jsonwriter.h" />
+    <ClInclude Include="wx\json_defs.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin_support\Icons\chrFile.ico" />
+    <None Include="..\bin_support\Icons\wmv.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wowmodelview.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

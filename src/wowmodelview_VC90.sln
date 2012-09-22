@@ -1,0 +1,57 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WowModelViewer", "wowmodelview_VC90.vcproj", "{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{78424708-1F6E-4D4B-920C-FB6D26847055} = {78424708-1F6E-4D4B-920C-FB6D26847055}
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Win32Installer", "..\Installers\Windows\32bit\Win32Installer.vdproj", "{B8C730E1-7726-436B-9E7A-8C983FF5FE60}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C} = {DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}
+	EndProjectSection
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Win64Installer", "..\Installers\Windows\64bit\Win64Installer.vdproj", "{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C} = {DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "StormLib", "stormlib\StormLib_VC90.vcproj", "{78424708-1F6E-4D4B-920C-FB6D26847055}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Debug|Win32.Build.0 = Debug|Win32
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Debug|x64.ActiveCfg = Debug|x64
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Debug|x64.Build.0 = Debug|x64
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Release|Win32.ActiveCfg = Release|Win32
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Release|Win32.Build.0 = Release|Win32
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Release|x64.ActiveCfg = Release|x64
+		{DCA0C667-2A7A-4FCE-AD02-466F7A380E0C}.Release|x64.Build.0 = Release|x64
+		{B8C730E1-7726-436B-9E7A-8C983FF5FE60}.Debug|Win32.ActiveCfg = Debug
+		{B8C730E1-7726-436B-9E7A-8C983FF5FE60}.Debug|x64.ActiveCfg = Debug
+		{B8C730E1-7726-436B-9E7A-8C983FF5FE60}.Release|Win32.ActiveCfg = Release
+		{B8C730E1-7726-436B-9E7A-8C983FF5FE60}.Release|Win32.Build.0 = Release
+		{B8C730E1-7726-436B-9E7A-8C983FF5FE60}.Release|x64.ActiveCfg = Release
+		{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}.Debug|Win32.ActiveCfg = Debug
+		{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}.Debug|x64.ActiveCfg = Debug
+		{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}.Release|Win32.ActiveCfg = Release
+		{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}.Release|x64.ActiveCfg = Release
+		{7BF2ABEC-134F-437C-A8BE-68F43E1FA97B}.Release|x64.Build.0 = Release
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Debug|Win32.ActiveCfg = Debug|Win32
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Debug|x64.ActiveCfg = Debug|x64
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Debug|x64.Build.0 = Debug|x64
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Release|Win32.ActiveCfg = Release|Win32
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Release|Win32.Build.0 = Release|Win32
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Release|x64.ActiveCfg = Release|x64
+		{78424708-1F6E-4D4B-920C-FB6D26847055}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
