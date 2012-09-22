@@ -1,0 +1,77 @@
+typedef enum <uchar>  {
+    TU_Animated = 0, 
+    TU_Static = 16
+} TEXUNITFLAGS;
+
+typedef struct {
+  uint32 nIndices;		
+  uint32 ofsIndices <format=hex>;		// Indices used in this View.
+  uint32 nTriangles;		
+  uint32 ofsTriangles <format=hex>;		// The triangles made with them.
+  uint32 nProperties;		
+  uint32 ofsProperties <format=hex>;		// Properties of the vertices.
+  uint32 nSubmeshes;		
+  uint32 ofsSubmeshes <format=hex>;		// Submeshes (Geosets) of this View.
+  uint32 nTextureUnits;	
+  uint32 ofsTextureUnits <format=hex>;	// Texture Units.
+  uint32 LOD;			// LOD distance or something else
+} HDR;
+
+typedef struct {
+   uint16 Vertex;		// The vertex in the global vertex list.
+} INDEX;
+
+typedef struct {
+   uint16 Indices[3];		// Three indices which make up a triangle.
+} TRI;
+
+typedef struct {
+   uint32 Properties;		// Usually 0? Purpose unknown.
+} VERTPROP;
+
+typedef struct {
+   uint32 ID;			// Mesh part ID, see below.
+   uint16 StartVertex;		// Starting vertex number.
+   uint16 nVertices;		// Number of vertices.
+   uint16 StartTriangle;		// Starting triangle index (that's 3* the number of triangles drawn so far).
+   uint16 nTriangles;		// Number of triangle indices.
+   uint16 nBones;		// Number of elements in the bone lookup table.
+   uint16 StartBones;		// Starting index in the bone lookup table.
+   uint16 Unknown;		
+   uint16 RootBone;		// Not sure.
+   float Position[3];		// Some Vector. Not sure about it being the Position.
+   float Floats[4];		// New Floats since BC.
+} SUB;
+
+typedef struct {
+    TEXUNITFLAGS flags;
+	uchar flags2;		// Flags
+	uint16 order;		// ?
+	uint16 submesh;			// Material this texture is part of (index into mat)
+	uint16 submesh2;			// Always same as above?
+	int16 colorIndex;	// color or -1
+	uint16 renderFlags;	// more flags...
+	uint16 texunit;		// Texture unit (0 or 1)
+	uint16 d4;			// ? (seems to be always 1)
+	uint16 textureid;	// Texture id (index into global texture list)
+	uint16 texunit2;	// copy of texture unit value?
+	uint16 transid;		// transparency id (index into transparency list)
+	uint16 texanimid;	// texture animation id
+} TEXU;
+
+//---------------------------------------------------
+
+FSeek(0);
+char magic[4];
+HDR SkinHeader;
+FSeek(SkinHeader.ofsIndices);
+INDEX Indices[SkinHeader.nIndices];
+FSeek(SkinHeader.ofsTriangles);
+TRI Triangles[SkinHeader.nTriangles / 3];
+FSeek(SkinHeader.ofsProperties);
+VERTPROP Properties[SkinHeader.nProperties];
+FSeek(SkinHeader.ofsSubmeshes);
+SUB Submeshes[SkinHeader.nSubmeshes];
+FSeek(SkinHeader.ofsTextureUnits);
+TEXU TextureUnits[SkinHeader.nTextureUnits];
+

@@ -1,0 +1,154 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File: M2 Skin File
+// Author: NiNtoxicated
+// Revision: 0.01
+// Purpose: Parse M2 Skin files
+//--------------------------------------
+
+local int bgflag = 0; //used in Main Loops
+
+enum entryid    { 
+                    INDS, FACES, VERTS,
+                    SUBS, TEXS
+                };
+
+void ChangeBG(local int &flag); //alternates BG color
+
+typedef struct
+{
+    float x, y, z;
+} Vec3D <read=Vec3DRead,write=Vec3DWrite>;
+
+string Vec3DRead(Vec3D &v3d)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+    return s;
+}
+
+typedef struct
+{
+    Vec3D min;
+    Vec3D max;
+    float radius;
+} Sphere;
+
+void Vec3DWrite(Vec3D &v3d, string s)
+{
+    SScanf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+}
+
+typedef struct
+{
+    ulong nEntry, ofsEntry;
+} Entry <read=EntryRead>;
+
+string EntryRead(Entry &e)
+{
+    string s;
+    SPrintf( s, "nEntry: %d   ofsEntry: %d", e.nEntry, e.ofsEntry);
+    return s;
+}
+
+typedef struct
+{
+    char fileID[4];
+    Entry Indices;
+    Entry Faces;
+    Entry VertInds;
+    Entry Submeshes;
+    Entry TexUnits;
+    uint32 skinnedBones;
+} skinHeader <bgcolor=cAqua>;
+
+typedef struct
+{
+    ubyte indices[4];
+} vertInds;
+
+typedef struct
+{
+    uint32 submeshID;
+    uint16 indVerts;
+    uint16 nVerts;
+    uint16 indFaces;
+    uint16 nFaces;
+    uint16 nBones;
+    uint16 indBones;
+    uint16 s1;
+    uint16 unkBone;
+    Sphere boundSphere;
+} ModelSubmesh;
+
+typedef struct
+{
+    struct
+    {
+        uint16 bitFlags <format=binary>;
+        FSkip (-2);
+        uint16 : 4;
+		uint16 Static: 1;
+    } texFlags;
+    struct
+    {
+        uint16 bitFlags <format=binary>;
+        FSkip (-2);
+        uint16 : 1;
+    } shaderFlags;
+    uint16 SubIndex;
+    uint16 SubIndex2;
+    int16  ColourIndex;
+    uint16 RenderFlagsIndex;
+    uint16 TexUnitIndex;
+    uint16 Mode;
+    uint16 TexIndex;
+    uint16 TexUnitIndex2;
+    uint16 TransIndex;
+    uint16 TexAnimIndex;    
+} ModelTexUnits;
+
+void ReadEntry (Entry &e, int id, string idstr)
+{
+    if (e.nEntry)
+    {
+        local uint count = e.nEntry;
+        FSeek(e.ofsEntry);
+        ChangeBG(bgflag);
+        Warning( "Loading %s.", idstr );
+        
+        switch (id)
+        {
+            case INDS: uint16 Indice[count]; break;
+            case FACES: uint16 Face[count]; break;
+            case VERTS: vertInds vertInd[count]; break;
+            case SUBS: ModelSubmesh Submesh[count]; break;
+            case TEXS: ModelTexUnits TexUnit[count]; break;
+        }
+    }
+}
+
+skinHeader header;
+
+ReadEntry (header.Indices, INDS, "Indices");
+ReadEntry (header.Faces, FACES, "Faces");
+ReadEntry (header.VertInds, VERTS, "Vertex Indices");
+ReadEntry (header.Submeshes, SUBS, "Submeshes");
+ReadEntry (header.TexUnits, TEXS, "Texture Units");
+
+Warning( "Loading Done!" );
+
+void ChangeBG(local int &flag)
+{
+  if (flag)
+  {
+    SetBackColor(cLtYellow);
+    flag = 0;
+  }
+  else
+  {
+    SetBackColor(cLtGreen);
+    flag = 1;
+  }
+}

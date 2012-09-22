@@ -1,0 +1,54 @@
+/*
+WoW Model Viewer uses the following Libraries:
+wxWidgets (2.8.x), CxImage (Version 600), GLEW (1.5.3), zlib (1.2.3), OpenGL, LibMPQ, DDSLib
+
+-=Required Library Websites=-
+wxWidgets: http://www.wxwidgets.org/
+
+-=Additional Libraries Websites=-
+CxImage: http://www.xdp.it/cximage.htm		Included version has been modified to support MacOSX.
+OpenGL: http://www.opengl.org/registry/
+LibMPQ: https://libmpq.org/			Included version was heavily modified to work on Windows.
+GLEW: http://glew.sourceforge.net/
+zlib: http://www.zlib.net/
+
+-=Build Instructions=-
+You will need to download wxWidgets and compile it. There are websites that can help you learn how to compile for your
+particular OS. The only reason you should have to download the compile the other libraries is if you need support for
+an OS not currently supported.
+
+Once wxWidgets is built, you need to add the include and lib paths to the project. Please remember to link ONLY the lib
+paths for the versions you're working on. IE: Don't link a path from a 64-bit Windows build, when you're working on a
+Mac OSX version. (Again, there are websites that can help you figure out how to include the paths.) Be sure to include the lib folder in the src directory too.
+
+-=Program Flow=-
+The program's "flow" all starts with App.cpp,  these initiates the program using wxWidgets to handle all events, etc.
+Once the program has initiated it will then create a window frame, this being "modelviewer.cpp". So essentially the
+flow could be read as something like...
+
+App.cpp		---> Modelviewer.cpp	--->	Modelcanvas.cpp		--->	model.cpp		---> Particle.cpp
+									--->	wmo.cpp
+					--->	Modelcontrol.cpp
+					--->	Modelexport.cpp
+					--->	AnimExporter.cpp
+					--->	lightcontrol.cpp
+					--->	Animcontrol.cpp
+					--->	charcontrol.cpp
+					--->	database.cpp		--->	mpq_libmpq.cpp
+									--->	dbcfile.cpp
+		---> Video.cpp		--->	ddslib.cpp
+		---> util.cpp
+			
+Of course it isn't 'exactly' like that since a lot of the controls/objects interlink with each other, 
+but you get the idea.
+
+Its a bit of a mess... actually thats an understatement, but thats to be expected when there
+wasn't any actual program design.  Instead it used and relied on the "evolutionary design process".
+
+
+-=Updating Notes=-
+When updating a support Library, be careful not to over-write the included files. Often, programmers will adjust the
+files for a library to support more OSs, or to make it do what they want it to do. So be sure to back up all the files
+and test them before commiting them.
+
+*/

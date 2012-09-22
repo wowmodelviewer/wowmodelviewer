@@ -1,0 +1,10 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=..\..\wowmodelview-0.chm
+Contents file=Table of Contents.hhc
+Display compile progress=No
+Index file=Index.hhk
+Language=0xc09 English (Australia)
+
+
+[INFOTYPES]

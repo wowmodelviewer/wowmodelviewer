@@ -1,0 +1,50 @@
+Cataclysm has split ADT files into 4 separate files, changing how it's read. I did a lot of exploring and documenting to figure this out, and I thought I would share my findings.
+
+Note: MCNK is now used to contain any sort of list.
+
+New format:
+
+
+-Base File (xxx.adt)
+MVER, (same)
+MHDR, (same layout, but many vars are now all Zeros.)
+MH2O, (same)
+MCNK
+ size, uint32
+ header (same as original MCNK header, I think...)
+ MCVT
+  count
+  float * count
+ MCCV, (same)
+ MCNR, (same)
+ MCSE, (same)
+MFBO, (same)
+
+Object File (xxx_obj0.adt, stores M2 & WMO references)
+MVER, (same)
+MMDX, (same)
+MMID, (same)
+MWMO, (same)
+ MWID, (same)
+MDDF, (same)
+MODF, (same)
+MCNK * (unknown)
+ size, uint32
+ MCRD (Not sure what this is for...)
+  size, uint32
+  uint32
+
+Texture file (xxx_tex0.adt or xxx_tex1.adt)
+MVER, (same)
+MAMP
+ size, uint32
+ uint32, tex file number (xxx_tex0.adt, xxx_tex1.adt)
+MTEX, (same)
+MCNK
+ size, uint32
+ MCLY (same)
+ MCAL (same)
+
+
+
+Didn't have time to figure out what all of it is or does, but at least this should start us down the right path.

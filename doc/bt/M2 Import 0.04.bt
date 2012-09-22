@@ -1,0 +1,659 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File: M2 Template
+// Author: NiNtoxicated
+// Revision: 0.04
+// Purpose: Parse the World of Warcraft model format (.m2)
+//--------------------------------------
+
+
+local int bgflag = 0; //used in Main Loops to change BG colour
+local int i, j; //used in Structs
+local quad temp; //read in file position to return to
+local int ABflag; //Animation Block flag for setting up the type of Key data to be read
+//ABflag defines
+enum animflags  {   AB_VEC3D, AB_QUAT, AB_BYTE3D, 
+                    AB_BYTE, AB_SHORT, AB_INT, 
+                    AB_UINT, AB_FLOAT, AB_TRUNC,
+                    AB_TANG
+                };
+
+enum entryid    { 
+                    NAME, 
+                    GLOBAL_SEQS, ANIMS, ANIMSLU, 
+                    BONES, KEYBONES,
+                    VERTS,
+                    VIEWS,
+                    COLOURS, TEXTURES, TRANSPARANCY,
+                    TEXANIMS, REP_TEXLU,
+                    RENDFLAGS,
+                    BONESLU,
+                    TEXLU, TEXUNITSLU, TRANSLU, TEXANIMLU,
+                    BNDTRIS, BNDVERTS, BNDNORMS,
+                    ATTACH, ATTACHLU, EVENTS,
+                    LIGHTS, CAM, CAMLU,
+                    RIBS, PARS,
+                    TEXPATH,
+                };
+
+void ChangeBG(local int &flag); //alternates BG color
+
+typedef struct
+{
+  float x, y, z;
+} Vec3D <read=Vec3DRead, write=Vec3DWrite>;
+
+string Vec3DRead(Vec3D &v3d)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+    return s;
+}
+
+void Vec3DWrite(Vec3D &v3d, string s)
+{
+    SScanf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+}
+
+typedef struct
+{
+    short x, y, z, w;
+} Vec4Dshort;
+
+typedef struct
+{
+    Vec3D min;
+    Vec3D max;
+    float radius;
+} Sphere;
+
+typedef struct
+{
+    ulong nEntry, ofsEntry;
+} Entry <read=EntryRead>;
+
+string EntryRead(Entry &e)
+{
+    string s;
+    SPrintf( s, "nEntry: %d   ofsEntry: %d", e.nEntry, e.ofsEntry);
+    return s;
+}
+
+typedef struct 
+{
+  char MD20[4];
+  uint32 Version;
+  Entry ModelName;
+  struct
+  {
+      ulong bitFlag <format=binary>;
+      FSkip (-4);
+      ulong tilt_x      : 1;
+      ulong tilt_y      : 1;
+      ulong unk1        : 1;
+      ulong extraEntry  : 1;
+      ulong unk2        : 1;
+  } globalFlags; 
+  Entry GlobalSequences, Animations, AnimLookup;
+  Entry Bones, KeyBones;
+  Entry Vertices;
+  uint32 nViews;
+  Entry Colors;
+  Entry Textures;
+  Entry Transparency;
+  Entry TexAnims;
+  Entry TexReplace;
+  Entry RenderFlags;
+  Entry BonesLookup;
+  Entry TexLookup;
+  Entry TexUnitsLookup;
+  Entry TransLookup;
+  Entry TexAnimLookup;
+  Sphere CollisionSphere;
+  Sphere BoundingSphere;
+  Entry BoundingTriangles;
+  Entry BoundingVertices;
+  Entry BoundingNormals;
+  Entry Attachments;
+  Entry AttachLookup;
+  Entry Events;
+  Entry Lights;
+  Entry Cameras;
+  Entry CameraLookup;
+  Entry RibbonEmitters;
+  Entry ParticleEmitters;
+  if (globalFlags.extraEntry == 1)
+  {
+    Entry Unk1; 
+  }
+} MHeader;
+
+typedef struct (int flags)
+{
+    uint32 nData;
+    uint32 ofsData;
+
+    if (nData > 0)
+    {
+        local int64 bm = FTell();
+        FSeek (ofsData);
+        switch (flags)
+        {
+            case AB_UINT: uint32 Times[nData]; break;
+            case AB_VEC3D: Vec3D Keys[nData]; break;
+            case AB_QUAT: Vec4Dshort Keys[nData]; break;
+            case AB_SHORT: uint16 Vis[nData]; break;
+        }
+        FSeek (bm);
+    }
+} SubAnimRef <optimize=false>;
+
+typedef struct 
+{
+  	USHORT type;		// interpolation type (0=none, 1=linear, 2=hermite)
+  	SHORT seq;		// global sequence id or -1
+  	ULONG nTimes;
+  	ULONG ofsTimes;
+    uint32 nKeys;
+    uint32 ofsKeys;
+
+    //Animation Times
+    if (nTimes > 0)
+    {
+        local int64 t_bm = FTell(); //bookmark current loc
+        FSeek (ofsTimes); //goto times offs
+        struct
+        {
+            SubAnimRef TimesRef (AB_UINT) [nTimes] <optimize=false>; //read in times
+        } Times <optimize=false>;
+        FSeek (t_bm); //return to original loc
+    }
+
+    //Animation Keyframes
+    if (nKeys > 0)
+    {
+        local int64 k_bm = FTell(); //bookmark
+        FSeek (ofsKeys); //goto keys offs
+        struct
+        {
+            SubAnimRef KeysRef (ABflag) [nKeys] <optimize=false>; //read in keys
+        } Keys;
+        FSeek (k_bm);
+    }
+} AnimationBlock <optimize=false>;
+
+typedef struct
+{
+  int nType;
+  int ofsType;
+
+  temp = FTell();
+
+  if (nType)
+  {
+    FSeek(ofsType);
+    struct
+    {
+	for (i = 0; i < nType; i++)
+	{
+	  char data;
+	}
+    } Data;
+  }
+
+  FSeek(temp);
+} ModelDataRef;
+
+typedef struct
+{
+    uint16  animID;
+    uint16  subanimID;
+    uint32  Length;
+    float   moveSpeed;
+    struct
+    {
+        ULONG   bitFlags <format=binary>;
+        FSkip (-4);
+        ULONG           : 5;
+        ULONG Looping   : 1;
+    } animFlags;
+    int16   rarity;
+    uint16  d1;
+    uint32  d2;
+    uint32  d3;
+    uint32  playSpeed;
+    Sphere boundSphere;
+    SHORT	animLink;
+    USHORT  Index;
+} ModelAnimation;
+
+typedef struct //Lookup table for Animations, DBC reference
+{
+  USHORT dbcid; //Reference what DBC animation to use
+  USHORT flag;
+} ModelAnimDbcLookup;
+
+typedef struct 
+{
+  char Name[header.nModelName];
+} Name;
+
+typedef struct 
+{
+    int32   idBlockF;
+    struct
+    {
+        uint32   bitFlags <format=binary>;
+        FSkip (-4);
+        uint32              : 3;
+        uint32 Billboarded  : 1;
+    } boneFlags;
+
+    int16  parent;
+    uint16 s1[3];
+
+    ABflag = AB_VEC3D; AnimationBlock translation;
+    ABflag = AB_QUAT; AnimationBlock rotation;
+    ABflag = AB_VEC3D; AnimationBlock scaling;
+    Vec3D  pivot;
+
+} ModelBone;
+
+typedef struct (int keyCount)
+{
+  for (i = 0; i < keyCount; i++) //Improved Lookup table, names for shorts
+  {
+    switch(i)
+    {
+      case 0:  short ArmL; break;
+      case 1:  short ArmR; break;
+      case 2:  short ShoulderL; break;
+      case 3:  short ShoulderR; break;
+      case 4:  short SpineLow; break; 
+      case 5:  short Waist; break;
+      case 6:  short Head; break; 
+      case 7:  short Jaw; break;
+      case 8:  short IndexFingerR; break;
+      case 9:  short MiddleFingerR; break;
+      case 10: short PinkyFingerR; break;
+      case 11: short RingFingerR; break;
+      case 12: short ThumbR; break;
+      case 13: short IndexFingerL; break;
+      case 14: short MiddleFingerL; break;
+      case 15: short PinkyFingerL; break;
+      case 16: short RingFingerL; break;
+      case 17: short ThumbL; break;
+      case 18: short Event_BTH; break;
+      case 19: short Event_CSR; break;
+      case 20: short Event_CSL; break;
+      case 21: short _Breath; break;
+      case 22: short _Name; break;
+      case 23: short _NameMount; break;
+      case 24: short Event_CHD; break;
+      case 25: short Event_CCH; break;
+      case 26: short Root; break;
+      case 27: short Wheel1; break;
+      case 28: short Wheel2; break;
+      case 29: short Wheel3; break;
+      case 30: short Wheel4; break;
+      case 31: short Wheel5; break;
+      case 32: short Wheel6; break;
+      case 33: short Wheel7; break;
+      case 34: short Wheel8; break;
+    }
+  }
+} KeyBoneLU;
+
+typedef struct 
+{
+  Vec3D   pos;
+  UBYTE   weBone[4];
+  UBYTE   weIndice[4];
+  Vec3D   vecNormal;
+  FLOAT   texCoords[2];
+  FLOAT   f1[2];
+} ModelVertex;
+
+typedef struct 
+{
+  	ABflag = FL_VEC3D; AnimationBlock Color;
+  	ABflag = FL_SHORT; AnimationBlock Opacity;
+} ModelColorDef;
+
+typedef struct  
+{
+  	uint32 type;
+  	uint32 flags;
+    Entry texturePath;
+    ReadEntry (texturePath, TEXPATH, "Texture Path");
+} ModelTexture;
+
+typedef struct 
+{
+	ABflag = FL_SHORT; AnimationBlock trans;
+}ModelTransDef ;
+
+typedef struct
+{
+  for (i = 0; i < header.nRepTexLookup; i++) //Improved Lookup table, names for shorts
+  {
+    switch(i)
+    { //Final_Hardcoded - Seems to point to the final Hardcoded texture in the tex defs
+      case 0:  short Final_Hardcoded; break;
+      case 1:  short Body_Clothes; break;
+      case 2:  short Unk1; break;
+      case 3:  short Unk2; break;
+      case 4:  short Unk3; break; 
+      case 5:  short Unk4; break;
+      case 6:  short Hair_Beard; break; 
+      case 7:  short Unk5; break;
+      case 8:  short TaurenFur; break;
+      case 9:  short Unk6; break;
+      case 10: short Unk7; break;
+      case 11: short CreatureSkin1; break;
+      case 12: short CreatureSkin2; break;
+      case 13: short CreatureSkin3; break;
+    }
+  }
+} RepTexLookup;
+
+typedef struct 
+{
+	ABflag = FL_VEC3D; AnimationBlock trans;
+	ABflag = FL_QUAT; AnimationBlock rot;
+	ABflag = FL_VEC3D; AnimationBlock scale;
+}TexAnim;
+
+typedef struct 
+{
+    struct
+    {
+        uint16   bitFlags <format=binary>;
+        FSkip (-2);
+        uint16   Unlit      : 1;
+        uint16   Unfogged   : 1;
+        uint16   TwoSided   : 1;
+        uint16   Billboarded : 1;
+        uint16   NoZbuffer : 1;
+    } renderFlags;
+    enum <uint16> matType { Opaque, Mod, Decal, Add, Mod2x, Fade, Unknown7 } blendMode;
+} ModelRenderFlags;
+
+typedef struct 
+{
+  	Vec3D pos;
+} BoundingVertex;
+
+typedef struct 
+{
+	Vec3D normal;
+} BoundingNormal;
+
+typedef struct 
+{
+  uint32 id;
+/*
+0 	Left wrist (shield) 	12 	Back 	 	24 	-
+1 	Right palm 		13 	- 		25 	-
+2 	Left palm 		14 	- 		26 	Right back sheath
+3 	Right elbow 		15 	Bust 		27 	Left back sheath
+4 	Left elbow 		16 	Bust 		28 	Middle back sheath
+5 	Right shoulder 		17 	Face 		29 	Belly
+6 	Left shoulder 		18 	Above character 30 	Left back
+7 	Right knee 		19 	Ground 		31 	Right back
+8 	Left knee 		20 	Top of head 	32 	Left hip sheath
+9 	- 			21 	Left palm 	33 	Right hip sheath
+10 	- 			22 	Right palm 	34 	Bust
+11 	Helmet 			23 	- 		35 	Right palm
+*/
+  uint32 bone;
+  Vec3D pos;
+  ABflag = AB_SHORT; AnimationBlock vis;
+} ModelAttachment;
+
+typedef struct
+{
+  for (i = 0; i < header.nAttachLookup; i++) //Improved Lookup table, names for shorts
+  {
+    switch(i)
+    {//Itm = Item Point   Hit = Hit Point   Spell = Spell Point   Shth = Sheath Point
+      case 0:  short Itm_Shield_Mount; break;
+      case 1:  short Itm_PalmR; break;
+      case 2:  short Itm_PalmL; break;
+      case 3:  short Itm_ElbowR; break;
+      case 4:  short Itm_ElbowL; break; 
+      case 5:  short Itm_ShoulderR; break;
+      case 6:  short Itm_ShoulderL; break; 
+      case 7:  short Itm_KneeR; break;
+      case 8:  short Itm_KneeL; break;
+      case 9:  short Itm_HipR; break;
+      case 10: short Itm_HipL; break;
+      case 11: short Itm_Helmet; break;
+      case 12: short Itm_Back; break;
+      case 13: short Itm_ShoulderExtR; break;
+      case 14: short Itm_ShoulderExtL; break;
+      case 15: short Hit_Front; break;
+      case 16: short Hit_Back; break;
+      case 17: short Spell_Mouth; break;
+      case 18: short Spell_NearHead; break;
+      case 19: short Spell_Base; break;
+      case 20: short Spell_Head; break;
+      case 21: short Spell_Precast1L; break;
+      case 22: short Spell_Precast1R; break;
+      case 23: short Spell_Precast2L; break;
+      case 24: short Spell_Precast2R; break;
+      case 25: short Spell_Precast3; break;
+      case 26: short Shth_UpBackR; break;
+      case 27: short Shth_UpBackL; break;
+      case 28: short Shth_CenBack; break;
+      case 29: short Shth_HipBelly; break;
+      case 30: short Shth_UpsDwnBack; break;
+      case 31: short Shth_unkBack; break;
+      case 32: short Shth_HipL; break;
+      case 33: short Shth_HipR; break;
+      case 34: short Spell_Chest; break;
+      case 35: short Unk_PalmR1; break;
+      case 36: short Unk_PalmR2; break;
+    }
+  }
+} AttachIDLookup;
+
+
+typedef struct 
+{
+/*
+ $TRD 	 Crotch
+$CCH 	Bust
+$BTH 	In front of head
+$CHD 	Head
+$SHL, $SHR 	Left/right shoulder
+$CSL, $CSR 	Left/right hand
+$BWP, $BWR 	Right hand (for weapons maybe?)
+*/
+char    id$[4]; 
+uint32 	idDatabase;
+uint32 	idBone;
+Vec3D   pos; //coords?
+ABflag = FL_TRUNC; AnimationBlock vis;
+} ModelEvent;
+
+typedef struct 
+{
+	int16 type;
+	int16 bone;
+	Vec3D pos;
+	ABflag = FL_VEC3D; AnimationBlock ambColor;
+	ABflag = FL_FLOAT; AnimationBlock ambIntensity;
+	ABflag = FL_VEC3D; AnimationBlock color;
+	ABflag = FL_FLOAT; AnimationBlock intensity;
+	ABflag = FL_FLOAT; AnimationBlock attStart;
+	ABflag = FL_FLOAT; AnimationBlock attEnd;
+	ABflag = FL_SHORT; AnimationBlock Vis;
+}ModelLightDef;
+
+typedef struct 
+{
+  	int32 id;
+	float fov, farclip, nearclip;
+	ABflag = FL_TANG; AnimationBlock transPos;
+	Vec3D pos;
+	ABflag = FL_TANG; AnimationBlock transTarget;
+	Vec3D target;
+	ABflag = FL_FLOAT; AnimationBlock rot;
+} ModelCameraDef;
+
+typedef struct 
+{
+	int32 id;
+	int32 bone;
+	Vec3D pos;
+	ModelDataRef Texture;
+	ModelDataRef RenderFlag;
+	ABflag = FL_VEC3D; AnimationBlock color;
+	ABflag = FL_SHORT; AnimationBlock opacity;
+	ABflag = FL_FLOAT; AnimationBlock above;
+	ABflag = FL_FLOAT; AnimationBlock below;
+	float res, length, unk;
+	int16 s1, s2;
+	ABflag = FL_INT; AnimationBlock Unk1;
+	ABflag = FL_SHORT; AnimationBlock Vis;
+} ModelRibbonEmitterDef ;
+
+typedef struct 
+{
+	float mid;
+	uint32 colors[3];
+	float sizes[3];
+	int16 indices[10];
+	float unk[3];
+	float scales[3];
+	float slowdown;
+	float rotation;
+	float f2[16];
+} ModelParticleAttribs ;
+
+typedef struct
+{
+	ABflag = FL_FLOAT;
+	AnimationBlock 	Em_Speed, Speed_Var, Spread, Unk, Grav, //Em = Emission
+			Lifespan, Em_Rate, Em_Length, Em_Width, Grav_Strong;
+} ParticleParam;
+
+typedef struct 
+{
+        int32 id;
+	int32 flags;
+	Vec3D pos;
+	int16 bone;
+	int16 texture;
+	ModelDataRef Ints[2] <optimize=false>;
+	int16 blendmode;
+	int16 emittertype;
+	int16 particletype;
+	int16 rotation;
+	int16 cols;
+	int16 rows;
+	ParticleParam ParticleParams <optimize=false>;
+	ModelParticleAttribs ParticleAttribs;
+	ABflag = FL_SHORT; AnimationBlock Vis;
+}ModelParticleEmitterDef;
+
+typedef struct (int nBones)
+{
+    ModelBone Bone[nBones] <optimize=false>;
+} MBones;
+
+typedef struct (int nTexs)
+{
+    ModelTexture Tex[nTexs] <optimize=false>;
+} MTexs;
+
+typedef struct (int nAttachs)
+{
+    ModelAttachment Attach[nAttachs] <optimize=false>;
+} MAttachs;
+
+void ReadEntry (Entry &e, int id, string idstr)
+{
+    if (e.nEntry)
+    {
+        local uint64 t_bm = FTell();
+        local uint count = e.nEntry;
+        FSeek(e.ofsEntry);
+        Warning( "Loading %s.", idstr );
+        ChangeBG(bgflag);            
+        
+        switch (id)
+        {
+            case NAME: CHAR ModelName[count]; break;
+            case GLOBAL_SEQS: ULONG GlobalSeqs[count]; break;
+            case ANIMS: ModelAnimation Animation[count]; break;
+            case ANIMSLU: SHORT AnimLU[count]; break;
+            case BONES: SetBackColor(cNone); MBones Bones (count); break;
+            case KEYBONES: KeyBoneLU KeyBones(count); break;
+            case VERTS: ModelVertex Vert[count]; break;
+            case BONESLU: uint16 BonesLU[count]; break;
+            case TEXTURES: MTexs Textures(count); break;
+            case RENDFLAGS: ModelRenderFlags RenderFlags[count]; break;
+            case TEXLU: uint16 TexLU[count]; break;
+            case TEXUNITSLU: int16 TexUnitLU[count]; break;
+            case ATTACH: MAttachs Attachs (count); break;
+            case ATTACHLU: int16 AttachLU[count]; break;
+            case TEXPATH: CHAR TexturePath[count]; break;
+        }
+
+        FSeek(t_bm);
+    }
+}
+
+//---------------
+
+//----Start-----
+
+//---------------
+LittleEndian(); 
+SetBackColor(cAqua);
+Warning( "Loading Header." );
+MHeader header;
+if( header.MD20 != "MD20" )
+{
+    Warning( "File is not a model. Template Stopped." );
+    return -1;
+}
+
+if (header.Version != 264)
+{
+    Warning ( "Wrong model version. Template Stopped." );
+    return -1;
+}
+
+ReadEntry (header.ModelName, NAME, "Model Name");
+ReadEntry (header.GlobalSequences, GLOBAL_SEQS, "Global Sequences");
+ReadEntry (header.Animations, ANIMS, "Animations");
+ReadEntry (header.AnimLookup, ANIMSLU, "Animation Index Lookup");
+ReadEntry (header.Bones, BONES, "Bones");
+ReadEntry (header.KeyBones, KEYBONES, "Key Bones");
+ReadEntry (header.Vertices, VERTS, "Vertices");
+ReadEntry (header.BonesLookup, BONESLU, "Bones Lookup");
+ReadEntry (header.Textures, TEXTURES, "Textures");
+ReadEntry (header.RenderFlags, RENDFLAGS, "Render Flags");
+ReadEntry (header.TexLookup, TEXLU, "Textures Lookup");
+ReadEntry (header.TexUnitsLookup, TEXUNITSLU, "Texture Units Lookup");
+ReadEntry (header.Attachments, ATTACH, "Attachments");
+ReadEntry (header.AttachLookup, ATTACHLU, "Attachments Lookup");
+Warning( "Loading Done!" );
+
+void ChangeBG(local int &flag)
+{
+  if (flag)
+  {
+    SetBackColor(cLtYellow);
+    flag = 0;
+  }
+  else
+  {
+    SetBackColor(cLtGreen);
+    flag = 1;
+  }
+}

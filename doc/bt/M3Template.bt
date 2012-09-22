@@ -1,0 +1,1468 @@
+//--------------------------------------
+//--- 010 Editor v3.1 Binary Template
+//
+// File: M3 Template
+// Author: NiNtoxicated
+// Revision: 0.98
+// Purpose: Parse the Starcraft 2 Model File Format (.M3)
+//--------------------------------------
+
+// === Global Variables ===
+//Model Type
+local int MODL_TYPE = 0;
+
+//Switches
+const int FL_VERT = 0x08;
+const int FL_ANIM = 0x09;
+
+//Data Switches
+local int flg_vert = 0;
+local int flg_data = 0;
+
+//Misc variables
+local quad bm; //read in file position to return to
+local uint t_offs = 0; //tag offset
+local int tag_size = 16; //tag byte size
+local int i = 0; //used in for loops
+
+// ==================
+// ==  DATA TYPES  ==
+// ==================
+typedef ubyte fltByte <read=fltByteRead, write=fltByteWrite>;
+
+string fltByteRead( fltByte b )
+{
+    string s; 
+    local float flt = b / 255.0;  
+    SPrintf( s, "%f", flt );
+    return s;
+}
+
+void fltByteWrite( fltByte &b, string s )
+{
+    b = (fltByte)( Atof( s ) * 255.0 );
+}
+
+typedef ubyte fltNormal <read=fltNormalRead, write=fltNormalWrite>;
+
+string fltNormalRead( fltNormal b )
+{
+    string s;
+    float flt;
+    if (b != 0)
+    {
+        flt = (2 * b / 255.0) - 1;
+    }
+    else 
+    {
+        flt = 0;
+    }
+    SPrintf( s, "%f", flt );
+    return s;
+}
+
+void fltNormalWrite( fltNormal &b, string s )
+{
+    local int cn = 1 + Atof (s);
+    cn = (cn / 2) * 255;
+    b = (fltNormal)( cn );
+}
+
+typedef short uvShort <read=uvShortRead, write=uvShortRead>;
+
+string uvShortRead( uvShort uvs )
+{
+    string s;   
+    SPrintf( s, "%f", uvs / 2048.0 );
+    return s;
+}
+
+void uvShortWrite( uvShort &uvs, string s )
+{
+    uvs = (uvShort)( Atof( s ) * 2048.0 );
+}
+
+typedef struct
+{
+    float x, y;
+} Vec2D <read=Vec2DRead, write=Vec2DWrite>;
+
+string Vec2DRead(Vec2D &v2d)
+{
+    string s;
+    SPrintf( s, "[%f, %f]", v2d.x, v2d.y);
+    return s;
+}
+
+string Vec2DWrite(Vec2D &v2d, string s)
+{
+    SScanf( s, "[%f, %f]", v2d.x, v2d.y);
+}
+
+typedef struct
+{
+    float x, y, z;
+} Vec3D <read=Vec3DRead,write=Vec3DWrite>;
+
+string Vec3DRead(Vec3D &v3d)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+    return s;
+}
+
+void Vec3DWrite(Vec3D &v3d, string s)
+{
+    SScanf( s, "[%f, %f, %f]", v3d.x, v3d.y, v3d.z);
+}
+
+typedef struct
+{
+    float x, y, z, w;
+} Vec4D <read=Vec4DRead,write=Vec4DWrite>;
+
+string Vec4DRead(Vec4D &q)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f, %f]", q.x, q.y, q.z, q.w);
+    return s;
+}
+
+void Vec4DWrite( Vec4D &q, string s )
+{
+    SScanf( s, "[%f, %f, %f, %f]", q.x, q.y, q.z, q.w);
+}
+
+typedef struct
+{
+    fltByte blue, green, red, alpha;
+} Colour;
+
+typedef struct (int type)
+{
+    Vec4D a, b, c, d;
+    if (type == 34) { ulong flags; }
+} matrix;
+
+typedef struct (int type)
+{
+    Vec3D min;
+    Vec3D max;
+    float radius;
+    if (type == 34) { ulong flags; }
+} Sphere;
+
+// ==================
+// ==  M3 STRUCTS  ==
+// ==================
+typedef struct
+{
+    ulong nData, indData;
+    if (fHead.fType == "43DM")
+    {
+        ulong flags;
+    }
+} HeadRef <read=RefRead>;
+
+string RefRead(HeadRef &r)
+{
+    string s;
+    SPrintf( s, "nData: %d\tindData: %d", r.nData, r.indData);
+    return s;
+}
+
+typedef struct
+{
+    char blockID[4];
+    ULONG ofs;
+    ULONG count; //number of chunks
+    ULONG vers;
+} Tag <read=BlockIDRead, bgcolor=cLtPurple>;
+
+//Function tag read declare
+void ReadTag(Tag &t);
+
+string BlockIDRead(Tag &t)
+{
+    string s;
+    SPrintf( s, "%s", t.blockID);
+    return s;
+}
+
+typedef struct
+{
+    char fType[4];
+    ULONG ofsTags;
+    ULONG nTags;
+    HeadRef mref;
+    t_offs = ofsTags;
+    bm = FTell();
+
+    FSeek(t_offs);
+    Tag htag;
+    local uint mtagoffs = t_offs + (mref.indData * tag_size);
+    FSeek(mtagoffs);
+    Tag mtag;
+    FSeek(bm);
+} FileHeader <bgcolor=cLtGray>; //MD33
+
+typedef struct 
+{
+    local quad ret;
+    local uint t_goto;
+    HeadRef HRef;
+
+    if (HRef.nData > 0 && HRef.indData != 65535)
+    {
+        ret = FTell(); //bookmark
+        t_goto = t_offs + (tag_size * HRef.indData);
+        FSeek(t_goto); //goto tags
+        //Tag Chunk
+        Tag chunk;
+        //Tag Data
+        ReadTag(chunk);
+    
+        FSeek(ret); //return to bookmark
+    }
+} Ref <optimize=false>;
+
+// =============================
+// ==  ANIM. REFERENCE TYPES  ==
+// =============================
+
+typedef struct
+{
+    ushort type;
+    ushort flags;
+    ulong animid;
+} Animref <read=AnimrefRead>;
+
+string AnimrefRead(Animref &ar)
+{
+    string s;
+    if (ar.flags == 6)
+    {
+        SPrintf( s, "<Animated>\tAnimid: %d", ar.animid);
+    }
+    else
+    {
+        SPrintf( s, "Animid: %d", ar.animid);
+    }
+    return s;
+}
+
+typedef struct
+{
+    Animref Aref;
+    Vec2D value; //initial value
+    Vec2D unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_VEC2D <read=Aref_VEC2DRead, write = Aref_VEC2DWrite>;
+
+string Aref_VEC2DRead(Aref_VEC2D &v2d)
+{
+    string s;
+    SPrintf( s, "[%f, %f]", v2d.value.x, v2d.value.y);
+    return s;
+}
+
+void Aref_VEC2DWrite(Aref_VEC2D &v2d, string s)
+{
+    SScanf( s, "[%f, %f]", v2d.value.x, v2d.value.y);
+}
+
+typedef struct
+{
+    Animref Aref;
+    Vec3D value; //initial value
+    Vec3D unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_VEC3D <read=Aref_VEC3DRead, write = Aref_VEC3DWrite>;
+
+string Aref_VEC3DRead(Aref_VEC3D &v3d)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f]", v3d.value.x, v3d.value.y, v3d.value.z);
+    return s;
+}
+
+void Aref_VEC3DWrite(Aref_VEC3D &v3d, string s)
+{
+    SScanf( s, "[%f, %f, %f]", v3d.value.x, v3d.value.y, v3d.value.z);
+}
+
+typedef struct
+{
+    Animref Aref;
+    short value[3]; //initial value
+    short unValue[3]; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_shrtVEC3D <read=Aref_shrtVEC3DRead, write = Aref_shrtVEC3DWrite>;
+
+string Aref_shrtVEC3DRead(Aref_shrtVEC3D &sv3d)
+{
+    string s;
+    SPrintf( s, "[%d, %d, %d]", sv3d.value[0], sv3d.value[1], sv3d.value[2]);
+    return s;
+}
+
+void Aref_shrtVEC3DWrite(Aref_shrtVEC3D &sv3d, string s)
+{
+    SScanf( s, "[%d, %d, %d]", sv3d.value[0], sv3d.value[1], sv3d.value[2]);
+}
+
+typedef struct
+{
+    Animref Aref;
+    Vec4D value; //initial value
+    Vec4D unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_VEC4D <read = Aref_VEC4DRead, write = Aref_VEC4DWrite>;
+
+string Aref_VEC4DRead(Aref_VEC4D &v4d)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f, %f]", v4d.value.x, v4d.value.y, v4d.value.z, v4d.value.w);
+    return s;
+}
+
+void Aref_VEC4DWrite(Aref_VEC4D &v4d, string s)
+{
+    SScanf( s, "[%f, %f, %f, %f]", v4d.value.x, v4d.value.y, v4d.value.z, v4d.value.w);
+}
+
+typedef struct
+{
+    Animref Aref;
+    Colour value; //initial value
+    Colour unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_Colour; 
+
+typedef struct
+{
+    Animref Aref;
+    uint32 value; //initial value
+    uint32 unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_UINT32 <read = Aref_UINT32Read, write = Aref_UINT32Write>;
+
+string Aref_UINT32Read(Aref_UINT32 &d)
+{
+    string s;
+    SPrintf( s, "%d", d.value);
+    return s;
+}
+
+void Aref_UINT32Write(Aref_UINT32 &d, string s)
+{
+    SScanf( s, "%d", d.value);
+}
+
+typedef struct
+{
+    Animref Aref;
+    uint16 value; //initial value
+    uint16 unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_UINT16 <read = Aref_UINT16Read, write = Aref_UINT16Write>;
+
+string Aref_UINT16Read(Aref_UINT16 &shrt)
+{
+    string s;
+    SPrintf( s, "%d", shrt.value);
+    return s;
+}
+
+void Aref_UINT16Write(Aref_UINT16 &shrt, string s)
+{
+    SScanf( s, "%d", shrt.value);
+}
+
+typedef struct
+{
+    Animref Aref;
+    float value; //initial value
+    float unValue; //unused extra value
+    uint32 flags; //unused, 0
+} Aref_FLOAT <read = Aref_FLOATRead, write = Aref_FLOATWrite>;
+
+string Aref_FLOATRead(Aref_FLOAT &f)
+{
+    string s;
+    SPrintf( s, "%f", f.value);
+    return s;
+}
+
+void Aref_FLOATWrite(Aref_FLOAT &f, string s)
+{
+    SScanf( s, "%f", f.value);
+}
+
+typedef struct
+{
+    Animref Aref;
+    Sphere value(0); //initial value
+    Sphere unValue(0); //unused extra value
+    uint32 flags; //unused, 0
+} Aref_Sphere;
+
+typedef struct
+{
+    Ref frames;
+    ulong flags<format=binary>;
+    ulong framelength;
+    Ref data;
+} Animblock;
+
+typedef struct (int mflags)
+{
+    Ref     Modelname;
+    ULONG   type;
+    Ref     mSEQS;
+    Ref     mSTC;
+    Ref     mSTG; //standing animation?
+    Vec3D   v3d1;
+    if (MODL_TYPE == 34) { ulong d10; }
+    Ref     mSTS;
+    Ref     mBone;
+    ULONG   nSkinnedBones;
+    struct
+    {
+        ULONG   bitFlags <format=binary>;
+        FSkip (-4);
+        ULONG       : 9;
+        ULONG   u1  : 1;
+        ULONG       : 8;
+        ULONG   v36 : 1;
+        ULONG   v38 : 1;
+        ULONG   v40 : 1;
+        ULONG   v42 : 1;
+    } vertFlags;
+    flg_vert = vertFlags.bitFlags;
+    flg_data = FL_VERT;
+    Ref     mVert;
+    Ref     mDIV;
+    Ref     mBoneLU;
+    Sphere boundSphere (MODL_TYPE);
+    switch (MODL_TYPE)
+    {
+        case 33:{
+                    switch (mflags)
+                    {
+                        case 20: int d2[11]; break;
+                        default: int d2[13];
+                    }
+                    break;
+                }
+        default:{
+                    switch (mflags)
+                    {
+                        case 20: int d2[11]; break;
+                        default: int d2[15];
+                    }
+                }
+    }
+    Ref     mAttach;
+    Ref     mAttachLU;
+    Ref     mLite;
+    Ref     mSHBX;
+    Ref     mCam;
+    Ref     D; //uint16
+    Ref     mMatLU;
+    Ref     mMat; //materials
+    Ref     mDIS;
+    Ref     mCMP;
+    Ref     mTER;
+    Ref     mVOL;
+    Ref     r1;
+    Ref     mCREP;
+    Ref     mPar;
+    Ref     mParc;
+    Ref     mRibbon;
+    Ref     mPROJ;
+    Ref     mFOR;
+    Ref     mWRP;
+    Ref     r2;
+    Ref     mPHRB;
+    Ref     r3[3];
+    Ref     mIKJT;
+    Ref     r4;
+    Ref     mPATU;
+    Ref     mTRGD;
+    Ref     mIREF;
+    int d7[2];
+    matrix  mat(MODL_TYPE);
+    Sphere ext2(MODL_TYPE);
+    Ref     mSGSS;
+    Ref     mATVL;
+    Ref     F; //uint16
+    Ref     G; //uint16
+    Ref     mBBSC;
+    switch (MODL_TYPE)
+    {
+        case 33:{
+                    switch (mflags)
+                    {
+                        case 20: int d9; break;
+                        default:{
+                                    Ref mTMD;
+                                    uint d9[3];
+                                }
+                    }
+                    break;
+                }
+        default:{
+                    switch (mflags)
+                    {
+                        case 20: int d9; break;
+                        default:{
+                                    Ref mTMD;
+                                    uint d9[4];
+                                }
+                    }
+                }
+    }
+} MODL <open=true, bgcolor=cAqua>;
+
+typedef struct
+{
+    long d1[2];
+    Ref name;
+    ulong AnimStart;
+    ulong AnimEnd;
+    float MoveSpeed;
+    struct
+    {
+        ULONG   bitFlags <format=binary>;
+        FSkip (-4);
+        ULONG   NonLooping: 1;
+        ULONG   hardGlobal: 1; //seems to play this animation for every animation
+        ULONG   : 1;
+        ULONG   editorGlobal: 1; //marks global animation as true in editor, but does nothing
+    } animFlags;
+    ulong frequency;
+    ulong ReplayStart;
+    ulong ReplayEnd;
+    ulong d4[2];
+    Sphere boundSphere (MODL_TYPE);
+    ulong d5[2];
+} SEQS <read=SEQSRead>; //Animation Sequence info
+
+string SEQSRead(SEQS &seq)
+{
+    string s;
+    SPrintf( s, "%s", seq.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    Ref name;
+    Ref AnimRef;
+} STG_ <read=STGRead>;
+
+string STGRead(STG_ &stg)
+{
+    string s;
+    SPrintf( s, "%s", stg.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    Ref name;
+    ulong d1;
+    ushort AnimIndRef[2]; 
+    Ref animid;
+    flg_data = FL_ANIM; //Reads ulong data ref as two ushorts
+    Ref animoffs;
+    flg_data = 0; //Reset flag
+    ulong d2;
+    Ref arEvents;
+    Ref arVec2D;
+    Ref arVec3D;
+    Ref arQuat;
+    Ref arColour;
+    Ref arFloat;
+    Ref r3;
+    Ref arInt16;
+    Ref r4[3];
+    Ref arFlags;
+    Ref arBounds;
+} STC_ <read=STCRead>; //Sequence Transformation Collection
+
+string STCRead(STC_ &stc)
+{
+    string s;
+    if (stc.name.HRef.nData > 1)
+    {
+        SPrintf( s, "%s", stc.name.Block);
+    }
+    return s;
+}
+
+//Sequence Data (SD**) chunks
+typedef struct
+{
+    Animblock animdata;
+} SDEV;
+
+typedef struct
+{
+    Ref name;
+    long d1;
+    short s1;
+    ushort s2;
+    matrix emat (0);
+    switch (MODL_TYPE)
+    {
+        case 33: ulong d2[3]; break;
+        default: ulong d2[5];
+    }
+} EVNT <read=EVNTRead>; //Model Event
+
+string EVNTRead(EVNT &e)
+{
+    string s;
+    SPrintf( s, "%s", e.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    Animblock animdata;
+} SD2V;
+
+typedef struct
+{
+    Animblock animdata;
+} SD3V; //Translational Animation data
+
+typedef struct
+{
+   Vec3D pos;
+} VEC3; //3D vectors
+
+typedef struct
+{
+    Animblock animdata;
+} SD4Q;
+
+typedef struct
+{
+    Animblock animdata;
+} SDR3; //REAL data
+
+typedef struct
+{
+    float value;
+} REAL;
+
+typedef struct
+{
+    Animblock animdata;
+} SDS6; //some particle info, I16_ data
+
+typedef struct
+{
+    Animblock animdata;
+} SDMB;
+
+typedef struct
+{
+    Vec3D min, max;
+    float radius;
+} BNDS; //boundary? bounding box?
+
+typedef struct
+{
+    Animblock animdata;
+} SDFG;
+
+typedef struct
+{
+    ushort unk[2];
+} FLAG; //Flags of some sort?
+
+typedef struct
+{
+    Animblock animdata;
+} SDCC; //found in ribbons, COL values
+
+typedef struct
+{
+    fltByte b, g, r, a;
+} COL;
+
+typedef struct
+{
+    Ref     animid;
+    long    d1[3];
+    short   s1;
+    ushort  s2;
+} STS_;
+
+typedef struct
+{
+    long d1;
+    Ref bname;
+    struct
+    {
+        ulong bitFlag <format=binary>;
+        FSkip (-4);
+        //flags:
+        // 0x1      - Inherit Translation (off = true)
+        // 0x2      - Inherit Scale (off = true)
+        // 0x4      - Inherit Rotation (off = true)
+        // 0x10     - Billboard
+        // 0x40     - Billboard again?
+        // 0x100    - 2D Projection
+        // 0x200    - Animated
+        // 0x400    - IK
+        // 0x800    - Skinned
+        // 0x2000   - Unknown?
+        ulong inhTrans: 1;
+        ulong inhScale: 1;
+        ulong inhRot: 1;
+        ulong : 1;
+        ulong billboard1: 1;
+        ulong : 1;
+        ulong billboard2: 1;
+        ulong : 1;
+        ulong proj2d: 1;
+        ulong animated: 1;
+        ulong ik: 1;
+        ulong skinned: 1;
+        ulong : 1;
+        ulong unk1: 1;
+    } flags;
+
+    short boneparent;
+    ushort s1;
+    Aref_VEC3D trans;
+    Aref_VEC4D rot;
+    Aref_VEC3D scale;
+    Aref_UINT32 ar1;
+} BONE <read=BoneRead>; //bones! yay!
+
+string BoneRead(BONE &b)
+{
+    string s;
+    SPrintf( s, "%s", b.bname.Block);
+    return s;
+}
+
+typedef struct
+{
+    Vec3D   pos;
+    fltByte  weBone[4];
+    UBYTE   weIndice[4];
+    fltNormal normal[4]; //normal[x]/255.0
+    if (flg_vert & 0x200) {long d1;}
+    uvShort uv1[2];  //uv[x]/2046
+    if (flg_vert & 0x40000) {uvShort uv2[2];}
+    if (flg_vert & 0x80000) {uvShort uv3[2];}
+    if (flg_vert & 0x100000) {uvShort uv4[2];}
+    fltByte tan[4];     
+} Vertex <read=VertexRead>; //U8__
+
+string VertexRead(Vertex &v)
+{
+    string s;
+    SPrintf( s, "[%f, %f, %f]", v.pos.x, v.pos.y, v.pos.z);
+    return s;
+}
+
+typedef struct
+{
+    Ref faces, submesh, BAT, MSEC;
+    ulong unk;
+} DIV_;
+
+typedef struct
+{
+    ulong d1;
+    Aref_Sphere bndSphere;
+} MSEC;
+
+typedef struct
+{
+    switch (MODL_TYPE)
+    {
+        case 33: 
+        {
+            ushort s1[2];
+            ushort vind;
+            ushort vnum;
+            break;
+        }
+        default:
+        {
+            ulong d1[2];
+            ulong vind;
+            ulong vnum;
+        }
+    }
+
+    ulong find;
+    ulong fnum;
+    ushort bcount;
+    ushort bind;
+    ushort bnum;
+    ushort s2;
+    ubyte b1[2];
+    ushort rootBone;
+} REGN; // Model Submeshes
+
+typedef struct
+{
+    ulong unk1;
+    ushort regnIndex;
+    ushort unk2[2];
+    ushort matmIndex;
+    short unk3; //-1
+} BAT_;
+
+typedef struct
+{
+    long i1; //-1
+    Ref name;
+    ulong bone;
+} ATT_ <read=AttachRead>; //Attachments?
+
+string AttachRead(ATT_ &a)
+{
+    string s;
+    SPrintf( s, "%s", a.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    //Material Lookup table
+    enum <ulong> matmEnum { MATM_Unk0, MATM_Standard, MATM_Displacement, MATM_Composite, MATM_Null, MATM_Unk5 } matType;
+    ulong matInd; //Mat lookup reference
+} MATM;
+
+typedef struct
+{
+    ulong bitFlag <format=binary>;
+    FSkip (-4);
+    ulong                   : 2;
+    ulong Unfogged          : 1;
+    ulong TwoSided          : 1;
+    ulong Unshaded          : 1;
+    ulong NoShadowsCast     : 1;
+    ulong NoHitTest         : 1;
+    ulong NoShadowsReceived : 1;
+
+    ulong DepthPrepass      : 1;
+    ulong UseTerrainHDR     : 1;
+    ulong                   : 1;
+    ulong splatUVfix        : 1;
+    ulong SoftBlending      : 1;
+    ulong Unfogged2         : 1;
+} matFlags;
+
+typedef struct
+{
+    Ref     name;
+    ulong   d1;
+    matFlags flags;
+    // Blend modes
+    enum <ulong> benum { Opaque, AlphaBlend, Add, AlphaAdd, Mod, Mod2x } blendMode;
+    ulong   priority;
+    ulong   d3;
+    float   Specularity;
+    float   f1;
+    ulong   cutout_thresh;
+    float   Spec_mult;
+    float   Emis_mult;
+    struct
+    {
+        Ref     LAYR_Diff;
+        Ref     LAYR_Decal;
+        Ref     LAYR_Spec;
+        Ref     LAYR_Emis;
+        Ref     LAYR_Emis2;
+        Ref     LAYR_Reflect;
+        Ref     LAYR_ReflectMask;
+        Ref     LAYR_Alpha;
+        Ref     LAYR_Unk3;
+        Ref     LAYR_Norm;
+        Ref     LAYR_Height;
+        Ref     LAYR_Unk4[2];
+    } layers;
+    ulong d2;
+    enum <ulong> lenum { lMod, lMod2x, lAdd, lBlend, lTeamColEmissAdd, lTeamColDiffAdd } LayerBlend;
+    enum <ulong> eenum { eMod, eMod2x, eAdd, eBlend, eTeamColEmissAdd, eTeamColDiffAdd } EmissiveBlend;
+    ulong d6;
+    ulong specularType; //0 = RGB, 1 = Alpha Only, 2 = Unknown
+    Aref_UINT32 Ar1;
+    Aref_UINT32 Ar2;
+} MAT_ <read=MATRead>; //Materials?
+
+string MATRead(MAT_ &m)
+{
+    string s;
+    SPrintf( s, "%s", m.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    ulong   d1;
+    Ref     name;
+    Aref_Colour initColour;
+    struct
+    {
+        ulong bitFlag <format=binary>;
+        FSkip (-4);
+        ulong            : 2;
+        ulong   texwrap_x: 1;
+        ulong   texwrap_y: 1;
+        ulong   texBlack : 1;
+        ulong            : 5;
+        ulong   useColour: 1; //enables initColour
+    } texFlags;
+    ulong   uvmapChannel; //flags, not a uint value
+    struct
+    {
+        ulong bitFlag <format=binary>;
+        FSkip (-4);
+        ulong alphaTeamColour   : 1;
+        ulong alphaOnly         : 1;
+        ulong alphaShading      : 1;
+        ulong texGarble01       : 1;
+    } renderFlags;
+    Aref_FLOAT brightness_mult1;
+    Aref_FLOAT brightness_mult2;
+    ulong   d4;
+    long  d5; //-1 to render texture
+    ulong   d6[2];
+    long    d7;
+    ulong   d8[2];
+    Aref_UINT32 ar1;
+    Aref_VEC2D ar2;
+    Aref_UINT16 ar3;
+    Aref_VEC2D uvMap;
+    Aref_VEC3D uvAngle; //3dsmaxAngle = value * 50 * -1
+    Aref_VEC2D uvTiling;
+    Aref_UINT32 ar5;
+    Aref_FLOAT ar6;
+    Aref_FLOAT brightness; //to 1.0
+    long    d20; //-1
+    struct
+    {
+        ulong bitFlag <format=binary>;
+        FSkip (-4);
+        ulong tintInverse : 1;
+        ulong tint : 1;
+        ulong useColour : 1; //same function as texFlags useColour
+    } tintFlags;
+    float   tintStrength;
+    float   tintUnk;
+    float   f8[2];        
+} LAYR <read=LAYRRead>; //Layer info?
+
+string LAYRRead(LAYR &l)
+{
+    string s;
+    if (l.name.HRef.nData > 1)
+    {
+        SPrintf( s, "%s", l.name.Block);
+        return s;
+    }
+    else
+    {
+        s = "(No Texture)";
+        return s;
+    }
+}
+
+typedef struct
+{
+    Ref     bitmap;
+    ulong d1;
+    Aref_FLOAT ar1;
+    Ref     Normal;
+    Ref     Strength;
+    matFlags flags;
+    ulong priority;
+} DIS_ <read=DISRead>; //Displacement
+
+string DISRead(DIS_ &d)
+{
+    string s;
+    SPrintf( s, "%s", d.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    Ref name;
+    ulong d1;
+    Ref cms;
+} CMP_ <read=CMPRead>; //Composite
+
+string CMPRead(CMP_ &c)
+{
+    string s;
+    SPrintf( s, "%s", c.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    ulong matmIndex;
+    Aref_FLOAT ar1;
+} CMS_;
+
+typedef struct
+{
+    Ref name;
+    Ref diffuse;
+} TER_ <read=TERRead>; // Terrain
+
+string TERRead(TER_ &t)
+{
+    string s;
+    SPrintf( s, "%s", t.name.Block);
+    return s;
+}
+
+typedef struct
+{
+    //determined through the beta previewer
+    ulong bitFlag <format=binary>;
+    FSkip (-4);
+    ulong sort                  : 1;
+    ulong collideTerrain        : 1;
+    ulong collideObjects        : 1;
+    ulong spawnOnBounce         : 1;
+    ulong useInnerShape         : 1;
+    ulong inheritEmissionParams : 1;
+    ulong inheritParentVel      : 1;
+    ulong sortByZHeight         : 1;
+    ulong reverseIteration      : 1;
+    ulong smoothRotation        : 1;
+    ulong bezSmoothRotation     : 1;
+    ulong smoothSize            : 1;
+    ulong bezSmoothSize         : 1;
+    ulong smoothColour          : 1;
+    ulong bezSmoothColour       : 1;
+    ulong litParts              : 1;
+    ulong randFlipbookStart     : 1;
+    ulong multiplyByGravity     : 1;
+    ulong clampTailParts        : 1;
+    ulong spawnTrailingParts    : 1;
+    ulong fixLengthTailParts    : 1;
+    ulong useVertexAlpha        : 1;
+    ulong modelParts            : 1;
+    ulong swapYZonModelParts    : 1;
+    ulong scaleTimeByParent     : 1;
+    ulong useLocalTime          : 1;
+    ulong simulateOnInit        : 1;
+    ulong copy                  : 1;
+} particleFlags;
+
+typedef struct
+{
+    //Courtesy of cutevisor:
+    //Most Vec3D values are [Start, End, Spread]
+    ulong bone;
+    ulong matmIndex;
+    Aref_FLOAT emisSpeedStart;
+    Aref_FLOAT speedVariation;
+    ulong enableSpeedVariation; //1 - On, 0 - Off
+    Aref_FLOAT yAngle;
+    Aref_FLOAT xAngle;
+    Aref_FLOAT xSpread;
+    Aref_FLOAT ySpread;
+    Aref_FLOAT lifespan;
+    Aref_FLOAT decay;
+    ulong enableDecay; //1 - On, 0 - Off
+    ulong d9[3];
+    float emisSpeedMid; //change in emission speed
+    float scaleRatio; //0 - 1.0, impacts on scale range
+    float f5[3];
+    Aref_VEC3D scale; //[start, end, range]
+    Aref_VEC3D speedUnk1;
+    //main particle colour attributes
+    struct
+    {
+        Aref_Colour col1Start;
+        Aref_Colour col1Mid;
+        Aref_Colour col1End;
+    } Colour1StartMidEnd;
+    float emisSpeedEnd; //odd setting
+    ulong d16;
+    float f9[2];
+    ulong d17[2];
+    uint16 s1[2];
+    uint16 s2[2];
+    ulong d18[3];
+    float f10;
+    ulong d19; //possibly minimum particles? not sure
+    ulong maxParticles; //maximum amount of particles
+    Aref_FLOAT emissionRate; //rate at which particles are released till maxParticles
+    //particle types determined through beta previewer
+    enum <ulong> pemitterType { ptPoint, ptPlane, ptSphere, ptBox, ptCylinder1, ptDisc, ptSpline, ptPlanarBillboard, ptPlanar, ptCylinder2, ptStarshaped   } particleType;
+    Aref_VEC3D emissionArea; //[width, length, spread]
+    Aref_VEC3D tailUnk1;
+    Aref_FLOAT pivotSpread;
+    Aref_VEC2D spreadUnk1;
+    Aref_VEC3D ar19;
+    ulong enableRotate; //1 - On, 0 - Off
+    Aref_VEC3D rotate; //[rotSpread1, rotSpread2, spinSpeed]
+    ulong enableColour2; //1 - On, 0 - Off
+    //if enabled, seems to pick randomly between Colour1 and Colour2 values
+    struct
+    {
+        Aref_Colour col2Start;
+        Aref_Colour col2Mid;
+        Aref_Colour col2End;
+    } Colour2StartMidEnd;
+    ulong d23;
+    Aref_UINT16 ar24;
+    Colour col1;
+    float lifespanRatio;
+    ushort columns;
+    ushort rows;
+    float f15[2];
+    ulong d25;
+    float f12;
+    long i1; //must be -1 or will crash the previewer
+    ulong d26[6];
+    float f13;
+    ulong d27[2];
+    float f14;
+    ulong d28;
+
+    /*
+    Following collection of Aref's appear to be completely unused
+
+    Have found no models that use them and altering their values seems to have
+    no effect
+    
+    Seem to have a new Aref type, Short Vec3D's, but that's only an assumption
+    as the amount of bytes between Aref's fits, must find a model that uses these...
+    */
+    
+    Aref_UINT32 ar25;
+    Aref_shrtVEC3D ar26;
+    Aref_UINT32 ar27;
+    Aref_shrtVEC3D ar28;
+    Aref_UINT32 ar29;
+    Aref_shrtVEC3D ar30;
+    Aref_UINT32 ar31;
+    Aref_shrtVEC3D ar32;
+    Aref_UINT32 ar33;
+    Aref_shrtVEC3D ar34;
+    Aref_UINT32 ar35;
+    Aref_shrtVEC3D ar36;
+    Aref_UINT32 ar37;
+    Aref_shrtVEC3D ar38;
+    Aref_UINT32 ar39;
+    Aref_shrtVEC3D ar40;
+    Aref_UINT32 ar41;
+    Aref_UINT32 ar42;
+    Aref_UINT32 ar43;
+    particleFlags parFlags; //determined through beta previewer
+    ulong d29[6];
+    Aref_UINT32 ar44;
+    Aref_FLOAT ar45;
+    long i2; //must be -1
+    ulong d30;
+    Aref_UINT32 ar46;
+    Colour col4;
+    ulong unk[7];
+} PAR_;  //Particles
+
+typedef struct
+{
+    //determined through the beta previewer
+    uint32 bitFlag <format=binary>;
+    FSkip (-4);
+    uint32                          : 1;
+    uint32 collideWithTerrain       : 1; //0x2
+    uint32 collideWithObjects       : 1; //0x4
+    uint32 edgeFalloff              : 1; //0x8
+    uint32 inheritParentVelocity    : 1; //0x10
+    uint32 smoothSize               : 1; //0x20
+    uint32 bezierSmoothSize         : 1; //0x40
+    uint32 useVertexAlpha           : 1; //0x80
+    uint32 scaleTimeByParent        : 1; //0x100
+    uint32 forceLegacy              : 1; //0x200
+    uint32 useLocalTime             : 1; //0x400
+    uint32 simulateOnInit           : 1; //0x800
+    uint32 useLengthAndTime         : 1; //0x1000             
+} ribbonFlags;
+
+typedef struct
+{
+    uint32 bone;
+    uint32 matmIndex;
+    Aref_FLOAT renderSpeed; //determines how fast ribbon renders, can affect ribbon end point?
+    Aref_UINT32 ar2;
+    uint32 d1;
+    Aref_UINT32 ar3;
+    Aref_UINT32 ar4;
+    Aref_UINT32 ar5;
+    Aref_UINT32 ar6;
+    Aref_FLOAT timeLength;
+    Aref_VEC3D ar8;
+    float emissionAngle; //determines where ribbon ends
+    float ribThickness; //0 - 1.0
+    float f1[3];
+    Aref_VEC3D ribScale; //[??, start, end]
+    Aref_VEC3D ribRotate; //[rotSpread1, rotSpread2, unk]?
+    Aref_Colour ar11;
+    Aref_Colour ar12;
+    Aref_Colour ar13;
+    float f2; //affects render speed
+    uint32 d2;
+    float f3;
+    uint32 d3[5];
+    float f4[4];
+    uint32 d4;
+    //determined through previewer
+    enum <ulong> ribbonType { rtPlanarBillboarded, rtPlanar, rtCylinder, rtStarShaped    } ribType;
+    uint32 d5;
+    float emissionRate;
+    uint32 d6;
+    float f6;
+    Aref_FLOAT ribLength;
+    uint32 d7;
+    Ref         paramerers;
+    Aref_UINT32 visible; //animated FLAG, seems to switch ribbon on or off
+    ribbonFlags ribFlags; //determined through beta previewer
+    uint32 d8[5];
+    Aref_FLOAT ar16;
+    Aref_FLOAT ar17;
+    uint32 d9;
+    Aref_UINT32 ar18;
+    Aref_UINT32 ar19;
+    uint32 d10;
+    Aref_UINT32 ar20;
+    Aref_UINT32 ar21;
+    uint32 d11;
+    Aref_UINT32 ar22;
+    Aref_UINT32 ar23;
+    uint32 d12;
+    Aref_UINT32 ar24;
+    Aref_UINT32 ar25;
+    Aref_FLOAT ar26;
+    Aref_UINT32 ar27;
+} RIB_; //Ribbons
+
+typedef struct
+{
+    Vec3D  startTrans;
+    float  f1;
+    float  f2;
+    Vec4D  rot;
+    Vec3D  endTrans;
+    uint32 endBone;
+    Aref_FLOAT ctrl1;
+    Aref_FLOAT ctrl2;
+    uint32 d2;
+    Aref_UINT32 ar3;
+    Aref_UINT32 ar4;
+    uint32 d3;
+    Aref_UINT32 ar5;
+    Aref_UINT32 ar6;
+    uint32 d4;
+    Aref_UINT32 ar7;
+    Aref_UINT32 ar8;
+    Aref_UINT32 ar9;
+    Aref_UINT32 ar10;
+    float dd[4];
+} SRIB; 
+
+typedef struct
+{
+    matrix mat(0);
+} IREF; //some reference to bones?
+
+typedef struct
+{
+    ulong unk[26];
+} FOR_;
+
+typedef struct
+{
+    ulong d1;
+    ulong bone;
+    matrix mat1 (MODL_TYPE);
+    Sphere ext1 (MODL_TYPE);
+} SSGS;
+
+typedef struct
+{
+    ulong d1[4];
+    matrix mat1 (MODL_TYPE);
+    Sphere ext1 (MODL_TYPE);
+} ATVL;
+
+//data types
+typedef struct
+{
+    long i32;
+} I32_; //signed integer (32 bits)
+
+typedef struct
+{
+    short i16;
+} I16_;
+
+typedef struct
+{
+    switch (flg_data)
+    {
+        case FL_ANIM: ushort aind; ushort sdind; break; 
+        default: ulong u32;
+    }
+} U32_; //unsigned integer (32 bits)
+
+typedef struct
+{
+    switch (flg_data)
+    {
+       default: ushort u16;
+    } 
+} U16_; //unsigned short (16 bits)
+
+typedef struct
+{
+    switch (flg_data)
+    {
+        default: ubyte u8;
+    }
+} U8__;
+
+//---------------
+//----Start------
+//---------------
+LittleEndian(); 
+//Load header block
+Warning( "Loading Header Block." ); 
+FileHeader fHead;
+if( fHead.fType != "33DM" && fHead.fType != "43DM" )
+{
+    Warning( "File is not an M3 model. Template Stopped." );
+    return -1;
+}
+
+//Load model information
+Warning( "Loading Model Information." );
+//Goto MODL data
+FSeek(fHead.mtag.ofs);
+//Set MODL vers
+switch (fHead.fType)
+{
+    case "33DM" : MODL_TYPE = 33; break;
+    default : MODL_TYPE = 34;
+}
+MODL mdata(fHead.mtag.vers);
+Warning( "Model successfully read." );
+
+void ReadTag(Tag &t)
+{
+    local quad ret;
+    ret = FTell(); //bookmark
+    FSeek(t.ofs);
+
+    local int i, m, vsize;
+    m = t.count;
+    //vert handling
+    if (t.blockID == "__8U" && flg_data == FL_VERT)
+    {
+        vsize = 32;
+        if (flg_vert & 0x40000) {vsize += 4;}
+        if (flg_vert & 0x80000) {vsize += 4;}
+        if (flg_vert & 0x100000) {vsize += 4;}
+        m /= vsize;
+    }
+
+    for (i=0; i<m; i++)
+    {
+        SetBackColor(cLtGreen);
+        switch (t.blockID)
+        {
+            // 33DM, 43DM and LDOM for error catching purposes
+            case "33DM" :   FileHeader fInfo;  break;
+            case "43DM" :   FileHeader fInfo;  break;
+            case "LDOM" :   
+                        {
+                            switch (fHead.fType)
+                            {
+                                case "33DM": MODL mdata(fHead.mtag.vers); break;
+                                case "43DM": MODL mdata(fHead.mtag.vers); break;
+                                default: MODL mdata(fHead.mtag.vers);
+                            }
+                            break;
+                        }
+            case "SQES" :   SEQS aSeqs;  break;
+            case "_CTS" :   STC_ stc;    break;
+            case "_23U" :   U32_ u32;    break;
+            case "_61U" :   U16_ u16;    break;
+            case "_61I" :   I16_ i16;    break;
+            case "VEDS" :   SDEV sdev;   break;
+            case "_23I" :   I32_ i32;    break;
+            case "TNVE" :   EVNT evnt;   break;
+            case "V2DS" :   SD2V sd2v;   break;
+            case "2CEV" :   Vec2D v2d;   break;
+            case "V3DS" :   SD3V sd3v;   break;
+            case "3CEV" :   Vec3D v3d;   break;
+            case "Q4DS" :   SD4Q sd4q;   break;
+            case "TAUQ" :   Vec4D quat;  break;
+            case "LAER" :   REAL real;   break;
+            case "3RDS" :   SDR3 sdr3;   break;
+            case "SDNB" :   BNDS bnds;   break;
+            case "BMDS" :   SDMB sdmb;   break;
+            case "CCDS" :   SDCC sdcc;   break;
+            case "LOC" :   COL col;     break;
+            case "_STS" :   STS_ sts;    break; 
+            case "GFDS" :   SDFG sdfg;   break;
+            case "GALF" :   FLAG flag;   break;
+            case "ENOB" :   BONE bone;   break;
+            case "__8U" :   
+                        {
+                            if (flg_data == FL_VERT)
+                            {
+                                Vertex vert;
+                            }
+                            else
+                            {
+                                U8__ u8;
+                            } 
+                            break;
+                        }
+            case "_RAP" :   PAR_ par;    break;
+            case "_BIR" :   RIB_ rib;    break;
+            case "BIRS" :   SRIB srib;   break;
+            case "_ROF" :   FOR_ mFor;   break;
+            case "FERI" :   IREF iref;   break;
+            case "SGSS" :   SSGS ssgs;   break;
+            case "LVTA" :   ATVL atvl;   break;
+            case "RYAL" :   LAYR layr;   break;
+            case "_VID" :   DIV_ div;    break;
+            case "CESM" :   MSEC msec;   break;
+            case "NGER" :   REGN regn;   break;
+            case "_TAB" :   BAT_ bat;    break;
+            case "_TTA" :   ATT_ att;    break;
+            case "MTAM" :   MATM matm;   break;
+            case "_TAM" :   MAT_ mat;    break;
+            case "_GTS" :   STG_ stg;    break;
+            case "_SID" :   DIS_ dis;    break;
+            case "_PMC" :   CMP_ cmp;    break;
+            case "_SMC" :   CMS_ cms;    break;
+            case "_RET" :   TER_ ter;    break;
+            case "6SDS" :   SDS6 sds;    break;
+            default     :   char Block[t.count]; i=m;
+        }
+    }
+    FSeek(ret); //return to original position
+}

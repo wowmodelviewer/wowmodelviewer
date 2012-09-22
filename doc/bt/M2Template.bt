@@ -1,0 +1,228 @@
+#include "M2_Types_CATA.bt"
+//#include "M2_Types_WOTLK.bt"
+//#include "M2_Types_BC.bt"
+
+FSeek(0);
+struct GI {
+    HEADER_OFFSETS Offsets;
+
+    FSeek(0x00);
+    char magic[4];
+    if(!(magic[0]=='M' && magic[1]=='D' && magic[2]=='2' && magic[3]=='0'))
+        return;
+    char Version <format=decimal>;
+    if((Version != V_REQ && V_REQ != -1) || (V_REQ == -1 && Version == 8)) {
+        return;
+    } 
+
+    FSeek(Offsets.ofsName);
+    char ModelName[Offsets.lName];
+    FSeek(0x10);
+	E_GLOBALFLAGS type;
+
+    FSeek(O_PHYS);
+    struct {
+        Vec3D VertexBox1;
+        Vec3D VertexBox2;
+        float VertexRadius;
+        Vec3D BoundingBox1;
+        Vec3D BoundingBox2;
+    	float BoundingRadius;
+    } PhysicsSettings;
+
+    FSeek(0);
+} GeneralInformation <read=CommentGI>;
+
+//--------------------------------------
+
+FSeek(0);
+struct AR {
+    FSeek(0);
+    if (GeneralInformation.Offsets.nGlobalSequences > 0) {
+        FSeek( GeneralInformation.Offsets.ofsGlobalSequences);
+        uint32 GlobalSequences[GeneralInformation.Offsets.nGlobalSequences];
+    }
+
+    FSeek(0);
+    struct AR_A {
+        FSeek( GeneralInformation.Offsets.ofsAnimations );
+        ANIMATION AnimationSequences[GeneralInformation.Offsets.nAnimations];
+    
+        FSeek( GeneralInformation.Offsets.ofsAnimationLookup);
+        short AnimationLookupTable[GeneralInformation.Offsets.nAnimationLookup];
+    
+        if(GeneralInformation.Version != 8 && GeneralInformation.Version != 16) {
+            FSeek( GeneralInformation.Offsets.ofsD);
+            SS BlockD[GeneralInformation.Offsets.nD];
+        } 
+    } AnimationsAndLookups <read=CommentAR_A>;
+
+    FSeek(0);
+    struct AR_B {
+        struct b_holder { 
+            FSeek( GeneralInformation.Offsets.ofsBones);
+            BONE Bones[GeneralInformation.Offsets.nBones] <optimize=false>;
+        } BoneHolder;
+
+        FSeek( GeneralInformation.Offsets.ofsBoneLookupTable);
+        short BoneLookup[GeneralInformation.Offsets.nBoneLookupTable];
+        
+        FSeek( GeneralInformation.Offsets.ofsSkelBoneLookup);
+        short SkeletalBoneLookup[GeneralInformation.Offsets.nSkelBoneLookup];
+    
+    } BonesAndLookups <read=CommentAR_B>;
+    FSeek(0);
+} AnimationRelated <read=CommentAR>;
+
+//--------------------------------------
+
+FSeek(0);
+struct GAR {
+    FSeek( GeneralInformation.Offsets.ofsVertices);
+    VERTEX Vertices[GeneralInformation.Offsets.nVertices];
+
+    if(GeneralInformation.Version != 8 && GeneralInformation.Version != 16) {
+        FSeek( GeneralInformation.Offsets.ofsViews);
+        VIEW Views[GeneralInformation.Offsets.nViews] <optimize=false>;
+    }
+
+    FSeek( GeneralInformation.Offsets.ofsRenderFlags);
+    RENDERFLAG Renderflags[GeneralInformation.Offsets.nRenderFlags];
+
+    FSeek(0);
+    struct GAR_CT {
+        if (GeneralInformation.Offsets.nColors > 0) {
+            FSeek( GeneralInformation.Offsets.ofsColors);
+            COLOR Colors[GeneralInformation.Offsets.nColors];
+        }
+
+        FSeek( GeneralInformation.Offsets.ofsTransparency);
+        TRANSPARENCY Transparency[GeneralInformation.Offsets.nTransparency];
+
+        FSeek( GeneralInformation.Offsets.ofsTransLookup);
+        uint16 TransparencyLookup[GeneralInformation.Offsets.nTransLookup];
+        FSeek(0);
+    } ColorsAndTransparency <read=CommentGAR_CT>;
+
+    FSeek(0);
+    struct GAR_T {
+        FSeek( GeneralInformation.Offsets.ofsTextures);
+        TEXTURE Textures[GeneralInformation.Offsets.nTextures];
+
+        FSeek( GeneralInformation.Offsets.ofsTexLookup);
+        uint16 TexturesLookup[GeneralInformation.Offsets.nTexLookup];
+
+        if(GeneralInformation.Offsets.nRibbonEmitters > 0) {
+            FSeek( GeneralInformation.Offsets.ofsTexAnims);
+            TEXTUREANIM TextureAnimations[GeneralInformation.Offsets.nTexAnims];
+        }
+
+        FSeek( GeneralInformation.Offsets.ofsTexAnimLookup);
+        int16 TextureAnimationLookup[GeneralInformation.Offsets.nTexAnimLookup];
+
+        FSeek( GeneralInformation.Offsets.ofsTexReplace);
+        int16 TextureReplaceLookup[GeneralInformation.Offsets.nTexReplace];
+
+        FSeek( GeneralInformation.Offsets.ofsTexUnitLookup);
+        int16 TextureUnitLookup[GeneralInformation.Offsets.nTexUnitLookup];
+        FSeek(0);
+    } TexturesAndTheirAnimations <read=CommentGAR_T>;
+    FSeek(0);
+} GeometryAndRendering <read=CommentGAR>;
+
+//--------------------------------------
+
+FSeek(0);
+struct EF {
+    FSeek( GeneralInformation.Offsets.ofsParticleEmitters);
+    PARTICLEEMITTER ParticleEmitters[GeneralInformation.Offsets.nParticleEmitters];
+    
+    if(GeneralInformation.Offsets.nRibbonEmitters > 0) {
+        FSeek( GeneralInformation.Offsets.ofsRibbonEmitters);
+        RIBBONEMITTER RibbonEmitters[GeneralInformation.Offsets.nRibbonEmitters];
+    }
+    FSeek(0);
+} Effects <read=CommentEF>;
+
+//--------------------------------------
+
+FSeek(0);
+struct MSC {
+    if (GeneralInformation.Offsets.nLights > 0) {
+        FSeek( GeneralInformation.Offsets.ofsLights);
+        LIGHT Lights[GeneralInformation.Offsets.nLights];
+    }
+    
+    FSeek( GeneralInformation.Offsets.ofsCameras);
+    CAMERA Cameras[GeneralInformation.Offsets.nCameras];
+    
+    FSeek( GeneralInformation.Offsets.ofsCameraLookup);
+    int16 CameraLookup[GeneralInformation.Offsets.nCameraLookup];
+
+    FSeek(0);
+    struct MSC_A {
+        FSeek( GeneralInformation.Offsets.ofsAttachments);
+        ATTACHMENT Attachments[GeneralInformation.Offsets.nAttachments];
+        
+        FSeek( GeneralInformation.Offsets.ofsAttachLookup);
+        int16 AttachmentLookup[GeneralInformation.Offsets.nAttachLookup];
+        FSeek(0);
+    } Attachments <read=CommentMSC_A>;
+
+    FSeek(0);
+    FSeek( GeneralInformation.Offsets.ofsEvent);
+    EVENT Event[GeneralInformation.Offsets.nEvent];
+
+    FSeek(0);
+    struct MSC_B {
+        FSeek( GeneralInformation.Offsets.ofsBoundingTriangles);
+        Vec3D BTriangles[GeneralInformation.Offsets.nBoundingTriangles];
+
+        FSeek( GeneralInformation.Offsets.ofsBoundingVertices);
+        TI BVertices[GeneralInformation.Offsets.nBoundingVertices];
+
+        FSeek( GeneralInformation.Offsets.ofsBoundingNormals);
+        Vec3D BNormals[GeneralInformation.Offsets.nBoundingNormals];
+        FSeek(0);
+    } BoundingVolume <read=CommentMSC_B>;
+    FSeek(0);
+} Miscellaneous <read=CommentMSC>;
+
+//--------------------------------------
+
+string CommentGI(GI &voi) {
+    return ("The Offsets and the model's name.");
+}
+string CommentAR(AR &voi) {
+    return ("Animation-tables, bones and global sequences.");
+}
+string CommentAR_A(AR_A &voi) {
+    return ("Here is stored, which timestamps are used for what.");
+}
+string CommentAR_B(AR_B &voi) {
+    return ("The bones describe how the model moves.");
+}
+string CommentGAR(GAR &voi) {
+    return ("The data for rendering the model.");
+}
+string CommentGAR_CT(GAR_CT &voi) {
+    return ("Colors and transparency. Where are colors used?");
+}
+string CommentGAR_T(GAR_T &voi) {
+    return ("Textures and their animations.");
+}
+string CommentEF(EF &voi) {
+    return ("Particles and ribbons. ");
+}
+string CommentMSC(MSC &voi) {
+    return ("Cameras, lights, boundings, attachments. ");
+}
+string CommentMSC_A(MSC_A &voi) {
+    return ("Attachments are used for weapons, spells etc.");
+}
+string CommentMSC_B(MSC_B &voi) {
+    return ("To let the client make the model collidable.");
+}
+
+
+

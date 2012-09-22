@@ -1,0 +1,353 @@
+
+--== Change Log History ==--
+
+=======================================================================
+
+This file chronicles the history of World of Warcraft Model Viewer v0.5.08 (Chuanhsing Update).
+See ChangeLog.txt for a current list of changes to WoW Model Viewer!
+
+=======================================================================
+
+r685
+ - Officially updated version to 0.7.0.0!
+ - Created New Icons files.
+ - (Dev Work) Moved ChangeLog.txt to Doc folder.
+ - (Dev Work) Moved Icons to bin_support/Icons folder.
+ - (Dev Work) Updated Docs/BuildNotes.txt
+ - (Dev Work) Made a minor update to Makefile for our Linux/Unix friends.
+ - (Dev Work) Removed Unneeded GLEW files.
+ - (Dev Work) Reverted CxImage changes to allow for cross-platform compatibility.
+
+r684
+ - First 64-bit Edition released!
+ - Updated Icons.
+ - Updated zlib support Library.
+ - Removed the 64-bit DLL files that were included in previous installer.
+ - Lightwave Exporter: 
+   - WMOs will no longer automatically remove duplicate names, causing some surface name/texture relationships to be wrong.
+   - Removed some redunant texturing code.
+ - (Dev Work) WMO Vertex Colors are now available to groups. (Outputting color vertex data isn't far off now!)
+
+r683
+ - Updated enUS Items.
+ - Updated zhTW Items & NPCs.
+ - Updated support Libraries, including OpenGL. (Might fix ATI Video Card problem)
+ - X3D Exporter Updates: (tob.franke)
+   - Fixed texture exporting for OSX in X3D exporter.
+   - Fixed texture definition: texture nodes need to be children of appearance nodes.
+   - Define on first use, reuse afterwards.
+ - Windows 32-bit Installer Released.
+
+r682
+ - Added new 3.2.2 items!
+ - Removed old exporting menu.
+ - Exporters that can export Attached items will no longer have oddly stretched items when exporting Init-Only Models.
+ - Lightwave Exporter Updates:
+   - WMO Surface names no longer contain the image's path. The image's path is still available in the surface's comment.
+   - M2 Geosets will now export as Parts for Lightwave.
+   - M2 Model surfaces are now smoothed by default.
+   - Character Models will now save variable textures (body, hair & cape) using the exported model's name.
+   - Updated/fixed M2 export format.
+   - Added support for attached character items, such as helmets & weapons. (Known Bug: Attached item textures are imported but are not linked the item's surface.)
+ - X3D Exporter Updates: (tob.franke)
+   - Fixed inverse transparency bug.
+   - Fixed calcCenteringTransform access to vertex array for initial pose.
+ - (Dev Work) M2 TextureList now has spots for a Character's Body, Hair, Fur, Cape, Reflections, and item/Monster replaceable textures.
+ - (Dev Work) Wrote SaveTexture2 so exporters can simply process a list of textures and they will be saved.
+
+r681
+ - Lightwave WMO Exports can now export Doodads as models! *NOTE* Some WMOs won't look right in WMV after exporting. This is a visual bug and will have no impact on other exports.
+ - Added X3D & X3D in XHTML Exporting.
+ - Renamed the Preserve Lightwave Content Directory option in the save file. Previous setting will be lost.
+ - Fixed a bug when exporting Lights to Lightwave. They will no longer have an attenuation of 0.
+ - (Dev Work) Added a lot of comments to help people add their items to the Export Menu
+ - (Dev Work) FileControl is now globally available.
+
+r680
+ - Fixed Armory URL problems for characters with accents in their character name. (IE: Daïmhôndrùs)
+ - Fixed an error where exporting WMO files with more than 65,280 points to Lightwave would cause the resulting object file to crash Lightwave.
+ - Fixed a bug where lights in certain models would crash WMV when exporting.
+
+r679
+- Add ICC new npcs
+
+r678
+- You can now turn off Doodad & Light exporting for Lightwave exports.
+- LWO M2 files will now be double-sided and have the smoothing option set to 180 degrees.
+- LWO M2 exporting now obeys the directory Export Options. *NOTE 1* Character models don't obey the "Preserve Content Directories" export option. *NOTE 2* Textures that don't load in WMV (appear white) will export with 0 bytes, making it invalid. *NOTE 3* Items & Creatures with multiple skin images won't have those images exported.
+- (Dev Work) Model objects now have a TextureList item, with strings of all the texture names of that model. Also includes alternate skins for creatures/items. Does not work with Character models.
+
+r677
+- Fixed error .skin format that makes WMV crash
+
+r676 by Kjasi
+-Export Menu's Init Only option will now save between sessions.
+-Export Options Menu now available.
+-Preserve Directories now available when exporting WMO files.
+-Lightwave Content directories can now be generated for exported WMO files.
+-LWO WMO Doodad Nulls will now be rotated correctly!
+-LWO WMO exported scenes will now have the model loaded with the scene!
+-(Dev Work) Wrote a function for converting Quaternions into Heading, Pitch and Bank values.
+-(Dev Work) Wrote a rounding function.
+-(Dev Work) Wrote a function that will create whatever sort of directory structure you give it.
+
+r675
+- Added interface language chooser by Chuanhsing
+
+r672
+- New Exporter Menu by Kjasi
+- Added new function: "View Item" in main menu by Chuanhsing
+
+r667
+-Exported Lightwave Scene files now contain Doodad Placement nulls, parented to DoodadSet nulls.
+-Lights attached to Doodads will now export to the Lightwave Scene file
+-Fixed a bug when exporting old M2/MDX models via LWO
+-(Dev Work) Defined Model Light Attenuation
+
+r666
+- Fixed WMO Export functions
+
+r663
+-Lightwave Scenes should read falloff data from WMO's lights and set up the light accordingly. (Don't know of a WMO with Light falloff settings, so I haven't tested it...);
+-Added default lighting settings to the Lightwave Scenes that look close to the game's settings.
+-(Dev Work) Defined some WMO Light properties that were previously unknown or not recorded.
+-(Dev Work) Moved Lightwave Exporting to a seperate file. Will move the others later.
+-(Dev Work) Did a lot of format research for LWO2 files. Large commented section in the WMO->LWO function.
+
+r662
+-LWO WMO Export now supports double-sided polys.
+-LWO WMO files are now smoothed 180 degrees by default.
+-LWO WMOs will now export each model group as a seperate Part.
+-LWO WMO files that have lights will now export a Scene file with those Lights, using the proper colors and in the proper positions!
+-Changed default LWO WMO Glossiness amount to 20% (up from 0%).
+-Adjusted surface attributes for OBJ WMO files. (Now they won't be so dang bright...)
+
+r661
+Thanks Kjasi for following patches
+- WMO exporting will now save the textures as their original filenames. This will reduce the overall number of files made when exporting many WMOs with the same textures. Surface names have been changed to reflect their texture's path & filename. This will make sorting & managing exported textures easier.
+- Fixed the inverted z-axis with WMO->LWO files.
+
+r659
+- Fixed particle bug that may contains invalid row and col number and cause WMV crash
+- Added Bezier Implementation in animation by Tigurius
+
+r654
+- Fixed a bug that after changing animation with particles to one without and back the particles are gone by Shamun
+
+r650
+- Fixed skybox crash bug
+
+r649
+- Added some missing npcs
+
+r647
+- Fixed export M2 to 3DS textures problem
+
+r646
+- Fixed export M2 to 3DS, but textures still bugged
+
+r643
+- Fixed a typo error that makes some textures gone
+
+r642
+- Added Export WMO to LightWave2
+
+r641
+- Fixed equip an npc from the creatures list
+- Due to wmo can only export to waveform, hide not yet implemented export format
+- Fixed some brokn .anim make wowmodelviewer crash
+
+r636
+- Fixed Export M2 to Waveform (obj)
+- Export wmo to Waveform will include .mtl and textures
+
+r635
+- Fixed Export M2 to LightWave
+- Added Export M2 to LightWave2
+
+r615
+- Merge LucidFox's linux porting code
+- Fixed a Discovery Item bug
+
+r612
+- Export Init-Pose Model
+
+r605
+- Partial Linux compatibility patch by inetperson
+- Fixed a crash bug when loading config.ini
+
+r601
+- add deDE translation by Tigurius
+
+r598
+- frFR UI translation by MadSquirrel
+
+r596
+- speed up the "Load NPC" listing time
+
+r594
+- Choose mount option for creatures. (like Furbolg, Vrykul, Arthas, etc.)
+
+r590
+- Better zhCN / zhTW support
+
+r589
+- New option: Options -> Settings -> Show Particle
+
+r586
+- Fixed default stand animation
+
+r581
+- Update some 3.3 items and npcs
+
+r581
+- zhTW and zhCN UI translation by Kurax
+- Update some 3.3 PTR items and npcs
+
+r571
+- back support for zhCN client (3.1.3)
+
+r570
+- animations list is sorted by name.
+
+In the animation controls, the animations in the latest builds have started
+being sorted by index instead of by name, which makes it hard to find what
+you need.
+
+r569
+- Improve texture quality
+
+r567
+- fix a WMO crash issue
+- reduce the initial time
+
+r564
+- increase the character texture resolution from 256x256 to 512x512.
+
+r561
+Thanks Daid! He provides a nice patch on WMO handling.
+http://www.wowmodelviewer.org/forum/index.php?topic=5198.0
+
+-Add mouse control to WMO viewing (left: rotate, right: move, left+right: move height, similar to UnrealEd)
+-Increase the viewing distance by 500% (those WMOs can be huge)
+-Fix a few assertions in debug builds
+-Add export from WMO to OBJ
+
+The WMO export does NOT export the doodads. So if you export dalaran for example (largest thing I could find) you don't get any small objects like trees, benches, banners. Note that an export of Dalaran is 200MB, and contains over 200 textures. Even without the doodads.
+
+r555
+- New Feature: File -> Discovery NPC
+- New Feature: Character -> Load NPC Outfit
+- Discovery Item will output to discoveryitems.csv
+
+Run File -> Discovery Item once. It will generate a discoveryitems.csv under your WMV dir. 
+
+And then try to use File -> Discovery NPC to get new NPC info. 
+
+Use File -> View NPC, and you will see some T10 sets in the end.
+
+Use Character - Bloodelf - female - bloodelffemale.m2, and use Character -> Load NPC Outfit to make them wear T10 sets.
+
+r548
+- New feature: Menu -> File -> Discovery Item
+  It may take a long time on a slow machine.
+
+r536
+- Model exporting to Ms3D have bones now
+
+r528
+- PTR compatible
+
+r527
+- fixed eye glow
+  - Add a "Show Eye Glow" feature under the characters menu to enable/disable character/deathknight eye glows
+
+r521
+- fixed particle system effects
+  - [Magnett] Several items have their particles messed up in the sense that their light effect is extremely exaggerated.
+  - [Magnett] The old WMV had a simple option, under Effects I think, to disable (all?) particles that fixed this. If this one does, I can't find it. I can    
+    disable them separately in model control, but this doesn't always work as sometimes I can only select the character model itself and not the shoulders/weapon.
+
+r517
+- fixed some crash issues
+
+r505
+- [blayaden] 2h off-hand weapons when sheathed overlap on the main-hand 2h weapon.  Arms warriors probably would find this annoying, since they are supposed to criss-cross on the back.
+
+r498
+- fixed "Save Equipment"
+
+r486
+- [Bug][handclaw] Belts lost it's texture_torso_lower
+
+r482
+- [Bug][zUkUu] some odd looking "shadows" on the textures.
+
+r481
+- [Bug][zUkUu] as you can see the scaling of the shoulders isn't correct.
+- [Bug][blayaden] Quiver's are like shoulder cannons again though. 
+
+r475
+- [Request][Kjasi] Being able to export all textures, with file paths preserved. So in the export directory, the files would be in the folders that they exist in in the MPQ. Example: Character/NightElf/Male/Eyeglow.tga would be exported when I export all to TGA. (I keep my LW texture filepaths the same as the MPQ files)
+
+r473
+- fix eye close
+
+r472
+- full 3.2.0 items, include heroic, hard, tributechest
+
+r463
+- fix texture animation
+
+r450
+- Model Filter
+
+r448
+- Remov the camera-node from the browsable models
+
+r447
+- [zUkUu] fix BLP plattized 'alphaBitDepth' field an unrecognized value (4).
+
+r446
+- [Pinkhair] Export texture can export tga format
+
+r441
+- [Frozen_Death_Knight]: Blood Elf male right leg has a really weird stretch from the knee that is almost as long as the thigh itself (look it up and try some emotes)
+- [Frozen_Death_Knight]: Human Females' jaws and fingers are gone in the character-folder as well as on many creature- and NPC-folders
+- [herosatoshi]: male gnome and famale tauren are also missing most of their fingers.. except the thumbs 
+- creature\Motocyclevechicle doesn't have wheel
+
+r427-ptr
+- support PTR, no compatible with live version
+- about 1100 new PTR items
+
+r427
+- fix some particle opacity problem
+
+r406
+- Fixed some bugs in the "Armory Import" feature
+- Fixed a bug in the armory import for undead characters
+- Disable the "Check for updates" feature
+
+r399
+- a new feature: model opened files export
+
+r350
+- use subversion version as release version
+- add more skybox
+- fix select attachment crash at show model control
+
+v0.27 (2009/07/15)
+1. fix some particle system problems
+
+v0.26 (2009/07/15)
+1. fix 1 crash bug
+2. fix some animation problems
+
+v0.25 (2009/07/03)
+1. fix 2 crash bugs
+2. fix some blp errors
+3. update items.csv and npcs.csv to 3.1.3.9947
+
+v0.24 (2009/07/03)
+1. reinitial version

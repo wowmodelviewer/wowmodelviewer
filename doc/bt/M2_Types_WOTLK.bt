@@ -1,0 +1,1085 @@
+local int QuatMode = SHORTS;
+local int V_REQ = 8;
+local int O_PHYS = 0x0A0;
+
+// - Enums start ---------------
+
+typedef enum { SHORTS, FLOATS, EULER } QUATMODE;
+
+typedef enum <uint32> { 
+    GF_NORMAL = 0, 
+    GF_TILTINGX  = 1,
+    GF_TILTINGY__ = 2,
+    GF_TILTINGXY = 3
+} E_GLOBALFLAGS;
+
+typedef enum <uint32> { 
+    AL_Looped = 0, 
+    AL_NotLooped = 1
+} E_ANIMATIONLOOP;
+
+typedef enum <int32>  { 
+    BF_None = 0, 
+    BF_Billboard = 8, 
+    BF_Transformed = 512, 
+    BF_BillboardAndTransformed = 520
+} E_BONESFLAGS;
+
+typedef enum <uchar>  {
+    TU_Animated = 0, 
+    TU_Static = 16
+} E_VIEW_TEXUNITFLAGS;
+
+typedef enum <ushort>  { 
+    RF_None = 0, 
+    RF_Unlit, 
+    RF_Unfogged, 
+    RF_TwoSided = 4, 
+    RF_ZBuffered = 16
+} E_RENDERFLAGS;
+
+typedef enum <ushort>  { 
+    RM_Opaque = 0, 
+    RM_AlphaTesting, 
+    RM_AlphaBlending, 
+    RM_Additive , 
+    RM_AdditiveAlpha, 
+    RM_Modulate, 
+    RM_DeeprumTram 
+} E_RENDERMODES;
+
+typedef enum <uint32> { 
+    TT_Hardcoded = 0, 
+    TT_BodyOrClothes, 
+    TT_Cape, 
+    TT_HairOrBeard = 6 , 
+    TT_TaurenFur = 8, 
+    TT_CreatureSkin1 = 11, 
+    TT_CreatureSkin2, 
+    TT_CreatureSkin3 
+} E_TEXTURETYPES;
+
+typedef enum <uint32> { 
+    TF_None = 0, 
+    TF_WrapX, 
+    TF_WrapY
+} E_TEXTUREFLAGS;
+
+typedef enum <uint16> {
+    A_Stand = 0,
+    A_Death,
+    A_Spell,
+    A_Stop,
+    A_Walk,
+    A_Run,
+    A_Dead,
+    A_Rise,
+    A_StandWound,
+    A_CombatWound,
+    A_CombatCritical,
+    A_ShuffleLeft,
+    A_ShuffleRight,
+    A_Walkbackwards,
+    A_Stun,
+    A_HandsClosed,
+    A_AttackUnarmed,
+    A_Attack1H,
+    A_Attack2H,
+    A_Attack2HL,
+    A_ParryUnarmed,
+    A_Parry1H,
+    A_Parry2H,
+    A_Parry2HL,
+    A_ShieldBlock,
+    A_ReadyUnarmed,
+    A_Ready1H,
+    A_Ready2H,
+    A_Ready2HL,
+    A_ReadyBow,
+    A_Dodge,
+    A_SpellPrecast,
+    A_SpellCast,
+    A_SpellCastArea,
+    A_NPCWelcome,
+    A_NPCGoodbye,
+    A_Block,
+    A_JumpStart,
+    A_Jump,
+    A_JumpEnd,
+    A_Fall,
+    A_SwimIdle,
+    A_Swim,
+    A_SwimLeft,
+    A_SwimRight,
+    A_SwimBackwards,
+    A_AttackBow,
+    A_FireBow,
+    A_ReadyRifle,
+    A_AttackRifle,
+    A_Loot,
+    A_ReadySpellDirected,
+    A_ReadySpellOmni,
+    A_SpellCastDirected,
+    A_SpellCastOmni,
+    A_BattleRoar,
+    A_ReadyAbility,
+    A_Special1H,
+    A_Special2H,,
+    A_ShieldBash,
+    A_EmoteTalk,
+    A_EmoteEat,
+    A_EmoteWork,
+    A_EmoteUseStanding,
+    A_EmoteTalkExclamation,
+    A_EmoteTalkQuestion,
+    A_EmoteBow,
+    A_EmoteWave,
+    A_EmoteCheer,
+    A_EmoteDance,
+    A_EmoteLaugh,
+    A_EmoteSleep,
+    A_EmoteSitGround,
+    A_EmoteRude,
+    A_EmoteRoar,
+    A_EmoteKneel,
+    A_EmoteKiss,
+    A_EmoteCry,
+    A_EmoteChicken,
+    A_EmoteBeg,
+    A_EmoteApplaud,
+    A_EmoteShout,
+    A_EmoteFlex,
+    A_EmoteShy,
+    A_EmotePoint,
+    A_Attack1HPierce,
+    A_Attack2HLoosePierce,
+    A_AttackOff,
+    A_AttackOffPierce,
+    A_Sheath,
+    A_HipSheath,
+    A_Mount,
+    A_RunRight,
+    A_RunLeft,
+    A_MountSpecial,
+    A_Kick,
+    A_SitGroundDown,
+    A_SitGround,
+    A_SitGroundUp,
+    A_SleepDown,
+    A_Sleep,
+    A_SleepUp,
+    A_SitChairLow,
+    A_SitChairMed,
+    A_SitChairHigh,
+    A_LoadBow,
+    A_LoadRifle,
+    A_AttackThrown,
+    A_ReadyThrown,
+    A_HoldBow,
+    A_HoldRifle,
+    A_HoldThrown,
+    A_LoadThrown,
+    A_EmoteSalute,
+    A_KneelStart,
+    A_KneelLoop,
+    A_KneelEnd,
+    A_AttackUnarmedOff,
+    A_SpecialUnarmed,
+    A_StealthWalk,
+    A_StealthStand,
+    A_Knockdown,
+    A_EatingLoop,
+    A_UseStandingLoop,
+    A_ChannelCastDirected,
+    A_ChannelCastOmni,
+    A_Whirlwind,
+    A_Birth,
+    A_UseStandingStart,
+    A_UseStandingEnd,
+    A_CreatureSpecial,
+    A_Drown,
+    A_Drowned,
+    A_FishingCast,
+    A_FishingLoop,
+    A_Fly,
+    A_EmoteWorkNoSheathe,
+    A_EmoteStunNoSheathe,
+    A_EmoteUseStandingNoSheathe,
+    A_SpellSleepDown,
+    A_SpellKneelStart,
+    A_SpellKneelLoop,
+    A_SpellKneelEnd,
+    A_Sprint,
+    A_InFlight,
+    A_Spawn,
+    A_Close,
+    A_Closed,
+    A_Open,
+    A_Opened,
+    A_Destroy,
+    A_Destroyed,
+    A_Rebuild,
+    A_Custom0,
+    A_Custom1,
+    A_Custom2,
+    A_Custom3,
+    A_Despawn,
+    A_Hold,
+    A_Decay,
+    A_BowPull,
+    A_BowRelease,
+    A_ShipStart,
+    A_ShipMoving,
+    A_ShipStop,
+    A_GroupArrow,
+    A_Arrow,
+    A_CorpseArrow,
+    A_GuideArrow,
+    A_Sway,
+    A_DruidCatPounce,
+    A_DruidCatRip,
+    A_DruidCatRake,
+    A_DruidCatRavage,
+    A_DruidCatClaw,
+    A_DruidCatCower,
+    A_DruidBearSwipe,
+    A_DruidBearBite,
+    A_DruidBearMaul,
+    A_DruidBearBash,
+    A_DragonTail,
+    A_DragonStomp,
+    A_DragonSpit,
+    A_DragonSpitHover,
+    A_DragonSpitFly,
+    A_EmoteYes,
+    A_EmoteNo,
+    A_JumpLandRun,
+    A_LootHold,
+    A_LootUp,
+    A_StandHigh,
+    A_Impact,
+    A_LiftOff,
+    A_Hover,
+    A_SuccubusEntice,
+    A_EmoteTrain,
+    A_EmoteDead,
+    A_EmoteDanceOnce,
+    A_Deflect,
+    A_EmoteEatNoSheathe,
+    A_Land,
+    A_Submerge,
+    A_Submerged,
+    A_Cannibalize,
+    A_ArrowBirth,
+    A_GroupArrowBirth,
+    A_CorpseArrowBirth,
+    A_GuideArrowBirth,
+    A_EmoteTalkNoSheathe,
+    A_EmotePointNoSheathe,
+    A_EmoteSaluteNoSheathe,
+    A_EmoteDanceSpecial,
+    A_Mutilate,
+    A_CustomSpell01,
+    A_CustomSpell02,
+    A_CustomSpell03,
+    A_CustomSpell04,
+    A_CustomSpell05,
+    A_CustomSpell06,
+    A_CustomSpell07,
+    A_CustomSpell08,
+    A_CustomSpell09,
+    A_CustomSpell10,
+    A_StealthRun
+} E_ANIMATIONS;
+
+// - Enums end -----------------
+
+
+// - Structs start -------------
+
+typedef struct {
+    float x,y;
+} Vec2D <read=Vec2DRead, write=Vec2DWrite>;
+
+typedef struct {
+    float x,y,z;
+} Vec3D <read=Vec3DRead, write=Vec3DWrite>;
+
+typedef struct {
+    float x,y,z,w;
+} Quat <read=QuatRead, write=QuatWrite>;
+
+typedef struct {
+    short x,y,z,w;
+} QuatS <read=QuatSRead, write=QuatSWrite>;
+
+typedef struct {
+    ushort a,b,c;
+} TI;
+
+typedef struct {
+    uint32 a,b;
+} RG <read=RGRead>;
+
+typedef struct {
+    uint16 a,b;
+} SS <read=SSRead>;
+
+typedef struct {
+    uint32 nEntries;
+    uint32 ofsEntries;
+} AB_Header;
+
+typedef struct {
+	int16 type;		// interpolation type (0=none, 1=linear, 2=hermite)
+	int16 seq;		// global sequence id or -1
+//	uint32 nRanges;
+//	uint32 ofsRanges <format=hex>;
+	uint32 n1;
+	uint32 ofs1 <format=hex>;
+	uint32 n2;
+	uint32 ofs2 <format=hex>;
+    local int pos = FTell();
+    if(ofs1!=0) {
+        FSeek(ofs1);
+        AB_Header Times[n1];
+	    //uint32 nTimes;
+	    //uint32 ofsTimes <format=hex>;
+        FSeek(ofs2);
+        AB_Header Keys[n2];
+	    //uint32 nKeys;
+	    //uint32 ofsKeys <format=hex>;
+        FSeek(pos);
+    } else {
+        FSeek(pos-16);
+        uint32 nTimes;
+        uint32 ofsTimes <format=hex>;
+	    uint32 nKeys;
+	    uint32 ofsKeys <format=hex>;
+    }
+} AB_HDR <write=NewAnimationBlock>;
+
+typedef struct {
+    AB_HDR AB_UInt16_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_UInt16_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("US",AB_UInt16_Header.Times[i].ofsEntries,AB_UInt16_Header.Times[i].nEntries,AB_UInt16_Header.Keys[i].ofsEntries,AB_UInt16_Header.Keys[i].nEntries);
+        } AB_UInt16_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_UInt16 <read=ShowInfo_UInt16>;
+
+typedef struct {
+    AB_HDR AB_Int16_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_Int16_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("S",AB_Int16_Header.Times[i].ofsEntries,AB_Int16_Header.Times[i].nEntries,AB_Int16_Header.Keys[i].ofsEntries,AB_Int16_Header.Keys[i].nEntries);
+        } AB_Int16_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_Int16 <read=ShowInfo_Int16>;
+
+typedef struct {
+    AB_HDR AB_UInt32_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_UInt32_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("UI",AB_UInt32_Header.Times[i].ofsEntries,AB_UInt32_Header.Times[i].nEntries,AB_UInt32_Header.Keys[i].ofsEntries,AB_UInt32_Header.Keys[i].nEntries);
+        } AB_UInt32_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_UInt32 <read=ShowInfo_UInt32>;
+
+typedef struct {
+    AB_HDR AB_Int32_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_Int32_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("I",AB_Int32_Header.Times[i].ofsEntries,AB_Int32_Header.Times[i].nEntries,AB_Int32_Header.Keys[i].ofsEntries,AB_Int32_Header.Keys[i].nEntries);
+        } AB_Int32_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_Int32 <read=ShowInfo_Int32>;
+
+typedef struct {
+    AB_HDR AB_Float_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_Float_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("F",AB_Float_Header.Times[i].ofsEntries,AB_Float_Header.Times[i].nEntries,AB_Float_Header.Keys[i].ofsEntries,AB_Float_Header.Keys[i].nEntries);
+        } AB_Float_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_Float <read=ShowInfo_Float>;
+
+typedef struct {
+    AB_HDR AB_Vec3D_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_Vec3D_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("Vec3D",AB_Vec3D_Header.Times[i].ofsEntries,AB_Vec3D_Header.Times[i].nEntries,AB_Vec3D_Header.Keys[i].ofsEntries,AB_Vec3D_Header.Keys[i].nEntries);
+        } AB_Vec3D_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_Vec3D <read=ShowInfo_Vec3D>;
+
+typedef struct {
+    AB_HDR AB_Quat_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_Quat_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("Quat",AB_Quat_Header.Times[i].ofsEntries,AB_Quat_Header.Times[i].nEntries,AB_Quat_Header.Keys[i].ofsEntries,AB_Quat_Header.Keys[i].nEntries);
+        } AB_Quat_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_Quat <read=ShowInfo_Quat>;
+
+typedef struct {
+    AB_HDR AB_QuatS_Header;
+    local int ppos = FTell();
+    local int i;
+    for(i=0; i<AB_QuatS_Header.n1; i++) {
+        FSeek(0);
+        struct {
+            readAnimBlock("QuatS",AB_QuatS_Header.Times[i].ofsEntries,AB_QuatS_Header.Times[i].nEntries,AB_QuatS_Header.Keys[i].ofsEntries,AB_QuatS_Header.Keys[i].nEntries);
+        } AB_QuatS_Data <optimize=false>;
+    }
+    FSeek(ppos);
+} AB_QuatS <read=ShowInfo_QuatS>;
+
+
+
+typedef struct {
+    FSeek(0x08);
+	uint32 lName;
+	uint32 ofsName <format=hex>;
+
+    FSeek(0x14);
+    uint32 nGlobalSequences;
+    uint32 ofsGlobalSequences <format=hex>;	// A list of timestamps.
+
+	uint32 nAnimations;
+	uint32 ofsAnimations <format=hex>;
+	uint32 nAnimationLookup;
+	uint32 ofsAnimationLookup <format=hex>;
+	uint32 nBones;
+	uint32 ofsBones <format=hex>;
+	uint32 nSkelBoneLookup;
+	uint32 ofsSkelBoneLookup <format=hex>;
+	uint32 nVertices;
+	uint32 ofsVertices <format=hex>;
+	uint32 nViews;
+	uint32 nColors;
+	uint32 ofsColors <format=hex>;
+
+	uint32 nTextures;
+	uint32 ofsTextures <format=hex>;
+
+	uint32 nTransparency; // H
+	uint32 ofsTransparency <format=hex>;
+//	uint32 nUnknown;   // always unused ?
+//	uint32 ofsUnknown <format=hex>;
+	uint32 nTexAnims;	// J
+	uint32 ofsTexAnims <format=hex>;
+	uint32 nTexReplace;
+	uint32 ofsTexReplace <format=hex>;
+
+	uint32 nRenderFlags;
+	uint32 ofsRenderFlags <format=hex>;
+	uint32 nBoneLookupTable;
+	uint32 ofsBoneLookupTable <format=hex>;
+
+	uint32 nTexLookup;
+	uint32 ofsTexLookup <format=hex>;
+
+	uint32 nTexUnitLookup;		// L
+	uint32 ofsTexUnitLookup <format=hex>;
+	uint32 nTransLookup; // M
+	uint32 ofsTransLookup <format=hex>;
+	uint32 nTexAnimLookup;
+	uint32 ofsTexAnimLookup <format=hex>;
+
+    FSeek(0x0D8);
+
+	uint32 nBoundingTriangles;
+	uint32 ofsBoundingTriangles <format=hex>;
+	uint32 nBoundingVertices;
+	uint32 ofsBoundingVertices <format=hex>;
+	uint32 nBoundingNormals;
+	uint32 ofsBoundingNormals <format=hex>;
+	uint32 nAttachments; // O
+	uint32 ofsAttachments <format=hex>;
+	uint32 nAttachLookup; // P
+	uint32 ofsAttachLookup <format=hex>;
+	uint32 nEvent; // Q
+	uint32 ofsEvent <format=hex>;
+	uint32 nLights; // R
+	uint32 ofsLights <format=hex>;
+	uint32 nCameras; // S
+	uint32 ofsCameras <format=hex>;
+	uint32 nCameraLookup;
+	uint32 ofsCameraLookup <format=hex>;
+	uint32 nRibbonEmitters; // U
+	uint32 ofsRibbonEmitters <format=hex>;
+	uint32 nParticleEmitters; // V
+	uint32 ofsParticleEmitters <format=hex>;
+} HEADER_OFFSETS;
+
+typedef struct {
+	E_ANIMATIONS animID;
+    uint16 subID;
+	uint32 timeLength;
+
+	float moveSpeed;
+
+    E_ANIMATIONLOOP looped;
+
+	uint32 flags <format=binary>;
+	uint32 d1;
+	uint32 d2;
+	uint32 playSpeed;  // note: this can't be play speed because it's 0 for some models
+
+	float boxA[3];
+    float boxB[3];
+	float rad;
+
+	int16 nextAnimation;
+	int16 s2;
+} ANIMATION <read=ReadAnimation>;
+
+typedef struct {
+    uint32 nIndex;
+    uint32 ofsIndex <format=hex>; // Vertices in this model (index into vertices[])
+    uint32 nTris;
+    uint32 ofsTris <format=hex>;	 // indices
+    uint32 nProps;
+    uint32 ofsProps <format=hex>; // additional vtx properties
+    uint32 nSub;
+    uint32 ofsSub <format=hex>;	 // materials/renderops/submeshes
+    uint32 nTex;
+    uint32 ofsTex <format=hex>;	 // material properties/textures
+	int32 lod;				 // LOD bias?
+} VIEW_HDR;
+
+typedef struct {
+	uint32 MeshId;		// mesh part id?
+	uint16 sVertices;	// first vertex
+	uint16 nVertices;	// num vertices
+	uint16 sIndices;	// first index
+	uint16 nIndices;	// num indices
+	uint16 nBonelookup;		// number of bone indices
+	uint16 sBonelookup;		// ? always 1 to 4
+	uint16 unknown;		// ?
+	uint16 rootbone;		// root bone?
+	Vec3D vector;
+	float unknown2[4];	// Added in WoW 2.0?
+} VIEW_DTA_SM;
+
+
+typedef struct {
+    E_VIEW_TEXUNITFLAGS flags;
+	uchar flags2;		// Flags
+	uint16 order;		// ?
+	uint16 submesh;			// Material this texture is part of (index into mat)
+	uint16 submesh2;			// Always same as above?
+	int16 colorIndex;	// color or -1
+	uint16 flagsIndex;	// more flags...
+	uint16 texunit;		// Texture unit (0 or 1)
+	uint16 d4;			// ? (seems to be always 1)
+	uint16 textureid;	// Texture id (index into global texture list)
+	uint16 texunit2;	// copy of texture unit value?
+	uint16 transid;		// transparency id (index into transparency list)
+	uint16 texanimid;	// texture animation id
+} VIEW_DTA_TEXU;
+
+typedef struct {
+    local int tempPos = FTell();
+    FSeek(View_Header.ofsIndex);
+    ushort Indices[View_Header.nIndex];
+
+    FSeek(View_Header.ofsTris);
+    TI Triangles[View_Header.nTris/3];
+
+    FSeek(View_Header.ofsProps);
+    int VertexProperties[View_Header.nProps];
+
+    FSeek(View_Header.ofsSub);
+    VIEW_DTA_SM Submeshes[View_Header.nSub];
+
+    FSeek(View_Header.ofsTex);
+    VIEW_DTA_TEXU TextureUnits[View_Header.nTex];
+    FSeek(tempPos);
+} VIEW_DTA;
+
+typedef struct {
+    VIEW_HDR View_Header;
+    VIEW_DTA View_Data;
+} VIEW;
+
+typedef struct {
+	int32 keyboneid;
+    E_BONESFLAGS flags;
+	int16 parent;
+	int16 geoid;
+	int16 unknown;
+	int16 unknown2;
+	AB_Vec3D translation;
+	AB_QuatS rotation;
+	AB_Vec3D scaling;
+	Vec3D pivot;
+} BONE <read=ReadBone>;
+
+typedef struct {
+	int16 type;
+	int16 bone;
+	Vec3D pos;
+	AB_Vec3D ambColor;
+	AB_Float ambIntensity;
+	AB_Vec3D color;
+	AB_Float intensity;
+	AB_Float attStart;
+	AB_Float attEnd;
+	AB_UInt32 unk1;
+} LIGHT <optimize=false>;
+
+typedef struct {
+	int32 id;
+    if (V_REQ != 16) {
+	float fov;
+    }
+    float farclip, nearclip;
+	AB_Vec3D transPos;
+	Vec3D pos;
+	AB_Vec3D transTarget;
+	Vec3D target;
+	AB_Quat rot;
+	if (V_REQ == 16) {
+		AB_Float unk;
+	}
+} CAMERA <optimize=false>;
+
+typedef struct  {
+    E_TEXTURETYPES type;
+    E_TEXTUREFLAGS flags;
+	uint32 nameLen;
+	uint32 nameOfs <format=hex>;
+} TEXTURE <read=ShowInfoTexture,write=ReadInfoTexture>;
+
+typedef struct {
+	Vec3D pos;
+	uchar weights[4] <format=decimal>;
+	uchar bones[4] <format=decimal>;
+	Vec3D normal;
+	float texcoords[2];
+	float unk[2];
+} VERTEX;
+
+typedef struct {
+    E_RENDERFLAGS flags;
+    E_RENDERMODES blendingmode;
+} RENDERFLAG;
+
+typedef struct {
+	AB_Vec3D color;
+	AB_UInt16 opacity;
+} COLOR <optimize=false>;
+
+
+typedef struct {
+	AB_UInt16 trans;
+} TRANSPARENCY <optimize=false>;
+
+typedef struct {
+	AB_Vec3D trans;
+    AB_Quat rot;
+    AB_Vec3D scale;
+} TEXTUREANIM <optimize=false>;
+
+
+typedef struct {
+    AB_Float emissionspeed;
+    AB_Float Speed_var;
+    AB_Float Vertical_range;
+    AB_Float Horizontal_range;
+    AB_Float Gravity;
+    AB_Float Lifespan;
+    int paddingoO;
+    AB_Float Emissionrate;
+    int paddingoO2;
+    AB_Float Emissionarea_length;
+    AB_Float Emissionarea_width;
+    AB_Float Gravity_strong;
+} PARTICLEANIMS;
+
+typedef struct {
+    uint32 nTimes;
+    uint32 ofsTimes <format=hex>;
+    uint32 nKeys;
+    uint32 ofsKeys <format=hex>;
+    local int ppos = FTell();
+    FSeek(ofsTimes);
+    uint16 Timestamps[3];
+    FSeek(ofsKeys);
+    Vec3D Colors[3];
+    FSeek(ppos);
+} FBlockVec3D <optimize=false>;
+
+typedef struct {
+    uint32 nTimes;
+    uint32 ofsTimes <format=hex>;
+    uint32 nKeys;
+    uint32 ofsKeys <format=hex>;
+    local int ppos = FTell();
+    FSeek(ofsTimes);
+    uint16 Timestamps[3];
+    FSeek(ofsKeys);
+    short Values[3] <format=hex>;
+    FSeek(ppos);
+} FBlockUInt16 <optimize=false>;
+
+typedef struct {
+    local int ppos = FTell();
+    FSeek(0);
+    FSeek(ppos);
+    uint32 nTimes;
+    uint32 ofsTimes <format=hex>;
+    uint32 nKeys;
+    uint32 ofsKeys <format=hex>;
+    FSeek(0);
+    FSeek(ofsTimes);
+    uint16 Timestamps[3];
+    FSeek(0);
+    FSeek(ofsKeys);
+    Vec2D Values[3];
+    FSeek(0);
+    FSeek(ppos+16);
+} FBlockVec2D  <optimize=false>;
+
+typedef struct {
+	FBlockVec3D Colors;
+	FBlockUInt16 Opacity;
+	FBlockVec2D Scale;
+	int32 d[2];
+	FBlockUInt16 Intensity;
+	FBlockUInt16 unk2;
+	Vec3D unk;
+	Vec3D scale;
+	float slowdown;
+    float unkfloats1[2];
+	float rotation;	//Sprite Rotation
+    float unkfloats2[2];
+	Vec3D Rot1;	//Model Rotation 1
+	Vec3D Rot2;	//Model Rotation 2
+	Vec3D Trans;	//Model Translation
+	float f2[4];
+	int32 ParticleType;
+	int32 ofsUnknownReferenc;
+} PARTICLEPARAMS <optimize=false>;
+
+typedef struct {
+    int32 id;
+	int16 flags;
+	int16 flags2;
+	Vec3D pos;
+	int16 bone;
+	int16 texture;
+	int32 nModelName;
+	int32 ofsModelName <format=hex>;
+	int32 nParticleFileName;
+	int32 ofsParticleFileName <format=hex>;
+	char blend;
+    char Emitter_type;
+	int16 Particly_type;
+    char ParticleType;
+	char HeadorTail;
+	int16 Texturerot;
+	int16 rows;
+	int16 cols;
+    PARTICLEANIMS AnimatedParameters;
+    PARTICLEPARAMS AdditionalParameters;
+	AB_UInt16 en;
+	if (V_REQ == 16) {
+		int32	unk[4];
+	}
+} PARTICLEEMITTER <optimize=false>;
+
+typedef struct {
+	int32 id;
+	int32 bone;
+	Vec3D pos;
+	int32 nTextures;
+	int32 ofsTextures <format=hex>;
+	int32 nUnknown;
+	int32 ofsUnknown <format=hex>;
+	AB_Vec3D color;
+	AB_UInt16 opacity;
+	AB_Float above;
+	AB_Float below;
+	float res, length, Emissionangle;
+	int16 s1, s2;
+	AB_UInt32 unk1;
+	AB_UInt32 unk2;
+	int32 unknown; // wotlk
+} RIBBONEMITTER <optimize=false>;
+
+typedef struct {
+	int32 id;
+	int32 bone;
+	Vec3D pos;
+	AB_Int32 unk;
+} ATTACHMENT <optimize=false>;
+
+void readTimeBlock(char type[], int ofsTimes, int nTimes)
+{
+    if(ofsTimes > FileSize()) {
+        int NONE;
+        return;
+    }
+    FSeek(ofsTimes);
+    if (nTimes > 1)
+        uint32 times[nTimes];
+    else
+        uint32 time;
+}
+
+typedef struct {
+	char id[4];
+	int32 dbid;
+	int32 bone;
+	Vec3D pos;
+	int16 type;
+	int16 seq;
+	//uint32 nRanges;
+	//uint32 ofsRanges <format=hex>;
+	uint32 n1;
+	uint32 ofs1 <format=hex>;
+	if (n1 > 0) {
+		local int ppos = FTell();
+		FSeek(0);
+		FSeek(ofs1);
+		AB_Header Times[n1];
+		local int i, pppos;
+		for(i=0; i<n1; i++) {
+            FSeek(0);
+            struct {
+                readTimeBlock("UI", Times[i].ofsEntries, Times[i].nEntries);
+			} Times_Data <optimize=false>;
+		}
+	    FSeek(ppos);
+	}
+} EVENT <read=ShowInfoEvent, optimize=false>;
+
+// - Structs end ---------------
+
+// - Read&Write start ----------
+
+string ShowInfoTexture(TEXTURE &tex)
+{  
+    if(tex.type==TT_Hardcoded)
+    {
+        return ReadString( tex.nameOfs );
+    } else {
+        return EnumToString( tex.type );
+    }
+}
+void ReadInfoTexture(TEXTURE &tex, string s)
+{  
+    if(tex.type==TT_Hardcoded)
+    {
+        tex.nameLen = Strlen(s)+1;
+        WriteString(tex.nameOfs, s );
+        WriteByte( tex.nameOfs+tex.nameLen-1, '\0' );
+    }
+}
+
+string SSRead(SS &v) {
+    string s; SPrintf( s, "%i:%i",v.a,v.b); return s;
+}
+
+string RGRead(RG &v) {
+    string s; SPrintf( s, "%i:%i",v.a,v.b); return s;
+}
+
+string Vec3DRead( Vec3D &v ) {
+    string s; SPrintf( s, "(%f %f %f)", v.x, v.y, v.z ); return s;
+}
+void Vec3DWrite( Vec3D &v, string s ) {
+    SScanf( s, "(%f %f %f)", v.x, v.y, v.z );
+}
+
+string Vec2DRead( Vec2D &v ) {
+    string s; SPrintf( s, "(%f %f)", v.x, v.y); return s;
+}
+void Vec2DWrite( Vec2D &v, string s ) {
+    SScanf( s, "(%f %f)", v.x, v.y );
+}
+
+string QuatRead( Quat &v ) {
+    string s; SPrintf( s, "(%f %f %f %f)", v.x, v.y, v.z, v.w ); return s;
+}
+void QuatWrite( Quat &v, string s ) {
+    SScanf( s, "(%f %f %f %f)", v.x, v.y, v.z, v.w );
+}
+
+string QuatSRead( QuatS &v ) {
+    string s; 
+    local float x,y,z,w;
+
+    if( QuatMode == SHORTS) {
+        SPrintf( s, "(%d %d %d %d)", v.x, v.y, v.z, v.w ); 
+    } else if( QuatMode == FLOATS || QuatMode == EULER) {
+    x = stf(v.x); y = stf(v.y); z = stf(v.z); w = stf(v.w);
+        SPrintf( s, "(%f %f %f %f)", x, y, z, w ); 
+    } 
+    return s;
+}
+
+void QuatSWrite( QuatS &v, string s ) {
+    local float x,y,z,w;
+
+    if( QuatMode == SHORTS) {
+        SScanf( s, "(%d %d %d %d)", v.x, v.y, v.z, v.w );
+        return;
+    } else if( QuatMode == FLOATS) {
+        SScanf( s, "(%f %f %f %f)", x, y, z, w );
+        v.x = fts(x);
+        v.y = fts(y);
+        v.z = fts(z);
+        v.w = fts(w);
+    } else if( QuatMode == EULER) {
+        SScanf( s, "(%f %f %f %f)", x, y, z, w );
+        EulerToQuat_(x, y, z, w);
+        v.x = x; v.y = y; v.z = z; v.w = w;
+    } 
+}
+
+void NewAnimationBlock(AB_HDR &hdr, string s)
+{
+    if(s == "NEW")
+    {
+        hdr.nTimes = 1;
+        hdr.ofsTimes = FileSize();
+        hdr.nKeys = 1;
+        hdr.ofsKeys = FileSize()+16;
+    
+    }
+} 
+
+void readAnimBlock(char type[], int ofsTimes, int nTimes, int ofsKeys, int nKeys)
+{
+    if(ofsTimes > FileSize()) {
+        int NONE;
+        return;
+    }
+    FSeek(ofsTimes);
+    if(nTimes>1) // < 3
+        uint32 times[nTimes];
+    else
+        uint32 time;
+    FSeek(ofsKeys);
+    if(nTimes>1) { // < 3
+        if(type == "S") {
+            int16 keys[nKeys];
+        } else if(type == "I") {
+            int32 keys[nKeys];
+        } else if(type == "US") {
+            uint16 keys[nKeys];
+        } else if(type == "UI") {
+            uint32 keys[nKeys];
+        } else if(type == "F") {
+            float keys[nKeys];
+        } else if(type == "Vec3D") {
+            Vec3D keys[nKeys];
+        } else if(type == "Quat") {
+            Quat keys[nKeys];
+        } else if(type == "QuatS") {
+            QuatS keys[nKeys];
+        } 
+    } else {
+        if(type == "S") {
+            int16 keys;
+        } else if(type == "I") {
+            int32 keys;
+        } else if(type == "US") {
+            uint16 keys;
+        } else if(type == "UI") {
+            uint32 keys;
+        } else if(type == "F") {
+            float keys;
+        } else if(type == "Vec3D") {
+            Vec3D keys;
+        } else if(type == "Quat") {
+            Quat keys;
+        } else if(type == "QuatS") {
+            QuatS keys;
+        } 
+    }
+}
+
+string ShowAnimBlockInfo(AB_HDR &hdr) {  
+    string s; if(hdr.n1 > 0 && hdr.Keys[0].nEntries > 0) { s = "used";  } else { s = "unused"; } return s;
+}
+
+string ShowInfo_UInt16(AB_UInt16 &x) {
+    return ShowAnimBlockInfo(x.AB_UInt16_Header);
+}
+string ShowInfo_Int16(AB_Int16 &x) {
+    return ShowAnimBlockInfo(x.AB_Int16_Header);
+}
+string ShowInfo_UInt32(AB_UInt32 &x) {
+    return ShowAnimBlockInfo(x.AB_UInt32_Header);
+}
+string ShowInfo_Int32(AB_Int32 &x) {
+    return ShowAnimBlockInfo(x.AB_Int32_Header);
+}
+string ShowInfo_Float(AB_Float &x) {
+    return ShowAnimBlockInfo(x.AB_Float_Header);
+}
+string ShowInfo_Vec3D(AB_Vec3D &x) {
+    return ShowAnimBlockInfo(x.AB_Vec3D_Header);
+}
+string ShowInfo_Quat(AB_Quat &x) {
+    return ShowAnimBlockInfo(x.AB_Quat_Header);
+}
+string ShowInfo_QuatS(AB_QuatS &x) {
+    return ShowAnimBlockInfo(x.AB_QuatS_Header);
+}
+
+string ReadAnimation( ANIMATION &a) {
+    if(a.nextAnimation==-1) {
+        string s; SPrintf( s, "[%i]: %s",a.timeLength,EnumToString( a.animID) ); 
+    } else {
+        string s; SPrintf( s, "[%i]: %s, > %i",a.timeLength,EnumToString( a.animID), a.nextAnimation ); 
+    }
+    return s;
+}
+
+string ReadBone(BONE &B) {
+    string s;
+    SPrintf( s, "%i > (%f %f %f)",B.parent,B.pivot.x,B.pivot.y,B.pivot.z);
+    return s;
+}
+
+
+string ShowInfoEvent(EVENT &event)
+{  
+    string s; SPrintf( s, "%s - b%i",event.id,event.bone); return s;
+}
+
+// - Read&Write end ------------
