@@ -517,17 +517,10 @@ void ModelOpened::ExportPNG(wxString val, wxString suffix)
 	}
 	//wxLogMessage(wxT("Info: Exporting texture to %s..."), temp.c_str());
 	if (suffix == wxT("tga"))
-#ifndef _MINGW
 		newImage->Save(temp.mb_str(), CXIMAGE_FORMAT_TGA);
-#else
-		newImage->Save(temp.wc_str(), CXIMAGE_FORMAT_TGA);
-#endif
 	else
-#ifndef _MINGW
 		newImage->Save(temp.mb_str(), CXIMAGE_FORMAT_PNG);
-#else
-		newImage->Save(temp.wc_str(), CXIMAGE_FORMAT_PNG);
-#endif
+
 	free(tempbuf);
 	newImage->Destroy();
 	wxDELETE(newImage);

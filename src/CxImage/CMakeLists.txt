@@ -51,8 +51,6 @@ if (WIN32)
 	add_definitions(-D_MINGW)
 	add_definitions(-D_WINDOWS)
 	add_definitions(-D_WIN32)
-	add_definitions(-D_UNICODE)
-	add_definitions(-DUNICODE)
 endif()
 
 add_library(cximage STATIC ${SRC_FILES})

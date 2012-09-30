@@ -352,17 +352,9 @@ void FileControl::ExportPNG(wxString val, wxString suffix)
 	newImage->CreateFromArray(tempbuf, tex.w, tex.h, 32, (tex.w*4), true);
 	//wxLogMessage(wxT("Info: Exporting texture to %s..."), temp.c_str());
 	if (suffix == wxT("tga"))
-#ifndef _MINGW
 		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_TGA);
-#else
-		newImage->Save(filename.wc_str(), CXIMAGE_FORMAT_TGA);
-#endif
 	else
-#ifndef _MINGW
 		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_PNG);
-#else
-		newImage->Save(filename.wc_str(), CXIMAGE_FORMAT_PNG);
-#endif
 	free(tempbuf);
 	newImage->Destroy();
 	wxDELETE(newImage);

@@ -38,10 +38,10 @@ GlobalSettings::GlobalSettings()
 	m_versionMajorNumber = 0;
 	m_versionMinorNumber = 7;
 	m_versionMajorRevNumber = 0;
-	m_versionMinorRevNumber = 3;
+	m_versionMinorRevNumber = 5;
 
-	m_appName = L"WoW Model Viewer";
-	m_buildName = L"Great-father Winter";
+	m_appName = "WoW Model Viewer";
+	m_buildName = "Chen Stormstout";
 
 	/*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -59,7 +59,8 @@ GlobalSettings::GlobalSettings()
 		Epic Lose
 		Lord Kezzak
 		Perky Pug
-
+		Great-father Winter
+		
 		--== Used Build Names ==--			(So we don't repeat...)
 		Wascally Wabbit
 		Gnome Punter
@@ -68,7 +69,7 @@ GlobalSettings::GlobalSettings()
 		Pickled Herring
 		Windrunner's Lament
 		Lost Lich King
-		Great-father Winter
+		
 
 	*/
 
@@ -92,10 +93,10 @@ GlobalSettings & GlobalSettings::instance()
 	return *GlobalSettings::m_p_instance;
 }
 
-std::wstring GlobalSettings::appVersion(std::wstring a_prefix)
+std::string GlobalSettings::appVersion(std::string a_prefix)
 {
-	std::wstring l_result = a_prefix;
-	std::wostringstream l_oss;
+	std::string l_result = a_prefix;
+	std::ostringstream l_oss;
 	l_oss.precision(0);
 
 	l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
@@ -105,19 +106,19 @@ std::wstring GlobalSettings::appVersion(std::wstring a_prefix)
 	return l_result;
 }
 
-std::wstring GlobalSettings::appName()
+std::string GlobalSettings::appName()
 {
 	return m_appName;
 }
 
-std::wstring GlobalSettings::buildName()
+std::string GlobalSettings::buildName()
 {
 	return m_buildName;
 }
 
-std::wstring GlobalSettings::appTitle()
+std::string GlobalSettings::appTitle()
 {
-	return appName() + appVersion(std::wstring(L" v"));
+	return appName() + appVersion(std::string(" v"));
 }
 
 // Protected methods

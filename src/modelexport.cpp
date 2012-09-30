@@ -29,17 +29,9 @@ void SaveTexture(wxString fn)
 	newImage->CreateFromArray(pixels, width, height, 32, (width*4), true);
 
 	if (fn.Last() == 'g')
-#ifndef _MINGW
 		newImage->Save(fn.mb_str(), CXIMAGE_FORMAT_PNG);
-#else
-		newImage->Save(fn.wc_str(), CXIMAGE_FORMAT_PNG);
-#endif
 	else
-#ifndef _MINGW
 		newImage->Save(fn.mb_str(), CXIMAGE_FORMAT_TGA);
-#else
-		newImage->Save(fn.wc_str(), CXIMAGE_FORMAT_TGA);
-#endif
 
 	//newImage->Destroy();
 	wxDELETE(newImage);
@@ -136,17 +128,9 @@ void SaveTexture2(wxString file, wxString outdir, wxString ExportID = wxEmptyStr
 
 	// Save image!
 	if (suffix == wxT("tga"))
-#ifndef _MINGW
 		newImage->Save(temp.mb_str(), CXIMAGE_FORMAT_TGA);
-#else
-		newImage->Save(temp.wc_str(), CXIMAGE_FORMAT_TGA);
-#endif
 	else
-#ifndef _MINGW
 		newImage->Save(temp.mb_str(), CXIMAGE_FORMAT_PNG);
-#else
-		newImage->Save(temp.wc_str(), CXIMAGE_FORMAT_PNG);
-#endif
 
 	// Clear data we don't need anymore
 	free(tempbuf);

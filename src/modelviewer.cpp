@@ -229,6 +229,7 @@ ModelViewer::ModelViewer()
 	if (Create(NULL, wxID_ANY, wxString(APP_TITLE wxT(" ") APP_VERSION wxT(" ") APP_PLATFORM APP_ISDEBUG), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) {
 #else
 	if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) {
+	SetIcon(wxICON(IDI_ICON1));
 #endif
 		SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 #ifndef	_LINUX // buggy

@@ -643,29 +643,13 @@ inline void ModelCanvas::CreateTexture(wxString filename, GLuint texture)
 	wxString tmp = filename.AfterLast(wxT('.')).Lower();
 
 	if (tmp == wxT("bmp"))
-#ifndef _MINGW
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_BMP);
-#else
-		image = new CxImage(filename.wc_str(), CXIMAGE_FORMAT_BMP);
-#endif
 	else if (tmp == wxT("tga"))
-#ifndef _MINGW
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_TGA);
-#else
-		image = new CxImage(filename.wc_str(), CXIMAGE_FORMAT_TGA);
-#endif
 	else if (tmp == wxT("jpg"))
-#ifndef _MINGW
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_JPG);
-#else
-		image = new CxImage(filename.wc_str(), CXIMAGE_FORMAT_JPG);
-#endif
 	else if (tmp == wxT("png"))
-#ifndef _MINGW
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_PNG);
-#else
-		image = new CxImage(filename.wc_str(), CXIMAGE_FORMAT_PNG);
-#endif
 	else 
 		return;
 
@@ -2005,11 +1989,8 @@ void ModelCanvas::LoadBackground(wxString filename)
 			format = CXIMAGE_FORMAT_PNG;
 		else 
 			return;
-#ifndef _MINGW
+			
 		image = new CxImage(filename.mb_str(), format);
-#else
-		image = new CxImage(filename.wc_str(), format);
-#endif
 		if (image == NULL)
 			return;
 

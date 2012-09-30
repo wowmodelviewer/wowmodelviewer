@@ -4,7 +4,15 @@ cmake_minimum_required(VERSION 2.6)
 set(CMAKE_BUILD_TYPE MinSizeRel)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
-find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
+
+if(WIN32)
+	set(RES_FILES "wmv_mingw.rc")
+	set(CMAKE_RC_COMPILER_INIT windres)
+	ENABLE_LANGUAGE(RC)
+	SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
+endif()
+
 
 set(USE_STORM 1)
 if (APPLE)
@@ -100,7 +108,7 @@ if(WIN32)
 	add_definitions(-D_MINGW)
 	set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
 	
-    add_executable(wowmodelviewer ${WOWMV_SOURCES})
+    add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
     add_dependencies(wowmodelviewer CxImage StormLib)   
 endif()
 
@@ -109,6 +117,8 @@ if(WIN32)
 		cximage
 		${wxWidgets_LIBRARIES}
 		${EXTRA_LIBS}
+		jpeg
+		png
 	)
 else()
 	target_link_libraries(wowmodelviewer

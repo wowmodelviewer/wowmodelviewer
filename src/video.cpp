@@ -752,11 +752,9 @@ bool TryLoadLocalTexture(const wxString& texName, int type, CxImage **imgptr)
 
 	if (!wxFile::Exists(fname))
 		return false;
-#ifndef _MINGW
+		
 	*imgptr = new (std::nothrow) CxImage(fname.mb_str(), type);
-#else
-	*imgptr = new (std::nothrow) CxImage(fname.wc_str(), type);
-#endif
+
 	return true;
 }
 

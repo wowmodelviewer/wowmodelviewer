@@ -43,10 +43,10 @@ class GlobalSettings
 		// Methods
 		static GlobalSettings & instance();
 		
-		std::wstring appVersion(std::wstring a_prefix = std::wstring(L""));
-		std::wstring appName();
-		std::wstring buildName();
-		std::wstring appTitle();
+		std::string appVersion(std::string a_prefix = std::string(""));
+		std::string appName();
+		std::string buildName();
+		std::string appTitle();
 
 		// Members
 		
@@ -78,8 +78,8 @@ class GlobalSettings
 		int m_versionMinorNumber;
 		int m_versionMajorRevNumber;
 		int m_versionMinorRevNumber;
-		std::wstring	m_appName;
-		std::wstring	m_buildName;
+		std::string	m_appName;
+		std::string	m_buildName;
 
 		
 		// friend class declarations

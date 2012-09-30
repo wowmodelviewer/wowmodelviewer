@@ -272,6 +272,9 @@ static const wxLanguage langIds[] =
 	wxLANGUAGE_RUSSIAN,
 };
 
+
+ 
+
 class WowModelViewApp : public wxApp
 {
 public:
@@ -288,9 +291,16 @@ public:
 	void SaveSettings();
 
 	ModelViewer *frame;
-
+	
 	wxLocale locale;
 	FILE *LogFile;
+#ifdef _MINGW	
+private:
+	bool LoadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
+	wxBitmap* CreateBitmapFromPngResource(const wxString& t_name);
+	wxBitmap* GetBitmapFromMemory(const char* t_data, const DWORD t_size);
+#endif
+	
 };
 
 void searchMPQs(bool firstTime);

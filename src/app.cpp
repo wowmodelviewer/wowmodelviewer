@@ -5,6 +5,10 @@
 #include <wx/stdpaths.h>
 #include <wx/app.h>
 
+#ifdef _MINGW
+#include <windows.h>
+#endif
+
 #include "UserSkins.h"
 #include "resource1.h"
 
@@ -37,6 +41,53 @@ IMPLEMENT_APP(WowModelViewApp)
 
 //#include "globalvars.h"
 
+  wxBitmap* WowModelViewApp::CreateBitmapFromPngResource(const wxString& t_name)
+  {
+     wxBitmap*   r_bitmapPtr = 0;
+  
+     char*       a_data      = 0;
+     DWORD       a_dataSize  = 0;
+  
+     if(LoadDataFromResource(a_data, a_dataSize, t_name))
+     {
+        r_bitmapPtr = GetBitmapFromMemory(a_data, a_dataSize);
+     }
+  
+     return r_bitmapPtr;
+  }
+
+
+  bool WowModelViewApp::LoadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name)
+  {
+     bool     r_result    = false;
+     HGLOBAL  a_resHandle = 0;
+     HRSRC    a_resource;
+  
+     a_resource = FindResource(0, t_name.mb_str(), RT_RCDATA);
+  
+     if(0 != a_resource)
+     {
+        a_resHandle = LoadResource(NULL, a_resource);
+        if (0 != a_resHandle)
+        {
+           t_data = (char*)LockResource(a_resHandle);
+           t_dataSize = SizeofResource(NULL, a_resource);
+           r_result = true;
+        }
+     }
+  
+     return r_result;
+  }
+
+
+  wxBitmap* WowModelViewApp::GetBitmapFromMemory(const char* t_data, const DWORD t_size)
+  {
+     wxMemoryInputStream a_is(t_data, t_size);
+     return new wxBitmap(wxImage(a_is, wxBITMAP_TYPE_PNG, -1), -1);
+  }
+
+
+
 void WowModelViewApp::setInterfaceLocale()
 {
 	if (interfaceID <= 0)
@@ -45,18 +96,12 @@ void WowModelViewApp::setInterfaceLocale()
 	// This chunk of code is all related to locale translation (if a translation is available).
 	// Only use locale for non-english?
 	wxString fn;
-#ifndef _MINGW
 	fn.Printf(wxT("mo%c%s.mo"), SLASH, locales[0]);
-#else
-	fn.Printf(wxT("mo%c%s.mo"), SLASH, (locales[0]).wc_str());
-#endif
+
 	if (interfaceID >= 0)
-#ifndef _MINGW
 		fn.Printf(wxT("mo%c%s.mo"), SLASH, locales[interfaceID]);
-#else
-		fn.Printf(wxT("mo%c%s.mo"), SLASH, (locales[interfaceID]).wc_str());
-#endif
-	if (wxFileExists(fn))
+
+		if (wxFileExists(fn))
 	{
 		locale.Init(langIds[interfaceID], wxLOCALE_CONV_ENCODING);
 		
@@ -76,7 +121,7 @@ bool WowModelViewApp::OnInit()
 	wxSplashScreen* splash = NULL;
 
 	wxImage::AddHandler( new wxPNGHandler);
-
+#ifndef _MINGW
 	if (wxFile::Exists(wxT("Splash.png"))) {
 		wxBitmap bitmap;
 		if (bitmap.LoadFile(wxT("Splash.png"),wxBITMAP_TYPE_PNG) == false){
@@ -90,7 +135,20 @@ bool WowModelViewApp::OnInit()
 		}
 		wxYield();
 	}
-
+#else
+	wxBitmap * bitmap = CreateBitmapFromPngResource("SPLASH");
+	if(!bitmap)
+		wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
+	else
+		splash = new wxSplashScreen(*bitmap,
+				wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
+				2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+				wxBORDER_NONE);
+	wxYield();
+	Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+#endif
+	
+	
 	// Error & Logging settings
 #ifndef _DEBUG
 	#if wxUSE_ON_FATAL_EXCEPTION
@@ -122,21 +180,27 @@ bool WowModelViewApp::OnInit()
 #ifndef _MINGW
 	wxLogMessage(wxString(wxT("Starting:\n") APP_TITLE wxT(" ") APP_VERSION wxT(" (") APP_BUILDNAME wxT(") ") APP_PLATFORM APP_ISDEBUG wxT("\n\n")));
 #else
-	wxLogMessage(wxString(wxT("Starting:")));
-	wxString l_logMess = GLOBALSETTINGS.appName() + L" " + GLOBALSETTINGS.appVersion() + L" " + GLOBALSETTINGS.buildName() + L"\n\n";
+	wxLogMessage(wxString(wxT("Starting:\n")));
+	wxString l_logMess = std::string(GLOBALSETTINGS.appName() 
+	+ " " 
+	+ GLOBALSETTINGS.appVersion() 
+	+ " "
+	+ GLOBALSETTINGS.buildName() 
+	+ "\n\n").c_str();
 	wxLogMessage(l_logMess);
 #endif
 
 	// set the config file path.
 	cfgPath = userPath+SLASH+wxT("Config.ini");
 
+	/*
 	bool loadfail = LoadSettings();
 	if (loadfail == true) {
 		if (splash)
 			splash->Show(false);
 		return false;
 	}
-
+*/
 	setInterfaceLocale();
 
 	// Now create our main frame.
@@ -606,71 +670,73 @@ bool WowModelViewApp::LoadSettings()
 	// Application Config Settings
 	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
 	
-	// Graphic / Video display settings
-	pConfig->SetPath(wxT("/Graphics"));
-	pConfig->Read(wxT("FSAA"), &video.curCap.aaSamples, 0);
-	pConfig->Read(wxT("AccumulationBuffer"), &video.curCap.accum, 0);
-	pConfig->Read(wxT("AlphaBits"), &video.curCap.alpha, 0);
-	pConfig->Read(wxT("ColourBits"), &video.curCap.colour, 24);
-	pConfig->Read(wxT("DoubleBuffer"), (bool*)&video.curCap.doubleBuffer, 1);	// True
+	if(pConfig)
+	{
+		// Graphic / Video display settings
+		pConfig->SetPath(wxT("/Graphics"));
+		pConfig->Read(wxT("FSAA"), &video.curCap.aaSamples, 0);
+		pConfig->Read(wxT("AccumulationBuffer"), &video.curCap.accum, 0);
+		pConfig->Read(wxT("AlphaBits"), &video.curCap.alpha, 0);
+		pConfig->Read(wxT("ColourBits"), &video.curCap.colour, 24);
+		pConfig->Read(wxT("DoubleBuffer"), (bool*)&video.curCap.doubleBuffer, 1);	// True
 #ifdef _WINDOWS
-	pConfig->Read(wxT("HWAcceleration"), &video.curCap.hwAcc, WGL_FULL_ACCELERATION_ARB);
+		pConfig->Read(wxT("HWAcceleration"), &video.curCap.hwAcc, WGL_FULL_ACCELERATION_ARB);
 #endif
-	pConfig->Read(wxT("SampleBuffer"), (bool*)&video.curCap.sampleBuffer, 0);	// False
-	pConfig->Read(wxT("StencilBuffer"), &video.curCap.stencil, 0);
-	pConfig->Read(wxT("ZBuffer"), &video.curCap.zBuffer, 16);
+		pConfig->Read(wxT("SampleBuffer"), (bool*)&video.curCap.sampleBuffer, 0);	// False
+		pConfig->Read(wxT("StencilBuffer"), &video.curCap.stencil, 0);
+		pConfig->Read(wxT("ZBuffer"), &video.curCap.zBuffer, 16);
 
-	// Application locale info
-	pConfig->SetPath(wxT("/Locale"));
-	pConfig->Read(wxT("LanguageID"), &langID, -1);
-	pConfig->Read(wxT("LanguageName"), &langName, wxEmptyString);
-	pConfig->Read(wxT("InterfaceID"), &interfaceID, 0);
+		// Application locale info
+		pConfig->SetPath(wxT("/Locale"));
+		pConfig->Read(wxT("LanguageID"), &langID, -1);
+		pConfig->Read(wxT("LanguageName"), &langName, wxEmptyString);
+		pConfig->Read(wxT("InterfaceID"), &interfaceID, 0);
 
-	// Application settings
-	pConfig->SetPath(wxT("/Settings"));
-	pConfig->Read(wxT("Path"), &gamePath, wxEmptyString);
-	pConfig->Read(wxT("ArmoryPath"), &armoryPath, wxEmptyString);
-	pConfig->Read(wxT("TOCVersion"), &gameVersion, 0);
+		// Application settings
+		pConfig->SetPath(wxT("/Settings"));
+		pConfig->Read(wxT("Path"), &gamePath, wxEmptyString);
+		pConfig->Read(wxT("ArmoryPath"), &armoryPath, wxEmptyString);
+		pConfig->Read(wxT("TOCVersion"), &gameVersion, 0);
 
-	pConfig->Read(wxT("UseLocalFiles"), &useLocalFiles, false);
-	pConfig->Read(wxT("SSCounter"), &ssCounter, 100);
-	//pConfig->Read(wxT("AntiAlias"), &useAntiAlias, true);
-	//pConfig->Read(wxT("DisableHWAcc"), &disableHWAcc, false);
-	pConfig->Read(wxT("DefaultFormat"), &imgFormat, 0);
+		pConfig->Read(wxT("UseLocalFiles"), &useLocalFiles, false);
+		pConfig->Read(wxT("SSCounter"), &ssCounter, 100);
+		//pConfig->Read(wxT("AntiAlias"), &useAntiAlias, true);
+		//pConfig->Read(wxT("DisableHWAcc"), &disableHWAcc, false);
+		pConfig->Read(wxT("DefaultFormat"), &imgFormat, 0);
 
-	pConfig->Read(wxT("PerferedExporter"), &Perfered_Exporter, -1);
-	pConfig->Read(wxT("ModelExportInitOnly"), &modelExportInitOnly, true);
-	pConfig->Read(wxT("ModelExportPreserveDirs"), &modelExport_PreserveDir, true);
-	pConfig->Read(wxT("ModelExportUseWMVPosRot"), &modelExport_UseWMVPosRot, false);
-	pConfig->Read(wxT("ModelExportScaleToRealWorld"), &modelExport_ScaleToRealWorld, false);
+		pConfig->Read(wxT("PerferedExporter"), &Perfered_Exporter, -1);
+		pConfig->Read(wxT("ModelExportInitOnly"), &modelExportInitOnly, true);
+		pConfig->Read(wxT("ModelExportPreserveDirs"), &modelExport_PreserveDir, true);
+		pConfig->Read(wxT("ModelExportUseWMVPosRot"), &modelExport_UseWMVPosRot, false);
+		pConfig->Read(wxT("ModelExportScaleToRealWorld"), &modelExport_ScaleToRealWorld, false);
 
-	pConfig->Read(wxT("ModelExportLWPreserveDirs"), &modelExport_LW_PreserveDir, true);
-	pConfig->Read(wxT("ModelExportLWAlwaysWriteSceneFile"), &modelExport_LW_AlwaysWriteSceneFile, false);
-	pConfig->Read(wxT("ModelExportLWExportLights"), &modelExport_LW_ExportLights, true);
-	pConfig->Read(wxT("ModelExportLWExportDoodads"), &modelExport_LW_ExportDoodads, true);
-	pConfig->Read(wxT("ModelExportLWExportCameras"), &modelExport_LW_ExportCameras, true);
-	pConfig->Read(wxT("ModelExportLWExportBones"), &modelExport_LW_ExportBones, true);
+		pConfig->Read(wxT("ModelExportLWPreserveDirs"), &modelExport_LW_PreserveDir, true);
+		pConfig->Read(wxT("ModelExportLWAlwaysWriteSceneFile"), &modelExport_LW_AlwaysWriteSceneFile, false);
+		pConfig->Read(wxT("ModelExportLWExportLights"), &modelExport_LW_ExportLights, true);
+		pConfig->Read(wxT("ModelExportLWExportDoodads"), &modelExport_LW_ExportDoodads, true);
+		pConfig->Read(wxT("ModelExportLWExportCameras"), &modelExport_LW_ExportCameras, true);
+		pConfig->Read(wxT("ModelExportLWExportBones"), &modelExport_LW_ExportBones, true);
 
-	pConfig->Read(wxT("ModelExportLWDoodadsAs"), &modelExport_LW_DoodadsAs, 0);
+		pConfig->Read(wxT("ModelExportLWDoodadsAs"), &modelExport_LW_DoodadsAs, 0);
 
-	pConfig->Read(wxT("ModelExportM3BoundScale"), &tmp, wxT("0.5"));
-	modelExport_M3_BoundScale = wxAtof(tmp);
-	pConfig->Read(wxT("ModelExportM3SphereScale"), &tmp, wxT("0.5"));
-	modelExport_M3_SphereScale = wxAtof(tmp);
-	pConfig->Read(wxT("ModelExportM3TexturePath"), &modelExport_M3_TexturePath, wxEmptyString);
+		pConfig->Read(wxT("ModelExportM3BoundScale"), &tmp, wxT("0.5"));
+		modelExport_M3_BoundScale = wxAtof(tmp);
+		pConfig->Read(wxT("ModelExportM3SphereScale"), &tmp, wxT("0.5"));
+		modelExport_M3_SphereScale = wxAtof(tmp);
+		pConfig->Read(wxT("ModelExportM3TexturePath"), &modelExport_M3_TexturePath, wxEmptyString);
 
-	// Data path and mpq archive stuff
-	wxString archives;
-	pConfig->Read(wxT("MPQFiles"), &archives);
+		// Data path and mpq archive stuff
+		wxString archives;
+		pConfig->Read(wxT("MPQFiles"), &archives);
 	
-	wxStringTokenizer strToken(archives, wxT(";"), wxTOKEN_DEFAULT);
-	while (strToken.HasMoreTokens()) {
-		mpqArchives.Add(strToken.GetNextToken());
+		wxStringTokenizer strToken(archives, wxT(";"), wxTOKEN_DEFAULT);
+		while (strToken.HasMoreTokens()) {
+			mpqArchives.Add(strToken.GetNextToken());
+		}
+
+		// Clear our ini file config object
+		wxDELETE( pConfig );
 	}
-
-	// Clear our ini file config object
-	wxDELETE( pConfig );
-
 	return false;
 }
 

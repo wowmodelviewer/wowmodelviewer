@@ -188,11 +188,7 @@ void getGamePath()
 	HKEY key;
 	unsigned long t, s;
 	long l;
-#ifndef _MINGW
 	unsigned char path[1024];
-#else
-	wchar_t path[1024];
-#endif
 	memset(path, 0, sizeof(path));
 
 	wxArrayString sNames;
