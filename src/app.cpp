@@ -193,14 +193,14 @@ bool WowModelViewApp::OnInit()
 	// set the config file path.
 	cfgPath = userPath+SLASH+wxT("Config.ini");
 
-	/*
+	
 	bool loadfail = LoadSettings();
 	if (loadfail == true) {
 		if (splash)
 			splash->Show(false);
 		return false;
 	}
-*/
+
 	setInterfaceLocale();
 
 	// Now create our main frame.
@@ -668,7 +668,14 @@ bool WowModelViewApp::LoadSettings()
 {
 	wxString tmp;
 	// Application Config Settings
+#ifndef _MINGW	
 	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+#else
+	wxFileConfig *pConfig = new wxFileConfig(GetAppName(), wxEmptyString,
+                             cfgPath,
+                             wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+#endif
+	
 	
 	if(pConfig)
 	{
@@ -690,8 +697,8 @@ bool WowModelViewApp::LoadSettings()
 		pConfig->SetPath(wxT("/Locale"));
 		pConfig->Read(wxT("LanguageID"), &langID, -1);
 		pConfig->Read(wxT("LanguageName"), &langName, wxEmptyString);
-		pConfig->Read(wxT("InterfaceID"), &interfaceID, 0);
-
+		//pConfig->Read(wxT("InterfaceID"), &interfaceID, 0);
+		
 		// Application settings
 		pConfig->SetPath(wxT("/Settings"));
 		pConfig->Read(wxT("Path"), &gamePath, wxEmptyString);
