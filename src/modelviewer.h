@@ -78,6 +78,7 @@
 	Windrunner's Lament
 	Lost Lich King
 	Great-father Winter
+	Chen Stormstout
 
 */
 
