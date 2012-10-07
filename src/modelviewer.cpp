@@ -1434,6 +1434,16 @@ wxString ModelViewer::InitMPQArchives()
 		SetStatusText(wxT("Unable to gather TOC data."));
 		return wxT("Could not read data from MPQ files.\nPlease make sure World of Warcraft is not running.");
 	}
+	
+	// reading and dumping first 100 characters 
+	unsigned char tocfile[100];
+	f.read(tocfile,99);
+	wxString tocFileString((char *)tocfile);
+	wxLogMessage(wxT("TOC file size : %d"), f.getSize());
+	wxLogMessage(wxT("Content read from file to get TOC number :"));
+	wxLogMessage(tocFileString);
+	f.seek(0);
+	
 	f.seek(51); // offset to "## Interface: "
 	unsigned char toc[6];
 	memset(toc,'\0', 6);
