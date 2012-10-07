@@ -48,6 +48,7 @@ class GlobalSettings
 		std::string buildName();
 		std::string appTitle();
 
+		bool isBeta() { return m_isBetaVersion; }
 		// Members
 		
 	protected :
@@ -81,6 +82,8 @@ class GlobalSettings
 		std::string	m_appName;
 		std::string	m_buildName;
 		std::string m_platform;
+		
+		bool m_isBetaVersion;
 
 		
 		// friend class declarations

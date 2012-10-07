@@ -75,11 +75,16 @@ GlobalSettings::GlobalSettings()
 
   // platform 
   m_platform = "Unknown platform";
-	
 #ifdef _MINGW
   m_platform = "Windows 32 bits";
+#endif // to be completed
+
+#ifdef _BETAVERSION
+  m_isBetaVersion = true;
+#else
+  m_isBetaVersion = false;
 #endif
-	
+ 
 }
 
 // Destructor
@@ -125,7 +130,10 @@ std::string GlobalSettings::buildName()
 
 std::string GlobalSettings::appTitle()
 {
-	return appName() + appVersion(std::string(" v")) + " " + m_platform;
+	std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
+	if(m_isBetaVersion)
+		title += " - BETA VERSION";
+	return title;
 }
 
 // Protected methods

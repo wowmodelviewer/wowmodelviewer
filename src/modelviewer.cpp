@@ -2365,6 +2365,10 @@ Windows 98\\ME\\2000\\XP on 17th December 2006\n\n\
 #else
 	info.SetName(GLOBALSETTINGS.appName());
 	wxString l_version = L"\n" + GLOBALSETTINGS.appVersion() + L" (" + GLOBALSETTINGS.buildName() + L")\n";
+	
+	if(GLOBALSETTINGS.isBeta())
+	  l_version += "BETA VERSION";
+	
 	info.SetVersion(l_version);
 #endif
 	info.AddDeveloper(wxT("Ufo_Z"));
