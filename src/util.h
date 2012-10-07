@@ -24,7 +24,10 @@
 // Standard C++ headers
 #include <stdio.h>
 
+#include <windows.h>
+
 // wx
+#include <wx/bitmap.h>
 #include <wx/filename.h>
 #include <wx/fileconf.h>
 #include <wx/string.h>
@@ -32,6 +35,8 @@
 
 // Our other utility headers
 #include "vec3d.h"
+
+
 
 using namespace std;
 
@@ -160,6 +165,10 @@ inline T _SwapFourBytes (T w)
 
 	return a;
 }
+
+wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
+bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
 
 #endif
 
