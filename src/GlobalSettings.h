@@ -80,6 +80,7 @@ class GlobalSettings
 		int m_versionMinorRevNumber;
 		std::string	m_appName;
 		std::string	m_buildName;
+		std::string m_platform;
 
 		
 		// friend class declarations

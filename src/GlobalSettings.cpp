@@ -73,6 +73,13 @@ GlobalSettings::GlobalSettings()
 
 	*/
 
+  // platform 
+  m_platform = "Unknown platform";
+	
+#ifdef _MINGW
+  m_platform = "Windows 32 bits";
+#endif
+	
 }
 
 // Destructor
@@ -118,7 +125,7 @@ std::string GlobalSettings::buildName()
 
 std::string GlobalSettings::appTitle()
 {
-	return appName() + appVersion(std::string(" v"));
+	return appName() + appVersion(std::string(" v")) + " " + m_platform;
 }
 
 // Protected methods
