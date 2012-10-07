@@ -84,7 +84,10 @@ GlobalSettings::GlobalSettings()
 #else
   m_isBetaVersion = false;
 #endif
- 
+
+  // set it to whatever you want if you are building a special version
+  m_versionSpecialExtend = "-mingw";
+
 }
 
 // Destructor
@@ -115,6 +118,8 @@ std::string GlobalSettings::appVersion(std::string a_prefix)
 			<< m_versionMajorRevNumber << "." << m_versionMinorRevNumber;
 	l_result += l_oss.str();
 
+	l_result += m_versionSpecialExtend;
+	
 	return l_result;
 }
 
