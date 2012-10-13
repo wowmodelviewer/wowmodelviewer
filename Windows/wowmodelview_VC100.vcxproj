@@ -91,7 +91,7 @@
       <AdditionalOptions>/D "WotLK"
 /D "PLAY_MUSIC" /J %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;..\src\zlib\;..\src\glew\include\;..\src\bzip2\;..\src\CxImage\;..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -115,8 +115,8 @@
     <Link>
       <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
-      <Version>0.7.0.4</Version>
-      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);D:\wxWidgets-2.8.12\lib\vc_lib\;.\lib\Windows\32bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <Version>0.7.0.5</Version>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);..\src\zlib\$(OutDir);..\src\bzip2\$(OutDir);..\src\lib\Windows\$(PlatformArchitecture)bit;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -135,7 +135,7 @@
     <PostBuildEvent>
       <Command>copy ..\bin_support\Windows\32bit\cximagecrt32d.dll $(OutDir)
 copy ..\bin_support\Windows\32bit\fbxsdk_20113d.dll $(OutDir)
-copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+copy ..\bin_support\Splash\Splash_002.png $(OutDir)Splash.png
 mkdir $(OutDir)enUS
 copy ..\bin\enUS\* $(OutDir)enUS\
 copy ..\bin\*.csv $(OutDir)
@@ -150,7 +150,7 @@ copy ..\bin\*.csv $(OutDir)
       <AdditionalOptions>/D "WotLK"
 /D "PLAY_MUSIC" /J %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;..\src\zlib\;..\src\glew\include\;..\src\bzip2\;..\src\CxImage\;..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;WIN64;_WIN64;_AMD64_;_M_AMD64;__WINDOWS__;__WXMSW__;_DEBUG;__WXDEBUG__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -175,9 +175,9 @@ copy ..\bin\*.csv $(OutDir)
     <Link>
       <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
-      <Version>0.7.0.4</Version>
+      <Version>0.7.0.5</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);.\lib\Windows\64bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);..\src\zlib\$(OutDir);..\src\bzip2\$(OutDir);..\src\lib\Windows\$(PlatformArchitecture)bit;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -197,7 +197,7 @@ copy ..\bin\*.csv $(OutDir)
     <PostBuildEvent>
       <Command>copy ..\bin_support\Windows\64bit\cximagecrt64d.dll $(OutDir)\
 copy ..\bin_support\Windows\64bit\fbxsdk_20113_amd64d.dll $(OutDir)\
-copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+copy ..\bin_support\Splash\Splash_002.png $(OutDir)Splash.png
 mkdir $(OutDir)enUS
 copy ..\bin\enUS\* $(OutDir)enUS\
 copy ..\bin\*.csv $(OutDir)
@@ -211,7 +211,7 @@ copy ..\bin\*.csv $(OutDir)
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;..\src\zlib\;..\src\glew\include\;..\src\bzip2\;..\src\CxImage\;..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;__WINDOWS__;__WXMSW__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -235,9 +235,9 @@ copy ..\bin\*.csv $(OutDir)
       <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
-      <Version>0.7.0.4</Version>
+      <Version>0.7.0.5</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);D:\wxWidgets-2.8.12\lib\vc_lib\;.\lib\Windows\32bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);..\src\zlib\$(OutDir);..\src\bzip2\$(OutDir);..\src\lib\Windows\$(PlatformArchitecture)bit;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
@@ -260,7 +260,7 @@ copy ..\bin\*.csv $(OutDir)
 del $(OutDir)*.exp
 copy ..\bin_support\Windows\32bit\cximagecrt32.dll $(OutDir)
 copy ..\bin_support\Windows\32bit\fbxsdk_20113.dll $(OutDir)
-copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+copy ..\bin_support\Splash\Splash_002.png $(OutDir)Splash.png
 mkdir $(OutDir)enUS
 copy ..\bin\enUS\*.csv $(OutDir)enUS\
 copy ..\bin\*.csv $(OutDir)
@@ -288,7 +288,7 @@ copy ..\bin\userSettings\*.* $(OutDir)userSettings
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;.\zlib\;.\glew\include\;.\bzip2\;.\CxImage\;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\wxWidgets-2.8.12\include;D:\wxWidgets-2.8.12\include\msvc;..\src\zlib\;..\src\glew\include\;..\src\bzip2\;..\src\CxImage\;..\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32;_WINDOWS;WIN64;_WIN64;_AMD64_;__WINDOWS__;__WXMSW__;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <PreprocessSuppressLineNumbers>false</PreprocessSuppressLineNumbers>
@@ -312,9 +312,9 @@ copy ..\bin\userSettings\*.* $(OutDir)userSettings
       <AdditionalDependencies>glew$(PlatformArchitecture)_VC$(PlatformToolsetVersion).lib;wxpng.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>LinkVerboseLib</ShowProgress>
       <OutputFile>$(OutDir)$(TargetName).exe</OutputFile>
-      <Version>0.7.0.4</Version>
+      <Version>0.7.0.5</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);.\lib\Windows\64bit;.\zlib\$(OutDir);.\bzip2\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>D:\wxWidgets-2.8.12\lib\vc_lib\$(Platform);..\src\zlib\$(OutDir);..\src\bzip2\$(OutDir);..\src\lib\Windows\$(PlatformArchitecture)bit;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AssemblyDebug>false</AssemblyDebug>
@@ -337,7 +337,7 @@ copy ..\bin\userSettings\*.* $(OutDir)userSettings
 del $(OutDir)*.exp
 copy ..\bin_support\Windows\64bit\cximagecrt64.dll $(OutDir)
 copy ..\bin_support\Windows\64bit\fbxsdk_20113_amd64.dll $(OutDir)
-copy ..\bin_support\Splash\Splash_001.png $(OutDir)Splash.png
+copy ..\bin_support\Splash\Splash_002.png $(OutDir)Splash.png
 mkdir $(OutDir)enUS
 copy ..\bin\enUS\*.csv $(OutDir)enUS\
 copy ..\bin\*.csv $(OutDir)
@@ -356,147 +356,147 @@ copy ..\bin\userSettings\*.* $(OutDir)userSettings
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="animcontrol.cpp" />
-    <ClCompile Include="AnimExporter.cpp" />
-    <ClCompile Include="app.cpp" />
-    <ClCompile Include="arrows.cpp" />
-    <ClCompile Include="AVIGenerator.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="charcontrol.cpp" />
-    <ClCompile Include="database.cpp" />
-    <ClCompile Include="dbcfile.cpp" />
-    <ClCompile Include="ddslib.cpp" />
-    <ClCompile Include="effects.cpp" />
-    <ClCompile Include="filecontrol.cpp" />
-    <ClCompile Include="globalvars.cpp" />
-    <ClCompile Include="imagecontrol.cpp" />
-    <ClCompile Include="itemselection.cpp" />
-    <ClCompile Include="jsonreader.cpp" />
-    <ClCompile Include="jsonval.cpp" />
-    <ClCompile Include="jsonwriter.cpp" />
-    <ClCompile Include="lightcontrol.cpp" />
-    <ClCompile Include="liquid.cpp" />
-    <ClCompile Include="maptile.cpp" />
-    <ClCompile Include="model.cpp" />
-    <ClCompile Include="modelbankcontrol.cpp" />
-    <ClCompile Include="modelcanvas.cpp" />
-    <ClCompile Include="modelcontrol.cpp" />
-    <ClCompile Include="modelexport.cpp" />
-    <ClCompile Include="modelexport_fbx.cpp" />
-    <ClCompile Include="modelexport_lwo.cpp" />
-    <ClCompile Include="modelexport_m3.cpp" />
-    <ClCompile Include="modelexport_ms3d.cpp" />
-    <ClCompile Include="modelexport_obj.cpp" />
-    <ClCompile Include="modelexport_ogre.cpp" />
-    <ClCompile Include="modelexport_x3d.cpp" />
-    <ClCompile Include="modelexportoptions.cpp" />
-    <ClCompile Include="modelviewer.cpp" />
-    <ClCompile Include="mpq_stormlib.cpp" />
-    <ClCompile Include="particle.cpp" />
-    <ClCompile Include="Quantize.cpp" />
-    <ClCompile Include="RenderTexture.cpp" />
-    <ClCompile Include="settings.cpp" />
-    <ClCompile Include="shaders.cpp" />
-    <ClCompile Include="UserSkins.cpp" />
-    <ClCompile Include="util.cpp" />
-    <ClCompile Include="video.cpp">
+    <ClCompile Include="..\src\animcontrol.cpp" />
+    <ClCompile Include="..\src\AnimExporter.cpp" />
+    <ClCompile Include="..\src\app.cpp" />
+    <ClCompile Include="..\src\arrows.cpp" />
+    <ClCompile Include="..\src\AVIGenerator.cpp" />
+    <ClCompile Include="..\src\camera.cpp" />
+    <ClCompile Include="..\src\charcontrol.cpp" />
+    <ClCompile Include="..\src\database.cpp" />
+    <ClCompile Include="..\src\dbcfile.cpp" />
+    <ClCompile Include="..\src\ddslib.cpp" />
+    <ClCompile Include="..\src\effects.cpp" />
+    <ClCompile Include="..\src\filecontrol.cpp" />
+    <ClCompile Include="..\src\globalvars.cpp" />
+    <ClCompile Include="..\src\imagecontrol.cpp" />
+    <ClCompile Include="..\src\itemselection.cpp" />
+    <ClCompile Include="..\src\jsonreader.cpp" />
+    <ClCompile Include="..\src\jsonval.cpp" />
+    <ClCompile Include="..\src\jsonwriter.cpp" />
+    <ClCompile Include="..\src\lightcontrol.cpp" />
+    <ClCompile Include="..\src\liquid.cpp" />
+    <ClCompile Include="..\src\maptile.cpp" />
+    <ClCompile Include="..\src\model.cpp" />
+    <ClCompile Include="..\src\modelbankcontrol.cpp" />
+    <ClCompile Include="..\src\modelcanvas.cpp" />
+    <ClCompile Include="..\src\modelcontrol.cpp" />
+    <ClCompile Include="..\src\modelexport.cpp" />
+    <ClCompile Include="..\src\modelexport_fbx.cpp" />
+    <ClCompile Include="..\src\modelexport_lwo.cpp" />
+    <ClCompile Include="..\src\modelexport_m3.cpp" />
+    <ClCompile Include="..\src\modelexport_ms3d.cpp" />
+    <ClCompile Include="..\src\modelexport_obj.cpp" />
+    <ClCompile Include="..\src\modelexport_ogre.cpp" />
+    <ClCompile Include="..\src\modelexport_x3d.cpp" />
+    <ClCompile Include="..\src\modelexportoptions.cpp" />
+    <ClCompile Include="..\src\modelviewer.cpp" />
+    <ClCompile Include="..\src\mpq_stormlib.cpp" />
+    <ClCompile Include="..\src\particle.cpp" />
+    <ClCompile Include="..\src\Quantize.cpp" />
+    <ClCompile Include="..\src\RenderTexture.cpp" />
+    <ClCompile Include="..\src\settings.cpp" />
+    <ClCompile Include="..\src\shaders.cpp" />
+    <ClCompile Include="..\src\UserSkins.cpp" />
+    <ClCompile Include="..\src\util.cpp" />
+    <ClCompile Include="..\src\video.cpp">
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Level4</WarningLevel>
       <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Level4</WarningLevel>
     </ClCompile>
-    <ClCompile Include="wmo.cpp" />
+    <ClCompile Include="..\src\wmo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="animated.h" />
-    <ClInclude Include="animcontrol.h" />
-    <ClInclude Include="AnimExporter.h" />
-    <ClInclude Include="app.h" />
-    <ClInclude Include="arrows.h" />
-    <ClInclude Include="AVIGenerator.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="charcontrol.h" />
-    <ClInclude Include="database.h" />
-    <ClInclude Include="dbcfile.h" />
-    <ClInclude Include="ddslib.h" />
-    <ClInclude Include="displayable.h" />
-    <ClInclude Include="effects.h" />
-    <ClInclude Include="enums.h" />
-    <ClInclude Include="exporters.h" />
-    <ClInclude Include="fbxsdk.h" />
-    <ClInclude Include="filecontrol.h" />
-    <ClInclude Include="globalvars.h" />
-    <ClInclude Include="imagecontrol.h" />
-    <ClInclude Include="itemselection.h" />
-    <ClInclude Include="lightcontrol.h" />
-    <ClInclude Include="liquid.h" />
-    <ClInclude Include="manager.h" />
-    <ClInclude Include="maptile.h" />
-    <ClInclude Include="matrix.h" />
-    <ClInclude Include="model.h" />
-    <ClInclude Include="modelbankcontrol.h" />
-    <ClInclude Include="modelcanvas.h" />
-    <ClInclude Include="modelcontrol.h" />
-    <ClInclude Include="modelexport.h" />
-    <ClInclude Include="modelexport_lwo.h" />
-    <ClInclude Include="modelexport_m3.h" />
-    <ClInclude Include="modelexport_ms3d.h" />
-    <ClInclude Include="modelexportoptions.h" />
-    <ClInclude Include="modelheaders.h" />
-    <ClInclude Include="modelviewer.h" />
-    <ClInclude Include="mpq.h" />
-    <ClInclude Include="mpq_stormlib.h" />
-    <ClInclude Include="OpenGLHeaders.h" />
-    <ClInclude Include="particle.h" />
-    <ClInclude Include="Quantize.h" />
-    <ClInclude Include="quaternion.h" />
-    <ClInclude Include="RenderTexture.h" />
-    <ClInclude Include="resource1.h" />
-    <ClInclude Include="settings.h" />
-    <ClInclude Include="shaders.h" />
-    <ClInclude Include="UserSkins.h" />
-    <ClInclude Include="util.h" />
-    <ClInclude Include="vec3d.h" />
-    <ClInclude Include="video.h" />
-    <ClInclude Include="wmo.h" />
-    <ClInclude Include="CxImage\xfile.h" />
-    <ClInclude Include="CxImage\ximabmp.h" />
-    <ClInclude Include="CxImage\ximacfg.h" />
-    <ClInclude Include="CxImage\ximadef.h" />
-    <ClInclude Include="CxImage\ximage.h" />
-    <ClInclude Include="CxImage\ximagif.h" />
-    <ClInclude Include="CxImage\ximaico.h" />
-    <ClInclude Include="CxImage\ximaiter.h" />
-    <ClInclude Include="CxImage\ximajas.h" />
-    <ClInclude Include="CxImage\ximajbg.h" />
-    <ClInclude Include="CxImage\ximajpg.h" />
-    <ClInclude Include="CxImage\ximamng.h" />
-    <ClInclude Include="CxImage\ximapcx.h" />
-    <ClInclude Include="CxImage\ximapng.h" />
-    <ClInclude Include="CxImage\ximaraw.h" />
-    <ClInclude Include="CxImage\ximaska.h" />
-    <ClInclude Include="CxImage\ximatga.h" />
-    <ClInclude Include="CxImage\ximath.h" />
-    <ClInclude Include="CxImage\ximatif.h" />
-    <ClInclude Include="CxImage\ximawbmp.h" />
-    <ClInclude Include="CxImage\ximawmf.h" />
-    <ClInclude Include="CxImage\xiofile.h" />
-    <ClInclude Include="CxImage\xmemfile.h" />
-    <ClInclude Include="glew\include\GL\glew.h" />
-    <ClInclude Include="glew\include\GL\glxew.h" />
-    <ClInclude Include="glew\include\GL\wglew.h" />
-    <ClInclude Include="opengl\glext.h" />
-    <ClInclude Include="opengl\glxext.h" />
-    <ClInclude Include="opengl\wglext.h" />
-    <ClInclude Include="wx\jsonreader.h" />
+    <ClInclude Include="..\src\animated.h" />
+    <ClInclude Include="..\src\animcontrol.h" />
+    <ClInclude Include="..\src\AnimExporter.h" />
+    <ClInclude Include="..\src\app.h" />
+    <ClInclude Include="..\src\arrows.h" />
+    <ClInclude Include="..\src\AVIGenerator.h" />
+    <ClInclude Include="..\src\camera.h" />
+    <ClInclude Include="..\src\charcontrol.h" />
+    <ClInclude Include="..\src\database.h" />
+    <ClInclude Include="..\src\dbcfile.h" />
+    <ClInclude Include="..\src\ddslib.h" />
+    <ClInclude Include="..\src\displayable.h" />
+    <ClInclude Include="..\src\effects.h" />
+    <ClInclude Include="..\src\enums.h" />
+    <ClInclude Include="..\src\exporters.h" />
+    <ClInclude Include="..\src\fbxsdk.h" />
+    <ClInclude Include="..\src\filecontrol.h" />
+    <ClInclude Include="..\src\globalvars.h" />
+    <ClInclude Include="..\src\imagecontrol.h" />
+    <ClInclude Include="..\src\itemselection.h" />
+    <ClInclude Include="..\src\lightcontrol.h" />
+    <ClInclude Include="..\src\liquid.h" />
+    <ClInclude Include="..\src\manager.h" />
+    <ClInclude Include="..\src\maptile.h" />
+    <ClInclude Include="..\src\matrix.h" />
+    <ClInclude Include="..\src\model.h" />
+    <ClInclude Include="..\src\modelbankcontrol.h" />
+    <ClInclude Include="..\src\modelcanvas.h" />
+    <ClInclude Include="..\src\modelcontrol.h" />
+    <ClInclude Include="..\src\modelexport.h" />
+    <ClInclude Include="..\src\modelexport_lwo.h" />
+    <ClInclude Include="..\src\modelexport_m3.h" />
+    <ClInclude Include="..\src\modelexport_ms3d.h" />
+    <ClInclude Include="..\src\modelexportoptions.h" />
+    <ClInclude Include="..\src\modelheaders.h" />
+    <ClInclude Include="..\src\modelviewer.h" />
+    <ClInclude Include="..\src\mpq.h" />
+    <ClInclude Include="..\src\mpq_stormlib.h" />
+    <ClInclude Include="..\src\OpenGLHeaders.h" />
+    <ClInclude Include="..\src\particle.h" />
+    <ClInclude Include="..\src\Quantize.h" />
+    <ClInclude Include="..\src\quaternion.h" />
+    <ClInclude Include="..\src\RenderTexture.h" />
+    <ClInclude Include="..\src\resource1.h" />
+    <ClInclude Include="..\src\settings.h" />
+    <ClInclude Include="..\src\shaders.h" />
+    <ClInclude Include="..\src\UserSkins.h" />
+    <ClInclude Include="..\src\util.h" />
+    <ClInclude Include="..\src\vec3d.h" />
+    <ClInclude Include="..\src\video.h" />
+    <ClInclude Include="..\src\wmo.h" />
+    <ClInclude Include="..\src\CxImage\xfile.h" />
+    <ClInclude Include="..\src\CxImage\ximabmp.h" />
+    <ClInclude Include="..\src\CxImage\ximacfg.h" />
+    <ClInclude Include="..\src\CxImage\ximadef.h" />
+    <ClInclude Include="..\src\CxImage\ximage.h" />
+    <ClInclude Include="..\src\CxImage\ximagif.h" />
+    <ClInclude Include="..\src\CxImage\ximaico.h" />
+    <ClInclude Include="..\src\CxImage\ximaiter.h" />
+    <ClInclude Include="..\src\CxImage\ximajas.h" />
+    <ClInclude Include="..\src\CxImage\ximajbg.h" />
+    <ClInclude Include="..\src\CxImage\ximajpg.h" />
+    <ClInclude Include="..\src\CxImage\ximamng.h" />
+    <ClInclude Include="..\src\CxImage\ximapcx.h" />
+    <ClInclude Include="..\src\CxImage\ximapng.h" />
+    <ClInclude Include="..\src\CxImage\ximaraw.h" />
+    <ClInclude Include="..\src\CxImage\ximaska.h" />
+    <ClInclude Include="..\src\CxImage\ximatga.h" />
+    <ClInclude Include="..\src\CxImage\ximath.h" />
+    <ClInclude Include="..\src\CxImage\ximatif.h" />
+    <ClInclude Include="..\src\CxImage\ximawbmp.h" />
+    <ClInclude Include="..\src\CxImage\ximawmf.h" />
+    <ClInclude Include="..\src\CxImage\xiofile.h" />
+    <ClInclude Include="..\src\CxImage\xmemfile.h" />
+    <ClInclude Include="..\src\glew\include\GL\glew.h" />
+    <ClInclude Include="..\src\glew\include\GL\glxew.h" />
+    <ClInclude Include="..\src\glew\include\GL\wglew.h" />
+    <ClInclude Include="..\src\opengl\glext.h" />
+    <ClInclude Include="..\src\opengl\glxext.h" />
+    <ClInclude Include="..\src\opengl\wglext.h" />
+    <ClInclude Include="..\src\wx\jsonreader.h" />
     <ClInclude Include="wx\jsonval.h" />
-    <ClInclude Include="wx\jsonwriter.h" />
-    <ClInclude Include="wx\json_defs.h" />
+    <ClInclude Include="..\src\wx\jsonwriter.h" />
+    <ClInclude Include="..\src\wx\json_defs.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin_support\Icons\chrFile.ico" />
     <None Include="..\bin_support\Icons\wmv.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wowmodelview.rc" />
+    <ResourceCompile Include="..\src\wowmodelview.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

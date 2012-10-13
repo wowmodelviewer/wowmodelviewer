@@ -83,7 +83,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <ProgramDataBaseFileName>..\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>..\..\Windows\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -106,7 +106,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <ProgramDataBaseFileName>..\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>..\..\Windows\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
@@ -124,7 +124,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <ProgramDataBaseFileName>..\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>..\..\Windows\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
@@ -144,7 +144,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
-      <ProgramDataBaseFileName>..\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>..\..\Windows\$(Configuration)$(PlatformArchitecture)_VC$(PlatformToolsetVersion)\vc100.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level1</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
