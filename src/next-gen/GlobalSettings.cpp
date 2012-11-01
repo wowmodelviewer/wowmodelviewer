@@ -74,10 +74,7 @@ GlobalSettings::GlobalSettings()
 	*/
 
   // platform 
-  m_platform = "Unknown platform";
-#ifdef _MINGW
   m_platform = "Windows 32 bits";
-#endif // to be completed
 
 #ifdef _BETAVERSION
   m_isBetaVersion = true;

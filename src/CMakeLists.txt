@@ -52,6 +52,9 @@ if (WIN32)
 endif()
 
 add_subdirectory(CxImage)
+
+# adding compilation from next gen software
+add_subdirectory(next-gen)
 	
 if (USE_STORM)
     	message(STATUS "Using Stormlib")
@@ -110,7 +113,7 @@ if(WIN32)
 	set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
 	
     add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
-    add_dependencies(wowmodelviewer CxImage StormLib)   
+    add_dependencies(wowmodelviewer CxImage StormLib nextgen)   
 endif()
 
 if(WIN32)
@@ -120,6 +123,7 @@ if(WIN32)
 		${EXTRA_LIBS}
 		jpeg
 		png
+		nextgen
 	)
 else()
 	target_link_libraries(wowmodelviewer

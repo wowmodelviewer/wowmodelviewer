@@ -15,7 +15,7 @@
 #include "app.h"
 
 #ifdef _MINGW
-#include "GlobalSettings.h"
+#include "next-gen/GlobalSettings.h"
 #endif
 
 // default colour values
