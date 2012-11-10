@@ -834,17 +834,6 @@ void CharControl::RefreshModel()
 			} catch (CharSectionsDB::NotFound) {
 				wxLogMessage(wxT("DBC underwear Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 			}
-#if 0 // for worgen female
-			if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen
-				wxString fn;
-				fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleNakedPelvisSkin%02d_%02d.blp"), 0, cd.skinColor);
-				if (MPQFile::getSize(fn) > 0)
-					tex.addLayer(fn, CR_PELVIS_UPPER, 1); // pants
-				fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleNakedTorsoSkin%02d_%02d.blp"), 0, cd.skinColor);
-				if (MPQFile::getSize(fn) > 0)
-					tex.addLayer(fn, CR_TORSO_UPPER, 1); // top
-			}
-#endif // for worgen female
 		}
 
 		// face
@@ -855,29 +844,25 @@ void CharControl::RefreshModel()
 		} catch (CharSectionsDB::NotFound) {
 			wxLogMessage(wxT("DBC face Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		}
-#if 0 // for worgen female
-		if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen
-			wxString fn;
-			fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleFaceUpper%02d_%02d.blp"), cd.faceType, cd.skinColor);
-			if (MPQFile::getSize(fn) > 0)
-				tex.addLayer(fn, CR_FACE_UPPER, 1);
-			fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleFaceLower%02d_%02d.blp"), cd.faceType, cd.skinColor);
-			if (MPQFile::getSize(fn) > 0)
-				tex.addLayer(fn, CR_FACE_LOWER, 1);
-		}
-#endif // for worgen female
 
 		// facial feature geosets
 		try {
 			CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
-			if (gameVersion >= VERSION_CATACLYSM) {
-				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
-				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
-				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
-			} else {
+			// Buring Crusade & Vanilla
+			if (gameVersion < VERSION_WOTLK) {
+				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100BC);
+				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200BC);
+				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300BC);
+			// WotLK
+			} else if (gameVersion < VERSION_CATACLYSM) {
 				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100);
 				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200);
 				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300);
+			// Cataclysm & MoP
+			} else {
+				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
+				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
+				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
 			}
 		} catch (CharFacialHairDB::NotFound) {
 			wxLogMessage(wxT("DBC facial feature geosets Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
@@ -894,23 +879,29 @@ void CharControl::RefreshModel()
 	
 	}
 
- // select hairstyle geoset(s)
- for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
-  if (it->getUInt(CharHairGeosetsDB::Race)==cd.race &&
-               it->getUInt(CharHairGeosetsDB::Gender)==cd.gender &&
-               it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
-       {
-   unsigned int geosetId = it->getUInt(CharHairGeosetsDB::Geoset);
-         bald = it->getUInt(CharHairGeosetsDB::Bald) != 0;
+	// select hairstyle geoset(s)
+	for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
+		if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender && it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
+		{
+			unsigned int geosetId;
+			unsigned int section = it->getUInt(CharHairGeosetsDB::Section);
 
-         for (size_t j=0; j<model->geosets.size(); j++) {
-               if (model->geosets[j].id == geosetId)
-                 model->showGeosets[j] = showHair;
-               else if (model->geosets[j].id >= 1 && model->geosets[j].id <= cd.maxHairStyle)
-                 model->showGeosets[j] = false;
-         }
-  }
- }
+			if (gameVersion >= VERSION_MOP){
+				geosetId = it->getUInt(CharHairGeosetsDB::Geosetv500);
+				bald = it->getUInt(CharHairGeosetsDB::Baldv500) != 0;
+			}else{
+				geosetId = it->getUInt(CharHairGeosetsDB::Geoset);
+				bald = it->getUInt(CharHairGeosetsDB::Bald) != 0;
+			}
+
+			for (size_t j=0; j<model->geosets.size(); j++) {
+				if (model->geosets[j].id == geosetId)
+					model->showGeosets[j] = showHair;
+				else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.maxHairStyle+1))
+					model->showGeosets[j] = false;
+			}
+		}
+	}
 #if 0 // for worgen female
 	if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen 
 		for(unsigned int i=1; i<=21; i++) {
@@ -1287,10 +1278,17 @@ void CharControl::RefreshNPCModel()
 	// facial hair geosets
 	try {
 		CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
-		if (gameVersion < VERSION_CATACLYSM) {
+		// Burning Crusade & Vanilla
+		if (gameVersion < VERSION_WOTLK) {
+			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100BC);
+			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200BC);
+			cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300BC);
+		// WotLK
+		} else if (gameVersion < VERSION_CATACLYSM) {
 			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100);
 			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200);
 			cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300);
+		// Cataclysm & MoP
 		} else {
 			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
 			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);

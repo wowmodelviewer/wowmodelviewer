@@ -461,17 +461,19 @@ enum CharGeosets {
 	CG_GEOSET200,
 	CG_GEOSET300,
 	CG_GLOVES,
-	CG_BOOTS, // 5
+	CG_BOOTS,		// 5
 	CG_EARS = 7,
 	CG_WRISTBANDS,
 	CG_KNEEPADS,
-	CG_PANTS, // 10
+	CG_PANTS,		// 10
 	CG_PANTS2,
 	CG_TARBARD,
 	CG_TROUSERS,
-	CG_CAPE = 15, // 15
+	CG_TARBARD2,
+	CG_CAPE,		// 15
 	CG_EYEGLOW = 17,
 	CG_BELT,
+	CG_TAIL,
 
 	NUM_GEOSETS
 };
@@ -809,7 +811,11 @@ enum Races
     RACE_TAUNKA             = 19,
     RACE_NORTHREND_SKELETON = 20,
     RACE_ICE_TROLL          = 21,
-	RACE_WORGEN             = 22
+	RACE_WORGEN             = 22,
+	RACE_GILNEAN			= 23,
+	RACE_PANDAREN			= 24,	// Pandaren #1
+	RACE_PANDAREN2			= 25,	// Pandaren #2
+	RACE_PANDAREN3			= 26,	// Pandaren #3
 };
 
 
@@ -826,6 +832,7 @@ enum Classes
     CLASS_SHAMAN        = 7,
     CLASS_MAGE          = 8,
     CLASS_WARLOCK       = 9,
+	CLASS_MONK			= 10,
     CLASS_DRUID         = 11,
 };
 

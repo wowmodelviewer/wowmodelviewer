@@ -234,8 +234,8 @@ void ModelControl::Update()
 	// enum CharGeosets
 	wxString meshes[NUM_GEOSETS] = {wxT("Hairstyles"), wxT("Facial1"), wxT("Facial2"), wxT("Facial3"), wxT("Braces"),
 		wxT("Boots"), wxEmptyString, wxT("Ears"), wxT("Wristbands"),  wxT("Kneepads"),
-		 wxT("Pants"), wxT("Pants2"), wxT("Tarbard"), wxT("Trousers"), wxEmptyString,
-		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt") };
+		 wxT("Pants"), wxT("Pants2"), wxT("Tarbard"), wxT("Trousers"), wxT("Tarbard2"),
+		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
 	for (size_t i=0; i<model->geosets.size(); i++) {
 		size_t mesh = model->geosets[i].id / 100;
 		if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)

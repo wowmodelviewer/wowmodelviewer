@@ -1476,15 +1476,15 @@ wxString ModelViewer::InitMPQArchives()
 	stoc.ToLong(&itoc);
 
 	// If we support more than 1 TOC version, place the others here.
-	if ((itoc >= 30100) && (itoc <=30300)) {			// WotLK TOCs
+	if ((itoc >= VERSION_WOTLK) && (itoc <=39999)) {			// WotLK TOCs
 		wxLogMessage(wxT("Compatible Wrath of the Lich King Version Found."));
 		//wxMessageBox(info, wxT("Compatible Wrath of the Lich King Version Found."),wxOK);
 		gameVersion = itoc;
-	} else if ((itoc >= VERSION_CATACLYSM) && (itoc < 49999)) {		// This will accept any TOC for Cataclysm.
+	} else if ((itoc >= VERSION_CATACLYSM) && (itoc < 49999)) {		// Cataclysm TOCs
 		wxLogMessage(wxT("Compatible Cataclysm Version Found."));
 		gameVersion = itoc;
 		langOffset = 0;
-	} else if ((itoc >= VERSION_MOP) && (itoc < 59999)) {		// Mists of Pandaria TOCs.
+	} else if ((itoc >= VERSION_MOP) && (itoc < 59999)) {		// Mists of Pandaria TOCs
 		wxLogMessage(wxT("Compatible Mists of Pandaria Version Found."));
 		gameVersion = itoc;
 		langOffset = 0;

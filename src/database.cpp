@@ -96,57 +96,11 @@ int CharHairGeosetsDB::getGeosetsFor(unsigned int race, unsigned int gender)
 int CharSectionsDB::getColorsFor(size_t race, size_t gender, size_t type, size_t section, size_t npc)
 {
 	int n = 0;
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && race == RACE_WORGEN && gender == GENDER_FEMALE) { // worgen female
-		wxString fn;
-		switch(type) { // 0: base, 1: face, 2: facial, 3: hair, 4: underwear
-			case SkinType: // Character\Worgen\Female\WorgenFemaleSkin00_12.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleSkin%02d_%02d.blp"), section, i);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case FaceType: // Character\Worgen\Female\WorgenFemaleFaceUpper27_09.blp
-				for(int i=0; i<30; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleFaceUpper%02d_%02d.blp"), section, i);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case HairType: // Character\Worgen\Hair00_00.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Hair00_%02d.blp"), i);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case UnderwearType: // Character\Worgen\Male\WorgenMaleNakedPelvisSkin00_00.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleNakedPelvisSkin%02d_%02d.blp"), section, i);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-		}
-	}
-	// if already in dbc
-	if (n > 0)
-		return n;
-#endif // for worgen female
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
 		// don't allow NPC skins ;(
 		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(IsNPC)==npc) {
+			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(SectionBC)==section && i->getUInt(IsNPCBC)==npc) {
 				n++;
 			}
 		} else {
@@ -162,56 +116,10 @@ int CharSectionsDB::getColorsFor(size_t race, size_t gender, size_t type, size_t
 int CharSectionsDB::getSectionsFor(size_t race, size_t gender, size_t type, size_t color, size_t npc)
 {
 	int n = 0;
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && race == RACE_WORGEN && gender == GENDER_FEMALE) { // worgen female
-		wxString fn;
-		switch(type) { // 0: base, 1: face, 2: facial, 3: hair, 4: underwear
-			case SkinType: // Character\Worgen\Female\WorgenFemaleSkin00_12.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleSkin%02d_%02d.blp"), i, color);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case FaceType: // Character\Worgen\Female\WorgenFemaleFaceUpper27_09.blp
-				for(int i=0; i<30; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleFaceUpper%02d_%02d.blp"), i, color);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case HairType: // Character\Worgen\Hair00_00.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Hair%02d_%02d.blp"), i, color);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-			case UnderwearType: // Character\Worgen\Male\WorgenMaleNakedPelvisSkin00_00.blp
-				for(int i=0; i<20; i++) {
-					fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleNakedPelvisSkin%02d_%02d.blp"), i, color);
-					if (MPQFile::getSize(fn) > 0)
-						n++;
-					else
-						break;
-				}
-				break;
-		}
-	}
-	// if already in dbc
-	if (n > 0)
-		return n;
-#endif // for worgen female
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
 		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Color)==color && i->getUInt(IsNPC)==npc) {
+			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(ColorBC)==color && i->getUInt(IsNPCBC)==npc) {
 				n++;
 			}
 		} else {
@@ -228,7 +136,7 @@ CharSectionsDB::Record CharSectionsDB::getByParams(size_t race, size_t gender, s
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
 		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(Color)==color && i->getUInt(IsNPC)==npc)
+			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(SectionBC)==section && i->getUInt(ColorBC)==color && i->getUInt(IsNPCBC)==npc)
 				return (*i);
 		} else {
 			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(Color)==color)

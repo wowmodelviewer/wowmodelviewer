@@ -193,14 +193,20 @@ public:
 	static const size_t Race = 1;				// uint
 	static const size_t Gender = 2;				// uint, 0 = Male, 1 = Female
 	static const size_t Section = 3;			// uint, ID unique between race, and gender.
-	static const size_t Geoset = 5;				// uint, Defines hairstyle, each number should be unique for that race / gender combo.
-	static const size_t Bald = 7;				// uint, If this hairstyle bald or not.
+	static const size_t Geoset = 4;				// uint, Defines hairstyle, each number should be unique for that race / gender combo.
+	static const size_t Bald = 5;				// uint, If this hairstyle bald or not.
+
+	// Mists of Pandaria
+	static const size_t Geosetv500 = 5;			// uint, Defines hairstyle, each number should be unique for that race / gender combo.
+	static const size_t Baldv500 = 7;			// uint, If this hairstyle bald or not.
+	//static const size_t Value6 = 6;			// Usually 0, but is 19 when it's not.
+	//static const size_t Value8 = 8;			// -1, unless Value6 is not 0
 
 	Record getByParams(unsigned int race, unsigned int gender, unsigned int section);
 	int getGeosetsFor(unsigned int race, unsigned int gender);
 };
 
-// As specified in http://www.madx.dk/wowdev/wiki/index.php?title=CharSections.dbc
+// As specified in http://www.pxr.dk/wowdev/wiki/index.php?title=CharSections.dbc
 class CharSectionsDB: public DBCFile
 {
 public:
@@ -212,21 +218,20 @@ public:
 	static const size_t Race = 1;		// uint
 	static const size_t Gender = 2;		// uint
 	static const size_t Type = 3;		// uint
-	#ifndef WotLK
-	static const size_t Section = 4;	// uint
-	static const size_t Color = 5;		// uint
-	static const size_t Tex1 = 6;		// string
-	static const size_t Tex2 = 7;		// string
-	static const size_t Tex3 = 8;		// string
-	static const size_t IsNPC = 9;		// uint | 1 for npc
-	#else
 	static const size_t Tex1 = 4;		// string
 	static const size_t Tex2 = 5;		// string
 	static const size_t Tex3 = 6;		// string
 	static const size_t IsNPC = 7;		// Flags, uint, IsNPC = 0x1 ?, IsDeathKnight?
 	static const size_t Section = 8;	// uint
 	static const size_t Color = 9;		// uint
-	#endif
+
+	// Burning Crusade & Vanilla
+	static const size_t SectionBC = 4;	// uint
+	static const size_t ColorBC = 5;	// uint
+	static const size_t Tex1BC = 6;		// string
+	static const size_t Tex2BC = 7;		// string
+	static const size_t Tex3BC = 8;		// string
+	static const size_t IsNPCBC = 9;	// uint | 1 for npc
 
 	/// Types
 	enum{
@@ -295,31 +300,29 @@ public:
 	CharFacialHairDB(): DBCFile(wxT("DBFilesClient\\CharacterFacialHairStyles.dbc")) {}
 	~CharFacialHairDB() {}
 
-	/// Fields
+	// Fields
 	static const size_t Race = 0;				// uint
 	static const size_t Gender = 1;				// uint
 	static const size_t Style = 2;				// uint
-	#ifndef WotLK
-	static const size_t Geoset100 = 6;			// uint
-	static const size_t Geoset300 = 7;			// uint
-	static const size_t Geoset200 = 8;			// uint
-	#else
 	static const size_t Geoset100 = 3;			// uint
 	static const size_t Geoset300 = 4;			// uint
 	static const size_t Geoset200 = 5;			// uint
-	#endif
-	// uint
-	// uint
-	
-	Record getByParams(unsigned int race, unsigned int gender, unsigned int style);
-	int getStylesFor(unsigned int race, unsigned int gender);
 
+	// Burning Crusade & Vanilla
+	static const size_t Geoset100BC = 6;		// uint
+	static const size_t Geoset300BC = 7;		// uint
+	static const size_t Geoset200BC = 8;		// uint
+
+	// Cataclysm & Mists of Pandaria
 	static const size_t RaceV400 = 1;				// uint
 	static const size_t GenderV400 = 2;				// uint
 	static const size_t StyleV400 = 3;				// uint
 	static const size_t Geoset100V400 = 4;			// uint
 	static const size_t Geoset300V400 = 5;			// uint
 	static const size_t Geoset200V400 = 6;			// uint
+	
+	Record getByParams(unsigned int race, unsigned int gender, unsigned int style);
+	int getStylesFor(unsigned int race, unsigned int gender);
 };
 
 
