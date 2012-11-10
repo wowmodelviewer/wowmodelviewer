@@ -628,14 +628,17 @@ void ItemSparseDB::init()
 	int id, qualityid;
 	wxString name, itemstring;
 	//wxLogMessage(wxT("gameVersion: %d"), gameVersion);
-	if (gameVersion != 40200 && gameVersion != 40300)
+
+	// Item-sparse.db2 didn't appear until Cataclysm
+	if (gameVersion < VERSION_CATACLYSM)
 		return;
+
 	for(Iterator i=begin(); i!=end(); ++i) {
 		id = i->getInt(ID);
 		qualityid = i->getInt(QualityID);
-		if (gameVersion == 40200)
+		if (gameVersion <= 40200)
 			name = i->getString(Name40200);
-		else if (gameVersion == 40300)
+		else if (gameVersion >= 40300)
 			name = i->getString(Name40300);
 		//wxLogMessage(wxT("ItemSparseDB::init %d,%d,%s"), id, qualityid, name.c_str());
 		itemstring = wxString::Format(wxT("%d,%d,"), id, qualityid) + name;

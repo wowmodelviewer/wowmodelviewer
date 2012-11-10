@@ -1449,10 +1449,20 @@ wxString ModelViewer::InitMPQArchives()
 	memset(toc,'\0', 6);
 	f.read(toc, 5);
 	f.close();
+
+	// Check for Corrupted MPQ
+	if (!int(toc[0]) || !int(toc[1]) || !int(toc[2]) || !int(toc[3]) || !int(toc[4])) {
+		wxLogMessage(wxT("MPQ files appear to be corrupted. TOC Read: %s"), (char*)toc);
+		return wxT("Your MPQ files appear to be unreadable.\nPlease re-download and re-install your WoW client.");
+	}else{
+		wxLogMessage(wxT("MPQ files do not appear to be corrupted."));
+	}
+
+	// Read Version Number
 	SetStatusText(wxString((char *)toc, wxConvUTF8), 1);
 	wxLogMessage(wxT("Loaded Content TOC: v%c.%c%c.%c%c"), toc[0], toc[1], toc[2], toc[3], toc[4]);
 	if (wxString((char *)toc, wxConvUTF8) > wxT("99999")) {		// The 99999 should be updated if the TOC ever gets that high.
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("There was a problem reading the TOC number.\nAre you sure to quit?"), 
+		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("There was a problem reading the TOC number.\nDo you want to quit?"), 
 			wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
 		if (wxID_YES == dial->ShowModal())
 			return wxT("There was a problem reading the TOC number.\nCould not determine WoW version.");
