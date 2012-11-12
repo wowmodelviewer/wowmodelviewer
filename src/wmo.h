@@ -47,11 +47,11 @@ public:
 	Vec2D *texcoords;
 	uint16 *indices;
 	uint16 *materials;
-	int32 nTriangles, nVertices,  nIndices, nBatches;
+	uint32 nTriangles, nVertices,  nIndices, nBatches;
 	unsigned int *cv;
 	WMOBatch *batches;
 	WMOVertColor *VertexColors;
-	size_t *IndiceToVerts;
+	uint32 *IndiceToVerts;
 
 	Vec3D v1,v2;
 	Vec3D b1,b2;
@@ -61,7 +61,7 @@ public:
 	bool outdoorLights;
 	wxString name, desc;
 
-	WMOGroup() : dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL), indices(NULL), materials(NULL), batches(NULL) {}
+	WMOGroup() : dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL), indices(NULL), materials(NULL), batches(NULL), nTriangles(0), nVertices(0), nIndices(0), nBatches(0) {}
 	~WMOGroup();
 	void init(WMO *wmo, MPQFile &f, int num, char *names);
 	void initDisplayList();

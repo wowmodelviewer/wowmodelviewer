@@ -206,6 +206,8 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << APP_VERSION << endl << endl;
 	f << wxT("mtllib ") << matName << endl << endl;
 
+	wxLogMessage(wxT("Materials and Texture Images Exported."));
+
 	bool vertMsg = false;
 	// output all the vertice data
 	int vertics = 0;
@@ -332,6 +334,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 		}
 	}
 	f << wxT("# ") << vertics << wxT(" vertices") << endl << endl;
+	wxLogMessage(wxT("Geometry Verticies Exported."));
 
 	// output all the texture coordinate data
 	int textures = 0;
@@ -373,6 +376,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 		}
 	}
 	f << wxT("# ") << textures << wxT(" texture coordinates") << endl << endl;
+	wxLogMessage(wxT("Texture Verticies (UVs) Exported."));
 
 	// output all the vertice normals data
 	int normals = 0;
@@ -414,6 +418,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 		}
 	}
 	f << wxT("# ") << normals << wxT(" normals") << endl << endl;
+	wxLogMessage(wxT("Vertex Normals Exported."));
 
 	int counter=1;
 	uint32 pointnum = 0;
@@ -531,9 +536,13 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 		}
 	}
 	f << wxT("# ") << triangles_total << wxT(" triangles total") << endl << endl;
+	wxLogMessage(wxT("Material Links Exported."));
 	
 	// Close file
 	fs.Close();
+
+	g_modelViewer->SetStatusText(wxT("Wavefront Object Export Successful!"));
+	wxLogMessage(wxT("Wavefront OBJ successfully exported."));
 }
 
 void ExportOBJ_WMO(WMO *m, wxString file)
@@ -658,6 +667,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		}
 	}
 	fm.close();
+	wxLogMessage(wxT("Materials and Texture Images Exported."));
 
 	f << "# Wavefront OBJ exported by WoW Model Viewer " << APP_VERSION << endl << endl;
 	f << "mtllib " << mtlName.mb_str() << endl << endl;
@@ -678,6 +688,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		}
 	}
 	f << endl;
+	wxLogMessage(wxT("Geometry Verticies Exported."));
 
 	// texture vertices (vt)
 	// vt horizontal vertical depth
@@ -693,6 +704,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		}
 	}
 	f << endl;
+	wxLogMessage(wxT("Texture Verticies (UVs) Exported."));
 
 	// vertex normals (vn)
 	// vn x y z
@@ -708,6 +720,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		}
 	}
 	f << endl;
+	wxLogMessage(wxT("Vertex Normals Exported."));
 
 	// Referencing groups of vertices
 	// f v/vt/vn v/vt/vn v/vt/vn v/vt/vn
@@ -737,8 +750,12 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 			f << endl;
 		}
 	}
+	wxLogMessage(wxT("Material Links Exported."));
 
 	// Close file
 	f.close();
 	wxDELETEA(texarray);
+
+	g_modelViewer->SetStatusText(wxT("Wavefront Object Export Successful!"));
+	wxLogMessage(wxT("Wavefront OBJ successfully exported."));
 }

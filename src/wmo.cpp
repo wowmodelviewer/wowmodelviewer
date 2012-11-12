@@ -766,13 +766,14 @@ void WMOGroup::initDisplayList()
 			// materials per triangle
 			nTriangles = (uint32)(size / 2);
 			materials = new uint16[nTriangles];
-			memcpy(materials, gf.getPointer(), size);
+			gf.read(materials, size);
+			//memcpy(materials, gf.getPointer(), size);
 		}
 		else if (!strcmp(fourcc,"MOVI")) {
 			/*
 			Vertex indices for triangles. Three 16-bit integers per triangle, that are indices into the vertex list. The numbers specify the 3 vertices for each triangle, their order makes it possible to do backface culling.
 			*/
-			nIndices = (int32)(size / 2);
+			nIndices = (size / 2);
 			indices = new uint16[nIndices];
 			gf.read(indices, size);
 		}
@@ -780,7 +781,7 @@ void WMOGroup::initDisplayList()
 			/*
 			Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
 			*/
-			nVertices = (int32)(size / 12);
+			nVertices = (size / 12);
 			// let's hope it's padded to 12 bytes, not 16...
 			vertices = new Vec3D[nVertices];
 			gf.read(vertices, size);
@@ -801,13 +802,14 @@ void WMOGroup::initDisplayList()
 		}
 		else if (!strcmp(fourcc,"MONR")) {
 			// Normals. 3 floats per vertex normal, in (X,Z,-Y) order.
-			//uint32 NormSize = (uint32)(size / 12);
-			normals = new Vec3D[(uint32)(size / 12)];
+			uint32 tSize = (uint32)(size/12);
+			normals = new Vec3D[tSize];
 			gf.read(normals, size);
 		}
 		else if (!strcmp(fourcc,"MOTV")) {
 			// Texture coordinates, 2 floats per vertex in (X,Y) order. The values range from 0.0 to 1.0. Vertices, normals and texture coordinates are in corresponding order, of course.
-			texcoords = new Vec2D[(uint32)(size/8)];
+			uint32 tSize = (uint32)(size/8);
+			texcoords = new Vec2D[tSize];
 			gf.read(texcoords, size);
 		}
 		else if (!strcmp(fourcc,"MOLR")) {
@@ -824,8 +826,8 @@ void WMOGroup::initDisplayList()
 			Doodad references, one 16-bit integer per doodad.
 			The numbers are indices into the doodad instance table (MODD chunk) of the WMO root file. These have to be filtered to the doodad set being used in any given WMO instance.
 			*/
-			nDoodads = (int)size / 2;
-			ddr = new short[(size_t)nDoodads];
+			nDoodads = (int)(size/2);
+			ddr = new short[nDoodads];
 			gf.read(ddr,size);
 		}
 		else if (strcmp(fourcc,"MOBN")==0) {
@@ -990,7 +992,7 @@ void WMOGroup::initDisplayList()
 
 	// assume that texturing is on, for unit 1
 
-	IndiceToVerts = new size_t[nIndices]+2;
+	IndiceToVerts = new uint32[nIndices]+2;
 
 	for (size_t b=0; b<nBatches; b++) {
 		WMOBatch *batch = &batches[b];
