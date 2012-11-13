@@ -292,7 +292,7 @@ void MapTile::initDisplay()
 	// default strip indices
 	short *defstrip = new short[stripsize2];
 	for (size_t i=0; i<stripsize2; i++) 
-		defstrip[i] = i; // note: this is ugly and should be handled in stripify
+		defstrip[i] = (short)i; // note: this is ugly and should be handled in stripify
 	//mapstrip2 = new short[stripsize2];
 	stripify2<short>(defstrip, mapstrip2);
 	delete[] defstrip;
@@ -652,7 +652,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 
 						for(size_t j = 0; j < waterLayer.w * waterLayer.h; j++ )
 						{
-							if( getBitL2H( waterLayer.mask, j ) )		
+							if( getBitL2H( waterLayer.mask, (unsigned int)j ) )		
 							{
 								waterLayer.renderTiles.push_back( true );
 							}

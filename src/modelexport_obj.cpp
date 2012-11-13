@@ -13,7 +13,17 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 	// Open file
 	wxString filename(fn, wxConvUTF8);
 	wxString rootpath = filename.BeforeLast(SLASH);
+	int pathcount = 0;	// Counts the directories to the base/root directory, relative to the model.
+
 	if (m->modelType != MT_CHAR){
+		// Characters are always placed in the directory specified, and thus don't need to increase the pathcount.
+		wxString filepath = m->name;
+		while (filepath.Find(MPQ_SLASH)>0){
+			wxString a = filepath.BeforeFirst(MPQ_SLASH) + MPQ_SLASH;
+			filepath.Replace(a, wxEmptyString, true);
+			pathcount++;
+		}
+
 		if (modelExport_PreserveDir == true){
 			wxString Path1, Path2, Name;
 
@@ -64,7 +74,6 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 	wxTextOutputStream fm (ms);
 	matName = matName.AfterLast(SLASH);
 
-
 	fm << wxT("#") << endl;
 	fm << wxT("# ") << matName << endl;
 	fm << wxT("#") << endl;
@@ -81,7 +90,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 				wxString charname = filename.AfterLast(SLASH).BeforeLast(wxT('.')) + wxT("_");
 				if (texName.Find(MPQ_SLASH) != wxNOT_FOUND){
 					texName = charname + Texture.AfterLast(MPQ_SLASH).BeforeLast(wxT('.'));
-					TexturePath = wxT("");
+					TexturePath = wxEmptyString;
 				}
 				if (texName.Find(wxT("Body")) != wxNOT_FOUND){
 					texName = charname + wxT("Body");
@@ -101,7 +110,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 				ExportName << Path1 << SLASH << Path2 << SLASH << Name;
 			}
 			ExportName << wxT(".tga");
-			float amb = 0.25f;
+			float amb = 0.50f;
 			Vec4D diff = p.ocol;
 
 			wxString material = texName;
@@ -119,20 +128,28 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 			}
 
 			fm << wxT("newmtl ") << material << endl;
-			fm << wxT("illum 2") << endl;
+			fm << wxT("illum 1") << endl;
 			fm << wxString::Format(wxT("Kd %.03f %.03f %.03f"), diff.x, diff.y, diff.z) << endl;
 			fm << wxString::Format(wxT("Ka %.03f %.03f %.03f"), amb, amb, amb) << endl;
 			fm << wxString::Format(wxT("Ks %.03f %.03f %.03f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
-			fm << wxT("Ke 0.000 0.000 0.000") << endl;
-			fm << wxString::Format(wxT("Ns %0.3f"), 100.0f) << endl;
-			//fm << "Ka " << 0.7f << " " << 0.7f << " " << 0.7f << endl;
-			//fm << "Kd " << p.ocol.x << " " << p.ocol.y << " " << p.ocol.z << endl;
-			//fm << "Ks " << p.ecol.x << " " << p.ecol.y << " " << p.ecol.z << endl;
-			//fm << "Ns " << p.ocol.w << endl;
-			fm << wxT("map_Kd ") << TexturePath;
+			fm << wxT("Ns 1.0") << endl;
+
+			wxString predir = wxEmptyString;
+			for (size_t i=0;i<pathcount;i++){
+				predir << wxT("..") << SLASH;
+			}
+			predir << TexturePath;
+			wxString mapname = predir;
 			if (TexturePath.Len() > 0)
-				fm << SLASH;
-			fm << texName << wxT(".tga") << endl << endl;
+				mapname << SLASH;
+			if (m->modelType != MT_CHAR)
+				mapname << ExportName;
+			else
+				mapname << texName;
+			if (SLASH == wxT('\\')){
+				mapname.Replace(wxT("\\"),wxT("\\\\"),true);
+			}
+			fm << wxT("map_Kd ") << mapname << wxT(".tga") << endl << endl;
 
 			wxLogMessage(wxT("Exporting Image: %s"), ExportName.c_str());
 			SaveTexture(ExportName);
@@ -148,7 +165,6 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 			Attachment *att2 = att->children[c];
 			for (size_t j=0; j<att2->children.size(); j++) {
 				Model *mAttChild = static_cast<Model*>(att2->children[j]->model);
-
 				if (mAttChild){
 					wxLogMessage(wxT("AttChild Model found."));
 					for (size_t i=0; i<mAttChild->passes.size(); i++) {
@@ -158,7 +174,8 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 							wxString Texture = mAttChild->TextureList[p.tex];
 							wxString TexturePath = Texture.BeforeLast(MPQ_SLASH);
 							wxString texName = Texture.AfterLast(MPQ_SLASH).BeforeLast(wxT('.'));
-							wxString ExportName = wxString(fn, wxConvUTF8).BeforeLast(SLASH) + SLASH + texName;
+							wxString ExportName = rootpath;
+							ExportName << SLASH << texName;
 							if (modelExport_PreserveDir == true){
 								wxString Path1, Path2, Name;
 								Path1 << ExportName.BeforeLast(SLASH);
@@ -174,9 +191,14 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 
 							wxString material = texName;
 
+							float amb = 0.50f;
+							Vec4D diff = p.ocol;
+
 							if (p.unlit == true) {
 								// Add Lum, just in case there's a non-luminous surface with the same name.
 								material = material + wxT("_Lum");
+								amb = 1.0f;
+								diff = Vec4D(0,0,0,0);
 							}
 
 							// If Doublesided
@@ -185,14 +207,25 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 							}
 
 							fm << wxT("newmtl ") << material << endl;
-							texName << wxT(".tga");
-							fm << wxT("illum 2") << endl;
-							fm << wxString::Format(wxT("Kd %.03f %.03f %.03f"), p.ocol.x, p.ocol.y, p.ocol.z) << endl;
-							fm << wxString::Format(wxT("Ka %.03f %.03f %.03f"), 0.7f, 0.7f, 0.7f) << endl;
+							fm << wxT("illum 1") << endl;
+							fm << wxString::Format(wxT("Kd %.03f %.03f %.03f"), diff.x, diff.y, diff.z) << endl;
+							fm << wxString::Format(wxT("Ka %.03f %.03f %.03f"), amb, amb, amb) << endl;
 							fm << wxString::Format(wxT("Ks %.03f %.03f %.03f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
-							fm << wxT("Ke 0.000 0.000 0.000") << endl;
-							fm << wxString::Format(wxT("Ns %0.3f"), 100.0f) << endl;
-							fm << wxT("map_Kd ") << TexturePath << SLASH << texName << wxT(".tga") << endl << endl;
+							fm << wxT("Ns 1.0") << endl;
+
+							wxString predir = wxEmptyString;
+							for (size_t i=0;i<pathcount;i++){
+								predir << wxT("..") << SLASH;
+							}
+							predir << TexturePath;
+							wxString mapname = predir;
+							if (TexturePath.Len() > 0)
+								mapname << SLASH;
+							mapname << texName;
+							if (SLASH == wxT('\\')){
+								mapname.Replace(wxT("\\"),wxT("\\\\"),true);
+							}
+							fm << wxT("map_Kd ") << mapname << wxT(".tga") << endl << endl;
 
 							wxLogMessage(wxT("Exporting Image: %s"),ExportName.c_str());
 							SaveTexture(ExportName);
@@ -550,6 +583,14 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 void ExportOBJ_WMO(WMO *m, wxString file)
 {
 	wxString rootpath = file.BeforeLast(SLASH);
+	int pathcount = 0;
+	wxString filepath = m->name;
+	while (filepath.Find(MPQ_SLASH)>0){
+		wxString a = filepath.BeforeFirst(MPQ_SLASH) + MPQ_SLASH;
+		filepath.Replace(a, wxEmptyString, true);
+		pathcount++;
+	}
+
 	// Open file
 	if (modelExport_PreserveDir == true){
 		wxString Path1, Path2, Name;
@@ -588,9 +629,9 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 #endif
 	mtlName = mtlName.AfterLast(SLASH);
 
-	fm << "#" << endl;
-	fm << "# " << mtlName.mb_str() << endl;
-	fm << "#" << endl;
+	fm << wxT("#") << endl;
+	fm << wxT("# ") << mtlName.mb_str() << endl;
+	fm << wxT("#") << endl;
 	fm <<  endl;
 
 	wxString *texarray = new wxString[m->nTextures+1];
@@ -636,18 +677,27 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 			//wxLogMessage(wxT("Processing %s..."),texNameFull);
 
 			//fm << "newmtl " << "Material_" << mat->tex+1 << endl;
+			fm << wxT("newmtl ") << texName.BeforeLast('.') << endl;
+			fm << wxT("illum 1") << endl;
+			fm << wxT("Kd 0.500 0.500 0.500") << endl; // diffuse
+			fm << wxT("Ka 0.500 0.500 0.500") << endl; // ambient/base color
+			fm << wxT("Ks 0.000 0.000 0.000") << endl; // specular amount
+			fm << wxT("Ns 1") << endl;	// glossiness, range: 0-1000
+
+			wxString predir = wxEmptyString;
+			for (size_t i=0;i<pathcount;i++){
+				predir << wxT("..") << SLASH;
+			}
+			wxString mapname = predir;
 			if (modelExport_PreserveDir == true)
-				fm << "newmtl " << texNameFull << endl;
+				mapname << texNameFull;
 			else
-				fm << "newmtl " << texName << endl;
-			fm << "Kd 0.750 0.750 0.750" << endl; // diffuse
-			fm << "Ka 0.250 0.250 0.250" << endl; // ambient
-			fm << "Ks 0.000 0.000 0.000" << endl; // specular
-			fm << "Ns 100.000" << endl;	// glossiness (How small/large the spec is) range: 0-1000
-			if (modelExport_PreserveDir == true)
-				fm << "map_Kd " << texNameFull << endl << endl;
-			else
-				fm << "map_Kd " << texName << endl << endl;
+				mapname << texName;
+			if (SLASH == wxT('\\')){
+				mapname.Replace(wxT("\\"),wxT("\\\\"),true);
+			}
+
+			fm << wxT("map_Kd ") << mapname << endl << endl;
 
 			wxString texFilename = rootpath;
 			texFilename << SLASH << texName;
@@ -673,8 +723,8 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 	fm.close();
 	wxLogMessage(wxT("Materials and Texture Images Exported."));
 
-	f << "# Wavefront OBJ exported by WoW Model Viewer " << APP_VERSION << endl << endl;
-	f << "mtllib " << mtlName.mb_str() << endl << endl;
+	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << APP_VERSION << endl << endl;
+	f << wxT("mtllib ") << mtlName.mb_str() << endl << endl;
 
 	// geometric vertices (v)
 	// v x y z weight
@@ -736,19 +786,16 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 			WMOMaterial *mat = &m->mat[batch->texture];
 
 			// batch->texture or mat->tex ?
-			f << "g Geoset_" << i << "_" << j << "_tex_" << int(batch->texture) << endl;
-			f << "s 1" << endl;
+			f << wxT("g ") << m->groups[i].name << endl;
+			f << wxT("s 1") << endl;
 			//f << "usemtl Material_" << mat->tex+1 << endl;
 			// MilkShape3D cann't read long texname
-			if (modelExport_PreserveDir == true)
-				f << "usemtl " << texarray[mat->tex] << endl;
-			else
-				f << "usemtl " << texarray[mat->tex].AfterLast(MPQ_SLASH) << endl;
+			f << wxT("usemtl ") << texarray[mat->tex].AfterLast(MPQ_SLASH) << endl;
 			for (size_t k=0; k<batch->indexCount; k+=3) {
-				f << "f ";
-				f << counter << "/" << counter << "/" << counter << " ";
-				f << (counter+1) << "/" << (counter+1) << "/" << (counter+1) << " ";
-				f << (counter+2) << "/" << (counter+2) << "/" << (counter+2) << endl;
+				f << wxT("f ");
+				f << counter << wxT("/") << counter << wxT("/") << counter << wxT(" ");
+				f << (counter+1) << wxT("/") << (counter+1) << wxT("/") << (counter+1) << wxT(" ");
+				f << (counter+2) << wxT("/") << (counter+2) << wxT("/") << (counter+2) << endl;
 				counter += 3;
 			}
 			f << endl;

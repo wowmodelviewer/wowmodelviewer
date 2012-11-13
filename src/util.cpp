@@ -162,7 +162,7 @@ float round(float input, int limit = 2){
 void MakeDirs(wxString PathBase, wxString ExtPaths){
 	wxString NewBase = PathBase;
 	//wxLogMessage("MKDIR Paths\nBasePath: %s\nOthers Paths: %s", PathBase, ExtPaths);
-	wxString Paths[30];
+	wxString Paths[128];
 	size_t PathNum = 0;
 	while (ExtPaths.Find(SLASH)>0){
 		Paths[PathNum] = ExtPaths.BeforeFirst(SLASH);
