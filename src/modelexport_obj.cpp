@@ -12,6 +12,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 {
 	// Open file
 	wxString filename(fn, wxConvUTF8);
+	wxString rootpath = filename.BeforeLast(SLASH);
 	if (m->modelType != MT_CHAR){
 		if (modelExport_PreserveDir == true){
 			wxString Path1, Path2, Name;
@@ -86,7 +87,8 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 					texName = charname + wxT("Body");
 				}
 			}
-			wxString ExportName = wxString(fn, wxConvUTF8).BeforeLast(SLASH) + SLASH + texName;
+			wxString ExportName = rootpath;
+			ExportName << SLASH << texName;
 			if (modelExport_PreserveDir == true){
 				wxString Path1, Path2, Name;
 				Path1 << ExportName.BeforeLast(SLASH);
@@ -118,11 +120,11 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 
 			fm << wxT("newmtl ") << material << endl;
 			fm << wxT("illum 2") << endl;
-			fm << wxString::Format(wxT("Kd %.06f %.06f %.06f"), diff.x, diff.y, diff.z) << endl;
-			fm << wxString::Format(wxT("Ka %.06f %.06f %.06f"), amb, amb, amb) << endl;
-			fm << wxString::Format(wxT("Ks %.06f %.06f %.06f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
-			fm << wxT("Ke 0.000000 0.000000 0.000000") << endl;
-			fm << wxString::Format(wxT("Ns %0.6f"), 0.0f) << endl;
+			fm << wxString::Format(wxT("Kd %.03f %.03f %.03f"), diff.x, diff.y, diff.z) << endl;
+			fm << wxString::Format(wxT("Ka %.03f %.03f %.03f"), amb, amb, amb) << endl;
+			fm << wxString::Format(wxT("Ks %.03f %.03f %.03f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
+			fm << wxT("Ke 0.000 0.000 0.000") << endl;
+			fm << wxString::Format(wxT("Ns %0.3f"), 100.0f) << endl;
 			//fm << "Ka " << 0.7f << " " << 0.7f << " " << 0.7f << endl;
 			//fm << "Kd " << p.ocol.x << " " << p.ocol.y << " " << p.ocol.z << endl;
 			//fm << "Ks " << p.ecol.x << " " << p.ecol.y << " " << p.ecol.z << endl;
@@ -185,11 +187,11 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 							fm << wxT("newmtl ") << material << endl;
 							texName << wxT(".tga");
 							fm << wxT("illum 2") << endl;
-							fm << wxString::Format(wxT("Kd %.06f %.06f %.06f"), p.ocol.x, p.ocol.y, p.ocol.z) << endl;
-							fm << wxString::Format(wxT("Ka %.06f %.06f %.06f"), 0.7f, 0.7f, 0.7f) << endl;
-							fm << wxString::Format(wxT("Ks %.06f %.06f %.06f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
-							fm << wxT("Ke 0.000000 0.000000 0.000000") << endl;
-							fm << wxString::Format(wxT("Ns %0.6f"), 0.0f) << endl;
+							fm << wxString::Format(wxT("Kd %.03f %.03f %.03f"), p.ocol.x, p.ocol.y, p.ocol.z) << endl;
+							fm << wxString::Format(wxT("Ka %.03f %.03f %.03f"), 0.7f, 0.7f, 0.7f) << endl;
+							fm << wxString::Format(wxT("Ks %.03f %.03f %.03f"), p.ecol.x, p.ecol.y, p.ecol.z) << endl;
+							fm << wxT("Ke 0.000 0.000 0.000") << endl;
+							fm << wxString::Format(wxT("Ns %0.3f"), 100.0f) << endl;
 							fm << wxT("map_Kd ") << TexturePath << SLASH << texName << wxT(".tga") << endl << endl;
 
 							wxLogMessage(wxT("Exporting Image: %s"),ExportName.c_str());
@@ -547,10 +549,11 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 
 void ExportOBJ_WMO(WMO *m, wxString file)
 {
+	wxString rootpath = file.BeforeLast(SLASH);
 	// Open file
 	if (modelExport_PreserveDir == true){
 		wxString Path1, Path2, Name;
-		Path1 << file.BeforeLast(SLASH);
+		Path1 << rootpath;
 		Name << file.AfterLast(SLASH);
 		Path2 << m->name.BeforeLast(SLASH);
 
@@ -559,6 +562,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		file.Empty();
 		file << Path1 << SLASH << Path2 << SLASH << Name;
 	}
+	wxLogMessage(wxT("Final Output File: \"%s\""),file);
 
 	// FIXME: ofstream is not compitable with multibyte path name
 #ifndef _MINGW
@@ -625,33 +629,33 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 			wxString matName = texarray[mat->tex];
 
 			//wxString texName(fn, wxConvUTF8);
-			wxString texName = texarray[mat->tex];
-			wxString texPath = texName.BeforeLast(MPQ_SLASH);
-			texName = texName.AfterLast(MPQ_SLASH);
-			//texName << wxT("_") << mat->tex << wxT(".tga");
-			texName << wxT(".tga");
+			wxString texNameFull = texarray[mat->tex];
+			texNameFull << wxT(".tga");
+			wxString texPath = texNameFull.BeforeLast(MPQ_SLASH);
+			wxString texName = texNameFull.AfterLast(MPQ_SLASH);
+			//wxLogMessage(wxT("Processing %s..."),texNameFull);
 
 			//fm << "newmtl " << "Material_" << mat->tex+1 << endl;
 			if (modelExport_PreserveDir == true)
-				fm << "newmtl " << texarray[mat->tex] << endl;
+				fm << "newmtl " << texNameFull << endl;
 			else
-				fm << "newmtl " << texarray[mat->tex].AfterLast(MPQ_SLASH) << endl;
-			fm << "Kd 0.750000 0.750000 0.750000" << endl; // diffuse
-			fm << "Ka 0.250000 0.250000 0.250000" << endl; // ambient
-			fm << "Ks 0.000000 0.000000 0.000000" << endl; // specular
-			//fm << "Ke 0.000000 0.000000 0.000000" << endl;
-			fm << "Ns 0.000000" << endl;
-			fm << "map_Kd " << texName.c_str() << endl << endl;
+				fm << "newmtl " << texName << endl;
+			fm << "Kd 0.750 0.750 0.750" << endl; // diffuse
+			fm << "Ka 0.250 0.250 0.250" << endl; // ambient
+			fm << "Ks 0.000 0.000 0.000" << endl; // specular
+			fm << "Ns 100.000" << endl;	// glossiness (How small/large the spec is) range: 0-1000
+			if (modelExport_PreserveDir == true)
+				fm << "map_Kd " << texNameFull << endl << endl;
+			else
+				fm << "map_Kd " << texName << endl << endl;
 
-			wxString texFilename = file;
-			texFilename = texFilename.BeforeLast(SLASH);
-			texFilename += SLASH;
-			texFilename += texName;
+			wxString texFilename = rootpath;
+			texFilename << SLASH << texName;
 			
 			if (modelExport_PreserveDir == true){
 				wxString Path1, Path2, Name;
-				Path1 << wxString(texFilename, wxConvUTF8).BeforeLast(SLASH);
-				Name << texName.AfterLast(MPQ_SLASH);
+				Path1 << texFilename.BeforeLast(SLASH);
+				Name << texName;
 				Path2 << texPath;
 
 				MakeDirs(Path1,Path2);
