@@ -1444,15 +1444,17 @@ wxString ModelViewer::InitMPQArchives()
 	wxLogMessage(tocFileString);
 	f.seek(0);
 	
-	f.seek(51); // offset to "## Interface: "
+	// Seek the TOC number by searching for the Interface Offset
+	int tocstart = tocFileString.Find(wxT("## Interface: ")) + strlen(wxT("## Interface: "));
+	f.seek(tocstart);
 	unsigned char toc[6];
 	memset(toc,'\0', 6);
-	f.read(toc, 5);
+	f.read(toc, 5);		// Read the 5-digit TOC
 	f.close();
 
 	// Check for Corrupted MPQ
-	if (!int(toc[0]) || !int(toc[1]) || !int(toc[2]) || !int(toc[3]) || !int(toc[4])) {
-		wxLogMessage(wxT("MPQ files appear to be corrupted. TOC Read: %s"), (char*)toc);
+	if (!isdigit(toc[0]) || !isdigit(toc[1]) || !isdigit(toc[2]) || !isdigit(toc[3]) || !isdigit(toc[4])) {
+		wxLogMessage(wxT("MPQ files appear to be corrupted. TOC Read: \"%s\""), (char*)toc);
 		return wxT("Your MPQ files appear to be unreadable.\nPlease re-download and re-install your WoW client.");
 	}else{
 		wxLogMessage(wxT("MPQ files do not appear to be corrupted."));

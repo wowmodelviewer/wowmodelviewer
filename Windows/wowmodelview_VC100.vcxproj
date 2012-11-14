@@ -276,7 +276,6 @@ copy ..\doc\ChangeLog.txt $(OutDir)
 copy ..\Installers\License.rtf $(OutDir)
 copy ..\bin\COPYING $(OutDir)
 mkdir $(OutDir)userSettings
-copy ..\bin\userSettings\*.* $(OutDir)userSettings
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -354,7 +353,6 @@ copy ..\doc\ChangeLog.txt $(OutDir)
 copy ..\Installers\License.rtf $(OutDir)
 copy ..\bin\COPYING $(OutDir)
 mkdir $(OutDir)userSettings
-copy ..\bin\userSettings\*.* $(OutDir)userSettings
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
