@@ -254,10 +254,10 @@ ModelViewer::ModelViewer()
 		// GUI and Canvas Stuff
 		InitDocking();
 
-		// Are these really needed?
-#ifndef	_LINUX // buggy
+		// Ensure that the docking windows are properly positioned (otherwise it starts with a mess of overlapping windows)
 		interfaceManager.Update();
-#endif
+		
+		// Are these really needed?
 		Refresh();
 		Update();
 
