@@ -52,7 +52,7 @@ END_EVENT_TABLE()
 
 #ifndef _WINDOWS
 namespace {
-	int attrib[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 32, 0 };
+	int attrib[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0 };
 }
 #endif
 
