@@ -24,8 +24,6 @@
 // Standard C++ headers
 #include <stdio.h>
 
-#include <windows.h>
-
 // wx
 #include <wx/bitmap.h>
 #include <wx/filename.h>
@@ -166,9 +164,12 @@ inline T _SwapFourBytes (T w)
 	return a;
 }
 
+#if defined _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
-bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
+bool loadDataFromResource(char*& t_data, uint32_t& t_dataSize, const wxString& t_name);
+#endif
+
+wxBitmap* getBitmapFromMemory(const char* t_data, const uint32_t t_size, long type, int width, int height);
 
 #endif
 

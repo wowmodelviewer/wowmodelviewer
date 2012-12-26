@@ -1438,14 +1438,14 @@ wxString ModelViewer::InitMPQArchives()
 	// reading and dumping first 100 characters 
 	unsigned char tocfile[100];
 	f.read(tocfile,99);
-	wxString tocFileString((char *)tocfile);
+	wxString tocFileString((char *)tocfile, wxConvUTF8);
 	wxLogMessage(wxT("TOC file size : %d"), f.getSize());
 	wxLogMessage(wxT("Content read from file to get TOC number :"));
 	wxLogMessage(tocFileString);
 	f.seek(0);
 	
 	// Seek the TOC number by searching for the Interface Offset
-	int tocstart = tocFileString.Find(wxT("## Interface: ")) + strlen(wxT("## Interface: "));
+	int tocstart = tocFileString.Find(wxT("## Interface: ")) + strlen("## Interface: ");
 	f.seek(tocstart);
 	unsigned char toc[6];
 	memset(toc,'\0', 6);

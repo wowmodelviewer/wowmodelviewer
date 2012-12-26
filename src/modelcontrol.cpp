@@ -128,7 +128,7 @@ void ModelControl::RefreshModel(Attachment *root)
 			attachments.push_back(root);
 			if (!init)
 				UpdateModel(root);
-			wxLogMessage("ModelControl Refresh: Adding Model...");
+			wxLogMessage(wxT("ModelControl Refresh: Adding Model..."));
 		}
 		
 		for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
@@ -138,7 +138,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				attachments.push_back((*it));
 				if (!init)
 					UpdateModel((*it));
-				wxLogMessage("ModelControl Refresh: Adding Attachment Level 1...");
+				wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 1..."));
 			}
 
 			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
@@ -148,7 +148,7 @@ void ModelControl::RefreshModel(Attachment *root)
 					attachments.push_back((*it2));
 					if (!init)
 						UpdateModel((*it2));
-					wxLogMessage("ModelControl Refresh: Adding Attachment Level 2...");
+					wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 2..."));
 				}
 
 				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
@@ -158,7 +158,7 @@ void ModelControl::RefreshModel(Attachment *root)
 						attachments.push_back((*it3));
 						if (!init)
 							UpdateModel((*it3));
-						wxLogMessage("ModelControl Refresh: Adding Attachment Level 3...");
+						wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 3..."));
 					}
 				}
 			}
@@ -174,7 +174,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
 			}
 		}
-		wxLogMessage("ModelControl Refresh: Found %i Models...",attachments.size());
+		wxLogMessage(wxT("ModelControl Refresh: Found %i Models..."),attachments.size());
 
 		if (modelname->GetCount() > 0)
 			modelname->SetSelection(0);

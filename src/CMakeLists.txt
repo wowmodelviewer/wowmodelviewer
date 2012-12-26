@@ -44,6 +44,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 	find_package(ZLIB REQUIRED)
 	find_package(JPEG REQUIRED)
 	find_package(PNG REQUIRED)
+	set (EXTRA_LIBS ${EXTRA_LIBS} GLU)
 endif()
 
 if (WIN32)

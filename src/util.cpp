@@ -254,6 +254,7 @@ void getGamePath()
 #endif
 }
 
+#ifdef _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
 {
   wxBitmap*   r_bitmapPtr = 0;
@@ -291,6 +292,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
   
   return r_result;
 }
+#endif
 
 
 wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height)

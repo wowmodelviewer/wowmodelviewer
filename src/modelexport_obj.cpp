@@ -603,7 +603,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 		file.Empty();
 		file << Path1 << SLASH << Path2 << SLASH << Name;
 	}
-	wxLogMessage(wxT("Final Output File: \"%s\""),file);
+	wxLogMessage(wxT("Final Output File: \"%s\""),file.c_str());
 
 	// FIXME: ofstream is not compitable with multibyte path name
 #ifndef _MINGW

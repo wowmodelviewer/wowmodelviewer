@@ -70,7 +70,7 @@ void SaveTexture2(wxString file, wxString outdir, wxString ExportID = wxEmptyStr
 
 	wxFileName fn(file);
 	if (fn.GetExt().Lower() != wxT("blp")){
-		wxLogMessage(wxT("SaveTexture2 Error: Wrong Extension Found: %s"),fn.GetExt().Lower());
+		wxLogMessage(wxT("SaveTexture2 Error: Wrong Extension Found: %s"),fn.GetExt().Lower().c_str());
 		return;
 	}
 	TextureID temptex = texturemanager.add(file);
