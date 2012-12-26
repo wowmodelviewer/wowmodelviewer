@@ -188,6 +188,10 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 END_EVENT_TABLE()
 
 ModelViewer::ModelViewer()
+#ifdef _LINUX
+	// Transparency in interfaceManager crashes with Linux compositing
+	: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
+#endif
 {
 	// our main class objects
 	animControl = NULL;
