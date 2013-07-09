@@ -44,7 +44,7 @@
 //          WXDLLIMPEXP_DATA_MYCOMP(int) myGlobalIntVar;
 //
 
-
+#undef WXUSINGDLL
 #ifdef WXMAKINGDLL_JSON
     #define WXDLLIMPEXP_JSON                  WXEXPORT
     #define WXDLLIMPEXP_DATA_JSON(type)       WXEXPORT type

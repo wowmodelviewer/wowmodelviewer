@@ -10,6 +10,10 @@
 #undef max
 #endif
 
+#ifdef _WINDOWS
+#include <windows.h>
+#endif
+
 #include <algorithm>
 //#include <cstdlib>
 #include <fstream>
@@ -166,10 +170,10 @@ inline T _SwapFourBytes (T w)
 
 #if defined _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
-bool loadDataFromResource(char*& t_data, uint32_t& t_dataSize, const wxString& t_name);
+bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
 #endif
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const uint32_t t_size, long type, int width, int height);
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
 
 #endif
 
