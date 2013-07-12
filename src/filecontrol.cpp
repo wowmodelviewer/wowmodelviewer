@@ -77,10 +77,6 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		}
 		mpqFilter = new wxChoice(this, ID_FILELIST_FILTER_MPQ, wxPoint(10, 645), wxSize(130, 10), filterArchives);
 		mpqFilter->SetSelection(filterModeMPQ);
-#ifdef	PLAY_MUSIC
-		mcPlayer = new wxMediaCtrl(this, ID_FILELIST_PLAY, wxEmptyString, wxPoint(0,670), wxSize(280,50));
-		mcPlayer->SetVolume(1.0);
-#endif
 	} catch(...) {};
 }
 
@@ -368,16 +364,6 @@ void FileControl::OnPopupClick(wxCommandEvent &evt)
 	int id = evt.GetId();
 	if (id == ID_FILELIST_SAVE) { 
 		Export(val, 1);
-	} else if (id == ID_FILELIST_PLAY) {
-#ifdef	PLAY_MUSIC
-		Export(val, 0);
-		wxFileName fn(val);
-		wxString filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetFullName();
-		mcPlayer->Stop();
-		mcPlayer->Load(filename);
-		mcPlayer->Play();
-		wxLogMessage(wxT("Playing: %s, Vol: %f, State: %d"), filename.c_str(), mcPlayer->GetVolume(), mcPlayer->GetState());
-#endif
 	} else if (id == ID_FILELIST_VIEW) {
 		ExportPNG(val, wxT("png"));
 		wxFileName fn(val);
@@ -413,11 +399,6 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	// TODO: if is music, a Play option
 	wxString temp(tdata->fn);
 	temp.MakeLower();
-#ifdef	PLAY_MUSIC
-	if (temp.EndsWith(wxT("wav")) || temp.EndsWith(wxT("mp3"))) {
-		infoMenu.Append(ID_FILELIST_PLAY, wxT("&Play"), wxT("Play this object"));
-	}
-#endif
 	// if is graphic, a View option
 	if (temp.EndsWith(wxT("blp"))) {
 		infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));

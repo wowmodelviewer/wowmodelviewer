@@ -31,9 +31,6 @@ public:
 	wxChoice *mpqFilter;
 	int filterModeMPQ;
 	wxTreeItemId CurrentItem;
-#ifdef	PLAY_MUSIC
-	wxMediaCtrl *mcPlayer;
-#endif
 
 	ModelViewer* modelviewer; // point to parent
 
