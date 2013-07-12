@@ -13,8 +13,6 @@ if(WIN32)
 	SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
 endif()
 
-
-set(USE_STORM 1)
 if (APPLE)
 	message(STATUS "Using Mac OS X port")
 	add_definitions(-D_MAC)
@@ -64,17 +62,10 @@ add_subdirectory(CxImage)
 
 # adding compilation from next gen software
 add_subdirectory(next-gen)
-	
-if (USE_STORM)
-    	message(STATUS "Using Stormlib")
-    	add_subdirectory(stormlib)
-    	add_definitions(-DUSE_STORM)
-    	set (EXTRA_LIBS ${EXTRA_LIBS} StormLib)
-else ()
-    	message(STATUS "Using libmpq")
-    	add_library(mpq STATIC ${MPQ_SOURCES})
-    	set (EXTRA_LIBS ${EXTRA_LIBS} mpq)
-endif()
+
+# stormlib compilation	
+add_subdirectory(stormlib)
+set (EXTRA_LIBS ${EXTRA_LIBS} StormLib)
 
 add_definitions(
     -g -Wall -Werror

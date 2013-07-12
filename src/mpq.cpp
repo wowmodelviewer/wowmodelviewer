@@ -1,4 +1,4 @@
-#include "mpq_stormlib.h"
+#include "mpq.h"
 
 #include <wx/log.h>
 #include <wx/file.h>
