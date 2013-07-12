@@ -123,20 +123,12 @@ public:
 
 	ssize_t type, seq;
 	uint32 *globals;
-#ifndef WotLK
-	bool used;
-	std::vector<AnimRange> ranges;
-	std::vector<size_t> times;
-	std::vector<T> data;
-	// for nonlinear interpolations:
-	std::vector<T> in, out;
-#else
 	std::vector<size_t> times[MAX_ANIMATED];
 	std::vector<T> data[MAX_ANIMATED];
 	// for nonlinear interpolations:
 	std::vector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
 	size_t sizes; // for fix function
-#endif
+
 	bool uses(ssize_t anim)
 	{
 		if ((seq) && (seq>-1))
@@ -146,7 +138,6 @@ public:
 
 	T getValue(ssize_t anim, size_t time)
 	{
-#ifdef WotLK
 		// obtain a time value and a data range
 		if (seq>-1) {
 			// TODO
@@ -216,56 +207,6 @@ public:
 			else
 				return data[anim][0];
 		}
-#else
-		if (type != INTERPOLATION_NONE || data.size()>1) {
-			AnimRange range;
-
-			// obtain a time value and a data range
-			if (seq>-1) {
-				if (globals[seq]==0) 
-					time = 0;
-				else 
-					time = globalTime % globals[seq];
-				range.first = 0;
-				range.second = data.size()-1;
-			} else {
-				range = ranges[anim];
-				time %= times[times.size()-1]; // I think this might not be necessary?
-			}
-
- 			if (range.first != range.second) {
-				size_t t1, t2;
-				size_t pos=0;
-				for (size_t i=range.first; i<range.second; i++) {
-					if (time >= times[i] && time < times[i+1]) {
-						pos = i;
-						break;
-					}
-				}
-				t1 = times[pos];
-				t2 = times[pos+1];
-				float r = (time-t1)/(float)(t2-t1);
-
-				if (type == INTERPOLATION_LINEAR) 
-					return interpolate<T>(r,data[pos],data[pos+1]);
-				else if (type == INTERPOLATION_NONE) 
-					return data[pos];
-				else {
-					// INTERPOLATION_HERMITE is only used in cameras afaik?
-					return interpolateHermite<T>(r,data[pos],data[pos+1],in[pos],out[pos]);
-				}
-			} else {
-				return data[range.first];
-			}
-		} else {
-			// default value
-			if (data.size() == 0)
-				return 0;
-			else
-				return data[0];
-		}
-
-#endif
 
 	}
 
@@ -280,36 +221,11 @@ public:
 			//assert(gs);
 		}
 
-#ifndef	WotLK
-		// Old method
-		//used = (type != INTERPOLATION_NONE) || (seq != -1);
-		// New method suggested by Cryect
-		used = (b.nKeys > 0);
-#endif
-
-		// ranges
-		#ifndef WotLK
-		if (b.nRanges > 0) {
-			uint32 *pranges = (uint32*)(f.getBuffer() + b.ofsRanges);
-			for (size_t i=0, k=0; i<b.nRanges; i++) {
-				AnimRange r;
-				r.first = pranges[k++];
-				r.second = pranges[k++];
-				ranges.push_back(r);
-			}
-		} else if (type!=0 && seq==-1) {
-			AnimRange r;
-			r.first = 0;
-			r.second = b.nKeys - 1;
-			ranges.push_back(r);
-		}
-		#endif
 
 		// times
 		if (b.nTimes != b.nKeys)
 			return;
 		//assert(b.nTimes == b.nKeys);
-#ifdef WotLK // by Flow
 		sizes = b.nTimes;
 		if( b.nTimes == 0 )
 			return;
@@ -350,35 +266,8 @@ public:
 					break;
 			}
 		}
-#else
-		uint32 *ptimes = (uint32*)(f.getBuffer() + b.ofsTimes);
-		for (size_t i=0; i<b.nTimes; i++) 
-			times.push_back(ptimes[i]);
-
-		// keyframes
-		assert((D*)(f.getBuffer() + b.ofsKeys));
-		D *keys = (D*)(f.getBuffer() + b.ofsKeys);
-		switch (type) {
-			case INTERPOLATION_NONE:
-			case INTERPOLATION_LINEAR:
-				for (size_t i=0; i<b.nKeys; i++) 
-					data.push_back(Conv::conv(keys[i]));
-				break;
-			case INTERPOLATION_HERMITE:
-				for (size_t i=0; i<b.nKeys; i++) {
-					data.push_back(Conv::conv(keys[i*3]));
-					in.push_back(Conv::conv(keys[i*3+1]));
-					out.push_back(Conv::conv(keys[i*3+2]));
-				}
-				break;
-		}
-
-		if (data.size()==0) 
-			data.push_back(T());
-#endif
 	}
 
-#ifdef WotLK
 	void init(AnimationBlock &b, MPQFile &f, uint32 *gs, MPQFile *animfiles)
 	{
 		globals = gs;
@@ -445,27 +334,19 @@ public:
 			}
 		}
 	}
-#endif
 
 	void fix(T fixfunc(const T))
 	{
 		switch (type) {
 			case INTERPOLATION_NONE:
 			case INTERPOLATION_LINEAR:
-#ifdef WotLK
 				for (size_t i=0; i<sizes; i++) {
 					for (size_t j=0; j<data[i].size(); j++) {
 						data[i][j] = fixfunc(data[i][j]);
 					}
 				}
-#else
-				for (size_t i=0; i<data.size(); i++) {
-					data[i] = fixfunc(data[i]);
-				}
-#endif
 				break;
 			case INTERPOLATION_HERMITE:
-#ifdef WotLK
 				for (size_t i=0; i<sizes; i++) {
 					for (size_t j=0; j<data[i].size(); j++) {
 						data[i][j] = fixfunc(data[i][j]);
@@ -473,16 +354,8 @@ public:
 						out[i][j] = fixfunc(out[i][j]);
 					}
 				}
-#else
-				for (size_t i=0; i<data.size(); i++) {
-					data[i] = fixfunc(data[i]);
-					in[i] = fixfunc(in[i]);
-					out[i] = fixfunc(out[i]);
-				}
-#endif
 				break;
 			case INTERPOLATION_BEZIER:
-#ifdef WotLK
 				for (size_t i=0; i<sizes; i++) {
 					for (size_t j=0; j<data[i].size(); j++) {
 						data[i][j] = fixfunc(data[i][j]);
@@ -490,7 +363,6 @@ public:
 						out[i][j] = fixfunc(out[i][j]);
 					}
 				}
-#endif
 				break;
 		}
 	}

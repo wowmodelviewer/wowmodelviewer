@@ -51,7 +51,6 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
 
 	m_listctrl = NULL;
 
-#ifdef WotLK
 	// New Item Selection stuff
 	// Objective is to change over from a wxListBox to a wxListCtrl
 	// which supports different text colours
@@ -107,7 +106,6 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
 
 		m_listbox->Show(false);
 	}
-#endif	
 }
 
 void ChoiceDialog::OnClick(wxCommandEvent &)
@@ -174,7 +172,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
     
-#ifdef WotLK
+
 	m_listctrl->DeleteAllItems();
 
 	wxListItem item; 
@@ -196,9 +194,6 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
 		// m_listbox doesn't support wxListItem, try wxListCtrl
 		m_listctrl->InsertItem(item);
 	}
-#else
-    m_listbox->SetFocus();
-#endif
 }
 
 void FilteredChoiceDialog::OnFilter(wxCommandEvent& event){
@@ -213,7 +208,6 @@ void FilteredChoiceDialog::DoFilter()
 
 	m_indices.clear();
 
-#ifdef WotLK
 	m_listctrl->DeleteAllItems();
 
 	wxListItem item; 
@@ -230,18 +224,6 @@ void FilteredChoiceDialog::DoFilter()
 			m_listctrl->InsertItem(item);
 		}
 	}
-#else
-    wxArrayString filtered;
-    for(int i=0; i<(int)m_choices->GetCount(); ++i){
-		if (FilterFunc(i)) {
-            //m_indices[filtered.GetCount()]=(int)i;
-			m_indices.push_back((int)i);
-            filtered.Add(m_choices->Item(i));
-        }
-    }
-
-    m_listbox->Set(filtered);
-#endif
 }
 
 void FilteredChoiceDialog::InitFilter()

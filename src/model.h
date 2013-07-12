@@ -325,10 +325,8 @@ public:
 
 	ModelHeader header;
 	std::vector<ModelCamera> cam;
-#ifdef WotLK
 	wxString modelname;
 	wxString lodname;
-#endif
 	
 	std::vector<ModelRenderPass> passes;
 	std::vector<ModelGeoset> geosets;

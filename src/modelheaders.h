@@ -30,91 +30,6 @@ struct CharModelDetails {
 	}
 };
 
-#ifndef WotLK
-struct ModelHeader {
-	char id[4];
-	uint8 version[4];
-	uint32 nameLength;
-	uint32 nameOfs;
-	uint32 type;
-
-	uint32 nGlobalSequences;
-	uint32 ofsGlobalSequences;
-	uint32 nAnimations;
-	uint32 ofsAnimations;
-	uint32 nAnimationLookup;
-	uint32 ofsAnimationLookup;
-	uint32 nD;
-	uint32 ofsD;
-	uint32 nBones;
-	uint32 ofsBones;
-	uint32 nKeyBoneLookup;
-	uint32 ofsKeyBoneLookup;
-
-	uint32 nVertices;
-	uint32 ofsVertices;
-	uint32 nViews;
-	uint32 ofsViews;
-
-	uint32 nColors;
-	uint32 ofsColors;
-
-	uint32 nTextures;
-	uint32 ofsTextures;
-
-	uint32 nTransparency; // H
-	uint32 ofsTransparency;
-	uint32 nI;   // always unused ?
-	uint32 ofsI;
-	uint32 nTexAnims;	// J
-	uint32 ofsTexAnims;
-	uint32 nTexReplace;
-	uint32 ofsTexReplace;
-
-	uint32 nTexFlags;
-	uint32 ofsTexFlags;
-	uint32 nBoneLookup;
-	uint32 ofsBoneLookup;
-
-	uint32 nTexLookup;
-	uint32 ofsTexLookup;
-
-	uint32 nTexUnitLookup;		// L
-	uint32 ofsTexUnitLookup;
-	uint32 nTransparencyLookup; // M
-	uint32 ofsTransparencyLookup;
-	uint32 nTexAnimLookup;
-	uint32 ofsTexAnimLookup;
-
-	Sphere collisionSphere;
-	Sphere boundSphere;
-
-	uint32 nBoundingTriangles;
-	uint32 ofsBoundingTriangles;
-	uint32 nBoundingVertices;
-	uint32 ofsBoundingVertices;
-	uint32 nBoundingNormals;
-	uint32 ofsBoundingNormals;
-
-	uint32 nAttachments; // O
-	uint32 ofsAttachments;
-	uint32 nAttachLookup; // P
-	uint32 ofsAttachLookup;
-	uint32 nEvents; // Q
-	uint32 ofsEvents;
-	uint32 nLights; // R
-	uint32 ofsLights;
-	uint32 nCameras; // S
-	uint32 ofsCameras;
-	uint32 nCameraLookup;
-	uint32 ofsCameraLookup;
-	uint32 nRibbonEmitters; // U
-	uint32 ofsRibbonEmitters;
-	uint32 nParticleEmitters; // V
-	uint32 ofsParticleEmitters;
-
-};
-#else
 struct ModelHeader {
 	char id[4];
 	uint8 version[4];
@@ -197,7 +112,6 @@ struct ModelHeader {
 	uint32 nParticleEmitters; // V, Effects
 	uint32 ofsParticleEmitters; // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
 };
-#endif
 
 #define	ANIMATION_HANDSCLOSED	15
 #define	ANIMATION_MOUNT			91
@@ -247,17 +161,12 @@ struct ModelAnimationWotLK {
 struct AnimationBlock {
 	int16 type;		// interpolation type (0=none, 1=linear, 2=hermite)
 	int16 seq;		// global sequence id or -1
-	#ifndef WotLK
-	uint32 nRanges;
-	uint32 ofsRanges;
-	#endif
 	uint32 nTimes;
 	uint32 ofsTimes;
 	uint32 nKeys;
 	uint32 ofsKeys;
 };
 
-#ifdef WotLK
 struct FakeAnimationBlock {
 	uint32 nTimes;
 	uint32 ofsTimes;
@@ -270,7 +179,6 @@ struct AnimationBlockHeader
 	uint32 nEntrys;
 	uint32 ofsEntrys;
 };
-#endif
 
 #define	MODELBONE_BILLBOARD	8
 #define	MODELBONE_TRANSFORM	512
@@ -304,9 +212,7 @@ struct ModelVertex {
 
 /// Lod part, 
 struct ModelView {
-#ifdef WotLK
 	char id[4];				 // Signature
-#endif
     uint32 nIndex;
     uint32 ofsIndex; // int16, Vertices in this model (index into vertices[])
     uint32 nTris;
@@ -466,23 +372,6 @@ struct ModelCameraDefV10 {
 	AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
 };
 
-#ifndef WotLK
-struct ModelParticleParams {
-	float mid;
-	uint32 colors[3];
-	float sizes[3];
-	int16 d[10];
-	float unk[3];
-	Vec3D scales;
-	float slowdown;
-	float rotation;	//Sprite Rotation
-	float unknown;
-	Vec3D Rot1;	//Model Rotation 1
-	Vec3D Rot2;	//Model Rotation 2
-	Vec3D Trans;	//Model Translation
-	float f2[6];
-};
-#else
 struct ModelParticleParams {
 	FakeAnimationBlock colors; 	// (Vec3D)	This one points to 3 floats defining red, green and blue.
 	FakeAnimationBlock opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
@@ -503,7 +392,6 @@ struct ModelParticleParams {
 	int32 nUnknownReference;
 	int32 ofsUnknownReferenc;
 };
-#endif
 
 #define	MODELPARTICLE_FLAGS_DONOTTRAIL		0x10
 #define	MODELPARTICLE_FLAGS_DONOTBILLBOARD	0x1000
@@ -520,12 +408,6 @@ struct ModelParticleEmitterDef {
 	int32 ofsModelFileName;
 	int32 nParticleFileName;
 	int32 ofsParticleFileName; // TODO
-#ifndef WotLK
-	int16 blend;
-	int16 EmitterType;
-	int16 ParticleType;
-	int16 TextureTileRotation;
-#else
 	int8 blend;
 	int8 EmitterType; // EmitterType	 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
 	int16 ParticleColor; // This one is used so you can assign a color to specific particles. They loop over all 
@@ -535,7 +417,6 @@ struct ModelParticleEmitterDef {
 					   // 2 seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
 	int8 HeaderTail; // 0 - Head, 1 - Tail, 2 - Both
 	int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
-#endif
 	int16 cols; // How many different frames are on that texture? People should learn what rows and cols are.
 	int16 rows; // (2, 2) means slice texture to 2*2 pieces
 	AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
@@ -544,13 +425,9 @@ struct ModelParticleEmitterDef {
 	AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
 	AnimationBlock Gravity; // (Float) Fall down, apple!
 	AnimationBlock Lifespan; // (Float) Everyone has to die.
-#ifdef WotLK
 	int32 unknown;
-#endif
 	AnimationBlock EmissionRate; // (Float) Stread your particles, emitter.
-#ifdef WotLK
 	int32 unknown2;
-#endif
 	AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
 	AnimationBlock EmissionAreaWidth; // (Float) 
 	AnimationBlock Gravity2; // (Float) A second gravity? Its strong.
@@ -617,9 +494,7 @@ struct ModelRibbonEmitterDef {
 	int16 s1, s2;
 	AnimationBlock unk1; // (short)
 	AnimationBlock unk2; // (boolean)
-	#ifdef WotLK
 	int32 unknown; // This looks much like just some Padding to the fill up the 0x10 Bytes, always 0
-	#endif
 };
 
 /* 

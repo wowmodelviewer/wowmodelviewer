@@ -1182,7 +1182,7 @@ void Model::setLOD(MPQFile &f, int index)
 
 	// I thought the view controlled the Level of detail,  but that doesn't seem to be the case.
 	// Seems to only control the render order.  Which makes this function useless and not needed :(
-#ifdef WotLK
+
 	// remove suffix .M2
 	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
 	MPQFile g(lodname);
@@ -1214,59 +1214,6 @@ void Model::setLOD(MPQFile &f, int index)
 	// render ops
 	ModelGeoset *ops = (ModelGeoset*)(g.getBuffer() + view->ofsSub);
 	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
-#else // not WotLK
-	ModelView *view = (ModelView*)(f.getBuffer() + header.ofsViews);
-
-	// Indices,  Triangles
-	uint16 *indexLookup = (uint16*)(f.getBuffer() + view->ofsIndex);
-	uint16 *triangles = (uint16*)(f.getBuffer() + view->ofsTris);
-	nIndices = view->nTris;
-	wxDELETE(indices);
-	indices = new uint16[nIndices];
-	for (size_t i = 0; i<nIndices; i++) {
-        indices[i] = indexLookup[triangles[i]];
-	}
-
-	// render ops
-	ModelGeoset *ops = (ModelGeoset*)(f.getBuffer() + view->ofsSub);
-	ModelTexUnit *tex = (ModelTexUnit*)(f.getBuffer() + view->ofsTex);
-
-#endif // WotLK
-	/*
-	{
-		std::cout << "flags = " << hex << tex->flags << std::endl;
-		std::cout << "shading = " << hex << tex->shading << std::endl;
-		std::cout << "op = " << tex->op << std::endl;
-		std::cout << "op2 = " << tex->op2 << std::endl;
-		std::cout << "colorIndex = " << tex->colorIndex << std::endl;
-		std::cout << "flagsIndex = " << hex << tex->flagsIndex << std::endl;
-		std::cout << "texunit = " << tex->texunit << std::endl;
-		std::cout << "mode = " << tex->mode << std::endl;
-		std::cout << "textureid = " << tex->textureid << std::endl;
-		std::cout << "texunit2 = " << tex->texunit2 << std::endl;
-		std::cout << "transid = " << tex->transid << std::endl;
-		std::cout << "texanimid = " << tex->texanimid << std::endl;
-	}
-
-
-	{
-		std::cout << "=== ModelView ===" << std::endl;
-#ifdef WotLK
-		std::cout << "id : " << view->id[0] << view->id[1] << view->id[2] << view->id[3] << std::endl;
-#endif
-		std::cout << "nIndex : " << view->nIndex << std::endl;
-		std::cout << "ofsIndex : " << view->ofsIndex << std::endl;
-		std::cout << "nTris : " << view->nTris << std::endl;
-		std::cout << "ofsTris : " << view->ofsTris << std::endl;
-		std::cout << "nProps : " << view->nProps << std::endl;
-		std::cout << "ofsProps : " << view->ofsProps << std::endl;
-		std::cout << "nSub : " << view->nSub << std::endl;
-		std::cout << "ofsSub : " << view->ofsSub << std::endl;
-		std::cout << "nTex : " << view->nTex << std::endl;
-		std::cout << "ofsTex : " << view->ofsTex << std::endl;
-		std::cout << "lod : " << view->lod << std::endl;
-	}
-*/
 	ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f.getBuffer() + header.ofsTexFlags);
 	uint16 *texlookup = (uint16*)(f.getBuffer() + header.ofsTexLookup);
 	uint16 *texanimlookup = (uint16*)(f.getBuffer() + header.ofsTexAnimLookup);
@@ -1350,9 +1297,7 @@ void Model::setLOD(MPQFile &f, int index)
 		passes.push_back(pass);
 	}
 
-#ifdef WotLK
 	g.close();
-#endif
 	// transparent parts come later
 	//std::sort(passes.begin(), passes.end());
 }
