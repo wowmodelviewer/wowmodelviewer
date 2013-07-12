@@ -1369,7 +1369,7 @@ void Model::calcBones(ssize_t anim, size_t time)
 
 		// Animate the "core" rotations and transformations for the rest of the model to adopt into their transformations
 		if (keyBoneLookup[BONE_ROOT] > -1)	{
-			for (size_t i=0; i<=keyBoneLookup[BONE_ROOT]; i++) {
+			for (int i=0; i<=keyBoneLookup[BONE_ROOT]; i++) {
 				bones[i].calcMatrix(bones, anim, time);
 			}
 		}

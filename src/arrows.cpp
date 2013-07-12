@@ -92,7 +92,7 @@ void ArrowControl::OnButton(wxCommandEvent &event)
 
 }
 
-void ArrowControl::OnCombo(wxCommandEvent &event)
+void ArrowControl::OnCombo(wxCommandEvent &)
 {
 
 
@@ -111,7 +111,7 @@ void ArrowControl::OnSlider(wxCommandEvent &event)
 	}
 }
 
-void ArrowControl::OnClose(wxCloseEvent &event)
+void ArrowControl::OnClose(wxCloseEvent &)
 {
 	Show(false);
 }

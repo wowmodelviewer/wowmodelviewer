@@ -627,8 +627,7 @@ void WMOGroup::init(WMO *wmo, MPQFile &f, int num, char *names)
 void setGLColor(unsigned int col)
 {
 	//glColor4ubv((GLubyte*)(&col));
-	GLubyte r,g,b,a;
-	a = (col & 0xFF000000) >> 24;
+	GLubyte r,g,b;
 	r = (col & 0x00FF0000) >> 16;
 	g = (col & 0x0000FF00) >> 8;
 	b = (col & 0x000000FF);
@@ -1227,7 +1226,12 @@ void WMOGroup::setupFog()
 	*/
 }
 
-
+WMOGroup::WMOGroup() :
+dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
+indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
+nIndices(0), nBatches(0)
+{
+}
 
 WMOGroup::~WMOGroup()
 {

@@ -1217,7 +1217,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 			Complete and right as of 19-AUG-09 (3.0.9 or higher)
 			Texture layer definitions for this map chunk. 16 bytes per layer, up to 4 layers.
 			Every texture layer other than the first will have an alpha map to specify blending amounts. The first layer is rendered with full opacity. To know which alphamap is used, there is an offset into the MCAL chunk. That one is relative to MCAL.
-			You can animate these by setting the flags. Only simple linear animations are possible. You can specify the direction in 45¢X steps and the speed.
+			You can animate these by setting the flags. Only simple linear animations are possible. You can specify the direction in 45ï¿½X steps and the speed.
 			The textureId is just the array index of the filename array in the MTEX chunk.
 			For getting the right feeling when walking, you should set the effectId which links to GroundEffectTexture.dbc. It defines the little detaildoodads as well as the footstep sounds and if footprints are visible. You only need to have the upper layer with an id and you can set the id to -1 (int16!) to have no detaildoodads and footsteps at all (?).
 			Introduced in Wrath of the Lich King, terrain can now reflect a skybox. This is used for icecubes made out of ADTs to reflect something. You need to have the MTFX chunk in, if you want that. Look at an skybox Blizzard made to see how you should do it.
@@ -1230,9 +1230,9 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 			010h  		
 			};
 			Flag	 Description
-			0x001	 Animation: Rotate 45¢X clockwise.
-			0x002	 Animation: Rotate 90¢X clockwise.
-			0x004	 Animation: Rotate 180¢X clockwise.
+			0x001	 Animation: Rotate 45ï¿½X clockwise.
+			0x002	 Animation: Rotate 90ï¿½X clockwise.
+			0x004	 Animation: Rotate 180ï¿½X clockwise.
 			0x008	 Animation: Make this faster.
 			0x010	 Animation: Faster!!
 			0x020	 Animation: Faster!!!!
@@ -1243,7 +1243,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 			0x400	 Shiny! This layer adds reflection of the skybox in the texture. You should add a MTFX chunk.
 			*/
 			// texture info
-			nTextures = (int)size / 16;
+			nTextures = size / 16;
 			//gLog("=\n");
 			for (size_t i=0; i<nTextures; i++) {
 				f.read(&mcly[i], sizeof(struct MCLY));
@@ -1339,7 +1339,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 				mcly[3].offsetInMCAL,
 				comp_sizes[0], comp_sizes[1], comp_sizes[2], comp_sizes[3], header.sizeAlpha);
 				*/
-				for (ssize_t i=1; i<nTextures; i++) {
+				for (size_t i=1; i<nTextures; i++) {
 					// Alfred, error check
 					if ((mcly[i].flags & MCLY_USE_ALPHAMAP) == 0)
 						continue;
@@ -1768,7 +1768,7 @@ void MapChunk::draw()
 		glActiveTextureARB(GL_TEXTURE1_ARB);
 		glBindTexture(GL_TEXTURE_2D, blend);
 		// blended layers
-		for (ssize_t i=1; i<nTextures; i++) {
+		for (size_t i=1; i<nTextures; i++) {
 			int tex = GL_TEXTURE2_ARB + i - 1;
 			glActiveTextureARB(tex);
 			glBindTexture(GL_TEXTURE_2D, textures[i]);

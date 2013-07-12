@@ -241,7 +241,7 @@ void ModelControl::Update()
 		if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
 			geosetItems.Add(wxString::Format(wxT("%i [%s, %i]"), i, meshes[mesh].c_str(), model->geosets[i].id % 100), 1);
 		else
-			geosetItems.Add(wxString::Format(wxT("%i [%i, $i]"), i, mesh, model->geosets[i].id % 100), 1);
+			geosetItems.Add(wxString::Format(wxT("%i [%i, %i]"), i, mesh, (model->geosets[i].id % 100)), 1);
 	}
 	//geosets->InsertItems(items, 0);
 	clbGeosets->Set(geosetItems, 0);
@@ -368,7 +368,6 @@ void ModelControl::OnEnter(wxCommandEvent &event)
 	if (!init || !model)
 		return;
 
-	int id = event.GetId();
 	model->pos.x = wxAtof(txtX->GetValue());
 	model->pos.y = wxAtof(txtY->GetValue());
 	model->pos.z = wxAtof(txtZ->GetValue());

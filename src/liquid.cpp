@@ -113,9 +113,9 @@ void Liquid::initGeometry(MPQFile &f)
 	Vec3D *verts = new Vec3D[(xtiles+1)*(ytiles+1)];
 	float *col = new float[(xtiles+1)*(ytiles+1)];
 
-	for (ssize_t j=0; j<ytiles+1; j++) {
-		for (size_t i=0; i<xtiles+1; i++) {
-			size_t p = j*(xtiles+1)+i;
+	for (int j=0; j<ytiles+1; j++) {
+		for (int i=0; i<xtiles+1; i++) {
+			int p = j*(xtiles+1)+i;
 			float h = map[p].h;
 			if (h > 100000) h = pos.y;
             verts[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
@@ -131,12 +131,12 @@ void Liquid::initGeometry(MPQFile &f)
 	glBegin(GL_QUADS);
 	// draw tiles
 	for (ssize_t j=0; j<ytiles; j++) {
-		for (size_t i=0; i<xtiles; i++) {
+		for (int i=0; i<xtiles; i++) {
 			unsigned char f = flags[j*xtiles+i];
 			if ((f&8)==0) {
 				tmpflag = f;
 				// 15 seems to be "don't draw"
-				size_t p = j*(xtiles+1)+i;
+				int p = j*(xtiles+1)+i;
 
 				// HACK: pack the vertex color selection into the 2nd texture coordinate
 				//float fc;

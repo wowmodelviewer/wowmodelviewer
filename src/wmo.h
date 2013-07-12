@@ -39,7 +39,7 @@ class WMOGroup {
 	float rad;
 	int num;
 	int fog;
-	int nDoodads;
+	size_t nDoodads;
 	short *ddr;
 	//Liquid *lq;
 public:
@@ -61,7 +61,7 @@ public:
 	bool outdoorLights;
 	wxString name, desc;
 
-	WMOGroup() : dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL), indices(NULL), materials(NULL), batches(NULL), nTriangles(0), nVertices(0), nIndices(0), nBatches(0) {}
+	WMOGroup();
 	~WMOGroup();
 	void init(WMO *wmo, MPQFile &f, int num, char *names);
 	void initDisplayList();

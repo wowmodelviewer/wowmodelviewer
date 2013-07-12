@@ -74,7 +74,7 @@ struct CharTextureComponent
 	int region;
 	int layer;
 
-	const bool operator<(const CharTextureComponent& c) const
+	bool operator<(const CharTextureComponent& c) const
 	{
 		return layer < c.layer;
 	}

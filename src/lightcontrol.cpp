@@ -1,7 +1,7 @@
 
 #include "lightcontrol.h"
 
-extern const int MAX_LIGHTS;
+extern const size_t MAX_LIGHTS;
 
 // default colour values
 const static Vec4D def_ambience = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
@@ -58,7 +58,7 @@ LightControl::LightControl(wxWindow* parent, wxWindowID id)
 	}
 
 	wxArrayString choices;
-	for (ssize_t i=1; i<=MAX_LIGHTS; i++) {
+	for (size_t i=1; i<=MAX_LIGHTS; i++) {
 		wxString s = wxT("Light ");
 		s += wxString::Format(wxT("%i"), i);
 

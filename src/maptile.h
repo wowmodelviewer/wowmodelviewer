@@ -97,6 +97,8 @@ public:
 			children[i] = 0;
 	}
 
+	virtual ~MapNode() {}
+
 	int px, py, size;
 
 	Vec3D vmin, vmax, vcenter;
@@ -112,7 +114,7 @@ public:
 
 class MapChunk : public MapNode {
 public:
-	int nTextures;
+	size_t nTextures;
 
 	float xbase, ybase, zbase;
 	float r;
@@ -170,7 +172,7 @@ public:
 	Vec3D tn[mapbufsize], tv[mapbufsize];
 };
 
-const int stripsize2 = 16*18 + 7*2 + 8*2;
+const size_t stripsize2 = 16*18 + 7*2 + 8*2;
 
 class MapTile: public Displayable {
 public:
@@ -180,8 +182,8 @@ public:
 
 	//std::vector<WMOInstance> wmois;
 	//std::vector<ModelInstance> modelis;
-	int nWMO;
-	int nMDX;
+	size_t nWMO;
+	size_t nMDX;
 
 	wxString name;
 	int x, z;

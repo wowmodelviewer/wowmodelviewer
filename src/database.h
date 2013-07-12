@@ -503,7 +503,7 @@ struct ItemRecord {
 
 	void getLine(const char* line);
 
-	const bool operator< (const ItemRecord &r) const
+	bool operator< (const ItemRecord &r) const
 	{
 		if (type == r.type) 
 			return name < r.name;
@@ -585,7 +585,7 @@ struct NPCRecord
 	NPCRecord(): id(0), model(0), type(0) {}
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 
-	const bool operator< (const NPCRecord &r) const
+	bool operator< (const NPCRecord &r) const
 	{ 
 		return name < r.name;
 	}

@@ -77,7 +77,7 @@ else ()
 endif()
 
 add_definitions(
-    -DWotLK -Wall -Wno-unknown-pragmas -g
+    -DWotLK -g -Wall -Werror
 )
 
 include(${wxWidgets_USE_FILE})

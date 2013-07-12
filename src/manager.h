@@ -1,7 +1,7 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#ifdef _WINDOWS
+#if defined(_WINDOWS) && !defined(_MINGW)
     #pragma warning( disable : 4100 )
 #endif
 
@@ -86,7 +86,7 @@ public:
 			del(get(name));
 	}
 
-	virtual void doDelete(IDTYPE id) {}
+	virtual void doDelete(IDTYPE) {}
 
 	bool has(wxString name)
 	{

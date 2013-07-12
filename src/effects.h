@@ -23,7 +23,7 @@ struct NumStringPair {
 	int id;
 	wxString name;
 
-	const bool operator< (const NumStringPair &p) const {
+	bool operator< (const NumStringPair &p) const {
 		return name < p.name;
 	}
 };
@@ -33,7 +33,7 @@ struct EnchantsRec {
 	unsigned int index[5];
 	wxString name;
 
-	const bool operator< (const EnchantsRec &p) const {
+	bool operator< (const EnchantsRec &p) const {
 		return name < p.name;
 	}
 };

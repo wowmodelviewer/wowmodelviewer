@@ -110,7 +110,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
 #endif	
 }
 
-void ChoiceDialog::OnClick(wxCommandEvent &event)
+void ChoiceDialog::OnClick(wxCommandEvent &)
 {
     m_selection = m_listbox->GetSelection();
 	if (m_selection == -1) // If nothing was selected, exit function.
@@ -121,7 +121,7 @@ void ChoiceDialog::OnClick(wxCommandEvent &event)
 		cc->OnUpdateItem(type, GetSelection());
 }
 
-void ChoiceDialog::OnSelect(wxListEvent &event)
+void ChoiceDialog::OnSelect(wxListEvent &)
 {
     // MacOS is buggy with GetFocusedItem(), use GetFirstSelected instead
     m_selection = m_listctrl->GetFirstSelected();
@@ -151,7 +151,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
                             const wxString& message,
                             const wxString& caption,
                             const wxArrayString& choices,
-							const std::vector<int> *quality,
+							const std::vector<int> *,
 							bool keepfirst)
     :ChoiceDialog(dest, type, parent, message, caption, choices)
 {
@@ -314,15 +314,15 @@ bool CategoryChoiceDialog::FilterFunc(int index)
 	return m_catlist->IsChecked(m_cats[index]) && FilteredChoiceDialog::FilterFunc(index);
 }
 
-void CategoryChoiceDialog::OnCheck(wxCommandEvent &e)
+void CategoryChoiceDialog::OnCheck(wxCommandEvent &)
 {
     DoFilter();
 }
 
 void CategoryChoiceDialog::OnCheckDoubleClick(wxCommandEvent &e)
 {
-	for (size_t i=0; i<numcats; i++) {
-		Check((int)i, i==e.GetInt());
+	for (int i=0; i<numcats; i++) {
+		Check(i, i==e.GetInt());
 	}
 	DoFilter();
 }

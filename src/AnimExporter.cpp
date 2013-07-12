@@ -427,10 +427,10 @@ void CAnimationExporter::OnCheck(wxCommandEvent &event)
 	}
 }
 
-
+#if defined(_WINDOWS) && !defined(_MINGW)
 void CAnimationExporter::CreateAvi(wxString fn)
 {
-#if defined(_WINDOWS) && !defined(_MINGW)
+
 	if (!g_canvas || !g_canvas->model || !g_canvas->model->animManager) {
 		wxMessageBox(wxT("Unable to create AVI animation!"), wxT("Error"));
 		wxLogMessage(wxT("Error: Unable to created AVI animation.  A required object pointer was null!"));
@@ -548,8 +548,12 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	g_canvas->model->animManager->Play();
 	video.render = true;
 	g_canvas->InitView();
-#endif
 }
+#else
+void CAnimationExporter::CreateAvi(wxString)
+{
+}
+#endif
 
 // --
 

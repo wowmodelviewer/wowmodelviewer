@@ -884,7 +884,6 @@ void CharControl::RefreshModel()
 		if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender && it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
 		{
 			unsigned int geosetId;
-			unsigned int section = it->getUInt(CharHairGeosetsDB::Section);
 
 			if (gameVersion >= VERSION_MOP){
 				geosetId = it->getUInt(CharHairGeosetsDB::Geosetv500);
@@ -2549,7 +2548,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			displayID = modelRec.getUInt(CreatureSkinDB::ExtraInfoID);
 			//wxLogMessage(wxT("displayID: %d\n"), displayID);
 		} catch (...) {
-			wxLogMessage(wxT("Can't get extra info from: %d,%d,%d"), npcs.get(id).id, 
+			wxLogMessage(wxT("Can't get extra info from: %d,%d,%s"), npcs.get(id).id,
 				npcs.get(id).model, npcs.get(id).name.c_str());
 		}
 		if (displayID) {
@@ -2739,9 +2738,10 @@ int TabardDetails::GetMaxIconColor(int icon)
 
 int TabardDetails::GetMaxBorder()
 {
-	int i = 0;
+	int i = 0 , border = 0;
 	while(1) {
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), i))) {
+		// @TODO : what is expected here ?
+		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i))) {
 			break;
 		}
 		i ++;

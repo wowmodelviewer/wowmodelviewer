@@ -47,8 +47,8 @@ class MPQFile
 	size_t pointer, size;
 
 	// disable copying
-	MPQFile(const MPQFile &f) {}
-	void operator=(const MPQFile &f) {}
+	MPQFile(const MPQFile &) {}
+	void operator=(const MPQFile &) {}
 
 public:
 	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}

@@ -710,7 +710,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 }
 
 // bg recolor
-void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent &event)
+void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent &)
 {
 	wxTreeItemId h;
 	size_t i = 0;

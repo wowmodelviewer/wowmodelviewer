@@ -133,7 +133,7 @@ void ImageControl::OnText(wxCommandEvent &event)
 		x = value;
 		value = int(value / aspect);
 		y = value;
-		canvasHeight->SetValue(wxString::Format(wxT("%i"), value));
+		canvasHeight->SetValue(wxString::Format(wxT("%li"), value));
 	} else if (event.GetId() == ID_IMAGE_CANVASHEIGHT) {
 		tmp = canvasHeight->GetValue();
 		tmp.ToLong(&value);
@@ -141,7 +141,7 @@ void ImageControl::OnText(wxCommandEvent &event)
 		y = value;
 		value = int(value * aspect);
 		x = value;
-		canvasWidth->SetValue(wxString::Format(wxT("%i"), value));
+		canvasWidth->SetValue(wxString::Format(wxT("%li"), value));
 	}
 
 	if (x > maxSize) {

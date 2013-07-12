@@ -761,7 +761,8 @@ bool TryLoadLocalTexture(const wxString& texName, int type, CxImage **imgptr)
 void TextureManager::LoadBLP(GLuint id, Texture *tex)
 {
 	// Vars
-	int offsets[16], sizes[16], w=0, h=0, type=0;
+	int offsets[16], sizes[16], type=0;
+	size_t w=0, h=0;
 	GLint format = 0;
 	char attr[4];
 
@@ -824,7 +825,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	tex->h = h;
 
 	bool hasmipmaps = (attr[3]>0);
-	int mipmax = hasmipmaps ? 16 : 1;
+	size_t mipmax = hasmipmaps ? 16 : 1;
 
 	/*
 	reference: http://en.wikipedia.org/wiki/.BLP

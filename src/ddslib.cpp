@@ -427,7 +427,7 @@ static void DDSDecodeAlpha3BitLinear( unsigned int *pixel, ddsAlphaBlock3BitLine
 	/* decode 3-bit fields into array of 16 bytes with same value */
 	
 	/* first two rows of 4 pixels each */
-	stuff = *((unsigned int*) &(alphaBlock->stuff[ 0 ]));
+	stuff = *((unsigned char *) &(alphaBlock->stuff[ 0 ]));
 	
 	bits[ 0 ][ 0 ] = (unsigned char) (stuff & 0x00000007);
 	stuff >>= 3;
@@ -446,7 +446,7 @@ static void DDSDecodeAlpha3BitLinear( unsigned int *pixel, ddsAlphaBlock3BitLine
 	bits[ 1 ][ 3 ] = (unsigned char) (stuff & 0x00000007);
 	
 	/* last two rows */
-	stuff = *((unsigned int*) &(alphaBlock->stuff[ 3 ])); /* last 3 bytes */
+	stuff = *((unsigned char*) &(alphaBlock->stuff[ 3 ])); /* last 3 bytes */
 	
 	bits[ 2 ][ 0 ] = (unsigned char) (stuff & 0x00000007);
 	stuff >>= 3;

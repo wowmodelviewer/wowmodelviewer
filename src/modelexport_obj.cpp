@@ -13,7 +13,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 	// Open file
 	wxString filename(fn, wxConvUTF8);
 	wxString rootpath = filename.BeforeLast(SLASH);
-	int pathcount = 0;	// Counts the directories to the base/root directory, relative to the model.
+	size_t pathcount = 0;	// Counts the directories to the base/root directory, relative to the model.
 
 	if (m->modelType != MT_CHAR){
 		// Characters are always placed in the directory specified, and thus don't need to increase the pathcount.
@@ -583,7 +583,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 void ExportOBJ_WMO(WMO *m, wxString file)
 {
 	wxString rootpath = file.BeforeLast(SLASH);
-	int pathcount = 0;
+	size_t pathcount = 0;
 	wxString filepath = m->name;
 	while (filepath.Find(MPQ_SLASH)>0){
 		wxString a = filepath.BeforeFirst(MPQ_SLASH) + MPQ_SLASH;

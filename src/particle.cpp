@@ -106,9 +106,9 @@ void ParticleSystem::init(MPQFile &f, ModelParticleEmitterDef &mta, uint32 *glob
 	tofs = frand();
 
 	// init tiles, slice the texture
-	for (size_t i=0; i<rows*cols; i++) {
+	for (int i=0; i<rows*cols; i++) {
 		TexCoordSet tc;
-		initTile(tc.tc, (int)i);
+		initTile(tc.tc, i);
 		tiles.push_back(tc);
 	}
 }
@@ -347,8 +347,6 @@ void ParticleSystem::draw()
 		const float f = 1;//0.707106781f; // sqrt(2)/2
 		Vec3D bv0 = Vec3D(-f,+f,0);
 		Vec3D bv1 = Vec3D(+f,+f,0);
-		Vec3D bv2 = Vec3D(+f,-f,0);
-		Vec3D bv3 = Vec3D(-f,-f,0);
 
 		if (billboard) {
 			float modelview[16];

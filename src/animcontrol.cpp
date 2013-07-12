@@ -688,7 +688,7 @@ void AnimControl::OnSliderUpdate(wxCommandEvent &event)
 
 }
 
-void AnimControl::OnLoop(wxCommandEvent &event)
+void AnimControl::OnLoop(wxCommandEvent &)
 {
 	if (bOldStyle == true) {
 		g_selModel->animManager->Stop();
@@ -711,7 +711,7 @@ void AnimControl::SetSkin(int num)
 {
 	TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
 	for (size_t i=0; i<grp->count; i++) {
-		size_t base = grp->base + i;
+		int base = grp->base + i;
 		if (g_selModel->useReplaceTextures[base]) {
 			texturemanager.del(g_selModel->replaceTextures[base]);
 			wxString skin = makeSkinTexture(g_selModel->name, grp->tex[i]);

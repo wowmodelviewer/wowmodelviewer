@@ -697,14 +697,6 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 		g_modelViewer->SetStatusText(wxT("LWO Export: Writing Surface/Material data..."));
 		for (size_t x=0;x<Object.Surfaces.size();x++){
 			LWSurface cSurf = Object.Surfaces[x];
-
-			// Temp Values
-			Vec4D Color = Vec4D(1,1,1,1);
-
-			//LW_WriteSurface(f, cSurf, fileLen);
-			#ifdef _DEBUG
-				//wxLogMessage(wxT("LW Write Surface Vars:\nSurfName: %s\nColor: %f/%f/%f\nReflect Value: %f\nCulling: %s\nSurfaceID: %i\nComment: \"%s\""),Surface.Name.c_str(),Surface.Surf_Color.x,Surface.Surf_Color.y,Surface.Surf_Color.z,Surface.Surf_Reflect,(Surface.isDoubleSided?wxT("True"):wxT("False")),Surface.Image_Color,Surface.Comment);
-			#endif
 			int off_T;
 
 			uint32 surfaceDefSize = 0;
@@ -1690,9 +1682,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		if (p.init(m)){
 			// Main Model
 			int g = p.geoset;
-			bool isFound = false;
 			size_t partID = i;
-			size_t surfID = i;
 			size_t *Vert2Point = new size_t[p.vertexEnd];
 			float Surf_Diff = 1.0f;
 			float Surf_Lum = 0.0f;
@@ -1741,22 +1731,6 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 				wxLogMessage(wxT("Surface is Double-sided..."));
 				matName = matName + wxT("_Dbl");
 			}
-
-			// Test for Specularity
-			/*if ((p.blendmode == BM_OPAQUE)&&(p.opacity>0)){
-				matName = matName + wxT("_Spc");
-			}*/
-			
-			wxLogMessage(wxT("Surface name: %s"),matName.c_str());
-			for (size_t x=0;x<Object.Surfaces.size();x++){
-				if (Object.Surfaces[x].Name == matName){
-					isFound = true;
-					surfID = (uint32)x;
-					break;
-				}
-			}
-
-			//wxLogMessage(wxT("Doublesided: %s, P.Cull: %s"),(doublesided?wxT("true"):wxT("false")),(p.cull?wxT("true"):wxT("false")));
 
 			wxLogMessage(wxT("Processing Texture & image names..."));
 
@@ -2020,9 +1994,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 						ModelRenderPass &p = mAttChild->passes[i];
 
 						if (p.init(mAttChild)) {
-							bool isFound = false;
 							size_t partID = i;
-							size_t surfID = i;
 							size_t *Vert2Point = new size_t[p.vertexEnd];
 							float Surf_Diff = 1.0f;
 							float Surf_Lum = 0.0f;
@@ -2069,19 +2041,6 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 							// If Doublesided
 							if (doublesided == false) {
 								matName = matName + wxT("_Dbl");
-							}
-
-							// Test for Specularity
-							/*if (p.blendmode == BM_ALPHA_BLEND){
-								matName = matName + wxT("_Spc");
-							}*/
-
-							for (size_t x=0;x<Object.Surfaces.size();x++){
-								if (Object.Surfaces[x].Name == matName){
-									isFound = true;
-									surfID = (uint32)x;
-									break;
-								}
 							}
 
 							// Add Images to Model

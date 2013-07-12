@@ -21,7 +21,8 @@ extern float animSpeed;
 
 struct TextureGroup {
 	static const size_t num = 3;
-	int base, count;
+	size_t count;
+	int base;
 	wxString tex[num];
 	TextureGroup()
 	{
@@ -39,7 +40,8 @@ struct TextureGroup {
 		base = grp.base;
 		count = grp.count;
 	}
-	const bool operator<(const TextureGroup &grp) const
+
+	bool operator<(const TextureGroup &grp) const
 	{
 		for (size_t i=0; i<num; i++) {
 			if (tex[i]<grp.tex[i]) return true;

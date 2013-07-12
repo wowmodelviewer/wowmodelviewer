@@ -25,7 +25,7 @@
 
 // OpenGL only supports a maximum of 8 lights without using extensions.
 // I'm not sure if the specs were changed in OGL 2.0
-const int MAX_LIGHTS = 4;
+const size_t MAX_LIGHTS = 4;
 
 //intensity distribution of the spotlight with GL_SPOT_EXPONENT
 

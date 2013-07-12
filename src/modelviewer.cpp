@@ -336,9 +336,7 @@ void ModelViewer::InitMenu()
 	}
 	// The Rest
 	for (size_t x=0;x<ExporterTypeCount;x++){
-		if (x != Perfered_Exporter) {
 			exportMenu->Append((int)Exporter_Types[x].ID, Exporter_Types[x].MenuText);
-		}
 	}
 
 	// -= Enable/Disable Model Exporters =-
@@ -3015,7 +3013,7 @@ void ModelViewer::ModelInfo()
 
 //	xml << "    <>" << m->header. << "</>" << endl;
 	xml << "  <TextureLists>" << endl;
-	for(int i=0; i<m->TextureList.size(); i++) {
+	for(size_t i=0; i<m->TextureList.size(); i++) {
 		xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i] << "</TextureList>" << endl;
 	}
 	xml << "  </TextureLists>" << endl;
@@ -3095,26 +3093,7 @@ void DiscoveryItem()
 				f << ret << endl;
 		}
 	}
-	// 3. from creaturedisplayinfoextra.dbc
-	int slots[11] = {1, 3, 4, 5, 6, 7, 8, 9, 10, 19, 16};
-	for (NPCDB::Iterator it = npcdb.begin(); it != npcdb.end(); ++it) {
-		for(size_t i=0; i<11; i++) {
-			int id = it->getUInt(NPCDB::HelmID+i);
-			if (id == 0)
-				continue;
-			try {
-				ItemDB::Record r = itemdb.getByDisplayId(id);
-			} catch (ItemDB::NotFound) {
-				if (!items.avaiable(id+ItemDB::MaxItem)) {
-					int type = slots[i];
-					name.Printf(wxT("NPC%d"), it->getUInt(NPCDB::NPCID));
-					ret = items.addDiscoveryDisplayId(id, name, type);
-					if (!ret.IsEmpty())
-						f << ret << endl;
-				}
-			}
-		}
-	}
+
 	// 4. from model dir
 	// 5. from blp dir
 	wxLogMessage(wxT("Discovery item done."));

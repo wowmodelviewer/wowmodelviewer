@@ -69,7 +69,7 @@ Shader::Shader(GLenum target, const char *program, bool fromFile):target(target)
 	}
 
 	const char *progtext;
-	char *buf;
+	char *buf =0;
 	if (fromFile) {
 		FILE *f = fopen(program, "rb");
 		if (!f) {

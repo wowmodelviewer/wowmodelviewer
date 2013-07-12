@@ -29,11 +29,12 @@ BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
 END_EVENT_TABLE()
 
 
-#if defined(_WINDOWS) // The following time related functions COULD be 64bit incompatible.
+#if _MSC_VER // The following time related functions COULD be 64bit incompatible.
 	// for timeGetTime:
 	#pragma comment(lib,"Winmm.lib")
+#endif
 
-#else // for linux
+#ifndef _WINDOWS // for linux
 	#include <sys/time.h>
 
 	//typedef int DWORD;

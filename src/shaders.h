@@ -7,7 +7,7 @@
 #endif
 
 // Shut up MSVC compiler "inconsistent dll linkage" warning
-#ifdef _WINDOWS
+#ifdef _MSC_VER
 #  pragma warning (disable : 4273)
 #endif
 
@@ -29,7 +29,7 @@ public:
 	bool ok;
 
 	Shader(GLenum target, const char *program, bool fromFile = false);
-	~Shader();
+	virtual ~Shader();
 
 	virtual void bind();
 	virtual void unbind();
