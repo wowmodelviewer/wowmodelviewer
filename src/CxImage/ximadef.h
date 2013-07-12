@@ -78,21 +78,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#ifdef __BORLANDC__
-
-#ifndef _COMPLEX_DEFINED
-
-typedef struct tagcomplex {
-	double x,y;
-} _complex;
-
-#endif
-
-#define _cabs(c) sqrt(c.x*c.x+c.y*c.y)
-
-#endif
-
-
 #if !defined(_WINDOWS) && !defined(_WIN32_WCE)
 
 #include <stdlib.h>
