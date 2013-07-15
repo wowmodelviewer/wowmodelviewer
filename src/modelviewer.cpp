@@ -2441,7 +2441,7 @@ is (C)2004-2011 Blizzard Entertainment(R). All rights reserved.")));
 
 void ModelViewer::DownloadLocaleFiles()
 {
-	wxString trunk = wxT("http://wowmodelviewer.googlecode.com/svn/trunk/");
+	wxString trunk = wxT("http://wowmodelviewer.net/update/");
 	wxString lang = langName;
 	if (lang == wxT("enGB"))
 		lang = wxT("enUS");
@@ -2452,11 +2452,13 @@ void ModelViewer::DownloadLocaleFiles()
 		if (!wxDirExists(lang))
 			wxMkdir(lang);
 		for(size_t i=0; i<WXSIZEOF(csvs); i++) {
-			wxString items_csv = trunk + wxT("bin/") + lang + wxT("/") + csvs[i];
+			wxString items_csv = trunk + lang + wxT("/") + csvs[i];
+			wxLogMessage(wxT("Trying to get %s ... "),items_csv.c_str());
 			wxURL items_url(items_csv);
 			if(items_url.GetError() == wxURL_NOERR) {
 				wxInputStream *stream = items_url.GetInputStream();
 				if (stream) {
+					wxLogMessage(wxT("SUCCESS"));
 					wxFFileOutputStream f(lang + SLASH + csvs[i], wxT("w+b"));
 					wxString data;
 					char buffer[1024];
@@ -2464,10 +2466,10 @@ void ModelViewer::DownloadLocaleFiles()
 						stream->Read(buffer, sizeof(buffer));
 						f.Write(buffer, stream->LastRead());
 					}
-					delete stream;
+					//delete stream;
 					f.Close();
 				} else {
-				    wxLogMessage(wxT("wxInputStream failed: ")+items_csv);
+				    wxLogMessage(wxT("ERROR"));
 				}
 			} else {
 			    wxLogMessage(wxT("wxURL failed: ")+items_csv);
@@ -2478,27 +2480,25 @@ void ModelViewer::DownloadLocaleFiles()
 
 void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 {
-	wxString trunk = wxT("http://wowmodelviewer.googlecode.com/svn/trunk/");
+	wxString trunk = wxT("http://wowmodelviewer.net/update/");
 	DownloadLocaleFiles();
 
 	wxURL url(trunk + wxT("latest.txt"));
 	if(url.GetError() == wxURL_NOERR) {
 		wxInputStream *stream = url.GetInputStream();
-		
+		if(!stream)
+			return;
 		// here, just for example, I read 1024 bytes. You should read what you need...
 		char buffer[1024];
 		stream->Read(&buffer, sizeof(buffer));
 		
 		// Sort the data
 		wxString data(buffer, wxConvUTF8);
-		wxString version = data.BeforeFirst(10);
-		wxString downloadURL = data.AfterLast(10);
+		wxString version = data.BeforeFirst('\n');
+		wxString downloadURL = data.AfterFirst('\n');
 		int Compare = (int)version.find(wxString(APP_VERSION));
-#ifdef _DEBUG
-#ifndef _MINGW
-		wxLogMessage("Update Data:\nCurrent Version: \"%s\"\nRecorded Version \"%s\"\nURL Download: \"%s\"\nComparison Result: %i",wxString(APP_VERSION), version, downloadURL, Compare);
-#endif
-#endif
+
+		wxLogMessage("Update Data:\nCurrent Version: \"%s\"\nRecorded Version \"%s\"\nURL Download: %s\nComparison Result: %i",wxString(APP_VERSION).c_str(), version.c_str(), downloadURL.c_str(), Compare);
 
 		if (Compare == 0) {
 			wxMessageBox(_("You have the most up-to-date version."), _("Update Check"));
