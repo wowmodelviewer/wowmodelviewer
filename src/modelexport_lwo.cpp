@@ -2517,7 +2517,6 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 	
 	g_modelViewer->SetStatusText(wxT("Finished Gathering M2 Data!"));
 	return Object;
-	Object.~LWObject();
 }
 
 // Gather WMO Data
@@ -3147,7 +3146,6 @@ LWObject GatherWMOforLWO(WMO *m, const char *fn, LWScene &scene){
 
 	g_modelViewer->SetStatusText(wxT("Finished Gathering WMO Data!"));
 	return Object;
-	Object.~LWObject();
 }
 
 // Gather ADT Data
@@ -3209,7 +3207,6 @@ LWObject GatherADTforLWO(MapTile *m, const char *fn, LWScene &scene){
 
 	g_modelViewer->SetStatusText(wxT("Finished Gathering ADT Data!"));
 	return Object;
-	Object.~LWObject();
 }
 
 //---------------------------------------------
