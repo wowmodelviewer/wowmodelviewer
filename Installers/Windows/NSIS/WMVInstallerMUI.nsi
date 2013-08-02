@@ -4,7 +4,7 @@
 Name "WoW Model Viewer"
 
 # set the name of the installer
-outFile "WoWModelViewer Installer.exe"
+outFile "..\..\..\bin\WMV_Installer.exe"
 
 # force installed app to be run as admin
 RequestExecutionLevel admin

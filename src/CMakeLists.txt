@@ -1,6 +1,9 @@
 project(wowmodelviewer)
 cmake_minimum_required(VERSION 2.6)
 
+#put here full path to your makensis cmd
+set(MAKENSISCMD "C:\\Program Files\\NSIS\\makensis.exe")
+
 set(CMAKE_BUILD_TYPE MinSizeRel)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
@@ -108,9 +111,9 @@ endif()
 
 if(WIN32)
     add_definitions(-D_WINDOWS)
-	add_definitions(-D_MINGW)
-	add_definitions(-D_BETAVERSION) # comment if you are building a released version
-	set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
+	  add_definitions(-D_MINGW)
+	  add_definitions(-D_BETAVERSION) # comment if you are building a released version
+	  set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
 	
     add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
     add_dependencies(wowmodelviewer CxImage StormLib nextgen)   
@@ -136,6 +139,14 @@ else()
 		${JPEG_LIBRARIES}
 		${PNG_LIBRARIES}
 	)
+endif()
+
+if(WIN32)
+  add_custom_target(release
+                    ${MAKENSISCMD}
+                    "../Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                    DEPENDS wowmodelviewer
+                    )             
 endif()
 
 if(WIN32)
