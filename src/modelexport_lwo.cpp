@@ -664,7 +664,8 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 			wxString ImgName = wxEmptyString;
 			wxString ImgPath = wxEmptyString;
 			if (modelExport_LW_PreserveDir == true){
-				ImgName += wxT("Images") + SLASH;
+				ImgName = wxT("Images");
+				ImgName += SLASH;
 			}
 			if (modelExport_PreserveDir == true){
 				ImgPath = cImg.Source.Append(SLASH);
