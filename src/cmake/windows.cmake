@@ -30,7 +30,14 @@
   else()
     message("${CMAKE_BUILD_TYPE} build : Final exe will NOT be stripped")
   endif()
-  add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
+  
+  if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
+    add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
+  else()
+    # non min size release case ( = dev) => let a console attached to app
+    add_executable(wowmodelviewer ${WOWMV_SOURCES} ${RES_FILES} )
+  endif()
+  
   add_dependencies(wowmodelviewer CxImage StormLib nextgen)   
   
   target_link_libraries(wowmodelviewer
