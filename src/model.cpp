@@ -2201,8 +2201,8 @@ void Bone::calcMatrix(Bone *allbones, ssize_t anim, size_t time, bool rotate)
 			m *= Matrix::newQuatRotate(q);
 		}
 
-		if (scale.uses(0)) {
-			Vec3D sc = scale.getValue(0, time);
+		if (scale.uses(anim)) {
+			Vec3D sc = scale.getValue(anim, time);
 			m *= Matrix::newScale(sc);
 		}
 
