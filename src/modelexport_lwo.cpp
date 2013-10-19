@@ -1,6 +1,8 @@
 #include "modelexport_lwo.h"
 #include "wx/txtstrm.h"
 
+#include "Bone.h"
+
 //---------------------------------------------
 // --== Master Object Writing Function ==--
 //---------------------------------------------

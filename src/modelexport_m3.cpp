@@ -1,3 +1,4 @@
+#include "Bone.h"
 #include "globalvars.h"
 #include "modelexport.h"
 #include "modelexport_m3.h"

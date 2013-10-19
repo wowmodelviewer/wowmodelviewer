@@ -37,6 +37,7 @@
 
 // Our other utility headers
 #include "vec3d.h"
+#include "quaternion.h"
 
 
 
@@ -174,6 +175,10 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 #endif
 
 wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
+
+Vec3D fixCoordSystem(Vec3D v);
+Vec3D fixCoordSystem2(Vec3D v);
+Quaternion fixCoordSystemQuat(Quaternion v);
 
 #endif
 

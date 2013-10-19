@@ -1,6 +1,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+class Model;
 class ParticleSystem;
 class RibbonEmitter;
 
@@ -9,6 +10,8 @@ class RibbonEmitter;
 #include "mpq.h"
 
 #include <list>
+
+class Bone;
 
 struct Particle {
 	Vec3D pos, speed, down, origin, dir;

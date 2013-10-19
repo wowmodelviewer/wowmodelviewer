@@ -7,6 +7,8 @@
 #include "wx/jsonreader.h"
 
 #include "modelviewer.h"
+
+#include "Bone.h"
 #include "globalvars.h"
 #include "mpq.h"
 #include "exporters.h"

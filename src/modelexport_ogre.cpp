@@ -1,4 +1,5 @@
 
+#include "Bone.h"
 #include "modelcanvas.h"
 #include "modelexport.h"
 #include "database.h"

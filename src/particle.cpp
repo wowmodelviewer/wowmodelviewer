@@ -1,4 +1,6 @@
 #include "particle.h"
+
+#include "Bone.h"
 #include "util.h"
 
 #define MAX_PARTICLES 10000

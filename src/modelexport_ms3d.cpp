@@ -1,5 +1,6 @@
 #include <wx/wfstream.h>
 
+#include "Bone.h"
 #include "globalvars.h"
 #include "modelexport.h"
 #include "modelexport_ms3d.h"

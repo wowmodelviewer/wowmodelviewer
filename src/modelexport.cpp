@@ -1,6 +1,7 @@
 #include <wx/wfstream.h>
 #include <math.h>
 
+#include "Bone.h"
 #include "globalvars.h"
 #include "modelexport.h"
 #include "modelcanvas.h"

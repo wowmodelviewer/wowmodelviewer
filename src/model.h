@@ -16,9 +16,6 @@
 
 
 #include "AnimManager.h"
-class Model;
-class Bone;
-Vec3D fixCoordSystem(Vec3D v);
 
 #include "manager.h"
 #include "mpq.h"
@@ -32,29 +29,8 @@ Vec3D fixCoordSystem(Vec3D v);
 
 #include "enums.h"
 
+class Bone;
 
-class Bone {
-public:
-	Animated<Vec3D> trans;
-	//Animated<Quaternion> rot;
-	Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
-	Animated<Vec3D> scale;
-
-	Vec3D pivot, transPivot;
-	int16 parent;
-
-	bool billboard;
-	Matrix mat;
-	Matrix mrot;
-
-	ModelBoneDef boneDef;
-
-	bool calc;
-	Model *model;
-	void calcMatrix(Bone* allbones, ssize_t anim, size_t time, bool rotate=true);
-	void initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles);
-	void initV2(MPQFile &f, ModelBoneDef &b, uint32 *global);
-};
 
 class TextureAnim {
 public:
