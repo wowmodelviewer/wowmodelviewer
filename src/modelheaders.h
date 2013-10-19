@@ -3,6 +3,9 @@
 
 #pragma pack(push,1)
 
+#include "Vec3D.h"
+#include "util.h" // unit8, etC.
+
 struct Vertex {
     float tu, tv;
     float x, y, z;
