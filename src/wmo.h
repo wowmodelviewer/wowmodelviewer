@@ -13,6 +13,7 @@
 #include "model.h"
 #include "video.h"
 #include "displayable.h"
+#include "ModelManager.h"
 
 class WMO;
 class WMOGroup;

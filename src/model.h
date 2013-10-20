@@ -303,19 +303,5 @@ public:
 	friend struct ModelRenderPass;
 };
 
-class ModelManager: public SimpleManager {
-public:
-	int add(wxString name);
-
-	ModelManager() : v(0) {}
-
-	int v;
-
-	void resetAnim();
-	void updateEmitters(float dt);
-	void clear();
-
-};
-
 
 #endif
