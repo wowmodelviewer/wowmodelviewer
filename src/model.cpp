@@ -1880,30 +1880,6 @@ void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, uint32 *global)
 	scale.init(mta.scale, f, global);
 }
 
-void ModelAttachment::init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global)
-{
-	pos = fixCoordSystem(mad.pos);
-	bone = mad.bone;
-	id = mad.id;
-}
-
-void ModelAttachment::setup()
-{
-	Matrix m = model->bones[bone].mat;
-	m.transpose();
-	glMultMatrixf(m);
-	glTranslatef(pos.x, pos.y, pos.z);
-}
-
-void ModelAttachment::setupParticle()
-{
-	Matrix m = model->bones[bone].mat;
-	m.transpose();
-	glMultMatrixf(m);
-	glTranslatef(pos.x, pos.y, pos.z);
-}
-
-
 inline void Model::draw()
 {
 	if (!ok)

@@ -23,6 +23,7 @@
 #include "modelheaders.h"
 #include "quaternion.h"
 #include "matrix.h"
+#include "ModelAttachment.h"
 
 #include "animated.h"
 #include "particle.h"
@@ -115,17 +116,6 @@ struct ModelLight {
 	void setup(size_t time, GLuint l);
 };
 
-
-struct ModelAttachment {
-	int id;
-	Vec3D pos;
-	int bone;
-	Model *model;
-
-	void init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global);
-	void setup();
-	void setupParticle();
-};
 
 class ModelEvent {
 	ModelEventDef def;
