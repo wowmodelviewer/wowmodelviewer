@@ -33,15 +33,9 @@
 #include "enums.h"
 
 class Bone;
+struct ModelColor;
 struct ModelLight;
 class TextureAnim;
-
-struct ModelColor {
-	Animated<Vec3D> color;
-	AnimatedShort opacity;
-
-	void init(MPQFile &f, ModelColorDef &mcd, uint32 *global);
-};
 
 struct ModelTransparency {
 	AnimatedShort trans;

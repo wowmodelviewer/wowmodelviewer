@@ -3,6 +3,7 @@
 #include "modelexport.h"
 #include "modelexport_m3.h"
 #include "modelcanvas.h"
+#include "ModelColor.h"
 #include "TextureAnim.h"
 
 #define	ROOT_BONE	(1)

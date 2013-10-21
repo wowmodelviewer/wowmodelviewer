@@ -8,6 +8,7 @@
 #include "util.h"
 
 #include "Bone.h"
+#include "ModelColor.h"
 #include "ModelLight.h"
 #include "TextureAnim.h"
 
@@ -1387,16 +1388,6 @@ inline void Model::drawModel()
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
 	// done with all render ops
-}
-
-
-
-
-
-void ModelColor::init(MPQFile &f, ModelColorDef &mcd, uint32 *global)
-{
-	color.init(mcd.color, f, global);
-	opacity.init(mcd.opacity, f, global);
 }
 
 void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, uint32 *global)

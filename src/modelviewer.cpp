@@ -12,6 +12,7 @@
 #include "Bone.h"
 #include "exporters.h"
 #include "globalvars.h"
+#include "ModelColor.h"
 #include "mpq.h"
 #include "TextureAnim.h"
 #include "UserSkins.h"
