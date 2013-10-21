@@ -2,6 +2,7 @@
 #include "wx/txtstrm.h"
 
 #include "Bone.h"
+#include "ModelLight.h"
 
 //---------------------------------------------
 // --== Master Object Writing Function ==--

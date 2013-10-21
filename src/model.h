@@ -33,6 +33,7 @@
 #include "enums.h"
 
 class Bone;
+struct ModelLight;
 class TextureAnim;
 
 struct ModelColor {
@@ -46,21 +47,6 @@ struct ModelTransparency {
 	AnimatedShort trans;
 
 	void init(MPQFile &f, ModelTransDef &mtd, uint32 *global);
-};
-
-
-
-
-struct ModelLight {
-	ssize_t type;		// Light Type. MODELLIGHT_DIRECTIONAL = 0 or MODELLIGHT_POINT = 1
-	ssize_t parent;		// Bone Parent. -1 if there isn't one.
-	Vec3D pos, tpos, dir, tdir;
-	Animated<Vec3D> diffColor, ambColor;
-	Animated<float> diffIntensity, ambIntensity, AttenStart, AttenEnd;
-	Animated<int> UseAttenuation;
-
-	void init(MPQFile &f, ModelLightDef &mld, uint32 *global);
-	void setup(size_t time, GLuint l);
 };
 
 
