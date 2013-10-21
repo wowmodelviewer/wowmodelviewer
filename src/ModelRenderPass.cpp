@@ -9,6 +9,7 @@
 
 #include "enums.h"
 #include "Model.h"
+#include "TextureAnim.h"
 
 #include "GL/glew.h"
 

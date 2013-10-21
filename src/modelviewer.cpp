@@ -8,13 +8,16 @@
 
 #include "modelviewer.h"
 
+#include "app.h"
 #include "Bone.h"
+#include "exporters.h"
 #include "globalvars.h"
 #include "mpq.h"
-#include "exporters.h"
+#include "TextureAnim.h"
 #include "UserSkins.h"
 #include "util.h"
-#include "app.h"
+
+
 
 #ifdef _MINGW
 #include "next-gen/GlobalSettings.h"
