@@ -9,6 +9,7 @@
 
 #include "Bone.h"
 #include "ModelColor.h"
+#include "ModelEvent.h"
 #include "ModelLight.h"
 #include "TextureAnim.h"
 
@@ -1511,9 +1512,4 @@ void Model::drawParticles()
 }
 
 
-
-void ModelEvent::init(MPQFile &f, ModelEventDef &me, uint32 *globals)
-{
-	def = me;
-}
 

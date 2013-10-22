@@ -13,6 +13,7 @@
 #include "exporters.h"
 #include "globalvars.h"
 #include "ModelColor.h"
+#include "ModelEvent.h"
 #include "mpq.h"
 #include "TextureAnim.h"
 #include "UserSkins.h"
