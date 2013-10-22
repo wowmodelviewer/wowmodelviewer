@@ -14,6 +14,7 @@
 #include "globalvars.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
+#include "ModelTransparency.h"
 #include "mpq.h"
 #include "TextureAnim.h"
 #include "UserSkins.h"

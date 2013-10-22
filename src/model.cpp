@@ -11,6 +11,7 @@
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
+#include "ModelTransparency.h"
 #include "TextureAnim.h"
 
 size_t globalTime = 0;
@@ -1389,11 +1390,6 @@ inline void Model::drawModel()
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
 	// done with all render ops
-}
-
-void ModelTransparency::init(MPQFile &f, ModelTransDef &mcd, uint32 *global)
-{
-	trans.init(mcd.trans, f, global);
 }
 
 inline void Model::draw()

@@ -10,6 +10,7 @@
 #include "enums.h"
 #include "Model.h"
 #include "ModelColor.h"
+#include "ModelTransparency.h"
 #include "TextureAnim.h"
 
 #include "GL/glew.h"

@@ -36,13 +36,8 @@ class Bone;
 struct ModelColor;
 class ModelEvent;
 struct ModelLight;
+struct ModelTransparency;
 class TextureAnim;
-
-struct ModelTransparency {
-	AnimatedShort trans;
-
-	void init(MPQFile &f, ModelTransDef &mtd, uint32 *global);
-};
 
 class Model: public ManagedItem, public Displayable
 {
