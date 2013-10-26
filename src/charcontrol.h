@@ -19,6 +19,7 @@
 #include "enums.h"
 #include "model.h"
 #include "modelcanvas.h"
+#include "TabardDetails.h"
 
 
 // forward class declarations
@@ -26,7 +27,6 @@ class ChoiceDialog;
 class ModelViewer;
 
 bool slotHasModel(size_t i);
-bool correctType(ssize_t type, ssize_t slot);
 
 struct CharRegionCoords {
 	int xpos, ypos, xsize, ysize;
@@ -100,33 +100,6 @@ struct CharTexture
 		components.push_back(ct);
 	}
 	void compose(TextureID texID);
-};
-
-struct TabardDetails
-{
-	int Icon;
-	int IconColor;
-	int Border;
-	int BorderColor;
-	int Background;
-
-	int maxIcon;
-	int maxIconColor;
-	int maxBorder;
-	int maxBorderColor;
-	int maxBackground;
-
-	bool showCustom;
-
-	wxString GetIconTex(int slot);
-	wxString GetBorderTex(int slot);
-	wxString GetBackgroundTex(int slot);
-
-	int GetMaxIcon();
-	int GetMaxIconColor(int icon);
-	int GetMaxBorder();
-	int GetMaxBorderColor(int border);
-	int GetMaxBackground();
 };
 
 class CharControl: public wxWindow

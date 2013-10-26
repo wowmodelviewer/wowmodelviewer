@@ -7,7 +7,8 @@
 
 #include "CharDetails.h"
 
-#include "charcontrol.h" // TabardDetails
+#include "TabardDetails.h"
+#include "util.h" // correctType
 
 #include <wx/wfstream.h>
 
@@ -123,3 +124,23 @@ void CharDetails::loadStart(StartOutfitDB &start, ItemDatabase &items, int setid
 		}
 	} catch (ItemSetDB::NotFound) {}
 }
+
+void CharDetails::reset()
+{
+	skinColor = 0;
+	faceType = 0;
+	hairColor = 0;
+	hairStyle = 0;
+	facialHair = 0;
+
+	showUnderwear = true;
+	showHair = true;
+	showFacialHair = true;
+	showEars = true;
+	showFeet = false;
+
+	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
+		equipment[i] = 0;
+	}
+}
+

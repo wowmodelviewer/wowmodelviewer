@@ -1,11 +1,14 @@
-// our headers
-#include "util.h"
 #include "charcontrol.h"
-#include "modelviewer.h"
-#include "itemselection.h"
-#include "mpq.h"
+
+// our headers
 #include "globalvars.h"
+#include "itemselection.h"
+#include "modelviewer.h"
+#include "mpq.h"
+#include "util.h"
+
 #include "CxImage/ximage.h"
+
 #include <wx/txtstrm.h>
 
 int slotOrder[] = {	
@@ -1985,56 +1988,6 @@ void CharTexture::compose(TextureID texID)
 	free(destbuf);
 }
 
-void CharDetails::reset()
-{
-	skinColor = 0;
-	faceType = 0;
-	hairColor = 0;
-	hairStyle = 0;
-	facialHair = 0;
-
-	showUnderwear = true;
-	showHair = true;
-	showFacialHair = true;
-	showEars = true;
-	showFeet = false;
-
-	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-		equipment[i] = 0;
-	}
-}
-
-
-bool correctType(ssize_t type, ssize_t slot)
-{
-	if (type == IT_ALL) 
-		return true;
-
-	switch (slot) {
-	case CS_HEAD:		return (type == IT_HEAD);
-	case CS_NECK:		return (type == IT_NECK);
-	case CS_SHOULDER:	return (type == IT_SHOULDER);
-	case CS_SHIRT:		return (type == IT_SHIRT);
-	case CS_CHEST:		return (type == IT_CHEST || type == IT_ROBE);
-	case CS_BELT:		return (type == IT_BELT);
-	case CS_PANTS:		return (type == IT_PANTS);
-	case CS_BOOTS:		return (type == IT_BOOTS);
-	case CS_BRACERS:	return (type == IT_BRACERS);
-	case CS_GLOVES:		return (type == IT_GLOVES);
-
-	// Slight correction.  Type 21 = Lefthand weapon, Type 22 = Righthand weapon
-	//case CS_HAND_RIGHT:	return (type == IT_1HANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER);
-	//case CS_HAND_LEFT:	return (type == IT_1HANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_HAND_RIGHT:	return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_DAGGER);
-	case CS_HAND_LEFT:	return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_CAPE:		return (type == IT_CAPE);
-	case CS_TABARD:		return (type == IT_TABARD);
-	case CS_QUIVER:		return (type == IT_QUIVER);
-	}
-	return false;
-}
-
-
 void CharControl::ClearItemDialog()
 {
 	if (itemDialog) {
@@ -2676,90 +2629,7 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 	RefreshModel();
 }
 
-wxString TabardDetails::GetBackgroundTex(int slot)
-{
-	if (slot == CR_TORSO_UPPER)
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Background_%02d_TU_U.blp"), Background);
-	else
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Background_%02d_TL_U.blp"), Background);
-}
 
-wxString TabardDetails::GetBorderTex(int slot)
-{
-	if (slot == CR_TORSO_UPPER)
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), Border, BorderColor);
-	else
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TL_U.blp"), Border, BorderColor);
-}
-
-wxString TabardDetails::GetIconTex(int slot)
-{
-	if(slot == CR_TORSO_UPPER)
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TU_U.blp"), Icon, IconColor);
-	else
-		return wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TL_U.blp"), Icon, IconColor);
-}
-
-int TabardDetails::GetMaxBackground()
-{
-	int i = 0;
-	while(1) {
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Background_%02d_TU_U.blp"), i))) {
-			break;
-		}
-		i ++;
-	}
-	return i;
-}
-
-int TabardDetails::GetMaxIcon()
-{
-	int i = 0;
-	while(1) {
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TU_U.blp"), i, 0))) {
-			break;
-		}
-		i ++;
-	}
-	return i;
-}
-
-int TabardDetails::GetMaxIconColor(int icon)
-{
-	int i = 0;
-	while(1) {
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TU_U.blp"), icon, i))) {
-			break;
-		}
-		i ++;
-	}
-	return i;
-}
-
-int TabardDetails::GetMaxBorder()
-{
-	int i = 0 , border = 0;
-	while(1) {
-		// @TODO : what is expected here ?
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i))) {
-			break;
-		}
-		i ++;
-	}
-	return i;
-}
-
-int TabardDetails::GetMaxBorderColor(int border)
-{
-	int i = 0;
-	while(1) {
-		if (!MPQFile::exists(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i))) {
-			break;
-		}
-		i ++;
-	}
-	return i;
-}
 
 const wxString CharControl::selectCharModel()
 {

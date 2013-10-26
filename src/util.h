@@ -180,5 +180,7 @@ Vec3D fixCoordSystem(Vec3D v);
 Vec3D fixCoordSystem2(Vec3D v);
 Quaternion fixCoordSystemQuat(Quaternion v);
 
+bool correctType(ssize_t type, ssize_t slot);
+
 #endif
 
