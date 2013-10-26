@@ -1,7 +1,10 @@
-
 #include "modelcontrol.h"
+
+#include "Attachment.h"
 #include "mpq.h"
+
 #include "CxImage/ximage.h"
+
 #include <wx/wx.h>
 #include <wx/ffile.h>
 #include <wx/textctrl.h>

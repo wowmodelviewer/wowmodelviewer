@@ -1,7 +1,9 @@
-
 #include "database.h"
-#include "mpq.h"
+
 #include "globalvars.h"
+#include "modelviewer.h"
+#include "mpq.h"
+
 
 ItemDatabase		items;
 // dbs

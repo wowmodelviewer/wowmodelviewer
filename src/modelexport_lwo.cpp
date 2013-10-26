@@ -1,8 +1,12 @@
 #include "modelexport_lwo.h"
-#include "wx/txtstrm.h"
 
+#include "Attachment.h"
 #include "Bone.h"
 #include "ModelLight.h"
+#include "modelviewer.h"
+
+#include "wx/txtstrm.h"
+
 
 //---------------------------------------------
 // --== Master Object Writing Function ==--

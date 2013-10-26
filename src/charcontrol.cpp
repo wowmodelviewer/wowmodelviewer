@@ -1,6 +1,7 @@
 #include "charcontrol.h"
 
 // our headers
+#include "Attachment.h"
 #include "globalvars.h"
 #include "itemselection.h"
 #include "modelviewer.h"

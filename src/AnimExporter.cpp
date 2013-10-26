@@ -1,7 +1,11 @@
 
 #include "AnimExporter.h"
-#include "Quantize.h"
+
+#include "Attachment.h"
 #include "globalvars.h"
+#include "Quantize.h"
+
+
 // CxImage
 #include "CxImage/ximage.h"
 #include "CxImage/ximagif.h"

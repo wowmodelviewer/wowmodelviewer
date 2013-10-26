@@ -1,8 +1,10 @@
 #include "dbcfile.h"
-#include "mpq.h"
-#include "util.h"
+
 #include "enums.h"
 #include "globalvars.h"
+#include "modelviewer.h"
+#include "mpq.h"
+#include "util.h"
 
 DBCFile::DBCFile(const wxString &filename) : filename(filename)
 {

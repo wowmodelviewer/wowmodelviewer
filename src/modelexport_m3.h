@@ -1,6 +1,9 @@
 #ifndef MODELEXPORT_M3_H
 #define MODELEXPORT_M3_H
 
+#include "modelheaders.h" // Sphere
+#include "util.h"
+
 /*
 Most contents are retrived from http://code.google.com/p/libm3/w/list
 

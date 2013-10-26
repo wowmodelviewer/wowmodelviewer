@@ -1,9 +1,10 @@
-
-#include <wx/wfstream.h>
-#include <wx/arrstr.h>
-
 #include "modelbankcontrol.h"
+
 #include "globalvars.h"
+#include "modelviewer.h"
+
+#include <wx/arrstr.h>
+#include <wx/wfstream.h>
 
 IMPLEMENT_CLASS(ModelBankControl, wxWindow)
 

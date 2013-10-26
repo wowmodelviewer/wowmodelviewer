@@ -1,14 +1,7 @@
-
-#include <wx/txtstrm.h>
-#include <wx/tokenzr.h>
-#include <wx/utils.h>
-#include <wx/regex.h>
-#include <wx/app.h>
-#include "wx/jsonreader.h"
-
 #include "modelviewer.h"
 
 #include "app.h"
+#include "Attachment.h"
 #include "Bone.h"
 #include "exporters.h"
 #include "globalvars.h"
@@ -19,12 +12,16 @@
 #include "TextureAnim.h"
 #include "UserSkins.h"
 #include "util.h"
-
-
-
 #ifdef _MINGW
 #include "next-gen/GlobalSettings.h"
 #endif
+
+#include <wx/app.h>
+#include "wx/jsonreader.h"
+#include <wx/regex.h>
+#include <wx/tokenzr.h>
+#include <wx/txtstrm.h>
+#include <wx/utils.h>
 
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};

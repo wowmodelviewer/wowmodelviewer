@@ -1,13 +1,14 @@
-#include <wx/wfstream.h>
-#include <wx/txtstrm.h>
-#include <math.h>
-
+#include "Attachment.h"
 #include "Bone.h"
 #include "globalvars.h"
 #include "modelexport.h"
 #include "modelcanvas.h"
+#include "modelviewer.h"
 
-//#include "CxImage/ximage.h"
+#include <math.h>
+
+#include <wx/wfstream.h>
+#include <wx/txtstrm.h>
 
 void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 {

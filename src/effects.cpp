@@ -1,8 +1,9 @@
-
 #include "effects.h"
-#include "itemselection.h"
-#include "enums.h"
+
+#include "Attachment.h"
 #include "database.h"
+#include "enums.h"
+#include "itemselection.h"
 
 wxArrayString spelleffects;
 SpellEffectsDB spelleffectsdb;

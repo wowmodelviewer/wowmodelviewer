@@ -1,10 +1,14 @@
-#include "Bone.h"
-#include "globalvars.h"
-#include "modelexport.h"
 #include "modelexport_m3.h"
+
+#include "Bone.h"
+#include "database.h"
+#include "globalvars.h"
 #include "modelcanvas.h"
 #include "ModelColor.h"
+#include "modelexport.h"
 #include "TextureAnim.h"
+
+#include <wx/ffile.h>
 
 #define	ROOT_BONE	(1)
 

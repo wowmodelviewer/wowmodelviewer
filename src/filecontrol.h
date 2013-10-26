@@ -1,6 +1,13 @@
 #ifndef FILECONTROL_H
 #define FILECONTROL_H
 
+#include "mpq.h" // FileTreeItem
+
+class ModelViewer;
+
+#include <wx/string.h>
+#include <wx/treectrl.h> // wxTreeItemId
+
 class FileControl: public wxWindow
 {
 	DECLARE_CLASS(FileControl)

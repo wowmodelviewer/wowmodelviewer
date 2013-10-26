@@ -1,10 +1,14 @@
-#include <wx/wfstream.h>
+#include "modelexport.h"
+
+#include "Attachment.h"
+#include "Bone.h"
+#include "database.h"
+#include "filecontrol.h"
+#include "globalvars.h"
+
 #include <math.h>
 
-#include "Bone.h"
-#include "globalvars.h"
-#include "modelexport.h"
-#include "modelcanvas.h"
+#include <wx/wfstream.h>
 
 #include "CxImage/ximage.h"
 

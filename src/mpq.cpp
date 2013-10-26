@@ -1,12 +1,15 @@
 #include "mpq.h"
 
+#include "globalvars.h"
+#include "modelviewer.h"
+#include "util.h"
+
+#include <string>
+#include <vector>
+
 #include <wx/log.h>
 #include <wx/file.h>
 
-#include <vector>
-#include <string>
-#include "util.h"
-#include "globalvars.h"
 
 using namespace std;
 

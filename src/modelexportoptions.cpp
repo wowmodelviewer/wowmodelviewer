@@ -1,11 +1,12 @@
 // Copied from Settings.cpp
-
-#include "globalvars.h"
 #include "modelexportoptions.h"
-#include "exporters.h"
-#include "enums.h"
 
-//#include "globalvars.h"
+#include "enums.h"
+#include "exporters.h"
+#include "filecontrol.h"
+#include "globalvars.h"
+#include "model.h"
+#include "modelviewer.h"
 
 
 // All IDs & Vars should follow the naming structure similar to "ExportOptionswxT(3D Format)wxT(Option name)"

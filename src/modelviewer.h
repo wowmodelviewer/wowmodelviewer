@@ -14,6 +14,9 @@
 #include <wx/msgdlg.h>
 #include <wx/display.h>
 #include <wx/aboutdlg.h>
+#if defined(__WIN32__) && !defined(__WIN__)
+	#include <winsock.h>
+#endif
 #include <wx/url.h>
 #include <wx/xml/xml.h>
 #include <wx/wfstream.h>
