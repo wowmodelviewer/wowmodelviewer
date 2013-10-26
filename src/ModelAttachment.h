@@ -2,7 +2,7 @@
  * ModelAttachment.h
  *
  *  Created on: 20 oct. 2013
- *      Author: 502016519
+ *
  */
 
 #ifndef _MODELATTACHMENT_H_
