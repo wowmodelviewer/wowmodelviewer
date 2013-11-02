@@ -131,7 +131,7 @@ public:
 
 	bool uses(ssize_t anim)
 	{
-		if ((seq) && (seq>-1))
+		if (seq>-1)
 			anim = 0;
 		return ((data[anim].size()) > 0);
 	}

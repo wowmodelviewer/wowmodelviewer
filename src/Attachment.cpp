@@ -37,6 +37,7 @@ void Attachment::draw(ModelCanvas *c)
 
 		if (c->model) {
 			// no need to scale if its already 100%
+			// scaling manually set from model control panel
 			if (scale != 1.0f)
 				glScalef(scale, scale, scale);
 
