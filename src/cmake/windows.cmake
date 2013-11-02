@@ -49,6 +49,11 @@
     nextgen
    )
 
+  add_custom_target(release
+                    COMMAND ${MAKENSISCMD} "../Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                    DEPENDS wowmodelviewer)             
+
+
   install(TARGETS wowmodelviewer 
           RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
         
