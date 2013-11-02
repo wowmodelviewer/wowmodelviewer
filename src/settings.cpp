@@ -108,12 +108,7 @@ void Settings_Page1::OnButton(wxCommandEvent &event)
 		}
 
 	} else if (id==ID_SETTINGS_CLEAR) {
-		mpqArchives.Clear();
-		mpqList->Clear();
-		langID = -1;
-		getGamePath();
-		searchMPQs(false);
-		mpqList->Set(mpqArchives);
+		g_modelViewer->settingsControl->ResetMPQ();
 	}
 }
 
@@ -341,6 +336,16 @@ void SettingsControl::Open()
 void SettingsControl::Close()
 {
 	
+}
+
+void SettingsControl::ResetMPQ()
+{
+	mpqArchives.Clear();
+	page1->mpqList->Clear();
+	langID = -1;
+	getGamePath();
+	searchMPQs(false);
+	page1->mpqList->Set(mpqArchives);
 }
 
 // --

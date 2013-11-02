@@ -126,6 +126,15 @@ class ModelViewer: public wxFrame
 	std::vector<MPQArchive*> archives;
 
 public:
+    // MPQ archive init status
+    enum ArchiveInitStatus
+    {
+    	ARCHIVEINITSTATUS_NOERROR = 0, 			// No error
+    	ARCHIVEINITSTATUS_WOWRUNNING_ERROR = 1, // Impossible to read datas into MPQ archive (WoW is running)
+    	ARCHIVEINITSTATUS_TOCREADING_ERROR = 2, // Problem with reading TOC information
+    	ARCHIVEINITSTATUS_WOWVERSION_ERROR = 3  // Unsupported WoW version found
+    };
+
 	// Constructor + Deconstructor
 	ModelViewer();
 	~ModelViewer();
@@ -170,7 +179,7 @@ public:
 	wxString Init();
 	void InitDocking();
 	void InitDatabase();
-	wxString InitMPQArchives();
+	ArchiveInitStatus InitMPQArchives();
 
 	// Save and load various settings between sessions
 	void LoadSession();

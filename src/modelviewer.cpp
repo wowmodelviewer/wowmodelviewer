@@ -1422,10 +1422,26 @@ ModelViewer::~ModelViewer()
 	}
 }
 
-wxString ModelViewer::InitMPQArchives()
+
+/*
+ * Try to init mpq archives to use them in the viewer.
+ * See ArchiveInitStatus enum for error description
+ */
+
+ModelViewer::ArchiveInitStatus ModelViewer::InitMPQArchives()
 {
+	/*
+	Debug code to test reading problems easily
+	static bool first = true;
+	if(first)
+	{
+	//	first = false;
+		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
+	}
+    */
 	wxString path;
 
+	// first clear current archive list to remove unexisting files
 	archives.clear();
 	for (size_t i=0; i<mpqArchives.GetCount(); i++) {
 		if (wxFileName::FileExists(mpqArchives[i])) {
@@ -1439,7 +1455,7 @@ wxString ModelViewer::InitMPQArchives()
 		f.close();
 		wxLogMessage(wxT("Unable to gather TOC data."));
 		SetStatusText(wxT("Unable to gather TOC data."));
-		return wxT("Could not read data from MPQ files.\nPlease make sure World of Warcraft is not running.");
+		return ARCHIVEINITSTATUS_WOWRUNNING_ERROR;
 	}
 	
 	// reading and dumping first 100 characters 
@@ -1462,7 +1478,7 @@ wxString ModelViewer::InitMPQArchives()
 	// Check for Corrupted MPQ
 	if (!isdigit(toc[0]) || !isdigit(toc[1]) || !isdigit(toc[2]) || !isdigit(toc[3]) || !isdigit(toc[4])) {
 		wxLogMessage(wxT("MPQ files appear to be corrupted. TOC Read: \"%s\""), (char*)toc);
-		return wxT("Your MPQ files appear to be unreadable.\nPlease re-download and re-install your WoW client.");
+		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
 	}else{
 		wxLogMessage(wxT("MPQ files do not appear to be corrupted."));
 	}
@@ -1471,10 +1487,7 @@ wxString ModelViewer::InitMPQArchives()
 	SetStatusText(wxString((char *)toc, wxConvUTF8), 1);
 	wxLogMessage(wxT("Loaded Content TOC: v%c.%c%c.%c%c"), toc[0], toc[1], toc[2], toc[3], toc[4]);
 	if (wxString((char *)toc, wxConvUTF8) > wxT("99999")) {		// The 99999 should be updated if the TOC ever gets that high.
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("There was a problem reading the TOC number.\nDo you want to quit?"), 
-			wxT("Question"), wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
-		if (wxID_YES == dial->ShowModal())
-			return wxT("There was a problem reading the TOC number.\nCould not determine WoW version.");
+		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
 	}
 
 	wxString info = wxT("WoW Model Viewer is designed to work with the latest version of World of Warcraft.\nYour version is supported, but support will be removed in the near future.\nYou may experience diminished capacity while working with WoW Model Viewer.\nPlease update your World of Warcraft client soon.");
@@ -1498,11 +1511,7 @@ wxString ModelViewer::InitMPQArchives()
 		gameVersion = itoc;
 		langOffset = 0;
 	} else { // else if not a supported edition...
-		wxString info = wxT("WoW Model Viewer does not support your version of World of Warcraft.\nPlease update your World of Warcraft client soon.");
-		wxLogMessage(wxT("Notice: ") + info);
-		SetStatusText(wxT("WoW Model Viewer does not support your version of World of Warcraft."));
-
-		return info;
+		return ARCHIVEINITSTATUS_WOWVERSION_ERROR;
 	}
 
 	// log for debug
@@ -1526,7 +1535,8 @@ wxString ModelViewer::InitMPQArchives()
 		
 		wxRemoveFile(component);
 	}
-	return wxEmptyString;
+
+	return ARCHIVEINITSTATUS_NOERROR;
 }
 
 wxString ModelViewer::Init()
@@ -1543,15 +1553,48 @@ wxString ModelViewer::Init()
 	isModel = false;
 
 	// Load the games MPQ files into memory
-	wxString mpqarch = InitMPQArchives();
-	wxString result = mpqarch;
-	if (mpqarch.IsEmpty()){
-		result = wxT("Successfully Initialized.");
+	bool initArchivesSuccess = false;
+	wxString initArchivesText;
+	switch(InitMPQArchives())
+	{
+	case ARCHIVEINITSTATUS_TOCREADING_ERROR:
+	{
+		// TOC reading error : we propose to reset MPQ list and try to reload WoW again
+		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("There was a problem reading the TOC number.\nDo you want to try to reset your MPQ list ?"),
+								wxT("Question"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION);
+		size_t result = dial->ShowModal();
+		if (result == wxID_YES){
+			wxLogMessage(wxT("Trying to reset MPQ list to load WoW again."));
+			// so let's go, reset
+			settingsControl->ResetMPQ();
+			// then load again
+			if(InitMPQArchives() != ARCHIVEINITSTATUS_NOERROR) {
+				initArchivesText = wxT("Your MPQ files appear to be unreadable \n(Unable to read TOC number). \nPlease re-download and re-install your WoW client.");
+			}
+			else {
+				initArchivesSuccess = true;
+			}
+		}
+		break;
 	}
-	wxLogMessage(wxT("InitMPQArchives result: %s"), result.c_str());
+	case ARCHIVEINITSTATUS_WOWRUNNING_ERROR:
+		initArchivesText = wxT("Could not read data from MPQ files.\nPlease make sure World of Warcraft is not running.");
+		break;
+	case ARCHIVEINITSTATUS_WOWVERSION_ERROR:
+		initArchivesText = wxT("WoW Model Viewer does not support your version of World of Warcraft.\nPlease update your World of Warcraft client to be able to use it.");
+		break;
+	case ARCHIVEINITSTATUS_NOERROR:
+	default:
+		// by default, we consider there is no error, be carfeull if you put new value inside
+		// ArchiveInitStatus enum
+		initArchivesSuccess = true;
+		break;
+	}
 
-	if (!mpqarch.IsEmpty()){
-		return mpqarch;
+	if(!initArchivesSuccess) {
+		SetStatusText(initArchivesText.c_str());
+		wxLogMessage(wxT("InitMPQArchives result: %s"), initArchivesText.c_str());
+		return initArchivesText;
 	}
 
 	SetStatusText(wxT("Initializing File Control..."));

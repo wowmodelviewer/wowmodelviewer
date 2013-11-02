@@ -21,12 +21,12 @@ class Settings_Page1: public wxWindow
     DECLARE_EVENT_TABLE()
 
 	wxCheckBox *chkbox[NUM_SETTINGS1_CHECK];
-	wxListBox *mpqList;
 	wxTextCtrl *txtPath;
 	wxStaticText *lbl2;
 	wxButton *btn1, *btn2, *btn3, *btn4, *btn5;
 
 public:
+	wxListBox *mpqList;
 
 	Settings_Page1(wxWindow* parent, wxWindowID id);
 	~Settings_Page1(){};
@@ -71,6 +71,7 @@ public:
 	
 	void Open();
 	void Close();
+	void ResetMPQ();
 };
 
 #endif
