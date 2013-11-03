@@ -3560,7 +3560,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	wxInputStream *doc = apiPageURL.GetInputStream();
 	int numErrors = reader.Parse(*doc,&root);
 
-	if (numErrors == 0)
+	if (numErrors == 0 && root.Size() != 0)
 	{
 		// No Gathering Errors Detected.
 
