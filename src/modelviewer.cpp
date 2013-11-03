@@ -1247,6 +1247,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 		}
 	} catch (...) {}
 
+	fileControl->UpdateInterface();
+
 	// wxAUI
 	interfaceManager.GetPane(charControl).Show(isChar);
 	interfaceManager.Update();
