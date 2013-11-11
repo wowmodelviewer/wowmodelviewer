@@ -38,10 +38,10 @@ GlobalSettings::GlobalSettings()
 	m_versionMajorNumber = 0;
 	m_versionMinorNumber = 7;
 	m_versionMajorRevNumber = 0;
-	m_versionMinorRevNumber = 5;
+	m_versionMinorRevNumber = 6;
 
 	m_appName = "WoW Model Viewer";
-	m_buildName = "Chen Stormstout";
+	m_buildName = "Skeer the Bloodseeker";
 
 	/*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -83,7 +83,7 @@ GlobalSettings::GlobalSettings()
 #endif
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = "-mingw2";
+  m_versionSpecialExtend = "-rc1";
 
 }
 
