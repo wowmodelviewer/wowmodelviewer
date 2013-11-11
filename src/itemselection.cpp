@@ -1,6 +1,7 @@
 
 #include "itemselection.h"
 #include "charcontrol.h"
+#include "URLImporterDialog.h"
 
 // HACK: this is the ID for the single choice dialog listbox in the wx src
 // - if it changes this code may break
@@ -142,6 +143,7 @@ BEGIN_EVENT_TABLE(FilteredChoiceDialog, ChoiceDialog)
     EVT_TEXT(FilteredChoiceDialog::ID_FILTER_TEXT, FilteredChoiceDialog::OnFilter)
     EVT_BUTTON(FilteredChoiceDialog::ID_FILTER_BUTTON, FilteredChoiceDialog::OnFilter)
     EVT_BUTTON(FilteredChoiceDialog::ID_FILTER_CLEAR, FilteredChoiceDialog::OnFilter)
+    EVT_BUTTON(FilteredChoiceDialog::ID_IMPORT_BUTTON, FilteredChoiceDialog::OnImport)
 END_EVENT_TABLE()
 
 
@@ -168,7 +170,19 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
 	sizer->Add(m_pattern, 1, 0);
     sizer->Add(new wxButton(this, ID_FILTER_CLEAR, wxT("Clear"), wxDefaultPosition, wxSize(40,-1)), 0, 0);
     
-    topsizer->Prepend(sizer, 0, wxEXPAND | wxALL, 10);
+    wxBoxSizer *sizerImport = 0;
+    if(type == UPDATE_NPC){
+    	sizerImport = new wxBoxSizer( wxHORIZONTAL );
+    	sizerImport->Add(new wxButton(this, ID_IMPORT_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
+    }
+    wxBoxSizer * globalActionsSizer = new wxBoxSizer( wxVERTICAL );
+    globalActionsSizer->Add(sizer);
+
+    if(sizerImport){
+    	globalActionsSizer->Add(sizerImport);
+    }
+
+    topsizer->Prepend(globalActionsSizer, 0, wxEXPAND | wxALL, 10);
     topsizer->SetSizeHints( this );
     topsizer->Fit( this );
     
@@ -200,6 +214,37 @@ void FilteredChoiceDialog::OnFilter(wxCommandEvent& event){
 	if (event.GetId() == ID_FILTER_CLEAR) 
 		m_pattern->SetValue(wxEmptyString);
     DoFilter();
+}
+
+void FilteredChoiceDialog::OnImport(wxCommandEvent& event){
+	URLImporterDialog *dlg = new URLImporterDialog();
+	if ( dlg->ShowModal() == wxID_OK ) {
+		int modelid = dlg->getImportedId();
+
+		if(modelid != -1) {
+			int id = 0;
+			bool found = false;
+			for (std::vector<NPCRecord>::iterator it=npcs.npcs.begin();  it!=npcs.npcs.end(); ++it, id++) {
+				if(it->id == modelid) {
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) { // npc is not present in current database
+				NPCRecord rec(dlg->getNPCLine());
+				if (rec.model > 0) {
+					npcs.npcs.push_back(rec);
+					id = npcs.npcs.size()-1;
+				}
+			}
+
+
+			if (cc)
+				cc->OnUpdateItem(UPDATE_NPC, id );
+		}
+	}
+	dlg->Destroy();
 }
 
 void FilteredChoiceDialog::DoFilter()

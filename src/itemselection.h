@@ -19,12 +19,12 @@ wxColour ItemQualityColour(int quality);
 class CharControl;
 
 class ChoiceDialog : public wxSingleChoiceDialog {
-	CharControl *cc;
 	int type;
 
     DECLARE_EVENT_TABLE()
 
 public:
+	CharControl *cc;
 	wxListView *m_listctrl;
 	ChoiceDialog(CharControl *dest, int type,
 	                       wxWindow *parent,
@@ -54,7 +54,8 @@ public:
     enum{
         ID_FILTER_TEXT = 1000,
         ID_FILTER_BUTTON,
-        ID_FILTER_CLEAR
+        ID_FILTER_CLEAR,
+        ID_IMPORT_BUTTON
     };
 
 	bool keepFirst;
@@ -68,6 +69,7 @@ public:
 						   bool keepfirst = true);
     
     virtual void OnFilter(wxCommandEvent& event);
+    virtual void OnImport(wxCommandEvent& event);
     virtual int GetSelection() const { return m_indices[m_selection]; }
 
 	virtual void InitFilter();
