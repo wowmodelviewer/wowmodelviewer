@@ -48,11 +48,19 @@ CreateDirectory $INSTDIR\
 
 CreateDirectory $INSTDIR\userSettings
 
+# create shortcuts
+CreateShortCut "$DESKTOP\WoW Model Viewer.lnk" "$INSTDIR\wowmodelviewer.exe" ""
+ 
+# create start-menu items
+CreateDirectory "$SMPROGRAMS\WoW Model Viewer"
+CreateShortCut "$SMPROGRAMS\WoW Model Viewer\Uninstall.lnk" "$INSTDIR\uninstaller.exe" "" "$INSTDIR\uninstaller.exe" 0
+CreateShortCut "$SMPROGRAMS\WoW Model Viewer\WoW Model Viewer.lnk" "$INSTDIR\wowmodelviewer.exe" "" "$INSTDIR\wowmodelviewer.exe" 0
+
 WriteRegStr HKLM "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\layers" "$INSTDIR\wowmodelviewer.exe" "RUNASADMIN"
 WriteRegStr HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\layers" "$INSTDIR\wowmodelviewer.exe" "RUNASADMIN"
 
 # define uninstaller name
-#writeUninstaller $INSTDIR\uninstaller.exe
+writeUninstaller $INSTDIR\uninstaller.exe
  
 #-------
 # default section end
@@ -66,16 +74,15 @@ section "Uninstall"
 delete $INSTDIR\uninstaller.exe
  
 # now delete installed file
-delete $INSTDIR\wowmodelviewer.exe
-delete $INSTDIR\ridable.csv
-delete $INSTDIR\jpeg62.dll
-delete $INSTDIR\libgcc_s_dw2-1.dll
-delete $INSTDIR\libstdc++-6.dll
-delete $INSTDIR\userSettings\*.*
-
-# and finally, remove folders
-RMDir $INSTDIR\userSettings
-RMDir $INSTDIR
+RMDir /r "$INSTDIR\*.*"    
+ 
+# Remove the installation directory
+RMDir "$INSTDIR"
+ 
+# Delete Shortcuts
+Delete "$DESKTOP\WoW Model Viewer.lnk"
+Delete "$SMPROGRAMS\WoW Model Viewer\*.*"
+RMDir "$SMPROGRAMS\WoW Model Viewer"
 
 # cleanup reg
 DeleteRegKey HKLM "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\layers"
