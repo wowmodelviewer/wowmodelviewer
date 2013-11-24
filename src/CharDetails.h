@@ -37,6 +37,8 @@ struct CharDetails
 	void loadStart(StartOutfitDB &start, ItemDatabase &items, int cls);
 
 	void reset();
+
+	void print();
 };
 
 

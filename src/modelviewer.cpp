@@ -1155,7 +1155,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	try {
 		CreatureSkinDB::Record modelRec = skindb.getBySkinID(modelid);
 		int displayID = modelRec.getUInt(CreatureSkinDB::ExtraInfoID);
-
 		// if the creature ID ISN'T a "NPC",  then load the creature model and skin it.
 		if (displayID == 0) {
 			
@@ -1217,8 +1216,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 				}
 			}
 			
-			//const char *newName = strModel.c_str();
-
 			Attachment *modelAtt;
 			modelAtt = canvas->LoadCharModel(strModel);
 			canvas->model->modelType = MT_NPC;
@@ -1228,7 +1225,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 			charControl->UpdateNPCModel(modelAtt, displayID);
 			charControl->customSkin = fn;
 
-			charControl->RefreshNPCModel(); // rec.getUInt(NPCDB::NPCID
+			charControl->RefreshModel();
 			charControl->RefreshEquipment();
 
 			menuBar->EnableTop(2, true);
@@ -1250,7 +1247,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	fileControl->UpdateInterface();
 
 	// wxAUI
-	interfaceManager.GetPane(charControl).Show(isChar);
+	interfaceManager.GetPane(charControl).Show(false);
 	interfaceManager.Update();
 }
 

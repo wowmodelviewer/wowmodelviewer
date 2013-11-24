@@ -144,3 +144,28 @@ void CharDetails::reset()
 	}
 }
 
+void CharDetails::print()
+{
+	std::cout << "CharDetails::print()" << std::endl;
+	std::cout << "skinColor = " << skinColor << std::endl;
+	std::cout << "faceType = " << faceType << std::endl;
+	std::cout << "hairColor = " << hairColor << std::endl;
+	std::cout << "hairStyle = " << hairStyle << std::endl;
+	std::cout << "facialHair = " << facialHair << std::endl;
+	std::cout << "facialColor = " << facialColor << std::endl;
+	std::cout << "maxFacialColor = " << maxFacialColor << std::endl;
+	std::cout << "maxHairStyle = " << maxHairColor << std::endl;
+	std::cout << "maxHairColor = " << maxHairColor << std::endl;
+	std::cout << "maxSkinColor = " << maxSkinColor << std::endl;
+	std::cout << "maxFaceType = " << maxFaceType << std::endl;
+	std::cout << "maxFacialHair = " << maxFacialHair << std::endl;
+	std::cout << "race = " << race << std::endl;
+	std::cout << "gender = " << gender << std::endl;
+	std::cout << "useNPC = " << useNPC << std::endl;
+	std::cout << "eyeGlowType = " << eyeGlowType << std::endl;
+	std::cout << "showUnderwear = " << showUnderwear << std::endl;
+	std::cout << "showEars = " << showEars << std::endl;
+	std::cout << "showHair = " << showHair << std::endl;
+	std::cout << "showFacialHair = " << showFacialHair << std::endl;
+	std::cout << "showFeet = " << showFeet << std::endl;
+}
