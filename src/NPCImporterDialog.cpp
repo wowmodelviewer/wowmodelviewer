@@ -1,11 +1,11 @@
 /*
- * URLImporterDialog.cpp
+ * NPCimporterDialog.cpp
  *
  *  Created on: 6 nov. 2013
  *
  */
 
-#include "URLImporterDialog.h"
+#include "NPCimporterDialog.h"
 
 #include "util.h" // CSConv
 
@@ -19,10 +19,10 @@
 
 #include <iostream>
 
-const int URLImporterDialog::ID_BTN_IMPORT = wxNewId();
+const int NPCimporterDialog::ID_BTN_IMPORT = wxNewId();
 
-BEGIN_EVENT_TABLE(URLImporterDialog,wxDialog)
-	EVT_BUTTON(ID_BTN_IMPORT,  URLImporterDialog::OnImportButtonClicked)
+BEGIN_EVENT_TABLE(NPCimporterDialog,wxDialog)
+	EVT_BUTTON(ID_BTN_IMPORT,  NPCimporterDialog::OnImportButtonClicked)
 END_EVENT_TABLE()
 
 class HTMLParser : public wxHtmlParser
@@ -31,14 +31,9 @@ public:
 	wxObject* GetProduct () { return NULL;}
 	void AddText(const wxChar* txt) {}
 };
-/*
-wxString URLImporterDialog::extractTagValue(wxString & inputText, wxString & tagValue)
-{
 
-}
-*/
 
-URLImporterDialog::URLImporterDialog(wxWindow * parent /* = NULL */, wxWindowID id /* = 1 */, const wxString & title /* = "Import from URL" */,
+NPCimporterDialog::NPCimporterDialog(wxWindow * parent /* = NULL */, wxWindowID id /* = 1 */, const wxString & title /* = "Import from URL" */,
         							 const wxPoint & position /* = wxDefaultPosition */, const wxSize & size /*= wxSize(300, 300) */)
 : wxDialog( parent, id, title, position, size, wxRAISED_BORDER|wxDEFAULT_DIALOG_STYLE|wxCAPTION|wxTHICK_FRAME|wxSYSTEM_MENU )
 {
@@ -108,7 +103,7 @@ URLImporterDialog::URLImporterDialog(wxWindow * parent /* = NULL */, wxWindowID 
 }
 
 
-void URLImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
+void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 {
 	if(m_URLname->IsEmpty())
 	{
@@ -187,7 +182,7 @@ void URLImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 }
 
 
-int URLImporterDialog::getImportedId()
+int NPCimporterDialog::getImportedId()
 {
 	int result = -1;
 
@@ -197,7 +192,7 @@ int URLImporterDialog::getImportedId()
 	return result;
 }
 
-wxString URLImporterDialog::getNPCLine()
+wxString NPCimporterDialog::getNPCLine()
 {
 	wxString result = "";
 	if(m_idResult->GetLabel() != "No URL") // successful import

@@ -1,7 +1,7 @@
 
 #include "itemselection.h"
 #include "charcontrol.h"
-#include "URLImporterDialog.h"
+#include "NPCimporterDialog.h"
 
 // HACK: this is the ID for the single choice dialog listbox in the wx src
 // - if it changes this code may break
@@ -217,7 +217,7 @@ void FilteredChoiceDialog::OnFilter(wxCommandEvent& event){
 }
 
 void FilteredChoiceDialog::OnImport(wxCommandEvent& event){
-	URLImporterDialog *dlg = new URLImporterDialog();
+	NPCimporterDialog *dlg = new NPCimporterDialog();
 	if ( dlg->ShowModal() == wxID_OK ) {
 		int modelid = dlg->getImportedId();
 
