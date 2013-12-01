@@ -7,30 +7,18 @@
 
 #include "NPCimporterDialog.h"
 
-#include "util.h" // CSConv
+#include "NPCInfos.h"
+#include "WowheadImporter.h"
 
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
-#include <wx/sstream.h>
 #include <wx/statbox.h>
-#include <wx/regex.h>
-#include <wx/url.h>
-#include <wx/html/htmlpars.h>
-
-#include <iostream>
 
 const int NPCimporterDialog::ID_BTN_IMPORT = wxNewId();
 
 BEGIN_EVENT_TABLE(NPCimporterDialog,wxDialog)
 	EVT_BUTTON(ID_BTN_IMPORT,  NPCimporterDialog::OnImportButtonClicked)
 END_EVENT_TABLE()
-
-class HTMLParser : public wxHtmlParser
-{
-public:
-	wxObject* GetProduct () { return NULL;}
-	void AddText(const wxChar* txt) {}
-};
 
 
 NPCimporterDialog::NPCimporterDialog(wxWindow * parent /* = NULL */, wxWindowID id /* = 1 */, const wxString & title /* = "Import from URL" */,
@@ -113,63 +101,15 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-		wxURL url(m_URLname->GetValue());
-		if(url.GetError()==wxURL_NOERR)
+		WowheadImporter importer;
+		NPCInfos * result = importer.importNPC(m_URLname->GetValue().mb_str());
+		if(result)
 		{
-			wxString htmldata;
-			wxInputStream *in = url.GetInputStream();
-
-			if(in && in->IsOk())
-			{
-				wxStringOutputStream html_stream(&htmldata);
-				in->Read(html_stream);
-
-				std::string content(html_stream.GetString().ToAscii());
-
-				// let's go : finding name
-				// extract global infos
-				std::string pattern("(g_npcs[");
-				std::string patternEnd(";");
-				std::size_t beginIndex = content.find(pattern);
-				std::string NPCInfos = content.substr(beginIndex);
-				std::size_t endIndex = NPCInfos.find(patternEnd);
-				NPCInfos = NPCInfos.substr(0,endIndex);
-
-				// finding name
-				pattern = "name\":\"";
-				patternEnd = "\",";
-				std::string NPCName = NPCInfos.substr(NPCInfos.find(pattern)+pattern.length());
-				NPCName = NPCName.substr(0,NPCName.find(patternEnd));
-
-				// finding type
-				pattern = "type\":";
-				patternEnd = "}";
-				std::string NPCType = NPCInfos.substr(NPCInfos.find(pattern)+pattern.length());
-				NPCType = NPCType.substr(0,NPCType.find(patternEnd));
-
-				// finding id
-				pattern = "id\":";
-				patternEnd = ",";
-				std::string NPCId = NPCInfos.substr(NPCInfos.find(pattern)+pattern.length());
-				NPCId = NPCId.substr(0,NPCId.find(patternEnd));
-
-				// display id
-				pattern = "ModelViewer.show({";
-				std::string NPCDispId = content.substr(content.find(pattern)+pattern.length());
-				pattern = "displayId: ";
-				NPCDispId = NPCDispId.substr(NPCDispId.find(pattern)+pattern.length());
-				patternEnd = " ";
-				NPCDispId = NPCDispId.substr(0,NPCDispId.find(patternEnd));
-				if(NPCDispId.find(",") != std::string::npos) // comma at end of id
-					NPCDispId = NPCDispId.substr(0,NPCDispId.find(","));
-
-				m_nameResult->SetLabel(CSConv(NPCName));
-				m_typeResult->SetLabel(NPCType);
-				m_idResult->SetLabel(NPCId);
-				m_displayIdResult->SetLabel(NPCDispId);
-
-			}
-			delete in;
+			m_nameResult->SetLabel(wxString(result->name.c_str()));
+			m_typeResult->SetLabel(wxString::Format(wxT("%i"),result->type));
+			m_idResult->SetLabel(wxString::Format(wxT("%i"),result->id));
+			m_displayIdResult->SetLabel(wxString::Format(wxT("%i"),result->displayId));
+			delete result;
 		}
 		else
 		{
@@ -177,7 +117,6 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 					wxT("URL Error"), wxOK | wxICON_WARNING);
 			dial->ShowModal();
 		}
-
 	}
 }
 
