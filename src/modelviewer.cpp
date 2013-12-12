@@ -1,8 +1,10 @@
 #include "modelviewer.h"
 
 #include "app.h"
+#include "ArmoryImporter.h"
 #include "Attachment.h"
 #include "Bone.h"
+#include "CharInfos.h"
 #include "exporters.h"
 #include "globalvars.h"
 #include "ModelColor.h"
@@ -17,7 +19,6 @@
 #endif
 
 #include <wx/app.h>
-#include "wx/jsonreader.h"
 #include <wx/regex.h>
 #include <wx/tokenzr.h>
 #include <wx/txtstrm.h>
@@ -3468,209 +3469,36 @@ void ModelViewer::UpdateControls()
 
 void ModelViewer::ImportArmoury(wxString strURL)
 {
-	/*
-	Blizzard's API is mostly RESTful, with data being returned as JSON arrays.
-	Full documentation available here: http://blizzard.github.com/api-wow-docs/
+	ArmoryImporter importer;
+	CharInfos * result = importer.importChar(strURL.c_str());
 
-	We can now gather all the data with a single request of Host + "/api/wow/character/" + Realm + "/" + CharacterName + "?fields=appearance,items"
-	Example: http://us.battle.net/api/wow/character/steamwheedle-cartel/Kjasi?fields=appearance,items
-
-	This will give us all the information we need inside of a JSON array.
-	Format as follows:
+	if(result)
 	{
-		"lastModified":1319438058000
-		"name":"Kjasi",
-		"realm":"Steamwheedle Cartel",
-		"class":5,
-		"race":1,
-		"gender":0,
-		"level":83,
-		"achievementPoints":4290,
-		"thumbnail":"steamwheedle-cartel/193/3589057-avatar.jpg",
-		"items":{	This is the Items array. All available item information is listed here.
-			"averageItemLevel":298,
-			"averageItemLevelEquipped":277,
-			"head":{
-				"id":50006,
-				"name":"Corp'rethar Ceremonial Crown",
-				"icon":"inv_helmet_156",
-				"quality":4,
-				"tooltipParams":{
-					"gem0":41376,
-					"gem1":40151,
-					"enchant":3819,
-					"reforge":119
-					"transmogItem":63672
-				}
-			},
-			(More slots),
-			"ranged":{
-				"id":55480,
-				"name":"Swamplight Wand of the Invoker",
-				"icon":"inv_wand_1h_cataclysm_b_01",
-				"quality":2,
-				"tooltipParams":{
-					"suffix":-39
-				}
-			}
-		},
-		"appearance":{
-			"faceVariation":11,
-			"skinColor":1,
-			"hairVariation":11,
-			"hairColor":4,
-			"featureVariation":1,
-			"showHelm":true,
-			"showCloak":true
-		}
-	}
-	
-	As you can see, this will give us almost all the data we need to properly rebuild the character.
-
-	*/
-
-	// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
-	if ((strURL.Mid(7).Find(wxT("simple"))<0)&&(strURL.Mid(7).Find(wxT("advanced"))<0)){
-		wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-		wxLogMessage(wxT("Improperly Formatted URL. Lacks /simple and /advanced"));
-		return;
-	}		
-	wxString strDomain = strURL.Mid(7).BeforeFirst('/');
-	wxString strPage = strURL.Mid(7).Mid(strDomain.Len());
-
-	wxString strp = strPage.BeforeLast('/');	// No simple/advanced
-	wxString CharName = strp.AfterLast('/');
-	strp = strp.BeforeLast('/');				// Update strp
-	wxString Realm = strp.AfterLast('/');
-
-	wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Realm: %s, Character: %s"),strDomain.c_str(),Realm.c_str(),CharName.c_str());
-
-	wxString apiPage = wxT("http://") + strDomain;
-	apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items");
-
-	wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
-
-	// Build the JSON data containers
-	wxJSONValue root;
-	wxJSONReader reader;
-
-	//Read the Armory API Page & get the error numbers
-	wxURL apiPageURL(apiPage);
-	wxInputStream *doc = apiPageURL.GetInputStream();
-	int numErrors = reader.Parse(*doc,&root);
-
-	if (numErrors == 0 && root.Size() != 0)
-	{
-		// No Gathering Errors Detected.
-
-		// Gather Race & Gender
-		size_t raceID = root[wxT("race")].AsInt();
-		size_t genderID = root[wxT("gender")].AsInt();
-		wxString race = wxT("Human");
-		wxString gender = (genderID == 0) ? wxT("Male") : wxT("Female");
-		CharRacesDB::Record racer = racedb.getById(raceID);
-		if (gameVersion == 30100)
-			race = racer.getString(CharRacesDB::NameV310);
-		else
-			race = racer.getString(CharRacesDB::Name);
-		//wxLogMessage(wxT("RaceID: %i, Race: %s\n          GenderID: %i, Gender: %s"),raceID,race,genderID,gender);
-
 		// Load the model
-		wxString strModel = wxT("Character\\") + race + MPQ_SLASH + gender + MPQ_SLASH + race + gender + wxT(".m2");
+		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");
 		LoadModel(strModel);
 		if (!g_canvas->model)
 			return;
 
-		// Character Details
-		CharDetails cd = g_charControl->cd;
-		wxJSONValue app = root[wxT("appearance")];
-		cd.skinColor = app[wxT("skinColor")].AsInt();
-		cd.faceType = app[wxT("faceVariation")].AsInt();
-		cd.hairColor = app[wxT("hairColor")].AsInt();
-		cd.facialColor = app[wxT("hairColor")].AsInt();
-		cd.hairStyle = app[wxT("hairVariation")].AsInt();
-		cd.facialHair = app[wxT("featureVariation")].AsInt();
-
-		// Hide the helmet
-		// Currently broken.
-		//bHideHelmet = (app[wxT("featureVariation")].AsBool()==true?false:true);
-
-		// Gather Items
-		bool hasTransmogGear = false;
-		wxJSONValue items = root[wxT("items")];
-		if (items[wxT("back")].Size()>0){
-			cd.equipment[CS_CAPE] = items[wxT("back")][wxT("id")].AsInt();
-			if (items[wxT("back")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_CAPE] = items[wxT("back")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("chest")].Size()>0){
-			cd.equipment[CS_CHEST] = items[wxT("chest")][wxT("id")].AsInt();
-			if (items[wxT("chest")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_CHEST] = items[wxT("chest")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("feet")].Size()>0){
-			cd.equipment[CS_BOOTS] = items[wxT("feet")][wxT("id")].AsInt();
-			if (items[wxT("feet")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_BOOTS] = items[wxT("feet")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("hands")].Size()>0){
-			cd.equipment[CS_GLOVES] = items[wxT("hands")][wxT("id")].AsInt();
-			if (items[wxT("hands")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_GLOVES] = items[wxT("hands")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("head")].Size()>0){
-			cd.equipment[CS_HEAD] = items[wxT("head")][wxT("id")].AsInt();
-			if (items[wxT("head")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_HEAD] = items[wxT("head")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("legs")].Size()>0){
-			cd.equipment[CS_PANTS] = items[wxT("legs")][wxT("id")].AsInt();
-			if (items[wxT("legs")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_PANTS] = items[wxT("legs")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("mainHand")].Size()>0){
-			cd.equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("id")].AsInt();
-			if (items[wxT("mainHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("offHand")].Size()>0){
-			cd.equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("id")].AsInt();
-			if (items[wxT("offHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("shirt")].Size()>0){
-			cd.equipment[CS_SHIRT] = items[wxT("shirt")][wxT("id")].AsInt();
-			if (items[wxT("shirt")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_SHIRT] = items[wxT("shirt")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("shoulder")].Size()>0){
-			cd.equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("id")].AsInt();
-			if (items[wxT("shoulder")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("tabard")].Size()>0){
-			cd.equipment[CS_TABARD] = items[wxT("tabard")][wxT("id")].AsInt();
-			if (items[wxT("tabard")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_TABARD] = items[wxT("tabard")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("waist")].Size()>0){
-			cd.equipment[CS_BELT] = items[wxT("waist")][wxT("id")].AsInt();
-			if (items[wxT("waist")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_BELT] = items[wxT("waist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-		if (items[wxT("wrist")].Size()>0){
-			cd.equipment[CS_BRACERS] = items[wxT("wrist")][wxT("id")].AsInt();
-			if (items[wxT("wrist")][wxT("tooltipParams")].HasMember(wxT("transmogItem"))){	cd.equipment[CS_BRACERS] = items[wxT("wrist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt(); hasTransmogGear = true; }
-		}
-
-		if (hasTransmogGear == true){
+		if (result->hasTransmogGear == true)
+		{
 			wxLogMessage(wxT("Transmogrified Gear was found. Switching items..."));
 			wxMessageBox(wxT("We found Transmogrified gear on your character. The items your character is wearing will be exchanged for the items they look like."),wxT("Transmog Notice"));
 		}
 
-		// Set proper eyeglow
-		if (root[wxT("class")].AsInt() == CLASS_DEATH_KNIGHT){
-			cd.eyeGlowType = EGT_DEATHKNIGHT;
-		}else{
-			cd.eyeGlowType = EGT_DEFAULT;
-		}
-
 		// Update the model
-		g_charControl->cd = cd;
+		g_charControl->cd = result->cd;
 		g_charControl->RefreshModel();
 		g_charControl->RefreshEquipment();
 
 		g_modelViewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU, true);
-	}else{
+
+		delete result;
+	}
+	else
+	{
 		wxLogMessage(wxT("There were errors gathering the Armory page."));
 		wxMessageBox(wxT("There was an error when gathering the Armory data.\nPlease try again later."),wxT("Armory Error"));
+
 	}
 }
