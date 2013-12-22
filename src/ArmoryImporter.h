@@ -17,6 +17,7 @@ class ArmoryImporter : public URLImporter
 	~ArmoryImporter();
 
 	CharInfos * importChar(std::string url);
+	ItemRecord * importItem(std::string url);
 };
 
 

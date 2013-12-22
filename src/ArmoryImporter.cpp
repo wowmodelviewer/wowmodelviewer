@@ -9,7 +9,9 @@
 
 #include "charcontrol.h"
 #include "CharInfos.h"
+#include "database.h" // ItemRecord
 #include "globalvars.h"
+
 
 #include "wx/jsonreader.h"
 #include <wx/url.h>
@@ -278,6 +280,61 @@ CharInfos * ArmoryImporter::importChar(std::string url)
 			result->cd.eyeGlowType = EGT_DEATHKNIGHT;
 		else
 			result->cd.eyeGlowType = EGT_DEFAULT;
+
+		return result;
+	}
+
+	return NULL;
+}
+
+ItemRecord * ArmoryImporter::importItem(std::string url)
+{
+	wxString strURL(url);
+
+	// url given is something like http://eu.battle.net/wow/fr/item/104673
+	// we need :
+	// 1. base battle.net address
+	// 2. locale (fr in above example) - Later
+	// 3. item number
+
+	// for the sake of simplicity, only handle english name for now
+
+	wxString strDomain = strURL.Mid(7).BeforeFirst('/');
+	wxString itemNumber = strURL.Mid(7).AfterLast('/');
+
+	wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Item: %s"),strDomain.c_str(),itemNumber.c_str());
+
+	wxString apiPage = wxT("http://") + strDomain;
+	apiPage << wxT("/api/wow/item/") << itemNumber;
+
+	wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
+
+	// Build the JSON data containers
+	wxJSONValue root;
+	wxJSONReader reader;
+
+	//Read the Armory API Page & get the error numbers
+	wxURL apiPageURL(apiPage);
+	wxInputStream *doc = apiPageURL.GetInputStream();
+
+	if(!doc)
+		return NULL;
+
+	int numErrors = reader.Parse(*doc,&root);
+
+	if (numErrors == 0 && root.Size() != 0)
+	{
+		// No Gathering Errors Detected.
+		ItemRecord * result = new ItemRecord();
+
+		// Gather Race & Gender
+		result->id = root[wxT("id")].AsInt();
+		result->model = root[wxT("displayInfoId")].AsInt();
+		root[wxT("name")].AsString(result->name);
+		result->itemclass = root[wxT("itemClass")].AsInt();
+		result->subclass = root[wxT("itemSubClass")].AsInt();
+		result->quality = root[wxT("quality")].AsInt();
+		result->type = root[wxT("inventoryType")].AsInt();
 
 		return result;
 	}

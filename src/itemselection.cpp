@@ -1,6 +1,9 @@
 
 #include "itemselection.h"
 #include "charcontrol.h"
+#include "globalvars.h"
+#include "ItemImporterDialog.h"
+#include "ModelViewer.h"
 #include "NPCimporterDialog.h"
 
 // HACK: this is the ID for the single choice dialog listbox in the wx src
@@ -143,7 +146,8 @@ BEGIN_EVENT_TABLE(FilteredChoiceDialog, ChoiceDialog)
     EVT_TEXT(FilteredChoiceDialog::ID_FILTER_TEXT, FilteredChoiceDialog::OnFilter)
     EVT_BUTTON(FilteredChoiceDialog::ID_FILTER_BUTTON, FilteredChoiceDialog::OnFilter)
     EVT_BUTTON(FilteredChoiceDialog::ID_FILTER_CLEAR, FilteredChoiceDialog::OnFilter)
-    EVT_BUTTON(FilteredChoiceDialog::ID_IMPORT_BUTTON, FilteredChoiceDialog::OnImport)
+    EVT_BUTTON(FilteredChoiceDialog::ID_IMPORT_NPC_BUTTON, FilteredChoiceDialog::OnImportNPC)
+    EVT_BUTTON(FilteredChoiceDialog::ID_IMPORT_ITEM_BUTTON, FilteredChoiceDialog::OnImportItem)
 END_EVENT_TABLE()
 
 
@@ -173,7 +177,11 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
     wxBoxSizer *sizerImport = 0;
     if(type == UPDATE_NPC){
     	sizerImport = new wxBoxSizer( wxHORIZONTAL );
-    	sizerImport->Add(new wxButton(this, ID_IMPORT_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
+    	sizerImport->Add(new wxButton(this, ID_IMPORT_NPC_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
+    }
+    if(type == UPDATE_ITEM || type == UPDATE_SINGLE_ITEM){
+    	sizerImport = new wxBoxSizer( wxHORIZONTAL );
+    	sizerImport->Add(new wxButton(this, ID_IMPORT_ITEM_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
     }
     wxBoxSizer * globalActionsSizer = new wxBoxSizer( wxVERTICAL );
     globalActionsSizer->Add(sizer);
@@ -216,7 +224,7 @@ void FilteredChoiceDialog::OnFilter(wxCommandEvent& event){
     DoFilter();
 }
 
-void FilteredChoiceDialog::OnImport(wxCommandEvent& event){
+void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 	NPCimporterDialog *dlg = new NPCimporterDialog();
 	if ( dlg->ShowModal() == wxID_OK ) {
 		int modelid = dlg->getImportedId();
@@ -242,6 +250,39 @@ void FilteredChoiceDialog::OnImport(wxCommandEvent& event){
 
 			if (cc)
 				cc->OnUpdateItem(UPDATE_NPC, id );
+		}
+	}
+	dlg->Destroy();
+}
+
+void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event){
+	ItemImporterDialog *dlg = new ItemImporterDialog();
+	if ( dlg->ShowModal() == wxID_OK ){
+		ItemRecord rec = dlg->getImportedItem();
+
+		if(rec.id != 0) {
+			int displayId = 0;
+			bool found = false;
+
+			for (std::vector<ItemRecord>::iterator it=items.items.begin();  it!=items.items.end(); ++it) {
+				if(it->id == rec.id) {
+					displayId = it->model;
+					found = true;
+					break;
+				}
+			}
+
+			if(!found) { // item is not present in current database
+				std::cout << "pushing new item" << std::endl;
+
+				if (rec.model > 0) {
+					items.items.push_back(rec);
+					displayId = rec.model;
+				}
+			}
+
+			g_modelViewer->LoadItem(displayId);
+			g_modelViewer->UpdateControls();
 		}
 	}
 	dlg->Destroy();

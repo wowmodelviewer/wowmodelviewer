@@ -1276,13 +1276,33 @@ void ModelViewer::LoadItem(unsigned int displayID)
 			wxT("Item\\ObjectComponents\\Shield\\"),
 			wxT("Item\\ObjectComponents\\Weapon\\") };
 		wxString fn;
+		bool loaded = false;
 		for(int i=0; i<5; i++) {
 			fn = fns[i]+name;
 			if (MPQFile::getSize(fn) > 0) {
+				loaded = true;
 				LoadModel(fn);
 				break;
 			}
 		}
+
+		if(!loaded){ // try head item specific stuff
+			// sigh, head items have more crap to sort out
+			wxString name = modelRec.getString(ItemDisplayDB::Model);
+			name = name.substr(0, name.length()-4); // delete .mdx
+			name.append(wxT("_"));
+
+			// no model loaded, so try blood elf female
+			name.append(wxT("bef.m2"));
+
+			// finally try to load it again
+			fn = fns[0]+name;
+			if (MPQFile::getSize(fn) > 0) {
+				LoadModel(fn);
+			}
+
+		}
+
 		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		charMenu->Enable(ID_SHOW_EARS, false);

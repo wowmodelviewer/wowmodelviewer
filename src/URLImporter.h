@@ -10,7 +10,7 @@
 
 #include <string>
 
-class ItemInfos;
+struct ItemRecord;
 class CharInfos;
 class NPCInfos;
 
@@ -21,7 +21,7 @@ class URLImporter
 	virtual  ~URLImporter();
 
 	virtual NPCInfos * importNPC(std::string url);
-	virtual ItemInfos * importItem(std::string url);
+	virtual ItemRecord * importItem(std::string url);
 	virtual CharInfos * importChar(std::string url);
 };
 

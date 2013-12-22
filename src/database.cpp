@@ -392,7 +392,7 @@ ItemDisplayDB::Record ItemDisplayDB::getById(unsigned int id)
 		if (i->getUInt(ItemDisplayID)==id)
 			return (*i);
 	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
+	wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
 

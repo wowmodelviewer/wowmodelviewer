@@ -433,7 +433,7 @@ bool AnimControl::UpdateItemModel(Model *m)
 
 	// Check to see if its a helmet model, if so cut off the race
 	// and gender specific part of the filename off
-	if (fn.Find(wxT("\\head\\")) > wxNOT_FOUND) {
+	if (fn.Find(wxT("\\head\\")) > wxNOT_FOUND || fn.Find(wxT("\\Head\\")) > wxNOT_FOUND) {
 		fn = fn.BeforeLast('_') + wxT(".mdx");
 	}
 

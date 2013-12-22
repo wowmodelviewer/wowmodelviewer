@@ -55,7 +55,8 @@ public:
         ID_FILTER_TEXT = 1000,
         ID_FILTER_BUTTON,
         ID_FILTER_CLEAR,
-        ID_IMPORT_BUTTON
+        ID_IMPORT_NPC_BUTTON,
+        ID_IMPORT_ITEM_BUTTON
     };
 
 	bool keepFirst;
@@ -69,7 +70,8 @@ public:
 						   bool keepfirst = true);
     
     virtual void OnFilter(wxCommandEvent& event);
-    virtual void OnImport(wxCommandEvent& event);
+    virtual void OnImportNPC(wxCommandEvent& event);
+    virtual void OnImportItem(wxCommandEvent& event);
     virtual int GetSelection() const { return m_indices[m_selection]; }
 
 	virtual void InitFilter();

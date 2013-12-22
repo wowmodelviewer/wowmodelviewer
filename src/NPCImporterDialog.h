@@ -31,7 +31,7 @@ class NPCimporterDialog : public wxDialog
 	wxStaticText * m_idResult;
 	wxStaticText * m_displayIdResult;
 
-	static const int ID_BTN_IMPORT,ID_BTN_DISPLAY;
+	static const int ID_BTN_IMPORT;
 
 	void OnImportButtonClicked(wxCommandEvent &event);
 	void OnDisplayButtonClicked(wxCommandEvent &event);

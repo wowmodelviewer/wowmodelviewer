@@ -24,7 +24,7 @@ NPCInfos * URLImporter::importNPC(std::string url)
 	return NULL;
 }
 
-ItemInfos * URLImporter::importItem(std::string url)
+ItemRecord * URLImporter::importItem(std::string url)
 {
 	return NULL;
 }
