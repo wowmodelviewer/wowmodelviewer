@@ -10,6 +10,8 @@
 
 #include "URLImporter.h"
 
+#include "wx/jsonreader.h"
+
 class ArmoryImporter : public URLImporter
 {
   public:
@@ -18,6 +20,17 @@ class ArmoryImporter : public URLImporter
 
 	CharInfos * importChar(std::string url);
 	ItemRecord * importItem(std::string url);
+
+  private:
+	enum ImportType
+	{
+		CHARACTER,
+		ITEM
+	};
+
+	int readJSONValues(ImportType type, std::string url, wxJSONValue & result);
+
+
 };
 
 

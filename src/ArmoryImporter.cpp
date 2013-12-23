@@ -12,8 +12,6 @@
 #include "database.h" // ItemRecord
 #include "globalvars.h"
 
-
-#include "wx/jsonreader.h"
 #include <wx/url.h>
 
 ArmoryImporter::ArmoryImporter()
@@ -28,104 +26,9 @@ ArmoryImporter::~ArmoryImporter()
 
 CharInfos * ArmoryImporter::importChar(std::string url)
 {
-	/*
-		Blizzard's API is mostly RESTful, with data being returned as JSON arrays.
-		Full documentation available here: http://blizzard.github.com/api-wow-docs/
-
-		We can now gather all the data with a single request of Host + "/api/wow/character/" + Realm + "/" + CharacterName + "?fields=appearance,items"
-		Example: http://us.battle.net/api/wow/character/steamwheedle-cartel/Kjasi?fields=appearance,items
-
-		This will give us all the information we need inside of a JSON array.
-		Format as follows:
-		{
-			"lastModified":1319438058000
-			"name":"Kjasi",
-			"realm":"Steamwheedle Cartel",
-			"class":5,
-			"race":1,
-			"gender":0,
-			"level":83,
-			"achievementPoints":4290,
-			"thumbnail":"steamwheedle-cartel/193/3589057-avatar.jpg",
-			"items":{	This is the Items array. All available item information is listed here.
-				"averageItemLevel":298,
-				"averageItemLevelEquipped":277,
-				"head":{
-					"id":50006,
-					"name":"Corp'rethar Ceremonial Crown",
-					"icon":"inv_helmet_156",
-					"quality":4,
-					"tooltipParams":{
-						"gem0":41376,
-						"gem1":40151,
-						"enchant":3819,
-						"reforge":119
-						"transmogItem":63672
-					}
-				},
-				(More slots),
-				"ranged":{
-					"id":55480,
-					"name":"Swamplight Wand of the Invoker",
-					"icon":"inv_wand_1h_cataclysm_b_01",
-					"quality":2,
-					"tooltipParams":{
-						"suffix":-39
-					}
-				}
-			},
-			"appearance":{
-				"faceVariation":11,
-				"skinColor":1,
-				"hairVariation":11,
-				"hairColor":4,
-				"featureVariation":1,
-				"showHelm":true,
-				"showCloak":true
-			}
-		}
-
-		As you can see, this will give us almost all the data we need to properly rebuild the character.
-
-	 */
-	wxString strURL(url);
-
-	// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
-	if ((strURL.Mid(7).Find(wxT("simple"))<0)&&(strURL.Mid(7).Find(wxT("advanced"))<0))
-	{
-		wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-		wxLogMessage(wxT("Improperly Formatted URL. Lacks /simple and /advanced"));
-		return NULL;
-	}
-	wxString strDomain = strURL.Mid(7).BeforeFirst('/');
-	wxString strPage = strURL.Mid(7).Mid(strDomain.Len());
-
-	wxString strp = strPage.BeforeLast('/');	// No simple/advanced
-	wxString CharName = strp.AfterLast('/');
-	strp = strp.BeforeLast('/');				// Update strp
-	wxString Realm = strp.AfterLast('/');
-
-	wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Realm: %s, Character: %s"),strDomain.c_str(),Realm.c_str(),CharName.c_str());
-
-	wxString apiPage = wxT("http://") + strDomain;
-	apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items");
-
-	wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
-
-	// Build the JSON data containers
 	wxJSONValue root;
-	wxJSONReader reader;
 
-	//Read the Armory API Page & get the error numbers
-	wxURL apiPageURL(apiPage);
-	wxInputStream *doc = apiPageURL.GetInputStream();
-
-	if(!doc)
-		return NULL;
-
-	int numErrors = reader.Parse(*doc,&root);
-
-	if (numErrors == 0 && root.Size() != 0)
+	if (readJSONValues(CHARACTER,url,root) == 0 && root.Size() != 0)
 	{
 		// No Gathering Errors Detected.
 		CharInfos * result = new CharInfos();
@@ -289,40 +192,9 @@ CharInfos * ArmoryImporter::importChar(std::string url)
 
 ItemRecord * ArmoryImporter::importItem(std::string url)
 {
-	wxString strURL(url);
-
-	// url given is something like http://eu.battle.net/wow/fr/item/104673
-	// we need :
-	// 1. base battle.net address
-	// 2. locale (fr in above example) - Later
-	// 3. item number
-
-	// for the sake of simplicity, only handle english name for now
-
-	wxString strDomain = strURL.Mid(7).BeforeFirst('/');
-	wxString itemNumber = strURL.Mid(7).AfterLast('/');
-
-	wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Item: %s"),strDomain.c_str(),itemNumber.c_str());
-
-	wxString apiPage = wxT("http://") + strDomain;
-	apiPage << wxT("/api/wow/item/") << itemNumber;
-
-	wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
-
-	// Build the JSON data containers
 	wxJSONValue root;
-	wxJSONReader reader;
 
-	//Read the Armory API Page & get the error numbers
-	wxURL apiPageURL(apiPage);
-	wxInputStream *doc = apiPageURL.GetInputStream();
-
-	if(!doc)
-		return NULL;
-
-	int numErrors = reader.Parse(*doc,&root);
-
-	if (numErrors == 0 && root.Size() != 0)
+	if (readJSONValues(ITEM,url,root) == 0 && root.Size() != 0)
 	{
 		// No Gathering Errors Detected.
 		ItemRecord * result = new ItemRecord();
@@ -340,4 +212,131 @@ ItemRecord * ArmoryImporter::importItem(std::string url)
 	}
 
 	return NULL;
+}
+
+int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue & result)
+{
+	wxString apiPage;
+	switch(type)
+	{
+	case CHARACTER:
+	{
+		/*
+				Blizzard's API is mostly RESTful, with data being returned as JSON arrays.
+				Full documentation available here: http://blizzard.github.com/api-wow-docs/
+
+				We can now gather all the data with a single request of Host + "/api/wow/character/" + Realm + "/" + CharacterName + "?fields=appearance,items"
+				Example: http://us.battle.net/api/wow/character/steamwheedle-cartel/Kjasi?fields=appearance,items
+
+				This will give us all the information we need inside of a JSON array.
+				Format as follows:
+				{
+					"lastModified":1319438058000
+					"name":"Kjasi",
+					"realm":"Steamwheedle Cartel",
+					"class":5,
+					"race":1,
+					"gender":0,
+					"level":83,
+					"achievementPoints":4290,
+					"thumbnail":"steamwheedle-cartel/193/3589057-avatar.jpg",
+					"items":{	This is the Items array. All available item information is listed here.
+						"averageItemLevel":298,
+						"averageItemLevelEquipped":277,
+						"head":{
+							"id":50006,
+							"name":"Corp'rethar Ceremonial Crown",
+							"icon":"inv_helmet_156",
+							"quality":4,
+							"tooltipParams":{
+								"gem0":41376,
+								"gem1":40151,
+								"enchant":3819,
+								"reforge":119
+								"transmogItem":63672
+							}
+						},
+						(More slots),
+						"ranged":{
+							"id":55480,
+							"name":"Swamplight Wand of the Invoker",
+							"icon":"inv_wand_1h_cataclysm_b_01",
+							"quality":2,
+							"tooltipParams":{
+								"suffix":-39
+							}
+						}
+					},
+					"appearance":{
+						"faceVariation":11,
+						"skinColor":1,
+						"hairVariation":11,
+						"hairColor":4,
+						"featureVariation":1,
+						"showHelm":true,
+						"showCloak":true
+					}
+				}
+
+				As you can see, this will give us almost all the data we need to properly rebuild the character.
+
+		 */
+		wxString strURL(url);
+
+		// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
+		if ((strURL.Mid(7).Find(wxT("simple"))<0)&&(strURL.Mid(7).Find(wxT("advanced"))<0))
+		{
+			wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
+			wxLogMessage(wxT("Improperly Formatted URL. Lacks /simple and /advanced"));
+			return -1;
+		}
+		wxString strDomain = strURL.Mid(7).BeforeFirst('/');
+		wxString strPage = strURL.Mid(7).Mid(strDomain.Len());
+
+		wxString strp = strPage.BeforeLast('/');	// No simple/advanced
+		wxString CharName = strp.AfterLast('/');
+		strp = strp.BeforeLast('/');				// Update strp
+		wxString Realm = strp.AfterLast('/');
+
+		wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Realm: %s, Character: %s"),strDomain.c_str(),Realm.c_str(),CharName.c_str());
+
+		apiPage = wxT("http://") + strDomain;
+		apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items");
+		break;
+	}
+	case ITEM:
+	{
+		// url given is something like http://eu.battle.net/wow/fr/item/104673
+		// we need :
+		// 1. base battle.net address
+		// 2. locale (fr in above example) - Later
+		// 3. item number
+
+		// for the sake of simplicity, only handle english name for now
+
+		wxString strURL(url);
+		wxString strDomain = strURL.Mid(7).BeforeFirst('/');
+		wxString itemNumber = strURL.Mid(7).AfterLast('/');
+
+		wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Item: %s"),strDomain.c_str(),itemNumber.c_str());
+
+		apiPage = wxT("http://") + strDomain;
+		apiPage << wxT("/api/wow/item/") << itemNumber;
+
+		break;
+	}
+	}
+
+	wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
+
+	wxJSONReader reader;
+
+	//Read the Armory API Page & get the error numbers
+	wxURL apiPageURL(apiPage);
+	wxInputStream *doc = apiPageURL.GetInputStream();
+
+	if(!doc)
+		return -1;
+
+	return reader.Parse(*doc,&result);
 }

@@ -2246,7 +2246,6 @@ void CharControl::selectNPC(ssize_t type)
 
 void CharControl::OnUpdateItem(int type, int id)
 {
-	std::cout << __FUNCTION__ << " type = " << type << " id = " << id << std::endl;
 	switch (type) {
 	case UPDATE_ITEM:
 		if (choosingSlot == CS_HAND_LEFT)

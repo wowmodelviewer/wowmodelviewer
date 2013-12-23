@@ -1268,16 +1268,23 @@ void ModelViewer::LoadItem(unsigned int displayID)
 		wxString name = modelRec.getString(ItemDisplayDB::Model);
 		name = name.BeforeLast('.');
 		name.Append(wxT(".M2"));
-		//wxLogMessage(wxT("LoadItem %d %s"), displayID, name.c_str());
+		wxLogMessage(wxT("LoadItem %d %s"), displayID, name.c_str());
 
-		wxString fns[] = { wxT("Item\\ObjectComponents\\Head\\"),
-			wxT("Item\\ObjectComponents\\Shoulder\\"),
+		wxString fns[] = {
+			wxT("Item\\ObjectComponents\\Ammo\\"),
+			wxT("Item\\ObjectComponents\\Backpack\\"),
+			wxT("Item\\ObjectComponents\\Battlestandards\\"),
+			wxT("Item\\ObjectComponents\\Head\\"),
 			wxT("Item\\ObjectComponents\\Quiver\\"),
+			wxT("Item\\ObjectComponents\\Scroll\\"),
 			wxT("Item\\ObjectComponents\\Shield\\"),
-			wxT("Item\\ObjectComponents\\Weapon\\") };
+			wxT("Item\\ObjectComponents\\Shoulder\\"),
+			wxT("Item\\ObjectComponents\\Waist\\"),
+			wxT("Item\\ObjectComponents\\Weapon\\")
+		};
 		wxString fn;
 		bool loaded = false;
-		for(int i=0; i<5; i++) {
+		for(int i=0; i<10; i++) {
 			fn = fns[i]+name;
 			if (MPQFile::getSize(fn) > 0) {
 				loaded = true;
@@ -1296,7 +1303,7 @@ void ModelViewer::LoadItem(unsigned int displayID)
 			name.append(wxT("bef.m2"));
 
 			// finally try to load it again
-			fn = fns[0]+name;
+			fn = fns[3]+name;
 			if (MPQFile::getSize(fn) > 0) {
 				LoadModel(fn);
 			}

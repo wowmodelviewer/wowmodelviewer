@@ -179,7 +179,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
     	sizerImport = new wxBoxSizer( wxHORIZONTAL );
     	sizerImport->Add(new wxButton(this, ID_IMPORT_NPC_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
     }
-    if(type == UPDATE_ITEM || type == UPDATE_SINGLE_ITEM){
+    if(type == UPDATE_SINGLE_ITEM){
     	sizerImport = new wxBoxSizer( wxHORIZONTAL );
     	sizerImport->Add(new wxButton(this, ID_IMPORT_ITEM_BUTTON, wxT("Import from URL"), wxDefaultPosition, wxSize(-1,-1)), 0, 0);
     }
@@ -259,29 +259,23 @@ void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event){
 	ItemImporterDialog *dlg = new ItemImporterDialog();
 	if ( dlg->ShowModal() == wxID_OK ){
 		ItemRecord rec = dlg->getImportedItem();
-
 		if(rec.id != 0) {
-			int displayId = 0;
 			bool found = false;
 
 			for (std::vector<ItemRecord>::iterator it=items.items.begin();  it!=items.items.end(); ++it) {
 				if(it->id == rec.id) {
-					displayId = it->model;
 					found = true;
 					break;
 				}
 			}
 
 			if(!found) { // item is not present in current database
-				std::cout << "pushing new item" << std::endl;
-
 				if (rec.model > 0) {
 					items.items.push_back(rec);
-					displayId = rec.model;
 				}
 			}
 
-			g_modelViewer->LoadItem(displayId);
+			g_modelViewer->LoadItem(rec.model);
 			g_modelViewer->UpdateControls();
 		}
 	}
