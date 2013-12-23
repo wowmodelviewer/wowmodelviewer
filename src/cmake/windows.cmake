@@ -46,6 +46,8 @@
     ${EXTRA_LIBS}
     jpeg
     png
+    armory
+    wowhead
     nextgen
    )
 

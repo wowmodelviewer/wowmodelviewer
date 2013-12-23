@@ -14,7 +14,7 @@
 #include "resource1.h"
 
 #ifdef _MINGW
-#include "next-gen/GlobalSettings.h"
+#include "next-gen/core/GlobalSettings.h"
 #endif
 
 

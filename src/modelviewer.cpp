@@ -1,7 +1,8 @@
 #include "modelviewer.h"
 
 #include "app.h"
-#include "ArmoryImporter.h"
+// @TODO : remove this big path after full move to plugin
+#include "next-gen/plugins/importers/armory/ArmoryImporter.h"
 #include "Attachment.h"
 #include "Bone.h"
 #include "CharInfos.h"
@@ -15,7 +16,7 @@
 #include "UserSkins.h"
 #include "util.h"
 #ifdef _MINGW
-#include "next-gen/GlobalSettings.h"
+#include "next-gen/core/GlobalSettings.h"
 #endif
 
 #include <wx/app.h>
@@ -2132,7 +2133,7 @@ void ModelViewer::LoadWoW()
 	// Error check
 	if (!initDB) {
 		wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-		fileControl->Disable();
+		//fileControl->Disable();
 		SetStatusText(wxT("Some DBC files could not be loaded."));
 	} else {
 		isWoWLoaded = true;

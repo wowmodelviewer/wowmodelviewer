@@ -8,7 +8,7 @@
 #ifndef _WOWHEADIMPORTER_H_
 #define _WOWHEADIMPORTER_H_
 
-#include "URLImporter.h"
+#include "next-gen/core/URLImporter.h"
 
 class WowheadImporter : public URLImporter
 {
@@ -17,7 +17,9 @@ class WowheadImporter : public URLImporter
 	~WowheadImporter();
 
 	NPCInfos * importNPC(std::string url);
+	CharInfos * importChar(std::string url) {return NULL;}
 	ItemRecord * importItem(std::string url);
+
 
   private:
 	std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern);

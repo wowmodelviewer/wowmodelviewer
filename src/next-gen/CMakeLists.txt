@@ -3,13 +3,18 @@ cmake_minimum_required(VERSION 2.6)
 
 message(STATUS "Using Next Gen files")
 
-# Qt dependency
-#set(QT_USE_QTCORE 1)
-#find_package(Qt4 REQUIRED)
-#include(${QT_USE_FILE})
+include_directories(.)
+include_directories(../)
 
-file(GLOB src *.cpp)
+file(GLOB src core/*.cpp)
+
+# add plugins compilation (static compilation for now)
+add_subdirectory(plugins)
 
 add_library(nextgen STATIC ${src})
-#target_link_libraries(nextgen ${QT_LIBRARIES})
+
+add_dependencies(nextgen wowhead)
+add_dependencies(nextgen armory)
+
+target_link_libraries(nextgen wowhead armory)
         

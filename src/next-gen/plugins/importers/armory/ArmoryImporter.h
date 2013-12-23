@@ -8,7 +8,7 @@
 #ifndef _ARMORYIMPORTER_H_
 #define _ARMORYIMPORTER_H_
 
-#include "URLImporter.h"
+#include "next-gen/core/URLImporter.h"
 
 #include "wx/jsonreader.h"
 
@@ -18,6 +18,7 @@ class ArmoryImporter : public URLImporter
 	ArmoryImporter();
 	~ArmoryImporter();
 
+	NPCInfos * importNPC(std::string url) {return NULL;};
 	CharInfos * importChar(std::string url);
 	ItemRecord * importItem(std::string url);
 

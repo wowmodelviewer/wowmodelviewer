@@ -16,7 +16,7 @@
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 
 
 // for all others, include the necessary headers (this file is usually all you

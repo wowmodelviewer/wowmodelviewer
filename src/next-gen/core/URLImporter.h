@@ -17,12 +17,12 @@ class NPCInfos;
 class URLImporter
 {
   public:
-	URLImporter();
-	virtual  ~URLImporter();
+	URLImporter(){};
+	virtual  ~URLImporter(){};
 
-	virtual NPCInfos * importNPC(std::string url);
-	virtual ItemRecord * importItem(std::string url);
-	virtual CharInfos * importChar(std::string url);
+	virtual NPCInfos * importNPC(std::string url) = 0;
+	virtual ItemRecord * importItem(std::string url) = 0;
+	virtual CharInfos * importChar(std::string url) = 0;
 };
 
 

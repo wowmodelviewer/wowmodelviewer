@@ -10,16 +10,18 @@ cmake_minimum_required(VERSION 2.6)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # add wmv cmake directory to search path
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 
 # search for required package (wxwidgets)
 find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
 
+# Qt5 stuff
+# need to first set prefix to your Qt5 install directory
+set(CMAKE_PREFIX_PATH "C:\\Qt\\5.2.0\\mingw48_32")
+find_package(Qt5Core)
+
 # add cximage compilation 
 add_subdirectory(CxImage)
-
-# add compilation from next gen software
-add_subdirectory(next-gen)
 
 # stormlib compilation  
 add_subdirectory(stormlib)
@@ -46,3 +48,6 @@ elseif(APPLE)
   include(cmake/macos.cmake)	  
 endif()
         
+# add compilation from next gen software
+# after legacy part, to ensure that glew inclusio, link, etc is well defined
+add_subdirectory(next-gen)

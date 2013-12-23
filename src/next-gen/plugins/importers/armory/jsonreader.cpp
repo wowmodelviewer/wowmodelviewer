@@ -12,7 +12,7 @@
     #pragma implementation "jsonreader.cpp"
 #endif
 
-#include <wx/jsonreader.h>
+#include "wx/jsonreader.h"
 
 #include <wx/mstream.h>
 #include <wx/sstream.h>

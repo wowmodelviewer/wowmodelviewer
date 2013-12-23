@@ -8,7 +8,8 @@
 #include "NPCimporterDialog.h"
 
 #include "NPCInfos.h"
-#include "WowheadImporter.h"
+// @TODO : remove this big path after full move to plugin
+#include "next-gen/plugins/importers/wowhead/WowheadImporter.h"
 
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
