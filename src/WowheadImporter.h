@@ -18,6 +18,9 @@ class WowheadImporter : public URLImporter
 
 	NPCInfos * importNPC(std::string url);
 	ItemRecord * importItem(std::string url);
+
+  private:
+	std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern);
 };
 
 

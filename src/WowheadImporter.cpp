@@ -53,30 +53,19 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab)
 			infos = infos.substr(0,endIndex);
 
 			// finding name
-			pattern = "name\":\"";
-			patternEnd = "\",";
-			std::string NPCName = infos.substr(infos.find(pattern)+pattern.length());
-			NPCName = NPCName.substr(0,NPCName.find(patternEnd));
+			std::string NPCName = extractSubString(infos,"name\":\"","\",");
 
 			// finding type
-			pattern = "type\":";
-			patternEnd = "}";
-			std::string NPCType = infos.substr(infos.find(pattern)+pattern.length());
-			NPCType = NPCType.substr(0,NPCType.find(patternEnd));
+			std::string NPCType = extractSubString(infos,"type\":","}");
 
 			// finding id
-			pattern = "id\":";
-			patternEnd = ",";
-			std::string NPCId = infos.substr(infos.find(pattern)+pattern.length());
-			NPCId = NPCId.substr(0,NPCId.find(patternEnd));
+			std::string NPCId = extractSubString(infos,"id\":",",");
 
 			// display id
 			pattern = "ModelViewer.show({";
 			std::string NPCDispId = content.substr(content.find(pattern)+pattern.length());
-			pattern = "displayId: ";
-			NPCDispId = NPCDispId.substr(NPCDispId.find(pattern)+pattern.length());
-			patternEnd = " ";
-			NPCDispId = NPCDispId.substr(0,NPCDispId.find(patternEnd));
+			NPCDispId = extractSubString(NPCDispId,"displayId: "," ");
+
 			if(NPCDispId.find(",") != std::string::npos) // comma at end of id
 				NPCDispId = NPCDispId.substr(0,NPCDispId.find(","));
 
@@ -120,40 +109,27 @@ ItemRecord * WowheadImporter::importItem(std::string urlToGrab)
 			infos = infos.substr(0,endIndex);
 
 			// finding name
+			// due to specific stuff on index, name is treated here, not with method like others
 			pattern = "name\":\"";
 			patternEnd = "\",";
 			std::string itemName = infos.substr(infos.find(pattern)+pattern.length());
 			itemName = itemName.substr(1,itemName.find(patternEnd)-1); // first char is a number in name
 
 			// finding type
-			pattern = "slot\":";
-			patternEnd = "}";
-			std::string itemType = infos.substr(infos.find(pattern)+pattern.length());
-			itemType = itemType.substr(0,itemType.find(patternEnd));
+			std::string itemType = extractSubString(infos,"slot\":", "}");
 
 			// finding id
-			pattern = "[";
-			patternEnd = "]";
-			std::string itemId = infos.substr(infos.find(pattern)+pattern.length());
-			itemId = itemId.substr(0,itemId.find(patternEnd));
+			std::string itemId = extractSubString(infos,"[", "]");
 
 			// display id
-			pattern = "displayid\":";
-			patternEnd = "\",";
-			std::string itemDisplayId = infos.substr(infos.find(pattern)+pattern.length());
-			itemDisplayId = itemDisplayId.substr(0,itemDisplayId.find(patternEnd));
+			std::string itemDisplayId = extractSubString(infos,"displayid\":", "\",");
 
-			// display id
-			pattern = "classs\":"; // 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
-			patternEnd = "\",";
-			std::string idemClass = infos.substr(infos.find(pattern)+pattern.length());
-			idemClass = idemClass.substr(0,idemClass.find(patternEnd));
+			// class
+			// 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
+			std::string itemClass = extractSubString(infos,"classs\":", "\",");
 
-			// display id
-			pattern = "subclass\":"; // 3 sss it's not a typo (maybe to avoid conflict with "class" keyword in javascript)
-			patternEnd = "\",";
-			std::string idemSubClass = infos.substr(infos.find(pattern)+pattern.length());
-			idemSubClass = idemSubClass.substr(0,idemSubClass.find(patternEnd));
+			// subclass
+			std::string idemSubClass = extractSubString(infos,"subclass\":", "\",");
 
 			result = new ItemRecord();
 
@@ -161,10 +137,24 @@ ItemRecord * WowheadImporter::importItem(std::string urlToGrab)
 			result->type = atoi(itemType.c_str());
 			result->id = atoi(itemId.c_str());
 			result->model = atoi(itemDisplayId.c_str());
-			result->itemclass = atoi(idemClass.c_str());
+			result->itemclass = atoi(itemClass.c_str());
 			result->subclass = atoi(idemSubClass.c_str());
 		}
 		delete in;
+	}
+	return result;
+}
+
+std::string WowheadImporter::extractSubString(std::string & datas, std::string beginPattern, std::string endPattern)
+{
+	std::string result;
+	try
+	{
+		result = datas.substr(datas.find(beginPattern)+beginPattern.length());
+		result = result.substr(0,result.find(endPattern));
+	}
+	catch(...)
+	{
 	}
 	return result;
 }
