@@ -9,10 +9,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #if !defined( _WX_JSONVAL_H )
-#define _WX_JSONVAL_H
+  #define _WX_JSONVAL_H
 
 #ifdef __GNUG__
-    #pragma interface "jsonval.h"
+  #pragma interface "jsonval.h"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -21,10 +21,10 @@
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWidgets headers)
 #ifndef WX_PRECOMP
-    #include <wx/object.h>
-    #include <wx/hashmap.h>
-    #include <wx/dynarray.h>
-    #include <wx/arrstr.h>
+  #include <wx/object.h>
+  #include <wx/hashmap.h>
+  #include <wx/dynarray.h>
+  #include <wx/arrstr.h>
 #endif
 
 
@@ -35,36 +35,36 @@ class WXDLLIMPEXP_JSON wxJSONReader;
 class WXDLLIMPEXP_JSON wxJSONRefData;
 
 #if defined( wxJSON_USE_STL )
-    // if compiling on MinGW we use the STL-style declaration of wxWidget's
-    // container classes
-    class WXDLLIMPEXP_JSON wxJSONValue;
-    WX_DECLARE_OBJARRAY( wxJSONValue, wxJSONInternalArray );
-    WX_DECLARE_STRING_HASH_MAP( wxJSONValue, wxJSONInternalMap );
+  // if compiling on MinGW we use the STL-style declaration of wxWidget's
+  // container classes
+  class WXDLLIMPEXP_JSON wxJSONValue;
+  WX_DECLARE_OBJARRAY( wxJSONValue, wxJSONInternalArray );
+  WX_DECLARE_STRING_HASH_MAP( wxJSONValue, wxJSONInternalMap );
 #else
-    class WXDLLIMPEXP_JSON wxJSONInternalMap;
-    class WXDLLIMPEXP_JSON wxJSONInternalArray;
+  class WXDLLIMPEXP_JSON wxJSONInternalMap;
+  class WXDLLIMPEXP_JSON wxJSONInternalArray;
 #endif
 
 
 //! The type of the value held by the wxJSONRefData class
 enum wxJSONType {
-    wxJSONTYPE_INVALID = 0,  /*!< the object is not uninitialized        */
-    wxJSONTYPE_NULL,       /*!< the object contains a NULL value         */
-    wxJSONTYPE_INT,        /*!< the object contains an integer           */
-    wxJSONTYPE_UINT,       /*!< the object contains an unsigned integer  */
-    wxJSONTYPE_DOUBLE,     /*!< the object contains a double             */
-    wxJSONTYPE_STRING,     /*!< the object contains a wxString object    */
-    wxJSONTYPE_CSTRING,    /*!< the object contains a static C-string    */
-    wxJSONTYPE_BOOL,       /*!< the object contains a boolean            */
-    wxJSONTYPE_ARRAY,      /*!< the object contains an array of values   */
-    wxJSONTYPE_OBJECT,     /*!< the object contains a map of keys/values */
-    wxJSONTYPE_LONG,       /*!< the object contains a 32-bit integer     */
-    wxJSONTYPE_INT64,      /*!< the object contains a 64-bit integer     */
-    wxJSONTYPE_ULONG,      /*!< the object contains an unsigned 32-bit integer  */
-    wxJSONTYPE_UINT64,     /*!< the object contains an unsigned 64-bit integer  */
-    wxJSONTYPE_SHORT,      /*!< the object contains a 16-bit integer            */
-    wxJSONTYPE_USHORT,     /*!< the object contains a 16-bit unsigned integer   */
-    wxJSONTYPE_MEMORYBUFF  /*!< the object contains a binary memory buffer   */
+  wxJSONTYPE_INVALID = 0,  /*!< the object is not uninitialized        */
+  wxJSONTYPE_NULL,       /*!< the object contains a NULL value         */
+  wxJSONTYPE_INT,        /*!< the object contains an integer           */
+  wxJSONTYPE_UINT,       /*!< the object contains an unsigned integer  */
+  wxJSONTYPE_DOUBLE,     /*!< the object contains a double             */
+  wxJSONTYPE_STRING,     /*!< the object contains a wxString object    */
+  wxJSONTYPE_CSTRING,    /*!< the object contains a static C-string    */
+  wxJSONTYPE_BOOL,       /*!< the object contains a boolean            */
+  wxJSONTYPE_ARRAY,      /*!< the object contains an array of values   */
+  wxJSONTYPE_OBJECT,     /*!< the object contains a map of keys/values */
+  wxJSONTYPE_LONG,       /*!< the object contains a 32-bit integer     */
+  wxJSONTYPE_INT64,      /*!< the object contains a 64-bit integer     */
+  wxJSONTYPE_ULONG,      /*!< the object contains an unsigned 32-bit integer  */
+  wxJSONTYPE_UINT64,     /*!< the object contains an unsigned 64-bit integer  */
+  wxJSONTYPE_SHORT,      /*!< the object contains a 16-bit integer            */
+  wxJSONTYPE_USHORT,     /*!< the object contains a 16-bit unsigned integer   */
+  wxJSONTYPE_MEMORYBUFF  /*!< the object contains a binary memory buffer   */
 };
 
 // the comment position: every value only has one comment position
@@ -80,7 +80,7 @@ enum {
 
             class wxJSONValue
 
-***********************************************************************/
+ ***********************************************************************/
 
 
 // class WXDLLIMPEXP_JSON wxJSONValue : public wxObject
@@ -88,7 +88,7 @@ class WXDLLIMPEXP_JSON wxJSONValue
 {
     friend class wxJSONReader;
 
-public:
+  public:
 
     // ctors and dtor
     wxJSONValue();
@@ -264,7 +264,7 @@ public:
     static  int      CompareMemoryBuff( const wxMemoryBuffer& buff1, const void* buff2 );
     static wxMemoryBuffer ArrayToMemoryBuff( const wxJSONValue& value );
 
-protected:
+  protected:
     wxJSONValue*  Find( unsigned index ) const;
     wxJSONValue*  Find( const wxString& key ) const;
     void          DeepCopy( const wxJSONValue& other );
@@ -295,10 +295,10 @@ protected:
 
 
 #if !defined( wxJSON_USE_STL )
-    // if using wxWidget's implementation of container classes we declare
-    // the OBJARRAY are HASH_MAP _after_ the wxJSONValue is fully known
-    WX_DECLARE_OBJARRAY( wxJSONValue, wxJSONInternalArray );
-    WX_DECLARE_STRING_HASH_MAP( wxJSONValue, wxJSONInternalMap );
+// if using wxWidget's implementation of container classes we declare
+// the OBJARRAY are HASH_MAP _after_ the wxJSONValue is fully known
+WX_DECLARE_OBJARRAY( wxJSONValue, wxJSONInternalArray );
+WX_DECLARE_STRING_HASH_MAP( wxJSONValue, wxJSONInternalMap );
 #endif
 
 
@@ -306,7 +306,7 @@ protected:
 
             class wxJSONRefData
 
-***********************************************************************/
+ ***********************************************************************/
 
 
 
@@ -321,7 +321,7 @@ protected:
  types such as ints unsigned ints, long and so on.
  To know more about the internal structure of the wxJSONValue class
  see \ref pg_json_internals.
-*/
+ */
 union wxJSONValueHolder  {
     int             m_valInt;
     unsigned int    m_valUInt;
@@ -336,7 +336,7 @@ union wxJSONValueHolder  {
     wxInt64         m_valInt64;
     wxUint64        m_valUInt64;
 #endif
-    };
+};
 
 //
 // access to the (unsigned) integer value is done through
@@ -344,11 +344,11 @@ union wxJSONValueHolder  {
 // data member of the 'long long' integer if 64-bits integer
 // support is enabled
 #if defined( wxJSON_64BIT_INT )
- #define VAL_INT  m_valInt64
- #define VAL_UINT m_valUInt64
+#define VAL_INT  m_valInt64
+#define VAL_UINT m_valUInt64
 #else
- #define VAL_INT  m_valLong
- #define VAL_UINT m_valULong
+#define VAL_INT  m_valLong
+#define VAL_UINT m_valULong
 #endif
 
 
@@ -360,7 +360,7 @@ class WXDLLIMPEXP_JSON wxJSONRefData
     friend class wxJSONValue;
     friend class wxJSONWriter;
 
-public:
+  public:
 
     wxJSONRefData();
     virtual ~wxJSONRefData();
@@ -381,7 +381,7 @@ public:
     JSON syntax with the exception of the complex objects.
     This data member is an union of the primitive types
     so that it is simplier to cast them in other compatible types.
-    */
+     */
     wxJSONValueHolder m_value;
 
     //! The JSON string value.
@@ -399,7 +399,7 @@ public:
     \li \c wxJSONVALUE_COMMENT_BEFORE
     \li \c wxJSONVALUE_COMMENT_AFTER
     \li \c wxJSONVALUE_COMMENT_INLINE
-    */
+     */
     int               m_commentPos;
 
     //! The array of comment lines; may be empty.
@@ -412,7 +412,7 @@ public:
     the value appeared. This value is compared to the line number
     of a comment line in order to obtain the value which a
     comment refersto.
-    */
+     */
     int               m_lineNo;
 
     //! The pointer to the memory buffer object
@@ -420,7 +420,7 @@ public:
      Note that despite using reference counting, the \b wxMemoryBuffer is not a 
      \e copy-on-write structure so the wxJSON library uses some tricks in order to
      avoid the side effects of copying / assigning wxMemoryBuffer objects
-    */
+     */
     wxMemoryBuffer* m_memBuff;
 
     // used for debugging purposes: only in debug builds.

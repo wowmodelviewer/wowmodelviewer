@@ -50,69 +50,69 @@
 
 class GlobalSettings
 {
-	public :
-		// Constants / Enums
-		
-		// Constructors 
-	
-		// Destructors
-		~GlobalSettings();
-	
-		// Methods
-		static GlobalSettings & instance();
-		
-		std::string appVersion(std::string a_prefix = std::string(""));
-		std::string appName();
-		std::string buildName();
-		std::string appTitle();
+  public :
+    // Constants / Enums
 
-		bool isBeta() { return m_isBetaVersion; }
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors 
+    // Constructors
 
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors 
-		GlobalSettings();
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		static GlobalSettings * m_p_instance;
+    // Destructors
+    ~GlobalSettings();
 
-		int m_versionMajorNumber;
-		int m_versionMinorNumber;
-		int m_versionMajorRevNumber;
-		int m_versionMinorRevNumber;
-		std::string m_versionSpecialExtend;
-		
-		std::string	m_appName;
-		std::string	m_buildName;
-		std::string m_platform;
-		
-		bool m_isBetaVersion;
+    // Methods
+    static GlobalSettings & instance();
 
-		
-		// friend class declarations
-	
+    std::string appVersion(std::string a_prefix = std::string(""));
+    std::string appName();
+    std::string buildName();
+    std::string appTitle();
+
+    bool isBeta() { return m_isBetaVersion; }
+    // Members
+
+  protected :
+    // Constants / Enums
+
+    // Constructors
+
+    // Destructors
+
+    // Methods
+
+    // Members
+
+  private :
+    // Constants / Enums
+
+    // Constructors
+    GlobalSettings();
+
+    // Destructors
+
+    // Methods
+
+    // Members
+    static GlobalSettings * m_p_instance;
+
+    int m_versionMajorNumber;
+    int m_versionMinorNumber;
+    int m_versionMajorRevNumber;
+    int m_versionMinorRevNumber;
+    std::string m_versionSpecialExtend;
+
+    std::string	m_appName;
+    std::string	m_buildName;
+    std::string m_platform;
+
+    bool m_isBetaVersion;
+
+
+    // friend class declarations
+
 };
 
 // static members definition
 #ifdef _GLOBALSETTINGS_CPP_
-	GlobalSettings * GlobalSettings::m_p_instance = 0;
+GlobalSettings * GlobalSettings::m_p_instance = 0;
 
 #endif
 

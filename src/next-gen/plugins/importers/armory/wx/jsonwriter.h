@@ -12,7 +12,7 @@
 #define _WX_JSONWRITER_H
 
 #ifdef __GNUG__
-    #pragma interface "jsonwriter.h"
+  #pragma interface "jsonwriter.h"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -21,8 +21,8 @@
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWidgets headers)
 #ifndef WX_PRECOMP
-    #include <wx/stream.h>
-    #include <wx/string.h>
+  #include <wx/stream.h>
+  #include <wx/string.h>
 #endif
 
 #include "json_defs.h"

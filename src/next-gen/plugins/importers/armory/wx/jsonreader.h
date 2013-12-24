@@ -9,10 +9,10 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #if !defined( _WX_JSONREADER_H )
-#define _WX_JSONREADER_H
+  #define _WX_JSONREADER_H
 
 #ifdef __GNUG__
-    #pragma interface "jsonreader.h"
+  #pragma interface "jsonreader.h"
 #endif
 
 // For compilers that support precompilation, includes "wx/wx.h".
@@ -22,9 +22,9 @@
 // for all others, include the necessary headers (this file is usually all you
 // need because it includes almost all "standard" wxWidgets headers)
 #ifndef WX_PRECOMP
-    #include <wx/stream.h>
-    #include <wx/string.h>
-    #include <wx/arrstr.h>
+  #include <wx/stream.h>
+  #include <wx/string.h>
+  #include <wx/arrstr.h>
 #endif
 
 
@@ -33,25 +33,25 @@
 
 // The flags of the parser
 enum {
-    wxJSONREADER_STRICT          = 0,
-    wxJSONREADER_ALLOW_COMMENTS  = 1,
-    wxJSONREADER_STORE_COMMENTS  = 2,
-    wxJSONREADER_CASE            = 4,
-    wxJSONREADER_MISSING         = 8,
-    wxJSONREADER_MULTISTRING     = 16,
-    wxJSONREADER_COMMENTS_AFTER  = 32,
-    wxJSONREADER_NOUTF8_STREAM   = 64,
-    wxJSONREADER_MEMORYBUFF      = 128,
+  wxJSONREADER_STRICT          = 0,
+  wxJSONREADER_ALLOW_COMMENTS  = 1,
+  wxJSONREADER_STORE_COMMENTS  = 2,
+  wxJSONREADER_CASE            = 4,
+  wxJSONREADER_MISSING         = 8,
+  wxJSONREADER_MULTISTRING     = 16,
+  wxJSONREADER_COMMENTS_AFTER  = 32,
+  wxJSONREADER_NOUTF8_STREAM   = 64,
+  wxJSONREADER_MEMORYBUFF      = 128,
 
-    wxJSONREADER_TOLERANT        = wxJSONREADER_ALLOW_COMMENTS | wxJSONREADER_CASE |
-                                 wxJSONREADER_MISSING | wxJSONREADER_MULTISTRING,
-    wxJSONREADER_COMMENTS_BEFORE = wxJSONREADER_ALLOW_COMMENTS | wxJSONREADER_STORE_COMMENTS
+  wxJSONREADER_TOLERANT        = wxJSONREADER_ALLOW_COMMENTS | wxJSONREADER_CASE |
+  wxJSONREADER_MISSING | wxJSONREADER_MULTISTRING,
+  wxJSONREADER_COMMENTS_BEFORE = wxJSONREADER_ALLOW_COMMENTS | wxJSONREADER_STORE_COMMENTS
 };
 
 
 class WXDLLIMPEXP_JSON  wxJSONReader
 {
-public:
+  public:
     wxJSONReader( int flags = wxJSONREADER_TOLERANT, int maxErrors = 30 );
     virtual ~wxJSONReader();
 
@@ -72,7 +72,7 @@ public:
     static bool DoStrto_ll( const wxString& str, wxUint64* ui64, wxChar* sign );
 #endif
 
-protected:
+  protected:
 
     int  DoRead( wxInputStream& doc, wxJSONValue& val );
     void AddError( const wxString& descr );

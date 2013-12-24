@@ -53,15 +53,15 @@
 //--------------------------------------------------------------------
 GlobalSettings::GlobalSettings()
 {
-	m_versionMajorNumber = 0;
-	m_versionMinorNumber = 7;
-	m_versionMajorRevNumber = 0;
-	m_versionMinorRevNumber = 6;
+  m_versionMajorNumber = 0;
+  m_versionMinorNumber = 7;
+  m_versionMajorRevNumber = 0;
+  m_versionMinorRevNumber = 6;
 
-	m_appName = "WoW Model Viewer";
-	m_buildName = "Skeer the Bloodseeker";
+  m_appName = "WoW Model Viewer";
+  m_buildName = "Skeer the Bloodseeker";
 
-	/*
+  /*
 		--==List of Build Name ideas==--	(Feel free to add!)
 		Bouncing Baracuda
 		Hoppin Jalapeno
@@ -78,7 +78,7 @@ GlobalSettings::GlobalSettings()
 		Lord Kezzak
 		Perky Pug
 		Great-father Winter
-		
+
 		--== Used Build Names ==--			(So we don't repeat...)
 		Wascally Wabbit
 		Gnome Punter
@@ -87,9 +87,9 @@ GlobalSettings::GlobalSettings()
 		Pickled Herring
 		Windrunner's Lament
 		Lost Lich King
-		
 
-	*/
+
+   */
 
   // platform 
   m_platform = "Windows 32 bits";
@@ -116,44 +116,44 @@ GlobalSettings::~GlobalSettings()
 //--------------------------------------------------------------------
 GlobalSettings & GlobalSettings::instance()
 {
-	if(GlobalSettings::m_p_instance == 0)
-	{
-		GlobalSettings::m_p_instance = new GlobalSettings();
-	}
-	return *GlobalSettings::m_p_instance;
+  if(GlobalSettings::m_p_instance == 0)
+  {
+    GlobalSettings::m_p_instance = new GlobalSettings();
+  }
+  return *GlobalSettings::m_p_instance;
 }
 
 std::string GlobalSettings::appVersion(std::string a_prefix)
 {
-	std::string l_result = a_prefix;
-	std::ostringstream l_oss;
-	l_oss.precision(0);
+  std::string l_result = a_prefix;
+  std::ostringstream l_oss;
+  l_oss.precision(0);
 
-	l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
-			<< m_versionMajorRevNumber << "." << m_versionMinorRevNumber;
-	l_result += l_oss.str();
+  l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
+      << m_versionMajorRevNumber << "." << m_versionMinorRevNumber;
+  l_result += l_oss.str();
 
-	l_result += m_versionSpecialExtend;
-	
-	return l_result;
+  l_result += m_versionSpecialExtend;
+
+  return l_result;
 }
 
 std::string GlobalSettings::appName()
 {
-	return m_appName;
+  return m_appName;
 }
 
 std::string GlobalSettings::buildName()
 {
-	return m_buildName;
+  return m_buildName;
 }
 
 std::string GlobalSettings::appTitle()
 {
-	std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
-	if(m_isBetaVersion)
-		title += " - BETA VERSION";
-	return title;
+  std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
+  if(m_isBetaVersion)
+    title += " - BETA VERSION";
+  return title;
 }
 
 // Protected methods
