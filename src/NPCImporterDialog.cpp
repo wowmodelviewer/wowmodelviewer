@@ -7,9 +7,10 @@
 
 #include "NPCimporterDialog.h"
 
-#include "NPCInfos.h"
-// @TODO : remove this big path after full move to plugin
-#include "next-gen/plugins/importers/wowhead/WowheadImporter.h"
+#include "core/ImporterPlugin.h"
+#include "core/NPCInfos.h"
+#include "core/PluginManager.h"
+#include "metaclasses/Iterator.h"
 
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
@@ -102,8 +103,18 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-		WowheadImporter importer;
-		NPCInfos * result = importer.importNPC(m_URLname->GetValue().mb_str());
+	  std::string url = m_URLname->GetValue().ToAscii();
+	  Iterator<ImporterPlugin> pluginIt(PluginManager::instance());
+	  NPCInfos * result = NULL;
+	  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+	  {
+	    ImporterPlugin * plugin = *pluginIt;
+	    if(plugin->acceptURL(url))
+	    {
+	      result = plugin->importNPC(url);
+	    }
+	  }
+
 		if(result)
 		{
 			m_nameResult->SetLabel(wxString(result->name.c_str()));

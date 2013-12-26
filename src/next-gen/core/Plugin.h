@@ -17,27 +17,26 @@
 \*----------------------------------------------------------------------*/
 
 /*
- * WowheadImporter.h
+ * Plugin.h
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 24 dec. 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#ifndef _PLUGIN_H_
+#define _PLUGIN_H_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <string>
 
 // Qt
-#include <QObject>
-#include <QtPlugin>
 
 // Externals
 
 // Other libraries
-#include "core/ImporterPlugin.h"
+#include "metaclasses/Component.h"
 
 // Current library
 
@@ -48,60 +47,65 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+class Plugin : public Component
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
+	public :
+		// Constants / Enums
+		
+		// Constructors
+    Plugin();
 
-  public :
-    // Constants / Enums
+		// Destructors
+    ~Plugin() {}
+	
+		// Methods
+    // these fields are filled within json plugin informations and set by PluginManager
+    // at load time
+    std::string coreVersionNeeded() const { return m_coreVersionNeeded;}
+    std::string name() const  { return m_name; }
+    std::string version() const { return m_version; }
+    std::string id() const { return (m_category + "_" + m_internalName); }
 
-    // Constructors
-    WowheadImporter() {}
+    static Plugin * load(std::string path);
 
-    // Destructors
-    ~WowheadImporter() {}
+    // overload from component class
+    void doPrint();
 
-    // Methods
-    bool acceptURL(std::string url) const;
-
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
-
-    // Members
-
-    // friend class declarations
-
+		// Members
+		
+	protected :
+		// Constants / Enums
+	
+		// Constructors
+	
+		// Destructors
+	
+		// Methods
+		
+		// Members
+		
+	private :
+		// Constants / Enums
+	
+		// Constructors
+	
+		// Destructors
+	
+		// Methods
+		
+		// Members
+    std::string m_name;
+    std::string m_internalName;
+    std::string m_category;
+    std::string m_version;
+    std::string m_coreVersionNeeded;
+		
+		// friend class declarations
 };
 
 // static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
+#ifdef _PLUGIN_CPP_
 
 #endif
 
-#endif /* _WOWHEADIMPORTER_H_ */
+#endif /* _PLUGIN_H_ */

@@ -26,33 +26,87 @@
 #ifndef _ARMORYIMPORTER_H_
 #define _ARMORYIMPORTER_H_
 
-#include "next-gen/core/URLImporter.h"
+// Includes / class Declarations
+//--------------------------------------------------------------------
+// STL
 
+// Qt
+#include <QObject>
+#include <QtPlugin>
+
+// Externals
+
+// Other libraries
+#include "core/ImporterPlugin.h"
+
+// Current library
 #include "wx/jsonreader.h"
 
-class ArmoryImporter : public URLImporter
+// Namespaces used
+//--------------------------------------------------------------------
+
+
+// Class Declaration
+//--------------------------------------------------------------------
+class ArmoryImporter : public QObject, public ImporterPlugin
 {
-  public:
-    ArmoryImporter();
-    ~ArmoryImporter();
+    Q_INTERFACES(ImporterPlugin)
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "armoryimporter.json")
 
-    NPCInfos * importNPC(std::string url) {return NULL;};
-    CharInfos * importChar(std::string url);
-    ItemRecord * importItem(std::string url);
+  public :
+    // Constants / Enums
 
-  private:
+    // Constructors
+    ArmoryImporter() {}
+
+    // Destructors
+    ~ArmoryImporter() {}
+
+    // Methods
+    bool acceptURL(std::string url) const;
+
+    NPCInfos * importNPC(std::string url) const {return NULL;};
+    CharInfos * importChar(std::string url) const;
+    ItemRecord * importItem(std::string url) const;
+
+    // Members
+
+  protected :
+    // Constants / Enums
+
+    // Constructors
+
+    // Destructors
+
+    // Methods
+
+    // Members
+
+  private :
+    // Constants / Enums
     enum ImportType
     {
       CHARACTER,
       ITEM
     };
 
-    int readJSONValues(ImportType type, std::string url, wxJSONValue & result);
+    // Constructors
 
+    // Destructors
+
+    // Methods
+    int readJSONValues(ImportType type, std::string url, wxJSONValue & result) const;
+
+    // Members
+
+    // friend class declarations
 
 };
 
+// static members definition
+#ifdef _ARMORYIMPORTER_CPP_
 
-
+#endif
 
 #endif /* _ARMORYIMPORTER_H_ */

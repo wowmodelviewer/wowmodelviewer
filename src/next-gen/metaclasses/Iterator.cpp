@@ -16,28 +16,29 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
+
 /*
- * WowheadImporter.h
+ * Iterator.cpp
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 4 may 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#define _ITERATOR_CPP_
+#include "Iterator.h"
+#undef _ITERATOR_CPP_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
 
-// Qt
-#include <QObject>
-#include <QtPlugin>
+// Qt 
+
+// Irrlicht
 
 // Externals
 
 // Other libraries
-#include "core/ImporterPlugin.h"
 
 // Current library
 
@@ -45,63 +46,23 @@
 // Namespaces used
 //--------------------------------------------------------------------
 
-
-// Class Declaration
+// Beginning of implementation
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
-{
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
 
-  public :
-    // Constants / Enums
 
-    // Constructors
-    WowheadImporter() {}
+// Constructors 
+//--------------------------------------------------------------------
 
-    // Destructors
-    ~WowheadImporter() {}
 
-    // Methods
-    bool acceptURL(std::string url) const;
+// Destructor
+//--------------------------------------------------------------------
 
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
 
-    // Members
+// Public methods
+//--------------------------------------------------------------------
 
-  protected :
-    // Constants / Enums
+// Protected methods
+//--------------------------------------------------------------------
 
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
-
-    // Members
-
-    // friend class declarations
-
-};
-
-// static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
-
-#endif
-
-#endif /* _WOWHEADIMPORTER_H_ */
+// Private methods
+//--------------------------------------------------------------------

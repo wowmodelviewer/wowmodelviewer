@@ -17,30 +17,27 @@
 \*----------------------------------------------------------------------*/
 
 /*
- * WowheadImporter.h
+ * BaseIterator.h
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 5 mai 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#ifndef _BASEITERATOR_H_
+#define _BASEITERATOR_H_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <vector>
 
 // Qt
-#include <QObject>
-#include <QtPlugin>
 
 // Externals
 
 // Other libraries
-#include "core/ImporterPlugin.h"
 
 // Current library
-
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -48,40 +45,40 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+template <class ItemType>
+class BaseIterator
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
-
   public :
     // Constants / Enums
 
     // Constructors
-    WowheadImporter() {}
+    BaseIterator();
 
     // Destructors
-    ~WowheadImporter() {}
+    virtual ~BaseIterator();
 
     // Methods
-    bool acceptURL(std::string url) const;
+    void begin();
 
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
+    bool ended();
 
-    // Members
+    void operator++(int);
+
+    int size() { return m_items.size(); }
 
   protected :
     // Constants / Enums
 
     // Constructors
 
+
     // Destructors
 
     // Methods
 
     // Members
+    std::vector<ItemType * > m_items;
+    unsigned int m_index;
 
   private :
     // Constants / Enums
@@ -91,17 +88,50 @@ class WowheadImporter : public QObject, public ImporterPlugin
     // Destructors
 
     // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
 
     // Members
 
     // friend class declarations
-
 };
 
 // static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
+#ifdef _BASEITERATOR_CPP_
 
 #endif
 
-#endif /* _WOWHEADIMPORTER_H_ */
+// Constructors
+//--------------------------------------------------------------------
+template<class ItemType>
+BaseIterator<ItemType>::BaseIterator()
+{
+  m_index = 0;
+}
+
+// Destructor
+//--------------------------------------------------------------------
+template<class ItemType>
+BaseIterator<ItemType>::~BaseIterator()
+{
+
+}
+// Public methods
+//--------------------------------------------------------------------
+template<class ItemType>
+void BaseIterator<ItemType>::begin()
+{
+  m_index = 0;
+}
+
+template<class ItemType>
+bool BaseIterator<ItemType>::ended()
+{
+  return (m_index >= m_items.size());
+}
+
+template<class ItemType>
+void BaseIterator<ItemType>::operator++(int)
+{
+  m_index++;
+}
+
+#endif /* _BASEITERATOR_H_ */

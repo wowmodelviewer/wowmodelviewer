@@ -23,48 +23,72 @@
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
+#define _ARMORYIMPORTER_CPP_
 #include "ArmoryImporter.h"
+#undef _ARMORYIMPORTER_CPP_
 
+// Includes / class Declarations
+//--------------------------------------------------------------------
+// STL
+
+// Qt
+
+// Irrlicht
+
+// Externals
+#include <wx/url.h>
+
+// Other libraries
 #include "charcontrol.h"
-#include "CharInfos.h"
+#include "core/CharInfos.h"
 #include "database.h" // ItemRecord
 #include "globalvars.h"
 
-#include <wx/url.h>
 
-ArmoryImporter::ArmoryImporter()
+// Current library
+
+
+// Namespaces used
+//--------------------------------------------------------------------
+
+// Beginning of implementation
+//--------------------------------------------------------------------
+
+
+// Constructors
+//--------------------------------------------------------------------
+
+// Destructor
+//--------------------------------------------------------------------
+
+
+// Public methods
+//--------------------------------------------------------------------
+bool ArmoryImporter::acceptURL(std::string url) const
 {
-
+  return (url.find("battle.net") != std::string::npos);
 }
 
-ArmoryImporter::~ArmoryImporter()
-{
 
-}
-
-CharInfos * ArmoryImporter::importChar(std::string url)
+CharInfos * ArmoryImporter::importChar(std::string url) const
 {
+  wxInitialize();
+
+  CharInfos * result = NULL;
   wxJSONValue root;
 
   if (readJSONValues(CHARACTER,url,root) == 0 && root.Size() != 0)
   {
     // No Gathering Errors Detected.
-    CharInfos * result = new CharInfos();
+    result = new CharInfos();
 
     // Gather Race & Gender
     result->raceId = root[wxT("race")].AsInt();
     result->genderId = root[wxT("gender")].AsInt();
     result->race = wxT("Human");
     result->gender = (result->genderId == 0) ? wxT("Male") : wxT("Female");
-    CharRacesDB::Record racer = racedb.getById(result->raceId);
-    if (gameVersion == 30100)
-      result->race = racer.getString(CharRacesDB::NameV310);
-    else
-      result->race = racer.getString(CharRacesDB::Name);
-    //wxLogMessage(wxT("RaceID: %i, Race: %s\n          GenderID: %i, Gender: %s"),raceID,race,genderID,gender);
 
     // Character Details
-    result->cd = g_charControl->cd;
     result->cd.race = result->raceId;
     result->cd.gender = result->genderId;
     wxJSONValue app = root[wxT("appearance")];
@@ -202,20 +226,23 @@ CharInfos * ArmoryImporter::importChar(std::string url)
     else
       result->cd.eyeGlowType = EGT_DEFAULT;
 
-    return result;
+    wxUninitialize();
   }
 
-  return NULL;
+  return result;
 }
 
-ItemRecord * ArmoryImporter::importItem(std::string url)
+ItemRecord * ArmoryImporter::importItem(std::string url) const
 {
+  wxInitialize();
+
   wxJSONValue root;
+  ItemRecord * result = NULL;
 
   if (readJSONValues(ITEM,url,root) == 0 && root.Size() != 0)
   {
     // No Gathering Errors Detected.
-    ItemRecord * result = new ItemRecord();
+    result = new ItemRecord();
 
     // Gather Race & Gender
     result->id = root[wxT("id")].AsInt();
@@ -225,14 +252,19 @@ ItemRecord * ArmoryImporter::importItem(std::string url)
     result->subclass = root[wxT("itemSubClass")].AsInt();
     result->quality = root[wxT("quality")].AsInt();
     result->type = root[wxT("inventoryType")].AsInt();
-
-    return result;
   }
 
-  return NULL;
+  wxUninitialize();
+  return result;
 }
 
-int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue & result)
+
+// Protected methods
+//--------------------------------------------------------------------
+
+// Private methods
+//--------------------------------------------------------------------
+int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue & result) const
 {
   wxString apiPage;
   switch(type)

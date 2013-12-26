@@ -1,11 +1,8 @@
 #include "modelviewer.h"
 
 #include "app.h"
-// @TODO : remove this big path after full move to plugin
-#include "next-gen/plugins/importers/armory/ArmoryImporter.h"
 #include "Attachment.h"
 #include "Bone.h"
-#include "CharInfos.h"
 #include "exporters.h"
 #include "globalvars.h"
 #include "ModelColor.h"
@@ -15,9 +12,13 @@
 #include "TextureAnim.h"
 #include "UserSkins.h"
 #include "util.h"
-#ifdef _MINGW
-#include "next-gen/core/GlobalSettings.h"
-#endif
+
+#include "core/CharInfos.h"
+#include "core/GlobalSettings.h"
+#include "core/ImporterPlugin.h"
+#include "core/PluginManager.h"
+#include "metaclasses/Iterator.h"
+
 
 #include <wx/app.h>
 #include <wx/regex.h>
@@ -3497,11 +3498,28 @@ void ModelViewer::UpdateControls()
 
 void ModelViewer::ImportArmoury(wxString strURL)
 {
-	ArmoryImporter importer;
-	CharInfos * result = importer.importChar(strURL.c_str());
+  CharInfos * result = NULL;
+
+  std::string url = strURL.ToAscii();
+  Iterator<ImporterPlugin> pluginIt(PluginManager::instance());
+  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+  {
+    ImporterPlugin * plugin = *pluginIt;
+    if(plugin->acceptURL(url))
+    {
+      result = plugin->importChar(url);
+    }
+  }
 
 	if(result)
 	{
+	  CharRacesDB::Record racer = racedb.getById(result->raceId);
+	  if (gameVersion == 30100)
+	    result->race = racer.getString(CharRacesDB::NameV310);
+	  else
+	    result->race = racer.getString(CharRacesDB::Name);
+	  //wxLogMessage(wxT("RaceID: %i, Race: %s\n          GenderID: %i, Gender: %s"),raceID,race,genderID,gender);
+
 		// Load the model
 		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");
 		LoadModel(strModel);

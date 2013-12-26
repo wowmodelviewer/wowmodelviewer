@@ -46,9 +46,7 @@
     ${EXTRA_LIBS}
     jpeg
     png
-    armory
-    wowhead
-    nextgen
+    core
    )
 
   add_custom_target(release

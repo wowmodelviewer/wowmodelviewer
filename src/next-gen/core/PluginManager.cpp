@@ -16,28 +16,31 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
+
 /*
- * WowheadImporter.h
+ * PluginManager.cpp
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 24 dec. 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#define _PLUGINMANAGER_CPP_
+#include "PluginManager.h"
+#undef _PLUGINMANAGER_CPP_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
 
-// Qt
-#include <QObject>
-#include <QtPlugin>
+// Qt 
+#include <QDir>
+#include <Qstring>
+#include <QStringList>
+
 
 // Externals
 
 // Other libraries
-#include "core/ImporterPlugin.h"
 
 // Current library
 
@@ -46,62 +49,48 @@
 //--------------------------------------------------------------------
 
 
-// Class Declaration
+// Beginning of implementation
+//====================================================================
+
+// Constructors 
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+// private constructor
+PluginManager::PluginManager()
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
 
-  public :
-    // Constants / Enums
+}
 
-    // Constructors
-    WowheadImporter() {}
+// Destructor
+//--------------------------------------------------------------------
 
-    // Destructors
-    ~WowheadImporter() {}
 
-    // Methods
-    bool acceptURL(std::string url) const;
+// Public methods
+//--------------------------------------------------------------------
+ void PluginManager::init(const std::string & dir)
+ {
+   QString directory = QString::fromStdString(dir);
+   std::cout << "--== Loading Plugins ==--" << std::endl;
+   QDir pluginDir(directory);
+   QStringList plugins = pluginDir.entryList(QDir::Files);
+   for (int i=0;i<plugins.size();i++)
+   {
+     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString());
+     addChild(newPlugin);
+   }
 
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
+   std::cout << "--== Plugin Report ==--" << std::endl;
+   print();
+   std::cout << "--== End Plugin Loading ==--" << std::endl;
+ }
 
-    // Members
+ void PluginManager::doPrint()
+ {
+   std::cout << "PluginManager (" << nbChildren() << " plugins loaded)" << std::endl;
+ }
 
-  protected :
-    // Constants / Enums
+// Protected methods
+//--------------------------------------------------------------------
 
-    // Constructors
 
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
-
-    // Members
-
-    // friend class declarations
-
-};
-
-// static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
-
-#endif
-
-#endif /* _WOWHEADIMPORTER_H_ */
+// Private methods
+//--------------------------------------------------------------------

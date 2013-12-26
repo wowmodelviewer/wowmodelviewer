@@ -23,29 +23,56 @@
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
+#define _WOWHEADIMPORTER_CPP_
 #include "WowheadImporter.h"
+#undef _WOWHEADIMPORTER_CPP_
 
-#include "database.h" // ItemRecord
-#include "NPCInfos.h"
-#include "util.h" // CSConv
+// Includes / class Declarations
+//--------------------------------------------------------------------
+// STL
 
+// Qt
+
+// Irrlicht
+
+// Externals
 #include <wx/sstream.h>
 #include <wx/url.h>
 #include <wx/html/htmlpars.h>
 
-WowheadImporter::WowheadImporter()
-{
+// Other libraries
+#include "database.h" // ItemRecord
+#include "core/NPCInfos.h"
+#include "util.h" // CSConv
 
+// Current library
+
+
+// Namespaces used
+//--------------------------------------------------------------------
+
+// Beginning of implementation
+//--------------------------------------------------------------------
+
+
+// Constructors
+//--------------------------------------------------------------------
+
+
+// Destructor
+//--------------------------------------------------------------------
+
+
+// Public methods
+//--------------------------------------------------------------------
+bool WowheadImporter::acceptURL(std::string url) const
+{
+  return (url.find("wowhead") != std::string::npos);
 }
 
-WowheadImporter::~WowheadImporter()
+NPCInfos * WowheadImporter::importNPC(std::string urlToGrab) const
 {
-
-}
-
-
-NPCInfos * WowheadImporter::importNPC(std::string urlToGrab)
-{
+  wxInitialize();
   NPCInfos * result = NULL;
 
   wxURL url(urlToGrab);
@@ -89,7 +116,7 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab)
 
       result = new NPCInfos();
 
-      result->name = CSConv(NPCName).mb_str();
+      result->name = NPCName;
       result->type = atoi(NPCType.c_str());
       result->id = atoi(NPCId.c_str());
       result->displayId = atoi(NPCDispId.c_str());
@@ -97,11 +124,13 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab)
     }
     delete in;
   }
+  wxUninitialize();
   return result;
 }
 
-ItemRecord * WowheadImporter::importItem(std::string urlToGrab)
+ItemRecord * WowheadImporter::importItem(std::string urlToGrab) const
 {
+  wxInitialize();
   ItemRecord * result = NULL;
 
   wxURL url(urlToGrab);
@@ -151,7 +180,7 @@ ItemRecord * WowheadImporter::importItem(std::string urlToGrab)
 
       result = new ItemRecord();
 
-      result->name = CSConv(itemName).mb_str();
+      result->name = itemName;
       result->type = atoi(itemType.c_str());
       result->id = atoi(itemId.c_str());
       result->model = atoi(itemDisplayId.c_str());
@@ -160,10 +189,18 @@ ItemRecord * WowheadImporter::importItem(std::string urlToGrab)
     }
     delete in;
   }
+
+  wxUninitialize();
   return result;
 }
 
-std::string WowheadImporter::extractSubString(std::string & datas, std::string beginPattern, std::string endPattern)
+
+// Protected methods
+//--------------------------------------------------------------------
+
+// Private methods
+//--------------------------------------------------------------------
+std::string WowheadImporter::extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const
 {
   std::string result;
   try

@@ -17,27 +17,26 @@
 \*----------------------------------------------------------------------*/
 
 /*
- * WowheadImporter.h
+ * CharInfos.h
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 26 nov. 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#ifndef _CHARINFOS_H_
+#define _CHARINFOS_H_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
 
 // Qt
-#include <QObject>
-#include <QtPlugin>
 
 // Externals
+#include <wx/string.h>
 
 // Other libraries
-#include "core/ImporterPlugin.h"
+#include "CharDetails.h"
 
 // Current library
 
@@ -48,29 +47,24 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+class CharInfos
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
-
   public :
     // Constants / Enums
 
     // Constructors
-    WowheadImporter() {}
 
     // Destructors
-    ~WowheadImporter() {}
 
     // Methods
-    bool acceptURL(std::string url) const;
-
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
 
     // Members
+    size_t raceId;
+    size_t genderId;
+    wxString race;
+    wxString gender;
+    bool hasTransmogGear;
+    CharDetails cd;
 
   protected :
     // Constants / Enums
@@ -91,7 +85,6 @@ class WowheadImporter : public QObject, public ImporterPlugin
     // Destructors
 
     // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
 
     // Members
 
@@ -100,8 +93,8 @@ class WowheadImporter : public QObject, public ImporterPlugin
 };
 
 // static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
+#ifdef _CHARINFOS_CPP_
 
 #endif
 
-#endif /* _WOWHEADIMPORTER_H_ */
+#endif /* _CHARINFOS_H_ */

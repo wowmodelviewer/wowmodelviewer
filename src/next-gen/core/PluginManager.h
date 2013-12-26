@@ -17,30 +17,28 @@
 \*----------------------------------------------------------------------*/
 
 /*
- * WowheadImporter.h
+ * PluginManager.h
  *
- *  Created on: 1 dec. 2013
+ *  Created on: 24 dec. 2013
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#ifndef _PLUGINMANAGER_H_
+#define _PLUGINMANAGER_H_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
 
 // Qt
-#include <QObject>
-#include <QtPlugin>
 
 // Externals
 
 // Other libraries
-#include "core/ImporterPlugin.h"
+#include "metaclasses/Container.h"
 
 // Current library
-
+#include "Plugin.h"
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -48,60 +46,60 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+class PluginManager : public Container<Plugin>
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
+	public :
+		// Constants / Enums
+		
+		// Constructors
 
-  public :
-    // Constants / Enums
+		// Destructors
+	
+		// Methods
+    static PluginManager & instance()
+    {
+      static PluginManager m_instance;
+      return m_instance;
+    }
 
-    // Constructors
-    WowheadImporter() {}
+    // load all plugins in given directory
+    void init(const std::string & pluginDir);
 
-    // Destructors
-    ~WowheadImporter() {}
+    // overloaded from Component method
+    void doPrint();
 
-    // Methods
-    bool acceptURL(std::string url) const;
+		// Members
+		
+	protected :
+		// Constants / Enums
+	
+		// Constructors
+	
+		// Destructors
+	
+		// Methods
+		
+		// Members
+		
+	private :
+		// Constants / Enums
+	
+		// Constructors
+    // to avoid unwanted instantiation as this class is a Singleton
+    PluginManager();
+    PluginManager(PluginManager &);
 
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
+		// Destructors
+	
+		// Methods
 
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    std::string extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const;
-
-    // Members
-
-    // friend class declarations
-
+		// friend class declarations
+	
 };
 
 // static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
+#ifdef _PLUGINMANAGER_CPP_
 
 #endif
 
-#endif /* _WOWHEADIMPORTER_H_ */
+#endif /* _PLUGINMANAGER_H_ */

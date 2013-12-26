@@ -15,6 +15,7 @@
 
 #ifdef _MINGW
 #include "next-gen/core/GlobalSettings.h"
+#include "next-gen/core/PluginManager.h"
 #endif
 
 
@@ -271,6 +272,7 @@ bool WowModelViewApp::OnInit()
 		frame->LoadWoW();
 	}
 
+	PluginManager::instance().init("./plugins");
 	return true;
 }
 
