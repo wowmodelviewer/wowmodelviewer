@@ -104,7 +104,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	else
 	{
 	  std::string url = m_URLname->GetValue().ToAscii();
-	  Iterator<ImporterPlugin> pluginIt(PluginManager::instance());
+	  Iterator<ImporterPlugin> pluginIt(PLUGINMANAGER);
 	  NPCInfos * result = NULL;
 	  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
 	  {

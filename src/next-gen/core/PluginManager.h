@@ -46,6 +46,8 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
+#define PLUGINMANAGER PluginManager::instance()
+
 class PluginManager : public Container<Plugin>
 {
 	public :

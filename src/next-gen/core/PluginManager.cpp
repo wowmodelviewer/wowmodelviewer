@@ -69,7 +69,6 @@ PluginManager::PluginManager()
  void PluginManager::init(const std::string & dir)
  {
    QString directory = QString::fromStdString(dir);
-   std::cout << "--== Loading Plugins ==--" << std::endl;
    QDir pluginDir(directory);
    QStringList plugins = pluginDir.entryList(QDir::Files);
    for (int i=0;i<plugins.size();i++)
@@ -77,10 +76,7 @@ PluginManager::PluginManager()
      Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString());
      addChild(newPlugin);
    }
-
-   std::cout << "--== Plugin Report ==--" << std::endl;
    print();
-   std::cout << "--== End Plugin Loading ==--" << std::endl;
  }
 
  void PluginManager::doPrint()

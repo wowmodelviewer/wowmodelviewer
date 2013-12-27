@@ -272,7 +272,7 @@ bool WowModelViewApp::OnInit()
 		frame->LoadWoW();
 	}
 
-	PluginManager::instance().init("./plugins");
+	PLUGINMANAGER.init("./plugins");
 	return true;
 }
 

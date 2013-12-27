@@ -3501,7 +3501,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
   CharInfos * result = NULL;
 
   std::string url = strURL.ToAscii();
-  Iterator<ImporterPlugin> pluginIt(PluginManager::instance());
+  Iterator<ImporterPlugin> pluginIt(PLUGINMANAGER);
   for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
   {
     ImporterPlugin * plugin = *pluginIt;
