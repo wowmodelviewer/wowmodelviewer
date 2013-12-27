@@ -55,11 +55,10 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 7;
-  m_versionMajorRevNumber = 0;
-  m_versionMinorRevNumber = 6;
+  m_versionRevNumber = 1;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Skeer the Bloodseeker";
+  m_buildName = "Great-father Winter";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -87,7 +86,7 @@ GlobalSettings::GlobalSettings()
 		Pickled Herring
 		Windrunner's Lament
 		Lost Lich King
-
+    Skeer the Bloodseeker
 
    */
 
@@ -114,15 +113,6 @@ GlobalSettings::~GlobalSettings()
 
 // Public methods
 //--------------------------------------------------------------------
-GlobalSettings & GlobalSettings::instance()
-{
-  if(GlobalSettings::m_p_instance == 0)
-  {
-    GlobalSettings::m_p_instance = new GlobalSettings();
-  }
-  return *GlobalSettings::m_p_instance;
-}
-
 std::string GlobalSettings::appVersion(std::string a_prefix)
 {
   std::string l_result = a_prefix;
@@ -130,7 +120,7 @@ std::string GlobalSettings::appVersion(std::string a_prefix)
   l_oss.precision(0);
 
   l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
-      << m_versionMajorRevNumber << "." << m_versionMinorRevNumber;
+      << m_versionRevNumber;
   l_result += l_oss.str();
 
   l_result += m_versionSpecialExtend;

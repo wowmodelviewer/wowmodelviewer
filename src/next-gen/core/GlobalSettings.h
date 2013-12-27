@@ -59,7 +59,11 @@ class GlobalSettings
     ~GlobalSettings();
 
     // Methods
-    static GlobalSettings & instance();
+    static GlobalSettings & instance()
+    {
+      static GlobalSettings m_instance;
+      return m_instance;
+    }
 
     std::string appVersion(std::string a_prefix = std::string(""));
     std::string appName();
@@ -85,18 +89,17 @@ class GlobalSettings
 
     // Constructors
     GlobalSettings();
+    GlobalSettings(GlobalSettings &);
 
     // Destructors
 
     // Methods
 
     // Members
-    static GlobalSettings * m_p_instance;
 
     int m_versionMajorNumber;
     int m_versionMinorNumber;
-    int m_versionMajorRevNumber;
-    int m_versionMinorRevNumber;
+    int m_versionRevNumber;
     std::string m_versionSpecialExtend;
 
     std::string	m_appName;
@@ -112,7 +115,6 @@ class GlobalSettings
 
 // static members definition
 #ifdef _GLOBALSETTINGS_CPP_
-GlobalSettings * GlobalSettings::m_p_instance = 0;
 
 #endif
 

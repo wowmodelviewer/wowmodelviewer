@@ -19,7 +19,6 @@
 #include "core/PluginManager.h"
 #include "metaclasses/Iterator.h"
 
-
 #include <wx/app.h>
 #include <wx/regex.h>
 #include <wx/tokenzr.h>
@@ -237,12 +236,8 @@ ModelViewer::ModelViewer()
 
 	//wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
 	// create our main frame
-#ifndef _MINGW
-	if (Create(NULL, wxID_ANY, wxString(APP_TITLE wxT(" ") APP_VERSION wxT(" ") APP_PLATFORM APP_ISDEBUG), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) {
-#else
 	if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE|wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) {
-	SetIcon(wxICON(IDI_ICON1));
-#endif
+	  SetIcon(wxICON(IDI_ICON1));
 		SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 #ifndef	_LINUX // buggy
 		SetBackgroundStyle(wxBG_STYLE_CUSTOM);
@@ -2573,9 +2568,9 @@ void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 		wxString data(buffer, wxConvUTF8);
 		wxString version = data.BeforeFirst('\n');
 		wxString downloadURL = data.AfterFirst('\n');
-		int Compare = (int)version.find(wxString(APP_VERSION));
+		int Compare = (int)version.find(wxString(GLOBALSETTINGS.appVersion()));
 
-		wxLogMessage("Update Data:\nCurrent Version: \"%s\"\nRecorded Version \"%s\"\nURL Download: %s\nComparison Result: %i",wxString(APP_VERSION).c_str(), version.c_str(), downloadURL.c_str(), Compare);
+		wxLogMessage("Update Data:\nCurrent Version: \"%s\"\nRecorded Version \"%s\"\nURL Download: %s\nComparison Result: %i",GLOBALSETTINGS.appVersion().c_str(), version.c_str(), downloadURL.c_str(), Compare);
 
 		if (Compare == 0) {
 			wxMessageBox(_("You have the most up-to-date version."), _("Update Check"));

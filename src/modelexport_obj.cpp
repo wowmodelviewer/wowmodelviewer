@@ -7,6 +7,8 @@
 
 #include <math.h>
 
+#include "core/GlobalSettings.h"
+
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>
 
@@ -240,7 +242,7 @@ void ExportOBJ_M2(Attachment *att, Model *m, wxString fn, bool init)
 
 	ms.Close();
 
-	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << APP_VERSION << endl << endl;
+	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << GLOBALSETTINGS.appVersion() << endl << endl;
 	f << wxT("mtllib ") << matName << endl << endl;
 
 	wxLogMessage(wxT("Materials and Texture Images Exported."));
@@ -725,7 +727,7 @@ void ExportOBJ_WMO(WMO *m, wxString file)
 	fm.close();
 	wxLogMessage(wxT("Materials and Texture Images Exported."));
 
-	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << APP_VERSION << endl << endl;
+	f << wxT("# Wavefront OBJ exported by WoW Model Viewer ") << GLOBALSETTINGS.appVersion() << endl << endl;
 	f << wxT("mtllib ") << mtlName.mb_str() << endl << endl;
 
 	// geometric vertices (v)
