@@ -32,6 +32,7 @@
 #include <string>
 
 // Qt
+#include <QObject>
 
 // Externals
 struct ItemRecord;

@@ -37,8 +37,9 @@
 // Externals
 
 // Other libraries
+#define _IMPORTERPLUGIN_CPP_ // to define interface
 #include "core/ImporterPlugin.h"
-
+#undef _IMPORTERPLUGIN_CPP_
 // Current library
 
 
