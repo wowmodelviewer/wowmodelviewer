@@ -2477,7 +2477,7 @@ Windows 98\\ME\\2000\\XP on 17th December 2006\n\n\
 	info.AddTranslator(wxT("Tigurius (Deutsch)"));
 	info.AddTranslator(wxT("Kurax (Chinese)"));
 
-	info.SetWebSite(wxT("http://wowmodelviewer.org/forum/"));
+	info.SetWebSite(wxT("http://wowmodelviewer.net/forum/"));
     info.SetCopyright(
 wxString(wxT("World of Warcraft(R) is a Registered trademark of\n\
 Blizzard Entertainment(R). All game assets and content\n\
