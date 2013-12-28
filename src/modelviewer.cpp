@@ -2455,10 +2455,6 @@ Windows 98\\ME\\2000\\XP on 17th December 2006\n\n\
 */
 
 	wxAboutDialogInfo info;
-#ifndef _MINGW
-    info.SetName(APP_TITLE);
-	info.SetVersion(wxT("\n") APP_VERSION wxT(" (") APP_BUILDNAME wxT(")\n") APP_PLATFORM APP_ISDEBUG wxT(" Edition"));
-#else
 	info.SetName(GLOBALSETTINGS.appName());
 	wxString l_version = L"\n" + GLOBALSETTINGS.appVersion() + L" (" + GLOBALSETTINGS.buildName() + L")\n";
 	
@@ -2466,7 +2462,7 @@ Windows 98\\ME\\2000\\XP on 17th December 2006\n\n\
 	  l_version += "BETA VERSION";
 	
 	info.SetVersion(l_version);
-#endif
+
 	info.AddDeveloper(wxT("Ufo_Z"));
 	info.AddDeveloper(wxT("Darjk"));
 	info.AddDeveloper(wxT("Chuanhsing"));
