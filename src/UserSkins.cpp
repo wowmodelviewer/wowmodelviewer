@@ -28,12 +28,8 @@ void UserSkins::LoadFile(const wxString &filename)
 		return;
 	}
 
-	// FIXME: ifstream is not compitable with multibyte path name
-#ifndef _MINGW
-	std::ifstream in(filename.fn_str());
-#else
 	std::ifstream in(filename.char_str());
-#endif
+
 	if (!in.is_open()) {
 		wxLogMessage(wxT("Failed to open '%s' while loading user skins"), filename.c_str());
 		return;

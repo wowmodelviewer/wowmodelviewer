@@ -5,18 +5,14 @@
 #include <wx/stdpaths.h>
 #include <wx/app.h>
 
-#ifdef _MINGW
 #include <windows.h>
 #include "util.h"
-#endif
 
 #include "UserSkins.h"
 #include "resource1.h"
 
-#ifdef _MINGW
-#include "next-gen/core/GlobalSettings.h"
-#include "next-gen/core/PluginManager.h"
-#endif
+#include "core/GlobalSettings.h"
+#include "core/PluginManager.h"
 
 
 /*	THIS IS OUR MAIN "START UP" FILE.
@@ -77,21 +73,7 @@ bool WowModelViewApp::OnInit()
 
 	wxImage::AddHandler( new wxPNGHandler);
 	wxImage::AddHandler( new wxXPMHandler);
-#ifndef _MINGW
-	if (wxFile::Exists(wxT("Splash.png"))) {
-		wxBitmap bitmap;
-		if (bitmap.LoadFile(wxT("Splash.png"),wxBITMAP_TYPE_PNG) == false){
-			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
-			//return false;		// Used while debugging the splash screen.
-		} else {
-			splash = new wxSplashScreen(bitmap,
-				wxSPLASH_CENTRE_ON_SCREEN|wxSPLASH_TIMEOUT,
-				2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-				wxBORDER_NONE);
-		}
-		wxYield();
-	}
-#else
+
 	wxBitmap * bitmap = createBitmapFromResource("SPLASH");
 	if(!bitmap)
 		wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
@@ -102,7 +84,6 @@ bool WowModelViewApp::OnInit()
 				wxBORDER_NONE);
 	wxYield();
 	Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
-#endif
 	
 	
 	// Error & Logging settings
@@ -621,13 +602,9 @@ bool WowModelViewApp::LoadSettings()
 {
 	wxString tmp;
 	// Application Config Settings
-#ifndef _MINGW	
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
-#else
 	wxFileConfig *pConfig = new wxFileConfig(GetAppName(), wxEmptyString,
                              cfgPath,
                              wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
-#endif
 	
 	
 	if(pConfig)

@@ -2482,25 +2482,17 @@ is (C)2004-2011 Blizzard Entertainment(R). All rights reserved.")));
 	info.SetLicence(wxT("WoW Model Viewer is released under the GNU General Public License v3, Non-Commercial Use."));
 
 	info.SetDescription(wxT("WoW Model Viewer is a 3D model viewer for World of Warcraft.\nIt uses the data files included with the game to display\nthe 3D models from the game: creatures, characters, spell\neffects, objects and so forth.\n\nCredits To: Linghuye,  nSzAbolcs,  Sailesh, Terran and Cryect\nfor their contributions either directly or indirectly."));
-	//info.SetArtists();
-	//info.SetDocWriters();
-#ifndef _MINGW
-	wxIcon icon(wxT("mainicon"),wxBITMAP_TYPE_ICO_RESOURCE,128,128);
-#else
+
 	wxBitmap * bitmap = createBitmapFromResource("ABOUTICON",wxBITMAP_TYPE_XPM,128,128);
 	wxIcon icon;
 	icon.CopyFromBitmap(*bitmap);
-#endif
+
 #if defined (_LINUX)
 	//icon.LoadFile(wxT("../bin_support/icon/wmv_xpm"));
 #elif defined (_MAC)
 	//icon.LoadFile(wxT("../bin_support/icon/wmv.icns"));
 #endif
 
-#ifndef _MINGW
-	icon.SetHeight(128);
-	icon.SetWidth(128);
-#endif
 	info.SetIcon(icon);
 
 	// FIXME: Doesn't link on OSX

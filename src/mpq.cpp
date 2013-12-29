@@ -20,11 +20,8 @@ MPQArchive::MPQArchive(wxString filename) : ok(false)
 {
 	wxLogMessage(wxT("Opening %s %s"), filename.Mid(gamePath.Len()).c_str(), isPartialMPQ(filename) ? "(Partial)" : "");
 	g_modelViewer->SetStatusText(wxT("Initiating "+filename+wxT(" Archive")));
-#ifndef _MINGW
-	if (!SFileOpenArchive(filename.fn_str(), 0, MPQ_OPEN_FORCE_MPQ_V1|MPQ_OPEN_READ_ONLY, &mpq_a )) {
-#else
+
 	if (!SFileOpenArchive(filename.char_str(), 0, MPQ_OPEN_FORCE_MPQ_V1|MPQ_OPEN_READ_ONLY, &mpq_a )) {
-#endif
 		int nError = GetLastError();
 		wxLogMessage(wxT("Error opening archive %s, error #: 0x%X"), filename.Mid(gamePath.Len()).c_str(), nError);
 		return;
@@ -40,21 +37,12 @@ MPQArchive::MPQArchive(wxString filename) : ok(false)
 			if (!mpqArchives[j].AfterLast(SLASH).StartsWith(wxT("wow-update-")))
 				continue;
 			if (mpqArchives[j].AfterLast(SLASH).Len() == strlen("wow-update-xxxxx.mpq")) {
-#ifndef _MINGW
-				SFileOpenPatchArchive(mpq_a, mpqArchives[j].fn_str(), "base", 0);
-				SFileOpenPatchArchive(mpq_a, mpqArchives[j].fn_str(), langName.fn_str(), 0);
-#else
 				SFileOpenPatchArchive(mpq_a, mpqArchives[j].char_str(), "base", 0);
 				SFileOpenPatchArchive(mpq_a, mpqArchives[j].char_str(), langName.char_str(), 0);
-#endif
 				// too many for ptr client, just comment it
 				// wxLogMessage(wxT("Appending base & %s patch %s"), langName.c_str(), mpqArchives[j].Mid(gamePath.Len()).c_str());
 			} else if (mpqArchives[j].BeforeLast(SLASH) == filename.BeforeLast(SLASH)) { // same directory only
-#ifndef _MINGW
-				SFileOpenPatchArchive(mpq_a, mpqArchives[j].fn_str(), "", 0);
-#else
 				SFileOpenPatchArchive(mpq_a, mpqArchives[j].char_str(), "", 0);
-#endif
 				// wxLogMessage(wxT("Appending patch %s"), mpqArchives[j].Mid(gamePath.Len()).c_str());
 			}
 		}
@@ -160,11 +148,7 @@ MPQFile::openFile(wxString filename)
 			HANDLE &mpq_a = *i->second;
 
 			HANDLE fh;
-#ifndef _MINGW
-			if( !SFileOpenFileEx( mpq_a, alterName.fn_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#else
 			if( !SFileOpenFileEx( mpq_a, alterName.char_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#endif
 				continue;
 
 			// Found!
@@ -191,11 +175,7 @@ MPQFile::openFile(wxString filename)
 		HANDLE &mpq_a = *i->second;
 
 		HANDLE fh;
-#ifndef _MINGW
-		if( !SFileOpenFileEx( mpq_a, filename.fn_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#else
 		if( !SFileOpenFileEx( mpq_a, filename.char_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#endif
 			continue;
 
 		// Found!
@@ -255,11 +235,7 @@ bool MPQFile::exists(wxString filename)
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
 		HANDLE &mpq_a = *i->second;
-#ifndef _MINGW
-		if( SFileHasFile( mpq_a, filename.fn_str() ) )
-#else
 		if( SFileHasFile( mpq_a, filename.char_str() ) )
-#endif
 			return true;
 	}
 
@@ -343,11 +319,7 @@ int MPQFile::getSize(wxString filename)
 	{
 		HANDLE &mpq_a = *i->second;
 		HANDLE fh;
-#ifndef _MINGW
-		if( !SFileOpenFileEx( mpq_a, filename.fn_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#else
 		if( !SFileOpenFileEx( mpq_a, filename.char_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#endif
 			continue;
 
 		DWORD filesize = SFileGetFileSize( fh );
@@ -381,11 +353,7 @@ wxString MPQFile::getArchive(wxString filename)
 	{
 		HANDLE &mpq_a = *i->second;
 		HANDLE fh;
-#ifndef _MINGW
-		if( !SFileOpenFileEx( mpq_a, filename.fn_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#else
 		if( !SFileOpenFileEx( mpq_a, filename.char_str(), SFILE_OPEN_PATCHED_FILE, &fh ) )
-#endif
 			continue;
 
 		return i->first;
