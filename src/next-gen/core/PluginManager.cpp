@@ -66,14 +66,14 @@ PluginManager::PluginManager()
 
 // Public methods
 //--------------------------------------------------------------------
- void PluginManager::init(const std::string & dir)
+ void PluginManager::init(const std::string & dir, WMVLog::Logger * logger)
  {
    QString directory = QString::fromStdString(dir);
    QDir pluginDir(directory);
    QStringList plugins = pluginDir.entryList(QDir::Files);
    for (int i=0;i<plugins.size();i++)
    {
-     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString());
+     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),logger);
      addChild(newPlugin);
    }
    print();

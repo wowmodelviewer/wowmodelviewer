@@ -15,7 +15,7 @@ include_directories(../)
 set(CMAKE_PREFIX_PATH "C:\\Qt\\5.2.0\\mingw48_32")
 find_package(Qt5Core)
 
-file(GLOB src *.cpp ../metaclasses/*.cpp)
+file(GLOB src *.cpp ../metaclasses/*.cpp ../logger/*.cpp)
 
 add_library(core STATIC ${src})
 

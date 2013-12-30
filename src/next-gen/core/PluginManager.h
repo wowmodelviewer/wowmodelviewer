@@ -37,6 +37,12 @@
 // Other libraries
 #include "metaclasses/Container.h"
 
+namespace WMVLog
+{
+  class Logger;
+}
+
+
 // Current library
 #include "Plugin.h"
 
@@ -65,7 +71,7 @@ class PluginManager : public Container<Plugin>
     }
 
     // load all plugins in given directory
-    void init(const std::string & pluginDir);
+    void init(const std::string & pluginDir, WMVLog::Logger *);
 
     // overloaded from Component method
     void doPrint();

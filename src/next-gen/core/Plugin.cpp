@@ -63,7 +63,7 @@ Plugin::Plugin()
 
 // Public methods
 //--------------------------------------------------------------------
-Plugin * Plugin::load(std::string path)
+Plugin * Plugin::load(std::string path, WMVLog::Logger * logger)
 {
   QString pluginToLoad = QString::fromStdString(path);
   Plugin * newPlugin = NULL;
@@ -79,6 +79,7 @@ Plugin * Plugin::load(std::string path)
     newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
     newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
     newPlugin->m_category = metaInfos.value("category").toString().toStdString();
+    newPlugin->m_logger = logger;
     return newPlugin;
   }
   else

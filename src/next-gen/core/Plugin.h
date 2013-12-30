@@ -36,17 +36,17 @@
 // Externals
 
 // Other libraries
+#include "logger/Logger.h"
 #include "metaclasses/Component.h"
 
 // Current library
 
-
 // Namespaces used
 //--------------------------------------------------------------------
 
-
 // Class Declaration
 //--------------------------------------------------------------------
+
 class Plugin : public Component
 {
 	public :
@@ -66,7 +66,8 @@ class Plugin : public Component
     std::string version() const { return m_version; }
     std::string id() const { return (m_category + "_" + m_internalName); }
 
-    static Plugin * load(std::string path);
+    static Plugin * load(std::string path, WMVLog::Logger *);
+
 
     // overload from component class
     void doPrint();
@@ -83,7 +84,8 @@ class Plugin : public Component
 		// Methods
 		
 		// Members
-		
+    WMVLog::Logger * m_logger;
+
 	private :
 		// Constants / Enums
 	

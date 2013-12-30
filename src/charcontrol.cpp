@@ -1925,8 +1925,8 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	int sel=0, ord=0;
 	for (std::vector<ItemRecord>::iterator it = items.items.begin(); it != items.items.end(); ++it) {
 		if (type == UPDATE_SINGLE_ITEM) {
-			if (/*it->type == IT_HEAD ||*/ it->type == IT_SHOULDER || it->type == IT_SHIELD || 
-				it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED || 
+			if (/*it->type == IT_HEAD ||*/ it->type == IT_SHOULDER || it->type == IT_SHIELD ||
+				it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
 				it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN) {
 				choices.Add(CSConv(it->name));
 				numbers.push_back(it->id);

@@ -13,6 +13,9 @@
 
 #include "core/GlobalSettings.h"
 #include "core/PluginManager.h"
+#include "logger/Logger.h"
+#include "logger/LogOutputConsole.h"
+#include "logger/LogOutputFile.h"
 
 
 /*	THIS IS OUR MAIN "START UP" FILE.
@@ -67,6 +70,18 @@ void WowModelViewApp::setInterfaceLocale()
 
 bool WowModelViewApp::OnInit()
 {
+  // init next-gen stuff
+  LOGGER.addChild(new WMVLog::LogOutputConsole());
+  LOGGER.addChild(new WMVLog::LogOutputFile("logfile.txt"));
+
+  LOG_INFO << "info message";
+  LOG_ERROR << "error message";
+  LOG_WARNING << "warning message";
+ // LOG_FATAL << "fatal message";
+
+  // be carefull, LOGGER must be instanciated before plugin, to pass pointer to all plugins !
+  PLUGINMANAGER.init("./plugins",&LOGGER);
+
 	frame = NULL;
 	LogFile = NULL;
 	wxSplashScreen* splash = NULL;
@@ -237,19 +252,12 @@ bool WowModelViewApp::OnInit()
 	frame->LoadLayout();
 
 	wxLogMessage(wxT("WoW Model Viewer successfully loaded!\n----\n"));
-	
-	if (splash) {
-		// splash will auto closed after 2000ms
-		// splash->Show(false);
-		// splash->~wxSplashScreen();
-	}
 
 	// Classic Mode?
 	if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) == wxYES) {
 		frame->LoadWoW();
 	}
 
-	PLUGINMANAGER.init("./plugins");
 	return true;
 }
 
