@@ -17,7 +17,6 @@
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
 
-
 /*	THIS IS OUR MAIN "START UP" FILE.
 	App.cpp creates our wxApp class object.
 	the wxApp initiates our program (takes over the role of main())
@@ -72,18 +71,12 @@ bool WowModelViewApp::OnInit()
 {
   // init next-gen stuff
   LOGGER.addChild(new WMVLog::LogOutputConsole());
-  LOGGER.addChild(new WMVLog::LogOutputFile("logfile.txt"));
-
-  LOG_INFO << "info message";
-  LOG_ERROR << "error message";
-  LOG_WARNING << "warning message";
- // LOG_FATAL << "fatal message";
+  LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
   // be carefull, LOGGER must be instanciated before plugin, to pass pointer to all plugins !
   PLUGINMANAGER.init("./plugins",&LOGGER);
 
 	frame = NULL;
-	LogFile = NULL;
 	wxSplashScreen* splash = NULL;
 
 	wxImage::AddHandler( new wxPNGHandler);
@@ -113,16 +106,6 @@ bool WowModelViewApp::OnInit()
 	wxFileName fname(execPath);
 	wxString userPath = fname.GetPath(wxPATH_GET_VOLUME)+SLASH+wxT("userSettings");
 	wxFileName::Mkdir(userPath, 0777, wxPATH_MKDIR_FULL);
-
-	// set the log file path.
-	wxString logPath = userPath+SLASH+wxT("log.txt");
-
-	LogFile = fopen(logPath.mb_str(), "w+");
-	if (LogFile) {
-		wxLog *logger = new wxLogStderr(LogFile);
-		delete wxLog::SetActiveTarget(logger);
-		wxLog::SetVerbose(false);
-	}
 
 	// Application Info
 	SetVendorName(wxT("WoWModelViewer"));
@@ -287,15 +270,6 @@ int WowModelViewApp::OnExit()
 	
 	//if (frame != NULL)
 	//	frame->Destroy();
-
-//#ifdef _DEBUG
-	//delete wxLog::SetActiveTarget(NULL);
-	if (LogFile) {
-		fclose(LogFile);
-		//wxDELETE(LogFile);
-		LogFile = NULL;
-	}
-//#endif
 
 	CleanUp();
 

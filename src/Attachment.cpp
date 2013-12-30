@@ -7,6 +7,8 @@
 
 #include "Attachment.h"
 
+#include "logger/Logger.h"
+
 #include "modelcanvas.h"
 
 Attachment::~Attachment()

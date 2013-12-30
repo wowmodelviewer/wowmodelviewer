@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <wx/log.h>
+#include "logger/Logger.h"
 #include <wx/file.h>
 
 

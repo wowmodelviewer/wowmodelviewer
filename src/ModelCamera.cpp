@@ -12,6 +12,8 @@
 #include "database.h"
 #include "video.h" // video global var
 
+#include "logger/Logger.h"
+
 void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, uint32 *global, wxString modelname)
 {
 	wxLogMessage(wxT("Using original Camera Model Definitions."));

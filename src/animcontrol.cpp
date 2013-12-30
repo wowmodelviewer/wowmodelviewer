@@ -3,6 +3,7 @@
 #include "globalvars.h"
 #include <wx/wx.h>
 #include "UserSkins.h"
+#include "logger/Logger.h"
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 

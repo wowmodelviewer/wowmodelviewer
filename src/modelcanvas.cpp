@@ -7,6 +7,8 @@
 #include "shaders.h"
 #include "video.h"
 
+#include "logger/Logger.h"
+
 #include "CxImage/ximage.h"
 
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};

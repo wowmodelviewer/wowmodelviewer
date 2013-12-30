@@ -4,6 +4,8 @@
 #include "exporters.h"
 #include "CxImage/ximage.h"
 
+#include "logger/Logger.h"
+
 typedef std::pair<wxTreeItemId, wxString> TreeStackItem;
 typedef std::vector<TreeStackItem> TreeStack;
 

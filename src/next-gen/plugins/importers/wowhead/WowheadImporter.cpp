@@ -67,9 +67,6 @@
 //--------------------------------------------------------------------
 bool WowheadImporter::acceptURL(std::string url) const
 {
-  LOG_INFO << "info message from plugin !";
-  LOG_ERROR << "error message from plugin !";
-  LOG_WARNING << "warning message from plugin !";
   return (url.find("wowhead") != std::string::npos);
 }
 

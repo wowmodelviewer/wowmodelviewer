@@ -5,6 +5,7 @@
 #include "globalvars.h"
 #include "Quantize.h"
 
+#include "logger/Logger.h"
 
 // CxImage
 #include "CxImage/ximage.h"

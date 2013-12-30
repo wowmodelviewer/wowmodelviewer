@@ -6,6 +6,8 @@
 #include "modelexport_ms3d.h"
 #include "modelcanvas.h"
 
+#include "logger/Logger.h"
+
 //#include "CxImage/ximage.h"
 
 Vec3D FixPivot(Model *m, int index, Vec3D v)

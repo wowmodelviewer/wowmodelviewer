@@ -337,7 +337,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       if ((strURL.Mid(7).Find(wxT("simple"))<0)&&(strURL.Mid(7).Find(wxT("advanced"))<0))
       {
         wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-        wxLogMessage(wxT("Improperly Formatted URL. Lacks /simple and /advanced"));
+        LOG_INFO << wxT("Improperly Formatted URL. Lacks /simple and /advanced");
         return -1;
       }
       wxString strDomain = strURL.Mid(7).BeforeFirst('/');
@@ -348,7 +348,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       strp = strp.BeforeLast('/');				// Update strp
       wxString Realm = strp.AfterLast('/');
 
-      wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Realm: %s, Character: %s"),strDomain.c_str(),Realm.c_str(),CharName.c_str());
+      LOG_INFO << "Loading Battle.Net Armory. Site: " << strDomain.c_str() << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
 
       apiPage = wxT("http://") + strDomain;
       apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items");
@@ -368,7 +368,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       wxString strDomain = strURL.Mid(7).BeforeFirst('/');
       wxString itemNumber = strURL.Mid(7).AfterLast('/');
 
-      wxLogMessage(wxT("Loading Battle.Net Armory. Site: %s, Item: %s"),strDomain.c_str(),itemNumber.c_str());
+      LOG_INFO << "Loading Battle.Net Armory. Site: " << strDomain.c_str() << ", Item: " << itemNumber.c_str();
 
       apiPage = wxT("http://") + strDomain;
       apiPage << wxT("/api/wow/item/") << itemNumber;
@@ -377,7 +377,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
     }
   }
 
-  wxLogMessage(wxT("Final API Page: %s"),apiPage.c_str());
+  LOG_INFO << "Final API Page: " << apiPage.c_str();
 
   wxJSONReader reader;
 

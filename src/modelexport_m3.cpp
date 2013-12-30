@@ -8,6 +8,8 @@
 #include "modelexport.h"
 #include "TextureAnim.h"
 
+#include "logger/Logger.h"
+
 #include <wx/ffile.h>
 
 #define	ROOT_BONE	(1)

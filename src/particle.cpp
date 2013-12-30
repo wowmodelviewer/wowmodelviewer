@@ -3,6 +3,8 @@
 #include "Bone.h"
 #include "util.h"
 
+#include "logger/Logger.h"
+
 #define MAX_PARTICLES 10000
 
 Vec4D fromARGB(uint32 color)

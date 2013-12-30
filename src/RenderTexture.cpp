@@ -1,6 +1,8 @@
 
 #include "RenderTexture.h"
 
+#include "logger/Logger.h"
+
 bool CHECK_FRAMEBUFFER_STATUS()
 {
 	GLenum status = 0;

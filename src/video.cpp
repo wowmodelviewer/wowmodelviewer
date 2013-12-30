@@ -3,6 +3,8 @@
 #include "mpq.h"
 #include "CxImage/ximage.h"
 
+#include "logger/Logger.h"
+
 // wx
 #include <wx/display.h>
 // gl

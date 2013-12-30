@@ -6,6 +6,8 @@
 #include "filecontrol.h"
 #include "globalvars.h"
 
+#include "logger/Logger.h"
+
 #include <math.h>
 
 #include <wx/wfstream.h>

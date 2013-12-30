@@ -7,6 +7,7 @@
 
 #include "wx/txtstrm.h"
 
+#include "logger/Logger.h"
 
 //---------------------------------------------
 // --== Master Object Writing Function ==--
@@ -145,7 +146,7 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 	// Check to see if we have any data to generate this file.
 	if ((Object.Layers.size() < 1) || (Object.Layers[0].Points.size() < 1)){
 		wxMessageBox(wxT("No Layer Data found.\nUnable to write object file."),wxT("Error"));
-		wxLogMessage(wxT("Error: No Layer Data. Unable to write object file."));
+		LOG_INFO << "Error: No Layer Data. Unable to write object file.";
 		return EXPORT_ERROR_NO_DATA;
 	}
 
@@ -161,7 +162,7 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 	// Check if file exists, and ask about overwriting if it does.
 	bool overwrite = false;		// Don't overwrite by default.
 	if (filef.FileExists() == true){
-		wxLogMessage(wxT("File %s already exists. Asking if we should overwrite..."),file.c_str());
+		LOG_INFO << "File " << file.c_str() << " already exists. Asking if we should overwrite...";
 		wxMessageDialog *ovr = new wxMessageDialog(NULL,wxString::Format(wxT("File \"%s\" already exists.\nDo you wish to overwrite the file?"),file.AfterLast(SLASH).c_str()),wxT("Overwrite Confirmation"),wxYES_NO | wxNO_DEFAULT | wxCANCEL | wxICON_QUESTION | wxSTAY_ON_TOP);
 		size_t result = ovr->ShowModal();
 		if (result == wxID_YES){
@@ -182,7 +183,7 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 	wxFFileOutputStream f(file, wxT("w+b"));
 	if (!f.IsOk()) {
 		wxMessageBox(wxString::Format(wxT("Unable to access Lightwave Object file.\nCould not export model %s."), file.AfterLast(SLASH).c_str()), wxT("Error"));
-		wxLogMessage(wxT("Error: Unable to open Lightwave Object file '%s'. Could not export model."), file.c_str());
+		LOG_INFO << "Error: Unable to open Lightwave Object file '" << file.c_str() << "'. Could not export model.";
 		g_modelViewer->SetStatusText(wxT("Unable to open Lightwave Object file. Could not export model."));
 		return EXPORT_ERROR_FILE_ACCESS;
 	}
@@ -394,7 +395,7 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 		// Vertex Colors Map
 		// ===================================================
 		if (cLyr.HasVectorColors == true){
-			wxLogMessage(wxT("Has Vector Colors"));
+			LOG_INFO << "Has Vector Colors";
 
 			f.Write("VMPA", 4);
 			u32 = MSB4<uint32>(8);	// We got 2 Paramaters, * 4 Bytes.
@@ -423,8 +424,9 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 				gf = (float)(cLyr.Points[i].VertexColors.g/255.0f);
 				bf = (float)(cLyr.Points[i].VertexColors.b/255.0f);
 				af = (float)((255.0f-cLyr.Points[i].VertexColors.a)/255.0f);
-				//wxLogMessage(wxT("Point: %i - R:%f(%i), G:%f(%i), B:%f(%i), A:%f(%i)"),i,rf,cLyr.Points[i].VertexColors.r,gf,cLyr.Points[i].VertexColors.g,bf,cLyr.Points[i].VertexColors.b,af,cLyr.Points[i].VertexColors.a);
-
+				/*
+				 wxLogMessage(wxT("Point: %i - R:%f(%i), G:%f(%i), B:%f(%i), A:%f(%i)"),i,rf,cLyr.Points[i].VertexColors.r,gf,cLyr.Points[i].VertexColors.g,bf,cLyr.Points[i].VertexColors.b,af,cLyr.Points[i].VertexColors.a);
+				 */
 				LW_WriteVX(f,i,vmapSize);
 
 				Vec4D vert;
@@ -450,7 +452,7 @@ size_t WriteLWObject(wxString filename, LWObject Object) {
 		// Weight Maps
 		// ===================================================
 		if (cLyr.Weights.size() > 0){
-			wxLogMessage(wxT("Has Weight Maps"));
+			LOG_INFO << "Has Weight Maps";
 			for (size_t w=0;w<cLyr.Weights.size();w++){
 				f.Write("VMPA", 4);
 				u32 = MSB4<uint32>(8);	// We got 2 Paramaters, * 4 Bytes.
@@ -1250,7 +1252,7 @@ void WriteLWSceneBone(wxTextOutputStream &fs, LWBones BoneData)
 // Writes an Object or Null, including Bones, to the scene file.
 void WriteLWSceneObject(wxTextOutputStream &fs, LWSceneObj Object)
 {
-	wxLogMessage(wxT("Writing object information for %s..."), Object.Name.AfterLast(SLASH).c_str());
+	LOG_INFO << "Writing object information for " << Object.Name.AfterLast(SLASH).c_str();
 	if (Object.isNull == true){
 		fs << wxT("AddNullObject");
 	}else{
@@ -1353,7 +1355,7 @@ void WriteLWSceneLight(wxTextOutputStream &fs, LWLight Light) //uint32 &lcount, 
 // Write Lightwave Scene data to a file.
 // Currently incomplete.
 size_t WriteLWScene(LWScene *SceneData){
-	wxLogMessage(wxT("Export Lightwave Scene Function running."));
+	LOG_INFO << "Export Lightwave Scene Function running.";
 	g_modelViewer->SetStatusText(wxT("Preparing Scene Export Settings..."));
 
 	// Fail if there is nothing to write
@@ -1428,8 +1430,9 @@ size_t WriteLWScene(LWScene *SceneData){
 	// Objects & Bones
 	g_modelViewer->SetStatusText(wxT("Writing Scene Objects & Bones..."));
 	size_t numObj = SceneData->Objects.size();
-	if (numObj>0)
+	if (numObj>0){
 		wxLogMessage(wxT("Writing information for %i %s and their bones..."),numObj,(numObj>1?wxT("objects"):wxT("object")));
+	}
 	for (size_t o=0;o<numObj;o++){
 		WriteLWSceneObject(fs,SceneData->Objects[o]);
 	}
@@ -1606,15 +1609,15 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		Layer.BoundingBox2 = m->bounds[1];
 	}*/
 
-	wxLogMessage(wxT("M2 Texture List:"));
+	LOG_INFO << "M2 Texture List:";
 	for (size_t x=0;x<m->TextureList.size();x++){
-		wxLogMessage(wxT("Image %i: %s"),x,m->TextureList[x].c_str());
+		LOG_INFO << "Image " << x << ": " << m->TextureList[x].c_str();
 	}
 
 	// Build Part Names
 	// Seperated from the rest of the build for various reasons.
 	g_modelViewer->SetStatusText(wxT("Building Part Names..."));
-	wxLogMessage(wxT("Building Part Names..."));
+	LOG_INFO << "Building Part Names...";
 	for (size_t i=0; i<m->passes.size(); i++) {
 		ModelRenderPass &p = m->passes[i];
 		if (p.init(m)){
@@ -1643,7 +1646,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 	// Parts for Attached Objects
 	if (att != NULL){
 		if (att->model){
-			wxLogMessage(wxT("Att Model found."));
+			LOG_INFO << "Att Model found.";
 		}
 		for (size_t c=0; c<att->children.size(); c++) {
 			Attachment *att2 = att->children[c];
@@ -1651,7 +1654,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 				Model *mAttChild = static_cast<Model*>(att2->children[j]->model);
 
 				if (mAttChild){
-					wxLogMessage(wxT("AttChild Model found."));
+					LOG_INFO << "AttChild Model found.";
 					for (size_t i=0; i<mAttChild->passes.size(); i++) {
 						ModelRenderPass &p = mAttChild->passes[i];
 
@@ -1660,7 +1663,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 							wxString partName;
 
 							int thisslot = att2->children[j]->slot;
-							if (thisslot < 15 && slots[thisslot]!=wxEmptyString){
+							if (thisslot < 15 && !slots[thisslot].Empty()){
 								partName = wxString::Format(wxT("Child %02i - %s"),j,slots[thisslot].c_str());
 							}else{
 								partName = wxString::Format(wxT("Child %02i - Slot %02i"),j,att2->children[j]->slot);
@@ -1682,10 +1685,10 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 	}
 
 	// Process Passes
-	wxLogMessage(wxT("Processing Model File..."));
+	LOG_INFO << "Processing Model File...";
 	g_modelViewer->SetStatusText(wxT("Processing Model File..."));
 	for (size_t i=0; i<m->passes.size(); i++) {
-		wxLogMessage(wxT("Processing model, pass %i of %i..."),i,m->passes.size());
+	  LOG_INFO << "Processing model, pass " << i << " of " << m->passes.size() << "...";
 		ModelRenderPass &p = m->passes[i];
 		if (p.init(m)){
 			// Main Model
@@ -1727,7 +1730,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 */
 			// If Luminous...
 			if (p.unlit == true) {
-				wxLogMessage(wxT("Surface is Luminous..."));
+				LOG_INFO << "Surface is Luminous...";
 				Surf_Diff = 0.0f;
 				Surf_Lum = 1.0f;
 				// Add Lum, just in case there's a non-luminous surface with the same name.
@@ -1736,11 +1739,11 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 
 			// If Doublesided
 			if (doublesided == false) {
-				wxLogMessage(wxT("Surface is Double-sided..."));
+				LOG_INFO << "Surface is Double-sided...";
 				matName = matName + wxT("_Dbl");
 			}
 
-			wxLogMessage(wxT("Processing Texture & image names..."));
+			LOG_INFO << "Processing Texture & image names...";
 
 			// Add Images to Model
 			LWClip ClipImage;
@@ -1798,11 +1801,11 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 			SaveTexture(ExportName);
 			//SaveTexture2(ClipImage.Filename,ClipImage.Source,wxString(wxT("LWO")),wxString(wxT("tga")));
 
-			wxLogMessage(wxT("Building Surface..."));
+			LOG_INFO << "Building Surface...";
 			LWSurface Surface(matName,m->TextureList[p.tex],SurfImage_Color,LWSurf_Image(),LWSurf_Image(),Vec3D(1,1,1),Surf_Diff,Surf_Lum,doublesided);
 
 			// Points
-			wxLogMessage(wxT("Processing Vertex point data..."));
+			LOG_INFO << "Processing Vertex point data...";
 			for (size_t v=p.vertexStart; v<p.vertexEnd; v++) {
 				// --== Point Data ==--
 				LWPoint Point;
@@ -1813,13 +1816,13 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 				Vec3D vert;
 				if ((m->animated == true) && (init == false) && (m->vertices)) {
 					if (vertMsg == false){
-						wxLogMessage(wxT("Using Verticies"));
+						LOG_INFO << "Using Verticies";
 						vertMsg = true;
 					}
 					vert = m->vertices[v];
 				} else {
 					if (vertMsg == false){
-						wxLogMessage(wxT("Using Original Verticies"));
+					  LOG_INFO << "Using Original Verticies";
 						vertMsg = true;
 					}
 					vert = m->origVertices[v].pos;
@@ -1852,7 +1855,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 			}
 
 			// Polys
-			wxLogMessage(wxT("Processing Polygon data..."));
+			LOG_INFO << "Processing Polygon data...";
 			for (size_t k=0; k<p.indexCount; k+=3) {
 				// --== Polygon Data ==--	
 				LWPoly Poly;
@@ -1895,7 +1898,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 	// Functions that should only be called if there are bones...
 	if (m->header.nBones > 0) {
 		// Build Bone Data for Weight Maps
-		wxLogMessage(wxT("Processing Bone data..."));
+	  LOG_INFO << "Processing Bone data...";
 		for (size_t x=0;x<m->header.nBones;x++){
 			LWWeightMap wMap;
 
@@ -1914,7 +1917,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		};
 
 		// Fill Weightmap Data
-		wxLogMessage(wxT("Processing Bone Limits..."));
+		LOG_INFO << "Processing Bone Limits...";
 		size_t numv = m->header.nVertices;
 		LWWeightMap wMap;
 		for (size_t i=0; i<numv; i++) {
@@ -1934,7 +1937,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 	// --== Attachments ==--
 	if (att != NULL){
 		g_modelViewer->SetStatusText(wxT("Processing Attached Model Files..."));
-		wxLogMessage(wxT("Processing Attached Model Files..."));
+		LOG_INFO << "Processing Attached Model Files...";
 		/* Have yet to find an att->model, so skip it until we do.
 		if (att->model){
 		} */
@@ -1947,10 +1950,10 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 					int boneID = -1;
 					Model *mParent = NULL;
 
-					wxLogMessage(wxT("Attached Child Model: %s"),mAttChild->name.c_str());
-					wxLogMessage(wxT("Texture List:"));
+					LOG_INFO << "Attached Child Model: " << mAttChild->name.c_str();
+					LOG_INFO << "Texture List:";
 					for (size_t x=0;x<mAttChild->TextureList.size();x++){
-						wxLogMessage(wxT("Image %i: %s"),x,mAttChild->TextureList[x].c_str());
+					  LOG_INFO << "Image " << x << ": " << mAttChild->TextureList[x].c_str();
 					}
 
 					if (att2->parent) {
@@ -2026,7 +2029,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 
 							// Surface Name
 							matName = mAttChild->TextureList[p.tex].AfterLast(MPQ_SLASH).BeforeLast(wxT('.'));
-							if (thisslot < WXSIZEOF(slots) && slots[thisslot]!=wxEmptyString){
+							if (thisslot < WXSIZEOF(slots) && slots[thisslot]!=""){
 								if (matName != wxEmptyString){
 									matName = wxString::Format(wxT("%s - %s"),slots[thisslot].c_str(),matName.c_str());
 								}else {
@@ -2191,7 +2194,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 
 	// --== Scene Data ==--
 	g_modelViewer->SetStatusText(wxT("Gathering Scene Data..."));
-	wxLogMessage(wxT("Gathering Scene Data..."));
+	LOG_INFO << "Gathering Scene Data...";
 	int modelExport_LW_ExportAnim = 0;	// Temp here until I build the interface.
 	//bool animExportError = false;
 	// Object Placement
@@ -2202,7 +2205,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		// Bones
 		if (m->header.nBones > 0){
 			g_modelViewer->SetStatusText(wxT("Gathering Bones..."));
-			wxLogMessage(wxT("Model has %i %s."),m->header.nBones,(m->hasCamera?wxT("bones"):wxT("bone")));
+			LOG_INFO << "Model has " << m->header.nBones << " " << m->hasCamera?wxT("bones"):wxT("bone");
 			for (size_t x=0;x<m->header.nBones;x++){
 				LWBones lwBone((uint32)x);
 				Bone *cbone = &m->bones[x];
@@ -2358,7 +2361,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		// Lights
 		uint32 nLights = m->header.nLights;
 		if (nLights>0){
-			wxLogMessage(wxT("Model has %i %s."),nLights,(nLights>1?wxT("Lights"):wxT("Light")));
+		  LOG_INFO << "Model has " << nLights << " " << (nLights>1?wxT("Lights"):wxT("Light"));
 			g_modelViewer->SetStatusText(wxT("Gathering Lights..."));
 		}
 		for (size_t x=0;x<nLights;x++){
@@ -2396,7 +2399,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		// No attachment lights have been found so far...
 		if (att != NULL){
 			if (att->model){
-				wxLogMessage(wxT("Att Model found."));
+				LOG_INFO << "Att Model found.";
 			}
 			for (size_t c=0; c<att->children.size(); c++) {
 				Attachment *att2 = att->children[c];
@@ -2405,7 +2408,7 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 
 					if (mAttChild){
 						if (mAttChild->header.nLights > 0){
-							wxLogMessage(wxT("Found Attached light! Model: %s, on %s"),mAttChild->modelname.c_str(),m->modelname.c_str());
+							LOG_INFO << "Found Attached light! Model: " << mAttChild->modelname.c_str() << ", on " << m->modelname.c_str();
 #ifdef _DEBUG
 							g_modelViewer->SetStatusText(wxString::Format(wxT("Found Attached light! Model: %s, on %s"),mAttChild->modelname.c_str(),m->modelname.c_str()));
 #endif
@@ -2432,16 +2435,16 @@ LWObject GatherM2forLWO(Attachment *att, Model *m, bool init, wxString fn, LWSce
 		
 		// Cameras
 		if (m->header.nCameras > 0){
-			wxLogMessage(wxT("Model has %i %s."),m->header.nCameras,(m->header.nCameras>1?wxT("Cameras"):wxT("Camera")));
+			LOG_INFO << "Model has " << m->header.nCameras << " " << (m->header.nCameras>1?wxT("Cameras"):wxT("Camera"));
 			g_modelViewer->SetStatusText(wxT("Gathering Cameras..."));
 		}else{
-			wxLogMessage(wxT("Model does not have a Camera."));
+			LOG_INFO << "Model does not have a Camera.";
 		}
 		if (m->hasCamera == true){
 			for (size_t i=0;i<m->cam.size();i++){
 				size_t CameraID = LW_CamCount.GetValue();
 				LWCamera C;
-				wxLogMessage(wxT("Processing Camera %02i of %02i..."),CameraID,m->cam.size()-1);
+				LOG_INFO << "Processing Camera " << CameraID << "of " << m->cam.size()-1;
 
 				ModelCamera *cam = &m->cam[i];
 				C.FieldOfView = cam->fov;
@@ -2602,7 +2605,7 @@ LWObject GatherWMOforLWO(WMO *m, const char *fn, LWScene &scene){
 			// Add Images to Model
 			LWClip ClipImage;
 			wxString Texture = m->textures[t];
-			wxLogMessage(wxT("Texture: %s"),Texture.c_str());
+			LOG_INFO << "Texture: " << Texture.c_str();
 
 			ClipImage.Filename = Texture.AfterLast(SLASH).BeforeLast('.');
 			ClipImage.Source = Texture.BeforeLast(SLASH);
@@ -2727,7 +2730,7 @@ LWObject GatherWMOforLWO(WMO *m, const char *fn, LWScene &scene){
 		}
 	}
 	Object.Layers.push_back(Layer);
-	wxLogMessage(wxT("Completed WMO Gathering. Building Basic Scene Data..."));
+	LOG_INFO << "Completed WMO Gathering. Building Basic Scene Data...";
 
 	// Scene Data
 	g_modelViewer->SetStatusText(wxT("Gathering Scene Data..."));
@@ -3283,27 +3286,27 @@ size_t ExportLWO_M2(Attachment *att, Model *m, const char *fn, bool init){
 	LWObject Object = GatherM2forLWO(att,m,init,wxString(fn, wxConvUTF8),Scene);
 	if (Object.SourceType == wxEmptyString){
 		wxMessageBox(wxT("Error gathering information for export."),wxT("Export Error"));
-		wxLogMessage(wxT("Failure gathering information for export."));
+		LOG_INFO << "Failure gathering information for export.";
 		return EXPORT_ERROR_NO_DATA;
 	}
 	g_modelViewer->SetStatusText(wxT("Sending M2 Data to LWO Writing Function..."));
-	wxLogMessage(wxT("Sending M2 Data to LWO Writing Function..."));
+	LOG_INFO << "Sending M2 Data to LWO Writing Function...";
 	size_t objr = WriteLWObject(filename, Object);
 	if (objr != EXPORT_OKAY){
 		if ((objr == EXPORT_ERROR_NO_DATA)||(objr == EXPORT_ERROR_FILE_ACCESS)){
 			wxString msg = wxT("Error Writing the M2 file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_BAD_FILENAME){
 			wxString msg = wxT("Bad Filename. Failed writing Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_NO_OVERWRITE){
 			wxLogMessage(wxT("Writing stopped. Did not overwrite the existing Lightwave Object file."));
 		}else{
 			wxString msg = wxT("Error Writing the M2 file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}
 		return objr;
 	}else{
@@ -3409,29 +3412,29 @@ size_t ExportLWO_WMO(WMO *m, const char *fn){
 	LWObject Object = GatherWMOforLWO(m, fn, Scene);
 	if (Object.SourceType == wxEmptyString){
 		wxMessageBox(wxT("Error gathering information for export."),wxT("Export Error"));
-		wxLogMessage(wxT("Failure gathering information for export."));
+		LOG_INFO << "Failure gathering information for export.";
 		return EXPORT_ERROR_NO_DATA;
 	}
 
 	// Write LWO File
-	wxLogMessage(wxT("Sending WMO Data to LWO Writing Function..."));
+	LOG_INFO << "Sending WMO Data to LWO Writing Function...";
 	g_modelViewer->SetStatusText(wxT("Sending WMO Data to LWO Writing Function..."));
 	size_t objr = WriteLWObject(filename, Object);
 	if (objr != EXPORT_OKAY){
 		if ((objr == EXPORT_ERROR_NO_DATA)||(objr == EXPORT_ERROR_FILE_ACCESS)){
 			wxString msg = wxT("Error Writing the WMO file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_BAD_FILENAME){
 			wxString msg = wxT("Bad Filename. Failed writing Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_NO_OVERWRITE){
 			wxLogMessage(wxT("Writing stopped. Did not overwrite the existing Lightwave Object file."));
 		}else{
 			wxString msg = wxT("Error Writing the WMO file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}
 		return objr;
 	}else{
@@ -3455,23 +3458,23 @@ size_t ExportLWO_WMO(WMO *m, const char *fn){
 	// Write the Scene File
 	if (writescene == true){
 		g_modelViewer->SetStatusText(wxT("Sending Scene data to be written..."));
-		wxLogMessage(wxT("Writing Scene file..."));
+		LOG_INFO << "Writing Scene file...";
 		scnr = WriteLWScene(&Scene);
 	}else{
-		wxLogMessage(wxT("Scene file not written."));
+		LOG_INFO << "Scene file not written.";
 	}
-	wxLogMessage(wxT("Cleaning Scene File Data..."));
+	LOG_INFO << "Cleaning Scene File Data...";
 	Scene.~LWScene();
 
-	wxLogMessage(wxT("Checking Scene error code..."));
+	LOG_INFO << "Checking Scene error code...";
 	if (scnr != EXPORT_OKAY){
 		g_modelViewer->SetStatusText(wxT("An error occured while writing the scene file."));
-		wxLogMessage(wxT("An error occured while writing the scene file."));
+		LOG_INFO << "An error occured while writing the scene file.";
 		return scnr;
 	}
 	
 	g_modelViewer->SetStatusText(wxT("Lightwave WMO Export complete!"));
-	wxLogMessage(wxT("Lightwave WMO Export finished with no errors."));
+	LOG_INFO << "Lightwave WMO Export finished with no errors.";
 	return EXPORT_OKAY;
 }
 
@@ -3534,33 +3537,33 @@ size_t ExportLWO_ADT(MapTile *m, const char *fn){
 	LWObject Object = GatherADTforLWO(m,fn,Scene);
 	if (Object.SourceType == wxEmptyString){
 		wxMessageBox(wxT("Error gathering information for export."),wxT("Export Error"));
-		wxLogMessage(wxT("Failure gathering information for export."));
+		LOG_INFO << "Failure gathering information for export.";
 		return EXPORT_ERROR_NO_DATA;
 	}
 
 	// Write LWO File
-	wxLogMessage(wxT("Sending ADT Data to LWO Writing Function..."));
+	LOG_INFO << "Sending ADT Data to LWO Writing Function...";
 	size_t objr = WriteLWObject(filename, Object);
 
 	if (objr != EXPORT_OKAY){
 		if ((objr == EXPORT_ERROR_NO_DATA)||(objr == EXPORT_ERROR_FILE_ACCESS)){
 			wxString msg = wxT("Error Writing the ADT file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_BAD_FILENAME){
 			wxString msg = wxT("Bad Filename. Failed writing Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}else if (objr == EXPORT_ERROR_NO_OVERWRITE){
-			wxLogMessage(wxT("Writing stopped. Did not overwrite the existing Lightwave Object file."));
+			LOG_INFO << "Writing stopped. Did not overwrite the existing Lightwave Object file.";
 		}else{
 			wxString msg = wxT("Error Writing the ADT file to a Lightwave Object.");
 			wxMessageBox(msg,wxT("Writing Error"));
-			wxLogMessage(msg);
+			LOG_INFO << msg.ToAscii();
 		}
 		return objr;
 	}else{
-		wxLogMessage(wxT("LWO Object Writing Complete."));
+		LOG_INFO << "LWO Object Writing Complete.";
 	}
 	Object.~LWObject();
 
@@ -3568,6 +3571,6 @@ size_t ExportLWO_ADT(MapTile *m, const char *fn){
 	Scene.~LWScene();
 
 	g_modelViewer->SetStatusText(wxT("Lightwave ADT Export complete!"));
-	wxLogMessage(wxT("Lightwave ADT Export finished with no errors."));
+	LOG_INFO << "Lightwave ADT Export finished with no errors.";
 	return EXPORT_OKAY;
 }

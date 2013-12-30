@@ -1,6 +1,8 @@
 #include "shaders.h"
 #include <string>
 
+#include "logger/Logger.h"
+
 bool supportShaders = false;
 static bool initedShaders = false;
 

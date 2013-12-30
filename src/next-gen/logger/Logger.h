@@ -29,7 +29,7 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream> // debug
+#include <cstdio> // sprintf for wxLogMessage macro
 #include <list>
 
 // Qt
@@ -63,6 +63,14 @@
 #define LOG_ERROR LOGGER(WMVLog::Logger::ERROR_LOG)
 #define LOG_WARNING LOGGER(WMVLog::Logger::WARNING_LOG)
 #define LOG_FATAL LOGGER(WMVLog::Logger::FATAL_LOG)
+
+// ugly macro to overload wx function and use Logger stuff
+#define wxLogMessage(...) \
+  { \
+    char buffer[200]; \
+    std::sprintf (buffer, __VA_ARGS__); \
+    LOG_INFO << buffer; \
+  } \
 
 namespace WMVLog
 {

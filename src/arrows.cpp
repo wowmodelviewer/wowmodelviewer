@@ -3,6 +3,7 @@
 #include "Attachment.h"
 #include "enums.h"
 #include "modelexport.h"
+#include "logger/Logger.h"
 
 IMPLEMENT_CLASS(ArrowControl, wxWindow)
 

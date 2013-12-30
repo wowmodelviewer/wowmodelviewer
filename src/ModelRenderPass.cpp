@@ -13,6 +13,8 @@
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
 
+#include "logger/Logger.h"
+
 #include "GL/glew.h"
 
 void ModelRenderPass::deinit()

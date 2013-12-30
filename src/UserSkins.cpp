@@ -1,6 +1,8 @@
 #include <fstream>
 #include "UserSkins.h"
 
+#include "logger/Logger.h"
+
 #define SET_WARN_COUNT 10
 
 UserSkins::UserSkins(const wxString &filename)

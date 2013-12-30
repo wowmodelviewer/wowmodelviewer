@@ -8,6 +8,8 @@
 #include "mpq.h"
 #include "util.h"
 
+#include "logger/Logger.h"
+
 #include <wx/txtstrm.h>
 
 int slotOrder[] = {	

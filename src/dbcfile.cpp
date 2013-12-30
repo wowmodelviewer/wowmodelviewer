@@ -6,6 +6,8 @@
 #include "mpq.h"
 #include "util.h"
 
+#include "logger/Logger.h"
+
 DBCFile::DBCFile(const wxString &filename) : filename(filename)
 {
 	data = NULL;

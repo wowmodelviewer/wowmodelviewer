@@ -8,6 +8,8 @@
 #include "model.h"
 #include "modelviewer.h"
 
+#include "logger/Logger.h"
+
 
 // All IDs & Vars should follow the naming structure similar to "ExportOptionswxT(3D Format)wxT(Option name)"
 

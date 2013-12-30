@@ -2,6 +2,8 @@
 #include "imagecontrol.h"
 #include "enums.h"
 
+#include "logger/Logger.h"
+
 IMPLEMENT_CLASS(ImageControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ImageControl, wxWindow)

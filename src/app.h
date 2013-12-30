@@ -23,6 +23,8 @@
 #include "globalvars.h"
 #include "modelviewer.h"
 
+#include "logger/Logger.h"
+
 // vars
 static wxString langNames[] =
 {
@@ -71,7 +73,6 @@ public:
 	ModelViewer *frame;
 	
 	wxLocale locale;
-	FILE *LogFile;
 	
 };
 

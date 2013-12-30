@@ -729,14 +729,22 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
 
 	if(!itemdisplaydb.open())
+	{
 		wxLogMessage(wxT("Error: Could not open the ItemDisplayInfo DB."));
+	}
 	else
+	{
 		items.cleanup(itemdisplaydb);
+	}
 
 	if(!setsdb.open())
+	{
 		wxLogMessage(wxT("Error: Could not open the Item Sets DB."));
+	}
 	else
+	{
 		setsdb.cleanup(items);
+	}
 
 	SetStatusText(wxT("Initializing npcs.csv Databases..."));
 	filename = langName+SLASH+wxT("npcs.csv");
@@ -992,8 +1000,9 @@ void ModelViewer::LoadLayout()
 
 	// if the layout data exists,  load it.
 	if (!layout.IsNull() && !layout.IsEmpty()) {
-		if (!interfaceManager.LoadPerspective(layout, false))
+		if (!interfaceManager.LoadPerspective(layout, false)){
 			wxLogMessage(wxT("Error: Could not load the layout."));
+		}
 		else {
 			// No need to display these windows on startup
 			interfaceManager.GetPane(modelControl).Show(false);
@@ -3222,11 +3231,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 				wxLogMessage(wxT("Info: Exporting M2 model to %s..."), wxString(dialog.GetPath().fn_str(), wxConvUTF8).c_str());
 
 				// Your M2 export function goes here.
-#ifndef _MINGW
-				returncode = ExportLWO_M2(canvas->root, canvas->model, dialog.GetPath().fn_str(), init);
-#else
-				returncode = ExportLWO_M2(canvas->root, canvas->model, dialog.GetPath().char_str(), init);
-#endif
+				//returncode = ExportLWO_M2(canvas->root, canvas->model, dialog.GetPath().char_str(), init);
 			}else{
 				returncode = EXPORT_ERROR_BAD_FILENAME;
 			}
@@ -3237,11 +3242,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 				wxLogMessage(wxT("Info: Exporting WMO model to %s..."), wxString(dialog.GetPath().fn_str(), wxConvUTF8).c_str());
 
 				// Your WMO export function goes here.
-#ifndef _MINGW
-				returncode = ExportLWO_WMO(canvas->wmo, dialog.GetPath().fn_str());
-#else
-				returncode = ExportLWO_WMO(canvas->wmo, dialog.GetPath().char_str());
-#endif
+				//returncode = ExportLWO_WMO(canvas->wmo, dialog.GetPath().char_str());
 			}else{
 				returncode = EXPORT_ERROR_BAD_FILENAME;
 			}
@@ -3252,11 +3253,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 				wxLogMessage(wxT("Info: Exporting MapTile model to %s..."), wxString(dialog.GetPath().fn_str(), wxConvUTF8).c_str());
 
 				// Your ADT export function goes here.
-#ifndef _MINGW
-				returncode = ExportLWO_ADT(canvas->adt, dialog.GetPath().fn_str());
-#else
-				returncode = ExportLWO_ADT(canvas->adt, dialog.GetPath().char_str());
-#endif
+				//returncode = ExportLWO_ADT(canvas->adt, dialog.GetPath().char_str());
 			}else{
 				returncode = EXPORT_ERROR_BAD_FILENAME;
 			}
@@ -3272,7 +3269,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 			if (dialog.ShowModal()==wxID_OK) {
 				wxLogMessage(wxT("Info: Exporting model to %s..."), wxString(dialog.GetPath().fn_str(), wxConvUTF8).c_str());
 
-				ExportOBJ_M2(canvas->root, canvas->model, dialog.GetPath(), init);
+			//	ExportOBJ_M2(canvas->root, canvas->model, dialog.GetPath(), init);
 			}else{
 				returncode = EXPORT_ERROR_BAD_FILENAME;
 			}
@@ -3281,7 +3278,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 			if (dialog.ShowModal()==wxID_OK) {
 				wxLogMessage(wxT("Info: Exporting model to %s..."), wxString(dialog.GetPath().fn_str(), wxConvUTF8).c_str());
 
-				ExportOBJ_WMO(canvas->wmo, dialog.GetPath());
+		//		ExportOBJ_WMO(canvas->wmo, dialog.GetPath());
 			}else{
 				returncode = EXPORT_ERROR_BAD_FILENAME;
 			}

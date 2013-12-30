@@ -4,6 +4,8 @@
 #include "modelviewer.h"
 #include "mpq.h"
 
+#include "logger/Logger.h"
+
 
 ItemDatabase		items;
 // dbs

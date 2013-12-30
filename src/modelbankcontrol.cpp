@@ -3,6 +3,8 @@
 #include "globalvars.h"
 #include "modelviewer.h"
 
+#include "logger/Logger.h"
+
 #include <wx/arrstr.h>
 #include <wx/wfstream.h>
 

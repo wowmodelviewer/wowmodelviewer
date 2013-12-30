@@ -7,6 +7,8 @@
 
 #include "ModelLight.h"
 
+#include "logger/Logger.h"
+
 #include "enums.h"
 
 

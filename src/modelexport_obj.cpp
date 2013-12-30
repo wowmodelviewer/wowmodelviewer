@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "core/GlobalSettings.h"
+#include "logger/Logger.h"
 
 #include <wx/wfstream.h>
 #include <wx/txtstrm.h>

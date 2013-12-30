@@ -3,6 +3,8 @@
 #include "Attachment.h"
 #include "mpq.h"
 
+#include "logger/Logger.h"
+
 #include "CxImage/ximage.h"
 
 #include <wx/wx.h>

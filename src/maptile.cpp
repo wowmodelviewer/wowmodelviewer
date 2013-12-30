@@ -1,12 +1,13 @@
 #include "modelviewer.h"
 #include "globalvars.h"
 #include "maptile.h"
-//#include "world.h"
 #include "vec3d.h"
-//#include "video.h"
 #include "shaders.h"
 #include <cassert>
 #include <algorithm>
+
+#include "logger/Logger.h"
+
 using namespace std;
 
 struct WaterTile

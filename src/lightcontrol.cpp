@@ -1,6 +1,8 @@
 
 #include "lightcontrol.h"
 
+#include "logger/Logger.h"
+
 extern const size_t MAX_LIGHTS;
 
 // default colour values

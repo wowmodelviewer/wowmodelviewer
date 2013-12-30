@@ -14,6 +14,8 @@
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
 
+#include "logger/Logger.h"
+
 size_t globalTime = 0;
 extern ModelViewer *g_modelViewer;
 
@@ -26,10 +28,12 @@ glGetAll()
 	wxLogMessage(wxT("GL_BLEND: %d"), glIsEnabled(GL_BLEND));
 	wxLogMessage(wxT("GL_CULL_FACE: %d"), glIsEnabled(GL_CULL_FACE));
 	glGetIntegerv(GL_FRONT_FACE, &bled);
-	if (bled == GL_CW)
+	if (bled == GL_CW) {
 	    wxLogMessage(wxT("glFrontFace: GL_CW"));
-	else if (bled == GL_CCW)
+	}
+	else if (bled == GL_CCW) {
 	    wxLogMessage(wxT("glFrontFace: GL_CCW"));
+	}
 	wxLogMessage(wxT("GL_DEPTH_TEST: %d"), glIsEnabled(GL_DEPTH_TEST));
 	wxLogMessage(wxT("GL_DEPTH_WRITEMASK: %d"), glIsEnabled(GL_DEPTH_WRITEMASK));
 	wxLogMessage(wxT("GL_COLOR_MATERIAL: %d"), glIsEnabled(GL_COLOR_MATERIAL));
