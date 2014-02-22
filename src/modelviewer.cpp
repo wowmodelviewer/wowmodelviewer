@@ -2549,6 +2549,8 @@ void ModelViewer::DownloadLocaleFiles()
 
 void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 {
+  wxExecute("UpdateManager.exe",wxEXEC_SYNC);
+  /*
 	wxString trunk = wxT("http://wowmodelviewer.net/update/");
 	DownloadLocaleFiles();
 
@@ -2585,6 +2587,7 @@ void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 	}else{
 		wxMessageBox(wxT("Error retrieving update information.\nPlease try again later."), wxT("Update Error"));
 	}
+	*/
 }
 
 void ModelViewer::OnCanvasSize(wxCommandEvent &event)

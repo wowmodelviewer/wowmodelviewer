@@ -11,4 +11,5 @@ add_subdirectory(core)
 # add plugins compilation
 add_subdirectory(plugins)
 
-        
+# add update manager compilation
+add_subdirectory(UpdateManager)        
