@@ -26,7 +26,12 @@ set(CMAKE_AUTOMOC ON)
 
 file(GLOB src *.cpp)
 
-add_executable(UpdateManager ${src} ${RES_FILES})
+if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
+  add_executable(UpdateManager WIN32 ${src} ${RES_FILES} )
+else()
+  # non min size release case ( = dev) => let a console attached to app
+  add_executable(UpdateManager ${src} ${RES_FILES} )
+endif()
 
 add_dependencies(UpdateManager core)
 

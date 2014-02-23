@@ -35,10 +35,15 @@ setOutPath $INSTDIR
 # specify file to go in output path
 !define wmvroot "..\..\..\"
 File "${wmvroot}\bin\wowmodelviewer.exe"
+File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\ridable.csv"
 File "${wmvroot}\bin_support\MinGW\jpeg62.dll"
 File "${wmvroot}\bin_support\MinGW\libgcc_s_dw2-1.dll"
 File "${wmvroot}\bin_support\MinGW\libstdc++-6.dll"
+
+CreateDirectory $INSTDIR\plugins
+SetOutPath $INSTDIR\plugins
+File "${wmvroot}\bin\plugins\*"
 
 CreateDirectory $INSTDIR\mo
 SetOutPath $INSTDIR\mo
@@ -49,6 +54,7 @@ CreateDirectory $INSTDIR\
 CreateDirectory $INSTDIR\userSettings
 
 # create shortcuts
+setOutPath $INSTDIR
 CreateShortCut "$DESKTOP\WoW Model Viewer.lnk" "$INSTDIR\wowmodelviewer.exe" ""
  
 # create start-menu items
