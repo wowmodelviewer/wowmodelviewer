@@ -37,9 +37,7 @@ setOutPath $INSTDIR
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\ridable.csv"
-File "${wmvroot}\bin_support\MinGW\jpeg62.dll"
-File "${wmvroot}\bin_support\MinGW\libgcc_s_dw2-1.dll"
-File "${wmvroot}\bin_support\MinGW\libstdc++-6.dll"
+File "${wmvroot}\bin_support\MinGW\*"
 
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins
