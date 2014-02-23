@@ -58,4 +58,6 @@
           RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
         
   file(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/MinGW/*.dll")
+  file(GLOB platform_files "${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/MinGW/platforms/*.dll")
   install(FILES ${files} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
+  install(FILES ${platform_files} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin/platforms)

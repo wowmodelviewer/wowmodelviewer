@@ -47,6 +47,10 @@ CreateDirectory $INSTDIR\mo
 SetOutPath $INSTDIR\mo
 File "${wmvroot}\src\po\*.mo"
 
+CreateDirectory $INSTDIR\platforms
+SetOutPath $INSTDIR\platforms
+File "${wmvroot}\bin_support\MinGW\platforms\*"
+
 CreateDirectory $INSTDIR\
 
 CreateDirectory $INSTDIR\userSettings
