@@ -58,7 +58,7 @@ GlobalSettings::GlobalSettings()
   m_versionRevNumber = 1;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Great-father Winter";
+  m_buildName = "Thrall's revenge";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -78,6 +78,7 @@ GlobalSettings::GlobalSettings()
 		Perky Pug
 		Great-father Winter
 
+
 		--== Used Build Names ==--			(So we don't repeat...)
 		Wascally Wabbit
 		Gnome Punter
@@ -87,6 +88,7 @@ GlobalSettings::GlobalSettings()
 		Windrunner's Lament
 		Lost Lich King
     Skeer the Bloodseeker
+
 
    */
 
@@ -100,7 +102,7 @@ GlobalSettings::GlobalSettings()
 #endif
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = "";
+  m_versionSpecialExtend = ".beta1";
 
 }
 
