@@ -1,2 +1,9 @@
 syntax: glob
-*.*
+./bin/*
+./CMakeBuild/*
+./src/latex/*
+./src/html/*
+.project
+.cproject
+.settings/*
+./Installers/Windows/NSIS/*.exe
