@@ -116,7 +116,6 @@ void VersionManager::checkForNewVersionAndExit()
   QString currentVersion = m_currentVersionsMap[appName];
   QString lastVersion = getLastVersionFor(appName);
   int result = compareVersion(currentVersion,lastVersion);
-  std::cout << __FUNCTION__ << " " << result << std::endl;
   qApp->exit(result);
 }
 

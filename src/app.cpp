@@ -237,7 +237,7 @@ bool WowModelViewApp::OnInit()
 	wxLogMessage(wxT("WoW Model Viewer successfully loaded!\n----\n"));
 
 	// check for last version
-	if(wxExecute("UpdateManager.exe --no-ui",wxEXEC_SYNC) != 0)
+	if(wxExecute("UpdateManager.exe --no-ui",wxEXEC_SYNC) < 0)
 	  if(wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES) {
 	    wxExecute("UpdateManager.exe",wxEXEC_SYNC);
 	  }
