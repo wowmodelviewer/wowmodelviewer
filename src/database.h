@@ -118,7 +118,7 @@ public:
 	static const size_t QualityID = 1;	// unit
 	static const size_t SlotID = 9; // unit
 	static const size_t Name40200 = 96;		// string, localization
-	static const size_t Name40300 = 99;		// string, localization
+	static const size_t Name40300 = 100;		// string, localization
 
 	void init();
 };
