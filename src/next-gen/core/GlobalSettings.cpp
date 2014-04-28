@@ -102,7 +102,7 @@ GlobalSettings::GlobalSettings()
 #endif
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".beta1";
+  m_versionSpecialExtend = ".beta2";
 
 }
 
