@@ -137,7 +137,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_EQCREATURE_R, ModelViewer::OnEffects)
 	EVT_MENU(ID_EQCREATURE_L, ModelViewer::OnEffects)
 	EVT_MENU(ID_SHADER_DEATH, ModelViewer::OnEffects)
-	EVT_MENU(ID_TEST, ModelViewer::OnTest)
 
 	// Options
 	EVT_MENU(ID_SAVE_CHAR, ModelViewer::OnToggleCommand)
@@ -207,7 +206,6 @@ ModelViewer::ModelViewer()
 	enchants = NULL;
 	lightControl = NULL;
 	modelControl = NULL;
-	arrowControl = NULL;
 	imageControl = NULL;
 	settingsControl = NULL;
 	modelbankControl = NULL;
@@ -512,7 +510,6 @@ void ModelViewer::InitMenu()
 			effectsMenu->Append(ID_SHADER_DEATH, _("Death Effect"));
 			effectsMenu->Enable(ID_SHADER_DEATH, false);
 		}
-		effectsMenu->Append(ID_TEST, _("Arrows Test"));
 
 		// Options menu
 		optMenu = new wxMenu;
@@ -3439,31 +3436,6 @@ void ModelViewer::OnExportOther(wxCommandEvent &event)
 		DiscoveryNPC();
 		fileMenu->Enable(ID_FILE_DISCOVERY_NPC, false);
 	}
-}
-
-void ModelViewer::OnTest(wxCommandEvent &event)
-{
-		if (!charControl->charAtt)
-			return;
-
-		if (arrowControl) {
-			arrowControl->Show(true);
-		} else {
-			arrowControl = new ArrowControl(this, wxID_ANY, wxDefaultPosition, charControl->charAtt);
-			/* // wxIFM stuff
-			arrowControlPanel = new wxIFMDefaultChildData(arrowControl, IFM_CHILD_GENERIC, wxDefaultPosition, wxSize(140, 300), true, wxT("Arrow Control"));
-			arrowControlPanel->m_orientation = IFM_ORIENTATION_FLOAT;
-			interfaceManager->AddChild(arrowControlPanel);
-			interfaceManager->Update(IFM_DEFAULT_RECT,true);
-
-			interfaceManager->ShowChild(arrowControl,true,true);
-			*/
-			// wxAUI
-			interfaceManager.AddPane(arrowControl, wxAuiPaneInfo().
-			Name(wxT("Arrows")).Caption(wxT("Arrows")).
-			FloatingSize(wxSize(150,300)).Float().Show(true)); //.FloatingPosition(GetStartPosition())
-			interfaceManager.Update();
-		}
 }
 
 void ModelViewer::UpdateControls()

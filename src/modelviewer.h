@@ -34,7 +34,6 @@
 #include "util.h"
 #include "AnimExporter.h"
 #include "effects.h"
-#include "arrows.h"
 #include "modelexport.h"
 #include "settings.h"
 #include "modelbankcontrol.h"
@@ -71,7 +70,6 @@ public:
 	EnchantsDialog *enchants;
 	LightControl *lightControl;
 	ModelControl *modelControl;
-	ArrowControl *arrowControl;
 	ImageControl *imageControl;
 	//SoundControl *soundControl;
 	SettingsControl *settingsControl;
