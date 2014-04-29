@@ -75,26 +75,6 @@ extern bool bShowParticle;
 extern bool bZeroParticle;
 extern bool bAlternate;
 
-extern int Perfered_Exporter;
-extern bool modelExportInitOnly;
-extern bool modelExport_PreserveDir;
-extern bool modelExport_UseWMVPosRot;
-extern bool modelExport_ScaleToRealWorld;
-extern bool modelExport_LW_PreserveDir;
-extern bool modelExport_LW_AlwaysWriteSceneFile;
-extern bool modelExport_LW_ExportLights;
-extern bool modelExport_LW_ExportDoodads;
-extern bool modelExport_LW_ExportCameras;
-extern bool modelExport_LW_ExportBones;
-extern int modelExport_LW_DoodadsAs;
-extern bool modelExport_X3D_ExportAnimation;
-extern bool modelExport_X3D_CenterModel;
-extern float modelExport_M3_BoundScale;
-extern float modelExport_M3_SphereScale;
-extern wxString modelExport_M3_TexturePath;
-extern std::vector<uint32> modelExport_M3_Anims;
-extern wxArrayString modelExport_M3_AnimNames;
-
 extern wxArrayString mpqArchives;
 
 class UserSkins;

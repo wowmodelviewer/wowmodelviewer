@@ -802,9 +802,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	glBindTexture(GL_TEXTURE_2D, id);
 	
 	MPQFile f(tex->name);
-	if (g_modelViewer) {
-		g_modelViewer->modelOpened->Add(wxString(tex->name.c_str(), wxConvUTF8));
-	}
+
 	if (f.isEof()) {
 		tex->id = 0;
 		wxLogMessage(wxT("Error: Could not load the texture '%s'"), wxString(tex->name.c_str(), wxConvUTF8).c_str());

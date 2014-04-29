@@ -155,7 +155,6 @@ Model::Model(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(force
 	// --
 
 	MPQFile f(tempname);
-	g_modelViewer->modelOpened->Add(tempname);
 	g_modelViewer->SetStatusText(tempname);
 	ok = false;
 	if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
@@ -172,7 +171,6 @@ Model::Model(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(force
 
 	//displayHeader(header);
 
-	// Error check
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0') {
 		wxLogMessage(wxT("Error:\t\tInvalid model!  May be corrupted."));
 		ok = false;
@@ -314,8 +312,6 @@ Model::~Model()
 		} else {
 			glDeleteLists(dlist, 1);
 		}
-		if (g_modelViewer)
-			g_modelViewer->modelOpened->Clear();
 	}
 }
 
@@ -781,10 +777,8 @@ void Model::initAnimated(MPQFile &f)
 				anims[i].Index = animsWotLK.Index;
 
 				tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
-				if (MPQFile::getSize(tempname) > 0) {
+				if (MPQFile::getSize(tempname) > 0)
 					animfiles[i].openFile(tempname);
-					g_modelViewer->modelOpened->Add(tempname);
-				}
 			}
 		}
 
@@ -957,7 +951,6 @@ void Model::setLOD(MPQFile &f, int index)
 	// remove suffix .M2
 	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
 	MPQFile g(lodname);
-	g_modelViewer->modelOpened->Add(lodname);
 	if (g.isEof()) {
 		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
 		g.close();

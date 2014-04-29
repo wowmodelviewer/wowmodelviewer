@@ -30,32 +30,6 @@ bool bShowParticle = true;
 bool bZeroParticle = true;
 bool bAlternate = false; // for zhCN alternate.MPQ
 
-// Model Export Options
-// General Options
-int Perfered_Exporter = -1; // Defaults to None
-bool modelExportInitOnly = true;
-bool modelExport_PreserveDir = true;
-bool modelExport_UseWMVPosRot = false;
-bool modelExport_ScaleToRealWorld = false;
-
-// Lightwave Options
-bool modelExport_LW_PreserveDir = true;
-bool modelExport_LW_AlwaysWriteSceneFile = false;
-bool modelExport_LW_ExportLights = true;
-bool modelExport_LW_ExportDoodads = true;
-bool modelExport_LW_ExportCameras = true;
-bool modelExport_LW_ExportBones = true;
-int modelExport_LW_DoodadsAs = 0;
-// X3D Options
-bool modelExport_X3D_ExportAnimation = false;
-bool modelExport_X3D_CenterModel = true;
-// M3 Options
-float modelExport_M3_BoundScale = 0.5f;
-float modelExport_M3_SphereScale = 0.5f;
-wxString modelExport_M3_TexturePath = wxT("");
-std::vector<uint32> modelExport_M3_Anims;
-wxArrayString modelExport_M3_AnimNames;
-
 long langID = -1;
 wxString langName;
 long langOffset = -1;
@@ -64,21 +38,6 @@ int ssCounter = 100; // ScreenShot Counter
 int imgFormat = 0;
 
 wxString locales[] = {wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU")};
-
-/*
-wxString langCSConv[] =
-{
-	wxT("iso-8859-1"),
-	wxEmptyString,
-	wxEmptyString,
-	wxEmptyString,
-	wxT("gb2312"),
-	wxT("big5"),
-	wxEmptyString,
-	wxEmptyString,
-};
-wxString CSConvStr;
-*/
 
 // Slash correction, just in case.
 wxString fixMPQPath(wxString path)

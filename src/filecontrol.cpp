@@ -1,7 +1,6 @@
 #include "modelviewer.h"
 #include "globalvars.h"
 #include "mpq.h"
-#include "exporters.h"
 #include "CxImage/ximage.h"
 
 #include "logger/Logger.h"
@@ -373,10 +372,6 @@ void FileControl::OnPopupClick(wxCommandEvent &evt)
 		temp = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
 	    ScrWindow *sw = new ScrWindow(temp);
 	    sw->Show(true);
-	} else if (id == ID_FILELIST_EXPORT_PNG) {
-		ExportPNG(val, wxT("png"));
-	} else if (id == ID_FILELIST_EXPORT_TGA) {
-		ExportPNG(val, wxT("tga"));
 	}
 }
 
@@ -401,12 +396,11 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	// TODO: if is music, a Play option
 	wxString temp(tdata->fn);
 	temp.MakeLower();
+
 	// if is graphic, a View option
-	if (temp.EndsWith(wxT("blp"))) {
+	if (temp.EndsWith(wxT("blp")))
 		infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));
-		infoMenu.Append(ID_FILELIST_EXPORT_PNG, wxT("&Save as PNG..."), wxT("Save image as a PNG"));
-		infoMenu.Append(ID_FILELIST_EXPORT_TGA, wxT("&Save as TGA..."), wxT("Save image as a TGA"));
-	}
+
 	infoMenu.AppendSeparator();
 	wxString archive = MPQFile::getArchive(tdata->fn);
 	infoMenu.Append(ID_FILELIST, archive, archive);
@@ -488,13 +482,6 @@ void FileControl::UpdateInterface()
 	// your function will still be disabled!!
 	if (modelviewer->isModel == true){
 		// If it's an M2 file...
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,true);
-		modelviewer->exportMenu->Enable(ID_MODELEXPORT_INIT, true);
-
-		for (size_t x=0;x<ExporterTypeCount;x++){
-			modelviewer->exportMenu->Enable((int)Exporter_Types[x].ID, Exporter_Types[x].canM2);
-		}
-
 		// Enable Controls for Characters
 		modelviewer->charMenu->Enable(ID_SAVE_CHAR, true);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, true);
@@ -513,13 +500,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, true);
 	}else if (modelviewer->isADT == true){
 		// If it's an ADT file...
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,true);
-		modelviewer->exportMenu->Enable(ID_MODELEXPORT_INIT, false);	// Disable Init Mode
-
-		for (size_t x=0;x<ExporterTypeCount;x++){
-			modelviewer->exportMenu->Enable((int)Exporter_Types[x].ID, Exporter_Types[x].canADT);
-		}
-
 		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
@@ -537,13 +517,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}else if (modelviewer->isWMO == true){
 		// If the object is a WMO file...
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,true);
-		modelviewer->exportMenu->Enable(ID_MODELEXPORT_INIT, false);	// Disable Init Mode
-
-		for (size_t x=0;x<ExporterTypeCount;x++){
-			modelviewer->exportMenu->Enable((int)Exporter_Types[x].ID, Exporter_Types[x].canWMO);
-		}
-
 		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
@@ -561,8 +534,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}else{
 		// If it's not a 3D file...
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,false); // Disable Exporters
-
 		modelviewer->charMenu->Enable(ID_SAVE_CHAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
 		modelviewer->charMenu->Enable(ID_SHOW_EARS, false);
@@ -590,8 +561,6 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 	// make sure that a valid Tree Item was actually selected.
 	if (!item.IsOk() || !modelviewer->canvas){
-		modelviewer->fileMenu->Enable(ID_MODELEXPORT_BASE,false);
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,false);
 		return;
 	}
 
@@ -599,14 +568,10 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 	// make sure the data (file name) is valid
 	if (!data){
-		modelviewer->fileMenu->Enable(ID_MODELEXPORT_BASE,false);
-		modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,false);
 		return; // isn't valid, exit.
 	}
 
 	CurrentItem = item;
-	modelviewer->fileMenu->Enable(ID_MODELEXPORT_BASE,true);
-	modelviewer->fileMenu->Enable(ID_FILE_MODELEXPORT_MENU,true);
 
 	if (filterMode == FILE_FILTER_MODEL) {
 		// Exit, if its the same model thats currently loaded

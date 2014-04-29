@@ -630,27 +630,6 @@ bool WowModelViewApp::LoadSettings()
 		//pConfig->Read(wxT("DisableHWAcc"), &disableHWAcc, false);
 		pConfig->Read(wxT("DefaultFormat"), &imgFormat, 0);
 
-		pConfig->Read(wxT("PerferedExporter"), &Perfered_Exporter, -1);
-		pConfig->Read(wxT("ModelExportInitOnly"), &modelExportInitOnly, true);
-		pConfig->Read(wxT("ModelExportPreserveDirs"), &modelExport_PreserveDir, true);
-		pConfig->Read(wxT("ModelExportUseWMVPosRot"), &modelExport_UseWMVPosRot, false);
-		pConfig->Read(wxT("ModelExportScaleToRealWorld"), &modelExport_ScaleToRealWorld, false);
-
-		pConfig->Read(wxT("ModelExportLWPreserveDirs"), &modelExport_LW_PreserveDir, true);
-		pConfig->Read(wxT("ModelExportLWAlwaysWriteSceneFile"), &modelExport_LW_AlwaysWriteSceneFile, false);
-		pConfig->Read(wxT("ModelExportLWExportLights"), &modelExport_LW_ExportLights, true);
-		pConfig->Read(wxT("ModelExportLWExportDoodads"), &modelExport_LW_ExportDoodads, true);
-		pConfig->Read(wxT("ModelExportLWExportCameras"), &modelExport_LW_ExportCameras, true);
-		pConfig->Read(wxT("ModelExportLWExportBones"), &modelExport_LW_ExportBones, true);
-
-		pConfig->Read(wxT("ModelExportLWDoodadsAs"), &modelExport_LW_DoodadsAs, 0);
-
-		pConfig->Read(wxT("ModelExportM3BoundScale"), &tmp, wxT("0.5"));
-		modelExport_M3_BoundScale = wxAtof(tmp);
-		pConfig->Read(wxT("ModelExportM3SphereScale"), &tmp, wxT("0.5"));
-		modelExport_M3_SphereScale = wxAtof(tmp);
-		pConfig->Read(wxT("ModelExportM3TexturePath"), &modelExport_M3_TexturePath, wxEmptyString);
-
 		// Data path and mpq archive stuff
 		wxString archives;
 		pConfig->Read(wxT("MPQFiles"), &archives);
@@ -685,25 +664,6 @@ void WowModelViewApp::SaveSettings()
 	//pConfig->Write(wxT("AntiAlias"), useAntiAlias);
 	//pConfig->Write(wxT("DisableHWAcc"), disableHWAcc);
 	pConfig->Write(wxT("DefaultFormat"), imgFormat);
-
-	pConfig->Write(wxT("PerferedExporter"), Perfered_Exporter);
-	pConfig->Write(wxT("ModelExportInitOnly"), modelExportInitOnly);
-	pConfig->Write(wxT("ModelExportPreserveDirs"), modelExport_PreserveDir);
-	pConfig->Write(wxT("ModelExportUseWMVPosRot"), modelExport_UseWMVPosRot);
-	pConfig->Write(wxT("ModelExportScaleToRealWorld"), modelExport_ScaleToRealWorld);
-
-	pConfig->Write(wxT("ModelExportLWPreserveDirs"), modelExport_LW_PreserveDir);
-	pConfig->Write(wxT("ModelExportLWAlwaysWriteSceneFile"), modelExport_LW_AlwaysWriteSceneFile);
-	pConfig->Write(wxT("ModelExportLWExportLights"), modelExport_LW_ExportLights);
-	pConfig->Write(wxT("ModelExportLWExportDoodads"), modelExport_LW_ExportDoodads);
-	pConfig->Write(wxT("ModelExportLWExportCameras"), modelExport_LW_ExportCameras);
-	pConfig->Write(wxT("ModelExportLWExportBones"), modelExport_LW_ExportBones);
-
-	pConfig->Write(wxT("ModelExportLWDoodadsAs"), modelExport_LW_DoodadsAs);
-
-	pConfig->Write(wxT("ModelExportM3BoundScale"), wxString::Format(wxT("%0.2f"), modelExport_M3_BoundScale));
-	pConfig->Write(wxT("ModelExportM3SphereScale"), wxString::Format(wxT("%0.2f"), modelExport_M3_SphereScale));
-	pConfig->Write(wxT("ModelExportM3TexturePath"), modelExport_M3_TexturePath);
 
 	wxString archives;
 
