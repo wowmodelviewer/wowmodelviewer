@@ -127,7 +127,7 @@ void ModelControl::RefreshModel(Attachment *root)
 	try {
 		attachments.clear();
 
-		Model *m = static_cast<Model*>(root->model);
+		WoWModel *m = static_cast<WoWModel*>(root->model);
 		if (m) {
 		//	wxASSERT(m);
 			attachments.push_back(root);
@@ -138,7 +138,7 @@ void ModelControl::RefreshModel(Attachment *root)
 		
 		for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
 			//m = NULL;
-			m = static_cast<Model*>((*it)->model);
+			m = static_cast<WoWModel*>((*it)->model);
 			if (m) {
 				attachments.push_back((*it));
 				if (!init)
@@ -147,7 +147,7 @@ void ModelControl::RefreshModel(Attachment *root)
 			}
 
 			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
-				m = static_cast<Model*>((*it2)->model);
+				m = static_cast<WoWModel*>((*it2)->model);
 				if (m) {
 					//models.push_back(m);
 					attachments.push_back((*it2));
@@ -157,7 +157,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				}
 
 				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
-					m = static_cast<Model*>((*it3)->model);
+					m = static_cast<WoWModel*>((*it3)->model);
 					if (m) {
 						//models.push_back(m);
 						attachments.push_back((*it3));
@@ -173,7 +173,7 @@ void ModelControl::RefreshModel(Attachment *root)
 		wxString tmp;
 		modelname->Clear();
 		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
-			m = static_cast<Model*>((*it)->model);
+			m = static_cast<WoWModel*>((*it)->model);
 			if (m) {
 				tmp = m->name;
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
@@ -197,9 +197,9 @@ void ModelControl::UpdateModel(Attachment *a)
 
 	init = false;
 
-	Model *m = NULL;
+	WoWModel *m = NULL;
 	if (a->model)
-		m = static_cast<Model*>(a->model);
+		m = static_cast<WoWModel*>(a->model);
 
 	if (m) {
 		init = true;
@@ -333,7 +333,7 @@ void ModelControl::OnCombo(wxCommandEvent &event)
 		if (CurrentSelection < (int)attachments.size()) {
 			UpdateModel(attachments[CurrentSelection]);
 			att = attachments[CurrentSelection];
-			model = static_cast<Model*>(attachments[CurrentSelection]->model);
+			model = static_cast<WoWModel*>(attachments[CurrentSelection]->model);
 			
 			animControl->UpdateModel(model);
 			modelname->SetSelection(CurrentSelection);

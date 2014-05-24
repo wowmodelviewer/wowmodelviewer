@@ -17,7 +17,7 @@
 #include <string>
 
 // our headers
-#include "model.h"
+#include "WoWModel.h"
 #include "wmo.h"
 #include "util.h"
 #include "maptile.h"
@@ -182,8 +182,8 @@ public:
 	int ignoreMouse;
 
 	// Models / Attachments
-	Model *model;
-	Model *skyModel;
+	WoWModel *model;
+	WoWModel *skyModel;
 	WMO *wmo;
 	MapTile *adt;
 

@@ -18,7 +18,7 @@
 #include "CharTexture.h"
 #include "database.h"
 #include "enums.h"
-#include "model.h"
+#include "WoWModel.h"
 #include "modelcanvas.h"
 #include "TabardDetails.h"
 
@@ -81,7 +81,7 @@ public:
 	TabardDetails td;
 
 	Attachment *charAtt;
-	Model *model;
+	WoWModel *model;
 
 	wxString makeItemTexture(int region, const wxString name);
 	wxString customSkin;

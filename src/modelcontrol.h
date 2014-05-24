@@ -6,7 +6,7 @@
     #include <wx/wx.h>
 #endif
 
-#include "model.h"
+#include "WoWModel.h"
 #include "modelcanvas.h"
 #include "animcontrol.h"
 
@@ -47,7 +47,7 @@ class ModelControl: public wxWindow
 	bool init;
 	
 public:
-	Model *model;	// Currently 'active' model.
+	WoWModel *model;	// Currently 'active' model.
 	Attachment *att; // Currently 'active' attachment.
 	AnimControl *animControl;
 

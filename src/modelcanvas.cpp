@@ -336,7 +336,7 @@ Attachment* ModelCanvas::LoadModel(wxString fn)
 
 	wxDELETE(wmo);
 
-	model = new Model(fn, true);
+	model = new WoWModel(fn, true);
 	if (!model->ok) {
 		wxDELETE(model);
 		model = NULL;
@@ -359,7 +359,7 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 	wxDELETE(wmo);
 
 	// Create new one
-	model = new Model(fn, true);
+	model = new WoWModel(fn, true);
 	if (!model->ok) {
 		wxDELETE(model);
 		model = NULL;

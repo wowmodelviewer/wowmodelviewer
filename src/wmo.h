@@ -10,7 +10,7 @@
 #include "manager.h"
 #include "vec3d.h"
 #include "mpq.h"
-#include "model.h"
+#include "WoWModel.h"
 #include "video.h"
 #include "displayable.h"
 #include "ModelManager.h"
@@ -172,7 +172,7 @@ public:
 	float sc;		// Scale Factor
 	unsigned int d1;
 	
-	Model *model;
+	WoWModel *model;
 	wxString filename;
 	int id;
 	unsigned int scale;
@@ -239,7 +239,7 @@ public:
 
 	std::vector<WMODoodadSet> doodadsets;
 
-	Model *skybox;
+	WoWModel *skybox;
 	int sbid;
 
 	WMO(wxString name);

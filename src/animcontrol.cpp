@@ -134,7 +134,7 @@ AnimControl::~AnimControl()
 	skinList->Destroy();
 }
 
-void AnimControl::UpdateModel(Model *m)
+void AnimControl::UpdateModel(WoWModel *m)
 {
 	if (!m)
 		return;
@@ -334,7 +334,7 @@ bool filterDir(wxString fn)
 	return (tmp.StartsWith(sFilterDir) && tmp.EndsWith(wxT("blp")));
 }
 
-bool AnimControl::UpdateCreatureModel(Model *m)
+bool AnimControl::UpdateCreatureModel(WoWModel *m)
 {
 	wxString fn = m->name;
 
@@ -425,7 +425,7 @@ bool AnimControl::UpdateCreatureModel(Model *m)
 	return ret;
 }
 
-bool AnimControl::UpdateItemModel(Model *m)
+bool AnimControl::UpdateItemModel(WoWModel *m)
 {
 	wxString fn = m->name;
 

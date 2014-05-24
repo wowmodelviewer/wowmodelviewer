@@ -30,7 +30,7 @@ void Attachment::draw(ModelCanvas *c)
 		//model->reset();
 		setup();
 
-		Model *m = static_cast<Model*>(model);
+		WoWModel *m = static_cast<WoWModel*>(model);
 
 		if (!m) {
 			glPopMatrix();
@@ -126,7 +126,7 @@ void Attachment::drawParticles(bool force)
 	glPushMatrix();
 
 	if (model) {
-		Model *m = static_cast<Model*>(model);
+		WoWModel *m = static_cast<WoWModel*>(model);
 		if (!m) {
 			glPopMatrix();
 			return;
@@ -192,7 +192,7 @@ Attachment* Attachment::addChild(wxString modelfn, int id, int slot, float scale
 	if (!modelfn || modelfn.Len() == 0 || id<0)
 		return 0;
 
-	Model *m = new Model(modelfn, true);
+	WoWModel *m = new WoWModel(modelfn, true);
 
 	if (m && m->ok) {
 		return addChild(m, id, slot, scale, rot, pos);
@@ -232,11 +232,11 @@ void Attachment::delSlot(int slot)
 	}
 }
 
-Model* Attachment::getModelFromSlot(int slot)
+WoWModel* Attachment::getModelFromSlot(int slot)
 {
 	for (size_t i=0; i<children.size(); ) {
 		if (children[i]->slot == slot) {
-			return (static_cast<Model*>(children[i]->model));
+			return (static_cast<WoWModel*>(children[i]->model));
 		} else i++;
 	}
 

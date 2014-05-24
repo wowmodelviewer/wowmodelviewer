@@ -8,7 +8,7 @@
 #include "ModelRenderPass.h"
 
 #include "enums.h"
-#include "Model.h"
+#include "WoWModel.h"
 #include "ModelColor.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
@@ -131,7 +131,7 @@ void ModelRenderPass::deinit()
 }
 
 
-bool ModelRenderPass::init(Model *m)
+bool ModelRenderPass::init(WoWModel *m)
 {
 	// May aswell check that we're going to render the geoset before doing all this crap.
 	if (!m->showGeosets[geoset])

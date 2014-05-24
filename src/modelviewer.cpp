@@ -1032,7 +1032,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		charControl->UpdateModel(modelAtt);
 	} else {
 		charControl->charAtt = modelAtt;
-		charControl->model = (Model*)modelAtt->model;
+		charControl->model = (WoWModel*)modelAtt->model;
 
 		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
@@ -1882,9 +1882,9 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 		}
 
 	} else if (id == ID_EQCREATURE_R) { // R for righthand
-		Model *m = static_cast<Model*>(canvas->root->model);
+		WoWModel *m = static_cast<WoWModel*>(canvas->root->model);
 		if (!m)
-			m = static_cast<Model*>(canvas->model);
+			m = static_cast<WoWModel*>(canvas->model);
 
 		// make sure m is a valid pointer to a model
 		if (m) {
@@ -1898,9 +1898,9 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 		}
 
 	} else if (id == ID_EQCREATURE_L) { // L for lefthand
-		Model *m = static_cast<Model*>(canvas->root->model);
+		WoWModel *m = static_cast<WoWModel*>(canvas->root->model);
 		if (!m)
-			m = static_cast<Model*>(canvas->model);
+			m = static_cast<WoWModel*>(canvas->model);
 
 		// make sure m is a valid pointer to a model
 		if (m) {
@@ -2221,7 +2221,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
 			wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
 			if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString) {
-				canvas->skyModel = new Model(wxString(skyDialog.GetStringSelection()), false);
+				canvas->skyModel = new WoWModel(wxString(skyDialog.GetStringSelection()), false);
 				canvas->sky->model = canvas->skyModel;
 			}
 		}
@@ -2555,7 +2555,7 @@ void ModelViewer::ModelInfo()
 {
 	if (!canvas->model)
 		return;
-	Model *m = canvas->model;
+	WoWModel *m = canvas->model;
 	wxString fn = wxT("ModelInfo.xml");
 	// FIXME: ofstream is not compitable with multibyte path name
 #ifndef _MINGW

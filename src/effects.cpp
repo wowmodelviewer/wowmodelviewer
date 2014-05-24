@@ -175,7 +175,7 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 						if (att->children.size() > 0)
 							att->delChildren();
 
-						Model *m = static_cast<Model*>(att->model);
+						WoWModel *m = static_cast<WoWModel*>(att->model);
 						if (!m)
 							return;
 

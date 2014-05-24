@@ -7,7 +7,7 @@
 
 #include "ModelManager.h"
 
-#include "Model.h"
+#include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's
 int ModelManager::add(wxString name)
@@ -19,7 +19,7 @@ int ModelManager::add(wxString name)
 		return id;
 	}
 	// load new
-	Model *model = new Model(name);
+	WoWModel *model = new WoWModel(name);
 	id = nextID();
     do_add(name, id, model);
     return id;
@@ -29,7 +29,7 @@ int ModelManager::add(wxString name)
 void ModelManager::resetAnim()
 {
 	for (std::map<int, ManagedItem*>::iterator it = items.begin(); it != items.end(); ++it) {
-		((Model*)it->second)->animcalc = false;
+		((WoWModel*)it->second)->animcalc = false;
 	}
 }
 
@@ -37,7 +37,7 @@ void ModelManager::resetAnim()
 void ModelManager::updateEmitters(float dt)
 {
 	for (std::map<int, ManagedItem*>::iterator it = items.begin(); it != items.end(); ++it) {
-		((Model*)it->second)->updateEmitters(dt);
+		((WoWModel*)it->second)->updateEmitters(dt);
 	}
 }
 

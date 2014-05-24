@@ -15,7 +15,7 @@
 #include "mpq.h" // MPQFile
 #include "Vec3D.h"
 
-class Model;
+class WoWModel;
 
 
 class Bone {
@@ -35,7 +35,7 @@ public:
 	ModelBoneDef boneDef;
 
 	bool calc;
-	Model *model;
+	WoWModel *model;
 	void calcMatrix(Bone* allbones, ssize_t anim, size_t time, bool rotate=true);
 	void initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles);
 	void initV2(MPQFile &f, ModelBoneDef &b, uint32 *global);

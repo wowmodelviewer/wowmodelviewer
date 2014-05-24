@@ -1399,7 +1399,7 @@ void WMOModelInstance::draw()
 
 void WMOModelInstance::loadModel(ModelManager &mm)
 {
-    model = (Model*)mm.items[mm.add(filename)];
+    model = (WoWModel*)mm.items[mm.add(filename)];
 	model->isWMO = true;
 }
 

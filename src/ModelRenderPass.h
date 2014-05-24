@@ -11,7 +11,7 @@
 #include "quaternion.h"
 #include "util.h"
 
-class Model;
+class WoWModel;
 
 struct ModelRenderPass {
 	uint32 indexStart, indexCount, vertexStart, vertexEnd;
@@ -31,7 +31,7 @@ struct ModelRenderPass {
 	// colours
 	Vec4D ocol, ecol;
 
-	bool init(Model *m);
+	bool init(WoWModel *m);
 	void deinit();
 
 	bool operator< (const ModelRenderPass &m) const

@@ -1,11 +1,11 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-class Model;
+class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "model.h"
+#include "WoWModel.h"
 #include "animated.h"
 #include "mpq.h"
 
@@ -72,7 +72,7 @@ class ParticleSystem {
 	Bone *parent;
 
 public:
-	Model *model;
+	WoWModel *model;
 	float tofs;
 
 	Animated<uint16> enabled;
@@ -167,7 +167,7 @@ class RibbonEmitter {
 	std::list<RibbonSegment> segs;
 
 public:
-	Model *model;
+	WoWModel *model;
 
 	void init(MPQFile &f, ModelRibbonEmitterDef &mta, uint32 *globals);
 	void setup(size_t anim, size_t time);

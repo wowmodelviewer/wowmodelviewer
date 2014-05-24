@@ -247,7 +247,7 @@ void CharControl::UpdateModel(Attachment *a)
 		return;
 
 	charAtt = a;
-	model = (Model*)charAtt->model;
+	model = (WoWModel*)charAtt->model;
 
 	// The following isn't actually needed, 
 	// pretty sure all this gets taken care of by TextureManager and CharTexture
@@ -408,7 +408,7 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 		return;
 
 	charAtt = a;
-	model = (Model*)a->model;
+	model = (WoWModel*)a->model;
 
 	charTex = 0;
 	if (charTex==0) 
@@ -1621,7 +1621,7 @@ void CharControl::RefreshItem(ssize_t slot)
 			wxString mp;
 			bool succ = false;
 			Attachment *att = NULL;
-			Model *m = NULL;
+			WoWModel *m = NULL;
 
 			if (id1>=0) {
 				mp = (path + r.getString(ItemDisplayDB::Model));
@@ -1643,7 +1643,7 @@ void CharControl::RefreshItem(ssize_t slot)
 				if (mp.length()) {
 					att = charAtt->addChild(mp, id1, slot);
 					if (att) {
-						m = static_cast<Model*>(att->model);
+						m = static_cast<WoWModel*>(att->model);
 						if (m->ok) {
 							mp = (path + r.getString(ItemDisplayDB::Skin));
 							mp.append(wxT(".blp"));
@@ -1696,7 +1696,7 @@ void CharControl::RefreshItem(ssize_t slot)
 				if (mp.length()) {
 					att = charAtt->addChild(mp, id2, slot);
 					if (att) {
-						m = static_cast<Model*>(att->model);
+						m = static_cast<WoWModel*>(att->model);
 						if (m->ok) {
 							mp = (path + r.getString(ItemDisplayDB::Skin2));
 							mp.append(wxT(".blp"));
@@ -1732,7 +1732,7 @@ void CharControl::RefreshItem(ssize_t slot)
 				}
 
 				if (m == NULL)
-					m = static_cast<Model*>(att->model);
+					m = static_cast<WoWModel*>(att->model);
 
 				if (visualid > 0) {
 					try {
@@ -1797,7 +1797,7 @@ void CharControl::RefreshCreatureItem(ssize_t slot)
 			wxString mp;
 			bool succ = false;
 			Attachment *att = NULL;
-			Model *m = NULL;
+			WoWModel *m = NULL;
 
 			if (id1>=0) {
 				mp = (path + r.getString(ItemDisplayDB::Model));
@@ -1805,7 +1805,7 @@ void CharControl::RefreshCreatureItem(ssize_t slot)
 				if (mp.length()) {
 					att = g_canvas->root->addChild(mp, id1, slot);
 					if (att) {
-						m = static_cast<Model*>(att->model);
+						m = static_cast<WoWModel*>(att->model);
 						if (m->ok) {
 							mp = (path + r.getString(ItemDisplayDB::Skin));
 							mp.append(wxT(".blp"));
@@ -1830,7 +1830,7 @@ void CharControl::RefreshCreatureItem(ssize_t slot)
 				}
 
 				if (m == NULL)
-					m = static_cast<Model*>(att->model);
+					m = static_cast<WoWModel*>(att->model);
 
 				if (visualid > 0) {
 					try {
@@ -2318,7 +2318,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			}
 			g_animControl->UpdateModel(model);
 		} else {
-			Model *m = new Model(creaturemodels[id-1], false);
+			WoWModel *m = new WoWModel(creaturemodels[id-1], false);
 			m->isMount = true;
 
 			// TODO: check if model is ridable

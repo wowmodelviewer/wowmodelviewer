@@ -14,13 +14,13 @@
 #include "util.h"
 
 
-class Model;
+class WoWModel;
 
 struct ModelAttachment {
 	int id;
 	Vec3D pos;
 	int bone;
-	Model *model;
+	WoWModel *model;
 
 	void init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global);
 	void setup();

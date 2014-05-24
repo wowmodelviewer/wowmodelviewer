@@ -1,6 +1,6 @@
 #include "globalvars.h"
 #include "modelviewer.h"
-#include "model.h"
+#include "WoWModel.h"
 #include "mpq.h"
 
 #include <cassert>
@@ -77,7 +77,7 @@ void glInitAll()
 
 
 
-Model::Model(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
+WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
 {
 	if (name == wxT(""))
 		return;
@@ -241,7 +241,7 @@ Model::Model(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(force
 	alpha = 1.0f;
 }
 
-Model::~Model()
+WoWModel::~WoWModel()
 {
 	if (ok) {
 #ifdef _DEBUG
@@ -316,7 +316,7 @@ Model::~Model()
 }
 
 
-void Model::displayHeader(ModelHeader & a_header)
+void WoWModel::displayHeader(ModelHeader & a_header)
 {
 	std::cout << "id : " << a_header.id[0] << a_header.id[1] << a_header.id[2] << a_header.id[3] << std::endl;
 	std::cout << "version : " << (int)a_header.version[0] << (int)a_header.version[1] << (int)a_header.version[2] << (int)a_header.version[3] << std::endl;
@@ -390,7 +390,7 @@ void Model::displayHeader(ModelHeader & a_header)
 }
 
 
-bool Model::isAnimated(MPQFile &f)
+bool WoWModel::isAnimated(MPQFile &f)
 {
 	// see if we have any animated bones
 	ModelBoneDef *bo = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
@@ -465,7 +465,7 @@ bool Model::isAnimated(MPQFile &f)
 	return animGeometry || animTextures || animMisc;
 }
 
-void Model::initCommon(MPQFile &f)
+void WoWModel::initCommon(MPQFile &f)
 {
 	// assume: origVertices already set
 
@@ -715,7 +715,7 @@ void Model::initCommon(MPQFile &f)
 	// zomg done
 }
 
-void Model::initStatic(MPQFile &f)
+void WoWModel::initStatic(MPQFile &f)
 {
 	origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
 
@@ -737,7 +737,7 @@ void Model::initStatic(MPQFile &f)
 	wxDELETEA(transparency);
 }
 
-void Model::initAnimated(MPQFile &f)
+void WoWModel::initAnimated(MPQFile &f)
 {
 	if (origVertices) {
 		delete [] origVertices;
@@ -937,7 +937,7 @@ void Model::initAnimated(MPQFile &f)
 	animcalc = false;
 }
 
-void Model::setLOD(MPQFile &f, int index)
+void WoWModel::setLOD(MPQFile &f, int index)
 {
 	// Texture definitions
 	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
@@ -1066,7 +1066,7 @@ void Model::setLOD(MPQFile &f, int index)
 	//std::sort(passes.begin(), passes.end());
 }
 
-void Model::calcBones(ssize_t anim, size_t time)
+void WoWModel::calcBones(ssize_t anim, size_t time)
 {
 	// Reset all bones to 'false' which means they haven't been animated yet.
 	for (size_t i=0; i<header.nBones; i++) {
@@ -1214,7 +1214,7 @@ void Model::calcBones(ssize_t anim, size_t time)
 	}
 }
 
-void Model::animate(ssize_t anim)
+void WoWModel::animate(ssize_t anim)
 {
 	size_t t=0;
 	
@@ -1308,7 +1308,7 @@ void Model::animate(ssize_t anim)
 
 
 
-inline void Model::drawModel()
+inline void WoWModel::drawModel()
 {
 	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 	if (video.supportVBO && animated)	{
@@ -1389,7 +1389,7 @@ inline void Model::drawModel()
 	// done with all render ops
 }
 
-inline void Model::draw()
+inline void WoWModel::draw()
 {
 	if (!ok)
 		return;
@@ -1414,7 +1414,7 @@ inline void Model::draw()
 }
 
 // These aren't really needed in the model viewer.. only wowmapviewer
-void Model::lightsOn(GLuint lbase)
+void WoWModel::lightsOn(GLuint lbase)
 {
 	// setup lights
 	for (size_t i=0, l=lbase; i<header.nLights; i++) 
@@ -1422,14 +1422,14 @@ void Model::lightsOn(GLuint lbase)
 }
 
 // These aren't really needed in the model viewer.. only wowmapviewer
-void Model::lightsOff(GLuint lbase)
+void WoWModel::lightsOff(GLuint lbase)
 {
 	for (size_t i=0, l=lbase; i<header.nLights; i++) 
 		glDisable((GLenum)l++);
 }
 
 // Updates our particles within models.
-void Model::updateEmitters(float dt)
+void WoWModel::updateEmitters(float dt)
 {
 	if (!ok || !showParticles || !bShowParticle) 
 		return;
@@ -1441,7 +1441,7 @@ void Model::updateEmitters(float dt)
 
 
 // Draws the "bones" of models  (skeletal animation)
-void Model::drawBones()
+void WoWModel::drawBones()
 {
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_LINES);
@@ -1457,7 +1457,7 @@ void Model::drawBones()
 }
 
 // Sets up the models attachments
-void Model::setupAtt(int id)
+void WoWModel::setupAtt(int id)
 {
 	int l = attLookup[id];
 	if (l>-1)
@@ -1465,7 +1465,7 @@ void Model::setupAtt(int id)
 }
 
 // Sets up the models attachments
-void Model::setupAtt2(int id)
+void WoWModel::setupAtt2(int id)
 {
 	int l = attLookup[id];
 	if (l>=0)
@@ -1473,7 +1473,7 @@ void Model::setupAtt2(int id)
 }
 
 // Draws the Bounding Volume, which is used for Collision detection.
-void Model::drawBoundingVolume()
+void WoWModel::drawBoundingVolume()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
@@ -1489,7 +1489,7 @@ void Model::drawBoundingVolume()
 }
 
 // Renders our particles into the pipeline.
-void Model::drawParticles()
+void WoWModel::drawParticles()
 {
 	// draw particle systems
 	for (size_t i=0; i<header.nParticleEmitters; i++) {

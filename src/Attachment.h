@@ -15,7 +15,7 @@
 #include <wx/string.h>
 
 class Displayable;
-class Model;
+class WoWModel;
 class ModelCanvas;
 
 struct Attachment {
@@ -41,7 +41,7 @@ struct Attachment {
 	Attachment* addChild(Displayable *disp, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f));
 	void delSlot(int slot);
 	void delChildren();
-	Model* getModelFromSlot(int slot);
+	WoWModel* getModelFromSlot(int slot);
 
 	void draw(ModelCanvas *c);
 	void drawParticles(bool force=false);

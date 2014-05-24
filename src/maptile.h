@@ -11,7 +11,7 @@
 #include "video.h"
 #include "mpq.h"
 #include "wmo.h"
-#include "model.h"
+#include "WoWModel.h"
 #include "liquid.h"
 #include <vector>
 #include <string>

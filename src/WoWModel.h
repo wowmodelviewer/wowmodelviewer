@@ -1,5 +1,5 @@
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef _WOWMODEL_H
+#define _WOWMODEL_H
 
 // C++ files
 #include <vector>
@@ -32,6 +32,8 @@
 
 #include "enums.h"
 
+#include "core/Model.h"
+
 class Bone;
 struct ModelColor;
 class ModelEvent;
@@ -39,7 +41,7 @@ struct ModelLight;
 struct ModelTransparency;
 class TextureAnim;
 
-class Model: public ManagedItem, public Displayable
+class WoWModel: public ManagedItem, public Displayable, public Model
 {
 	// VBO Data
 	GLuint vbuf, nbuf, tbuf;
@@ -92,8 +94,8 @@ public:
 	// --
 
 public:
-	Model(wxString name, bool forceAnim=false);
-	~Model();
+	WoWModel(wxString name, bool forceAnim=false);
+	~WoWModel();
 
 	ModelHeader header;
 	std::vector<ModelCamera> cam;

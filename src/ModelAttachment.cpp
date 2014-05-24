@@ -11,7 +11,7 @@
 
 #include "Bone.h"
 #include "matrix.h"
-#include "Model.h"
+#include "WoWModel.h"
 
 void ModelAttachment::init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global)
 {
