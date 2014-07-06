@@ -7,7 +7,6 @@
   SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
 
   message(STATUS "Using Windows MinGW version")
-  set(JPEG_INCLUDE_DIR c:/MinGW/include)
 
   message(STATUS "Using glew")
   include(glew/glew.cmake)

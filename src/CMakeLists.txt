@@ -38,9 +38,14 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 NEW)
 endif()
 
+if(POLICY CMP0028)
+  cmake_policy(SET CMP0028 NEW)
+endif()
+
 # Qt5 stuff
-# need to first set prefix to your Qt5 install directory
-set(CMAKE_PREFIX_PATH "C:\\Qt\\5.2.0\\mingw48_32")
+# init cmake with our qt install directory
+set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE_DIR})
+
 find_package(Qt5Core)
 
 include_directories(next-gen)
