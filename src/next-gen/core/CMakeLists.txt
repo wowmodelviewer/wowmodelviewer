@@ -18,5 +18,5 @@ file(GLOB src *.cpp ../metaclasses/*.cpp ../logger/*.cpp)
 
 add_library(core STATIC ${src})
 
-qt5_use_modules(core Core Network)
+target_link_libraries(core Qt5::Core Qt5::Network)
         
