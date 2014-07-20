@@ -37,7 +37,7 @@ setOutPath $INSTDIR
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\ridable.csv"
-File "${wmvroot}\bin_support\MinGW\*"
+File "${wmvroot}\bin\*.dll"
 
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins
@@ -49,7 +49,7 @@ File "${wmvroot}\src\po\*.mo"
 
 CreateDirectory $INSTDIR\platforms
 SetOutPath $INSTDIR\platforms
-File "${wmvroot}\bin_support\MinGW\platforms\*"
+File "${wmvroot}\bin\platforms\*.dll"
 
 CreateDirectory $INSTDIR\
 

@@ -15,6 +15,9 @@ set(WMV_BASE_PATH "${CMAKE_SOURCE_DIR}")
 # add wmv cmake directory to search path
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 
+# define policies to avoid warnings
+include(cmake/policies.cmake)
+
 # search for required package (wxwidgets)
 find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
 
@@ -34,19 +37,12 @@ include(${wxWidgets_USE_FILE})
 # add wmv source files compilation
 include(cmake/sources.cmake)
 
-if(POLICY CMP0020)
-  cmake_policy(SET CMP0020 NEW)
-endif()
-
-if(POLICY CMP0028)
-  cmake_policy(SET CMP0028 NEW)
-endif()
-
 # Qt5 stuff
 # init cmake with our qt install directory
 set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE_DIR})
 
 find_package(Qt5Core)
+
 
 include_directories(next-gen)
 

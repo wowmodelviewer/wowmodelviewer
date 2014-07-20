@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 2.6)
 
 message(STATUS "Building UpdateManager")
 
+# define policies to avoid warnings
+include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
+
 set(RES_FILES "UpdateManager.rc")
 set(CMAKE_RC_COMPILER_INIT windres)
 ENABLE_LANGUAGE(RC)
@@ -32,7 +35,8 @@ endif()
 
 add_dependencies(UpdateManager core)
 
-target_link_libraries(UpdateManager core Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+qt5_use_modules(UpdateManager Core Gui Widgets Network)
+target_link_libraries(UpdateManager core)
 
 install(TARGETS UpdateManager 
           RUNTIME DESTINATION ${WMV_BASE_PATH}/../bin)

@@ -1,12 +1,16 @@
 project(wowhead)
 cmake_minimum_required(VERSION 2.6)
 
+# define policies to avoid warnings
+include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
+
 message(STATUS "Building wowhead importer")
 
 find_package(wxWidgets COMPONENTS net core base REQUIRED)
 
 # Qt5 stuff
 find_package(Qt5Core)
+find_package(Qt5Network)
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
