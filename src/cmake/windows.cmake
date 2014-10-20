@@ -41,7 +41,7 @@ endif()
 
 find_package(Qt5Network)
 
-add_dependencies(wowmodelviewer cximage StormLib core)   
+add_dependencies(wowmodelviewer cximage StormLib casc_static core)   
   
 target_link_libraries(wowmodelviewer
   cximage

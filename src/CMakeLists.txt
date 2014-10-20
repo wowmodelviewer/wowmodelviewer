@@ -28,6 +28,10 @@ add_subdirectory(CxImage)
 add_subdirectory(stormlib)
 set (EXTRA_LIBS ${EXTRA_LIBS} StormLib)
 
+# CascLib compilation
+add_subdirectory(casclib)
+set (EXTRA_LIBS ${EXTRA_LIBS} casc_static)
+
 # add global definitions : all warnings considered as errors
 add_definitions(-g -Wall -Werror)
 
