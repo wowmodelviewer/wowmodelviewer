@@ -25,7 +25,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 		return interpolate<T>((life-mid) / (1.0f-mid),b,c);
 }
 
-void ParticleSystem::init(MPQFile &f, ModelParticleEmitterDef &mta, uint32 *globals)
+void ParticleSystem::init(GameFile * f, ModelParticleEmitterDef &mta, uint32 *globals)
 {
 	speed.init (mta.EmissionSpeed, f, globals);
 	variation.init (mta.SpeedVariation, f, globals);
@@ -41,11 +41,11 @@ void ParticleSystem::init(MPQFile &f, ModelParticleEmitterDef &mta, uint32 *glob
 
 	if (gameVersion >= VERSION_WOTLK) {
 		Vec3D colors2[3];
-		memcpy(colors2, f.getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
+		memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
 		for (size_t i=0; i<3; i++) {
-			float opacity = *(short*)(f.getBuffer()+mta.p.opacity.ofsKeys+i*2);
+			float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
 			colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f, colors2[i].z/255.0f, opacity/32767.0f);
-			sizes[i] = (*(float*)(f.getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];		
+			sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
 		}
 		mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
 	} else {
@@ -725,7 +725,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 
 
 
-void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, uint32 *globals)
+void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, uint32 *globals)
 {
 	color.init(mta.color, f, globals);
 	opacity.init(mta.opacity, f, globals);
@@ -733,7 +733,7 @@ void RibbonEmitter::init(MPQFile &f, ModelRibbonEmitterDef &mta, uint32 *globals
 	below.init(mta.below, f, globals);
 
 	parent = model->bones + mta.bone;
-	int *texlist = (int*)(f.getBuffer() + mta.ofsTextures);
+	int *texlist = (int*)(f->getBuffer() + mta.ofsTextures);
 	// just use the first texture for now; most models I've checked only had one
 	texture = model->textures[texlist[0]];
 

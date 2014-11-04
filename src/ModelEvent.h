@@ -14,7 +14,7 @@
 class ModelEvent {
 	ModelEventDef def;
 public:
-	void init(MPQFile &f, ModelEventDef &mad, uint32 *global);
+	void init(GameFile *, ModelEventDef &mad, uint32 *global);
 
 	friend std::ostream& operator<<(std::ostream& out, ModelEvent& v)
 	{

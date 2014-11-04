@@ -1,5 +1,6 @@
 #include "dbcfile.h"
 
+#include "CASCFile.h"
 #include "enums.h"
 #include "globalvars.h"
 #include "modelviewer.h"
@@ -18,7 +19,7 @@ DBCFile::DBCFile(const wxString &filename) : filename(filename)
 	stringSize = 0;
 }
 
-bool DBCFile::open()
+bool DBCFile::open(CASCFolder * folder)
 {
 	enum FileType {
 		FT_UNK,
@@ -31,16 +32,21 @@ bool DBCFile::open()
 	}
 
 	g_modelViewer->SetStatusText(wxT("Initiating ")+filename+wxT(" Database..."));
-	MPQFile f(filename);
+	GameFile * f = 0;
+	if(!folder)
+	  f = new MPQFile(filename);
+	else
+	  f = new CASCFile(filename.c_str(),folder);
 	// Need some error checking, otherwise an unhandled exception error occurs
 	// if people screw with the data path.
-	if (f.isEof())
-		return false;
+
+	//if (f->isEof())
+		//return false;
 
 	char header[5];
 	unsigned int na,nb,es,ss;
 
-	f.read(header, 4); // File Header
+	f->read(header, 4); // File Header
 
 	if (strncmp(header, "WDBC", 4) == 0)
 		db_type = FT_WDBC;
@@ -48,7 +54,7 @@ bool DBCFile::open()
 		db_type = FT_WDB2;
 
 	if (db_type == FT_UNK) {
-		f.close();
+		f->close();
 		data = NULL;
 		wxLogMessage(wxT("Critical Error: An error occured while trying to read the DBCFile %s."), filename.c_str());
 		return false;
@@ -56,20 +62,20 @@ bool DBCFile::open()
 
 	//assert(header[0]=='W' && header[1]=='D' && header[2]=='B' && header[3] == 'C');
 
-	f.read(&na,4); // Number of records
-	f.read(&nb,4); // Number of fields
-	f.read(&es,4); // Size of a record
-	f.read(&ss,4); // String size
+	f->read(&na,4); // Number of records
+	f->read(&nb,4); // Number of fields
+	f->read(&es,4); // Size of a record
+	f->read(&ss,4); // String size
 
 	if (db_type == FT_WDB2) {
-		f.seekRelative(28);
+		f->seekRelative(28);
 		// just some buggy check
 		unsigned int check;
-		f.read(&check, 4);
+		f->read(&check, 4);
 		if (check == 6) // wrong place
-			f.seekRelative(-20);
+			f->seekRelative(-20);
 		else // check == 17, right place
-			f.seekRelative(-4);
+			f->seekRelative(-4);
 	}
 	
 	recordSize = es;
@@ -83,10 +89,10 @@ bool DBCFile::open()
 	data = new unsigned char[recordSize*recordCount+stringSize];
 	stringTable = data + recordSize*recordCount;
 	if (db_type == FT_WDB2) {
-		f.seek(f.getSize() - recordSize*recordCount - stringSize);
+		f->seek(f->getSize() - recordSize*recordCount - stringSize);
 	}
-	f.read(data, recordSize*recordCount+stringSize);
-	f.close();
+	f->read(data, recordSize*recordCount+stringSize);
+	f->close();
 	return true;
 }
 

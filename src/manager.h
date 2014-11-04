@@ -70,8 +70,8 @@ public:
 			#endif
 
 			doDelete(id);
-			names.erase(names.find(i->name));
-			items.erase(items.find(id));
+		//	names.erase(names.find(i->name));
+		//	items.erase(items.find(id));
 
 			wxDELETE(i);
 		}

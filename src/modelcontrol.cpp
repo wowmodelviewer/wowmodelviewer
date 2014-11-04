@@ -241,12 +241,15 @@ void ModelControl::Update()
 		wxT("Boots"), wxEmptyString, wxT("Ears"), wxT("Wristbands"),  wxT("Kneepads"),
 		 wxT("Pants"), wxT("Pants2"), wxT("Tarbard"), wxT("Trousers"), wxT("Tarbard2"),
 		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
+
 	for (size_t i=0; i<model->geosets.size(); i++) {
 		size_t mesh = model->geosets[i].id / 100;
 		if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
 			geosetItems.Add(wxString::Format(wxT("%i [%s, %i]"), i, meshes[mesh].c_str(), model->geosets[i].id % 100), 1);
 		else
+		{
 			geosetItems.Add(wxString::Format(wxT("%i [%i, %i]"), i, mesh, (model->geosets[i].id % 100)), 1);
+		}
 	}
 	//geosets->InsertItems(items, 0);
 	clbGeosets->Set(geosetItems, 0);
@@ -314,7 +317,7 @@ void ModelControl::OnCombo(wxCommandEvent &event)
 		}
 
 		model->showModel = false;
-		model->setLOD(f, value);
+		model->setLOD(&f, value);
 		model->showModel = true;
 
 		/*

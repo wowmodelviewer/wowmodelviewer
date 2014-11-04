@@ -6,6 +6,8 @@
 
 #include <wx/wx.h>
 
+class CASCFolder;
+
 class DBCFile
 {
 public:
@@ -13,7 +15,7 @@ public:
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
-	bool open();
+	bool open(CASCFolder * folder = 0);
 
 	// TODO: Add a close function?
 

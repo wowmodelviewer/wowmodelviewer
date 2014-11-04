@@ -24,6 +24,9 @@
 #include <wx/txtstrm.h>
 #include <wx/utils.h>
 
+#include "CASCFile.h"
+#include "CASCFolder.h"
+
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 const static float def_diffuse[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -208,6 +211,8 @@ ModelViewer::ModelViewer()
 	isChar = false;
 	isADT = false;
 	initDB = false;
+
+	gameFolder = NULL;
 
 	//wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
 	// create our main frame
@@ -563,12 +568,12 @@ void ModelViewer::InitDatabase()
 	SetStatusText(wxT("Initializing Databases..."));
 	initDB = true;
 
-	if (!itemdb.open()) {
+	if (!itemdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item DB."));
 	}
 
-	if (!itemsparsedb.open()) {
+	if (!itemsparsedb.open(gameFolder)) {
 		wxLogMessage(wxT("Error: Could not open the Item Sparse DB."));
 	}
 
@@ -585,84 +590,84 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not find items.csv to load an item list from."));
 	}
 
-	if (!skyboxdb.open()) {
+	if (!skyboxdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
 	}
 
-	if (!spellitemenchantmentdb.open()) {
+	if (!spellitemenchantmentdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Spell Item Enchanement DB."));
 	}
 
-	if (!itemvisualsdb.open()) {
+	if (!itemvisualsdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item Visuals DB."));
 	}
 
-	if (!animdb.open()) {
+	if (!animdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Animation DB."));
 	}
 
-	if (!modeldb.open()) {
+	if (!modeldb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Creatures DB."));
 	}
 
-	if (!skindb.open()) {
+	if (!skindb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the CreatureDisplayInfo DB."));
 	}
 
-	if(!hairdb.open()) {
+	if(!hairdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Hair Geoset DB."));
 	}
 
-	if(!chardb.open()) {
+	if(!chardb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Character DB."));
 	}
 
-	if(!racedb.open()) {
+	if(!racedb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Races DB."));
 	}
 
-	if(!classdb.open()) {
+	if(!classdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Classes DB."));
 	}
 
-	if(!facialhairdb.open()) {
+	if(!facialhairdb.open(gameFolder)) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Facial Hair DB."));
 	}
 
-	if(!visualdb.open())
+	if(!visualdb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the ItemVisuals DB."));
 
-	if(!effectdb.open())
+	if(!effectdb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the ItemVisualEffects DB."));
 
-	if(!subclassdb.open())
+	if(!subclassdb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the Item Subclasses DB."));
 
-	if(!startdb.open())
+	if(!startdb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the Start Outfit Sets DB."));
 	//if(!helmetdb.open()) return false;
 
-	if(!npcdb.open()) 
+	if(!npcdb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the Start Outfit NPC DB."));
 
-	if(!npctypedb.open())
+	if(!npctypedb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the Creature Type DB."));
 
-	if(!camcinemadb.open())
+	if(!camcinemadb.open(gameFolder))
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
 
-	if(!itemdisplaydb.open())
+	if(!itemdisplaydb.open(gameFolder))
 	{
 		wxLogMessage(wxT("Error: Could not open the ItemDisplayInfo DB."));
 	}
@@ -671,7 +676,7 @@ void ModelViewer::InitDatabase()
 		items.cleanup(itemdisplaydb);
 	}
 
-	if(!setsdb.open())
+	if(!setsdb.open(gameFolder))
 	{
 		wxLogMessage(wxT("Error: Could not open the Item Sets DB."));
 	}
@@ -694,7 +699,7 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not find npcs.csv, unable to create NPC list."));
 	}
 
-	if(spelleffectsdb.open())
+	if(spelleffectsdb.open(gameFolder))
 		GetSpellEffects();
 	else
 		wxLogMessage(wxT("Error: Could not open the SpellVisualEffects DB."));
@@ -1207,7 +1212,7 @@ void ModelViewer::LoadItem(unsigned int displayID)
 		bool loaded = false;
 		for(int i=0; i<10; i++) {
 			fn = fns[i]+name;
-			if (MPQFile::getSize(fn) > 0) {
+			if (MPQFile::exists(fn)) {
 				loaded = true;
 				LoadModel(fn);
 				break;
@@ -1225,7 +1230,7 @@ void ModelViewer::LoadItem(unsigned int displayID)
 
 			// finally try to load it again
 			fn = fns[3]+name;
-			if (MPQFile::getSize(fn) > 0) {
+			if (MPQFile::exists(fn)) {
 				LoadModel(fn);
 			}
 
@@ -1450,28 +1455,6 @@ ModelViewer::ArchiveInitStatus ModelViewer::InitMPQArchives()
 		langOffset = 0;
 	} else { // else if not a supported edition...
 		return ARCHIVEINITSTATUS_WOWVERSION_ERROR;
-	}
-
-	// log for debug
-	wxString component = wxT("component.wow-data.txt");
-	MPQFile f2(component);
-	if (!f2.isEof()) {
-		f2.save(component);
-		f2.close();
-		
-		wxXmlDocument xmlDoc;
-		if (xmlDoc.Load(wxString(component, wxConvUTF8), wxT("UTF-8"))) {
-			wxXmlNode *child = xmlDoc.GetRoot()->GetChildren(); // componentinfo->component.version
-			if (child && child->GetName() == wxT("component")) {
-				wxString version = child->GetPropVal(wxT("version"), wxT("0"));
-				if (version != wxT("0")) {
-					wxLogMessage(wxT("Loaded Content Version: %s"), version.c_str());
-					SetStatusText(wxString((char *)toc, wxConvUTF8)+wxT(".")+version, 1);
-				}
-			}
-		}
-		
-		wxRemoveFile(component);
 	}
 
 	return ARCHIVEINITSTATUS_NOERROR;
@@ -1969,6 +1952,44 @@ void ModelViewer::LoadWoW()
 		mpqArchives.Clear();
 	}
 
+	gameFolder = new CASCFolder(gamePath.c_str());
+
+  CASCFile TOCFile("Interface\\FrameXML\\FrameXML.TOC",gameFolder);
+
+  if(!TOCFile.open())
+  {
+    LOG_ERROR << "Opening TOC file in folder " << gameFolder->folder().c_str() << " failed.";
+    delete gameFolder;
+    gameFolder = NULL;
+  }
+  else
+  {
+    DWORD dwBytesRead;
+    char buffer[100];
+    dwBytesRead = TOCFile.read(buffer,100);
+
+    if(dwBytesRead !=0)
+    {
+      std::string tocString = buffer;
+      // Seek the TOC number by searching for the Interface Offset
+      int tocstart = tocString.find("## Interface: ") + strlen("## Interface: ");
+      tocString = tocString.substr(tocstart, tocstart+5);
+      tocString.resize(5);
+      TOCFile.close();
+      SetStatusText(wxString(tocString), 1);
+    }
+    else
+    {
+      LOG_ERROR << "FAIL to read TOC content from file.";
+      delete gameFolder;
+      gameFolder = NULL;
+    }
+  }
+
+
+
+/*
+
 	// auto search for MPQ Archives
 	if (mpqArchives.GetCount() == 0) {
 		searchMPQs(true);
@@ -2008,13 +2029,31 @@ void ModelViewer::LoadWoW()
 		else
 			langOffset = langID;
 	}
+*/
+  SetStatusText(wxString(gameFolder->locale()), 2);
 
-	// we should get this from searchMPQs or pConfig
-	if (!langName.IsEmpty())
-		SetStatusText(langName, 2);
+  InitDatabase();
+
+    // Error check
+    if (!initDB) {
+      wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
+      //fileControl->Disable();
+      SetStatusText(wxT("Some DBC files could not be loaded."));
+    } else {
+      isWoWLoaded = true;
+      SetStatusText(wxT("Initial WoW Done."));
+      fileMenu->Enable(ID_LOAD_WOW, false);
+    }
+
+    SetStatusText(wxT("Initializing File Control..."));
+    fileControl->Init(this);
+
+    if (charControl->Init() == false){
+       SetStatusText(wxT("Error Initializing the Character Controls."));
+    };
 
 	// load our World of Warcraft mpq archives
-	wxString initvar = Init();
+	/*wxString initvar = Init();
 	if (initvar != wxEmptyString){
 		wxString info = wxT("Fatal Error: ") + initvar;
 		wxLogMessage(info);
@@ -2030,18 +2069,8 @@ void ModelViewer::LoadWoW()
 		wxLogMessage(wxT("Warning: Failed to load user skins"));
 
 	// Initial Databases like dbc, db2, csvs
-	InitDatabase();
 
-	// Error check
-	if (!initDB) {
-		wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-		//fileControl->Disable();
-		SetStatusText(wxT("Some DBC files could not be loaded."));
-	} else {
-		isWoWLoaded = true;
-		SetStatusText(wxT("Initial WoW Done."));
-		fileMenu->Enable(ID_LOAD_WOW, false);
-	}
+	*/
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)

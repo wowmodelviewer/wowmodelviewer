@@ -610,7 +610,7 @@ public:
 class SpellEffectsDB: public DBCFile
 {
 public:
-	SpellEffectsDB(): DBCFile(wxT("DBFilesClient\\SpellVisualEffectName.dbc")) {}
+	SpellEffectsDB(): DBCFile(wxT("DBFilesClient\\SpellVisualEffectName.db2")) {}
 	~SpellEffectsDB() {}
 
 	/// Fields

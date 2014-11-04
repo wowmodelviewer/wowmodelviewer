@@ -40,6 +40,8 @@ class ModelEvent;
 struct ModelLight;
 struct ModelTransparency;
 class TextureAnim;
+class GameFile;
+class CASCFile;
 
 class WoWModel: public ManagedItem, public Displayable, public Model
 {
@@ -55,10 +57,10 @@ class WoWModel: public ManagedItem, public Displayable, public Model
 	void displayHeader(ModelHeader & a_header);
 
 	inline void drawModel();
-	void initCommon(MPQFile &f);
-	bool isAnimated(MPQFile &f);
-	void initAnimated(MPQFile &f);
-	void initStatic(MPQFile &f);
+	void initCommon(GameFile * f);
+	bool isAnimated(GameFile * f);
+	void initAnimated(GameFile * f);
+	void initStatic(GameFile * f);
 
 	void animate(ssize_t anim);
 	void calcBones(ssize_t anim, size_t time);
@@ -128,6 +130,7 @@ public:
 	bool isWMO;
 	bool isMount;
 	bool animated;
+	bool isHD;
 
 	// Misc values
 	float rad;
@@ -141,7 +144,7 @@ public:
 	int16 *animLookups;
 	AnimManager *animManager;
 	Bone *bones;
-	MPQFile *animfiles;
+	std::vector<GameFile *> animfiles;
 
 	size_t currentAnim;
 	bool animcalc;
@@ -182,7 +185,7 @@ public:
 	// -------------------------------
 	
 	void updateEmitters(float dt);
-	void setLOD(MPQFile &f, int index);
+	void setLOD(GameFile * f, int index);
 
 	void setupAtt(int id);
 	void setupAtt2(int id);

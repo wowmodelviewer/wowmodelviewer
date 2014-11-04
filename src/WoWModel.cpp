@@ -5,9 +5,12 @@
 
 #include <cassert>
 #include <algorithm>
+#include <iostream>
+
 #include "util.h"
 
 #include "Bone.h"
+#include "CASCFile.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
@@ -77,7 +80,10 @@ void glInitAll()
 
 
 
-WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim(forceAnim)
+WoWModel::WoWModel(wxString name, bool forceAnim) :
+    ManagedItem(name),
+    forceAnim(forceAnim),
+    isHD(false)
 {
 	if (name == wxT(""))
 		return;
@@ -85,6 +91,12 @@ WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim
 	// replace .MDX with .M2
 	wxString tempname(name);
 	tempname = tempname.BeforeLast(wxT('.')) + wxT(".m2");
+
+	std::string stdname = tempname.c_str();
+	if(stdname.find("_hd") != std::string::npos)
+	  isHD = true;
+
+	std::cout << __FUNCTION__ << "is HD ? " << boolalpha << isHD << std::endl;
 
 	// Initiate our model variables.
 	trans = 1.0f;
@@ -154,31 +166,43 @@ WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim
 	IndiceToVerts = 0;
 	// --
 
-	MPQFile f(tempname);
+	GameFile * f;
+	if(g_modelViewer->gameFolder)
+	{
+	  f = new CASCFile(tempname.c_str(), g_modelViewer->gameFolder);
+	}
+	else
+	{
+	  f = new MPQFile(tempname);
+	}
 	g_modelViewer->SetStatusText(tempname);
 	ok = false;
-	if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
+	if (f->isEof() || (f->getSize() < sizeof(ModelHeader))) {
 		wxLogMessage(wxT("Error: Unable to load model: [%s]"), tempname.c_str());
 		// delete this; //?
-		f.close();
+		f->close();
+		delete f;
 		return;
 	}
 	ok = true;
 	
-	memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
+	memcpy(&header, f->getBuffer(), sizeof(ModelHeader));
 
-	wxLogMessage(wxT("Loading model: %s, size: %d\n"), tempname.c_str(), f.getSize());
+	wxLogMessage(wxT("Loading model: %s, size: %d\n"), tempname.c_str(), f->getSize());
 
 	//displayHeader(header);
 
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0') {
 		wxLogMessage(wxT("Error:\t\tInvalid model!  May be corrupted."));
 		ok = false;
-		f.close();
+		f->close();
+		delete f;
 		return;
 	}
 
 	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
+
+	std::cout << "animated = " << std::boolalpha << animated << std::endl;
 
 	if (gameVersion >= VERSION_WOTLK) {
 		modelname = tempname;
@@ -207,7 +231,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim
 	if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
 		wxLogMessage(wxT("Error:\t\tModel version is incorrect!\n\t\tMake sure you are loading models from World of Warcraft 2.0.1 or newer client."));
 		ok = false;
-		f.close();
+		f->close();
 
 		if (header.version[0] == 0)
 			wxMessageBox(wxString::Format(wxT("An error occured while trying to load the model %s.\nWoW Model Viewer 0.5.x only supports loading WoW 2.0 models\nModels from WoW 1.12 or earlier are not supported"), tempname.c_str()), wxT("Error: Unable to load model"), wxICON_ERROR);
@@ -215,13 +239,13 @@ WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim
 		return;
 	}
 
-	if (f.getSize() < header.ofsParticleEmitters) {
+	if (f->getSize() < header.ofsParticleEmitters) {
 		wxLogMessage(wxT("Error: Unable to load the Model \"%s\", appears to be corrupted."), tempname.c_str());
 	}
 	
 	if (header.nGlobalSequences) {
 		globalSequences = new uint32[header.nGlobalSequences];
-		memcpy(globalSequences, (f.getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
+		memcpy(globalSequences, (f->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
 	}
 
 	if (forceAnim)
@@ -232,7 +256,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) : ManagedItem(name), forceAnim
 	else
 		initStatic(f);
 
-	f.close();
+	f->close();
 	
 	// Ready to render.
 	showModel = true;
@@ -256,6 +280,7 @@ WoWModel::~WoWModel()
 			// For character models, the texture isn't loaded into the texture manager, manually remove it
 			glDeleteTextures(1, &replaceTextures[1]);
 			
+			/*
 			// Clears textures that were loaded from Model::InitCommon()
 			for (size_t i=0; i<header.nTextures; i++) {
 				if (textures[i]>0)
@@ -266,6 +291,7 @@ WoWModel::~WoWModel()
 				if (replaceTextures[i] > 0)
 					texturemanager.del(replaceTextures[i]);
 			}
+			*/
 			
 			wxDELETEA(textures);
 		}
@@ -390,16 +416,16 @@ void WoWModel::displayHeader(ModelHeader & a_header)
 }
 
 
-bool WoWModel::isAnimated(MPQFile &f)
+bool WoWModel::isAnimated(GameFile * f)
 {
 	// see if we have any animated bones
-	ModelBoneDef *bo = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
+	ModelBoneDef *bo = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
 
 	animGeometry = false;
 	animBones = false;
 	ind = false;
 
-	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
+	ModelVertex *verts = (ModelVertex*)(f->getBuffer() + header.ofsVertices);
 	for (size_t i=0; i<header.nVertices && !animGeometry; i++) {
 		for (size_t b=0; b<4; b++) {
 			if (verts[i].weights[b]>0) {
@@ -441,7 +467,7 @@ bool WoWModel::isAnimated(MPQFile &f)
 
 	// animated colors
 	if (header.nColors) {
-		ModelColorDef *cols = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
+		ModelColorDef *cols = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
 		for (size_t i=0; i<header.nColors; i++) {
 			if (cols[i].color.type!=0 || cols[i].opacity.type!=0) {
 				animMisc = true;
@@ -452,7 +478,7 @@ bool WoWModel::isAnimated(MPQFile &f)
 
 	// animated opacity
 	if (header.nTransparency && !animMisc) {
-		ModelTransDef *trs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
+		ModelTransDef *trs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
 		for (size_t i=0; i<header.nTransparency; i++) {
 			if (trs[i].trans.type!=0) {
 				animMisc = true;
@@ -465,7 +491,7 @@ bool WoWModel::isAnimated(MPQFile &f)
 	return animGeometry || animTextures || animMisc;
 }
 
-void WoWModel::initCommon(MPQFile &f)
+void WoWModel::initCommon(GameFile * f)
 {
 	// assume: origVertices already set
 
@@ -496,18 +522,18 @@ void WoWModel::initCommon(MPQFile &f)
 	// bounds
 	if (header.nBoundingVertices > 0) {
 		bounds = new Vec3D[header.nBoundingVertices];
-		Vec3D *b = (Vec3D*)(f.getBuffer() + header.ofsBoundingVertices);
+		Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
 		for (size_t i=0; i<header.nBoundingVertices; i++) {
 			bounds[i] = fixCoordSystem(b[i]);
 		}
 	}
 	if (header.nBoundingTriangles > 0) {
 		boundTris = new uint16[header.nBoundingTriangles];
-		memcpy(boundTris, f.getBuffer() + header.ofsBoundingTriangles, header.nBoundingTriangles*sizeof(uint16));
+		memcpy(boundTris, f->getBuffer() + header.ofsBoundingTriangles, header.nBoundingTriangles*sizeof(uint16));
 	}
 
 	// textures
-	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
+	ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
 	if (header.nTextures) {
 		textures = new TextureID[header.nTextures];
 		for (size_t i=0; i<header.nTextures; i++) {
@@ -544,7 +570,7 @@ void WoWModel::initCommon(MPQFile &f)
 			*/
 
 			if (texdef[i].type == TEXTURE_FILENAME) {
-				wxString texname((char*)(f.getBuffer()+texdef[i].nameOfs), wxConvUTF8);
+				wxString texname((char*)(f->getBuffer()+texdef[i].nameOfs), wxConvUTF8);
 				textures[i] = texturemanager.add(texname);
 				TextureList.push_back(texname);
 				wxLogMessage(wxT("Info: Added %s to the TextureList[%i]."), texname.c_str(), TextureList.size());
@@ -646,14 +672,14 @@ void WoWModel::initCommon(MPQFile &f)
 	if (header.nTexReplace) {
 		size_t m = header.nTexReplace;
 		if (m>16) m = 16;
-		int16 *texrep = (int16*)(f.getBuffer() + header.ofsTexReplace);
+		int16 *texrep = (int16*)(f->getBuffer() + header.ofsTexReplace);
 		for (size_t i=0; i<m; i++) specialTextures[i] = texrep[i];
 	}
 	*/
 
 	// attachments
 	if (header.nAttachments) {
-		ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f.getBuffer() + header.ofsAttachments);
+		ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f->getBuffer() + header.ofsAttachments);
 		for (size_t i=0; i<header.nAttachments; i++) {
 			ModelAttachment att;
 			att.model = this;
@@ -663,7 +689,7 @@ void WoWModel::initCommon(MPQFile &f)
 	}
 
 	if (header.nAttachLookup) {
-		int16 *p = (int16*)(f.getBuffer() + header.ofsAttachLookup);
+		int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
 		if (header.nAttachLookup > ATT_MAX)
 			wxLogMessage(wxT("Critical Error: Model AttachLookup %d over %d"), header.nAttachLookup, ATT_MAX);
 		for (size_t i=0; i<header.nAttachLookup; i++) {
@@ -677,7 +703,7 @@ void WoWModel::initCommon(MPQFile &f)
 	// init colors
 	if (header.nColors) {
 		colors = new ModelColor[header.nColors];
-		ModelColorDef *colorDefs = (ModelColorDef*)(f.getBuffer() + header.ofsColors);
+		ModelColorDef *colorDefs = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
 		for (size_t i=0; i<header.nColors; i++) 
 			colors[i].init(f, colorDefs[i], globalSequences);
 	}
@@ -685,7 +711,7 @@ void WoWModel::initCommon(MPQFile &f)
 	// init transparency
 	if (header.nTransparency) {
 		transparency = new ModelTransparency[header.nTransparency];
-		ModelTransDef *trDefs = (ModelTransDef*)(f.getBuffer() + header.ofsTransparency);
+		ModelTransDef *trDefs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
 		for (size_t i=0; i<header.nTransparency; i++) 
 			transparency[i].init(f, trDefs[i], globalSequences);
 	}
@@ -715,9 +741,9 @@ void WoWModel::initCommon(MPQFile &f)
 	// zomg done
 }
 
-void WoWModel::initStatic(MPQFile &f)
+void WoWModel::initStatic(GameFile * f)
 {
-	origVertices = (ModelVertex*)(f.getBuffer() + header.ofsVertices);
+	origVertices = (ModelVertex*)(f->getBuffer() + header.ofsVertices);
 
 	initCommon(f);
 
@@ -737,7 +763,7 @@ void WoWModel::initStatic(MPQFile &f)
 	wxDELETEA(transparency);
 }
 
-void WoWModel::initAnimated(MPQFile &f)
+void WoWModel::initAnimated(GameFile * f)
 {
 	if (origVertices) {
 		delete [] origVertices;
@@ -745,7 +771,7 @@ void WoWModel::initAnimated(MPQFile &f)
 	}
 
 	origVertices = new ModelVertex[header.nVertices];
-	memcpy(origVertices, f.getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
+	memcpy(origVertices, f->getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
 
 	initCommon(f);
 
@@ -753,14 +779,20 @@ void WoWModel::initAnimated(MPQFile &f)
 		anims = new ModelAnimation[header.nAnimations];
 
 		if (gameVersion < VERSION_WOTLK) {
-			memcpy(anims, f.getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
+			memcpy(anims, f->getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
 		} else {
 			// or load anim files ondemand?
 			ModelAnimationWotLK animsWotLK;
 			wxString tempname;
-			animfiles = new MPQFile[header.nAnimations];
+		//	if(g_modelViewer->gameFolder)
+			  //animfiles = new CASCFile[header.nAnimations];
+	//		else
+		//	  animfiles = new MPQFile[header.nAnimations];
+
+			std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
+
 			for(size_t i=0; i<header.nAnimations; i++) {
-				memcpy(&animsWotLK, f.getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimationWotLK), sizeof(ModelAnimationWotLK));
+				memcpy(&animsWotLK, f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimationWotLK), sizeof(ModelAnimationWotLK));
 				anims[i].animID = animsWotLK.animID;
 				anims[i].timeStart = 0;
 				anims[i].timeEnd = animsWotLK.length;
@@ -777,8 +809,19 @@ void WoWModel::initAnimated(MPQFile &f)
 				anims[i].Index = animsWotLK.Index;
 
 				tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
-				if (MPQFile::getSize(tempname) > 0)
-					animfiles[i].openFile(tempname);
+				// std::cout << "tempname = " << tempname.c_str() << std::endl;
+        // std::cout << "g_modelViewer->gameFolder = " << g_modelViewer->gameFolder << std::endl;
+				if(!g_modelViewer->gameFolder)
+				{
+			//	  if (MPQFile::exists(tempname))
+			//	    animfiles[i].openFile(tempname.c_str());
+				}
+				else
+				{
+				  CASCFile * newfile = new CASCFile(tempname.c_str(),g_modelViewer->gameFolder);
+				  animfiles.push_back(newfile);
+
+				}
 			}
 		}
 
@@ -788,12 +831,12 @@ void WoWModel::initAnimated(MPQFile &f)
 	if (animBones) {
 		// init bones...
 		bones = new Bone[header.nBones];
-		ModelBoneDef *mb = (ModelBoneDef*)(f.getBuffer() + header.ofsBones);
+		ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
 		for (size_t i=0; i<header.nBones; i++) {
 			//if (i==0) mb[i].rotation.ofsRanges = 1.0f;
 			if (gameVersion >= VERSION_WOTLK) {
 				bones[i].model = this;
-				bones[i].initV3(f, mb[i], globalSequences, animfiles);
+				bones[i].initV3(*f, mb[i], globalSequences, animfiles);
 			} else {
 				bones[i].initV2(f, mb[i], globalSequences);
 			}
@@ -801,9 +844,9 @@ void WoWModel::initAnimated(MPQFile &f)
 
 		// Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
 		if (header.nKeyBoneLookup < BONE_MAX) {
-			memcpy(keyBoneLookup, f.getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
+			memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
 		} else {
-			memcpy(keyBoneLookup, f.getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
+			memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
 			wxLogMessage(wxT("Error: keyBone number [%d] over [%d]"), header.nKeyBoneLookup, BONE_MAX);
 		}
 	}
@@ -812,17 +855,18 @@ void WoWModel::initAnimated(MPQFile &f)
 		// free MPQFile
 		if (header.nAnimations > 0) {
 			for(size_t i=0; i<header.nAnimations; i++) {
-				if(animfiles[i].getSize() > 0)
-					animfiles[i].close();
+				if(animfiles[i]->getSize() > 0)
+					animfiles[i]->close();
+				delete animfiles[i];
 			}
-			delete [] animfiles;
+
 		}
 	}
 
 	// Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
 	if (header.nAnimationLookup > 0) {
 		animLookups = new int16[header.nAnimationLookup];
-		memcpy(animLookups, f.getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
+		memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
 	}
 	
 	const size_t size = (header.nVertices * sizeof(float));
@@ -857,13 +901,13 @@ void WoWModel::initAnimated(MPQFile &f)
 
 	if (animTextures) {
 		texAnims = new TextureAnim[header.nTexAnims];
-		ModelTexAnimDef *ta = (ModelTexAnimDef*)(f.getBuffer() + header.ofsTexAnims);
+		ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
 		for (size_t i=0; i<header.nTexAnims; i++)
 			texAnims[i].init(f, ta[i], globalSequences);
 	}
 
 	if (header.nEvents) {
-		ModelEventDef *edefs = (ModelEventDef *)(f.getBuffer()+header.ofsEvents);
+		ModelEventDef *edefs = (ModelEventDef *)(f->getBuffer()+header.ofsEvents);
 		events = new ModelEvent[header.nEvents];
 		for (size_t i=0; i<header.nEvents; i++) {
 			events[i].init(f, edefs[i], globalSequences);
@@ -873,7 +917,7 @@ void WoWModel::initAnimated(MPQFile &f)
 	// particle systems
 	if (header.nParticleEmitters) {
 		if (header.version[0] >= 0x10) {
-			ModelParticleEmitterDefV10 *pdefsV10 = (ModelParticleEmitterDefV10 *)(f.getBuffer() + header.ofsParticleEmitters);
+			ModelParticleEmitterDefV10 *pdefsV10 = (ModelParticleEmitterDefV10 *)(f->getBuffer() + header.ofsParticleEmitters);
 			ModelParticleEmitterDef *pdefs;
 			particleSystems = new ParticleSystem[header.nParticleEmitters];
 			hasParticles = true;
@@ -883,7 +927,7 @@ void WoWModel::initAnimated(MPQFile &f)
 				particleSystems[i].init(f, *pdefs, globalSequences);
 			}
 		} else {
-			ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f.getBuffer() + header.ofsParticleEmitters);
+			ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f->getBuffer() + header.ofsParticleEmitters);
 			particleSystems = new ParticleSystem[header.nParticleEmitters];
 			hasParticles = true;
 			for (size_t i=0; i<header.nParticleEmitters; i++) {
@@ -895,7 +939,7 @@ void WoWModel::initAnimated(MPQFile &f)
 
 	// ribbons
 	if (header.nRibbonEmitters) {
-		ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f.getBuffer() + header.ofsRibbonEmitters);
+		ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f->getBuffer() + header.ofsRibbonEmitters);
 		ribbons = new RibbonEmitter[header.nRibbonEmitters];
 		for (size_t i=0; i<header.nRibbonEmitters; i++) {
 			ribbons[i].model = this;
@@ -906,14 +950,14 @@ void WoWModel::initAnimated(MPQFile &f)
 	// Cameras
 	if (header.nCameras>0) {
 		if (header.version[0] <= 9){
-			ModelCameraDef *camDefs = (ModelCameraDef*)(f.getBuffer() + header.ofsCameras);
+			ModelCameraDef *camDefs = (ModelCameraDef*)(f->getBuffer() + header.ofsCameras);
 			for (size_t i=0;i<header.nCameras;i++){
 				ModelCamera a;
 				a.init(f, camDefs[i], globalSequences, modelname);
 				cam.push_back(a);
 			}
 		}else if (header.version[0] <= 16){
-			ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(f.getBuffer() + header.ofsCameras);
+			ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(f->getBuffer() + header.ofsCameras);
 			for (size_t i=0;i<header.nCameras;i++){
 				ModelCamera a;
 				a.initv10(f, camDefs[i], globalSequences, modelname);
@@ -928,7 +972,7 @@ void WoWModel::initAnimated(MPQFile &f)
 	// init lights
 	if (header.nLights) {
 		lights = new ModelLight[header.nLights];
-		ModelLightDef *lDefs = (ModelLightDef*)(f.getBuffer() + header.ofsLights);
+		ModelLightDef *lDefs = (ModelLightDef*)(f->getBuffer() + header.ofsLights);
 		for (size_t i=0; i<header.nLights; i++) {
 			lights[i].init(f, lDefs[i], globalSequences);
 		}
@@ -937,37 +981,48 @@ void WoWModel::initAnimated(MPQFile &f)
 	animcalc = false;
 }
 
-void WoWModel::setLOD(MPQFile &f, int index)
+void WoWModel::setLOD(GameFile * f, int index)
 {
 	// Texture definitions
-	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + header.ofsTextures);
+	ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
 
 	// Transparency
-	int16 *transLookup = (int16*)(f.getBuffer() + header.ofsTransparencyLookup);
+	int16 *transLookup = (int16*)(f->getBuffer() + header.ofsTransparencyLookup);
 
 	// I thought the view controlled the Level of detail,  but that doesn't seem to be the case.
 	// Seems to only control the render order.  Which makes this function useless and not needed :(
 
 	// remove suffix .M2
 	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
-	MPQFile g(lodname);
-	if (g.isEof()) {
+	GameFile * g;
+	if(g_modelViewer->gameFolder)
+	{
+	  g = new CASCFile(lodname.c_str(),g_modelViewer->gameFolder);
+	}
+	else
+	{
+	  g = new MPQFile(lodname);
+	}
+
+	if (g->isEof()) {
 		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
-		g.close();
+		g->close();
+		delete g;
 		return;
 	}
 
-	ModelView *view = (ModelView*)(g.getBuffer());
+	ModelView *view = (ModelView*)(g->getBuffer());
 
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N') {
 		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
-		g.close();
+		g->close();
+		delete g;
 		return;
 	}
 
 	// Indices,  Triangles
-	uint16 *indexLookup = (uint16*)(g.getBuffer() + view->ofsIndex);
-	uint16 *triangles = (uint16*)(g.getBuffer() + view->ofsTris);
+	uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
+	uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
 	nIndices = view->nTris;
 	wxDELETEA(indices);
 	indices = new uint16[nIndices];
@@ -976,12 +1031,12 @@ void WoWModel::setLOD(MPQFile &f, int index)
 	}
 
 	// render ops
-	ModelGeoset *ops = (ModelGeoset*)(g.getBuffer() + view->ofsSub);
-	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
-	ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f.getBuffer() + header.ofsTexFlags);
-	uint16 *texlookup = (uint16*)(f.getBuffer() + header.ofsTexLookup);
-	uint16 *texanimlookup = (uint16*)(f.getBuffer() + header.ofsTexAnimLookup);
-	int16 *texunitlookup = (int16*)(f.getBuffer() + header.ofsTexUnitLookup);
+	ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
+	ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
+	ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsTexFlags);
+	uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTexLookup);
+	uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
+	int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
 	wxDELETEA(showGeosets);
 	showGeosets = new bool[view->nSub];
@@ -1061,7 +1116,8 @@ void WoWModel::setLOD(MPQFile &f, int index)
 		passes.push_back(pass);
 	}
 
-	g.close();
+	g->close();
+	delete g;
 	// transparent parts come later
 	//std::sort(passes.begin(), passes.end());
 }
@@ -1443,6 +1499,7 @@ void WoWModel::updateEmitters(float dt)
 // Draws the "bones" of models  (skeletal animation)
 void WoWModel::drawBones()
 {
+  std::cout << __FUNCTION__ << std::endl;
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_LINES);
 	for (size_t i=0; i<header.nBones; i++) {

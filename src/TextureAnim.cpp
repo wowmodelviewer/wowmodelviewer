@@ -36,7 +36,7 @@ void TextureAnim::setup(ssize_t anim)
 	}
 }
 
-void TextureAnim::init(MPQFile &f, ModelTexAnimDef &mta, uint32 *global)
+void TextureAnim::init(GameFile * f, ModelTexAnimDef &mta, uint32 *global)
 {
 	trans.init(mta.trans, f, global);
 	rot.init(mta.rot, f, global);

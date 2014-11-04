@@ -1862,11 +1862,11 @@ void CharControl::RefreshCreatureItem(ssize_t slot)
 wxString CharControl::makeItemTexture(int region, const wxString name)
 {
 	// just return an empty filename
-	if (name.Length() < 3) 
+	if (name.Length() < 3)
 		return wxEmptyString;
 
 	wxChar leggings = name[name.Length() - 2];
-	
+
 	// try prefered version first
 	wxString fn = regionPaths[region];
 	fn += name;
@@ -1876,9 +1876,9 @@ wxString CharControl::makeItemTexture(int region, const wxString name)
 		fn += wxT("U");
 	else
 		fn += cd.gender ? wxT("F") : wxT("M");
-		
+
 	fn += wxT(".blp");
-	if (MPQFile::getSize(fn) > 0)  //MPQFile::exists(fn.c_str()) && 
+	if (MPQFile::exists(fn))
 		return fn;
 
 	if (fn.Length() < 5)
@@ -1890,11 +1890,11 @@ wxString CharControl::makeItemTexture(int region, const wxString name)
 	else
 		fn[fn.Length()-5] = 'U';
 
-	if (MPQFile::getSize(fn) > 0) //MPQFile::exists(fn.c_str()) && 
+	if (MPQFile::exists(fn))
 		return fn;
 
 	fn = regionPaths[region];
-	fn += name;	
+	fn += name;
 	fn += wxT(".blp");
 
 	// return the default name, nothing else could be found.

@@ -18,6 +18,7 @@ static ArchiveSet gOpenArchives;
 
 MPQArchive::MPQArchive(wxString filename) : ok(false)
 {
+  /*
 	wxLogMessage(wxT("Opening %s %s"), filename.Mid(gamePath.Len()).c_str(), isPartialMPQ(filename) ? "(Partial)" : "");
 	g_modelViewer->SetStatusText(wxT("Initiating "+filename+wxT(" Archive")));
 
@@ -50,6 +51,7 @@ MPQArchive::MPQArchive(wxString filename) : ok(false)
 
 	ok = true;
 	gOpenArchives.push_back( make_pair( filename, &mpq_a ) );
+	*/
 }
 
 MPQArchive::~MPQArchive()
@@ -74,6 +76,7 @@ bool MPQArchive::isPartialMPQ(wxString filename)
 
 void MPQArchive::close()
 {
+  /*
 	if (ok == false)
 		return;
 	SFileCloseArchive(mpq_a);
@@ -86,6 +89,7 @@ void MPQArchive::close()
 			return;
 		}
 	}
+	*/
 	
 }
 
@@ -97,8 +101,9 @@ bool MPQFile::isPartialMPQ(wxString filename)
 }
 
 void
-MPQFile::openFile(wxString filename)
+MPQFile::openFile(std::string filename)
 {
+  /*
 	eof = false;
 	buffer = 0;
 	pointer = 0;
@@ -195,18 +200,15 @@ MPQFile::openFile(wxString filename)
 
 		return;
 	}
-
+*/
 	eof = true;
 	buffer = 0;
 }
 
-MPQFile::MPQFile(wxString filename):
-	eof(false),
-	buffer(0),
-	pointer(0),
-	size(0)
+MPQFile::MPQFile(wxString filename)
+: GameFile()
 {
-	openFile(filename);
+	openFile(filename.c_str());
 }
 
 MPQFile::~MPQFile()
@@ -216,6 +218,7 @@ MPQFile::~MPQFile()
 
 bool MPQFile::exists(wxString filename)
 {
+  /*
 	if( useLocalFiles ) {
 		wxString fn1 = wxGetCwd()+SLASH+wxT("Import")+SLASH;
 		wxString fn2 = fn1;
@@ -238,63 +241,12 @@ bool MPQFile::exists(wxString filename)
 		if( SFileHasFile( mpq_a, filename.char_str() ) )
 			return true;
 	}
-
+*/
 	return false;
 }
 
-void MPQFile::save(wxString filename)
-{
-	wxFile f;
-	f.Open(filename, wxFile::write);
-	f.Write(buffer, size);
-	f.Close();
-}
 
-size_t MPQFile::read(void* dest, size_t bytes)
-{
-	if (eof) 
-		return 0;
-
-	size_t rpos = pointer + bytes;
-	if (rpos > size) {
-		bytes = size - pointer;
-		eof = true;
-	}
-
-	memcpy(dest, &(buffer[pointer]), bytes);
-
-	pointer = rpos;
-
-	return bytes;
-}
-
-bool MPQFile::isEof()
-{
-    return eof;
-}
-
-void MPQFile::seek(ssize_t offset) {
-	pointer = offset;
-	eof = (pointer >= size);
-}
-
-void MPQFile::seekRelative(ssize_t offset)
-{
-	pointer += offset;
-	eof = (pointer >= size);
-}
-
-void MPQFile::close()
-{
-	wxDELETEA(buffer);
-	eof = true;
-}
-
-size_t MPQFile::getSize()
-{
-	return size;
-}
-
+/*
 int MPQFile::getSize(wxString filename)
 {
 	if( useLocalFiles ) {
@@ -326,12 +278,13 @@ int MPQFile::getSize(wxString filename)
 		SFileCloseFile( fh );
 		return filesize;
 	}
-
 	return 0;
 }
+*/
 
 wxString MPQFile::getArchive(wxString filename)
 {
+  /*
 	if( useLocalFiles ) {
 		wxString fn1 = wxGetCwd()+SLASH+wxT("Import")+SLASH;
 		wxString fn2 = fn1;
@@ -358,30 +311,15 @@ wxString MPQFile::getArchive(wxString filename)
 
 		return i->first;
 	}
-
+*/
 	return wxT("unknown");
 }
-
-size_t MPQFile::getPos()
-{
-	return pointer;
-}
-
-unsigned char* MPQFile::getBuffer()
-{
-	return buffer;
-}
-
-unsigned char* MPQFile::getPointer()
-{
-	return buffer + pointer;
-}
-
 
 #include <wx/tokenzr.h>
 
 void getFileLists(std::set<FileTreeItem> &dest, bool filterfunc(wxString))
 {
+  /*
 	for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
 	{
 		HANDLE &mpq_a = *i->second;
@@ -475,4 +413,5 @@ void getFileLists(std::set<FileTreeItem> &dest, bool filterfunc(wxString))
 			SFileCloseFile( fh );
 		}
 	}
+	*/
 }

@@ -5,6 +5,9 @@
 
 #include "logger/Logger.h"
 
+#include "CASCFile.h"
+
+#include "globalvars.h" // g_selModel
 // wx
 #include <wx/display.h>
 // gl
@@ -801,25 +804,50 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	
-	MPQFile f(tex->name);
+	CASCFile * f = NULL;
 
-	if (f.isEof()) {
+	//std::cout << "model name = "
+	if(g_charControl->model && g_charControl->model->isHD)
+	{
+	  wxString texturename = tex->name;
+	  // try to load hd version of texture
+	  texturename = texturename.BeforeLast(wxT('.')) + wxT("_hd.blp");
+	  LOG_INFO << __FUNCTION__ << " trying to load HD version of texture : " << tex->name.c_str() << " => " << texturename.c_str();
+	  f = new CASCFile(texturename.c_str(), g_modelViewer->gameFolder);
+	  if(!f->isEof()) // success in hd => update tex->name
+	  {
+	    tex->name = texturename;
+	  }
+	  else
+	  {
+	    delete f;
+	    f = NULL;
+	  }
+	}
+
+	if(!f) // failed to load in hd, try in normal
+	{
+	  LOG_INFO << __FUNCTION__ << "Failed to load HD texture, fallback to normal one";
+	  f = new CASCFile(tex->name.c_str(), g_modelViewer->gameFolder);
+	}
+
+	if (f->isEof()) {
 		tex->id = 0;
 		wxLogMessage(wxT("Error: Could not load the texture '%s'"), wxString(tex->name.c_str(), wxConvUTF8).c_str());
-		f.close();
+		f->close();
 		return;
 	} else {
 		//tex->id = id; // I don't see the id being set anywhere,  should I set it now?
 		wxLogMessage(wxT("Loading texture: %s"), wxString(tex->name.c_str(), wxConvUTF8).c_str());
 	}
 
-	f.seek(4);
-	f.read(&type,4);
-	f.read(attr,4);
-	f.read(&w,4);
-	f.read(&h,4);
-	f.read(offsets,4*16);
-	f.read(sizes,4*16);
+	f->seek(4);
+	f->read(&type,4);
+	f->read(attr,4);
+	f->read(&w,4);
+	f->read(&h,4);
+	f->read(offsets,4*16);
+	f->read(sizes,4*16);
 
 	tex->w = w;
 	tex->h = h;
@@ -846,8 +874,8 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 		CxImage *image = NULL;
 		unsigned char *buf = new unsigned char[sizes[0]];
 
-		f.seek(offsets[0]);
-		f.read(buf,sizes[0]);
+		f->seek(offsets[0]);
+		f->read(buf,sizes[0]);
 		image = new CxImage(buf, sizes[0], CXIMAGE_FORMAT_JPG);
 
 		if (image == NULL)
@@ -906,8 +934,8 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 				if (w==0) w = 1;
 				if (h==0) h = 1;
 				if (offsets[i] && sizes[i]) {
-					f.seek(offsets[i]);
-					f.read(buf,sizes[i]);
+					f->seek(offsets[i]);
+					f->read(buf,sizes[i]);
 
 					int size = ((w+3)/4) * ((h+3)/4) * blocksize;
 
@@ -941,7 +969,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 			// encoding 1, uncompressed
 			unsigned int pal[256];
-			f.read(pal, 1024);
+			f->read(pal, 1024);
 
 			unsigned char *buf = new unsigned char[sizes[0]];
 			unsigned int *buf2 = new unsigned int[w*h];
@@ -957,8 +985,8 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 				if (w==0) w = 1;
 				if (h==0) h = 1;
 				if (offsets[i] && sizes[i]) {
-					f.seek(offsets[i]);
-					f.read(buf,sizes[i]);
+					f->seek(offsets[i]);
+					f->read(buf,sizes[i]);
 
 					int cnt = 0;
 					int alpha = 0;
@@ -1011,8 +1039,8 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 		}
 	}
 
-	f.close();
-
+	f->close();
+	delete f;
 	/*
 	// TODO: Add proper support for mipmaps
 	if (hasmipmaps) {

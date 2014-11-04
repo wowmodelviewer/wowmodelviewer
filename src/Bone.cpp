@@ -76,7 +76,7 @@ void Bone::calcMatrix(Bone *allbones, ssize_t anim, size_t time, bool rotate)
 	calc = true;
 }
 
-void Bone::initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles)
+void Bone::initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<GameFile *> & animfiles)
 {
 	calc = false;
 
@@ -87,6 +87,8 @@ void Bone::initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfile
 
 	boneDef = b;
 
+	//std::cout << __FUNCTION__ << "f.getBuffer() = " << f.getBuffer() << std::endl;
+
 	trans.init(b.translation, f, global, animfiles);
 	rot.init(b.rotation, f, global, animfiles);
 	scale.init(b.scaling, f, global, animfiles);
@@ -95,7 +97,7 @@ void Bone::initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfile
 	scale.fix(fixCoordSystem2);
 }
 
-void Bone::initV2(MPQFile &f, ModelBoneDef &b, uint32 *global)
+void Bone::initV2(GameFile * f, ModelBoneDef &b, uint32 *global)
 {
 	calc = false;
 

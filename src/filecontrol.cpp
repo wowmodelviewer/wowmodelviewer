@@ -5,6 +5,8 @@
 
 #include "logger/Logger.h"
 
+#include "CASCFolder.h"
+
 typedef std::pair<wxTreeItemId, wxString> TreeStackItem;
 typedef std::vector<TreeStackItem> TreeStack;
 
@@ -129,7 +131,12 @@ void FileControl::Init(ModelViewer* mv)
 
 	filterString = filterStrings[filterMode];
 	filterArchive = filterArchives[filterModeMPQ];
-	getFileLists(filelist, filterSearch);
+	if(!mv->gameFolder)
+	  getFileLists(filelist, filterSearch);
+	else
+	{
+	  mv->gameFolder->initFileList(filelist, filterSearch);
+	}
 
 	// Put all the viewable files into our File Tree.
 	TreeStack stack;
@@ -404,8 +411,8 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	infoMenu.AppendSeparator();
 	wxString archive = MPQFile::getArchive(tdata->fn);
 	infoMenu.Append(ID_FILELIST, archive, archive);
-	wxString size = wxString::Format(wxT("Size: %d"), MPQFile::getSize(tdata->fn));
-	infoMenu.Append(ID_FILELIST, size, size);
+//	wxString size = wxString::Format(wxT("Size: %d"), MPQFile::getSize(tdata->fn));
+//	infoMenu.Append(ID_FILELIST, size, size);
 	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, NULL, this);
 	PopupMenu(&infoMenu);
 }

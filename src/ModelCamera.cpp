@@ -14,7 +14,7 @@
 
 #include "logger/Logger.h"
 
-void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, uint32 *global, wxString modelname)
+void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, uint32 *global, wxString modelname)
 {
 	wxLogMessage(wxT("Using original Camera Model Definitions."));
 	ok = true;
@@ -53,7 +53,7 @@ void ModelCamera::init(MPQFile &f, ModelCameraDef &mcd, uint32 *global, wxString
 	WorldRotation = worot;
 }
 
-void ModelCamera::initv10(MPQFile &f, ModelCameraDefV10 &mcd, uint32 *global, wxString modelname)
+void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, wxString modelname)
 {
 	wxLogMessage(wxT("Using version 10 Camera Model Definitions."));
 	ok = true;

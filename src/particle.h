@@ -100,7 +100,7 @@ public:
 	}
 	~ParticleSystem() { delete emitter; }
 
-	void init(MPQFile &f, ModelParticleEmitterDef &mta, uint32 *globals);
+	void init(GameFile * f, ModelParticleEmitterDef &mta, uint32 *globals);
 	void update(float dt);
 
 	void setup(size_t anim, size_t time);
@@ -169,7 +169,7 @@ class RibbonEmitter {
 public:
 	WoWModel *model;
 
-	void init(MPQFile &f, ModelRibbonEmitterDef &mta, uint32 *globals);
+	void init(GameFile * f, ModelRibbonEmitterDef &mta, uint32 *globals);
 	void setup(size_t anim, size_t time);
 	void draw();
 };

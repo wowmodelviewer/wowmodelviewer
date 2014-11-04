@@ -41,7 +41,7 @@ endif()
 
 find_package(Qt5Network)
 
-add_dependencies(wowmodelviewer cximage StormLib casc_static core)   
+add_dependencies(wowmodelviewer cximage casc_static core)   
   
 target_link_libraries(wowmodelviewer
   cximage
@@ -82,7 +82,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(MINGW_BIN_DIR ${WMV_SDK_BASEDIR}/MinGW/bin)
 set(MINGW_SYS_FILES ${MINGW_BIN_DIR}/jpeg62.dll)
 
-set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES})
+set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/listfile.txt)
 set(platform_files ${QT_PLUGIN_SYS_FILES})			 
   				 
 install(FILES ${files} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)

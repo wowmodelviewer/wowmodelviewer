@@ -16,7 +16,7 @@
 struct ModelTransparency {
 	AnimatedShort trans;
 
-	void init(MPQFile &f, ModelTransDef &mtd, uint32 *global);
+	void init(GameFile * f, ModelTransDef &mtd, uint32 *global);
 };
 
 

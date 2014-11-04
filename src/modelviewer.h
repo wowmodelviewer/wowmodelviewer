@@ -40,6 +40,8 @@
 
 #include "enums.h"
 
+class CASCFolder;
+
 class ModelViewer: public wxFrame
 {    
     DECLARE_CLASS(ModelViewer)
@@ -76,6 +78,8 @@ public:
 	CAnimationExporter *animExporter;
 
 	FileControl *fileControl;
+
+	CASCFolder * gameFolder;
 
 	//wxWidget objects
 	wxMenuBar *menuBar;

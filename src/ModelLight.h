@@ -22,7 +22,7 @@ struct ModelLight {
 	Animated<float> diffIntensity, ambIntensity, AttenStart, AttenEnd;
 	Animated<int> UseAttenuation;
 
-	void init(MPQFile &f, ModelLightDef &mld, uint32 *global);
+	void init(GameFile * f, ModelLightDef &mld, uint32 *global);
 	void setup(size_t time, GLuint l);
 };
 

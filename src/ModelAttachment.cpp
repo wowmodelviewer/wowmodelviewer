@@ -10,10 +10,12 @@
 #include "GL/glew.h"
 
 #include "Bone.h"
+#include "GameFile.h"
 #include "matrix.h"
 #include "WoWModel.h"
 
-void ModelAttachment::init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global)
+
+void ModelAttachment::init(GameFile *f, ModelAttachmentDef &mad, uint32 *global)
 {
 	pos = fixCoordSystem(mad.pos);
 	bone = mad.bone;

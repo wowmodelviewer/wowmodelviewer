@@ -13,7 +13,7 @@
 #include "mpq.h"
 #include "util.h"
 
-
+class GameFile;
 class WoWModel;
 
 struct ModelAttachment {
@@ -22,7 +22,7 @@ struct ModelAttachment {
 	int bone;
 	WoWModel *model;
 
-	void init(MPQFile &f, ModelAttachmentDef &mad, uint32 *global);
+	void init(GameFile *f, ModelAttachmentDef &mad, uint32 *global);
 	void setup();
 	void setupParticle();
 };

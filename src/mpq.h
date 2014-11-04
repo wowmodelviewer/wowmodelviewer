@@ -1,7 +1,9 @@
 #ifndef MPQ_H
 #define MPQ_H
 
-#include "stormlib/src/StormLib.h"
+//#include "stormlib/src/StormLib.h"
+
+#include "GameFile.h"
 
 // C++ files
 #include <string>
@@ -39,37 +41,24 @@ public:
 };
 
 
-class MPQFile
+class MPQFile : public GameFile
 {
-	//MPQHANDLE handle;
-	bool eof;
-	unsigned char *buffer;
-	size_t pointer, size;
-
 	// disable copying
-	MPQFile(const MPQFile &) {}
-	void operator=(const MPQFile &) {}
+	MPQFile(const MPQFile &);
+	void operator=(const MPQFile &);
 
 public:
-	MPQFile():eof(false),buffer(0),pointer(0),size(0) {}
+	MPQFile(): GameFile() {}
 	MPQFile(wxString filename);	// filenames are not case sensitive
-	void openFile(wxString filename);
+	void openFile(std::string filename);
 	~MPQFile();
-	size_t read(void* dest, size_t bytes);
-	size_t getSize();
-	size_t getPos();
-	unsigned char* getBuffer();
-	unsigned char* getPointer();
-	bool isEof();
-	void seek(ssize_t offset);
-	void seekRelative(ssize_t offset);
-	void close();
-	void save(wxString filename);
 
 	static bool exists(wxString filename);
-	static int getSize(wxString filename); // Used to do a quick check to see if a file is corrupted
+//	static int getSize(wxString filename); // Used to do a quick check to see if a file is corrupted
 	static wxString getArchive(wxString filename);
 	bool isPartialMPQ(wxString filename);
+
+
 };
 
 inline void flipcc(char *fcc)

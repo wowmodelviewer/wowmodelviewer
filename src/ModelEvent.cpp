@@ -7,7 +7,7 @@
 
 #include "ModelEvent.h"
 
-void ModelEvent::init(MPQFile &f, ModelEventDef &me, uint32 *globals)
+void ModelEvent::init(GameFile *, ModelEventDef &me, uint32 *globals)
 {
 	def = me;
 }

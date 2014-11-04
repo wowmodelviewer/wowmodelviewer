@@ -37,8 +37,8 @@ public:
 	bool calc;
 	WoWModel *model;
 	void calcMatrix(Bone* allbones, ssize_t anim, size_t time, bool rotate=true);
-	void initV3(MPQFile &f, ModelBoneDef &b, uint32 *global, MPQFile *animfiles);
-	void initV2(MPQFile &f, ModelBoneDef &b, uint32 *global);
+	void initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<GameFile *> &animfiles);
+	void initV2(GameFile * f, ModelBoneDef &b, uint32 *global);
 };
 
 

@@ -140,7 +140,7 @@ void AnimControl::UpdateModel(WoWModel *m)
 		return;
 	
 	// Clear skin/texture data from previous model - if there is any.
-	if (g_selModel) {
+	if (g_selModel && g_selModel->name != m->name) {
 		for (size_t i=0; i<skinList->GetCount(); i++) {
 			TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
 			wxDELETE(grp);
