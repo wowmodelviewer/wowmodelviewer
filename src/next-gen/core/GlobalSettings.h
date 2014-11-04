@@ -71,6 +71,7 @@ class GlobalSettings
     std::string appTitle();
 
     bool isBeta() { return m_isBetaVersion; }
+
     // Members
 
   protected :
@@ -107,6 +108,7 @@ class GlobalSettings
     std::string m_platform;
 
     bool m_isBetaVersion;
+    bool m_isAlphaVersion;
 
 
     // friend class declarations

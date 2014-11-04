@@ -54,11 +54,11 @@
 GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
-  m_versionMinorNumber = 7;
-  m_versionRevNumber = 1;
+  m_versionMinorNumber = 8;
+  m_versionRevNumber = 0;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Thrall's revenge";
+  m_buildName = "Trip in Draenor";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -88,6 +88,7 @@ GlobalSettings::GlobalSettings()
 		Windrunner's Lament
 		Lost Lich King
     Skeer the Bloodseeker
+    Thrall's revenge
 
 
    */
@@ -101,8 +102,15 @@ GlobalSettings::GlobalSettings()
   m_isBetaVersion = false;
 #endif
 
+#ifdef _ALPHAVERSION
+  m_isAlphaVersion = true;
+#else
+  m_isAlphaVersion = false;
+#endif
+
+
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".beta2";
+  m_versionSpecialExtend = ".alpha1";
 
 }
 
@@ -145,6 +153,8 @@ std::string GlobalSettings::appTitle()
   std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
   if(m_isBetaVersion)
     title += " - BETA VERSION";
+  if(m_isAlphaVersion)
+    title += " - ALPHA VERSION";
   return title;
 }
 
