@@ -1977,6 +1977,10 @@ void ModelViewer::LoadWoW()
       tocString.resize(5);
       TOCFile.close();
       SetStatusText(wxString(tocString), 1);
+
+      mpqArchives.Add(wxString("fakeMPQFile"));
+      langName = gameFolder->locale();
+      gameVersion = atoi(tocString.c_str());
     }
     else
     {
@@ -1987,13 +1991,13 @@ void ModelViewer::LoadWoW()
   }
 
 
-
-/*
-
 	// auto search for MPQ Archives
-	if (mpqArchives.GetCount() == 0) {
-		searchMPQs(true);
-	}
+	//if (mpqArchives.GetCount() == 0) {
+	//	searchMPQs(true);
+	//}
+
+
+	/*
 
 	// if we can't search any mpqs
 	if (mpqArchives.GetCount() == 0) {
