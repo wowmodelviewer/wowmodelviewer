@@ -17,7 +17,7 @@
 CASCFolder::CASCFolder(const std::string &folder)
  : m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(folder)
 {
-  if(m_folder.find_last_of("\\") == m_folder.length())
+  if(m_folder.find_last_of("\\") == m_folder.length()-1)
     m_folder = m_folder.substr (0,m_folder.length()-1);
 
   LOG_INFO << "Loading Game Folder:" << m_folder.c_str();
