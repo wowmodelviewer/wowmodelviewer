@@ -344,7 +344,7 @@ void SettingsControl::ResetMPQ()
 	page1->mpqList->Clear();
 	langID = -1;
 	getGamePath();
-	searchMPQs(false);
+	//searchMPQs(false);
 	page1->mpqList->Set(mpqArchives);
 }
 
