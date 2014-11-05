@@ -25,7 +25,7 @@ CASCFolder::CASCFolder(const std::string &folder)
   // Open the storage directory
   if(!CascOpenStorage(m_folder.c_str(), 0, &hStorage))
   {
-    LOG_ERROR << "Opening" << m_folder.c_str() << "failed.";
+    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << GetLastError();
   }
   else
   {

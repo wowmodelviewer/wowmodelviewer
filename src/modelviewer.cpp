@@ -1991,6 +1991,13 @@ void ModelViewer::LoadWoW()
   }
 
 
+  if(!gameFolder)
+  {
+    wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
+
 	// auto search for MPQ Archives
 	//if (mpqArchives.GetCount() == 0) {
 	//	searchMPQs(true);

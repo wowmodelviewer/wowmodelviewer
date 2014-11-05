@@ -11,6 +11,7 @@
 #include "modelviewer.h"
 #include <iostream>
 
+#include "logger/Logger.h"
 //#define DEBUG_READ
 
 CASCFile::CASCFile()
@@ -35,7 +36,11 @@ bool CASCFile::open()
 {
   bool result = false;
   if(m_folder)
+  {
     result = CascOpenFile(m_folder->hStorage, m_filePath.c_str(), m_folder->CASCLocale(), 0, &m_handle);
+    if(!result)
+      LOG_ERROR << "Opening" << m_filePath.c_str() << "failed." << "Error" << GetLastError();
+  }
   else
     m_handle = NULL;
 #ifdef DEBUG_READ
