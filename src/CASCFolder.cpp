@@ -23,9 +23,10 @@ CASCFolder::CASCFolder(const std::string &folder)
   LOG_INFO << "Loading Game Folder:" << m_folder.c_str();
 
   // Open the storage directory
-  if(!CascOpenStorage(m_folder.c_str(), 0, &hStorage))
+  int opened = CascOpenStorage(m_folder.c_str(), 0, &hStorage);
+  if(opened != 0)
   {
-    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << GetLastError();
+    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << opened;
   }
   else
   {

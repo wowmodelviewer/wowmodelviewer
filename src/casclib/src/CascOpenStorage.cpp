@@ -13,8 +13,6 @@
 #include "CascCommon.h"
 #include "CascMndxRoot.h"
 
-//#include <iostream>
-
 //-----------------------------------------------------------------------------
 // Local structures
 
@@ -1076,7 +1074,7 @@ static TCascStorage * FreeCascStorage(TCascStorage * hs)
 //-----------------------------------------------------------------------------
 // Public functions
 
-bool WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage)
+int WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage)
 {
     TCascStorage * hs;        
     int nError = ERROR_SUCCESS;
@@ -1086,7 +1084,10 @@ bool WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * ph
     // Allocate the storage structure
     hs = (TCascStorage *)CASC_ALLOC(TCascStorage, 1);
     if(hs == NULL)
+    {
         nError = ERROR_NOT_ENOUGH_MEMORY;
+        return 1;
+    }
 
     // Load the storage configuration
     if(nError == ERROR_SUCCESS)
@@ -1097,40 +1098,36 @@ bool WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * ph
         hs->dwRefCount = 1;
         nError = InitializeCascDirectories(hs, szDataPath);
     }
+    else
+    {
+      return 2;
+    }
 
-//    std::cout << __FUNCTION__ << " " << __LINE__ << " nError = " << nError << std::endl;
 
     // Now we need to load the root file so we know the config files
     if(nError == ERROR_SUCCESS)
-    {
-        nError = LoadBuildConfiguration(hs);
-    }
+      nError = LoadBuildConfiguration(hs);
+    else
+      return 3;
 
-//    std::cout << __FUNCTION__ << " " << __LINE__ << " nError = " << nError << std::endl;
-
-    // Load the index files
-    if(nError == ERROR_SUCCESS)
-    {
-        nError = LoadIndexFiles(hs);
-    }
-
-    // std::cout << __FUNCTION__ << " " << __LINE__ << " nError = " << nError << std::endl;
 
     // Load the index files
     if(nError == ERROR_SUCCESS)
-    {
-        nError = LoadEncodingFile(hs);
-    }
-
-    // std::cout << __FUNCTION__ << " " << __LINE__ << " nError = " << nError << std::endl;
+      nError = LoadIndexFiles(hs);
+    else
+      return 4;
 
     // Load the index files
     if(nError == ERROR_SUCCESS)
-    {
-        nError = LoadRootFile(hs);
-    }
+      nError = LoadEncodingFile(hs);
+    else
+      return 5;
 
-    // std::cout << __FUNCTION__ << " " << __LINE__ << " nError = " << nError << std::endl;
+    // Load the index files
+    if(nError == ERROR_SUCCESS)
+      nError = LoadRootFile(hs);
+    else
+      return 6;
 
 #ifdef _DEBUG
 //  if(nError == ERROR_SUCCESS)
@@ -1148,7 +1145,7 @@ bool WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * ph
     }
 
     *phStorage = (HANDLE)hs;
-    return (nError == ERROR_SUCCESS);
+    return 0;
 }
 
 bool WINAPI CascGetStorageInfo(
