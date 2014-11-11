@@ -813,7 +813,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	  // try to load hd version of texture
 	  texturename = texturename.BeforeLast(wxT('.')) + wxT("_hd.blp");
 	  LOG_INFO << __FUNCTION__ << " trying to load HD version of texture : " << tex->name.c_str() << " => " << texturename.c_str();
-	  f = new CASCFile(texturename.c_str(), g_modelViewer->gameFolder);
+	  f = new CASCFile(texturename.c_str());
 	  if(!f->isEof()) // success in hd => update tex->name
 	  {
 	    tex->name = texturename;
@@ -828,7 +828,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	if(!f) // failed to load in hd, try in normal
 	{
 	  LOG_INFO << __FUNCTION__ << "Failed to load HD texture, fallback to normal one";
-	  f = new CASCFile(tex->name.c_str(), g_modelViewer->gameFolder);
+	  f = new CASCFile(tex->name.c_str());
 	}
 
 	if (f->isEof()) {

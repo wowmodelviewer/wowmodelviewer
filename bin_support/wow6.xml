@@ -1,0 +1,9 @@
+﻿<?xml version="1.0"?>
+<database>
+  <FileData>
+  	<gamefile name="DBFilesClient\FileData.dbc" />
+  	<field primary="yes" type="uint" name="id" />
+  	<field type="text" name="name" />
+  	<field type="text" name="path" />
+  </FileData>
+</database>

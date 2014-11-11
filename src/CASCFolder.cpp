@@ -14,9 +14,20 @@
 
 #include "logger/Logger.h"
 
-CASCFolder::CASCFolder(const std::string &folder)
- : m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(folder)
+
+CASCFolder::CASCFolder()
+ : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder("")
 {
+
+}
+
+
+
+
+void CASCFolder::init(const std::string &folder)
+{
+  m_folder = folder;
+
   if(m_folder.find_last_of("\\") == m_folder.length()-1)
     m_folder = m_folder.substr (0,m_folder.length()-1);
 

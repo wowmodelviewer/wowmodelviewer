@@ -17,10 +17,20 @@
 #include "casclib/src/CascLib.h"
 #include "mpq.h" // FileTreeItem
 
+#define CASCFOLDER CASCFolder::instance()
+
 class CASCFolder
 {
   public:
-    CASCFolder(const std::string & path);
+
+    static CASCFolder & instance()
+    {
+      static CASCFolder m_instance;
+      return m_instance;
+    }
+
+    void init(const std::string & path);
+
     HANDLE hStorage;
 
     std::string locale() { return m_currentLocale; }
@@ -32,6 +42,9 @@ class CASCFolder
 
 
   private:
+    CASCFolder();
+    CASCFolder(const CASCFolder &);
+
     void initLocale();
     std::string m_currentLocale;
     int m_currentCascLocale;

@@ -2,11 +2,11 @@
 #define DBCFILE_H
 
 #include <cassert>
+#include <map>
+#include <set>
 #include <string>
 
 #include <wx/wx.h>
-
-class CASCFolder;
 
 class DBCFile
 {
@@ -15,7 +15,7 @@ public:
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
-	bool open(CASCFolder * folder = 0);
+	bool open();
 
 	// TODO: Add a close function?
 
@@ -82,6 +82,21 @@ public:
 			//unsigned char * tmp2 = file.stringTable + stringOffset;
 			return wxString(reinterpret_cast<char*>(file.stringTable + stringOffset), wxConvUTF8);
 		}
+
+		std::string getStdString(size_t field) const
+		{
+		  assert(field < file.fieldCount);
+		  size_t stringOffset = getUInt(field);
+		  if (stringOffset >= file.stringSize)
+		    stringOffset = 0;
+		  assert(stringOffset < file.stringSize);
+
+		  return std::string(reinterpret_cast<char*>(file.stringTable + stringOffset));
+		}
+
+		std::set<std::string> get(const std::map<std::string,std::string> & structure) const;
+
+
 	private:
 		DBCFile &file;
 		unsigned char *offset;

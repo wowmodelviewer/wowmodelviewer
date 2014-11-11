@@ -34,7 +34,7 @@ else()
 endif()
   
 if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
-  add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
+  add_executable(wowmodelviewer ${WOWMV_SOURCES} ${RES_FILES} )
 else()
   # non min size release case ( = dev) => let a console attached to app
   add_executable(wowmodelviewer ${WOWMV_SOURCES} ${RES_FILES} )
@@ -51,6 +51,7 @@ target_link_libraries(wowmodelviewer
   jpeg
   png
   core
+  Qt5::Xml
 )
 
 add_custom_target(release make install
@@ -66,7 +67,8 @@ set(QT_BIN_DIR ${QT_MINGW_DIR}/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
   		     ${QT_BIN_DIR}/Qt5Gui.dll
   		     ${QT_BIN_DIR}/Qt5Network.dll
-  		     ${QT_BIN_DIR}/Qt5Widgets.dll)
+  		     ${QT_BIN_DIR}/Qt5Widgets.dll
+  		     ${QT_BIN_DIR}/Qt5Xml.dll)
   			 
 set(QT_SYS_FILES ${QT_BIN_DIR}/icudt52.dll
   			     ${QT_BIN_DIR}/icuin52.dll
@@ -80,10 +82,13 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
 
+set(EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/listfile.txt
+				${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/wow6.xml)
+
 set(MINGW_BIN_DIR ${WMV_SDK_BASEDIR}/MinGW/bin)
 set(MINGW_SYS_FILES ${MINGW_BIN_DIR}/jpeg62.dll)
 
-set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/listfile.txt)
+set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES} ${EXTRA_FILES})
 set(platform_files ${QT_PLUGIN_SYS_FILES})			 
   				 
 install(FILES ${files} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)

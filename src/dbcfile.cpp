@@ -9,6 +9,10 @@
 
 #include "logger/Logger.h"
 
+#include "CASCFolder.h"
+
+#include <sstream>
+
 DBCFile::DBCFile(const wxString &filename) : filename(filename)
 {
 	data = NULL;
@@ -19,7 +23,7 @@ DBCFile::DBCFile(const wxString &filename) : filename(filename)
 	stringSize = 0;
 }
 
-bool DBCFile::open(CASCFolder * folder)
+bool DBCFile::open()
 {
 	enum FileType {
 		FT_UNK,
@@ -33,10 +37,10 @@ bool DBCFile::open(CASCFolder * folder)
 
 	g_modelViewer->SetStatusText(wxT("Initiating ")+filename+wxT(" Database..."));
 	GameFile * f = 0;
-	if(!folder)
+	if(!CASCFOLDER.hStorage)
 	  f = new MPQFile(filename);
 	else
-	  f = new CASCFile(filename.c_str(),folder);
+	  f = new CASCFile(filename.c_str());
 	// Need some error checking, otherwise an unhandled exception error occurs
 	// if people screw with the data path.
 
@@ -99,6 +103,31 @@ bool DBCFile::open(CASCFolder * folder)
 DBCFile::~DBCFile()
 {
 	delete [] data;
+}
+
+
+std::set<std::string> DBCFile::Record::get(const std::map<std::string,std::string> & structure) const
+{
+  std::set<std::string> result;
+  int index = 0;
+  std::map<std::string,std::string>::const_iterator itEnd = structure.end();
+  for(std::map<std::string,std::string>::const_iterator it = structure.begin();
+      it != itEnd;
+      ++it, index++)
+  {
+    if(it->second == "uint")
+    {
+      stringstream ss;
+      ss << getUInt(index);
+      string field = ss.str();
+      result.insert(field);
+    }
+    else if(it->second == "text")
+    {
+      result.insert(getStdString(index));
+    }
+  }
+  return result;
 }
 
 DBCFile::Record DBCFile::getRecord(size_t id)

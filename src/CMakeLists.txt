@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # set build type you want
 # availabke values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
-SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE MinSizeRel)
 
 # define base repo path to use it cross folder
 set(WMV_BASE_PATH "${CMAKE_SOURCE_DIR}")
@@ -45,7 +45,8 @@ include(cmake/sources.cmake)
 # init cmake with our qt install directory
 set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE_DIR})
 
-find_package(Qt5Core)
+find_package(Qt5Core) 
+find_package(Qt5Xml)
 
 
 include_directories(next-gen)

@@ -19,6 +19,8 @@
 
 #include "logger/Logger.h"
 
+#include "CASCFolder.h"
+
 size_t globalTime = 0;
 extern ModelViewer *g_modelViewer;
 
@@ -167,9 +169,9 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	// --
 
 	GameFile * f;
-	if(g_modelViewer->gameFolder)
+	if(CASCFOLDER.hStorage)
 	{
-	  f = new CASCFile(tempname.c_str(), g_modelViewer->gameFolder);
+	  f = new CASCFile(tempname.c_str());
 	}
 	else
 	{
@@ -811,14 +813,14 @@ void WoWModel::initAnimated(GameFile * f)
 				tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
 				// std::cout << "tempname = " << tempname.c_str() << std::endl;
         // std::cout << "g_modelViewer->gameFolder = " << g_modelViewer->gameFolder << std::endl;
-				if(!g_modelViewer->gameFolder)
+				if(!CASCFOLDER.hStorage)
 				{
 			//	  if (MPQFile::exists(tempname))
 			//	    animfiles[i].openFile(tempname.c_str());
 				}
 				else
 				{
-				  CASCFile * newfile = new CASCFile(tempname.c_str(),g_modelViewer->gameFolder);
+				  CASCFile * newfile = new CASCFile(tempname.c_str());
 				  animfiles.push_back(newfile);
 
 				}
@@ -995,9 +997,9 @@ void WoWModel::setLOD(GameFile * f, int index)
 	// remove suffix .M2
 	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
 	GameFile * g;
-	if(g_modelViewer->gameFolder)
+	if(CASCFOLDER.hStorage)
 	{
-	  g = new CASCFile(lodname.c_str(),g_modelViewer->gameFolder);
+	  g = new CASCFile(lodname.c_str());
 	}
 	else
 	{

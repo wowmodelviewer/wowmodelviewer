@@ -20,7 +20,7 @@ class CASCFile : public GameFile
 {
   public:
     CASCFile();
-    CASCFile(const std::string & path, CASCFolder * parent = 0);
+    CASCFile(const std::string & path);
     bool open();
     bool close();
     void openFile(std::string filename);
@@ -28,7 +28,6 @@ class CASCFile : public GameFile
   private:
     HANDLE m_handle;
     std::string m_filePath;
-    CASCFolder * m_folder;
 };
 
 

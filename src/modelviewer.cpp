@@ -26,6 +26,7 @@
 
 #include "CASCFile.h"
 #include "CASCFolder.h"
+#include "GameDatabase.h"
 
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -211,8 +212,6 @@ ModelViewer::ModelViewer()
 	isChar = false;
 	isADT = false;
 	initDB = false;
-
-	gameFolder = NULL;
 
 	//wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
 	// create our main frame
@@ -564,16 +563,24 @@ void ModelViewer::InitObjects()
 
 void ModelViewer::InitDatabase()
 {
+  LOG_INFO << "Initializing Databases...";
+  SetStatusText(wxT("Initializing Databases..."));
+
+  if(!GAMEDATABASE.initFromXML("wow6.xml"))
+    LOG_ERROR << "Initializing failed !";
+  else
+    LOG_INFO << "Initializing succeed.";
+
 	wxLogMessage(wxT("Initializing Databases..."));
 	SetStatusText(wxT("Initializing Databases..."));
 	initDB = true;
 
-	if (!itemdb.open(gameFolder)) {
+	if (!itemdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item DB."));
 	}
 
-	if (!itemsparsedb.open(gameFolder)) {
+	if (!itemsparsedb.open()) {
 		wxLogMessage(wxT("Error: Could not open the Item Sparse DB."));
 	}
 
@@ -590,84 +597,84 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not find items.csv to load an item list from."));
 	}
 
-	if (!skyboxdb.open(gameFolder)) {
+	if (!skyboxdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
 	}
 
-	if (!spellitemenchantmentdb.open(gameFolder)) {
+	if (!spellitemenchantmentdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Spell Item Enchanement DB."));
 	}
 
-	if (!itemvisualsdb.open(gameFolder)) {
+	if (!itemvisualsdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item Visuals DB."));
 	}
 
-	if (!animdb.open(gameFolder)) {
+	if (!animdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Animation DB."));
 	}
 
-	if (!modeldb.open(gameFolder)) {
+	if (!modeldb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Creatures DB."));
 	}
 
-	if (!skindb.open(gameFolder)) {
+	if (!skindb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the CreatureDisplayInfo DB."));
 	}
 
-	if(!hairdb.open(gameFolder)) {
+	if(!hairdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Hair Geoset DB."));
 	}
 
-	if(!chardb.open(gameFolder)) {
+	if(!chardb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Character DB."));
 	}
 
-	if(!racedb.open(gameFolder)) {
+	if(!racedb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Races DB."));
 	}
 
-	if(!classdb.open(gameFolder)) {
+	if(!classdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Classes DB."));
 	}
 
-	if(!facialhairdb.open(gameFolder)) {
+	if(!facialhairdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Char Facial Hair DB."));
 	}
 
-	if(!visualdb.open(gameFolder))
+	if(!visualdb.open())
 		wxLogMessage(wxT("Error: Could not open the ItemVisuals DB."));
 
-	if(!effectdb.open(gameFolder))
+	if(!effectdb.open())
 		wxLogMessage(wxT("Error: Could not open the ItemVisualEffects DB."));
 
-	if(!subclassdb.open(gameFolder))
+	if(!subclassdb.open())
 		wxLogMessage(wxT("Error: Could not open the Item Subclasses DB."));
 
-	if(!startdb.open(gameFolder))
+	if(!startdb.open())
 		wxLogMessage(wxT("Error: Could not open the Start Outfit Sets DB."));
 	//if(!helmetdb.open()) return false;
 
-	if(!npcdb.open(gameFolder))
+	if(!npcdb.open())
 		wxLogMessage(wxT("Error: Could not open the Start Outfit NPC DB."));
 
-	if(!npctypedb.open(gameFolder))
+	if(!npctypedb.open())
 		wxLogMessage(wxT("Error: Could not open the Creature Type DB."));
 
-	if(!camcinemadb.open(gameFolder))
+	if(!camcinemadb.open())
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
 
-	if(!itemdisplaydb.open(gameFolder))
+	if(!itemdisplaydb.open())
 	{
 		wxLogMessage(wxT("Error: Could not open the ItemDisplayInfo DB."));
 	}
@@ -676,7 +683,7 @@ void ModelViewer::InitDatabase()
 		items.cleanup(itemdisplaydb);
 	}
 
-	if(!setsdb.open(gameFolder))
+	if(!setsdb.open())
 	{
 		wxLogMessage(wxT("Error: Could not open the Item Sets DB."));
 	}
@@ -699,7 +706,7 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not find npcs.csv, unable to create NPC list."));
 	}
 
-	if(spelleffectsdb.open(gameFolder))
+	if(spelleffectsdb.open())
 		GetSpellEffects();
 	else
 		wxLogMessage(wxT("Error: Could not open the SpellVisualEffects DB."));
@@ -1952,15 +1959,13 @@ void ModelViewer::LoadWoW()
 		mpqArchives.Clear();
 	}
 
-	gameFolder = new CASCFolder(gamePath.c_str());
+	CASCFOLDER.init(gamePath.c_str());
 
-  CASCFile TOCFile("Interface\\FrameXML\\FrameXML.TOC",gameFolder);
+  CASCFile TOCFile("Interface\\FrameXML\\FrameXML.TOC");
 
   if(!TOCFile.open())
   {
-    LOG_ERROR << "Opening TOC file in folder " << gameFolder->folder().c_str() << " failed.";
-    delete gameFolder;
-    gameFolder = NULL;
+    LOG_ERROR << "Opening TOC file in folder " << CASCFOLDER.folder().c_str() << " failed.";
   }
   else
   {
@@ -1979,19 +1984,17 @@ void ModelViewer::LoadWoW()
       SetStatusText(wxString(tocString), 1);
 
       mpqArchives.Add(wxString("fakeMPQFile"));
-      langName = gameFolder->locale();
+      langName = CASCFOLDER.locale();
       gameVersion = atoi(tocString.c_str());
     }
     else
     {
       LOG_ERROR << "FAIL to read TOC content from file.";
-      delete gameFolder;
-      gameFolder = NULL;
     }
   }
 
 
-  if(!gameFolder)
+  if(!CASCFOLDER.hStorage)
   {
     wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
     dial->ShowModal();
@@ -2041,7 +2044,7 @@ void ModelViewer::LoadWoW()
 			langOffset = langID;
 	}
 */
-  SetStatusText(wxString(gameFolder->locale()), 2);
+  SetStatusText(wxString(CASCFOLDER.locale()), 2);
 
   InitDatabase();
 

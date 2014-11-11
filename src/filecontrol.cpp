@@ -131,11 +131,11 @@ void FileControl::Init(ModelViewer* mv)
 
 	filterString = filterStrings[filterMode];
 	filterArchive = filterArchives[filterModeMPQ];
-	if(!mv->gameFolder)
+	if(!CASCFOLDER.hStorage)
 	  getFileLists(filelist, filterSearch);
 	else
 	{
-	  mv->gameFolder->initFileList(filelist, filterSearch);
+	 CASCFOLDER.initFileList(filelist, filterSearch);
 	}
 
 	// Put all the viewable files into our File Tree.
