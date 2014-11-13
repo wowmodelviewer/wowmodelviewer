@@ -692,18 +692,17 @@ void ModelViewer::InitDatabase()
 		setsdb.cleanup(items);
 	}
 
-	SetStatusText(wxT("Initializing npcs.csv Databases..."));
-	filename = langName+SLASH+wxT("npcs.csv");
-	if(!wxFile::Exists(filename))
-		filename = locales[0]+SLASH+wxT("npcs.csv");
-	if(wxFile::Exists(filename)) {
-		npcs.open(filename);
-	} else {
-		NPCRecord rec(wxT("26499,24949,7,Arthas"));
-		if (rec.model > 0) {
-			npcs.npcs.push_back(rec);
-		}		
-		wxLogMessage(wxT("Error: Could not find npcs.csv, unable to create NPC list."));
+	SetStatusText(wxT("Initializing Databases..."));
+
+	sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
+
+	if(npc.valid)
+	{
+	  for(int i=0, imax=npc.values.size() ; i < imax ; i++)
+	  {
+	    NPCRecord rec(npc.values[i]);
+	    npcs.npcs.push_back(rec);
+	  }
 	}
 
 	if(spelleffectsdb.open())
@@ -1087,6 +1086,38 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	isWMO = false;
 
 	try {
+
+	  stringstream ss;
+	  ss << modelid;
+	  string model = ss.str();
+
+	  std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.TextureVariation "
+	      "FROM Creature "
+	      "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
+	      "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+	      "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
+
+	  std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
+	  sqlResult r = GAMEDATABASE.sqlQuery(query.c_str());
+
+	  if(r.valid)
+	  {
+	    std::string modelname = r.values[0][0] + r.values[0][1];
+	    wxString name(modelname.c_str());
+	    LoadModel(name);
+	    canvas->model->modelType = MT_NORMAL;
+
+	    TextureGroup grp;
+	    grp.tex[0] = wxString(r.values[0][2]);
+	    grp.base = TEXTURE_GAMEOBJECT1;
+	    grp.count = 1;
+	    if (grp.tex[0].length() > 0)
+	      animControl->AddSkin(grp);
+
+	  }
+
+
+	  /*
 		CreatureSkinDB::Record modelRec = skindb.getBySkinID(modelid);
 		int displayID = modelRec.getUInt(CreatureSkinDB::ExtraInfoID);
 		// if the creature ID ISN'T a "NPC",  then load the creature model and skin it.
@@ -1175,7 +1206,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 			animControl->UpdateModel(canvas->model);
 			canvas->ResetView();
-		}
+		}*/
 	} catch (...) {}
 
 	fileControl->UpdateInterface();

@@ -15,7 +15,6 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
-
 GameDatabase::~GameDatabase()
 {
   if(m_db)
@@ -136,6 +135,7 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   std::string curTable = elem.nodeName().toStdString();
   std::string create = "CREATE TABLE "+curTable+" (";
 
+  int curfield = 0;
   while (!child.isNull())
   {
     QDomNamedNodeMap attributes = child.attributes();
@@ -143,25 +143,39 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
     // search if name and type are here
     QDomNode name = attributes.namedItem("name");
     QDomNode type = attributes.namedItem("type");
+    QDomNode index = attributes.namedItem("index");
 
     if(!name.isNull() && !type.isNull())
     {
+      int fieldIndex;
+      if(!index.isNull())
+        fieldIndex = index.nodeValue().toInt();
+      else
+        fieldIndex = curfield++;
+
       std::string fieldName = name.nodeValue().toStdString();
       std::string fieldType = type.nodeValue().toStdString();
+
+     //std::cout << "fieldName = " << fieldName << " / fieldType = " << fieldType << " / fieldIndex = " << fieldIndex << std::endl;
+
       create += fieldName;
       create += " ";
       create += fieldType;
       if(!attributes.namedItem("primary").isNull())
         create += " PRIMARY KEY NOT NULL";
-      if(child != lastChild)
-        create += ",";
-      m_dbStruct[curTable][fieldName] = fieldType;
+      create += ",";
+      m_dbStruct[curTable][fieldIndex] = std::make_pair(fieldName,fieldType);
     }
 
     child = child.nextSiblingElement();
   }
 
+  // remove spurious "," at the end of string, if any
+  if(create.find_last_of(",") == create.length()-1)
+    create = create.substr (0,create.length()-1);
   create += ");";
+
+  //std::cout << create << std::endl;
 
   sqlResult r = sqlQuery(create);
 
@@ -173,18 +187,19 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
   DBCFile dbc(gamefile.c_str());
   dbc.open();
 
-  std::map<std::string, std::string> tableStruct = m_dbStruct[table];
+  std::map<int, std::pair<std::string, std::string> > tableStruct = m_dbStruct[table];
 
   std::string query = "INSERT INTO ";
   query += table;
   query += "(";
   int nbFields = tableStruct.size();
+  //std::cout << __FUNCTION__ << " nb fields = " << nbFields << std::endl;
   int curfield = 0;
-  for(std::map<std::string, std::string>::iterator it = tableStruct.begin();
-      it != tableStruct.end();
+  for(std::map<int, std::pair<std::string, std::string> >::iterator it = tableStruct.begin(), itEnd = tableStruct.end();
+      it != itEnd ;
       ++it,curfield++)
   {
-    query += it->first;
+    query += it->second.first;
     if(curfield != nbFields-1)
       query += ",";
   }
@@ -193,20 +208,18 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
   std::string queryBase = query;
   int record = 0;
   int nbRecord = dbc.getRecordCount();
+ // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
   for(DBCFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it,record++)
   {
-    std::set<std::string> fields = it->get(tableStruct);
-    curfield=0;
-    for(std::set<std::string>::iterator itFields = fields.begin();
-        itFields != fields.end();
-        ++itFields, curfield++)
+    std::vector<std::string> fields = it->get(tableStruct);
+    for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
     {
-      if(curfield == 0)
+      if(field == 0)
         query += " (";
       query += "\"";
-      query += *itFields;
+      query += fields[field];
       query += "\"";
-      if(curfield != nbFields-1)
+      if(field != nbfield-1)
         query += ",";
       else
         query += ")";

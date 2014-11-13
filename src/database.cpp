@@ -829,6 +829,20 @@ NPCRecord::NPCRecord(wxString line)
 	name.Printf(wxT("%s [%d] [%d]"), line.c_str(), id, model);
 }
 
+
+NPCRecord::NPCRecord(const std::vector<std::string> & vals)
+    : id(0), model(0), type(0)
+{
+  if(vals.size() < 4)
+    return;
+
+  id = atoi(vals[0].c_str());
+  model = atoi(vals[1].c_str());
+  type = atoi(vals[2].c_str());
+  discovery = false;
+  name.Printf(wxT("%s [%d] [%d] [%d]"), vals[3].c_str(), id, model, type);
+}
+
 NPCDatabase::NPCDatabase(wxString filename)
 {
 	//ItemRecord all(wxT("---- None ----"), IT_ALL);

@@ -106,25 +106,35 @@ DBCFile::~DBCFile()
 }
 
 
-std::set<std::string> DBCFile::Record::get(const std::map<std::string,std::string> & structure) const
+std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<std::string, std::string> > & structure) const
 {
-  std::set<std::string> result;
-  int index = 0;
-  std::map<std::string,std::string>::const_iterator itEnd = structure.end();
-  for(std::map<std::string,std::string>::const_iterator it = structure.begin();
-      it != itEnd;
-      ++it, index++)
+  std::vector<std::string> result;
+  for(std::map<int, std::pair<std::string, std::string> >::const_iterator it = structure.begin(), itEnd = structure.end();
+      it != itEnd ;
+      ++it)
   {
-    if(it->second == "uint")
+   // std::cout << it->second.first << " => ";
+    if(it->second.second == "uint")
     {
+     // std::cout << "uint => " << it->first << " => ";
       stringstream ss;
-      ss << getUInt(index);
+      ss << getUInt(it->first);
       string field = ss.str();
-      result.insert(field);
+     // std::cout << field << std::endl;
+      result.push_back(field);
     }
-    else if(it->second == "text")
+    else if(it->second.second == "text")
     {
-      result.insert(getStdString(index));
+      result.push_back(getStdString(it->first));
+    }
+    else if(it->second.second == "float")
+    {
+     // std::cout << "float => " << it->first << " => ";
+      stringstream ss;
+      ss << getFloat(it->first);
+      string field = ss.str();
+     // std::cout << field << std::endl;
+      result.push_back(field);
     }
   }
   return result;

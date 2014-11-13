@@ -579,6 +579,7 @@ struct NPCRecord
 	bool discovery;
 
 	NPCRecord(wxString line);
+	NPCRecord(const std::vector<std::string> &);
 	NPCRecord(): id(0), model(0), type(0) {}
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 

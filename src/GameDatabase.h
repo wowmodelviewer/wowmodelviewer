@@ -54,7 +54,9 @@ class GameDatabase
     bool fillTableFromGameFile(const std::string & table, const std::string & gamefile);
 
     sqlite3 *m_db;
-    std::map<std::string, std::map<std::string, std::string> > m_dbStruct;
+    // std::map<TableName, [fieldID] <fieldName,fieldType> >
+    // ie m_dbStruct["FileData"][0] => pair<"id","unit">
+    std::map<std::string, std::map<int, std::pair<std::string, std::string> > >  m_dbStruct;
 
 };
 

@@ -2392,7 +2392,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		return;
 
 	case UPDATE_NPC:
-		g_modelViewer->LoadNPC(npcs.get(id).model);
+		g_modelViewer->LoadNPC(npcs.get(id).id);
 
 		break;
 

@@ -3,8 +3,9 @@
 
 #include <cassert>
 #include <map>
-#include <set>
 #include <string>
+#include <vector>
+
 
 #include <wx/wx.h>
 
@@ -94,7 +95,7 @@ public:
 		  return std::string(reinterpret_cast<char*>(file.stringTable + stringOffset));
 		}
 
-		std::set<std::string> get(const std::map<std::string,std::string> & structure) const;
+		std::vector<std::string> get(const std::map<int, std::pair<std::string, std::string> > & structure) const;
 
 
 	private:

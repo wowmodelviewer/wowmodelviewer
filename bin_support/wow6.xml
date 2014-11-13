@@ -1,9 +1,121 @@
 ﻿<?xml version="1.0"?>
 <database>
   <FileData>
-  	<gamefile name="DBFilesClient\FileData.dbc" />
-  	<field primary="yes" type="uint" name="id" />
-  	<field type="text" name="name" />
-  	<field type="text" name="path" />
+    <gamefile name="DBFilesClient\FileData.dbc" />
+    <field primary="yes" type="uint" name="id" />
+    <field type="text" name="name" />
+    <field type="text" name="path" />
   </FileData>
+  <CreatureModelData>
+  	<gamefile name="DBFilesClient\CreatureModelData.dbc" />
+  	<field primary="yes" type="uint" name="ID" />
+  	<field type="uint" name="Flags" />
+  	<field type="uint" name="FileDataID" />
+  	<field type="uint" name="SizeClass" />
+  	<field type="float" name="ModelScale" />
+  	<field type="uint" name="BloodID" />
+  	<field type="uint" name="FootprintTextureID" />
+   	<field type="float" name="FootprintTextureLength" />
+    <field type="float" name="FootprintTextureWidth" />
+    <field type="float" name="FootprintParticleScale" />
+    <field type="uint" name="FoleyMaterialID" />
+    <field type="uint" name="FootstepShakeSize" />
+    <field type="uint" name="DeathThudShakeSize" />
+    <field type="uint" name="SoundID" />
+    <field type="float" name="CollisionWidth" />
+    <field type="float" name="CollisionHeight" />
+    <field type="float" name="MountHeight" />
+    <field type="float" name="GeoBoxMin0" />
+    <field type="float" name="GeoBoxMin1" />
+    <field type="float" name="GeoBoxMin2" />
+    <field type="float" name="GeoBoxMax0" />
+    <field type="float" name="GeoBoxMax1" />
+    <field type="float" name="GeoBoxMax2" />
+    <field type="float" name="WorldEffectScale" />
+    <field type="float" name="AttachedEffectScale" />
+    <field type="float" name="MissileCollisionRadius" />
+    <field type="float" name="MissileCollisionPush" />
+    <field type="float" name="MissileCollisionRaise" />
+    <field type="float" name="OverrideLootEffectScale" />
+    <field type="float" name="OverrideNameScale" />
+    <field type="float" name="OverrideSelectionRadius" />
+    <field type="float" name="TamedPetBaseScale" />   
+    <field type="uint" name="CreatureGeosetDataID" />  
+    <field type="float" name="HoverHeight" />
+  </CreatureModelData>
+  <CreatureDisplayInfo>
+    <gamefile name="DBFilesClient\CreatureDisplayInfo.dbc" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="ModelID" />
+    <field type="uint" name="SoundID" />
+	<field type="uint" name="ExtendedDisplayInfoID" />
+	<field type="float" name="CreatureModelScale" />
+    <field type="uint" name="CreatureModelAlpha" />
+    <field type="text" name="TextureVariation" />
+    <field type="text" name="PortraitTextureName" />
+    <field type="uint" name="PortraitCreatureDisplayInfoID" />
+    <field type="uint" name="SizeClass" />
+    <field type="uint" name="BloodID" />
+    <field type="uint" name="NPCSoundID" />
+    <field type="uint" name="ParticleColorID" />
+    <field type="uint" name="CreatureGeosetData" />
+    <field type="uint" name="ObjectEffectPackageID" />
+    <field type="uint" name="AnimReplacementSetID" />
+    <field type="uint" name="Flags" />
+    <field type="uint" name="Gender" />
+    <field type="uint" name="StateSpellVisualKitID" />  
+  </CreatureDisplayInfo>
+  <CreatureDisplayInfoExtra>
+    <gamefile name="DBFilesClient\CreatureDisplayInfoExtra.dbc" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="DisplayRaceID" />
+    <field type="uint" name="DisplaySexID" />
+    <field type="uint" name="SkinID" />
+    <field type="uint" name="FaceID" />
+    <field type="uint" name="HairStyleID" />
+    <field type="uint" name="HairColorID" />
+    <field type="uint" name="FacialHairID" />
+    <field type="uint" name="NPCItemDisplay0" />
+    <field type="uint" name="NPCItemDisplay1" />
+    <field type="uint" name="NPCItemDisplay2" />
+    <field type="uint" name="NPCItemDisplay3" />
+    <field type="uint" name="NPCItemDisplay4" />
+    <field type="uint" name="NPCItemDisplay5" />
+    <field type="uint" name="NPCItemDisplay6" />
+    <field type="uint" name="NPCItemDisplay7" />
+    <field type="uint" name="NPCItemDisplay8" />
+    <field type="uint" name="NPCItemDisplay9" />
+    <field type="uint" name="NPCItemDisplay10" />
+    <field type="uint" name="Flags" />
+    <field type="uint" name="FileDataID" />
+    <field type="uint" name="HdFileDataID" />
+  </CreatureDisplayInfoExtra>
+  <Creature>
+    <gamefile name="DBFilesClient\Creature.db2" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="CreatureTypeID" />
+    <field type="uint" name="col2" />
+    <field type="uint" name="col3" />
+    <field type="uint" name="col4" />
+    <field type="uint" name="col5" />
+    <field type="uint" name="DisplayID" />
+    <field type="uint" name="col7" />
+    <field type="uint" name="col8" />
+    <field type="uint" name="col9" />
+    <field type="uint" name="col10" />
+    <field type="uint" name="col11" />
+    <field type="uint" name="col12" />
+    <field type="uint" name="col13" />
+    <field type="text" name="Name" />
+    <field type="uint" name="col15" />
+    <field type="uint" name="col16" />
+    <field type="uint" name="col17" />
+    <field type="uint" name="col18" />
+    <field type="uint" name="col19" />
+  </Creature>
+  <CreatureType>
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="Name" />
+    <field type="uint" name="Flags" />
+  <CreatureType>
 </database>
