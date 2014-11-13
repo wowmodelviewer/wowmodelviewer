@@ -2488,7 +2488,7 @@ void ModelViewer::DownloadLocaleFiles()
 
 	wxString msg = wxString::Format(_("Would you like to download %s locale files?"), lang.c_str());
 	if (wxMessageBox(msg, _("Update Locale Files"), wxYES_NO) == wxYES) {
-		wxString csvs[] = {wxT("items.csv"), wxT("npcs.csv")};
+		wxString csvs[] = {wxT("items.csv")};
 		if (!wxDirExists(lang))
 			wxMkdir(lang);
 		for(size_t i=0; i<WXSIZEOF(csvs); i++) {
