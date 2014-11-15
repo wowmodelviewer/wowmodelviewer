@@ -575,6 +575,18 @@ void ModelViewer::InitDatabase()
 	SetStatusText(wxT("Initializing Databases..."));
 	initDB = true;
 
+	sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
+
+	if(npc.valid)
+	{
+	  for(int i=0, imax=npc.values.size() ; i < imax ; i++)
+	  {
+	    NPCRecord rec(npc.values[i]);
+	    if(rec.model != 0)
+	      npcs.npcs.push_back(rec);
+	  }
+	}
+
 	if (!itemdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item DB."));
@@ -692,26 +704,14 @@ void ModelViewer::InitDatabase()
 		setsdb.cleanup(items);
 	}
 
-	SetStatusText(wxT("Initializing Databases..."));
-
-	sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
-
-	if(npc.valid)
-	{
-	  for(int i=0, imax=npc.values.size() ; i < imax ; i++)
-	  {
-	    NPCRecord rec(npc.values[i]);
-	    npcs.npcs.push_back(rec);
-	  }
-	}
-
 	if(spelleffectsdb.open())
 		GetSpellEffects();
 	else
 		wxLogMessage(wxT("Error: Could not open the SpellVisualEffects DB."));
 
-	wxLogMessage(wxT("Finished initiating database files."));
-	SetStatusText(wxT("Finished initiating database files."));
+  wxLogMessage(wxT("Finished initiating database files."));
+  SetStatusText(wxT("Finished initiating database files."));;
+
 }
 
 void ModelViewer::InitDocking()
@@ -1091,8 +1091,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  ss << modelid;
 	  string model = ss.str();
 
-	  std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.TextureVariation "
-	      "FROM Creature "
+	  std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+	      "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM Creature "
 	      "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
 	      "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
 	      "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
@@ -1108,46 +1108,25 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    canvas->model->modelType = MT_NORMAL;
 
 	    TextureGroup grp;
-	    grp.tex[0] = wxString(r.values[0][2]);
-	    grp.base = TEXTURE_GAMEOBJECT1;
-	    grp.count = 1;
+	    int count = 0;
+	    for(int i=0; i < 3; i++)
+	    {
+	      wxString tex(r.values[0][i+2]);
+	      grp.tex[i] = tex;
+	      if(tex.length() > 0)
+	        count++;
+	    }
+      grp.base = TEXTURE_GAMEOBJECT1;
+      grp.count = count;
 	    if (grp.tex[0].length() > 0)
 	      animControl->AddSkin(grp);
-
 	  }
 
 
 	  /*
 		CreatureSkinDB::Record modelRec = skindb.getBySkinID(modelid);
 		int displayID = modelRec.getUInt(CreatureSkinDB::ExtraInfoID);
-		// if the creature ID ISN'T a "NPC",  then load the creature model and skin it.
-		if (displayID == 0) {
-			
-			unsigned int modelID = modelRec.getUInt(CreatureSkinDB::ModelID);
-			CreatureModelDB::Record creatureModelRec = modeldb.getByID(modelID);
-			
-			wxString name(creatureModelRec.getString(CreatureModelDB::Filename));
-			name = name.BeforeLast('.');
-			name.Append(wxT(".m2"));
 
-			LoadModel(name);
-			canvas->model->modelType = MT_NORMAL;
-
-			TextureGroup grp;
-			int count = 0;
-			for (size_t i=0; i<TextureGroup::num; i++) {
-				wxString skin(modelRec.getString(CreatureSkinDB::Skin1 + i));
-				
-				grp.tex[i] = skin;
-				if (skin.length() > 0)
-					count++;
-			}
-			grp.base = TEXTURE_GAMEOBJECT1;
-			grp.count = count;
-			if (grp.tex[0].length() > 0) 
-				animControl->AddSkin(grp);
-
-		} else {
 			isChar = true;
 			NPCDB::Record rec = npcdb.getByNPCID(displayID);
 			CharRacesDB::Record rec2 = racedb.getById(rec.getUInt(NPCDB::RaceID));

@@ -169,9 +169,7 @@ void AnimControl::UpdateModel(WoWModel *m)
 
 	wxString fn = m->name.Lower();
 	if (fn.substr(0,4) != wxT("char")) {
-		if (fn.substr(0,8) == wxT("creature"))
-			res = UpdateCreatureModel(m);
-		else if (fn.substr(0,4) == wxT("item"))
+		if (fn.substr(0,4) == wxT("item"))
 			res = UpdateItemModel(m);
 	}
 
