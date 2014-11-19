@@ -37,8 +37,6 @@ class CharFacialHairDB;
 class CharHairGeosetsDB;
 class CharRacesDB;
 class CharSectionsDB;
-class CreatureModelDB;
-class CreatureSkinDB;
 class HelmGeosetDB;
 class ItemDatabase;
 class ItemDisplayDB;
@@ -49,13 +47,13 @@ class ItemVisualEffectDB;
 class NPCDatabase;
 class NPCDB;
 class StartOutfitDB;
-class CreatureTypeDB;
 class LightSkyBoxDB;
 class SpellItemEnchantmentDB;
 class ItemVisualsDB;
 class ItemDB;
 class CamCinematicDB;
 class ItemSparseDB;
+class CreatureTypeDB;
 
 // dbs
 extern ItemDatabase	items;
@@ -63,10 +61,8 @@ extern AnimDB animdb;
 extern HelmGeosetDB	helmetdb;
 extern ItemVisualEffectDB effectdb;
 extern ItemDisplayDB itemdisplaydb;
-extern CreatureModelDB modeldb;
 extern NPCDatabase npcs;
 extern ItemSetDB setsdb;
-extern CreatureSkinDB skindb;
 extern StartOutfitDB startdb;
 extern ItemSubClassDB subclassdb;
 extern ItemVisualDB visualdb;
@@ -489,6 +485,7 @@ struct ItemRecord {
 	bool discovery;
 
 	ItemRecord(wxString line);
+	ItemRecord(const std::vector<std::string> &);
 	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0), discovery(false)
 	{}
 	ItemRecord(wxString name, int type): name(name), id(0), itemclass(-1), subclass(-1), type(type), model(0), sheath(0), quality(0), discovery(false)
@@ -627,72 +624,6 @@ public:
 
 
 // ===============================================
-
-class CreatureModelDB: public DBCFile
-{
-public:
-	CreatureModelDB(): DBCFile(wxT("DBFilesClient\\CreatureModelData.dbc")) {}
-	~CreatureModelDB() {}
-
-	/// Fields
-	static const size_t ModelID = 0;		// uint
-	static const size_t Type = 1;			// uint
-	static const size_t Filename = 2;		// string
-
-	// filenames need to end in mdx though ;(
-	Record getByFilename(wxString fn);
-	Record getByID(unsigned int id);
-private:
-
-};
-
-class CreatureSkinDB: public DBCFile
-{
-public:
-	CreatureSkinDB(): DBCFile(wxT("DBFilesClient\\CreatureDisplayInfo.dbc")) {}
-	~CreatureSkinDB() {}
-
-	static const size_t SkinID = 0; 	 	 // uint
-	static const size_t ModelID = 1;	 	 // uint
-	static const size_t SoundID = 2;	 	 // uint
-	static const size_t ExtraInfoID = 3; 	 // uint
-	static const size_t Scale = 4;		 	 // float
-	static const size_t Opacity = 5;	 	 // uint
-	static const size_t Skin1 = 6;		 	 // string
-	static const size_t Skin2 = 7;		 	 // string
-	static const size_t Skin3 = 8;		 	 // string
-	static const size_t PortraitTexture = 9; // string
-	static const size_t BloodLevel = 10;	 // uint
-	static const size_t Blood = 11;	 		 // uint
-	static const size_t NPCSounds = 12;	 	 // uint
-	static const size_t Particles = 13;	 	 // uint
-	static const size_t GeoSetData = 14;	 // uint
-	static const size_t EffectPackage = 15;	 // uint
-
-	/*
-
-	/// Fields
-	static const size_t SkinID = 0;			// uint
-	static const size_t ModelID = 1;		// uint
-											// uint SoundID
-	static const size_t NPCID = 3;			// uint CreatureDisplayInfoExtraID
-	//static const size_t Scale = 4;			// float
-	//static const size_t Opacity = 5;			// uint, 0-255, 255 is solid
-	static const size_t Skin = 6;			// string
-	static const size_t Skin2 = 7;			// string
-	static const size_t Skin3 = 8;			// string
-	// uint IconID
-	// unit sizeClass
-	// unit bloodID
-	// unit NPCSoundID
-	// unit particleColorID
-	// unit creatureGeosetData
-	// unit objectEffectPackageID
-*/
-	Record getByModelID(unsigned int id);
-	Record getBySkinID(unsigned int id);
-};
-
 class CreatureTypeDB: public DBCFile
 {
 public:

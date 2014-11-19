@@ -37,6 +37,8 @@
 #include <QtGlobal>
 #include <QString>
 
+class QMessageLogContext;
+
 // Externals
 
 // Other libraries

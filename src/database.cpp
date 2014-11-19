@@ -29,8 +29,6 @@ CharClassesDB		classdb;
 CharFacialHairDB	facialhairdb;
 CharRacesDB			racedb;
 //--
-CreatureModelDB		modeldb;
-CreatureSkinDB		skindb;
 CreatureTypeDB		npctypedb;
 NPCDB				npcdb;
 LightSkyBoxDB			skyboxdb;
@@ -247,94 +245,12 @@ HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 // --
 
 
-// --
-// CREATUREDB.H
-//
-CreatureModelDB::Record CreatureModelDB::getByFilename(wxString fn)
-{
-	int nbtests = 0;
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		nbtests++;
-		wxString str(i->getString(CreatureModelDB::Filename));
-
-		str = str.BeforeLast(wxT('.'));
-
-		if(str.IsSameAs(fn, false) == true)
-			return (*i);
-	}
-	wxLogMessage(wxT("CreatureModelDB::getByFilename %s => %i tests !!! NOT FOUND !!!"), fn.c_str(), nbtests);
-	throw NotFound();
-}
-
-CreatureModelDB::Record CreatureModelDB::getByID(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ModelID)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-CreatureSkinDB::Record CreatureSkinDB::getByModelID(unsigned int id)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getUInt(ModelID) == id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-CreatureSkinDB::Record CreatureSkinDB::getBySkinID(unsigned int id)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getUInt(SkinID) == id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
 CreatureTypeDB::Record CreatureTypeDB::getByID(unsigned int id)
 {
 	/// Brute force search for now
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
 		if(i->getUInt(ID) == id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-NPCDB::Record NPCDB::getByFilename(wxString fn)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getString(Filename) == fn) {
-			//std::cout << i->getString(Filename).c_str() << "\n";
-			return (*i);
-		}
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-NPCDB::Record NPCDB::getByNPCID(size_t id)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getUInt(NPCID) == (unsigned int)id)
 			return (*i);
 	}
 	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
@@ -600,6 +516,29 @@ ItemRecord::ItemRecord(wxString line)
 
 }
 
+ItemRecord::ItemRecord(const std::vector<std::string> & vals)
+  : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
+{
+  if(vals.size() < 6)
+      return;
+
+  id = atoi(vals[0].c_str());
+  type = atoi(vals[2].c_str());
+  itemclass = atoi(vals[3].c_str());
+  subclass = atoi(vals[4].c_str());
+  model = 1;
+  switch(atoi(vals[5].c_str()))
+  {
+    case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;
+    case SHEATHETYPE_LARGEWEAPON: sheath = ATT_LEFT_BACK; break;
+    case SHEATHETYPE_HIPWEAPON: sheath = ATT_LEFT_HIP_SHEATH; break;
+    case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
+    default: sheath = SHEATHETYPE_NONE;
+  }
+  discovery = false;
+  name = CSConv(wxString(vals[1].c_str(), wxConvUTF8));
+}
+
 // Alfred. prevent null items bug.
 ItemDatabase::ItemDatabase()
 {
@@ -840,7 +779,7 @@ NPCRecord::NPCRecord(const std::vector<std::string> & vals)
   model = atoi(vals[1].c_str());
   type = atoi(vals[2].c_str());
   discovery = false;
-  name.Printf(wxT("%s [%d] [%d] [%d]"), vals[3].c_str(), id, model, type);
+  name = CSConv(wxString(vals[3].c_str(), wxConvUTF8));
 }
 
 NPCDatabase::NPCDatabase(wxString filename)

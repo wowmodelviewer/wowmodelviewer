@@ -28,6 +28,8 @@
 #include "CASCFolder.h"
 #include "GameDatabase.h"
 
+#include "Logger/Logger.h"
+
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 const static float def_diffuse[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -53,7 +55,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	// --
 	EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
 	EVT_MENU(ID_FILE_DISCOVERY_ITEM, ModelViewer::OnExportOther)
-	EVT_MENU(ID_FILE_DISCOVERY_NPC, ModelViewer::OnExportOther)
 	//--
 	EVT_MENU(ID_FILE_RESETLAYOUT, ModelViewer::OnToggleCommand)
 	// --
@@ -297,8 +298,6 @@ void ModelViewer::InitMenu()
 	// --== Continue regular menu ==--
 	fileMenu->AppendSeparator();
 	fileMenu->Append(ID_FILE_DISCOVERY_ITEM, _("Discovery Item"));
-	fileMenu->Append(ID_FILE_DISCOVERY_NPC, _("Discovery NPC"));
-	fileMenu->AppendSeparator();
 	fileMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
 
 	fileMenu->AppendSeparator();
@@ -565,6 +564,7 @@ void ModelViewer::InitDatabase()
 {
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
+  wxBusyCursor busyCursor;
 
   if(!GAMEDATABASE.initFromXML("wow6.xml"))
     LOG_ERROR << "Initializing failed !";
@@ -575,18 +575,44 @@ void ModelViewer::InitDatabase()
 	SetStatusText(wxT("Initializing Databases..."));
 	initDB = true;
 
-	sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
-
-	if(npc.valid)
 	{
-	  for(int i=0, imax=npc.values.size() ; i < imax ; i++)
+	  sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
+
+	  if(npc.valid && !npc.empty())
 	  {
-	    NPCRecord rec(npc.values[i]);
-	    if(rec.model != 0)
-	      npcs.npcs.push_back(rec);
+	    LOG_INFO << "Found" << npc.values.size() << "NPCs";
+	    for(int i=0, imax=npc.values.size() ; i < imax ; i++)
+	    {
+	      NPCRecord rec(npc.values[i]);
+	      if(rec.model != 0)
+	        npcs.npcs.push_back(rec);
+	    }
+	  }
+	  else
+	  {
+	    LOG_ERROR << "Error during NPC detection from database.";
 	  }
 	}
 
+	{
+	  sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
+
+	  if(item.valid && !item.empty())
+	  {
+	    LOG_INFO << "Found" << item.values.size() << "items";
+	    for(int i=0, imax=item.values.size() ; i < imax ; i++)
+	    {
+	      ItemRecord rec(item.values[i]);
+	      items.items.push_back(rec);
+	    }
+	  }
+	  else
+	  {
+	    LOG_ERROR << "Error during Item detection from database.";
+	  }
+	}
+
+	/*
 	if (!itemdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Item DB."));
@@ -595,6 +621,7 @@ void ModelViewer::InitDatabase()
 	if (!itemsparsedb.open()) {
 		wxLogMessage(wxT("Error: Could not open the Item Sparse DB."));
 	}
+
 
 	SetStatusText(wxT("Initializing items.csv Databases..."));
 	wxString filename = langName+SLASH+wxT("items.csv");
@@ -609,6 +636,7 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not find items.csv to load an item list from."));
 	}
 
+*/
 	if (!skyboxdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
@@ -629,15 +657,6 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not open the Animation DB."));
 	}
 
-	if (!modeldb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Creatures DB."));
-	}
-
-	if (!skindb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the CreatureDisplayInfo DB."));
-	}
 
 	if(!hairdb.open()) {
 		initDB = false;
@@ -685,24 +704,6 @@ void ModelViewer::InitDatabase()
 
 	if(!camcinemadb.open())
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
-
-	if(!itemdisplaydb.open())
-	{
-		wxLogMessage(wxT("Error: Could not open the ItemDisplayInfo DB."));
-	}
-	else
-	{
-		items.cleanup(itemdisplaydb);
-	}
-
-	if(!setsdb.open())
-	{
-		wxLogMessage(wxT("Error: Could not open the Item Sets DB."));
-	}
-	else
-	{
-		setsdb.cleanup(items);
-	}
 
 	if(spelleffectsdb.open())
 		GetSpellEffects();
@@ -1098,9 +1099,9 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	      "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
 
 	  std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
-	  sqlResult r = GAMEDATABASE.sqlQuery(query.c_str());
+	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  if(r.valid)
+	  if(r.valid && !r.empty())
 	  {
 	    std::string modelname = r.values[0][0] + r.values[0][1];
 	    wxString name(modelname.c_str());
@@ -1122,6 +1123,10 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	      animControl->AddSkin(grp);
 	  }
 
+	  /*
+	   SELECT CreatureModelData.*, CreatureDisplayInfoExtra.* FROM Creature LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID LEFT JOIN CreatureDisplayInfoExtra ON CreatureDisplayInfoExtra.ID = CreatureDisplayInfo.ExtendedDisplayInfoID  LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID WHERE Creature.ID = 63413;
+
+	   */
 
 	  /*
 		CreatureSkinDB::Record modelRec = skindb.getBySkinID(modelid);
@@ -1195,7 +1200,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	interfaceManager.Update();
 }
 
-void ModelViewer::LoadItem(unsigned int displayID)
+void ModelViewer::LoadItem(unsigned int id)
 {
 	canvas->clearAttachments();
 	//if (!isChar) // may memory leak
@@ -1207,51 +1212,69 @@ void ModelViewer::LoadItem(unsigned int displayID)
 	isWMO = false;
 
 	try {
-		ItemDisplayDB::Record modelRec = itemdisplaydb.getById(displayID);
-		wxString name = modelRec.getString(ItemDisplayDB::Model);
-		name = name.BeforeLast('.');
-		name.Append(wxT(".M2"));
-		wxLogMessage(wxT("LoadItem %d %s"), displayID, name.c_str());
+	  stringstream ss;
+	  ss << "SELECT Model1, TextureItemID1 FROM ItemDisplayInfo WHERE ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID =";
+	  ss << id;
+	  ss << "))";
+	  string query = ss.str();
 
-		wxString fns[] = {
-			wxT("Item\\ObjectComponents\\Ammo\\"),
-			wxT("Item\\ObjectComponents\\Backpack\\"),
-			wxT("Item\\ObjectComponents\\Battlestandards\\"),
-			wxT("Item\\ObjectComponents\\Head\\"),
-			wxT("Item\\ObjectComponents\\Quiver\\"),
-			wxT("Item\\ObjectComponents\\Scroll\\"),
-			wxT("Item\\ObjectComponents\\Shield\\"),
-			wxT("Item\\ObjectComponents\\Shoulder\\"),
-			wxT("Item\\ObjectComponents\\Waist\\"),
-			wxT("Item\\ObjectComponents\\Weapon\\")
-		};
-		wxString fn;
-		bool loaded = false;
-		for(int i=0; i<10; i++) {
-			fn = fns[i]+name;
-			if (MPQFile::exists(fn)) {
-				loaded = true;
-				LoadModel(fn);
-				break;
-			}
-		}
+	  sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
+	  std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
 
-		if(!loaded){ // try head item specific stuff
-			// sigh, head items have more crap to sort out
-			wxString name = modelRec.getString(ItemDisplayDB::Model);
-			name = name.substr(0, name.length()-4); // delete .mdx
-			name.append(wxT("_"));
+	  if(itemInfos.valid && !itemInfos.empty())
+	  {
+	    std::string model1 = itemInfos.values[0][0];
+	    std::cout << "model1 = " << model1 << std::endl;
+	    std::string texture1 = itemInfos.values[0][1];
+	    std::cout << "texture1 = " << texture1 << std::endl;
 
-			// no model loaded, so try blood elf female
-			name.append(wxT("bef.m2"));
+	    model1 = CASCFOLDER.getFullPathForFile(model1);
+	    if(model1 == "") // try with .m2 at the end
+	    {
+	      model1 = itemInfos.values[0][0];
+	      model1 = model1.substr(0, model1.length()-4); // remove .mdx
+	      model1 += ".m2"; // add .m2
+	      model1 = CASCFOLDER.getFullPathForFile(model1);
+	    }
 
-			// finally try to load it again
-			fn = fns[3]+name;
-			if (MPQFile::exists(fn)) {
-				LoadModel(fn);
-			}
+	    if(texture1 != "")
+	    {
+	      ss.str("");
+	      ss << "SELECT Path, Name from TextureFileData LEFT JOIN FileData  ON FileDataID = FileData.ID WHERE TextureItemID=";
+	      ss << texture1;
+	      std::string query = ss.str();
+	      std::cout << "query = " << query << std::endl;
+	      sqlResult tex1 = GAMEDATABASE.sqlQuery(query);
+	      if(tex1.valid && !tex1.empty())
+	      {
+	        texture1 = tex1.values[0][0] + tex1.values[0][1];
+	        // code is not ready for that ^, so fallback on this v
+	        texture1 = tex1.values[0][1];
+	        texture1 = texture1.substr(0, texture1.length()-4); // remove .blp
 
-		}
+	      }
+	      else
+	      {
+	        LOG_ERROR << "Fail to open texture with ID" << texture1.c_str();
+	      }
+	    }
+
+	    std::cout << "FINAL - model1 = " << model1 << std::endl;
+	    std::cout << "FINAL - texture1 = " << texture1 << std::endl;
+	    if(model1 != "" && texture1 != "")
+	    {
+	      LoadModel(model1.c_str());
+	      canvas->model->TextureList.push_back(texture1.c_str());
+	      TextureGroup grp;
+	      grp.base = TEXTURE_ITEM;
+	      grp.count = 1;
+
+	      grp.tex[0] = texture1.c_str();
+	      if (grp.tex[0].length() > 0)
+	        animControl->AddSkin(grp);
+	    }
+	  }
+
 
 		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
@@ -1324,13 +1347,6 @@ ModelViewer::~ModelViewer()
 
 	// wxAUI stuff
 	interfaceManager.UnInit();
-
-	// Clear the MPQ archives.
-	for (std::vector<MPQArchive*>::iterator it = archives.begin(); it != archives.end(); ++it) {
-        (*it)->close();
-		//archives.erase(it);
-	}
-	archives.clear();
 
 	// Save our session and layout info
 	SaveSession();
@@ -3046,28 +3062,6 @@ void ModelViewer::ModelInfo()
 	g.close();
 }
 
-void DiscoveryNPC()
-{
-	if (skindb.size() == 0)
-		return;
-	wxString name, ret;
-	// 1. from creaturedisplayinfo.dbc
-	for (CreatureSkinDB::Iterator it = skindb.begin(); it != skindb.end(); ++it) {
-		int npcid = it->getUInt(CreatureSkinDB::ExtraInfoID);
-		int id = it->getUInt(CreatureSkinDB::SkinID);
-		if (npcid == 0)
-			continue;
-		if (!npcs.avaiable(id)) {
-			name.Printf(wxT("Skin%d"), id);
-			ret = npcs.addDiscoveryId(id, name);
-		}
-	}
-	// 2. from creaturedisplayinfoextra.dbc
-	wxLogMessage(wxT("Discovery npc done."));
-	g_modelViewer->SetStatusText(wxT("Discovery npc done."));
-
-	g_modelViewer->fileMenu->Enable(ID_FILE_DISCOVERY_NPC, false);
-}
 
 void DiscoveryItem()
 {
@@ -3134,9 +3128,6 @@ void ModelViewer::OnExportOther(wxCommandEvent &event)
 	} else if (id == ID_FILE_DISCOVERY_ITEM) {
 		DiscoveryItem();
 		fileMenu->Enable(ID_FILE_DISCOVERY_ITEM, false);
-	} else if (id == ID_FILE_DISCOVERY_NPC) {
-		DiscoveryNPC();
-		fileMenu->Enable(ID_FILE_DISCOVERY_NPC, false);
 	}
 }
 

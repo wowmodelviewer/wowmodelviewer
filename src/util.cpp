@@ -54,8 +54,6 @@ wxString fixMPQPath(wxString path)
 // Convert UTF8 string to local string
 wxString CSConv(wxString str)
 {
-	if (langID <= 0) // || langCSConv[langID].IsEmpty())
-		return str;
 	return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
 	// old way
 	//return wxCSConv(langCSConv[langID]).cWC2WX(wxConvUTF8.cMB2WC(str));

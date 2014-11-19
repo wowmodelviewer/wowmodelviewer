@@ -285,7 +285,8 @@ void ParticleSystem::draw()
 	case BM_MODULATE:
 	case BM_MODULATEX2:
 	default:
-		wxLogMessage(wxT("blend unknown: %d"), blend);
+	  break;
+		//wxLogMessage(wxT("blend unknown: %d"), blend);
 	}
 	
 	//glDisable(GL_LIGHTING);

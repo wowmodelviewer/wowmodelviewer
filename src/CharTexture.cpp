@@ -123,7 +123,7 @@ void CharTexture::compose(TextureID texID)
 		}
 
 		free(tempbuf);
-	//	texturemanager.del(temptex);
+		texturemanager.del(temptex);
 	}
 
 	// good, upload this to video

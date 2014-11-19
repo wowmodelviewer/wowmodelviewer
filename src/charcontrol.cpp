@@ -404,6 +404,7 @@ void CharControl::UpdateModel(Attachment *a)
 
 void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 {
+  /*
 	if (!a)
 		return;
 
@@ -413,17 +414,6 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 	charTex = 0;
 	if (charTex==0) 
 		glGenTextures(1, &charTex);
-
-	// Open the first record, just so we can declare the var.
-	NPCDB::Record npcrec = npcdb.getRecord(0);
-
-	// Get the NPC Record to construct the NPC character model from.
-	try {
-		npcrec = npcdb.getByNPCID(id);
-	} catch (...) {
-		wxLogMessage(wxT("Exception Error: %s : line #%i : %s\n\tUnable to load NPC #%i"), __FILE__, __LINE__, __FUNCTION__, id);
-		return;
-	}
 
 	cd.reset();
 	td.showCustom = false;
@@ -535,6 +525,7 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 	}
 
 	RefreshNPCModel();
+	*/
 }
 
 void CharControl::OnSpin(wxSpinEvent &event)
@@ -1912,7 +1903,8 @@ void CharControl::ClearItemDialog()
 
 void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const wxChar *caption)
 {
-	if (items.items.size() == 0 || subclassdb.size() == 0)
+  std::cout << __FUNCTION__ << " type = " << type << " / slot = " << slot << " / current = " << current << std::endl;
+	if (items.items.size() == 0)
 		return;
 	ClearItemDialog();
 
@@ -1924,20 +1916,25 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	// collect all items for this slot, making note of the occurring subclasses
 	std::set<std::pair<int,int> > subclassesFound;
 	
+	std::cout << "item db size = " << items.items.size() << std::endl;
+
 	int sel=0, ord=0;
 	for (std::vector<ItemRecord>::iterator it = items.items.begin(); it != items.items.end(); ++it) {
-		if (type == UPDATE_SINGLE_ITEM) {
-			if (/*it->type == IT_HEAD ||*/ it->type == IT_SHOULDER || it->type == IT_SHIELD ||
-				it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
-				it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN) {
-				choices.Add(CSConv(it->name));
-				numbers.push_back(it->id);
-				quality.push_back(it->quality);
+		if (type == UPDATE_SINGLE_ITEM)
+		{
+		  if (it->type == IT_SHOULDER || it->type == IT_SHIELD ||
+		      it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
+		      it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN)
+		  {
+		    choices.Add(it->name);
+		    numbers.push_back(it->id);
+		    quality.push_back(it->quality);
 
-				subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
-			}
+		    subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
+		  }
 		}
-		else if (correctType((ssize_t)it->type, slot)) {
+		else if (correctType((ssize_t)it->type, slot))
+		{
 			choices.Add(CSConv(it->name));
 			numbers.push_back(it->id);
 			quality.push_back(it->quality);
@@ -1951,11 +1948,12 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 				subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
 		}
 	}
-
+	std::cout << "choices size = " << choices.GetCount() << std::endl;
 	// make category list
 	cats.clear();
 	catnames.clear();
-
+	itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
+/*
 	std::map<std::pair<int,int>, int> subclasslookup;
 	for (ItemSubClassDB::Iterator it=subclassdb.begin(); it != subclassdb.end(); ++it) {
 		int cl;
@@ -2000,9 +1998,10 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 
 		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);
 	} else {
-		itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
+	  itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
 	}
 
+	*/
 	itemDialog->SetSelection(sel);
 
 	wxSize s = itemDialog->GetSize();
@@ -2182,19 +2181,8 @@ void CharControl::selectNPC(ssize_t type)
 	int sel=0, ord=0;
 
 	for (std::vector<NPCRecord>::iterator it=npcs.npcs.begin();  it!=npcs.npcs.end(); ++it) {
-/*
-		if (type == UPDATE_NPC_START) {
-			try {
-				CreatureSkinDB::Record modelRec = skindb.getBySkinID(it->id);
-				int displayID = modelRec.getUInt(CreatureSkinDB::NPCID);
-				if (displayID == 0)
-					continue;
-			} catch (...) {}
-
-		}
-*/
 		if (it->model > 0) {
-			choices.Add(CSConv(it->name));
+			choices.Add(it->name);
 			numbers.push_back(it->id);
 			quality.push_back(0);
 
@@ -2397,8 +2385,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		break;
 
 	case UPDATE_SINGLE_ITEM:
-		id = numbers[id];
-		g_modelViewer->LoadItem(items.getById(id).model);
+		g_modelViewer->LoadItem(numbers[id]);
 		break;
 
 	case UPDATE_NPC_START:
@@ -2406,17 +2393,6 @@ void CharControl::OnUpdateItem(int type, int id)
 		NPCDB::Record npcrec = npcdb.getRecord(0);
 		int displayID = 0;
 
-		try {
-			// 68,3167,7,Stormwind City Guard, helmet 14964
-			NPCRecord r = npcs.get(id);
-			//wxLogMessage(wxT("id: %d, %d, %d, %s"), id, r.id, r.model, r.name.c_str());
-			CreatureSkinDB::Record modelRec = skindb.getBySkinID(r.model);
-			displayID = modelRec.getUInt(CreatureSkinDB::ExtraInfoID);
-			//wxLogMessage(wxT("displayID: %d\n"), displayID);
-		} catch (...) {
-			wxLogMessage(wxT("Can't get extra info from: %d,%d,%s"), npcs.get(id).id,
-				npcs.get(id).model, npcs.get(id).name.c_str());
-		}
 		if (displayID) {
 			try {
 				npcrec = npcdb.getByNPCID(displayID);

@@ -140,7 +140,7 @@ void AnimControl::UpdateModel(WoWModel *m)
 		return;
 	
 	// Clear skin/texture data from previous model - if there is any.
-	if (g_selModel && g_selModel->name != m->name) {
+	if (g_selModel) {
 		for (size_t i=0; i<skinList->GetCount(); i++) {
 			TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
 			wxDELETE(grp);
@@ -167,11 +167,13 @@ void AnimControl::UpdateModel(WoWModel *m)
 	// Find any textures that exist for the model
 	bool res = false;
 
+	/*
 	wxString fn = m->name.Lower();
 	if (fn.substr(0,4) != wxT("char")) {
 		if (fn.substr(0,4) == wxT("item"))
 			res = UpdateItemModel(m);
 	}
+	*/
 
 	skinList->Show(res);
 
@@ -332,99 +334,9 @@ bool filterDir(wxString fn)
 	return (tmp.StartsWith(sFilterDir) && tmp.EndsWith(wxT("blp")));
 }
 
-bool AnimControl::UpdateCreatureModel(WoWModel *m)
-{
-	wxString fn = m->name;
-
-	// remove extension
-	fn = fn.BeforeLast(wxT('.'));
-
-
-	TextureSet skins;
-
-	// see if this model has skins
-	wxLogMessage(wxT("Searching skins for '%s'"), m->name.c_str());
-	try {
-		CreatureModelDB::Record rec = modeldb.getByFilename(fn);
-		// for character models, don't use skins
-		if (rec.getUInt(CreatureModelDB::Type) != 4) {
-			//TextureSet skins;
-			unsigned int modelid = rec.getUInt(CreatureModelDB::ModelID);
-
-			wxLogMessage(wxT("Found model in CreatureModelDB, id: %u"), modelid);
-
-			for (CreatureSkinDB::Iterator it = skindb.begin();  it!=skindb.end();  ++it) {
-				if (it->getUInt(CreatureSkinDB::ModelID) == modelid) {
-					TextureGroup grp;
-					int count = 0;
-					for (size_t i=0; i<TextureGroup::num; i++) {
-						wxString skin(it->getString(CreatureSkinDB::Skin1 + i));
-						if (skin != wxEmptyString) {
-							grp.tex[i] = skin;
-							count++;
-						}
-					}
-					grp.base = TEXTURE_GAMEOBJECT1;
-					grp.count = count;
-					if (grp.tex[0].length() > 0) 
-						skins.insert(grp);
-				}
-			}
-		}
-	} catch (CreatureModelDB::NotFound) {
-		wxLogMessage(wxT("CreatureModelDB not found !!!"));
-	}
-	
-	wxString lwrName = fn;
-	lwrName.MakeLower();
-	if (gUserSkins.AddUserSkins(lwrName, skins)) 
-		wxLogMessage(wxT("Found user skins"));
-
-#ifdef	DEBUG
-	wxLogMessage(wxT("Found %d skins:"), skins.size());
-	for (TextureSet::iterator i=skins.begin(); i!=skins.end(); ++i) {
-		wxLogMessage(wxT("- * %s"), i->tex[0].c_str());
-		wxLogMessage(wxT("  * %s"), i->tex[1].c_str());
-		wxLogMessage(wxT("  * %s"), i->tex[2].c_str());
-	}
-#endif
-
-	int count = (int)skins.size();
-
-	// Search the same directory for BLPs
-	std::set<FileTreeItem> filelist;
-	sFilterDir = fn.BeforeLast(SLASH)+SLASH;
-	sFilterDir.MakeLower();
-	getFileLists(filelist, filterDir);
-	if (filelist.begin() != filelist.end()) {
-		TextureGroup grp;
-		grp.base = TEXTURE_GAMEOBJECT1;
-		grp.count = 1;
-		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-			grp.tex[0] = (*it).displayName.BeforeLast(wxT('.')).AfterLast(SLASH);
-			skins.insert(grp);
-		}
-	}
-
-	bool ret = false;
-
-	if (!skins.empty()) {
-		ret = FillSkinSelector(skins);
-
-		if (count == 0) // No entries on .dbc and skins.txt
-			count = (int)skins.size();
-
-		if (ret) { // Don't call SetSkin without a skin
-			int mySkin = randomSkins ? randint(0, (int)count-1) : 0;
-			SetSkin(mySkin);
-		}
-	}
-
-	return ret;
-}
-
 bool AnimControl::UpdateItemModel(WoWModel *m)
 {
+
 	wxString fn = m->name;
 
 	// change M2 to mdx

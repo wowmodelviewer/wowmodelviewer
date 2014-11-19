@@ -7,13 +7,14 @@
 
 #include "CASCFolder.h"
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <locale>
 
 #include "CASCFile.h"
 
 #include "logger/Logger.h"
-
 
 CASCFolder::CASCFolder()
  : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder("")
@@ -126,4 +127,31 @@ void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxSt
       dest.insert(tmp);
     }
   }
+}
+
+std::string CASCFolder::getFullPathForFile(std::string & file)
+{
+  std::ifstream listfile("listfile.txt");
+
+  if(!listfile.good())
+  {
+    LOG_ERROR << "Fail to open listfile.txt when searching fullpath for" << file.c_str();
+    return "";
+  }
+
+  std::transform(file.begin(), file.end(), file.begin(), ::tolower);
+  LOG_INFO << "Looking for full path for file" << file.c_str();
+  std::string line;
+  while(!listfile.eof())
+  {
+    listfile >> line;
+    std::transform(line.begin(), line.end(), line.begin(), ::tolower);
+    if(line.find(file) != std::string::npos)
+    {
+      LOG_INFO << "Found:" << line.c_str();
+      return line;
+    }
+  }
+  LOG_ERROR << "Not found";
+  return "";
 }

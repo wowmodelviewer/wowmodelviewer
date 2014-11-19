@@ -37,6 +37,10 @@ class CASCFolder
     int CASCLocale() { return m_currentCascLocale; }
     std::string folder() { return m_folder; }
 
+    // return full path for a given file ie :
+    // HumanMale.m2 => Character\Human\male\humanmale.m2
+    std::string getFullPathForFile(std::string & file);
+
 
     void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString) = CASCFolder::defaultFilterFunc);
 

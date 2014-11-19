@@ -23,6 +23,7 @@ class sqlResult
   public:
     sqlResult() : valid(false), nbcols(0) {}
     ~sqlResult() { /* TODO :free char** */ }
+    bool empty() { return values.size() == 0; }
     bool valid;
     int nbcols;
     std::vector<std::vector<std::string> > values;

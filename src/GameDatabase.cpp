@@ -14,6 +14,7 @@
 #include <QDomElement>
 #include <QDomNamedNodeMap>
 #include <QFile>
+#include <QString>
 
 GameDatabase::~GameDatabase()
 {
@@ -60,7 +61,7 @@ sqlResult GameDatabase::sqlQuery(const std::string & query)
   }
   else
   {
-    result.valid = true;
+    result.valid = true; // result is valid
   }
 
   return result;
@@ -77,7 +78,9 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
   std::vector<std::string> values;
   // update columns
   for(int i=0; i<nbcols; i++)
-    values.push_back(vals[i]);
+  {
+    values.push_back(QString(vals[i]).toStdString());
+  }
 
   r->values.push_back(values);
   r->nbcols = nbcols;
@@ -182,6 +185,30 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   return r.valid;
 }
 
+std::string escape(std::string const &s)
+{
+  std::size_t n = s.length();
+  std::string escaped;
+  escaped.reserve(n+10);        // pessimistic preallocation
+  bool escapeDone = false;
+
+  for (std::size_t i = 0; i < n; ++i)
+  {
+    if (s[i] == '"')
+    {
+      escapeDone = true;
+      escaped += '\\';
+    }
+    escaped += s[i];
+  }
+
+  if(escapeDone)
+    LOG_INFO << "Escaped string" << s.c_str() << "to" << escaped.c_str();
+
+  return escaped;
+}
+
+
 bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::string & gamefile)
 {
   DBCFile dbc(gamefile.c_str());
@@ -199,7 +226,7 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
       it != itEnd ;
       ++it,curfield++)
   {
-    query += it->second.first;
+    query += escape(it->second.first);
     if(curfield != nbFields-1)
       query += ",";
   }
