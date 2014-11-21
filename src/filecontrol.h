@@ -35,8 +35,6 @@ public:
 	wxTextCtrl *txtContent;
 	wxChoice *choFilter;
 	int filterMode;
-	wxChoice *mpqFilter;
-	int filterModeMPQ;
 	wxTreeItemId CurrentItem;
 
 	ModelViewer* modelviewer; // point to parent

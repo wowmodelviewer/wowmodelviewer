@@ -54,7 +54,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_FILE_EXPORTAVI, ModelViewer::OnSave)
 	// --
 	EVT_MENU(ID_FILE_MODEL_INFO, ModelViewer::OnExportOther)
-	EVT_MENU(ID_FILE_DISCOVERY_ITEM, ModelViewer::OnExportOther)
 	//--
 	EVT_MENU(ID_FILE_RESETLAYOUT, ModelViewer::OnToggleCommand)
 	// --
@@ -296,8 +295,6 @@ void ModelViewer::InitMenu()
 	fileMenu->AppendSeparator();
 
 	// --== Continue regular menu ==--
-	fileMenu->AppendSeparator();
-	fileMenu->Append(ID_FILE_DISCOVERY_ITEM, _("Discovery Item"));
 	fileMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
 
 	fileMenu->AppendSeparator();
@@ -612,31 +609,6 @@ void ModelViewer::InitDatabase()
 	  }
 	}
 
-	/*
-	if (!itemdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Item DB."));
-	}
-
-	if (!itemsparsedb.open()) {
-		wxLogMessage(wxT("Error: Could not open the Item Sparse DB."));
-	}
-
-
-	SetStatusText(wxT("Initializing items.csv Databases..."));
-	wxString filename = langName+SLASH+wxT("items.csv");
-	wxLogMessage(wxT("Trying to open %s file (for updating locale files)"),filename.c_str());
-	if (!wxFile::Exists(filename))
-		DownloadLocaleFiles();
-	if (!wxFile::Exists(filename))
-		filename = locales[0]+SLASH+wxT("items.csv");
-	if (wxFile::Exists(filename)) {
-		items.open(filename);
-	} else {
-		wxLogMessage(wxT("Error: Could not find items.csv to load an item list from."));
-	}
-
-*/
 	if (!skyboxdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
@@ -1398,169 +1370,6 @@ ModelViewer::~ModelViewer()
 	}
 }
 
-
-/*
- * Try to init mpq archives to use them in the viewer.
- * See ArchiveInitStatus enum for error description
- */
-
-ModelViewer::ArchiveInitStatus ModelViewer::InitMPQArchives()
-{
-	/*
-	Debug code to test reading problems easily
-	static bool first = true;
-	if(first)
-	{
-	//	first = false;
-		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
-	}
-    */
-	wxString path;
-
-	// first clear current archive list to remove unexisting files
-	archives.clear();
-	for (size_t i=0; i<mpqArchives.GetCount(); i++) {
-		if (wxFileName::FileExists(mpqArchives[i])) {
-			archives.push_back(new MPQArchive(mpqArchives[i]));
-		}
-	}
-
-	// Checks and logs the "TOC" version of the interface files that were loaded
-	MPQFile f(wxT("Interface\\FrameXML\\FrameXML.TOC"));
-	if (f.isEof()) {
-		f.close();
-		wxLogMessage(wxT("Unable to gather TOC data."));
-		SetStatusText(wxT("Unable to gather TOC data."));
-		return ARCHIVEINITSTATUS_WOWRUNNING_ERROR;
-	}
-	
-	// reading and dumping first 100 characters 
-	unsigned char tocfile[100];
-	f.read(tocfile,99);
-	wxString tocFileString((char *)tocfile, wxConvUTF8);
-	wxLogMessage(wxT("TOC file size : %d"), f.getSize());
-	wxLogMessage(wxT("Content read from file to get TOC number :"));
-	wxLogMessage(tocFileString);
-	f.seek(0);
-	
-	// Seek the TOC number by searching for the Interface Offset
-	int tocstart = tocFileString.Find(wxT("## Interface: ")) + strlen("## Interface: ");
-	f.seek(tocstart);
-	unsigned char toc[6];
-	memset(toc,'\0', 6);
-	f.read(toc, 5);		// Read the 5-digit TOC
-	f.close();
-
-	// Check for Corrupted MPQ
-	if (!isdigit(toc[0]) || !isdigit(toc[1]) || !isdigit(toc[2]) || !isdigit(toc[3]) || !isdigit(toc[4])) {
-		wxLogMessage(wxT("MPQ files appear to be corrupted. TOC Read: \"%s\""), (char*)toc);
-		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
-	}else{
-		wxLogMessage(wxT("MPQ files do not appear to be corrupted."));
-	}
-
-	// Read Version Number
-	SetStatusText(wxString((char *)toc, wxConvUTF8), 1);
-	wxLogMessage(wxT("Loaded Content TOC: v%c.%c%c.%c%c"), toc[0], toc[1], toc[2], toc[3], toc[4]);
-	if (wxString((char *)toc, wxConvUTF8) > wxT("99999")) {		// The 99999 should be updated if the TOC ever gets that high.
-		return ARCHIVEINITSTATUS_TOCREADING_ERROR;
-	}
-
-	wxString info = wxT("WoW Model Viewer is designed to work with the latest version of World of Warcraft.\nYour version is supported, but support will be removed in the near future.\nYou may experience diminished capacity while working with WoW Model Viewer.\nPlease update your World of Warcraft client soon.");
-	
-	// Convert our TOC into an integer
-	wxString stoc((char*)toc, wxConvUTF8);
-	long itoc;
-	stoc.ToLong(&itoc);
-
-	// If we support more than 1 TOC version, place the others here.
-	if ((itoc >= VERSION_WOTLK) && (itoc <=39999)) {			// WotLK TOCs
-		wxLogMessage(wxT("Compatible Wrath of the Lich King Version Found."));
-		//wxMessageBox(info, wxT("Compatible Wrath of the Lich King Version Found."),wxOK);
-		gameVersion = itoc;
-	} else if ((itoc >= VERSION_CATACLYSM) && (itoc < 49999)) {		// Cataclysm TOCs
-		wxLogMessage(wxT("Compatible Cataclysm Version Found."));
-		gameVersion = itoc;
-		langOffset = 0;
-	} else if ((itoc >= VERSION_MOP) && (itoc < 59999)) {		// Mists of Pandaria TOCs
-		wxLogMessage(wxT("Compatible Mists of Pandaria Version Found."));
-		gameVersion = itoc;
-		langOffset = 0;
-	} else { // else if not a supported edition...
-		return ARCHIVEINITSTATUS_WOWVERSION_ERROR;
-	}
-
-	return ARCHIVEINITSTATUS_NOERROR;
-}
-
-wxString ModelViewer::Init()
-{
-	// Initiate other stuff
-	wxLogMessage(wxT("Initializing Archives..."));
-	SetStatusText(wxT("Initializing Archives..."));
-
-	// more detail logging, this is so when someone has a problem and they send their log info
-	wxLogMessage(wxT("Game Data Path: %s"), gamePath.c_str());
-	wxLogMessage(wxT("Use Local Files: %s\n"), useLocalFiles ? wxT("true") : wxT("false"));
-	
-	isChar = false;
-	isModel = false;
-
-	// Load the games MPQ files into memory
-	bool initArchivesSuccess = false;
-	wxString initArchivesText;
-	switch(InitMPQArchives())
-	{
-	case ARCHIVEINITSTATUS_TOCREADING_ERROR:
-	{
-		// TOC reading error : we propose to reset MPQ list and try to reload WoW again
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("There was a problem reading the TOC number.\nDo you want to try to reset your MPQ list ?"),
-								wxT("Question"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION);
-		size_t result = dial->ShowModal();
-		if (result == wxID_YES){
-			wxLogMessage(wxT("Trying to reset MPQ list to load WoW again."));
-			// so let's go, reset
-			settingsControl->ResetMPQ();
-			// then load again
-			if(InitMPQArchives() != ARCHIVEINITSTATUS_NOERROR) {
-				initArchivesText = wxT("Your MPQ files appear to be unreadable \n(Unable to read TOC number). \nPlease re-download and re-install your WoW client.");
-			}
-			else {
-				initArchivesSuccess = true;
-			}
-		}
-		break;
-	}
-	case ARCHIVEINITSTATUS_WOWRUNNING_ERROR:
-		initArchivesText = wxT("Could not read data from MPQ files.\nPlease make sure World of Warcraft is not running.");
-		break;
-	case ARCHIVEINITSTATUS_WOWVERSION_ERROR:
-		initArchivesText = wxT("WoW Model Viewer does not support your version of World of Warcraft.\nPlease update your World of Warcraft client to be able to use it.");
-		break;
-	case ARCHIVEINITSTATUS_NOERROR:
-	default:
-		// by default, we consider there is no error, be carfeull if you put new value inside
-		// ArchiveInitStatus enum
-		initArchivesSuccess = true;
-		break;
-	}
-
-	if(!initArchivesSuccess) {
-		SetStatusText(initArchivesText.c_str());
-		wxLogMessage(wxT("InitMPQArchives result: %s"), initArchivesText.c_str());
-		return initArchivesText;
-	}
-
-	SetStatusText(wxT("Initializing File Control..."));
-	fileControl->Init(this);
-
-	if (charControl->Init() == false){
-		return wxT("Error Initializing the Character Controls.");
-	};
-
-	return wxEmptyString;
-}
-
 // Menu button press events
 void ModelViewer::OnToggleDock(wxCommandEvent &event)
 {
@@ -2009,7 +1818,6 @@ void ModelViewer::LoadWoW()
       TOCFile.close();
       SetStatusText(wxString(tocString), 1);
 
-      mpqArchives.Add(wxString("fakeMPQFile"));
       langName = CASCFOLDER.locale();
       gameVersion = atoi(tocString.c_str());
     }
@@ -2091,26 +1899,6 @@ void ModelViewer::LoadWoW()
     if (charControl->Init() == false){
        SetStatusText(wxT("Error Initializing the Character Controls."));
     };
-
-	// load our World of Warcraft mpq archives
-	/*wxString initvar = Init();
-	if (initvar != wxEmptyString){
-		wxString info = wxT("Fatal Error: ") + initvar;
-		wxLogMessage(info);
-		wxMessageDialog *dial = new wxMessageDialog(NULL, info, wxT("Fatal Error"), wxOK | wxICON_ERROR);
-		dial->ShowModal();
-		//Close(true);
-		return;
-	}
-
-	// Load user skins 
-	gUserSkins.LoadFile(cfgPath.BeforeLast(SLASH) + SLASH + wxT("Skins.txt"));
-	if (!gUserSkins.Loaded())
-		wxLogMessage(wxT("Warning: Failed to load user skins"));
-
-	// Initial Databases like dbc, db2, csvs
-
-	*/
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
@@ -2474,86 +2262,9 @@ is (C)2004-2011 Blizzard Entertainment(R). All rights reserved.")));
 	wxAboutBox(info);
 }
 
-void ModelViewer::DownloadLocaleFiles()
-{
-	wxString trunk = wxT("http://wowmodelviewer.net/update/");
-	wxString lang = langName;
-	if (lang == wxT("enGB"))
-		lang = wxT("enUS");
-
-	wxString msg = wxString::Format(_("Would you like to download %s locale files?"), lang.c_str());
-	if (wxMessageBox(msg, _("Update Locale Files"), wxYES_NO) == wxYES) {
-		wxString csvs[] = {wxT("items.csv")};
-		if (!wxDirExists(lang))
-			wxMkdir(lang);
-		for(size_t i=0; i<WXSIZEOF(csvs); i++) {
-			wxString items_csv = trunk + lang + wxT("/") + csvs[i];
-			wxLogMessage(wxT("Trying to get %s ... "),items_csv.c_str());
-			wxURL items_url(items_csv);
-			if(items_url.GetError() == wxURL_NOERR) {
-				wxInputStream *stream = items_url.GetInputStream();
-				if (stream) {
-					wxLogMessage(wxT("SUCCESS"));
-					wxFFileOutputStream f(lang + SLASH + csvs[i], wxT("w+b"));
-					wxString data;
-					char buffer[1024];
-					while(!stream->Eof()) {
-						stream->Read(buffer, sizeof(buffer));
-						f.Write(buffer, stream->LastRead());
-					}
-					//delete stream;
-					f.Close();
-				} else {
-				    wxLogMessage(wxT("ERROR"));
-				}
-			} else {
-			    wxLogMessage(wxT("wxURL failed: ")+items_csv);
-			}
-		}
-	}
-}
-
 void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 {
   wxExecute("UpdateManager.exe",wxEXEC_SYNC);
-  /*
-	wxString trunk = wxT("http://wowmodelviewer.net/update/");
-	DownloadLocaleFiles();
-
-	wxURL url(trunk + wxT("latest.txt"));
-	if(url.GetError() == wxURL_NOERR) {
-		wxInputStream *stream = url.GetInputStream();
-		if(!stream)
-			return;
-		// here, just for example, I read 1024 bytes. You should read what you need...
-		char buffer[1024];
-		stream->Read(&buffer, sizeof(buffer));
-		
-		// Sort the data
-		wxString data(buffer, wxConvUTF8);
-		wxString version = data.BeforeFirst('\n');
-		wxString downloadURL = data.AfterFirst('\n');
-		int Compare = (int)version.find(wxString(GLOBALSETTINGS.appVersion()));
-
-		wxLogMessage("Update Data:\nCurrent Version: \"%s\"\nRecorded Version \"%s\"\nURL Download: %s\nComparison Result: %i",GLOBALSETTINGS.appVersion().c_str(), version.c_str(), downloadURL.c_str(), Compare);
-
-		if (Compare == 0) {
-			wxMessageBox(_("You have the most up-to-date version."), _("Update Check"));
-		} else {
-			wxString msg = wxString::Format(wxT("The most recent version is : %s\nWould you like to go to the download page?"), version.c_str());
-			if (wxMessageBox(msg, _("Update Check"), wxYES_NO, this) == wxYES)
-				wxLaunchDefaultBrowser(wxString(downloadURL.ToUTF8(), wxConvUTF8));
-		}
-
-		// Create a string from the data that was received... (?)
-		//wxString webversion;
-		//wxMessageBox(wxString::Format("%s",buffer));
-
-		delete stream;
-	}else{
-		wxMessageBox(wxT("Error retrieving update information.\nPlease try again later."), wxT("Update Error"));
-	}
-	*/
 }
 
 void ModelViewer::OnCanvasSize(wxCommandEvent &event)
@@ -3063,71 +2774,12 @@ void ModelViewer::ModelInfo()
 }
 
 
-void DiscoveryItem()
-{
-	if (setsdb.size() == 0)
-		return;
-	wxString name, ret;
-	items.cleanupDiscovery();
-	wxFFileOutputStream fs (wxT("discoveryitems.csv"));
-
-	if (!fs.IsOk()) {
-		wxLogMessage(wxT("Error: Unable to open file 'discoveryitems.csv'. Could not discovery item."));
-		return;
-	}
-
-    wxTextOutputStream f (fs);
-
-	// 1. from itemsets.dbc
-	for (ItemSetDB::Iterator it = setsdb.begin(); it != setsdb.end(); ++it) {
-		for(size_t i=0; i<ItemSetDB::NumItems; i++) {
-			int id;
-			if (gameVersion >= VERSION_CATACLYSM)
-				id = it->getUInt(ItemSetDB::ItemIDBaseV400+i);
-			else
-				id = it->getUInt(ItemSetDB::ItemIDBase+i);
-			if (id == 0)
-				continue;
-			if (!items.avaiable(id)) {
-				if (langID == 0)
-					name = it->getString(ItemSetDB::Name);
-				else
-					name.Printf(wxT("Set%d"), it->getUInt(ItemSetDB::SetID));
-				ret = items.addDiscoveryId(id, name);
-				if (!ret.IsEmpty())
-					f << ret << endl;
-			}
-		}
-	}
-	// 2. from item.dbc
-	for (ItemDB::Iterator it = itemdb.begin(); it != itemdb.end(); ++it) {
-		int id = it->getUInt(ItemDB::ID);
-		if (!items.avaiable(id)) {
-			name.Printf(wxT("Item%d"), id);
-			ret = items.addDiscoveryId(id, name);
-			if (!ret.IsEmpty())
-				f << ret << endl;
-		}
-	}
-
-	// 4. from model dir
-	// 5. from blp dir
-	wxLogMessage(wxT("Discovery item done."));
-	g_modelViewer->SetStatusText(wxT("Discovery item done."));
-	fs.Close();
-	items.cleanup(itemdisplaydb);
-	g_modelViewer->fileMenu->Enable(ID_FILE_DISCOVERY_ITEM, false);
-}
-
 // Other things to export...
 void ModelViewer::OnExportOther(wxCommandEvent &event)
 {
 	int id = event.GetId();
 	if (id == ID_FILE_MODEL_INFO) {
 		ModelInfo();
-	} else if (id == ID_FILE_DISCOVERY_ITEM) {
-		DiscoveryItem();
-		fileMenu->Enable(ID_FILE_DISCOVERY_ITEM, false);
 	}
 }
 

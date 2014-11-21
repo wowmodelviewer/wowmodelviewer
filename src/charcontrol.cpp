@@ -717,10 +717,6 @@ void CharControl::OnButton(wxCommandEvent &event)
 		selectStart();
 
 	} else if (event.GetId()==ID_LOAD_NPC_START) {
-		// TODO: a "Load NPC Outfit..." option to the character menu. It's now possible to equip a character with the exact NPC's gear (without weapons).		
-		if (!wxFileExists(wxT("discoveryitems.csv"))) {
-			wxMessageBox(wxT("You should run 'Item Discovery' once before Load NPC Outfit"), wxT("Info"));
-		}
 		selectNPC(UPDATE_NPC_START);
 	} else if (event.GetId()==ID_MOUNT) {
 		selectMount();

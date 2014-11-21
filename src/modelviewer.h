@@ -45,21 +45,10 @@ class ModelViewer: public wxFrame
     DECLARE_CLASS(ModelViewer)
     DECLARE_EVENT_TABLE()
 
-	std::vector<MPQArchive*> archives;
-
 public:
-    // MPQ archive init status
-    enum ArchiveInitStatus
-    {
-    	ARCHIVEINITSTATUS_NOERROR = 0, 			// No error
-    	ARCHIVEINITSTATUS_WOWRUNNING_ERROR = 1, // Impossible to read datas into MPQ archive (WoW is running)
-    	ARCHIVEINITSTATUS_TOCREADING_ERROR = 2, // Problem with reading TOC information
-    	ARCHIVEINITSTATUS_WOWVERSION_ERROR = 3  // Unsupported WoW version found
-    };
-
 	// Constructor + Deconstructor
 	ModelViewer();
-	~ModelViewer();
+	virtual ~ModelViewer();
 
 	// our class objects
 	AnimControl *animControl;
@@ -95,10 +84,8 @@ public:
 	// Initialising related functions
 	void InitMenu();
 	void InitObjects();
-	wxString Init();
 	void InitDocking();
 	void InitDatabase();
-	ArchiveInitStatus InitMPQArchives();
 
 	// Save and load various settings between sessions
 	void LoadSession();
@@ -139,7 +126,6 @@ public:
 	void OnBackground(wxCommandEvent &event);
 	void OnLanguage(wxCommandEvent &event);
 	void OnAbout(wxCommandEvent &event);
-	void DownloadLocaleFiles();
 	void OnCheckForUpdate(wxCommandEvent &event);
 	void OnCanvasSize(wxCommandEvent &event);
 	void OnTest(wxCommandEvent &event);

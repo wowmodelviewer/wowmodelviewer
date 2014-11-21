@@ -546,43 +546,6 @@ ItemDatabase::ItemDatabase()
 	items.push_back(all);
 }
 
-void ItemDatabase::open(wxString filename)
-{
-	// 1. in-game db
-	itemsparsedb.init();
-
-	// 2. items.csv
-	wxTextFile fin;
-	if (wxFileExists(filename) && fin.Open(filename)) {
-		wxString line;
-		for ( line = fin.GetFirstLine(); !fin.Eof(); line = fin.GetNextLine() ) {
-			ItemRecord rec(line);
-			if (rec.type > 0) {
-				items.push_back(rec);
-			}
-		}
-		fin.Close();
-	}
-
-	// 3. discoveryitems.csv
-	wxTextFile fin2;;
-	if (wxFileExists(wxT("discoveryitems.csv")) && fin2.Open(wxT("discoveryitems.csv"))) {
-		wxString line;
-		g_modelViewer->SetStatusText(wxT("Initialing discoveryitems.csv Database..."));
-		for ( line = fin2.GetFirstLine(); !fin2.Eof(); line = fin2.GetNextLine() ) {
-			ItemRecord rec;
-			rec.getLine((char *)line.c_str());
-			if (rec.type > 0) {
-				items.push_back(rec);
-			}
-		}
-		fin2.Close();
-		g_modelViewer->fileMenu->Enable(ID_FILE_DISCOVERY_ITEM, false);
-	}
-
-	sort(items.begin(), items.end());
-}
-
 void ItemDatabase::cleanup(ItemDisplayDB &l_itemdisplaydb)
 {
 	std::set<unsigned int> itemset;

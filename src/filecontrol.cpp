@@ -20,7 +20,6 @@ BEGIN_EVENT_TABLE(FileControl, wxWindow)
 	EVT_BUTTON(ID_FILELIST_SEARCH, FileControl::OnButton)
 	EVT_TEXT_ENTER(ID_FILELIST_CONTENT, FileControl::OnButton)
 	EVT_CHOICE(ID_FILELIST_FILTER, FileControl::OnChoice)
-	EVT_CHOICE(ID_FILELIST_FILTER_MPQ, FileControl::OnChoice)
 	EVT_TREE_ITEM_MENU(ID_FILELIST, FileControl::OnTreeMenu)
 END_EVENT_TABLE()
 
@@ -53,14 +52,11 @@ static wxString filterStrings[] = {wxT("m2"), wxT("wmo"), wxT("adt"), wxT("wav")
 	wxT("blp"), wxT("bls"), wxT("dbc"), wxT("db2"), wxT("lua"), wxT("xml"), wxT("skin")};
 static wxString chos[] = {wxT("Models (*.m2)"), wxT("WMOs (*.wmo)"), wxT("ADTs (*.adt)"), wxT("WAVs (*.wav)"), wxT("OGGs (*.ogg)"), wxT("MP3s (*.mp3)"), 
 	wxT("Images (*.blp)"), wxT("Shaders (*.bls)"), wxT("DBCs (*.dbc)"), wxT("DB2s (*.db2)"), wxT("LUAs (*.lua)"), wxT("XMLs (*.xml)"), wxT("SKINs (*.skin)")};
-static wxString filterArchive;
-static wxArrayString filterArchives;
 
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
 {
 	modelviewer = NULL;
 	filterMode = FILE_FILTER_MODEL;
-	filterModeMPQ = 0;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(170,700), 0, wxT("ModelControlFrame")) == false) {
 		wxLogMessage(wxT("GUI Error: Failed to create a window for our FileControl!"));
@@ -73,13 +69,6 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(250,580), wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
 		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
 		choFilter->SetSelection(filterMode);
-
-		filterArchives.Add(wxEmptyString);
-		for (size_t i=0; i<mpqArchives.GetCount(); i++) {
-			filterArchives.Add(mpqArchives[i].AfterLast(SLASH));
-		}
-		mpqFilter = new wxChoice(this, ID_FILELIST_FILTER_MPQ, wxPoint(10, 645), wxSize(130, 10), filterArchives);
-		mpqFilter->SetSelection(filterModeMPQ);
 	} catch(...) {};
 }
 
@@ -105,13 +94,6 @@ bool filterSearch(wxString s)
 	if (!filterString.IsEmpty() && !temp.EndsWith(filterString))
 		return false;
 
-	// filter mpq
-	if (!filterArchive.IsEmpty()) {
-		wxString archive = MPQFile::getArchive(s);
-		if (!archive.EndsWith(filterArchive))
-			return false;
-	}
-
 	// filter text input
 	if (!content.IsEmpty() && temp.Find(content) == wxNOT_FOUND)
 		return false;
@@ -130,7 +112,7 @@ void FileControl::Init(ModelViewer* mv)
 	content = txtContent->GetValue().Lower().Trim();
 
 	filterString = filterStrings[filterMode];
-	filterArchive = filterArchives[filterModeMPQ];
+
 	if(!CASCFOLDER.hStorage)
 	  getFileLists(filelist, filterSearch);
 	else
@@ -242,7 +224,7 @@ void FileControl::Init(ModelViewer* mv)
                 fileTree->SetItemTextColour(item, *wxRED);					// patch-2.mpq & Cache patch files
                 break;
             case 3:
-				fileTree->SetItemTextColour(item, wxColour(160,0,160));		// Outland Purple (First Expansion)
+                fileTree->SetItemTextColour(item, wxColour(160,0,160));		// Outland Purple (First Expansion)
                 break;
             case 4:
                 fileTree->SetItemTextColour(item, wxColour(35,130,179));	// Frozen Blue (Second Expansion)
@@ -286,12 +268,6 @@ void FileControl::OnChoice(wxCommandEvent &event)
 		int curSelection = choFilter->GetCurrentSelection();
 		if (curSelection >= 0 && curSelection != filterMode) {
 			filterMode = curSelection;
-			Init();
-		}
-	} else if (id == ID_FILELIST_FILTER_MPQ) {
-		int curSelection = mpqFilter->GetCurrentSelection();
-		if (curSelection != filterModeMPQ) {
-			filterModeMPQ = curSelection;
 			Init();
 		}
 	}
