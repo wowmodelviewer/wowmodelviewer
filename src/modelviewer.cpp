@@ -19,6 +19,7 @@
 #include "metaclasses/Iterator.h"
 
 #include <wx/app.h>
+#include <wx/busyinfo.h>
 #include <wx/regex.h>
 #include <wx/tokenzr.h>
 #include <wx/txtstrm.h>
@@ -562,6 +563,8 @@ void ModelViewer::InitDatabase()
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
   wxBusyCursor busyCursor;
+  wxWindowDisabler disableAll;
+  wxBusyInfo info(_T("Please wait during game database analysis..."), this);
 
   if(!GAMEDATABASE.initFromXML("wow6.xml"))
     LOG_ERROR << "Initializing failed !";
@@ -582,7 +585,7 @@ void ModelViewer::InitDatabase()
 	    {
 	      NPCRecord rec(npc.values[i]);
 	      if(rec.model != 0)
-	        npcs.npcs.push_back(rec);
+	        npcs.push_back(rec);
 	    }
 	  }
 	  else
@@ -624,12 +627,6 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not open the Item Visuals DB."));
 	}
 
-	if (!animdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Animation DB."));
-	}
-
-
 	if(!hairdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the Hair Geoset DB."));
@@ -670,9 +667,6 @@ void ModelViewer::InitDatabase()
 
 	if(!npcdb.open())
 		wxLogMessage(wxT("Error: Could not open the Start Outfit NPC DB."));
-
-	if(!npctypedb.open())
-		wxLogMessage(wxT("Error: Could not open the Creature Type DB."));
 
 	if(!camcinemadb.open())
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
@@ -2463,12 +2457,14 @@ void ModelViewer::ModelInfo()
 			xml << "      <animID>"<< m->anims[i].animID << "</animID>" << endl;
 			// subAnimID
 			wxString strName;
+			/*
 			try {
 				AnimDB::Record rec = animdb.getByAnimID(m->anims[i].animID);
 				strName = rec.getString(AnimDB::Name);
 			} catch (AnimDB::NotFound) {
 				strName = wxT("???");
 			}
+			*/
 			xml << "      <animName>"<< strName.c_str() << "</animName>" << endl;
 			xml << "      <length>"<< m->anims[i].timeEnd << "</length>" << endl;
 			xml << "      <moveSpeed>"<< m->anims[i].moveSpeed << "</moveSpeed>" << endl;

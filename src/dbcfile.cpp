@@ -125,7 +125,10 @@ std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<std:
     }
     else if(it->second.second == "text")
     {
-      result.push_back(getStdString(it->first));
+      // as " character cause weird issues with sql queries, replace it with '
+      std::string val = getStdString(it->first);
+      std::replace(val.begin(),val.end(),'"','\'');
+      result.push_back(val);
     }
     else if(it->second.second == "float")
     {

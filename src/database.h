@@ -30,38 +30,39 @@
 #include "enums.h"
 #include "util.h"
 
-// 
-class AnimDB;
-class CharClassesDB;
-class CharFacialHairDB;
-class CharHairGeosetsDB;
-class CharRacesDB;
-class CharSectionsDB;
-class HelmGeosetDB;
+// wmv database
 class ItemDatabase;
+class NPCDatabase;
+class NPCRecord;
+
+extern ItemDatabase items;
+extern std::vector<NPCRecord> npcs;
+
+// game database
+class AnimDB;
+class HelmGeosetDB;
+class ItemVisualEffectDB;
 class ItemDisplayDB;
 class ItemSetDB;
+class StartOutfitDB;
 class ItemSubClassDB;
 class ItemVisualDB;
-class ItemVisualEffectDB;
-class NPCDatabase;
+class CharHairGeosetsDB;
+class CharSectionsDB;
+class CharClassesDB;
+class CharFacialHairDB;
+class CharRacesDB;
 class NPCDB;
-class StartOutfitDB;
+class CreatureTypeDB;
 class LightSkyBoxDB;
 class SpellItemEnchantmentDB;
 class ItemVisualsDB;
-class ItemDB;
 class CamCinematicDB;
-class ItemSparseDB;
-class CreatureTypeDB;
 
-// dbs
-extern ItemDatabase	items;
 extern AnimDB animdb;
 extern HelmGeosetDB	helmetdb;
 extern ItemVisualEffectDB effectdb;
 extern ItemDisplayDB itemdisplaydb;
-extern NPCDatabase npcs;
 extern ItemSetDB setsdb;
 extern StartOutfitDB startdb;
 extern ItemSubClassDB subclassdb;
@@ -72,52 +73,10 @@ extern CharClassesDB classdb;
 extern CharFacialHairDB	facialhairdb;
 extern CharRacesDB racedb;
 extern NPCDB npcdb;
-extern CreatureTypeDB npctypedb;
 extern LightSkyBoxDB skyboxdb;
 extern SpellItemEnchantmentDB spellitemenchantmentdb;
 extern ItemVisualsDB itemvisualsdb;
-extern ItemDB itemdb;
 extern CamCinematicDB camcinemadb;
-extern ItemSparseDB itemsparsedb;
-
-class ItemDB: public DBCFile
-{
-	std::map<int, int> itemLookup, itemDisplayLookup;
-	bool inited;
-public:
-	ItemDB(): DBCFile(wxT("DBFilesClient\\Item.dbc")), inited(false) {}
-	~ItemDB() {}
-
-	static const size_t MaxItem = 100000;
-
-	// Fields
-	static const size_t ID = 0;	// unit
-	static const size_t Itemclass = 1;	// unit
-	static const size_t Subclass = 2;	// unit
-	// static const size_t materialid = 4;	// uint
-	static const size_t ItemDisplayInfo = 5;	// unit
-	static const size_t InventorySlot = 6;	// unit
-	static const size_t Sheath = 7;	// unit
-
-	Record getById(unsigned int id);
-	Record getByDisplayId(unsigned int id);
-};
-
-class ItemSparseDB: public DBCFile
-{
-public:
-	ItemSparseDB(): DBCFile(wxT("DBFilesClient\\Item-sparse.db2")) {}
-	~ItemSparseDB() {}
-
-	// Fields
-	static const size_t ID = 0;	// unit
-	static const size_t QualityID = 1;	// unit
-	static const size_t SlotID = 9; // unit
-	static const size_t Name40200 = 96;		// string, localization
-	static const size_t Name40300 = 100;		// string, localization
-
-	void init();
-};
 
 class SpellItemEnchantmentDB: public DBCFile
 {
@@ -152,25 +111,6 @@ public:
 	// static const size_t ID;
 	static const size_t Name = 1;		// string
 	// static const size_t Flags;
-};
-
-class AnimDB: public DBCFile
-{
-public:
-	AnimDB(): DBCFile(wxT("DBFilesClient\\AnimationData.dbc")) {}
-	~AnimDB() {}
-
-	/// Fields
-	static const size_t AnimID = 0;		// uint
-	static const size_t Name = 1;		// string
-	// static const size_t WeaponState = 2;	// int, 32 = pull weapons out during animation. 16 and 4 weapons are put back.
-	// static const size_t Flags = 3;
-	// static const size_t Unkonwn = 4;
-	// static const size_t Preceeding; // The animation, preceeding this one.
-	// static const size_t RealId; // Same as ID for normal animations. (WotLK)
-	// static const size_t Group; // 0 for normal, 3 for fly. (WotLK)
-
-	Record getByAnimID(unsigned int id);
 };
 
 // ============
@@ -482,28 +422,10 @@ public:
 struct ItemRecord {
 	wxString name;
 	int id, itemclass, subclass, type, model, sheath, quality;
-	bool discovery;
 
-	ItemRecord(wxString line);
 	ItemRecord(const std::vector<std::string> &);
-	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0), discovery(false)
+	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
 	{}
-	ItemRecord(wxString name, int type): name(name), id(0), itemclass(-1), subclass(-1), type(type), model(0), sheath(0), quality(0), discovery(false)
-	{}
-	/*
-	ItemRecord(const ItemRecord &r): id(r.id), name(r.name), itemclass(r.itemclass), subclass(r.subclass), type(r.type), model(r.model), sheath(r.sheath), quality(r.quality)
-	{}
-	*/
-
-	void getLine(const char* line);
-
-	bool operator< (const ItemRecord &r) const
-	{
-		if (type == r.type) 
-			return name < r.name;
-		else 
-			return type < r.type;
-	}
 };
 
 class ItemDatabase {
@@ -513,17 +435,11 @@ public:
 	std::vector<ItemRecord> items;
 	std::map<int, int> itemLookup;
 
-	void cleanup(ItemDisplayDB &l_itemdb);	
-	void open(wxString filename);
-
 	const ItemRecord& getById(int id);
 	const ItemRecord& getByPos(int id);
 	int getItemIDByModel(int id);
 	bool avaiable(int id);
 	int getItemNum(int displayid);
-	wxString addDiscoveryId(int id, wxString name);
-	wxString addDiscoveryDisplayId(int id, wxString name, int type);
-	void cleanupDiscovery();
 };
 
 /*
@@ -573,34 +489,12 @@ struct NPCRecord
 {
 	wxString name;
 	int id, model, type;
-	bool discovery;
 
 	NPCRecord(wxString line);
 	NPCRecord(const std::vector<std::string> &);
 	NPCRecord(): id(0), model(0), type(0) {}
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 
-	bool operator< (const NPCRecord &r) const
-	{ 
-		return name < r.name;
-	}
-};
-
-class NPCDatabase 
-{
-public:
-	NPCDatabase(wxString filename);
-	NPCDatabase() { }
-
-	std::vector<NPCRecord> npcs;
-	std::map<int, int> npcLookup;
-
-	void open(wxString filename);
-
-	const NPCRecord& get(int id);
-	const NPCRecord& getByID(int id);
-	bool avaiable(int id);
-	wxString addDiscoveryId(int id, wxString name);
 };
 
 // =========================================

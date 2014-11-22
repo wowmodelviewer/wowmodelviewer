@@ -185,30 +185,6 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   return r.valid;
 }
 
-std::string escape(std::string const &s)
-{
-  std::size_t n = s.length();
-  std::string escaped;
-  escaped.reserve(n+10);        // pessimistic preallocation
-  bool escapeDone = false;
-
-  for (std::size_t i = 0; i < n; ++i)
-  {
-    if (s[i] == '"')
-    {
-      escapeDone = true;
-      escaped += '\\';
-    }
-    escaped += s[i];
-  }
-
-  if(escapeDone)
-    LOG_INFO << "Escaped string" << s.c_str() << "to" << escaped.c_str();
-
-  return escaped;
-}
-
-
 bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::string & gamefile)
 {
   DBCFile dbc(gamefile.c_str());
@@ -226,7 +202,7 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
       it != itEnd ;
       ++it,curfield++)
   {
-    query += escape(it->second.first);
+    query += it->second.first;
     if(curfield != nbFields-1)
       query += ",";
   }

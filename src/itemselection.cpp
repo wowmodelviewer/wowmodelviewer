@@ -232,7 +232,7 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 		if(modelid != -1) {
 			int id = 0;
 			bool found = false;
-			for (std::vector<NPCRecord>::iterator it=npcs.npcs.begin();  it!=npcs.npcs.end(); ++it, id++) {
+			for (std::vector<NPCRecord>::iterator it=npcs.begin();  it!=npcs.end(); ++it, id++) {
 				if(it->id == modelid) {
 					found = true;
 					break;
@@ -242,8 +242,8 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 			if(!found) { // npc is not present in current database
 				NPCRecord rec(dlg->getNPCLine());
 				if (rec.model > 0) {
-					npcs.npcs.push_back(rec);
-					id = npcs.npcs.size()-1;
+					npcs.push_back(rec);
+					id = npcs.size()-1;
 				}
 			}
 

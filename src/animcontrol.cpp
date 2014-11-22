@@ -4,6 +4,7 @@
 #include <wx/wx.h>
 #include "UserSkins.h"
 #include "logger/Logger.h"
+#include "GameDatabase.h"
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 
@@ -201,40 +202,66 @@ void AnimControl::UpdateModel(WoWModel *m)
 	*/
 
 	// Animation stuff
-	if (m->animated && m->anims) {
+	if (m->animated && m->anims)
+	{
 		wxString strName;
 		wxString strStand;
 		int selectAnim = 0;
-		for (size_t i=0; i<m->header.nAnimations; i++) {			
-			try {
-				AnimDB::Record rec = animdb.getByAnimID(m->anims[i].animID);
-				strName = rec.getString(AnimDB::Name);
-			} catch (AnimDB::NotFound) {
-				strName = wxT("???");
-			}
-			
-			//strName = name;
-			//if ((useanim==-1) && (strName=="Stand"))
-			//	useanim = i;
 
-			strName += wxString::Format(wxT(" [%i]"), i);
-
-			if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1) {
-				strStand = strName;
-				useanim = i;
-			}
-
-			animCList->Append(strName);
-			//if (g_selModel->charModelDetails.isChar) {
-				animCList2->Append(strName);
-				animCList3->Append(strName);
-			//}
+		std::string query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
+		std::stringstream ss;
+		for (size_t i=0; i<m->header.nAnimations; i++)
+		{
+		  ss <<  m->anims[i].animID;
+		  if(i < m->header.nAnimations -1)
+		    ss << ",";
+		  else
+		    ss << ")";
 		}
 
-		if (useanim != -1) {
-			for(unsigned int i=0; i<animCList->GetCount(); i++) {
+		query += ss.str();
+
+		sqlResult anims = GAMEDATABASE.sqlQuery(query);
+
+		if(anims.valid && !anims.empty())
+		{
+		  LOG_INFO << "Found" << anims.values.size() << "animations for model";
+
+		  // remap database results on model header indexes
+		  std::map<int, string> animsVal;
+		  for(int i=0, imax=anims.values.size() ; i < imax ; i++)
+		  {
+		    animsVal[atoi(anims.values[i][0].c_str())] = anims.values[i][1];
+		  }
+
+		  for (size_t i=0; i<m->header.nAnimations; i++)
+		  {
+		    std::stringstream label;
+		    label << animsVal[m->anims[i].animID];
+		    label << " [";
+		    label << i;
+		    label << "]";
+		    strName=label.str().c_str();
+
+		    if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
+		    {
+		      strStand = strName;
+		      useanim = i;
+		    }
+
+		    animCList->Append(strName);
+		    animCList2->Append(strName);
+		    animCList3->Append(strName);
+		  }
+		}
+
+		if (useanim != -1)
+		{
+			for(unsigned int i=0; i<animCList->GetCount(); i++)
+			{
 				strName = animCList->GetString(i);
-				if (strName == strStand) {
+				if (strName == strStand)
+				{
 					selectAnim = i;
 					break;
 				}

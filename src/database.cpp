@@ -8,8 +8,7 @@
 
 
 ItemDatabase		items;
-// dbs
-NPCDatabase			npcs;
+std::vector<NPCRecord> npcs;
 
 // --
 HelmGeosetDB		helmetdb;
@@ -19,17 +18,15 @@ StartOutfitDB		startdb;
 ItemSubClassDB		subclassdb;
 ItemVisualDB		visualdb;
 ItemSetDB			setsdb;
-ItemDB				itemdb;
-ItemSparseDB		itemsparsedb;
+
 // --
-AnimDB				animdb;
+//AnimDB				animdb;
 CharHairGeosetsDB	hairdb;
 CharSectionsDB		chardb;
 CharClassesDB		classdb;
 CharFacialHairDB	facialhairdb;
 CharRacesDB			racedb;
 //--
-CreatureTypeDB		npctypedb;
 NPCDB				npcdb;
 LightSkyBoxDB			skyboxdb;
 SpellItemEnchantmentDB	spellitemenchantmentdb;
@@ -37,6 +34,7 @@ ItemVisualsDB			itemvisualsdb;
 CamCinematicDB		 camcinemadb;
 
 // ANIMDB.H
+/*
 AnimDB::Record AnimDB::getByAnimID(unsigned int id)
 {
 	/// Brute force search for now
@@ -48,6 +46,7 @@ AnimDB::Record AnimDB::getByAnimID(unsigned int id)
 	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
+*/
 // --
 // CAMCINEMADB.H
 CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)
@@ -388,134 +387,6 @@ StartOutfitDB::Record StartOutfitDB::getById(unsigned int id)
 
 
 ////////////////////
-
-ItemDB::Record ItemDB::getById(unsigned int id)
-{
-	if (!inited) {
-		int j=0;
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			itemLookup[i->getUInt(ID)] = j;
-			itemDisplayLookup[i->getUInt(ItemDisplayInfo)] = j;
-			j++;
-		}
-		inited = true;
-	}
-
-    if (itemLookup.find(id)!=itemLookup.end()) {
-		int i = itemLookup[id];
-		ItemDB::Record rec = itemdb.getRecord(i);
-		return rec;
-    }
-	throw NotFound();
-
-/*
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ID)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d id:%d"), __FILE__, __FUNCTION__, __LINE__, id);
-	throw NotFound();
-*/
-}
-
-ItemDB::Record ItemDB::getByDisplayId(unsigned int id)
-{
-	if (!inited) {
-		int j=0;
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			itemLookup[i->getUInt(ID)] = j;
-			itemDisplayLookup[i->getUInt(ItemDisplayInfo)] = j;
-			j++;
-		}
-		inited = true;
-	}
-
-    if (itemDisplayLookup.find(id)!=itemDisplayLookup.end()) {
-		int i = itemDisplayLookup[id];
-		ItemDB::Record rec = itemdb.getRecord(i);
-		return rec;
-    }
-	throw NotFound();
-
-/*
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ItemDisplayInfo)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d id:%d"), __FILE__, __FUNCTION__, __LINE__, id);
-*/
-	throw NotFound();
-}
-
-void ItemSparseDB::init()
-{
-	int id, qualityid;
-	wxString name, itemstring;
-	//wxLogMessage(wxT("gameVersion: %d"), gameVersion);
-
-	// Item-sparse.db2 didn't appear until Cataclysm
-	if (gameVersion < VERSION_CATACLYSM)
-		return;
-
-	for(Iterator i=begin(); i!=end(); ++i) {
-		id = i->getInt(ID);
-		qualityid = i->getInt(QualityID);
-		if (gameVersion <= 40200)
-			name = i->getString(Name40200);
-		else if (gameVersion >= 40300)
-			name = i->getString(Name40300);
-		//wxLogMessage(wxT("ItemSparseDB::init %d,%d,%s"), id, qualityid, name.c_str());
-		itemstring = wxString::Format(wxT("%d,%d,"), id, qualityid) + name;
-		ItemRecord rec(itemstring);
-		if (rec.type > 0) {
-			items.items.push_back(rec);
-		}
-	}
-}
-
-// old format, deprecated
-void ItemRecord::getLine(const char *line)
-{
-	sscanf(line, "%u,%u,%u,%u,%u,%u,%u", &id, &model, &itemclass, &subclass, &type, &sheath, &quality); // failed with MacOS
-	for (size_t i=strlen(line)-2; i>1; i--) {
-		if (line[i]==',') {
-			name = wxString(line + i + 1, wxConvUTF8);
-			break;
-		}
-	}
-	discovery = true;
-}
-
-ItemRecord::ItemRecord(wxString line)
-    : type(0)
-{
-	id = wxAtoi(line.BeforeFirst(','));
-	line = line.AfterFirst(',');
-	quality = wxAtoi(line.BeforeFirst(','));
-	line = line.AfterFirst(',');
-	try {
-		ItemDB::Record r = itemdb.getById(id);
-		model = r.getInt(ItemDB::ItemDisplayInfo);
-		itemclass = r.getInt(ItemDB::Itemclass);
-		subclass = r.getInt(ItemDB::Subclass);
-		type = r.getInt(ItemDB::InventorySlot);
-		switch(r.getInt(ItemDB::Sheath)) {
-			case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;
-			case SHEATHETYPE_LARGEWEAPON: sheath = ATT_LEFT_BACK; break;
-			case SHEATHETYPE_HIPWEAPON: sheath = ATT_LEFT_HIP_SHEATH; break;
-			case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
-			default: sheath = SHEATHETYPE_NONE;
-		}
-		discovery = false;
-		name.Printf(wxT("%s [%d] [%d]"), line.c_str(), id, model);
-	} catch (ItemDB::NotFound) {}
-
-}
-
 ItemRecord::ItemRecord(const std::vector<std::string> & vals)
   : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
@@ -535,51 +406,17 @@ ItemRecord::ItemRecord(const std::vector<std::string> & vals)
     case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
     default: sheath = SHEATHETYPE_NONE;
   }
-  discovery = false;
   name = CSConv(wxString(vals[1].c_str(), wxConvUTF8));
 }
 
 // Alfred. prevent null items bug.
 ItemDatabase::ItemDatabase()
 {
-	ItemRecord all(wxT("---- None ----"), IT_ALL);
+	ItemRecord all;
+	all.name=wxT("---- None ----");
+	all.type=IT_ALL;
+
 	items.push_back(all);
-}
-
-void ItemDatabase::cleanup(ItemDisplayDB &l_itemdisplaydb)
-{
-	std::set<unsigned int> itemset;
-	for (ItemDisplayDB::Iterator it = l_itemdisplaydb.begin(); it != l_itemdisplaydb.end(); ++it) {
-		itemset.insert(it->getUInt(ItemDisplayDB::ItemDisplayID));
-	}
-	for (size_t i=0; i<items.size(); ) {
-		bool keepItem = (items[i].type==0) || (itemset.find(items[i].model)!=itemset.end());
-		if (keepItem) {
-			itemLookup[items[i].id] = (int)i;
-			i++;
-		}
-		else items.erase(items.begin() + i);
-	}
-}
-
-void ItemDatabase::cleanupDiscovery()
-{
-	for (size_t i=0; i<items.size(); ) {
-		if (items[i].discovery)
-			items.erase(items.begin() + i);
-		else
-			i++;
-	}
-}
-
-int ItemDatabase::getItemIDByModel(int id)
-{
-	if (id == 0)
-		return 0;
-	for (std::vector<ItemRecord>::iterator it = items.begin(); it != items.end(); ++it)
-		if(it->model == id) return it->id;
-    
-	return 0;
 }
 
 const ItemRecord& ItemDatabase::getById(int id)
@@ -598,12 +435,6 @@ const ItemRecord& ItemDatabase::getByPos(int id)
 bool ItemDatabase::avaiable(int id)
 {
 	return (itemLookup.find(id)!=itemLookup.end());
-/*
-	for (std::vector<ItemRecord>::iterator it = items.begin(); it != items.end(); ++it)
-		if(it->id == id) return id;
-
-	return 0;
-*/
 }
 
 int ItemDatabase::getItemNum(int displayid)
@@ -614,60 +445,6 @@ int ItemDatabase::getItemNum(int displayid)
 	return 0;
 }
 
-wxString ItemDatabase::addDiscoveryId(int id, wxString name)
-{
-	wxString ret = wxEmptyString;
-
-	try {
-		ItemDB::Record r = itemdb.getById(id);
-		ItemRecord rec;
-		rec.id = id;
-		rec.model = r.getInt(ItemDB::ItemDisplayInfo);
-		rec.itemclass = r.getInt(ItemDB::Itemclass);
-		rec.subclass = r.getInt(ItemDB::Subclass);
-		rec.type = r.getInt(ItemDB::InventorySlot);
-		switch(r.getInt(ItemDB::Sheath)) {
-			case SHEATHETYPE_MAINHAND: rec.sheath = ATT_LEFT_BACK_SHEATH; break;
-			case SHEATHETYPE_LARGEWEAPON: rec.sheath = ATT_LEFT_BACK; break;
-			case SHEATHETYPE_HIPWEAPON: rec.sheath = ATT_LEFT_HIP_SHEATH; break;
-			case SHEATHETYPE_SHIELD: rec.sheath = ATT_MIDDLE_BACK_SHEATH; break;
-			default: rec.sheath = SHEATHETYPE_NONE;
-		}
-		rec.discovery = true;
-		rec.name.Printf(wxT("%s [%d] [%d]"), name.c_str(), rec.id, rec.model);
-		if (rec.type > 0) {
-			items.push_back(rec);
-			itemLookup[rec.id] = (int)items.size()-1;
-			//wxLogMessage(wxT("Info: Not exist ItemID: %d, %s..."), id, rec.name.c_str());
-			ret.Printf(wxT("%d,%d,%d,%d,%d,%d,%d,%s"), rec.id, rec.model, rec.itemclass, rec.subclass,
-				rec.type, rec.sheath, rec.quality, rec.name.c_str());
-		}
-	} catch (ItemDB::NotFound) {}
-	return ret;
-}
-
-wxString ItemDatabase::addDiscoveryDisplayId(int id, wxString name, int type)
-{
-	wxString ret = wxEmptyString;
-
-	ItemRecord rec;
-	rec.id = id+ItemDB::MaxItem;
-	rec.model = id;
-	rec.itemclass = 4;
-	rec.subclass = 0;
-	rec.type = type;
-	rec.sheath = 0;
-	rec.discovery = true;
-	rec.name.Printf(wxT("%s [%d]"), name.c_str(), id);
-	if (rec.type > 0) {
-		items.push_back(rec);
-		itemLookup[rec.id] = (int)items.size()-1;
-		//wxLogMessage(wxT("Info: Not exist ItemID: %d, %s..."), id, rec.name.c_str());
-		ret.Printf(wxT("%d,%d,%d,%d,%d,%d,%d,%s"), rec.id, rec.model, rec.itemclass, rec.subclass,
-			rec.type, rec.sheath, rec.quality, rec.name.c_str());
-	}
-	return ret;
-}
 
 ItemSubClassDB::Record ItemSubClassDB::getById(int id, int subid)
 {
@@ -687,35 +464,6 @@ ItemSubClassDB::Record ItemSubClassDB::getById(int id, int subid)
 // ============================================================
 // =============================================================
 
-bool NPCDatabase::avaiable(int id)
-{
-	return (npcLookup.find(id)!=npcLookup.end());
-/*
-	for (std::vector<NPCRecord>::iterator it = npcs.begin(); it != npcs.end(); ++it)
-		if(it->id == id) return it->id;
-    
-	return 0;
-*/
-}
-
-wxString NPCDatabase::addDiscoveryId(int id, wxString name)
-{
-	wxString ret = wxEmptyString;
-
-	NPCRecord rec;
-	rec.id = id+100000;
-	rec.model = id;
-	rec.type = 7;
-	rec.discovery = true;
-	rec.name.Printf(wxT("%s [%d]"), name.c_str(), rec.id);
-	if (rec.type > 0) {
-		npcs.push_back(rec);
-		ret.Printf(wxT("%d,%d,%d,%s"), rec.id, rec.model, rec.type, rec.name.c_str());
-	}
-	return ret;
-}
-
-
 NPCRecord::NPCRecord(wxString line)
     : id(0), model(0), type(0)
 {
@@ -727,7 +475,6 @@ NPCRecord::NPCRecord(wxString line)
 	line = line.AfterFirst(',');
 	type = wxAtoi(line.BeforeFirst(','));
 	line = line.AfterFirst(',');
-	discovery = false;
 	name.Printf(wxT("%s [%d] [%d]"), line.c_str(), id, model);
 }
 
@@ -741,74 +488,7 @@ NPCRecord::NPCRecord(const std::vector<std::string> & vals)
   id = atoi(vals[0].c_str());
   model = atoi(vals[1].c_str());
   type = atoi(vals[2].c_str());
-  discovery = false;
   name = CSConv(wxString(vals[3].c_str(), wxConvUTF8));
-}
-
-NPCDatabase::NPCDatabase(wxString filename)
-{
-	//ItemRecord all(wxT("---- None ----"), IT_ALL);
-	//items.push_back(all);
-
-	wxTextFile fin(filename);
-	if (fin.Open(filename)) {
-		wxString line;
-		for ( line = fin.GetFirstLine(); !fin.Eof(); line = fin.GetNextLine() ) {
-			NPCRecord rec(line);
-			if (rec.model > 0) {
-				npcs.push_back(rec);
-			}
-		}
-		fin.Close();
-		sort(npcs.begin(), npcs.end());
-	}
-
-	int j=0;
-	for (std::vector<NPCRecord>::iterator it=npcs.begin();	it!=npcs.end(); ++it)
-	{
-		npcLookup[it->id] = j;
-		j++;
-	}
-}
-
-void NPCDatabase::open(wxString filename)
-{
-	wxTextFile fin(filename);
-	if (fin.Open(filename)) {
-		wxString line;
-		for ( line = fin.GetFirstLine(); !fin.Eof(); line = fin.GetNextLine() ) {
-			NPCRecord rec(line);
-			if (rec.model > 0) {
-				npcs.push_back(rec);
-			}
-		}
-		fin.Close();
-		sort(npcs.begin(), npcs.end());
-	}
-}
-
-
-const NPCRecord& NPCDatabase::get(int id)
-{
-	return npcs[id];
-}
-
-const NPCRecord& NPCDatabase::getByID(int id)
-{
-    if (npcLookup.find(id)!=npcLookup.end()) {
-		return npcs[npcLookup[id]];
-    }
-	
-	return npcs[0];
-/*
-	for (std::vector<NPCRecord>::iterator it=npcs.begin();  it!=npcs.end(); ++it) {
-		if (it->id == id) {
-			return (*it);
-		}
-	}
-
-	return npcs[0];
-*/
 }
 
 // --

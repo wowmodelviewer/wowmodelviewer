@@ -10,6 +10,8 @@
 
 #include "logger/Logger.h"
 
+#include "GameDatabase.h"
+
 #include <wx/txtstrm.h>
 
 int slotOrder[] = {	
@@ -1906,6 +1908,8 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 
 	numbers.clear();
 	choices.Clear();
+	cats.clear();
+	catnames.clear();
 
 	std::vector<int> quality;
 
@@ -1913,6 +1917,26 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	std::set<std::pair<int,int> > subclassesFound;
 	
 	std::cout << "item db size = " << items.items.size() << std::endl;
+
+	std::map<std::pair<int,int>, int> subclasslookup;
+
+	sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ID, SubClassID, Name, VerboseName FROM ItemSubClass");
+
+	if(itemClasses.valid && !itemClasses.empty())
+	{
+	  for(int i=0, imax=itemClasses.values.size() ; i < imax ; i++)
+	  {
+	    // first set verbose name
+	    wxString name = itemClasses.values[i][3].c_str();
+	    // if empty, fall back to normal one
+	    if(name.IsEmpty())
+	      name = itemClasses.values[i][2].c_str();
+
+	    catnames.Add(CSConv(name));
+	    subclasslookup[std::pair<int,int>(atoi(itemClasses.values[i][0].c_str()),atoi(itemClasses.values[i][1].c_str()))] = (int)catnames.size()-1;
+	  }
+	}
+
 
 	int sel=0, ord=0;
 	for (std::vector<ItemRecord>::iterator it = items.items.begin(); it != items.items.end(); ++it) {
@@ -1927,6 +1951,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 		    quality.push_back(it->quality);
 
 		    subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
+		    cats.push_back(subclasslookup[std::pair<int,int>(it->itemclass, it->subclass)]);
 		  }
 		}
 		else if (correctType((ssize_t)it->type, slot))
@@ -1945,59 +1970,12 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 		}
 	}
 	std::cout << "choices size = " << choices.GetCount() << std::endl;
-	// make category list
-	cats.clear();
-	catnames.clear();
-	itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
-/*
-	std::map<std::pair<int,int>, int> subclasslookup;
-	for (ItemSubClassDB::Iterator it=subclassdb.begin(); it != subclassdb.end(); ++it) {
-		int cl;
-		if (gameVersion >= VERSION_CATACLYSM)
-			cl = it->getInt(ItemSubClassDB::ClassIDV400);
-		else
-			cl = it->getInt(ItemSubClassDB::ClassID);
-		int scl;
-		if (gameVersion >= VERSION_CATACLYSM)
-			scl = it->getInt(ItemSubClassDB::SubClassIDV400);
-		else
-			scl = it->getInt(ItemSubClassDB::SubClassID);
-		// only add the subclass if it was found in the itemlist
-		if (cl>0 && subclassesFound.find(std::pair<int,int>(cl,scl)) != subclassesFound.end()) {
-			
-			// Used to go through the 'string fields' looking for the one with data.
-			wxString str;
-			if (gameVersion >= VERSION_CATACLYSM)
-				str = CSConv(it->getString(ItemSubClassDB::NameV400 + langOffset));
-			else
-				str = CSConv(it->getString(ItemSubClassDB::Name + langOffset));
 
-			int hands;
-			if (gameVersion >= VERSION_CATACLYSM)
-				hands = it->getInt(ItemSubClassDB::HandsV400);
-			else
-				hands = it->getInt(ItemSubClassDB::Hands);
-			if (hands > 0) {
-				str.append(wxString::Format(wxT(" (%d-handed)"), hands));
-			}
-			catnames.Add(str);
-			subclasslookup[std::pair<int,int>(cl,scl)] = (int)catnames.size()-1;
-		}
-	}
-
-	if (subclassesFound.size() > 1) {
-		// build category list
-		for (size_t i=0; i<numbers.size(); i++) {
-			ItemRecord r = items.getById(numbers[i]);
-			cats.push_back(subclasslookup[std::pair<int,int>(r.itemclass, r.subclass)]);
-		}
-
+	if (subclassesFound.size() > 1)
 		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);
-	} else {
+	else
 	  itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
-	}
 
-	*/
 	itemDialog->SetSelection(sel);
 
 	wxSize s = itemDialog->GetSize();
@@ -2159,69 +2137,64 @@ void CharControl::selectMount()
 
 void CharControl::selectNPC(ssize_t type)
 {
-	if (npcs.npcs.size() == 0 || npctypedb.size() == 0)
+	if (npcs.size() == 0)
 		return;
 	ClearItemDialog();
 
 	numbers.clear();
 	choices.Clear();
-
-	std::vector<int> quality;
-	
-	//choices.Add(wxT("---- None ----"));
-	//numbers.push_back(-1);
-	//quality.push_back(0);
-
-	// collect all items for this type, making note of the occurring subclasses
-	std::vector<int> typesFound;
-	int sel=0, ord=0;
-
-	for (std::vector<NPCRecord>::iterator it=npcs.npcs.begin();  it!=npcs.npcs.end(); ++it) {
-		if (it->model > 0) {
-			choices.Add(it->name);
-			numbers.push_back(it->id);
-			quality.push_back(0);
-
-			/*
-			if (it->id == current) 
-				sel = ord;
-			*/
-			ord++;
-			
-			if ((*it).type > 0) 
-				typesFound.push_back(it->type);
-		}
-	}
-	
-	// make category list
 	cats.clear();
 	catnames.clear();
 
-	std::map<int, int> typeLookup;
-	for (CreatureTypeDB::Iterator it=npctypedb.begin();  it!=npctypedb.end(); ++it) {
-		int type = it->getUInt(CreatureTypeDB::ID);
+	std::vector<int> quality;
 
-		catnames.Add(CSConv(it->getString(CreatureTypeDB::Name + langOffset)));
-		typeLookup[type] = (int)catnames.size()-1;
+
+	std::map<int, int> typeLookup;
+
+	sqlResult npccats = GAMEDATABASE.sqlQuery("SELECT ID,Name FROM CreatureType");
+
+	if(npccats.valid && !npccats.empty())
+	{
+	  for(int i=0, imax=npccats.values.size() ; i < imax ; i++)
+	  {
+	    catnames.Add(CSConv(npccats.values[i][1]));
+	    typeLookup[atoi(npccats.values[i][0].c_str())] = (int)catnames.size()-1;
+	  }
 	}
 
-	if (typesFound.size() > 1) {
-		// build category list
-		for (size_t i=0; i<numbers.size(); i++) {
-			NPCRecord r = npcs.getByID(numbers[i]);
-			cats.push_back(typeLookup[r.type]);
-		}
+	std::vector<int> typesFound;
 
-		itemDialog = new CategoryChoiceDialog(this, (int)type, g_modelViewer, _("Select an NPC"), _("NPC Models"), choices, cats, catnames, &quality, false, true);
-	} else {
-		itemDialog = new FilteredChoiceDialog(this, (int)type, g_modelViewer, _("Select an NPC"), _("NPC Models"), choices, &quality, false);
+	for (std::vector<NPCRecord>::iterator it=npcs.begin();  it!=npcs.end(); ++it)
+	{
+		if (it->model > 0)
+		{
+			choices.Add(it->name);
+			numbers.push_back(it->id);
+			quality.push_back(0);
+			
+			if (it->type >= 0)
+			{
+			  cats.push_back(typeLookup[it->type]);
+				typesFound.push_back(it->type);
+			}
+			else
+			{
+			  cats.push_back(0);
+			}
+		}
 	}
 	
-	itemDialog->SetSelection(sel);
+	if (typesFound.size() > 1)
+		itemDialog = new CategoryChoiceDialog(this, (int)type, g_modelViewer, _("Select an NPC"), _("NPC Models"), choices, cats, catnames, &quality, false, true);
+	else
+		itemDialog = new FilteredChoiceDialog(this, (int)type, g_modelViewer, _("Select an NPC"), _("NPC Models"), choices, &quality, false);
+	
+	itemDialog->SetSelection(0);
 	
 	wxSize s = itemDialog->GetSize();
 	const int w = 250;
-	if (s.GetWidth() > w) {
+	if (s.GetWidth() > w)
+	{
 		itemDialog->SetSizeHints(w,-1,-1,-1,-1,-1);
 		itemDialog->SetSize(w, -1);
 	}
@@ -2376,7 +2349,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		return;
 
 	case UPDATE_NPC:
-		g_modelViewer->LoadNPC(npcs.get(id).id);
+		g_modelViewer->LoadNPC(npcs[id].id);
 
 		break;
 

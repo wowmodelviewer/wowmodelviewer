@@ -322,4 +322,29 @@
     <field type="float" name="priceModifier" />
     <field type="text" name="Name" />
   </ItemClass>
+  <AnimationData>
+    <gamefile name="DBFilesClient\AnimationData.dbc" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="Name" />
+    <field type="uint" name="Flags" />
+    <field type="uint" name="Fallback" />
+    <field type="uint" name="BehaviorID" />
+    <field type="uint" name="BehaviorFly" />
+  </AnimationData>
+  <ItemSubClass>
+    <gamefile name="DBFilesClient\ItemSubClass.dbc" />
+    <field primary="yes" type="uint" name="col0" />
+    <field type="uint" name="ID" />
+    <field type="uint" name="SubClassID" />
+	<field type="uint" name="col3" />
+	<field type="uint" name="col4" />
+	<field type="uint" name="col5" />
+	<field type="uint" name="col6" />
+	<field type="uint" name="col7" />
+	<field type="uint" name="col8" />
+	<field type="uint" name="col9" />
+  	<field type="uint" name="col10" />
+  	<field type="text" name="Name" />
+  	<field type="text" name="VerboseName" />
+  </ItemSubClass>
 </database>
