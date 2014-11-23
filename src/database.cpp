@@ -20,7 +20,6 @@ ItemVisualDB		visualdb;
 ItemSetDB			setsdb;
 
 // --
-//AnimDB				animdb;
 CharHairGeosetsDB	hairdb;
 CharSectionsDB		chardb;
 CharClassesDB		classdb;
@@ -33,20 +32,6 @@ SpellItemEnchantmentDB	spellitemenchantmentdb;
 ItemVisualsDB			itemvisualsdb;
 CamCinematicDB		 camcinemadb;
 
-// ANIMDB.H
-/*
-AnimDB::Record AnimDB::getByAnimID(unsigned int id)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getUInt(AnimID) == id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-*/
 // --
 // CAMCINEMADB.H
 CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)

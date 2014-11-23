@@ -39,7 +39,6 @@ extern ItemDatabase items;
 extern std::vector<NPCRecord> npcs;
 
 // game database
-class AnimDB;
 class HelmGeosetDB;
 class ItemVisualEffectDB;
 class ItemDisplayDB;
@@ -59,7 +58,6 @@ class SpellItemEnchantmentDB;
 class ItemVisualsDB;
 class CamCinematicDB;
 
-extern AnimDB animdb;
 extern HelmGeosetDB	helmetdb;
 extern ItemVisualEffectDB effectdb;
 extern ItemDisplayDB itemdisplaydb;

@@ -2455,16 +2455,15 @@ void ModelViewer::ModelInfo()
 		for(size_t i=0; i<m->header.nAnimations; i++) {
 			xml << "    <Animation id=\"" << i << "\">" << endl;
 			xml << "      <animID>"<< m->anims[i].animID << "</animID>" << endl;
-			// subAnimID
 			wxString strName;
-			/*
-			try {
-				AnimDB::Record rec = animdb.getByAnimID(m->anims[i].animID);
-				strName = rec.getString(AnimDB::Name);
-			} catch (AnimDB::NotFound) {
-				strName = wxT("???");
-			}
-			*/
+			std::stringstream ss;
+			ss << "SELECT Name FROM AnimationData WHERE ID = ";
+			ss << m->anims[i].animID;
+			sqlResult anim = GAMEDATABASE.sqlQuery(ss.str());
+			if(anim.valid && !anim.empty())
+			  strName = anim.values[0][0].c_str();
+			else
+			  strName = wxT("???");
 			xml << "      <animName>"<< strName.c_str() << "</animName>" << endl;
 			xml << "      <length>"<< m->anims[i].timeEnd << "</length>" << endl;
 			xml << "      <moveSpeed>"<< m->anims[i].moveSpeed << "</moveSpeed>" << endl;
