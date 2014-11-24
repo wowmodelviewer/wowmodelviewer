@@ -92,26 +92,10 @@
   </CreatureDisplayInfoExtra>
   <Creature>
     <gamefile name="DBFilesClient\Creature.db2" />
-    <field primary="yes" type="uint" name="ID" />
-    <field type="uint" name="CreatureTypeID" />
-    <field type="uint" name="col2" />
-    <field type="uint" name="col3" />
-    <field type="uint" name="col4" />
-    <field type="uint" name="col5" />
-    <field type="uint" name="DisplayID" />
-    <field type="uint" name="col7" />
-    <field type="uint" name="col8" />
-    <field type="uint" name="col9" />
-    <field type="uint" name="col10" />
-    <field type="uint" name="col11" />
-    <field type="uint" name="col12" />
-    <field type="uint" name="col13" />
-    <field type="text" name="Name" />
-    <field type="uint" name="col15" />
-    <field type="uint" name="col16" />
-    <field type="uint" name="col17" />
-    <field type="uint" name="col18" />
-    <field type="uint" name="col19" />
+    <field primary="yes" type="uint" name="ID" index="0" />
+    <field type="uint" name="CreatureTypeID" index="1" />
+    <field type="uint" name="DisplayID" index="6" />
+    <field type="text" name="Name" index="14"/>
   </Creature>
   <CreatureType>
   	<gamefile name="DBFilesClient\CreatureType.dbc" />
@@ -121,137 +105,8 @@
   </CreatureType>
   <ItemSparse>
   	<gamefile name="DBFilesClient\Item-sparse.db2" />
-  	<field primary="yes" type="uint" name="ID" />
-  	<field type="uint" name="col1" />
-  	<field type="uint" name="col2" />
-  	<field type="uint" name="col3" />
-  	<field type="uint" name="col4" />
-  	<field type="uint" name="col5" />
-  	<field type="uint" name="col6" />
-  	<field type="uint" name="col7" />
-  	<field type="uint" name="col8" />
-  	<field type="uint" name="col9" />
-  	<field type="uint" name="col10" />
-  	<field type="uint" name="col11" />
-  	<field type="uint" name="col12" />
-  	<field type="uint" name="col13" />
-  	<field type="uint" name="col14" />
-  	<field type="uint" name="col15" />
-  	<field type="uint" name="col16" />
-  	<field type="uint" name="col17" />
-  	<field type="uint" name="col18" />
-  	<field type="uint" name="col19" />
-  	<field type="uint" name="col20" />
-  	<field type="uint" name="col21" />
-  	<field type="uint" name="col22" />
-  	<field type="uint" name="col23" />
-  	<field type="uint" name="col24" />
-  	<field type="uint" name="col25" />
-  	<field type="uint" name="col26" />
-  	<field type="uint" name="col27" />
-  	<field type="uint" name="col28" />
-  	<field type="uint" name="col29" />
-  	<field type="uint" name="col30" />
-  	<field type="uint" name="col31" />
-  	<field type="uint" name="col32" />
-  	<field type="uint" name="col33" />
-  	<field type="uint" name="col34" />
-  	<field type="uint" name="col35" />
-  	<field type="uint" name="col36" />
-  	<field type="uint" name="col37" />
-  	<field type="uint" name="col38" />
-  	<field type="uint" name="col39" />
-  	<field type="uint" name="col40" />
-  	<field type="uint" name="col41" />
-  	<field type="uint" name="col42" />
-  	<field type="uint" name="col43" />
-  	<field type="uint" name="col44" />
-  	<field type="uint" name="col45" />
-  	<field type="uint" name="col46" />
-  	<field type="uint" name="col47" />
-  	<field type="uint" name="col48" />
-  	<field type="uint" name="col49" />
-  	<field type="uint" name="col50" />
-  	<field type="uint" name="col51" />
-  	<field type="uint" name="col52" />
-  	<field type="uint" name="col53" />
-  	<field type="uint" name="col54" />
-  	<field type="uint" name="col55" />
-  	<field type="uint" name="col56" />
-  	<field type="uint" name="col57" />
-  	<field type="uint" name="col58" />
-  	<field type="uint" name="col59" />
-  	<field type="uint" name="col60" />
-  	<field type="uint" name="col61" />
-  	<field type="uint" name="col62" />
-  	<field type="uint" name="col63" />
-  	<field type="uint" name="col64" />
-  	<field type="uint" name="col65" />
-  	<field type="uint" name="col66" />
-  	<field type="uint" name="col67" />
-  	<field type="uint" name="col68" />
-  	<field type="uint" name="col69" />
-  	<field type="text" name="Name" />
-  	<field type="uint" name="col71" />
-  	<field type="uint" name="col72" />
-  	<field type="uint" name="col73" />
-  	<field type="uint" name="col74" />
-  	<field type="uint" name="col75" />
-  	<field type="uint" name="col76" />
-  	<field type="uint" name="col77" />
-  	<field type="uint" name="col78" />
-  	<field type="uint" name="col79" />
-  	<field type="uint" name="col80" />
-  	<field type="uint" name="col81" />
-  	<field type="uint" name="col82" />
-  	<field type="uint" name="col83" />
-  	<field type="uint" name="col84" />
-  	<field type="uint" name="col85" />
-  	<field type="uint" name="col86" />
-  	<field type="uint" name="col87" />
-  	<field type="uint" name="col88" />
-  	<field type="uint" name="col89" />
-  	<field type="uint" name="col90" />
-  	<field type="uint" name="col91" />
-  	<field type="uint" name="col92" />
-  	<field type="uint" name="col93" />
-  	<field type="uint" name="col94" />
-  	<field type="uint" name="col95" />
-  	<field type="uint" name="col96" />
-  	<field type="uint" name="col97" />
-  	<field type="uint" name="col98" />
-  	<field type="uint" name="col99" />
-  	<field type="uint" name="col100" />
-  	<field type="uint" name="col101" />
-  	<field type="uint" name="col102" />
-  	<field type="uint" name="col103" />
-  	<field type="uint" name="col104" />
-  	<field type="uint" name="col105" />
-  	<field type="uint" name="col106" />
-  	<field type="uint" name="col107" />
-  	<field type="uint" name="col108" />
-  	<field type="uint" name="col109" />
-  	<field type="uint" name="col110" />
-  	<field type="uint" name="col111" />
-  	<field type="uint" name="col112" />
-  	<field type="uint" name="col113" />
-  	<field type="uint" name="col114" />
-  	<field type="uint" name="col115" />
-  	<field type="uint" name="col116" />
-  	<field type="uint" name="col117" />
-  	<field type="uint" name="col118" />
-  	<field type="uint" name="col119" />
-  	<field type="uint" name="col120" />
-  	<field type="uint" name="col121" />
-  	<field type="uint" name="col122" />
-  	<field type="uint" name="col123" />
-  	<field type="uint" name="col124" />
-  	<field type="uint" name="col125" />
-  	<field type="uint" name="col126" />
-  	<field type="uint" name="col127" />
-  	<field type="uint" name="col128" />
-  	<field type="uint" name="col129" />
-  	<field type="uint" name="col130" />
+  	<field primary="yes" type="uint" name="ID" index="0" />
+  	<field type="text" name="Name" index="70" />
   </ItemSparse>
   <ItemDisplayInfo>
     <gamefile name="DBFilesClient\ItemDisplayInfo.dbc" />
@@ -260,25 +115,6 @@
     <field type="text" name="Model2" />
   	<field type="uint" name="TextureItemID1" />
   	<field type="uint" name="TextureItemID2" />
-  	<field type="uint" name="col4" />
-  	<field type="uint" name="col5" />
-  	<field type="uint" name="col6" />
-  	<field type="uint" name="col7" />
-  	<field type="uint" name="col8" />
-  	<field type="uint" name="col9" />
-  	<field type="uint" name="col10" />
-  	<field type="uint" name="col11" />
-  	<field type="uint" name="col12" />
-  	<field type="uint" name="RequiredLevel" />
-  	<field type="uint" name="col14" />
-  	<field type="uint" name="col15" />
-  	<field type="uint" name="col16" />
-  	<field type="uint" name="col17" />
-  	<field type="uint" name="col18" />
-  	<field type="uint" name="col19" />
-  	<field type="uint" name="col20" />
-  	<field type="uint" name="col21" />
-  	<field type="uint" name="col22" />
   </ItemDisplayInfo>
   <ItemAppearance>
     <gamefile name="DBFilesClient\ItemAppearance.db2" />
