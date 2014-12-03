@@ -612,6 +612,15 @@ void ModelViewer::InitDatabase()
 	  }
 	}
 
+	// init texture regions
+	CharTexture::initRegions();
+
+	// init Race informations
+	CharControl::initRaces();
+
+
+
+
 	if (!skyboxdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));

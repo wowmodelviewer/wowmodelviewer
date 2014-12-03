@@ -9,109 +9,114 @@
 
 #include "enums.h" // NUM_REGIONS
 
+#include "GameDatabase.h"
+
+#include "Logger/Logger.h"
+
 #include "CxImage/ximage.h"
 
-#define	REGION_FAC_X	2
-#define REGION_FAC_Y  2
-#define	REGION_PX_WIDTH	(256*REGION_FAC_X)
-#define REGION_PX_HEIGHT (256*REGION_FAC_Y)
+#include <QImage>
 
-const CharRegionCoords regions[NUM_REGIONS] =
-{
-	{0, 0, 256*REGION_FAC_X, 256*REGION_FAC_Y},	// base
-	{0, 0, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// arm upper
-	{0, 64*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// arm lower
-	{0, 128*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y},	// hand
-	{0, 160*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y},	// face upper
-	{0, 192*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// face lower
-	{128*REGION_FAC_X, 0, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// torso upper
-	{128*REGION_FAC_X, 64*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y},	// torso lower
-	{128*REGION_FAC_X, 96*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y}, // pelvis upper
-	{128*REGION_FAC_X, 160*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},// pelvis lower
-	{128*REGION_FAC_X, 224*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y}	// foot
-};
+std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 
-const CharRegionCoords pandaren_regions[NUM_REGIONS] =
+void CharTexture::addLayer(wxString fn, int region, int layer)
 {
-  {0, 0, 256*REGION_FAC_X*2, 256*REGION_FAC_Y},	// base
-  {0, 0, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// arm upper
-  {0, 64*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// arm lower
-  {0, 128*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y},	// hand
-  {128*REGION_FAC_X*2, 0, 256*REGION_FAC_X, 256*REGION_FAC_Y},	// face upper
-  {0, 192*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// face lower
-  {128*REGION_FAC_X, 0, 128*REGION_FAC_X, 64*REGION_FAC_Y},	// torso upper
-  {128*REGION_FAC_X, 64*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y},	// torso lower
-  {128*REGION_FAC_X, 96*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y}, // pelvis upper
-  {128*REGION_FAC_X, 160*REGION_FAC_Y, 128*REGION_FAC_X, 64*REGION_FAC_Y},// pelvis lower
-  {128*REGION_FAC_X, 224*REGION_FAC_Y, 128*REGION_FAC_X, 32*REGION_FAC_Y}	// foot
-};
+  if (!fn || fn.length()==0)
+    return;
+
+  CharTextureComponent ct;
+  ct.name = fn;
+  ct.region = region;
+  ct.layer = layer;
+  m_components.push_back(ct);
+}
 
 // 2007.07.03 Alfred, enlarge buf size and make it static to prevent stack overflow
 //static unsigned char destbuf[REGION_PX*REGION_PX*4], tempbuf[REGION_PX*REGION_PX*4];
 void CharTexture::compose(TextureID texID)
 {
+  std::cout << "texID = " << texID << std::endl;
+
   // scale for pandaren race.
-  size_t x_scale = race == 24 ? 2 : 1;
-  size_t y_scale = 1;
+  pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
+
+  std::cout << __FUNCTION__ << " " << __LINE__ << " " << layoutInfos.first.width << "x" << layoutInfos.first.height << std::endl;
 
 	// if we only have one texture then don't bother with compositing
-	if (components.size()==1) {
-		Texture temp(components[0].name);
+  std::cout << "nb component = " << m_components.size() << std::endl;
+	if (m_components.size()==1)
+	{
+		Texture temp(m_components[0].name);
 		texturemanager.LoadBLP(texID, &temp);
 		return;
 	}
 
-	std::sort(components.begin(), components.end());
+	std::sort(m_components.begin(), m_components.end());
 
 	unsigned char *destbuf, *tempbuf;
-	destbuf = (unsigned char*)malloc(REGION_PX_WIDTH*x_scale*REGION_PX_HEIGHT*y_scale*4);
-	memset(destbuf, 0, REGION_PX_WIDTH*x_scale*REGION_PX_HEIGHT*y_scale*4);
 
-	for (std::vector<CharTextureComponent>::iterator it = components.begin(); it != components.end(); ++it) {
+	destbuf = (unsigned char*)calloc(layoutInfos.first.width*layoutInfos.first.height,4);
+
+	for (std::vector<CharTextureComponent>::iterator it = m_components.begin(); it != m_components.end(); ++it)
+	{
 		CharTextureComponent &comp = *it;
+		std::cout << __FUNCTION__ << " " << comp.name.c_str() << std::endl;
     // pandaren with different regions.
-		const CharRegionCoords &coords = race == 24 ? pandaren_regions[comp.region] : regions[comp.region];
+		const CharRegionCoords &coords = layoutInfos.second[comp.region];
+		/*
+		std::cout << "coords :" << std::endl;
+		std::cout << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
+		*/
 		TextureID temptex = texturemanager.add(comp.name);
-		Texture &tex = *((Texture*)texturemanager.items[temptex]);
+		Texture * tex = dynamic_cast<Texture*>(texturemanager.items[temptex]);
+
 
 		// Alfred 2009.07.03, tex width or height can't be zero
-		if (tex.w == 0 || tex.h == 0) {
+		if (tex->w == 0 || tex->h == 0)
+		{
 			texturemanager.del(temptex);
 			continue;
 		}
-		tempbuf = (unsigned char*)malloc(tex.w*tex.h*4);
-		if (!tempbuf)
-			continue;
-		memset(tempbuf, 0, tex.w*tex.h*4);
+		tempbuf = (unsigned char*)calloc(tex->w*tex->h,4);
 
-		if (tex.w!=coords.xsize || tex.h!=coords.ysize)
+		std::cout << "tex->w = " << tex->w << " vs coords.width = " << coords.width << std::endl;
+		std::cout << "tex->h = " << tex->h << " vs coords.height = " << coords.height << std::endl;
+		if (tex->w!=coords.width || tex->h!=coords.height)
 		{
-			tex.getPixels(tempbuf, GL_BGRA_EXT);
+			tex->getPixels(tempbuf, GL_BGRA_EXT);
 			CxImage *newImage = new CxImage(0);
 			if (newImage) {
 				newImage->AlphaCreate();	// Create the alpha layer
 				newImage->IncreaseBpp(32);	// set image to 32bit
-				newImage->CreateFromArray(tempbuf, tex.w, tex.h, 32, (tex.w*4), false);
-				newImage->Resample(coords.xsize, coords.ysize, 0); // 0: hight quality, 1: normal quality
+				newImage->CreateFromArray(tempbuf, tex->w, tex->h, 32, (tex->w*4), false);
+				newImage->Resample(coords.width, coords.height, 2); // 0: hight quality, 1: normal quality
 				wxDELETE(tempbuf);
 				tempbuf = NULL;
-				long size = coords.xsize * coords.ysize * 4;
+				long size = coords.width * coords.height * 4;
 				newImage->Encode2RGBA(tempbuf, size, false);
 				wxDELETE(newImage);
-			} else {
+			}
+			else
+			{
 				free(tempbuf);
 				continue;
 			}
-		} else
-			tex.getPixels(tempbuf);
+		}
+		else
+		{
+			tex->getPixels(tempbuf);
+		}
 
 		// blit the texture region over the original
-		for (ssize_t y=0, dy=coords.ypos; y<coords.ysize; y++,dy++) {
-			for (ssize_t x=0, dx=coords.xpos; x<coords.xsize; x++,dx++) {
-				unsigned char *src = tempbuf + y*coords.xsize*4 + x*4;
-				unsigned char *dest = destbuf + dy*REGION_PX_WIDTH*x_scale*4 + dx*4;
+		for (ssize_t y=0, dy=coords.ypos; y<coords.height; y++,dy++)
+		{
+			for (ssize_t x=0, dx=coords.xpos; x<coords.width; x++,dx++)
+			{
+				unsigned char *src = tempbuf + y*coords.width*4 + x*4;
+				unsigned char *dest = destbuf + dy*layoutInfos.first.width*4 + dx*4;
 
 				// this is slow and ugly but I don't care
+				// take into account alpha chanel
 				float r = src[3] / 255.0f;
 				float ir = 1.0f - r;
 				// zomg RGBA?
@@ -128,8 +133,70 @@ void CharTexture::compose(TextureID texID)
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, REGION_PX_WIDTH*x_scale, REGION_PX_HEIGHT*y_scale, 0, GL_RGBA, GL_UNSIGNED_BYTE, destbuf);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, layoutInfos.first.width, layoutInfos.first.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, destbuf);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+
+	// debug write texture on disk
+	static int texIndex=0;
+	QString name = QString("./ComposedTexture%1.png").arg(texIndex++);
+	QImage FinalTexture(destbuf,layoutInfos.first.width, layoutInfos.first.height,QImage::Format_RGBA8888);
+	FinalTexture.save(name);
+
 	free(destbuf);
 }
+
+
+void CharTexture::initRegions()
+{
+  sqlResult layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
+
+  if(!layouts.valid || layouts.empty())
+  {
+    LOG_ERROR << "Fail to retrieve Texture Layout information from game database";
+    return;
+  }
+
+  // Iterate on layout to initialize our members (sections informations)
+  for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
+  {
+    LayoutSize texLayout;
+    int curLayout = atoi(layouts.values[i][0].c_str());
+    texLayout.width = atoi(layouts.values[i][1].c_str());
+    texLayout.height = atoi(layouts.values[i][2].c_str());
+
+    // search all regions for this layout
+    QString query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
+    sqlResult regions = GAMEDATABASE.sqlQuery(query.toStdString());
+
+    if(!regions.valid || regions.empty())
+    {
+      LOG_ERROR << "Fail to retrieve Section Layout information from game database for layout" << curLayout;
+      continue;
+    }
+
+    std::map<int,CharRegionCoords> regionCoords;
+    CharRegionCoords base;
+    base.xpos = 0;
+    base.ypos = 0;
+    base.width = texLayout.width;
+    base.height = texLayout.height;
+    regionCoords[0] = base;
+
+    for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
+    {
+      CharRegionCoords coords;
+      coords.xpos = atoi(regions.values[r][1].c_str());
+      coords.ypos = atoi(regions.values[r][2].c_str());
+      coords.width = atoi(regions.values[r][3].c_str());
+      coords.height = atoi(regions.values[r][4].c_str());
+      std::cout << atoi(regions.values[r][0].c_str())+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
+      regionCoords[atoi(regions.values[r][0].c_str())+1] = coords;
+
+    }
+    LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
+    CharTexture::LAYOUTS[curLayout] = make_pair<LayoutSize, std::map<int,CharRegionCoords> >(texLayout,regionCoords);
+  }
+
+}
+

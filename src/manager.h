@@ -17,6 +17,8 @@
 
 #include "OpenGLHeaders.h"
 
+#include <iostream>
+
 // base class for manager objects
 
 class ManagedItem {
@@ -65,13 +67,13 @@ public:
 			if (!i)
 				return;
 
-			#ifdef _DEBUG
-				wxLogMessage(wxT("Unloading Texture: %s"), i->name.c_str());
-			#endif
+#ifdef _DEBUG
+				std::cout << "Unloading Texture: " << i->name.c_str();
+#endif
 
 			doDelete(id);
-		//	names.erase(names.find(i->name));
-		//	items.erase(items.find(id));
+			names.erase(names.find(i->name));
+			items.erase(items.find(id));
 
 			wxDELETE(i);
 		}

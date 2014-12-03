@@ -14,6 +14,8 @@
 
 #include <wx/txtstrm.h>
 
+std::map< std::string, RaceInfos> CharControl::RACES;
+
 int slotOrder[] = {	
 	CS_SHIRT,
 	CS_HEAD,
@@ -242,6 +244,29 @@ bool CharControl::Init()
 	return true;
 }
 
+void CharControl::refreshModelSpins()
+{
+  if (cd.maxFaceType==0) cd.maxFaceType = 1;
+  if (cd.maxSkinColor==0) cd.maxSkinColor = 1;
+  if (cd.maxHairColor==0) cd.maxHairColor = 1;
+  if (cd.maxHairStyle==0) cd.maxHairStyle = 1;
+  if (cd.maxFacialHair==0) cd.maxFacialHair = 1;
+
+  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)cd.maxSkinColor-1);
+  spins[SPIN_FACE_TYPE]->SetRange(0, (int)cd.maxFaceType-1);
+  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
+  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)cd.maxHairStyle-1);
+  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)cd.maxFacialHair-1);
+  spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
+
+  spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
+  spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
+  spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
+  spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
+  spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
+  spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
+}
+
 //void CharControl::UpdateModel(Model *m)
 void CharControl::UpdateModel(Attachment *a)
 {
@@ -272,69 +297,43 @@ void CharControl::UpdateModel(Attachment *a)
 	wxString raceName = model->name.substr(p1+1,p2-p1-1);
 	wxString genderName = model->name.substr(p2+1,p3-p2-1);
 
-	unsigned int race, gender;
 
-	try {
-		// Okay for some reason Blizzard have removed the full racial names
-		// out of the ChrRaces.dbc.  Going to have to hardcode the values.
-		CharRacesDB::Record raceRec = racedb.getByName(raceName);
-		race = raceRec.getUInt(CharRacesDB::RaceID);
-		gender = (genderName.Lower() == wxT("female")) ? GENDER_FEMALE : GENDER_MALE;
-	
-	} catch (CharRacesDB::NotFound) {
-		// wtf
-		race = 0;
-		gender = GENDER_MALE;
-	}
-
-	// Enable the use of NPC skins if its  a goblin.
-	if (race == RACE_GOBLIN && gameVersion < VERSION_CATACLYSM)
-		cd.useNPC=1;
-	else
-		cd.useNPC=0;
-
+/*
 	if (race==RACE_TAUREN || race==RACE_TROLL || race==RACE_DRAENEI || race==RACE_NAGA || race==RACE_BROKEN) // If its a troll/tauren/dranei/naga/broken, show the feet (dont wear boots)
 		cd.showFeet = true;
 	else
 		cd.showFeet = false;
+*/
 
-	// hardcoded
-	if (0 && race == RACE_WORGEN) {
-		model->showGeosets[3] = false;
-		model->showGeosets[4] = false;
-		model->showGeosets[72] = false;
-		model->showGeosets[81] = false;
-	}
+	cd.maxSkinColor = getNbValuesForSection(model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
+	cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+	cd.maxHairColor = getNbValuesForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
 
-	// get max values
-	cd.maxSkinColor = chardb.getColorsFor(race, gender, CharSectionsDB::SkinType, 0, cd.useNPC);
-	if (cd.maxSkinColor==0 && cd.useNPC==1) {
-		wxMessageBox(wxT("The selected character does not have any NPC skins!\nSwitching back to normal character skins."));
-		cd.useNPC = 0;
-		cd.maxSkinColor = chardb.getColorsFor(race, gender, CharSectionsDB::SkinType, 0, cd.useNPC);
-	}
-	cd.maxFaceType  = chardb.getSectionsFor(race, gender, CharSectionsDB::FaceType, 0, cd.useNPC);
-	cd.maxHairColor = chardb.getColorsFor(race, gender, CharSectionsDB::HairType, 0, 0);
+	/*cd.maxHairColor = chardb.getColorsFor(race, gender, CharSectionsDB::HairType, 0, 0);
 	cd.maxFacialHair = facialhairdb.getStylesFor(race, gender);
 	cd.maxFacialColor = cd.maxHairColor;
+*/
 
-	if (gameVersion < VERSION_WOTLK) {
-		// Re-set the menu
-		if (cd.useNPC)
-			g_modelViewer->optMenu->Check(ID_USE_NPCSKINS, 1);
-		else
-			g_modelViewer->optMenu->Check(ID_USE_NPCSKINS, 0);
-	}
+	cd.maxFacialHair = 0;
+	cd.maxFacialColor = 0;
+
 
 	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 	// ----
 
-	cd.race = race;
-	cd.gender = gender;
+	RaceInfos infos;
+	if(!getRaceInfosForCurrentModel(infos))
+	{
+	  LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
+	  return;
+	}
+
+	cd.race = infos.raceid;
+	cd.gender = infos.sexid;
 
 	std::set<int> styles;
 	for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
-		if (it->getUInt(CharHairGeosetsDB::Race)==race && it->getUInt(CharHairGeosetsDB::Gender)==gender) {
+		if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender) {
 			styles.insert(it->getUInt(CharHairGeosetsDB::Section));
 		}
 	}
@@ -345,30 +344,13 @@ void CharControl::UpdateModel(Attachment *a)
 	}
 #endif // for worgen female
 
-	if (cd.maxFaceType==0) cd.maxFaceType = 1;
-	if (cd.maxSkinColor==0) cd.maxSkinColor = 1;
-	if (cd.maxHairColor==0) cd.maxHairColor = 1;
-	if (cd.maxHairStyle==0) cd.maxHairStyle = 1;
-	if (cd.maxFacialHair==0) cd.maxFacialHair = 1;
-	spins[SPIN_SKIN_COLOR]->SetRange(0, (int)cd.maxSkinColor-1);
-	spins[SPIN_FACE_TYPE]->SetRange(0, (int)cd.maxFaceType-1);
-	spins[SPIN_HAIR_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
-	spins[SPIN_HAIR_STYLE]->SetRange(0, (int)cd.maxHairStyle-1);
-	spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)cd.maxFacialHair-1);
-	spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
+	refreshModelSpins();
 
 	td.Icon = randint(0, td.maxIcon);
 	td.IconColor = randint(0, td.maxIconColor);
 	td.Border = randint(0, td.maxBorder);
 	td.BorderColor = randint(0, td.maxBorderColor);
 	td.Background = randint(0, td.maxBackground);
-
-	spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
-	spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
-	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
-	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
-	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 
 	tabardSpins[SPIN_TABARD_ICON]->SetValue(td.Icon);
 	tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(td.IconColor);
@@ -536,7 +518,31 @@ void CharControl::OnSpin(wxSpinEvent &event)
 		return;
 
 	if (event.GetId()==ID_SKIN_COLOR) 
-		cd.skinColor = event.GetPosition();
+	{
+	  cd.skinColor = event.GetPosition();
+	  // check if underwear texture is available for this color
+		// if no, uncheck option, and make menu unavailable
+	  if(getTextureNameForSection(model->isHD?CharSectionsDB::UnderwearHDType:CharSectionsDB::UnderwearType).size() == 0)
+	  {
+	    cd.showUnderwear = false;
+	    g_modelViewer->charMenu->Check(ID_SHOW_UNDERWEAR, false);
+	    g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
+	  }
+	  else
+	  {
+	    g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, true);
+	  }
+
+	  // update facial type based on skin chosen
+	  cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+	  std::cout << "--------------------------------------" << std::endl;
+	  std::cout << __FUNCTION__ << " => cd.maxFaceType = " << cd.maxFaceType << std::endl;
+	  std::cout << "--------------------------------------" << std::endl;
+	  if(cd.faceType > cd.maxFaceType)
+	    cd.faceType = 0;
+
+	  refreshModelSpins();
+	}
 
 	if(g_canvas->model->modelType == MT_NPC)
 		return;
@@ -767,77 +773,64 @@ void CharControl::RefreshModel()
 	if (cd.showEars) 
 		cd.geosets[CG_EARS] = 2;
 
-	CharTexture tex(cd.race);
-
-	CharSectionsDB::Record rec = chardb.getRecord(0);
-
-	// base character layer/texture
-	try {
-		rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::SkinType, 0, cd.skinColor, cd.useNPC);
-		wxString baseTexName = rec.getString(CharSectionsDB::Tex1);
-		tex.addLayer(baseTexName, CR_BASE, 0);
-		//UpdateTextureList(baseTexName, TEXTURE_BODY);
-
-		// Tauren fur
-		wxString furTexName = rec.getString(CharSectionsDB::Tex2);
-		if (!furTexName.IsEmpty())
-		{
-			furTex = texturemanager.add(furTexName);
-			UpdateTextureList(furTexName, TEXTURE_FUR);
-		}
-
-	} catch (CharSectionsDB::NotFound) {
-		wxLogMessage(wxT("Assertion base character Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
+	RaceInfos infos;
+	if(!getRaceInfosForCurrentModel(infos))
+	{
+	  LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
+	  return;
 	}
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen
-		wxString fn;
-		fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleSkin%02d_%02d.blp"), 0, cd.skinColor);
-		if (MPQFile::getSize(fn) > 0) {
-			tex.addLayer(fn, CR_BASE, 0);
-			//UpdateTextureList(fn, TEXTURE_BODY);
-		}
-		fn.Printf(wxT("Character\\Worgen\\Female\\WorgenFemaleSkin%02d_%02d_Extra.blp"), 0, cd.skinColor);
-		if (MPQFile::getSize(fn) > 0) {
-			furTex = texturemanager.add(fn);
-			UpdateTextureList(fn, TEXTURE_FUR);
-			model->textures[4] = furTex;
-		}
-	}
-#endif // for worgen female
 
-	// HACK: for goblin males, explicitly load a hair texture
-	if (cd.race == RACE_GOBLIN && cd.gender == GENDER_MALE && gobTex == 0 && gameVersion < VERSION_CATACLYSM) {
-        gobTex = texturemanager.add(wxT("Creature\\Goblin\\Goblin.blp"));	
+  std::cout << "infos : " << infos.prefix << " " << infos.textureLayoutID << std::endl;
+  std::cout << "race = " << infos.raceid << " sex = " << ((infos.sexid == 0)?"Male":"Female") << std::endl;
+
+	CharTexture tex(infos.textureLayoutID);
+
+	std::vector<std::string> textures = getTextureNameForSection(model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
+
+	tex.addLayer(textures[0].c_str(), CR_BASE, 0);
+
+	wxString furTexName = textures[1].c_str();
+
+	if(!furTexName.IsEmpty())
+	{
+	  furTex = texturemanager.add(furTexName);
+	  UpdateTextureList(furTexName, TEXTURE_FUR);
 	}
 
 	// Hair related boolean flags
-	bool bald = false;
-	bool showHair = cd.showHair;
-	bool showFacialHair = cd.showFacialHair;
+//	bool bald = false;
+//	bool showHair = cd.showHair;
+//	bool showFacialHair = cd.showFacialHair;
 
-	if (cd.race != RACE_GOBLIN || gameVersion >= VERSION_CATACLYSM) { // Goblin chars base texture already contains all this stuff.
+	// Display underwear on the model?
+	if (cd.showUnderwear)
+	{
+	  textures = getTextureNameForSection(model->isHD?CharSectionsDB::UnderwearHDType:CharSectionsDB::UnderwearType);
 
-		// Display underwear on the model?
-		if (cd.showUnderwear) {
-			try {
-				rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::UnderwearType, 0, cd.skinColor, cd.useNPC);
-				tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_PELVIS_UPPER, 1); // pants
-				tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_TORSO_UPPER, 1); // top
-			} catch (CharSectionsDB::NotFound) {
-				wxLogMessage(wxT("DBC underwear Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
-			}
-		}
+	  if(textures[0] != "")
+	    tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
 
-		// face
-		try {
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FaceType, cd.faceType, cd.skinColor, cd.useNPC);
-			tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_FACE_LOWER, 1);
-			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 1);
-		} catch (CharSectionsDB::NotFound) {
-			wxLogMessage(wxT("DBC face Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
-		}
+	  if(textures[1] != "")
+	    tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
+	}
 
+	// face
+	textures = getTextureNameForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+	if(textures.size() != 0)
+	{
+	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 1);
+	  tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 1);
+	}
+
+	// Hair
+	textures = getTextureNameForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
+	if(textures.size() != 0)
+	{
+	  std::cout << "textures[0] = " << textures[0] << std::endl;
+	  UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+	}
+
+/*
 		// facial feature geosets
 		try {
 			CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
@@ -975,7 +968,7 @@ void CharControl::RefreshModel()
 			wxLogMessage(wxT("Assertion FacialHair Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		}
       }
-
+*/
 	/*
 	// TODO, Temporary work-around - need to do more research.
 	// Check to see if we are wearing a helmet - if so, we need to hide our hair
@@ -1026,7 +1019,7 @@ void CharControl::RefreshModel()
 		} catch (...) {}
 	}
 	*/
-
+/*
 	// check if we have a robe on
 	bool hadRobe = false;
 	if (cd.equipment[CS_CHEST] != 0) {
@@ -1101,7 +1094,7 @@ void CharControl::RefreshModel()
 				model->showGeosets[j] = (id == (a + cd.geosets[i]));
 		}
 	}
-
+*/
 	// finalize character texture
 	tex.compose(charTex);
 	
@@ -1204,11 +1197,11 @@ void CharControl::RefreshNPCModel()
 	// base layer texture
 	try {
 		if (!customSkin.IsEmpty()) {
-			tex.addLayer(customSkin, CR_BASE, 0);
-			UpdateTextureList(customSkin, TEXTURE_BODY);
+			//tex.addLayer(customSkin, CR_BASE, 0);
+			//UpdateTextureList(customSkin, TEXTURE_BODY);
 		} else {
-			wxString baseTexName = rec.getString(CharSectionsDB::Tex1);
-			tex.addLayer(baseTexName, CR_BASE, 0);
+			//wxString baseTexName = rec.getString(CharSectionsDB::Tex1);
+			//tex.addLayer(baseTexName, CR_BASE, 0);
 			//UpdateTextureList(baseTexName, TEXTURE_BODY);
 
 			if (cd.showUnderwear) {
@@ -2525,4 +2518,182 @@ const wxString CharControl::selectCharModel()
 	return wxT("");
 }
 
+void CharControl::initRaces()
+{
+  sqlResult races = GAMEDATABASE.sqlQuery(" \
+  SELECT FDM.name as malemodel, ClientPrefix, CharComponentTexLayoutID, \
+  FDF.name AS femalemodel, ClientPrefix, CharComponentTexLayoutID, \
+  FDMHD.name as malemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, \
+  FDFHD.name AS femalemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, \
+  ChrRaces.ID FROM ChrRaces \
+  LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID LEFT JOIN FileData FDM ON CMDM.FileDataID = FDM.ID \
+  LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID LEFT JOIN FileData FDF ON CMDF.FileDataID = FDF.ID \
+  LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID LEFT JOIN FileData FDMHD ON CMDMHD.FileDataID = FDMHD.ID \
+  LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID LEFT JOIN FileData FDFHD ON CMDFHD.FileDataID = FDFHD.ID \
+  WHERE (ChrRaces.ID != 23 AND ChrRaces.ID != 25 AND ChrRaces.ID != 26)");
+ // exclude Gilnean (conflicts with Human) and Two last pandaren races (we want to use id 24 for pandarens)
 
+  if(!races.valid || races.empty())
+  {
+    LOG_ERROR << "Unable to collect race information from game database";
+    return;
+  }
+
+  for(int i=0, imax = races.values.size() ; i < imax ; i++)
+  {
+    for(int r = 0; r <12 ; r+=3)
+    {
+      if(races.values[i][r] != "")
+      {
+        RaceInfos infos;
+        infos.prefix = races.values[i][r+1];
+        infos.textureLayoutID = atoi(races.values[i][r+2].c_str());
+        infos.raceid = atoi(races.values[i][12].c_str());
+        infos.sexid = (r == 0 || r == 6)?0:1;
+        std::string modelname = races.values[i][r];
+        std::transform(modelname.begin(), modelname.end(), modelname.begin(), ::tolower);
+        RACES[modelname] = infos;
+      }
+    }
+  }
+
+}
+
+bool CharControl::getRaceInfosForCurrentModel(RaceInfos & result)
+{
+  // find informations from curent model
+  std::string modelName = model->name.c_str();
+  size_t lastSlashPos = modelName.find_last_of("\\");
+  if(lastSlashPos != std::string::npos)
+  {
+    modelName = modelName.substr(lastSlashPos+1, modelName.length());
+  }
+
+  std::map< std::string, RaceInfos>::iterator raceInfosIt = RACES.find(modelName);
+  if(raceInfosIt != RACES.end())
+  {
+    result = raceInfosIt->second;
+    return true;
+  }
+
+  return false;
+}
+
+std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::SectionType type)
+{
+  std::vector<std::string> result;
+
+  RaceInfos infos;
+  if(!getRaceInfosForCurrentModel(infos))
+  {
+    LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
+    return result;
+  }
+/*
+  std::cout << __FUNCTION__ << std::endl;
+  std::cout << "----------------------------------------------" << std::endl;
+  std::cout << "infos.raceid = " << infos.raceid << std::endl;
+  std::cout << "infos.sexid = " << infos.sexid << std::endl;
+  std::cout << "cd.skinColor = " << cd.skinColor << std::endl;
+  std::cout << "type = " << type << std::endl;
+
+  std::cout << "----------------------------------------------" << std::endl;
+  */
+  QString query;
+  switch(type)
+  {
+    case CharSectionsDB::SkinType:
+    case CharSectionsDB::SkinHDType:
+    case CharSectionsDB::UnderwearType:
+    case CharSectionsDB::UnderwearHDType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+            (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4)")
+            .arg(infos.raceid)
+            .arg(infos.sexid)
+            .arg(cd.skinColor)
+            .arg(type);
+      break;
+    case CharSectionsDB::FaceType:
+    case CharSectionsDB::FaceHDType:
+    case CharSectionsDB::HairType:
+    case CharSectionsDB::HairHDType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+                  (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND BaseSection=%5)")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(cd.skinColor)
+                  .arg(cd.faceType)
+                  .arg(type);
+      break;
+    default:
+      query = "";
+  }
+
+  if(query != "")
+  {
+    sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+    if(vals.valid && !vals.values.empty())
+    {
+      result.push_back(vals.values[0][0]);
+      result.push_back(vals.values[0][1]);
+      result.push_back(vals.values[0][2]);
+    }
+    else
+    {
+      LOG_ERROR << "Unable to collect infos for model";
+      LOG_ERROR << query;
+    }
+  }
+
+  return result;
+}
+
+int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
+{
+  int result = 0;
+
+  RaceInfos infos;
+  if(!getRaceInfosForCurrentModel(infos))
+  {
+    LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
+    return result;
+  }
+
+  QString query;
+  switch(type)
+  {
+    case CharSectionsDB::SkinType:
+    case CharSectionsDB::SkinHDType:
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND BaseSection=%3")
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(type);
+      break;
+    case CharSectionsDB::FaceType:
+    case CharSectionsDB::FaceHDType:
+    case CharSectionsDB::HairType:
+    case CharSectionsDB::HairHDType:
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(cd.skinColor)
+              .arg(type);
+      break;
+
+    default:
+      query = "";
+  }
+
+  sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(vals.valid && !vals.values.empty())
+  {
+    result = atoi(vals.values[0][0].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of customization for model" << model->name.c_str();
+  }
+
+  return result;
+}

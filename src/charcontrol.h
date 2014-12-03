@@ -29,6 +29,16 @@ class ModelViewer;
 
 bool slotHasModel(size_t i);
 
+class RaceInfos
+{
+  public:
+    int raceid;
+    int sexid; // 0 male / 1 female
+    int textureLayoutID;
+    std::string prefix;
+};
+
+
 class CharControl: public wxWindow
 {
 	DECLARE_CLASS(CharControl)
@@ -43,6 +53,14 @@ class CharControl: public wxWindow
 
 	void AddEquipment(ssize_t slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup = true);
 	void UpdateTextureList(wxString texName, int special);
+
+	static std::map< std::string, RaceInfos> RACES;
+	bool getRaceInfosForCurrentModel(RaceInfos &);
+
+	std::vector<std::string> getTextureNameForSection(CharSectionsDB::SectionType);
+	int getNbValuesForSection(CharSectionsDB::SectionType type);
+
+	void refreshModelSpins();
 
 public:
 	// Item selection stuff
@@ -95,6 +113,9 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
+
+	static void initRaces();
+
 };
 
 

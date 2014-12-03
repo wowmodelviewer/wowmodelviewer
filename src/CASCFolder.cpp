@@ -51,29 +51,31 @@ void CASCFolder::initLocale()
 {
   LOG_INFO << "Determining Locale for:" << m_folder.c_str();
   // init map based on CASCLib
-  std::map<int,std::string> localesMap;
-  localesMap[CASC_LOCALE_ENUS]="enUS";
-  localesMap[CASC_LOCALE_KOKR]="koKR";
-  localesMap[CASC_LOCALE_FRFR]="frFR";
-  localesMap[CASC_LOCALE_DEDE]="deDE";
-  localesMap[CASC_LOCALE_ZHCN]="zhCN";
-  localesMap[CASC_LOCALE_ESES]="esES";
-  localesMap[CASC_LOCALE_ZHTW]="zhTW";
-  localesMap[CASC_LOCALE_ENGB]="enGB";
-  localesMap[CASC_LOCALE_ENCN]="enCN";
-  localesMap[CASC_LOCALE_ENTW]="enTW";
-  localesMap[CASC_LOCALE_ESMX]="esMX";
-  localesMap[CASC_LOCALE_RURU]="ruRU";
-  localesMap[CASC_LOCALE_PTBR]="ptBR";
-  localesMap[CASC_LOCALE_ITIT]="itIT";
-  localesMap[CASC_LOCALE_PTPT]="ptPT";
+  std::list<std::pair<int,std::string> > locales;
+  locales.push_back(std::make_pair(CASC_LOCALE_FRFR,"frFR"));
+  locales.push_back(std::make_pair(CASC_LOCALE_DEDE,"deDE"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ESES,"esES"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ESMX,"esMX"));
+  locales.push_back(std::make_pair(CASC_LOCALE_PTBR,"ptBR"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ITIT,"itIT"));
+  locales.push_back(std::make_pair(CASC_LOCALE_PTPT,"ptPT"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ENGB,"enGB"));
+  locales.push_back(std::make_pair(CASC_LOCALE_RURU,"ruRU"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ENUS,"enUS"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ENCN,"enCN"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ENTW,"enTW"));
+  locales.push_back(std::make_pair(CASC_LOCALE_KOKR,"koKR"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ZHCN,"zhCN"));
+  locales.push_back(std::make_pair(CASC_LOCALE_ZHTW,"zhTW"));
+
+
 
   HANDLE dummy;
 
   //search for current locale for this folder
   // => look at Interface\FrameXML\Localization.lua file
-  std::map<int,std::string>::iterator it = localesMap.begin();
-  for( ; it != localesMap.end() ; ++it)
+  std::list<std::pair<int,std::string> >::iterator it = locales.begin();
+  for( ; it != locales.end() ; ++it)
   {
     if(CascOpenFile(hStorage,"Interface\\FrameXML\\Localization.lua", it->first, 0, &dummy))
     {
@@ -82,7 +84,7 @@ void CASCFolder::initLocale()
     }
   }
 
-  if(it != localesMap.end())
+  if(it != locales.end())
   {
     m_currentLocale = it->second;
     m_currentCascLocale = it->first;

@@ -52,6 +52,7 @@ target_link_libraries(wowmodelviewer
   png
   core
   Qt5::Xml
+  Qt5::Gui
 )
 
 add_custom_target(release make install

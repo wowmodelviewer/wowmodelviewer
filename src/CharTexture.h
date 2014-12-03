@@ -12,8 +12,14 @@
 
 #include <wx/string.h>
 
+#include <map>
+
 struct CharRegionCoords {
-	int xpos, ypos, xsize, ysize;
+	int xpos, ypos, width, height;
+};
+
+struct LayoutSize {
+  int width, height;
 };
 
 struct CharTextureComponent
@@ -28,27 +34,24 @@ struct CharTextureComponent
 	}
 };
 
-struct CharTexture
+class CharTexture
 {
-  size_t race;
-	std::vector<CharTextureComponent> components;
+  public:
+    CharTexture(size_t _layoutSizeId)
+        : layoutSizeId(_layoutSizeId)
+      {}
 
-  CharTexture(size_t _race)
-    : race(_race)
-  {}
+    void addLayer(wxString fn, int region, int layer);
 
-	void addLayer(wxString fn, int region, int layer)
-	{
-		if (!fn || fn.length()==0)
-			return;
+    void compose(TextureID texID);
 
-		CharTextureComponent ct;
-		ct.name = fn;
-		ct.region = region;
-		ct.layer = layer;
-		components.push_back(ct);
-	}
-	void compose(TextureID texID);
+    static void initRegions();
+
+  private:
+    size_t layoutSizeId;
+	  std::vector<CharTextureComponent> m_components;
+	  static std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
+
 };
 
 

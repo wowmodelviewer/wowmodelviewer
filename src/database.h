@@ -165,12 +165,17 @@ public:
 	static const size_t IsNPCBC = 9;	// uint | 1 for npc
 
 	/// Types
-	enum{
+	enum SectionType{
 		SkinType = 0,
 		FaceType,
 		FacialHairType,
 		HairType,
-		UnderwearType
+		UnderwearType,
+		SkinHDType,
+		FaceHDType,
+		FacialHairHDType,
+		HairHDType,
+		UnderwearHDType
 	};
 	/*
 	static const size_t SkinType = 0;

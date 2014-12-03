@@ -804,32 +804,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	
-	CASCFile * f = NULL;
-
-	//std::cout << "model name = "
-	if(g_charControl->model && g_charControl->model->isHD)
-	{
-	  wxString texturename = tex->name;
-	  // try to load hd version of texture
-	  texturename = texturename.BeforeLast(wxT('.')) + wxT("_hd.blp");
-	  LOG_INFO << __FUNCTION__ << " trying to load HD version of texture : " << tex->name.c_str() << " => " << texturename.c_str();
-	  f = new CASCFile(texturename.c_str());
-	  if(!f->isEof()) // success in hd => update tex->name
-	  {
-	    tex->name = texturename;
-	  }
-	  else
-	  {
-	    delete f;
-	    f = NULL;
-	  }
-	}
-
-	if(!f) // failed to load in hd, try in normal
-	{
-	  LOG_INFO << __FUNCTION__ << "Failed to load HD texture, fallback to normal one";
-	  f = new CASCFile(tex->name.c_str());
-	}
+	CASCFile * f = new CASCFile(tex->name.c_str());
 
 	if (f->isEof()) {
 		tex->id = 0;
@@ -851,6 +826,9 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 	tex->w = w;
 	tex->h = h;
+	std::cout << __FUNCTION__ << " " << __FILE__ << " " << __LINE__ << std::endl;
+	std::cout << "tex->w = " << tex->w << std::endl;
+	std::cout << "tex->h = " << tex->h << std::endl;
 
 	bool hasmipmaps = (attr[3]>0);
 	size_t mipmax = hasmipmaps ? 16 : 1;
