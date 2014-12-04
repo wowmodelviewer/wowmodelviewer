@@ -309,40 +309,39 @@ void CharControl::UpdateModel(Attachment *a)
 	cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
 	cd.maxHairColor = getNbValuesForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
 
+	RaceInfos infos;
+	if(getRaceInfosForCurrentModel(infos))
+	{
+	  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
+	        .arg(infos.raceid)
+	        .arg(infos.sexid);
+
+	  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	  if(hairStyles.valid && !hairStyles.values.empty())
+	  {
+	    cd.maxHairStyle = atoi(hairStyles.values[0][0].c_str());
+	  }
+	  else
+	  {
+	    LOG_ERROR << "Unable to collect number of hair styles for model" << model->name.c_str();
+	    cd.maxHairStyle = 0;
+	  }
+	}
+
 	/*cd.maxHairColor = chardb.getColorsFor(race, gender, CharSectionsDB::HairType, 0, 0);
 	cd.maxFacialHair = facialhairdb.getStylesFor(race, gender);
 	cd.maxFacialColor = cd.maxHairColor;
 */
 
-	cd.maxFacialHair = 0;
+
 	cd.maxFacialColor = 0;
 
 
 	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
-	// ----
-
-	RaceInfos infos;
-	if(!getRaceInfosForCurrentModel(infos))
-	{
-	  LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
-	  return;
-	}
 
 	cd.race = infos.raceid;
 	cd.gender = infos.sexid;
-
-	std::set<int> styles;
-	for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
-		if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender) {
-			styles.insert(it->getUInt(CharHairGeosetsDB::Section));
-		}
-	}
-	cd.maxHairStyle = (int)styles.size();
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen 
-		cd.maxHairStyle = 21;
-	}
-#endif // for worgen female
 
 	refreshModelSpins();
 
@@ -775,10 +774,7 @@ void CharControl::RefreshModel()
 
 	RaceInfos infos;
 	if(!getRaceInfosForCurrentModel(infos))
-	{
-	  LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
 	  return;
-	}
 
   std::cout << "infos : " << infos.prefix << " " << infos.textureLayoutID << std::endl;
   std::cout << "race = " << infos.raceid << " sex = " << ((infos.sexid == 0)?"Male":"Female") << std::endl;
@@ -798,8 +794,8 @@ void CharControl::RefreshModel()
 	}
 
 	// Hair related boolean flags
-//	bool bald = false;
-//	bool showHair = cd.showHair;
+  //	bool bald = false;
+  	bool showHair = cd.showHair;
 //	bool showFacialHair = cd.showFacialHair;
 
 	// Display underwear on the model?
@@ -822,14 +818,64 @@ void CharControl::RefreshModel()
 	  tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 1);
 	}
 
-	// Hair
-	textures = getTextureNameForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
-	if(textures.size() != 0)
+  // select hairstyle geoset(s)
+	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+	                  .arg(infos.raceid)
+	                  .arg(infos.sexid)
+	                  .arg(cd.hairStyle);
+
+	sqlResult hairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	if(hairStyle.valid && !hairStyle.values.empty())
 	{
-	  std::cout << "textures[0] = " << textures[0] << std::endl;
-	  UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+	  unsigned int geosetId = atoi(hairStyle.values[0][0].c_str());
+	  // bald =
+
+	  for (size_t j=0; j<model->geosets.size(); j++) {
+	    if (model->geosets[j].id == geosetId)
+	      model->showGeosets[j] = showHair;
+	    else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.maxHairStyle+1))
+	      model->showGeosets[j] = false;
+	  }
+	}
+	else
+	{
+	  LOG_ERROR << "Unable to collect number of hair style" << cd.hairStyle << "for model" << model->name.c_str();
 	}
 
+  // Hair texture
+	textures = getTextureNameForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
+  if(textures.size() != 0)
+  {
+    std::cout << "textures[0] = " << textures[0] << std::endl;
+    std::cout << "textures[1] = " << textures[1] << std::endl;
+    std::cout << "textures[2] = " << textures[2] << std::endl;
+    hairTex = texturemanager.add(textures[0].c_str());
+    UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+    tex.addLayer(textures[1].c_str(), CR_FACE_LOWER, 3);
+    tex.addLayer(textures[2].c_str(), CR_FACE_UPPER, 3);
+  }
+
+
+/*
+
+  for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
+    if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender && it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
+    {
+      unsigned int geosetId;
+
+      if (gameVersion >= VERSION_MOP){
+        geosetId = it->getUInt(CharHairGeosetsDB::Geosetv500);
+        bald = it->getUInt(CharHairGeosetsDB::Baldv500) != 0;
+      }else{
+        geosetId = it->getUInt(CharHairGeosetsDB::Geoset);
+        bald = it->getUInt(CharHairGeosetsDB::Bald) != 0;
+      }
+
+
+    }
+  }
+*/
 /*
 		// facial feature geosets
 		try {
@@ -887,17 +933,7 @@ void CharControl::RefreshModel()
 			}
 		}
 	}
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen 
-		for(unsigned int i=1; i<=21; i++) {
-			unsigned int section = i - 1;
-			for (size_t j=0; j<model->geosets.size(); j++) {
-				if (model->geosets[j].id == i)
-					model->showGeosets[j] = ((cd.hairStyle==section) && showHair);
-			}
-		}
-	}
-#endif // for worgen female
+
 
 	// hair
 	try {
@@ -2576,6 +2612,7 @@ bool CharControl::getRaceInfosForCurrentModel(RaceInfos & result)
     return true;
   }
 
+  LOG_ERROR << "Unable to retrieve race infos for model" << model->name.c_str();
   return false;
 }
 
@@ -2585,10 +2622,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
 
   RaceInfos infos;
   if(!getRaceInfosForCurrentModel(infos))
-  {
-    LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
     return result;
-  }
 /*
   std::cout << __FUNCTION__ << std::endl;
   std::cout << "----------------------------------------------" << std::endl;
@@ -2607,23 +2641,31 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
     case CharSectionsDB::UnderwearType:
     case CharSectionsDB::UnderwearHDType:
       query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-            (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4)")
-            .arg(infos.raceid)
-            .arg(infos.sexid)
-            .arg(cd.skinColor)
-            .arg(type);
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(cd.skinColor)
+              .arg(type);
       break;
     case CharSectionsDB::FaceType:
     case CharSectionsDB::FaceHDType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND BaseSection=%5)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(cd.skinColor)
+              .arg(cd.faceType)
+              .arg(type);
+      break;
     case CharSectionsDB::HairType:
     case CharSectionsDB::HairHDType:
       query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-                  (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND BaseSection=%5)")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
-                  .arg(cd.skinColor)
-                  .arg(cd.faceType)
-                  .arg(type);
+              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND BaseSection=%5)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(cd.hairStyle)
+              .arg(cd.hairColor)
+              .arg(type);
       break;
     default:
       query = "";
@@ -2654,10 +2696,7 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
 
   RaceInfos infos;
   if(!getRaceInfosForCurrentModel(infos))
-  {
-    LOG_ERROR << "Unable to determine Texture Layout size for model" << model->name.c_str();
     return result;
-  }
 
   QString query;
   switch(type)
@@ -2665,21 +2704,26 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
     case CharSectionsDB::SkinType:
     case CharSectionsDB::SkinHDType:
       query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND BaseSection=%3")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(type);
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(type);
       break;
     case CharSectionsDB::FaceType:
     case CharSectionsDB::FaceHDType:
-    case CharSectionsDB::HairType:
-    case CharSectionsDB::HairHDType:
       query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.skinColor)
               .arg(type);
       break;
-
+    case CharSectionsDB::HairType:
+    case CharSectionsDB::HairHDType:
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND BaseSection=%4")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(cd.hairStyle)
+              .arg(type);
+      break;
     default:
       query = "";
   }

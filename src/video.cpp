@@ -826,9 +826,6 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 	tex->w = w;
 	tex->h = h;
-	std::cout << __FUNCTION__ << " " << __FILE__ << " " << __LINE__ << std::endl;
-	std::cout << "tex->w = " << tex->w << std::endl;
-	std::cout << "tex->h = " << tex->h << std::endl;
 
 	bool hasmipmaps = (attr[3]>0);
 	size_t mipmax = hasmipmaps ? 16 : 1;

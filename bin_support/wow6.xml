@@ -266,4 +266,15 @@
 	<field type="uint" name="HighResFemaleDisplayId" />
 	<field type="uint" name="CharComponentTexLayoutHiResID" />
   </ChrRaces>
+  <CharHairGeoSets>
+    <gamefile name="DBFilesClient\CharHairGeoSets.dbc" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="RaceID" />
+    <field type="uint" name="SexID" />
+    <field type="uint" name="VariationID" />
+    <field type="uint" name="VariationType" />
+    <field type="uint" name="GeoSetID" />
+    <field type="uint" name="ShowScalp" />
+    <field type="uint" name="ColorIndex" />
+  </CharHairGeoSets>
 </database>
