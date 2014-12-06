@@ -2614,7 +2614,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
     case CharSectionsDB::UnderwearType:
     case CharSectionsDB::UnderwearHDType:
       query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4)")
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.skinColor)
@@ -2623,7 +2623,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
     case CharSectionsDB::FaceType:
     case CharSectionsDB::FaceHDType:
       query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND BaseSection=%5)")
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.skinColor)
@@ -2633,7 +2633,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
     case CharSectionsDB::HairType:
     case CharSectionsDB::HairHDType:
       query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND BaseSection=%5)")
+              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.hairStyle)
@@ -2678,14 +2678,14 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
   {
     case CharSectionsDB::SkinType:
     case CharSectionsDB::SkinHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND BaseSection=%3")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(type);
       break;
     case CharSectionsDB::FaceType:
     case CharSectionsDB::FaceHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND BaseSection=%4")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.skinColor)
@@ -2693,7 +2693,7 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
       break;
     case CharSectionsDB::HairType:
     case CharSectionsDB::HairHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND BaseSection=%4")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.hairStyle)
