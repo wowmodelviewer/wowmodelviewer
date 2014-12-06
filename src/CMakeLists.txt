@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # set build type you want
 # availabke values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
-SET(CMAKE_BUILD_TYPE MinSizeRel)
+SET(CMAKE_BUILD_TYPE Debug)
 
 # define base repo path to use it cross folder
 set(WMV_BASE_PATH "${CMAKE_SOURCE_DIR}")

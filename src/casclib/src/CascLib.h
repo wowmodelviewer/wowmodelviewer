@@ -155,6 +155,8 @@ typedef enum _CASC_STORAGE_INFO_CLASS
 {
     CascStorageFileCount,
     CascStorageFeatures,
+    CascStorageGameInfo,
+    CascStorageGameBuild,
     CascStorageInfoClassMax
 
 } CASC_STORAGE_INFO_CLASS, *PCASC_STORAGE_INFO_CLASS;
@@ -193,7 +195,7 @@ void qsort_pointer_array(void ** base, size_t num, int (*compare)(const void *, 
 //-----------------------------------------------------------------------------
 // Functions for storage manipulation
 
-int  WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage);
+bool  WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage);
 bool  WINAPI CascGetStorageInfo(HANDLE hStorage, CASC_STORAGE_INFO_CLASS InfoClass, void * pvStorageInfo, size_t cbStorageInfo, size_t * pcbLengthNeeded);
 bool  WINAPI CascCloseStorage(HANDLE hStorage);
 

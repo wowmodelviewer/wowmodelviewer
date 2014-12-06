@@ -9,6 +9,7 @@ set(HEADER_FILES
     src/common/Common.h
     src/common/FileStream.h
     src/common/ListFile.h
+    src/common/Map.h
     src/jenkins/lookup.h
 )
 
@@ -17,7 +18,7 @@ set(SRC_FILES
     src/common/Directory.cpp
     src/common/FileStream.cpp
     src/common/ListFile.cpp
-	src/common/Map.cpp
+    src/common/Map.cpp
     src/jenkins/lookup3.c
     src/CascBuildCfg.cpp
     src/CascCommon.cpp
@@ -88,7 +89,6 @@ if(WITH_TEST)
     target_link_libraries(casc_test casc)
 endif()
 
-
 message(STATUS "Building static CascLib")
 add_library(casc_static STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
 target_link_libraries(casc_static ${LINK_LIBS})
@@ -103,4 +103,3 @@ if(UNIX)
     set_target_properties(casc PROPERTIES VERSION 1.0.0)
     set_target_properties(casc PROPERTIES SOVERSION 1)
 endif()
-

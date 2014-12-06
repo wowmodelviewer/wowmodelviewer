@@ -23,9 +23,9 @@
 
 #include "CascPort.h"
 #include "common/Common.h"
+#include "common/Map.h"
 #include "common/FileStream.h"
 #include "common/ListFile.h"
-#include "common/Map.h"
 
 // Headers from LibTomCrypt
 #include "libtomcrypt/src/headers/tomcrypt.h"
@@ -48,6 +48,20 @@
 
 #define CASC_SEARCH_HAVE_NAME   0x0001          // Indicated that previous search found a name
 
+#define BLTE_HEADER_SIGNATURE   0x45544C42      // 'BLTE' header in the data files
+#define BLTE_HEADER_DELTA       0x1E            // Distance of BLTE header from begin of the header area
+#define MAX_HEADER_AREA_SIZE    0x2A            // Length of the file header area
+
+// File header area in the data.xxx:
+//  BYTE  HeaderHash[MD5_HASH_SIZE];            // MD5 of the frame array
+//  DWORD dwFileSize;                           // Size of the file (see comment before CascGetFileSize for details)
+//  BYTE  SomeSize[4];                          // Some size (big endian)
+//  BYTE  Padding[6];                           // Padding (?)
+//  DWORD dwSignature;                          // Must be "BLTE"
+//  BYTE  HeaderSizeAsBytes[4];                 // Header size in bytes (big endian)
+//  BYTE  MustBe0F;                             // Must be 0x0F. Optional, only if HeaderSizeAsBytes != 0
+//  BYTE  FrameCount[3];                        // Frame count (big endian). Optional, only if HeaderSizeAsBytes != 0
+
 // Prevent problems with CRT "min" and "max" functions,
 // as they are not defined on all platforms
 #define CASCLIB_MIN(a, b) ((a < b) ? a : b)
@@ -57,16 +71,46 @@
 #define CASC_PACKAGE_BUFFER     0x1000
 
 //-----------------------------------------------------------------------------
-// Structures
+// On-disk structures
 
+typedef struct _FILE_LOCALE_BLOCK
+{
+    DWORD NumberOfFiles;                        // Number of entries
+    DWORD Flags;
+    DWORD Locales;                              // File locale mask (CASC_LOCALE_XXX)
+
+    // Followed by a block of 32-bit integers (count: NumberOfFiles)
+    // Followed by the MD5 and file name hash (count: NumberOfFiles)
+
+} FILE_LOCALE_BLOCK, *PFILE_LOCALE_BLOCK;
+
+typedef struct _FILE_ROOT_ENTRY
+{
+    BYTE EncodingKey[MD5_HASH_SIZE];            // MD5 of the file
+    ULONGLONG FileNameHash;                     // Jenkins hash of the file name
+
+} FILE_ROOT_ENTRY, *PFILE_ROOT_ENTRY;
+
+typedef struct _ROOT_BLOCK_INFO
+{
+    PFILE_LOCALE_BLOCK pLocaleBlockHdr;         // Pointer to the locale block
+    PDWORD pInt32Array;                         // Pointer to the array of 32-bit integers
+    PFILE_ROOT_ENTRY pRootEntries;
+
+} ROOT_BLOCK_INFO, *PROOT_BLOCK_INFO;
+
+//-----------------------------------------------------------------------------
+// In-memory structures
+
+class TMndxFindResult;
 struct TFileStream;
 struct _MAR_FILE;
 
 typedef struct _CASC_INDEX_ENTRY
 {
     BYTE IndexKey[CASC_FILE_KEY_SIZE];              // The first 9 bytes of the encoding key
-    BYTE FileOffset[5];                             // 
-    BYTE FileSize[4];
+    BYTE FileOffsetBE[5];                           // Index of data file and offset within (big endian).
+    BYTE FileSizeLE[4];                             // Size occupied in the storage file (data.###). See comment before CascGetFileSize for details
 } CASC_INDEX_ENTRY, *PCASC_INDEX_ENTRY;
 
 typedef struct _CASC_MAPPING_TABLE
@@ -113,7 +157,7 @@ typedef struct _CASC_ENCODING_HEADER
 typedef struct _CASC_ENCODING_ENTRY
 {
     USHORT KeyCount;                                // Number of subitems
-    BYTE FileSizeBytes[4];                          // File size as bytes (big-endian)
+    BYTE FileSizeBE[4];                          // Compressed file size (header area + frame headers + compressed frames), in bytes
     BYTE EncodingKey[MD5_HASH_SIZE];                // File encoding key
 
     // Followed by the index keys
@@ -132,6 +176,18 @@ typedef struct _CASC_ROOT_LOCALE_BLOCK
 
 } CASC_ROOT_LOCALE_BLOCK, *PCASC_ROOT_LOCALE_BLOCK;
 
+// Root file entry for CASC storages with MNDX root file (Heroes of the Storm)
+// Corresponds to the in-file structure
+typedef struct _CASC_ROOT_ENTRY_MNDX
+{
+    DWORD Flags;                                    // High 8 bits: Flags, low 24 bits: package index
+    BYTE  EncodingKey[MD5_HASH_SIZE];               // Encoding key for the file
+    DWORD FileSize;                                 // Uncompressed file size, in bytes
+
+} CASC_ROOT_ENTRY_MNDX, *PCASC_ROOT_ENTRY_MNDX;
+
+// Root file entry for CASC storages without MNDX root file (World of Warcraft 6.0+)
+// Does not match to the in-file structure of the root entry
 typedef struct _CASC_ROOT_ENTRY
 {
     BYTE EncodingKey[MD5_HASH_SIZE];                // File encoding key (MD5)
@@ -140,21 +196,6 @@ typedef struct _CASC_ROOT_ENTRY
     DWORD Flags;                                    // File flags
 
 } CASC_ROOT_ENTRY, *PCASC_ROOT_ENTRY;
-
-typedef struct _CASC_ROOT_KEY_INFO
-{
-    BYTE EncodingKey[MD5_HASH_SIZE];                // Encoding key for the file, obtained from root info
-    ULONGLONG FileSize;                             // Size of the file, in bytes
-    BYTE Flags;                                     // File flags
-} CASC_ROOT_KEY_INFO, *PCASC_ROOT_KEY_INFO;
-
-typedef struct _CASC_MNDX_ENTRY
-{
-    DWORD Flags;                                    // High 8 bits: Flags, low 24 bits: package index
-    BYTE  EncodingKey[MD5_HASH_SIZE];               // Encoding key for the file
-    DWORD FileSize;                                 // Size of the file, in bytes
-
-} CASC_MNDX_ENTRY, *PCASC_MNDX_ENTRY;
 
 typedef struct _CASC_MNDX_INFO
 {
@@ -174,8 +215,8 @@ typedef struct _CASC_MNDX_INFO
     struct _MAR_FILE * pMarFile1;                   // File name list for the packages
     struct _MAR_FILE * pMarFile2;                   // File name list for names stripped of package names
     struct _MAR_FILE * pMarFile3;                   // File name list for complete names
-    PCASC_MNDX_ENTRY pMndxEntries;
-    PCASC_MNDX_ENTRY * ppValidEntries;
+    PCASC_ROOT_ENTRY_MNDX pMndxEntries;
+    PCASC_ROOT_ENTRY_MNDX * ppValidEntries;
 
 } CASC_MNDX_INFO, *PCASC_MNDX_INFO;
 
@@ -208,6 +249,7 @@ typedef struct _TCascStorage
     DWORD dwRefCount;                               // Number of references
     DWORD dwGameInfo;                               // Game type
     DWORD dwBuildNumber;                            // Game build number
+    DWORD dwFileBeginDelta;                         // This is number of bytes to shift back from archive offset (from index entry) to actual begin of file data
     
     QUERY_KEY CdnConfigKey;
     QUERY_KEY CdnBuildKey;
@@ -258,9 +300,11 @@ typedef struct _TCascFile
 
     DWORD ArchiveIndex;                             // Index of the archive (data.###)
     DWORD HeaderOffset;                             // Offset of the BLTE header, relative to the begin of the archive
+    DWORD HeaderSize;                               // Length of the BLTE header
     DWORD FramesOffset;                             // Offset of the frame data, relative to the begin of the archive
     DWORD CompressedSize;                           // Compressed size of the file (in bytes)
     DWORD FileSize;                                 // Size of file, in bytes
+    BYTE FrameArrayHash[MD5_HASH_SIZE];             // MD5 hash of the frame array
 
     PCASC_FILE_FRAME pFrames;                       // Array of file frames
     DWORD FrameCount;                               // Number of the file frames
@@ -270,9 +314,15 @@ typedef struct _TCascFile
     DWORD CacheStart;                               // Starting offset in the cache
     DWORD CacheEnd;                                 // Ending offset in the cache
 
-} TCascFile;
+#ifdef CASCLIB_TEST     // Extra fields for analyzing the file size problem
+    DWORD FileSize_RootEntry;                       // File size, from the root entry
+    DWORD FileSize_EncEntry;                        // File size, from the encoding entry
+    DWORD FileSize_IdxEntry;                        // File size, from the index entry
+    DWORD FileSize_HdrArea;                         // File size, as stated in the file header area
+    DWORD FileSize_FrameSum;                        // File size as sum of frame sizes
+#endif
 
-class TMndxFindResult;
+} TCascFile;
 
 typedef struct _TCascSearch
 {
@@ -305,17 +355,10 @@ typedef struct _TCascSearch
 //
 
 #if defined(_MSC_VER) && defined(_DEBUG)
-/*
-void * DbgRealloc(void * ptr, size_t nSize);
 
-#define CASC_REALLOC(type, ptr, count) (type *)DbgRealloc(ptr, ((count) * sizeof(type)))
+#define CASC_REALLOC(type, ptr, count) (type *)HeapReAlloc(GetProcessHeap(), 0, ptr, ((count) * sizeof(type)))
 #define CASC_ALLOC(type, count)        (type *)HeapAlloc(GetProcessHeap(), 0, ((count) * sizeof(type)))
 #define CASC_FREE(ptr)                 HeapFree(GetProcessHeap(), 0, ptr)
-*/
-
-#define CASC_REALLOC(type, ptr, count) (type *)realloc(ptr, (count) * sizeof(type))
-#define CASC_ALLOC(type, count)        (type *)malloc((count) * sizeof(type))
-#define CASC_FREE(ptr)                 free(ptr)
 
 #else
 
@@ -336,7 +379,7 @@ ULONGLONG ConvertBytesToInteger_5(LPBYTE ValueAsBytes);
 //-----------------------------------------------------------------------------
 // Build configuration reading
 
-int LoadBuildConfiguration(TCascStorage * hs);
+int LoadBuildInfo(TCascStorage * hs);
 
 //-----------------------------------------------------------------------------
 // Internal file functions
@@ -351,24 +394,16 @@ PCASC_INDEX_ENTRY    FindIndexEntry(TCascStorage * hs, PQUERY_KEY pIndexKey);
 int CascDecompress(void * pvOutBuffer, PDWORD pcbOutBuffer, void * pvInBuffer, DWORD cbInBuffer);
 
 //-----------------------------------------------------------------------------
-// Dump data
+// Dumping CASC data structures
 
 #ifdef _DEBUG
 void CascDumpSparseArray(const char * szFileName, void * pvSparseArray);
 void CascDumpNameFragTable(const char * szFileName, void * pvMarFile);
 void CascDumpFileNames(const char * szFileName, void * pvMarFile);
-void CascDumpMndxRoot(const char * szFileName, PCASC_MNDX_INFO pMndxInfo);
 void CascDumpIndexEntries(const char * szFileName, TCascStorage * hs);
-void CascDumpStorage(const char * szFileName, TCascStorage * hs, const TCHAR * szListFile);
+void CascDumpMndxRoot(const char * szFileName, PCASC_MNDX_INFO pMndxInfo);
+void CascDumpRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile, const char * szFormat, const TCHAR * szListFile, int nDumpLevel);
 void CascDumpFile(const char * szFileName, HANDLE hFile);
-#else   // _DEBUG
-#define CascDumpSparseArray(n,a)    /* */
-#define CascDumpNameFragTable(n, m) /* */
-#define CascDumpFileNames(n, m)     /* */
-#define CascDumpMndxRoot(n,i)       /* */
-#define CascDumpIndexEntries(n,h)   /* */
-#define CascDumpStorage(n,h)        /* */
-#define CascDumpFile(n,h)           /* */
 #endif  // _DEBUG
 
 #endif // __CASCCOMMON_H__

@@ -2361,6 +2361,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		break;
 
 	case UPDATE_NPC_START:
+	  /*
 		// Open the first record, just so we can declare the var.
 		NPCDB::Record npcrec = npcdb.getRecord(0);
 		int displayID = 0;
@@ -2441,7 +2442,7 @@ void CharControl::OnUpdateItem(int type, int id)
 				wxLogMessage(wxT("npcdb.getByNPCID error"));
 			}
 		}
-
+*/
 		break;
 
 	}

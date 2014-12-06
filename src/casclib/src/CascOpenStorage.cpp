@@ -14,6 +14,13 @@
 #include "CascMndxRoot.h"
 
 //-----------------------------------------------------------------------------
+// Dumping options
+
+#ifdef _DEBUG
+#define CASC_DUMP_ROOT_FILE  2              // The root file will be dumped (level 2)
+#endif
+
+//-----------------------------------------------------------------------------
 // Local structures
 
 #define CASC_ENCODING_SEGMENT_SIZE  0x1000
@@ -78,32 +85,6 @@ typedef struct _FILE_ENCODING_SEGMENT
     BYTE SegmentHash[MD5_HASH_SIZE];                // MD5 hash of the entire segment
 
 } FILE_ENCODING_SEGMENT, *PFILE_ENCODING_SEGMENT;
-
-typedef struct _FILE_LOCALE_BLOCK
-{
-    DWORD NumberOfFiles;                        // Number of entries
-    DWORD Flags;
-    DWORD Locales;                              // File locale mask (CASC_LOCALE_XXX)
-
-    // Followed by a block of 32-bit integers (count: NumberOfFiles)
-    // Followed by the MD5 and file name hash (count: NumberOfFiles)
-
-} FILE_LOCALE_BLOCK, *PFILE_LOCALE_BLOCK;
-
-typedef struct _FILE_ROOT_ENTRY
-{
-    BYTE EncodingKey[MD5_HASH_SIZE];            // MD5 of the file
-    ULONGLONG FileNameHash;                     // Jenkins hash of the file name
-
-} FILE_ROOT_ENTRY, *PFILE_ROOT_ENTRY;
-
-typedef struct _ROOT_BLOCK_INFO
-{
-    PFILE_LOCALE_BLOCK pLocaleBlockHdr;         // Pointer to the locale block
-    PDWORD pInt32Array;                         // Pointer to the array of 32-bit integers
-    PFILE_ROOT_ENTRY pRootEntries;
-
-} ROOT_BLOCK_INFO, *PROOT_BLOCK_INFO;
 
 //-----------------------------------------------------------------------------
 // Local variables
@@ -235,7 +216,7 @@ static bool IsCascIndexHeader_V2(LPBYTE pbFileData, DWORD cbFileData)
     return (HashHigh == pSizeAndHash->dwBlockHash);
 }
 
-static LPBYTE VerifyLocaleBlock(PROOT_BLOCK_INFO pBlockInfo, LPBYTE pbFilePointer, LPBYTE pbFileEnd)
+LPBYTE VerifyLocaleBlock(PROOT_BLOCK_INFO pBlockInfo, LPBYTE pbFilePointer, LPBYTE pbFileEnd)
 {
     // Validate the locale header
     pBlockInfo->pLocaleBlockHdr = (PFILE_LOCALE_BLOCK)pbFilePointer;
@@ -664,79 +645,6 @@ static int CreateMapOfEncodingKeys(TCascStorage * hs, PFILE_ENCODING_SEGMENT pEn
     return nError;
 }
 
-static DWORD GetSizeOfEncodingFile(HANDLE hFile)
-{
-    CASC_ENCODING_HEADER EncodingHeader;
-    DWORD cbEncodingFile = 0;
-    DWORD dwSegmentPos;
-    DWORD dwNumSegments;
-    DWORD dwBytesRead;
-
-    // Read the endoding header
-    CascReadFile(hFile, &EncodingHeader, sizeof(CASC_ENCODING_HEADER), &dwBytesRead);
-    if(dwBytesRead == sizeof(CASC_ENCODING_HEADER))
-    {
-        dwNumSegments = ConvertBytesToInteger_4(EncodingHeader.NumSegments);
-        dwSegmentPos = ConvertBytesToInteger_4(EncodingHeader.SegmentsPos);
-
-        cbEncodingFile = sizeof(CASC_ENCODING_HEADER) +
-                         dwSegmentPos +
-                         dwNumSegments * (sizeof(FILE_ENCODING_SEGMENT) + CASC_ENCODING_SEGMENT_SIZE);
-    }
-
-    // Reset the position back
-    CascSetFilePointer(hFile, 0, NULL, FILE_BEGIN);
-    return cbEncodingFile;
-}
-
-static LPBYTE LoadCascFile(HANDLE hFile, DWORD cbMaxSize, PDWORD pcbFileData)
-{
-    LPBYTE pbFileData = NULL;
-    DWORD cbFileData;
-    DWORD dwBytesRead = 0;
-    int nError = ERROR_SUCCESS;
-
-    // Retrieve the size of the file
-    cbFileData = CascGetFileSize(hFile, NULL);
-    if(cbFileData != 0 && cbFileData != CASC_INVALID_SIZE)
-    {
-        // Trim the size to the maximum
-        cbFileData = CASCLIB_MIN(cbMaxSize, cbFileData);
-
-        // Allocate the buffer that will hold the entire file
-        pbFileData = CASC_ALLOC(BYTE, cbFileData);
-        if(pbFileData != NULL)
-        {
-            // Read the entire file to memory
-            CascReadFile(hFile, pbFileData, cbFileData, &dwBytesRead);
-            if(dwBytesRead != cbFileData)
-                nError = ERROR_FILE_CORRUPT;
-        }
-        else
-            nError = ERROR_NOT_ENOUGH_MEMORY;
-    }
-    else
-        nError = ERROR_FILE_CORRUPT;
-
-    // If something failed, clean-up the buffers
-    if(nError != ERROR_SUCCESS)
-    {
-        // Clear the file data
-        if(pbFileData != NULL)
-            CASC_FREE(pbFileData);
-        pbFileData = NULL;
-        cbFileData = 0;
-
-        // Set the last error value
-        SetLastError(nError);
-    }
-
-    // Return what we got
-    if(pcbFileData != NULL)
-        *pcbFileData = cbFileData;
-    return pbFileData;
-}
-
 static int LoadIndexFiles(TCascStorage * hs)
 {
     DWORD IndexArray[CASC_INDEX_COUNT];
@@ -772,6 +680,113 @@ static int LoadIndexFiles(TCascStorage * hs)
     return nError;
 }
 
+static LPBYTE LoadEncodingFileToMemory(HANDLE hFile, DWORD * pcbEncodingFile)
+{
+    CASC_ENCODING_HEADER EncodingHeader;
+    LPBYTE pbEncodingFile = NULL;
+    DWORD cbEncodingFile = 0;
+    DWORD dwSegmentPos = 0;
+    DWORD dwNumSegments = 0;
+    DWORD dwBytesRead;
+    int nError = ERROR_BAD_FORMAT;
+
+    // Read the encoding header
+    CascReadFile(hFile, &EncodingHeader, sizeof(CASC_ENCODING_HEADER), &dwBytesRead);
+    if(dwBytesRead == sizeof(CASC_ENCODING_HEADER))
+    {
+        dwNumSegments = ConvertBytesToInteger_4(EncodingHeader.NumSegments);
+        dwSegmentPos = ConvertBytesToInteger_4(EncodingHeader.SegmentsPos);
+        if(EncodingHeader.Magic[0] == 'E' && EncodingHeader.Magic[1] == 'N' && dwSegmentPos != 0 && dwNumSegments != 0)
+            nError = ERROR_SUCCESS;
+    }
+
+    // Calculate and allocate space for the entire file
+    if(nError == ERROR_SUCCESS)
+    {
+        cbEncodingFile = sizeof(CASC_ENCODING_HEADER) +
+                         dwSegmentPos +
+                         dwNumSegments * (sizeof(FILE_ENCODING_SEGMENT) + CASC_ENCODING_SEGMENT_SIZE);
+        pbEncodingFile = CASC_ALLOC(BYTE, cbEncodingFile);
+        if(pbEncodingFile == NULL)
+            nError = ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    // If all went OK, we load the entire file to memory
+    if(nError == ERROR_SUCCESS)
+    {
+        // Copy the header itself
+        memcpy(pbEncodingFile, &EncodingHeader, sizeof(CASC_ENCODING_HEADER));
+
+        // Read the rest of the data
+        CascReadFile(hFile, pbEncodingFile + sizeof(CASC_ENCODING_HEADER), cbEncodingFile - sizeof(CASC_ENCODING_HEADER), &dwBytesRead);
+        if(dwBytesRead != (cbEncodingFile - sizeof(CASC_ENCODING_HEADER)))
+            nError = ERROR_FILE_CORRUPT;
+    }
+
+    // Give the loaded file length
+    if(pcbEncodingFile != NULL)
+        *pcbEncodingFile = cbEncodingFile;
+    return pbEncodingFile;
+}
+
+static LPBYTE LoadRootFileToMemory(HANDLE hFile, DWORD * pcbRootFile)
+{
+    TCascFile * hf;
+    LPBYTE pbRootFile = NULL;
+    DWORD cbRootFile = 0;
+    DWORD dwBytesRead;
+    BYTE StartOfFile[0x10];
+    int nError = ERROR_SUCCESS;
+
+    // Dummy read the first 16 bytes
+    CascReadFile(hFile, &StartOfFile, sizeof(StartOfFile), &dwBytesRead);
+    if(dwBytesRead != sizeof(StartOfFile))
+        nError = ERROR_BAD_FORMAT;
+
+    // Calculate and allocate space for the entire file
+    if(nError == ERROR_SUCCESS)
+    {
+        // Convert the file handle to pointer to TCascFile
+        hf = IsValidFileHandle(hFile);
+        if(hf != NULL)
+        {
+            // Parse the frames to get the file size
+            for(DWORD i = 0; i < hf->FrameCount; i++)
+            {
+                cbRootFile += hf->pFrames[i].FrameSize;
+            }
+        }
+
+        // Evaluate the error
+        nError = (cbRootFile != 0) ? ERROR_SUCCESS : ERROR_FILE_CORRUPT;
+    }
+
+    // Allocate space for the entire file
+    if(nError == ERROR_SUCCESS)
+    {
+        pbRootFile = CASC_ALLOC(BYTE, cbRootFile);
+        if(pbRootFile == NULL)
+            nError = ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    // If all went OK, we load the entire file to memory
+    if(nError == ERROR_SUCCESS)
+    {
+        // Copy the header itself
+        memcpy(pbRootFile, StartOfFile, sizeof(StartOfFile));
+
+        // Read the rest of the data
+        CascReadFile(hFile, pbRootFile + sizeof(StartOfFile), cbRootFile - sizeof(StartOfFile), &dwBytesRead);
+        if(dwBytesRead != (cbRootFile - sizeof(StartOfFile)))
+            nError = ERROR_FILE_CORRUPT;
+    }
+
+    // Give the loaded file length
+    if(pcbRootFile != NULL)
+        *pcbRootFile = cbRootFile;
+    return pbRootFile;
+}
+
 static int LoadEncodingFile(TCascStorage * hs)
 {
     PFILE_ENCODING_SEGMENT pEncodingSegment;
@@ -788,18 +803,15 @@ static int LoadEncodingFile(TCascStorage * hs)
     if(!CascOpenFileByIndexKey((HANDLE)hs, &hs->EncodingEKey, 0, &hFile))
         nError = GetLastError();
 
-    // Load the encoding file to memory
+    // Load the entire ENCODING file to memory
     if(nError == ERROR_SUCCESS)
     {
-        // Retrieve the CASC header. We do not usually need to load
-        // the entire file, but we need to know how big part of it we need
-        cbEncodingFile = GetSizeOfEncodingFile(hFile);
-
-        // Load the entire file to memory
-        pbEncodingFile = LoadCascFile(hFile, cbEncodingFile, &cbEncodingFile);
+        // Load the necessary part of the ENCODING file to memory
+        pbEncodingFile = LoadEncodingFileToMemory(hFile, &cbEncodingFile);
         if(pbEncodingFile == NULL || cbEncodingFile <= sizeof(CASC_ENCODING_HEADER))
             nError = ERROR_FILE_CORRUPT;
 
+        // Close the encoding file
         CascCloseFile(hFile);
     }
 
@@ -870,6 +882,16 @@ static int LoadRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
     size_t nRootIndex = 0;
     int nError = ERROR_NOT_ENOUGH_MEMORY;
 
+    // Dump the root file, if needed
+#ifdef CASC_DUMP_ROOT_FILE
+    //CascDumpRootFile(hs,
+    //                 pbRootFile,
+    //                 cbRootFile,
+    //                 "\\casc_root_%build%.txt",
+    //                 _T("\\Ladik\\Appdir\\CascLib\\listfile\\listfile-wow6.txt"),
+    //                 CASC_DUMP_ROOT_FILE);
+#endif
+
     // Calculate the root entries
     for(pbFilePointer = pbRootFile; pbFilePointer <= pbRootFileEnd; )
     {
@@ -878,8 +900,9 @@ static int LoadRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
         if(pbFilePointer == NULL)
             break;
 
-        // Add the number of entries
-        nRootEntries = nRootEntries + BlockInfo.pLocaleBlockHdr->NumberOfFiles;
+        // Skip block with flags set to 0x80
+        if((BlockInfo.pLocaleBlockHdr->Flags & 0x80) == 0)
+            nRootEntries = nRootEntries + BlockInfo.pLocaleBlockHdr->NumberOfFiles;
     }
 
     // Create a linear array of the root entries and sort it
@@ -895,27 +918,31 @@ static int LoadRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
             if(pbFilePointer == NULL)
                 break;
 
-            // Get the pointer to the first root entry
-            pSrcEntry = (PFILE_ROOT_ENTRY)BlockInfo.pRootEntries;
-
-            // Convert all entries
-            for(DWORD i = 0; i < BlockInfo.pLocaleBlockHdr->NumberOfFiles; i++)
+            // Skip block with flags set to 0x80
+            if((BlockInfo.pLocaleBlockHdr->Flags & 0x80) == 0)
             {
-                // Copy the root entry
-                CopyFileKey(pTrgEntry->EncodingKey, pSrcEntry->EncodingKey);
-                pTrgEntry->FileNameHash = pSrcEntry->FileNameHash;
-                pTrgEntry->Locales = BlockInfo.pLocaleBlockHdr->Locales;
-                pTrgEntry->Flags = BlockInfo.pLocaleBlockHdr->Flags;
+                // Get the pointer to the first root entry
+                pSrcEntry = (PFILE_ROOT_ENTRY)BlockInfo.pRootEntries;
 
-//              if(pTrgEntry->FileNameHash == 0x5ddb88608673f698ULL)
-//                  DebugBreak();
+                // Convert all entries
+                for(DWORD i = 0; i < BlockInfo.pLocaleBlockHdr->NumberOfFiles; i++)
+                {
+                    // Copy the root entry
+                    CopyFileKey(pTrgEntry->EncodingKey, pSrcEntry->EncodingKey);
+                    pTrgEntry->FileNameHash = pSrcEntry->FileNameHash;
+                    pTrgEntry->Locales = BlockInfo.pLocaleBlockHdr->Locales;
+                    pTrgEntry->Flags = BlockInfo.pLocaleBlockHdr->Flags;
 
-                // Insert the CASC root entry to the linear array of pointers
-                hs->ppRootEntries[nRootIndex++] = pTrgEntry;
+//                  if(pTrgEntry->FileNameHash == 0x4548C346A9F091A2ULL)
+//                      DebugBreak();
 
-                // Move to the next root entry
-                pSrcEntry++;
-                pTrgEntry++;
+                    // Insert the CASC root entry to the linear array of pointers
+                    hs->ppRootEntries[nRootIndex++] = pTrgEntry;
+
+                    // Move to the next root entry
+                    pSrcEntry++;
+                    pTrgEntry++;
+                }
             }
         }
 
@@ -929,18 +956,6 @@ static int LoadRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile)
     }
 
     return nError;
-
-/*
-    FILE * fp = fopen("E:\\root_entries.txt", "wt");
-    if(fp != NULL)
-    {
-        for(size_t i = 0; i < nRootEntries; i++)
-        {
-            fprintf(fp, "%08X: %016I64lX\n", i, hs->ppRootEntries[i]->FileNameHash);
-        }
-        fclose(fp);
-    }
-*/
 }
 
 static int LoadRootFile(TCascStorage * hs)
@@ -963,15 +978,15 @@ static int LoadRootFile(TCascStorage * hs)
     if(!CascOpenFileByEncodingKey((HANDLE)hs, &hs->RootKey, 0, &hFile))
         nError = GetLastError();
 
-    // Load ther entire root file to memory
+    // Load the entire ROOT file to memory
     if(nError == ERROR_SUCCESS)
     {
-        // Load the entire root file to memory
-        pbRootFile = LoadCascFile(hFile, 0xFFFFFFFF, &cbRootFile);
-        if(pbRootFile == NULL || cbRootFile == 0)
+        // Load the necessary part of the ENCODING file to memory
+        pbRootFile = LoadRootFileToMemory(hFile, &cbRootFile);
+        if(pbRootFile == NULL || cbRootFile <= sizeof(PFILE_LOCALE_BLOCK))
             nError = ERROR_FILE_CORRUPT;
 
-        // Close the root file
+        // Close the encoding file
         CascCloseFile(hFile);
     }
 
@@ -1074,7 +1089,7 @@ static TCascStorage * FreeCascStorage(TCascStorage * hs)
 //-----------------------------------------------------------------------------
 // Public functions
 
-int WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage)
+bool WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phStorage)
 {
     TCascStorage * hs;        
     int nError = ERROR_SUCCESS;
@@ -1084,10 +1099,7 @@ int WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phS
     // Allocate the storage structure
     hs = (TCascStorage *)CASC_ALLOC(TCascStorage, 1);
     if(hs == NULL)
-    {
         nError = ERROR_NOT_ENOUGH_MEMORY;
-        return 1;
-    }
 
     // Load the storage configuration
     if(nError == ERROR_SUCCESS)
@@ -1095,47 +1107,34 @@ int WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phS
         // Prepare the base storage parameters
         memset(hs, 0, sizeof(TCascStorage));
         hs->szClassName = "TCascStorage";
+        hs->dwFileBeginDelta = 0xFFFFFFFF;
         hs->dwRefCount = 1;
         nError = InitializeCascDirectories(hs, szDataPath);
     }
-    else
-    {
-      return 2;
-    }
-
 
     // Now we need to load the root file so we know the config files
     if(nError == ERROR_SUCCESS)
-      nError = LoadBuildConfiguration(hs);
-    else
-      return 3;
-
-
-    // Load the index files
-    if(nError == ERROR_SUCCESS)
-      nError = LoadIndexFiles(hs);
-    else
-      return 4;
+    {
+        nError = LoadBuildInfo(hs);
+    }
 
     // Load the index files
     if(nError == ERROR_SUCCESS)
-      nError = LoadEncodingFile(hs);
-    else
-      return 5;
+    {
+        nError = LoadIndexFiles(hs);
+    }
 
     // Load the index files
     if(nError == ERROR_SUCCESS)
-      nError = LoadRootFile(hs);
-    else
-      return 6;
+    {
+        nError = LoadEncodingFile(hs);
+    }
 
-#ifdef _DEBUG
-//  if(nError == ERROR_SUCCESS)
-//  {
-//      CascDumpStorage("E:\\casc_dump.txt", hs, _T("e:\\Ladik\\Appdir\\CascLib\\listfile\\listfile-wow6.txt"));
-//      CascDumpIndexEntries("E:\\casc_index.txt", hs);
-//  }
-#endif
+    // Load the index files
+    if(nError == ERROR_SUCCESS)
+    {
+        nError = LoadRootFile(hs);
+    }
 
     // If something failed, free the storage and return
     if(nError != ERROR_SUCCESS)
@@ -1145,7 +1144,7 @@ int WINAPI CascOpenStorage(const TCHAR * szDataPath, DWORD dwFlags, HANDLE * phS
     }
 
     *phStorage = (HANDLE)hs;
-    return 0;
+    return (nError == ERROR_SUCCESS);
 }
 
 bool WINAPI CascGetStorageInfo(
@@ -1156,7 +1155,7 @@ bool WINAPI CascGetStorageInfo(
     size_t * pcbLengthNeeded)
 {
     TCascStorage * hs;
-    DWORD dwCascFeatures = 0;
+    DWORD dwInfoValue = 0;
 
     // Verify the storage handle
     hs = IsValidStorageHandle(hStorage);
@@ -1170,41 +1169,41 @@ bool WINAPI CascGetStorageInfo(
     switch(InfoClass)
     {
         case CascStorageFileCount:
-
-            // Check the buffer size
-            if(cbStorageInfo < sizeof(DWORD))
-            {
-                *pcbLengthNeeded = sizeof(DWORD);
-                SetLastError(ERROR_INSUFFICIENT_BUFFER);
-                return false;
-            }
-
-            // Give the number of files
-            *(PDWORD)pvStorageInfo = (DWORD)hs->pIndexEntryMap->ItemCount;
-            return true;
+            dwInfoValue = (DWORD)hs->pIndexEntryMap->ItemCount;
+            break;
 
         case CascStorageFeatures:
-
-            // Check the buffer size
-            if(cbStorageInfo < sizeof(DWORD))
-            {
-                *pcbLengthNeeded = sizeof(DWORD);
-                SetLastError(ERROR_INSUFFICIENT_BUFFER);
-                return false;
-            }
-
-            // Construct the features
             if(hs->pMndxInfo != NULL)
-                dwCascFeatures |= CASC_FEATURE_LISTFILE;
+                dwInfoValue |= CASC_FEATURE_LISTFILE;
+            break;
 
-            // Give the number of files
-            *(PDWORD)pvStorageInfo = dwCascFeatures;
-            return true;
+        case CascStorageGameInfo:
+            dwInfoValue = hs->dwGameInfo;
+            break;
+
+        case CascStorageGameBuild:
+            dwInfoValue = hs->dwBuildNumber;
+            break;
 
         default:
             SetLastError(ERROR_INVALID_PARAMETER);
             return false;
     }
+
+    //
+    // Return the required DWORD value
+    //
+
+    if(cbStorageInfo < sizeof(DWORD))
+    {
+        *pcbLengthNeeded = sizeof(DWORD);
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        return false;
+    }
+
+    // Give the number of files
+    *(PDWORD)pvStorageInfo = dwInfoValue;
+    return true;
 }
 
 
