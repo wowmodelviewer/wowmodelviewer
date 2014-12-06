@@ -78,7 +78,7 @@ BEGIN_EVENT_TABLE(CharControl, wxWindow)
 	EVT_SPIN(ID_HAIR_COLOR, CharControl::OnSpin)
 	EVT_SPIN(ID_HAIR_STYLE, CharControl::OnSpin)
 	EVT_SPIN(ID_FACIAL_HAIR, CharControl::OnSpin)
-	EVT_SPIN(ID_FACIAL_COLOR, CharControl::OnSpin)
+//	EVT_SPIN(ID_FACIAL_COLOR, CharControl::OnSpin)
 
 	EVT_SPIN(ID_TABARD_ICON, CharControl::OnTabardSpin)
 	EVT_SPIN(ID_TABARD_ICONCOLOR, CharControl::OnTabardSpin)
@@ -133,7 +133,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	ADD_CONTROLS(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color"))
 	ADD_CONTROLS(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style"))
 	ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature"))
-	ADD_CONTROLS(SPIN_FACIAL_COLOR, ID_FACIAL_COLOR, _("Facial color"))
+	//ADD_CONTROLS(SPIN_FACIAL_COLOR, ID_FACIAL_COLOR, _("Facial color"))
 	#undef ADD_CONTROLS
 	
 	//gs->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Proportion(0).Expand());
@@ -257,14 +257,14 @@ void CharControl::refreshModelSpins()
   spins[SPIN_HAIR_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
   spins[SPIN_HAIR_STYLE]->SetRange(0, (int)cd.maxHairStyle-1);
   spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)cd.maxFacialHair-1);
-  spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
+//  spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
 
   spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
   spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
   spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
   spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
   spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-  spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
+ // spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 }
 
 //void CharControl::UpdateModel(Model *m)
@@ -327,12 +327,24 @@ void CharControl::UpdateModel(Attachment *a)
 	    LOG_ERROR << "Unable to collect number of hair styles for model" << model->name.c_str();
 	    cd.maxHairStyle = 0;
 	  }
-	}
 
-	/*cd.maxHairColor = chardb.getColorsFor(race, gender, CharSectionsDB::HairType, 0, 0);
-	cd.maxFacialHair = facialhairdb.getStylesFor(race, gender);
-	cd.maxFacialColor = cd.maxHairColor;
-*/
+
+	  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
+              .arg(infos.raceid)
+              .arg(infos.sexid);
+
+	  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+	  if(facialHairStyles.valid && !facialHairStyles.values.empty())
+	  {
+	    cd.maxFacialHair = atoi(facialHairStyles.values[0][0].c_str());
+	  }
+	  else
+	  {
+	    LOG_ERROR << "Unable to collect number of facial hair styles for model" << model->name.c_str();
+	    cd.maxFacialHair = 0;
+	  }
+
+	}
 
 
 	cd.maxFacialColor = 0;
@@ -555,8 +567,8 @@ void CharControl::OnSpin(wxSpinEvent &event)
 		cd.hairStyle = event.GetPosition();
 	else if (event.GetId()==ID_FACIAL_HAIR) 
 		cd.facialHair = event.GetPosition();
-	else if (event.GetId()==ID_FACIAL_COLOR) 
-		cd.facialColor = event.GetPosition();
+	//else if (event.GetId()==ID_FACIAL_COLOR)
+	//	cd.facialColor = event.GetPosition();
 
 	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
 		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
@@ -653,7 +665,7 @@ inline void CharControl::RandomiseChar()
 	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
+	//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 }
 
 void CharControl::RefreshEquipment()
@@ -702,7 +714,7 @@ void CharControl::OnButton(wxCommandEvent &event)
 				spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 				spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 				spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-				spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.hairColor);
+				//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.hairColor);
 				for (size_t i=0; i<NUM_SPIN_BTNS; i++) 
 					spins[i]->Refresh(false);
 			}
@@ -776,8 +788,8 @@ void CharControl::RefreshModel()
 	if(!getRaceInfosForCurrentModel(infos))
 	  return;
 
-  std::cout << "infos : " << infos.prefix << " " << infos.textureLayoutID << std::endl;
-  std::cout << "race = " << infos.raceid << " sex = " << ((infos.sexid == 0)?"Male":"Female") << std::endl;
+  LOG_INFO << "infos : " << infos.prefix.c_str() << " " << infos.textureLayoutID;
+  LOG_INFO << "race = " << infos.raceid << " sex = " << ((infos.sexid == 0)?"Male":"Female");
 
 	CharTexture tex(infos.textureLayoutID);
 
@@ -845,37 +857,39 @@ void CharControl::RefreshModel()
 
   // Hair texture
 	textures = getTextureNameForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
-  if(textures.size() != 0)
+  if(textures.size() != 0 && textures[0] != "")
   {
     std::cout << "textures[0] = " << textures[0] << std::endl;
-    std::cout << "textures[1] = " << textures[1] << std::endl;
-    std::cout << "textures[2] = " << textures[2] << std::endl;
     hairTex = texturemanager.add(textures[0].c_str());
     UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
-    tex.addLayer(textures[1].c_str(), CR_FACE_LOWER, 3);
-    tex.addLayer(textures[2].c_str(), CR_FACE_UPPER, 3);
+  }
+
+  // select hairstyle geoset(s)
+  query = QString("SELECT GeoSet1,GeoSet2,GeoSet3 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+                          .arg(infos.raceid)
+                          .arg(infos.sexid)
+                          .arg(cd.facialHair);
+
+  sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(facialHairStyle.valid && !facialHairStyle.values.empty())
+  {
+    LOG_INFO << "Facial GeoSets : " << atoi(facialHairStyle.values[0][0].c_str())
+        << " " << atoi(facialHairStyle.values[0][1].c_str())
+        << " " << atoi(facialHairStyle.values[0][2].c_str());
+
+    cd.geosets[CG_GEOSET100] = atoi(facialHairStyle.values[0][0].c_str());
+    cd.geosets[CG_GEOSET200] = atoi(facialHairStyle.values[0][1].c_str());
+    cd.geosets[CG_GEOSET300] = atoi(facialHairStyle.values[0][2].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair << "for model" << model->name.c_str();
   }
 
 
-/*
-
-  for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
-    if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender && it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
-    {
-      unsigned int geosetId;
-
-      if (gameVersion >= VERSION_MOP){
-        geosetId = it->getUInt(CharHairGeosetsDB::Geosetv500);
-        bald = it->getUInt(CharHairGeosetsDB::Baldv500) != 0;
-      }else{
-        geosetId = it->getUInt(CharHairGeosetsDB::Geoset);
-        bald = it->getUInt(CharHairGeosetsDB::Bald) != 0;
-      }
 
 
-    }
-  }
-*/
 /*
 		// facial feature geosets
 		try {
@@ -899,41 +913,7 @@ void CharControl::RefreshModel()
 		} catch (CharFacialHairDB::NotFound) {
 			wxLogMessage(wxT("DBC facial feature geosets Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		}
-
-		// facial feature
-		try {
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FacialHairType, cd.facialHair, cd.facialColor, 0);
-			tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_FACE_LOWER, 2);
-			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 2);
-		} catch (CharSectionsDB::NotFound) {
-			wxLogMessage(wxT("DBC facial feature Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
-		}
-	
 	}
-
-	// select hairstyle geoset(s)
-	for (CharHairGeosetsDB::Iterator it = hairdb.begin(); it != hairdb.end(); ++it) {
-		if (it->getUInt(CharHairGeosetsDB::Race)==cd.race && it->getUInt(CharHairGeosetsDB::Gender)==cd.gender && it->getUInt(CharHairGeosetsDB::Section)==cd.hairStyle)
-		{
-			unsigned int geosetId;
-
-			if (gameVersion >= VERSION_MOP){
-				geosetId = it->getUInt(CharHairGeosetsDB::Geosetv500);
-				bald = it->getUInt(CharHairGeosetsDB::Baldv500) != 0;
-			}else{
-				geosetId = it->getUInt(CharHairGeosetsDB::Geoset);
-				bald = it->getUInt(CharHairGeosetsDB::Bald) != 0;
-			}
-
-			for (size_t j=0; j<model->geosets.size(); j++) {
-				if (model->geosets[j].id == geosetId)
-					model->showGeosets[j] = showHair;
-				else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.maxHairStyle+1))
-					model->showGeosets[j] = false;
-			}
-		}
-	}
-
 
 	// hair
 	try {
@@ -971,16 +951,6 @@ void CharControl::RefreshModel()
 		wxLogMessage(wxT("DBC hair Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		hairTex = 0;
 	}
-#if 0 // for worgen female
-	if (gameVersion >= VERSION_CATACLYSM && cd.race == RACE_WORGEN && cd.gender == GENDER_FEMALE) { // female worgen
-		wxString fn;
-		fn.Printf(wxT("Character\\Worgen\\Hair00_%02d.blp"), cd.hairColor);
-		if (MPQFile::getSize(fn) > 0) {
-			hairTex = texturemanager.add(fn);
-			model->textures[2] = hairTex;
-		}
-	}
-#endif // for worgen female
 
 	// If they have no hair, toggle the 'bald' flag.
 	if (!showHair)
@@ -1108,29 +1078,31 @@ void CharControl::RefreshModel()
 			wxLogMessage(wxT("Assertion robe/gloves Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		}
 	}
-	
+
 	// dressup
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		int sn = hadRobe ? slotOrderWithRobe[i] : slotOrder[i];
-		if (cd.equipment[sn] != 0) 
+		if (cd.equipment[sn] != 0)
 			AddEquipment(sn, cd.equipment[sn], 10+i, tex);
 	}
-
+*/
 	// reset geosets
 	for (size_t j=0; j<model->geosets.size(); j++) {
 		int id = model->geosets[j].id;
 
 		// hide top-of-head if we have hair.
-		if (id == 1)
-			model->showGeosets[j] = bald;
+	//	if (id == 1)
+	//		model->showGeosets[j] = bald;
 
 		for (size_t i=1; i<NUM_GEOSETS; i++) {
 			int a = (int)i*100, b = ((int)i+1) * 100;
 			if (id>a && id<b) 
 				model->showGeosets[j] = (id == (a + cd.geosets[i]));
+
 		}
 	}
-*/
+
+
 	// finalize character texture
 	tex.compose(charTex);
 	
@@ -1156,8 +1128,9 @@ void CharControl::RefreshModel()
 	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
+	//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 
+	/*
 	// Eye Glows
 	for(size_t i=0; i<model->passes.size(); i++) {
 		ModelRenderPass &p = model->passes[i];
@@ -1195,6 +1168,7 @@ void CharControl::RefreshModel()
 		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
 	else
 		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+		*/
 }
 
 void CharControl::RefreshNPCModel()
@@ -2565,9 +2539,7 @@ void CharControl::initRaces()
   LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID LEFT JOIN FileData FDM ON CMDM.FileDataID = FDM.ID \
   LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID LEFT JOIN FileData FDF ON CMDF.FileDataID = FDF.ID \
   LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID LEFT JOIN FileData FDMHD ON CMDMHD.FileDataID = FDMHD.ID \
-  LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID LEFT JOIN FileData FDFHD ON CMDFHD.FileDataID = FDFHD.ID \
-  WHERE (ChrRaces.ID != 23 AND ChrRaces.ID != 25 AND ChrRaces.ID != 26)");
- // exclude Gilnean (conflicts with Human) and Two last pandaren races (we want to use id 24 for pandarens)
+  LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID LEFT JOIN FileData FDFHD ON CMDFHD.FileDataID = FDFHD.ID");
 
   if(!races.valid || races.empty())
   {
@@ -2588,7 +2560,8 @@ void CharControl::initRaces()
         infos.sexid = (r == 0 || r == 6)?0:1;
         std::string modelname = races.values[i][r];
         std::transform(modelname.begin(), modelname.end(), modelname.begin(), ::tolower);
-        RACES[modelname] = infos;
+        if(RACES.find(modelname) == RACES.end())
+          RACES[modelname] = infos;
       }
     }
   }
@@ -2670,6 +2643,8 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
     default:
       query = "";
   }
+
+  LOG_INFO << query;
 
   if(query != "")
   {
