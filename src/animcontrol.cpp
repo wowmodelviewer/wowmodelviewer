@@ -647,7 +647,6 @@ void AnimControl::OnLoop(wxCommandEvent &)
 
 void AnimControl::SetSkin(int num)
 {
-  /*
 	TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
 	for (size_t i=0; i<grp->count; i++) {
 		int base = grp->base + i;
@@ -666,7 +665,6 @@ void AnimControl::SetSkin(int num)
 	}
 
 	skinList->Select(num);
-	*/
 }
 
 wxString AnimControl::makeSkinTexture(wxString texfn, wxString skin)
