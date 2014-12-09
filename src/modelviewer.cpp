@@ -1728,111 +1728,44 @@ void ModelViewer::LoadWoW()
 		mpqArchives.Clear();
 	}
 
-	CASCFOLDER.init(gamePath.c_str());
-
-  CASCFile TOCFile("Interface\\FrameXML\\FrameXML.TOC");
-
-  if(!TOCFile.open())
-  {
-    LOG_ERROR << "Opening TOC file in folder " << CASCFOLDER.folder().c_str() << " failed.";
-  }
-  else
-  {
-    DWORD dwBytesRead;
-    char buffer[100];
-    dwBytesRead = TOCFile.read(buffer,100);
-
-    if(dwBytesRead !=0)
-    {
-      std::string tocString = buffer;
-      // Seek the TOC number by searching for the Interface Offset
-      int tocstart = tocString.find("## Interface: ") + strlen("## Interface: ");
-      tocString = tocString.substr(tocstart, tocstart+5);
-      tocString.resize(5);
-      TOCFile.close();
-      SetStatusText(wxString(tocString), 1);
-
-      langName = CASCFOLDER.locale();
-      gameVersion = atoi(tocString.c_str());
-    }
-    else
-    {
-      LOG_ERROR << "FAIL to read TOC content from file.";
-    }
-  }
-
-
-  if(!CASCFOLDER.hStorage)
-  {
-    wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-    dial->ShowModal();
-    return;
-  }
-
-	// auto search for MPQ Archives
-	//if (mpqArchives.GetCount() == 0) {
-	//	searchMPQs(true);
-	//}
-
-
-	/*
-
-	// if we can't search any mpqs
-	if (mpqArchives.GetCount() == 0) {
-		wxLogMessage(wxT("World of Warcraft Data Directory Not Found. Returned GamePath: %s"), gamePath.c_str());
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not find your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-		dial->ShowModal();
-		return;
+	if(!CASCFOLDER.init(gamePath.c_str()))
+	{
+	  wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
+	  dial->ShowModal();
+	  return;
 	}
 
-    if (langID == -1 && WXSIZEOF(langNames) > 0) {
-        // the arrays should be in sync
-        wxCOMPILE_TIME_ASSERT(WXSIZEOF(langNames) == WXSIZEOF(langIds), LangArraysMismatch);
-        langID = wxGetSingleChoiceIndex(wxT("Please select a language:"), wxT("Language"), WXSIZEOF(langNames), langNames);
-	}
+	// init game version
+	gameVersion = atoi(CASCFOLDER.version().c_str());
+	SetStatusText(wxString(CASCFOLDER.version()), 1);
 
-	if (langID == -1) {
-		wxLogMessage(wxT("World of Warcraft Data Directory Not Found. Returned GamePath: %s"), gamePath.c_str());
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not find your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-		dial->ShowModal();
-		return;
-	}
-
-	// initial interfaceID as langID
-	if (interfaceID == 0 && langID >= 0) {
-		interfaceID = langID;
-	}
-
-	// initial langOffset
-	if (langOffset == -1) {
-		// gameVersion VERSION_CATACLYSM remove all other language strings
-		if (gameVersion >= VERSION_CATACLYSM)
-			langOffset = 0;
-		else
-			langOffset = langID;
-	}
-*/
+	// init game locale
+	langName = CASCFOLDER.locale();
   SetStatusText(wxString(CASCFOLDER.locale()), 2);
 
   InitDatabase();
 
-    // Error check
-    if (!initDB) {
-      wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-      //fileControl->Disable();
-      SetStatusText(wxT("Some DBC files could not be loaded."));
-    } else {
-      isWoWLoaded = true;
-      SetStatusText(wxT("Initial WoW Done."));
-      fileMenu->Enable(ID_LOAD_WOW, false);
-    }
+  // Error check
+  if (!initDB)
+  {
+    wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
+    //fileControl->Disable();
+    SetStatusText(wxT("Some DBC files could not be loaded."));
+  }
+  else
+  {
+    isWoWLoaded = true;
+    SetStatusText(wxT("Initial WoW Done."));
+    fileMenu->Enable(ID_LOAD_WOW, false);
+  }
 
-    SetStatusText(wxT("Initializing File Control..."));
-    fileControl->Init(this);
+  SetStatusText(wxT("Initializing File Control..."));
+  fileControl->Init(this);
 
-    if (charControl->Init() == false){
-       SetStatusText(wxT("Error Initializing the Character Controls."));
-    };
+  if (charControl->Init() == false)
+  {
+    SetStatusText(wxT("Error Initializing the Character Controls."));
+  };
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)

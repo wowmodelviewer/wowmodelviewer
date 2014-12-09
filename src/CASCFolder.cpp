@@ -22,7 +22,7 @@ CASCFolder::CASCFolder()
 
 }
 
-void CASCFolder::init(const std::string &folder)
+bool CASCFolder::init(const std::string &folder)
 {
   m_folder = folder;
 
@@ -35,11 +35,14 @@ void CASCFolder::init(const std::string &folder)
   if(!CascOpenStorage(m_folder.c_str(), 0, &hStorage))
   {
     LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << GetLastError();
+    return false;
   }
   else
   {
     LOG_INFO << "Succesfully opened. ";
     initLocale();
+    initVersion();
+    return true;
   }
 }
 
@@ -91,6 +94,32 @@ void CASCFolder::initLocale()
     LOG_ERROR << "Determining Locale for folder" << m_folder.c_str() << "failed.";
   }
 
+}
+
+
+void CASCFolder::initVersion()
+{
+  std::string buildinfofile = m_folder+"\\..\\.build.info";
+  std::cout << "buildinfofile = " << buildinfofile << std::endl;
+  std::ifstream buildinfo(buildinfofile.c_str());
+
+  if(!buildinfo.good())
+  {
+    LOG_ERROR << "Fail to open .build.info to determine game version";
+    return;
+  }
+
+  std::string line;
+
+  while(!buildinfo.eof())
+  {
+    buildinfo >> line;
+  }
+
+  if(line.find_last_of("|") != std::string::npos)
+    m_version = line.substr (line.find_last_of("|")+1, line.length()-1);
+  else
+    LOG_ERROR << "Fail to grab game version info in .build.info file";
 }
 
 void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString)/* = CASCFolder::defaultFilterFunc*/)

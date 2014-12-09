@@ -29,13 +29,15 @@ class CASCFolder
       return m_instance;
     }
 
-    void init(const std::string & path);
+    bool init(const std::string & path);
 
     HANDLE hStorage;
 
     std::string locale() { return m_currentLocale; }
+    std::string version() { return m_version; }
     int CASCLocale() { return m_currentCascLocale; }
     std::string folder() { return m_folder; }
+
 
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2
@@ -50,7 +52,9 @@ class CASCFolder
     CASCFolder(const CASCFolder &);
 
     void initLocale();
+    void initVersion();
     std::string m_currentLocale;
+    std::string m_version;
     int m_currentCascLocale;
     std::string m_folder;
 
