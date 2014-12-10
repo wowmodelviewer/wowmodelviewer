@@ -1723,24 +1723,24 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 
 void ModelViewer::LoadWoW()
 {
-	if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
-		getGamePath();
-		mpqArchives.Clear();
-	}
+  if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
+    getGamePath();
+    mpqArchives.Clear();
+  }
 
-	if(!CASCFOLDER.init(gamePath.c_str()))
-	{
-	  wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-	  dial->ShowModal();
-	  return;
-	}
+  if(!CASCFOLDER.init(gamePath.c_str()))
+  {
+    wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
 
-	// init game version
-	gameVersion = atoi(CASCFOLDER.version().c_str());
-	SetStatusText(wxString(CASCFOLDER.version()), 1);
+  // init game version
+  gameVersion = atoi(CASCFOLDER.version().c_str());
+  SetStatusText(wxString(CASCFOLDER.version()), 1);
 
-	// init game locale
-	langName = CASCFOLDER.locale();
+  // init game locale
+  langName = CASCFOLDER.locale();
   SetStatusText(wxString(CASCFOLDER.locale()), 2);
 
   InitDatabase();
