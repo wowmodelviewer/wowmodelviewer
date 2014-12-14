@@ -90,8 +90,6 @@ public:
 	void SetAnimSpeed(float speed);
 	void SetAnimFrame(size_t frame);
 
-	static wxString makeSkinTexture(wxString texfn, wxString skin);
-
 	bool randomSkins;
 	bool defaultDoodads;
 

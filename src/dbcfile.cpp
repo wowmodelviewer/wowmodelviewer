@@ -123,6 +123,15 @@ std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<std:
      // std::cout << field << std::endl;
       result.push_back(field);
     }
+    if(it->second.second == "int")
+    {
+      // std::cout << "uint => " << it->first << " => ";
+      stringstream ss;
+      ss << getInt(it->first);
+      string field = ss.str();
+      // std::cout << field << std::endl;
+      result.push_back(field);
+    }
     else if(it->second.second == "text")
     {
       // as " character cause weird issues with sql queries, replace it with '

@@ -35,15 +35,14 @@ void CharTexture::addLayer(wxString fn, int region, int layer)
 //static unsigned char destbuf[REGION_PX*REGION_PX*4], tempbuf[REGION_PX*REGION_PX*4];
 void CharTexture::compose(TextureID texID)
 {
-  std::cout << "texID = " << texID << std::endl;
+  //std::cout << "texID = " << texID << std::endl;
 
-  // scale for pandaren race.
   pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
-  std::cout << __FUNCTION__ << " " << __LINE__ << " " << layoutInfos.first.width << "x" << layoutInfos.first.height << std::endl;
+  //std::cout << __FUNCTION__ << " " << __LINE__ << " " << layoutInfos.first.width << "x" << layoutInfos.first.height << std::endl;
 
 	// if we only have one texture then don't bother with compositing
-  std::cout << "nb component = " << m_components.size() << std::endl;
+  //std::cout << "nb component = " << m_components.size() << std::endl;
 	if (m_components.size()==1)
 	{
 		Texture temp(m_components[0].name);
@@ -60,7 +59,7 @@ void CharTexture::compose(TextureID texID)
 	for (std::vector<CharTextureComponent>::iterator it = m_components.begin(); it != m_components.end(); ++it)
 	{
 		CharTextureComponent &comp = *it;
-		std::cout << __FUNCTION__ << " " << comp.name.c_str() << std::endl;
+		//std::cout << __FUNCTION__ << " " << comp.name.c_str() << std::endl;
     // pandaren with different regions.
 		const CharRegionCoords &coords = layoutInfos.second[comp.region];
 		/*
@@ -79,8 +78,8 @@ void CharTexture::compose(TextureID texID)
 		}
 		tempbuf = (unsigned char*)calloc(tex->w*tex->h,4);
 
-		std::cout << "tex->w = " << tex->w << " vs coords.width = " << coords.width << std::endl;
-		std::cout << "tex->h = " << tex->h << " vs coords.height = " << coords.height << std::endl;
+		//std::cout << "tex->w = " << tex->w << " vs coords.width = " << coords.width << std::endl;
+		//std::cout << "tex->h = " << tex->h << " vs coords.height = " << coords.height << std::endl;
 		if (tex->w!=coords.width || tex->h!=coords.height)
 		{
 			tex->getPixels(tempbuf, GL_BGRA_EXT);

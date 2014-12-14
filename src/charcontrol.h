@@ -51,7 +51,7 @@ class CharControl: public wxWindow
 	wxStaticText *labels[NUM_CHAR_SLOTS];
 	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
 
-	void AddEquipment(ssize_t slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup = true);
+	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup = true);
 	void UpdateTextureList(wxString texName, int special);
 
 	static std::map< std::string, RaceInfos> RACES;

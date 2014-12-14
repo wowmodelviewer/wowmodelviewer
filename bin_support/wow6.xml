@@ -115,6 +115,24 @@
     <field type="text" name="Model2" />
   	<field type="uint" name="TextureItemID1" />
   	<field type="uint" name="TextureItemID2" />
+  	<field type="uint" name="GeosetGroup1" />
+  	<field type="uint" name="GeosetGroup2" />
+  	<field type="uint" name="GeosetGroup3" />
+  	<field type="uint" name="Flags" />
+ 	<field type="uint" name="SpellVisualID" />
+ 	<field type="uint" name="HelmetGeosetVis1" />
+ 	<field type="uint" name="HelmetGeosetVis2" />
+	<field type="uint" name="TextureID1" />
+	<field type="uint" name="TextureID2" />
+	<field type="uint" name="TextureID3" />
+	<field type="uint" name="TextureID4" />
+	<field type="uint" name="TextureID5" />
+	<field type="uint" name="TextureID6" />
+	<field type="uint" name="TextureID7" />
+	<field type="uint" name="TextureID8" />
+	<field type="uint" name="TextureID9" />
+	<field type="uint" name="ItemVisual" />
+  	<field type="uint" name="ParticleColorID" />
   </ItemDisplayInfo>
   <ItemAppearance>
     <gamefile name="DBFilesClient\ItemAppearance.db2" />
@@ -277,4 +295,15 @@
     <field type="uint" name="ShowScalp" />
     <field type="uint" name="ColorIndex" />
   </CharHairGeoSets>
+  <HelmetGeosetVisData>
+  	<gamefile name="DBFilesClient\HelmetGeosetVisData.dbc" />
+  	<field primary="yes" type="uint" name="ID" />
+  	<field type="int" name="HideGeoset1" />
+  	<field type="int" name="HideGeoset2" />
+  	<field type="int" name="HideGeoset3" />
+  	<field type="int" name="HideGeoset4" />
+  	<field type="int" name="HideGeoset5" />
+  	<field type="int" name="HideGeoset6" />
+  	<field type="int" name="HideGeoset7" />
+  </HelmetGeosetVisData>
 </database>

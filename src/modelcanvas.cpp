@@ -362,8 +362,8 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 	// Create new one
 	model = new WoWModel(fn, true);
 	std::cout << __FUNCTION__ << " ok ? " << std::boolalpha << model->ok << std::endl;
-	if (!model->ok) {
-
+	if (!model->ok)
+	{
 		wxDELETE(model);
 		model = NULL;
 		return NULL;

@@ -950,25 +950,29 @@ void ModelViewer::LoadModel(const wxString fn)
 
 	// check if this is a character model
 	isChar = (fn.Lower().StartsWith(wxT("char")) || fn.Lower().StartsWith(wxT("alternate\\char")));
-
 	Attachment *modelAtt = NULL;
 
-	if (isChar) {
+	if (isChar)
+	{
 		modelAtt = canvas->LoadCharModel(fn);
 
 		// error check
-		if (!modelAtt) {
+		if (!modelAtt)
+		{
 			wxLogMessage(wxT("Error: Failed to load the model - %s"), fn.c_str());
 			return;
 		}
 
 		canvas->model->modelType = MT_CHAR;
 
-	} else {
+	}
+	else
+	{
 		modelAtt = canvas->LoadCharModel(fn); //  change it from LoadModel, don't sure it's right or not.
 
 		// error check
-		if (!modelAtt) {
+		if (!modelAtt)
+		{
 			wxLogMessage(wxT("Error: Failed to load the model - %s"), fn.c_str());
 			return;
 		}
@@ -977,7 +981,8 @@ void ModelViewer::LoadModel(const wxString fn)
 	}
 
 	// Error check,  make sure the model was actually loaded and set to canvas->model
-	if (!canvas->model) {
+	if (!canvas->model)
+	{
 		wxLogMessage(wxT("Error: [ModelViewer::LoadModel()]  Model* Canvas::model is null!"));
 		return;
 	}
@@ -985,14 +990,16 @@ void ModelViewer::LoadModel(const wxString fn)
 	canvas->model->charModelDetails.isChar = isChar;
 	
 	viewMenu->Enable(ID_USE_CAMERA, canvas->model->hasCamera);
-	if (canvas->useCamera && !canvas->model->hasCamera) {
+	if (canvas->useCamera && !canvas->model->hasCamera)
+	{
 		canvas->useCamera = false;
 		viewMenu->Check(ID_USE_CAMERA, false);
 	}
 	
 	// wxAUI
 	interfaceManager.GetPane(charControl).Show(isChar);
-	if (isChar) {
+	if (isChar)
+	{
 		charMenu->Check(ID_SHOW_UNDERWEAR, true);
 		charMenu->Check(ID_SHOW_EARS, true);
 		charMenu->Check(ID_SHOW_HAIR, true);
@@ -1017,7 +1024,9 @@ void ModelViewer::LoadModel(const wxString fn)
 		charMenu->Enable(ID_CHAR_RANDOMISE, true);
 
 		charControl->UpdateModel(modelAtt);
-	} else {
+	}
+	else
+	{
 		charControl->charAtt = modelAtt;
 		charControl->model = (WoWModel*)modelAtt->model;
 
@@ -1061,22 +1070,22 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	isChar = false;
 	isWMO = false;
 
-	try {
+	stringstream ss;
+	ss << modelid;
+	string model = ss.str();
 
-	  stringstream ss;
-	  ss << modelid;
-	  string model = ss.str();
+	std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+	    "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, CreatureDisplayInfo.ExtendedDisplayInfoID FROM Creature "
+	    "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
+	    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+	    "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
 
-	  std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
-	      "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM Creature "
-	      "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
-	      "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-	      "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
-	  sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-	  if(r.valid && !r.empty())
+	if(r.valid && !r.empty())
+	{
+	  // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
+	  if(atoi(r.values[0][5].c_str()) == 0)
 	  {
 	    std::string modelname = r.values[0][0] + r.values[0][1];
 	    wxString name(modelname.c_str());
@@ -1087,17 +1096,23 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    int count = 0;
 	    for(int i=0; i < 3; i++)
 	    {
-	      wxString tex(r.values[0][i+2]);
+	      std::string tex = r.values[0][i+2];
+	      tex = CASCFOLDER.getFullPathForFile(tex);
+
 	      grp.tex[i] = tex;
 	      if(tex.length() > 0)
 	        count++;
 	    }
-      grp.base = TEXTURE_GAMEOBJECT1;
-      grp.count = count;
+	    grp.base = TEXTURE_GAMEOBJECT1;
+	    grp.count = count;
 	    if (grp.tex[0].length() > 0)
 	      animControl->AddSkin(grp);
 	  }
-	} catch (...) {}
+	  else
+	  {
+	    LoadModel(r.values[0][0] + r.values[0][1]);
+	  }
+	}
 
 	fileControl->UpdateInterface();
 
@@ -1119,7 +1134,10 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	try {
 	  stringstream ss;
-	  ss << "SELECT Model1, TextureItemID1 FROM ItemDisplayInfo WHERE ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID =";
+	  ss << "SELECT Model1, Path, Name FROM ItemDisplayInfo \
+	      LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID \
+	      LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID \
+	      WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID =";
 	  ss << id;
 	  ss << "))";
 	  string query = ss.str();
@@ -1143,27 +1161,7 @@ void ModelViewer::LoadItem(unsigned int id)
 	      model1 = CASCFOLDER.getFullPathForFile(model1);
 	    }
 
-	    if(texture1 != "")
-	    {
-	      ss.str("");
-	      ss << "SELECT Path, Name from TextureFileData LEFT JOIN FileData  ON FileDataID = FileData.ID WHERE TextureItemID=";
-	      ss << texture1;
-	      std::string query = ss.str();
-	      std::cout << "query = " << query << std::endl;
-	      sqlResult tex1 = GAMEDATABASE.sqlQuery(query);
-	      if(tex1.valid && !tex1.empty())
-	      {
-	        texture1 = tex1.values[0][0] + tex1.values[0][1];
-	        // code is not ready for that ^, so fallback on this v
-	        texture1 = tex1.values[0][1];
-	        texture1 = texture1.substr(0, texture1.length()-4); // remove .blp
-
-	      }
-	      else
-	      {
-	        LOG_ERROR << "Fail to open texture with ID" << texture1.c_str();
-	      }
-	    }
+	    texture1 = itemInfos.values[0][1] + itemInfos.values[0][2];
 
 	    std::cout << "FINAL - model1 = " << model1 << std::endl;
 	    std::cout << "FINAL - texture1 = " << texture1 << std::endl;

@@ -406,10 +406,12 @@ ItemDatabase::ItemDatabase()
 
 const ItemRecord& ItemDatabase::getById(int id)
 {
-    if (itemLookup.find(id)!=itemLookup.end()) 
-		return items[itemLookup[id]];
-	else 
-		return items[0];
+  for (std::vector<ItemRecord>::iterator it=items.begin();  it!=items.end(); ++it)
+  {
+    if(it->id == id)
+      return *it;
+  }
+  return items[0];
 }
 
 const ItemRecord& ItemDatabase::getByPos(int id)

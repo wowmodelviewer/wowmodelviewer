@@ -648,14 +648,17 @@ void AnimControl::OnLoop(wxCommandEvent &)
 void AnimControl::SetSkin(int num)
 {
 	TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
-	for (size_t i=0; i<grp->count; i++) {
+	for (size_t i=0; i<grp->count; i++)
+	{
 		int base = grp->base + i;
-		if (g_selModel->useReplaceTextures[base]) {
-		//	texturemanager.del(g_selModel->replaceTextures[base]);
-			wxString skin = makeSkinTexture(g_selModel->name, grp->tex[i]);
+		if (g_selModel->useReplaceTextures[base])
+		{
+			wxString skin = grp->tex[i];
 			// refresh TextureList for further use
-			for (ssize_t j=0; j<TEXTURE_MAX; j++) {
-				if (base == g_selModel->specialTextures[j]) {
+			for (ssize_t j=0; j<TEXTURE_MAX; j++)
+			{
+				if (base == g_selModel->specialTextures[j])
+				{
 					g_selModel->TextureList[j] = skin;
 					break;
 				}
@@ -665,16 +668,6 @@ void AnimControl::SetSkin(int num)
 	}
 
 	skinList->Select(num);
-}
-
-wxString AnimControl::makeSkinTexture(wxString texfn, wxString skin)
-{
-	wxString res = texfn;
-	size_t i = res.find_last_of(MPQ_SLASH);
-	res = res.substr(0,i+1);
-	res.append(skin);
-	res.append(wxT(".blp"));
-	return res;
 }
 
 int AnimControl::AddSkin(TextureGroup grp)
