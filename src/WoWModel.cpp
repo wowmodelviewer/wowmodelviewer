@@ -1501,7 +1501,6 @@ void WoWModel::updateEmitters(float dt)
 // Draws the "bones" of models  (skeletal animation)
 void WoWModel::drawBones()
 {
-  std::cout << __FUNCTION__ << std::endl;
 	glDisable(GL_DEPTH_TEST);
 	glBegin(GL_LINES);
 	for (size_t i=0; i<header.nBones; i++) {

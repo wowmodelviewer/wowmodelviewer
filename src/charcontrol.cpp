@@ -1467,7 +1467,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       model += "_";
       model += infos.prefix;
       // add sex suffix
-      model += ((infos.raceid == 0)?"M":"F");
+      model += ((infos.sexid == 0)?"M":"F");
       // add .m2
       model += ".m2";
       model = CASCFOLDER.getFullPathForFile(model);
