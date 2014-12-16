@@ -1690,6 +1690,13 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
     }
       break;
     case CS_TABARD:
+    {
+      cd.geosets[CG_TARBARD] = 2;
+      wxString texture = iteminfos.values[0][17] + iteminfos.values[0][18];
+      tex.addLayer(texture, CR_TORSO_UPPER, layer);
+      texture = iteminfos.values[0][19] + iteminfos.values[0][20];
+      tex.addLayer(texture, CR_TORSO_LOWER, layer);
+    }
       break;
     case CS_QUIVER:
       break;
