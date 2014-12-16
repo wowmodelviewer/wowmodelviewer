@@ -15,7 +15,7 @@
 //#define DEBUG_READ
 
 CASCFile::CASCFile()
-: GameFile(),m_handle(NULL)
+: GameFile(), m_handle(NULL),  m_filePath("")
 {
 #ifdef DEBUG_READ
   std::cout << __FUNCTION__ << " 2" << std::endl;
@@ -64,12 +64,20 @@ void CASCFile::openFile(std::string filename)
   {
     DWORD nbBytesRead = 0;
     size = CascGetFileSize(m_handle,0);
+    if(buffer)
+      delete [] buffer;
     buffer = new unsigned char[size];
     CascReadFile(m_handle, buffer, size, &nbBytesRead);
     if(nbBytesRead != 0)
       eof = false;
+    else
+      eof = true;
 #ifdef DEBUG_READ
     std::cout << __FUNCTION__ <<  " | " << m_filePath << " nb bytes read => " << nbBytesRead << " / " << size << std::endl;
 #endif
+  }
+  else
+  {
+    eof = true;
   }
 }

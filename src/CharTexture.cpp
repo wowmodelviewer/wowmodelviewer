@@ -136,13 +136,13 @@ void CharTexture::compose(TextureID texID)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-	/*
+
 	// debug write texture on disk
 	static int texIndex=0;
 	QString name = QString("./ComposedTexture%1.png").arg(texIndex++);
 	QImage FinalTexture(destbuf,layoutInfos.first.width, layoutInfos.first.height,QImage::Format_RGBA8888);
 	FinalTexture.save(name);
-*/
+
 	free(destbuf);
 }
 

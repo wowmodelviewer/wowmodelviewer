@@ -156,7 +156,7 @@ void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxSt
   }
 }
 
-std::string CASCFolder::getFullPathForFile(std::string & file)
+std::string CASCFolder::getFullPathForFile(std::string file)
 {
   std::ifstream listfile("listfile.txt");
 
@@ -167,7 +167,7 @@ std::string CASCFolder::getFullPathForFile(std::string & file)
   }
 
   std::transform(file.begin(), file.end(), file.begin(), ::tolower);
-  LOG_INFO << "Looking for full path for file" << file.c_str();
+  //LOG_INFO << "Looking for full path for file" << file.c_str();
   std::string line;
   while(!listfile.eof())
   {
@@ -175,10 +175,10 @@ std::string CASCFolder::getFullPathForFile(std::string & file)
     std::transform(line.begin(), line.end(), line.begin(), ::tolower);
     if(line.find(file) != std::string::npos)
     {
-      LOG_INFO << "Found:" << line.c_str();
+      //LOG_INFO << "Found:" << line.c_str();
       return line;
     }
   }
-  LOG_ERROR << "Not found";
+  LOG_ERROR << __FUNCTION__ << file.c_str() << "Not found";
   return "";
 }
