@@ -331,10 +331,7 @@ void CharControl::UpdateModel(Attachment *a)
 	  }
 
 	}
-
-
 	cd.maxFacialColor = 0;
-
 
 	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
@@ -383,6 +380,12 @@ void CharControl::UpdateModel(Attachment *a)
 	if (useRandomLooks)
 		RandomiseChar();
 
+	LOG_INFO << "Current model config :"
+	         << "skinColor" << cd.skinColor
+	         << "faceType" << cd.faceType
+	         << "hairColor" << cd.hairColor
+	         << "hairStyle" << cd.hairStyle
+	         << "facialHair" << cd.facialHair;
 	RefreshModel();
 }
 
@@ -564,7 +567,14 @@ void CharControl::OnSpin(wxSpinEvent &event)
 	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
 		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
 
+	LOG_INFO << "Current model config :"
+	         << "skinColor" << cd.skinColor
+	         << "faceType" << cd.faceType
+	         << "hairColor" << cd.hairColor
+	         << "hairStyle" << cd.hairStyle
+	         << "facialHair" << cd.facialHair;
 	RefreshModel();
+
 }
 
 void CharControl::OnCheck(wxCommandEvent &event)
@@ -780,9 +790,6 @@ void CharControl::RefreshModel()
 	RaceInfos infos;
 	if(!getRaceInfosForCurrentModel(infos))
 	  return;
-
-  LOG_INFO << "infos : " << infos.prefix.c_str() << " " << infos.textureLayoutID;
-  LOG_INFO << "race = " << infos.raceid << " sex = " << ((infos.sexid == 0)?"Male":"Female");
 
 	CharTexture tex(infos.textureLayoutID);
 
@@ -1709,6 +1716,12 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       cd.geosets[CG_TARBARD] = 2;
       if(itemnum == 5976) // guild tabard
       {
+        LOG_INFO << "Current tabard config :"
+                 << "Icon" << td.Icon
+                 << "IconColor" << td.IconColor
+                 << "Border" << td.Border
+                 << "BorderColor" << td.BorderColor
+                 << "Background" << td.Background;
         td.showCustom = true;
         tex.addLayer(td.GetBackgroundTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
         tex.addLayer(td.GetBackgroundTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
@@ -2794,6 +2807,13 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 	for (size_t i=0; i<NUM_TABARD_BTNS; i++)
 	  spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
 
+	LOG_INFO << "Current tabard config :"
+	           << "Icon" << td.Icon
+	           << "IconColor" << td.IconColor
+	           << "Border" << td.Border
+	           << "BorderColor" << td.BorderColor
+	           << "Background" << td.Background;
+
 	RefreshModel();
 }
 
@@ -2952,7 +2972,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
       query = "";
   }
 
-  LOG_INFO << query;
+  //LOG_INFO << query;
 
   if(query != "")
   {
