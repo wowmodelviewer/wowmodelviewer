@@ -1575,7 +1575,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_PANTS:
     {
-      // some pants have specific lower leg texture for male / female,
+      // some pants have specific lower/upper leg textures for male / female,
       // in that case, female is the forst one, and male the second one
       // need to figure out if there is a better way to do that...
       int valToUse = 0;
@@ -1587,7 +1587,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       }
 
       cd.geosets[CG_KNEEPADS] = 1 + atoi(iteminfos.values[0][7].c_str());
-      wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
+      wxString texture = iteminfos.values[valToUse][21] + iteminfos.values[valToUse][22];
       tex.addLayer(texture, CR_LEG_UPPER, layer);
       texture = iteminfos.values[valToUse][23] + iteminfos.values[valToUse][24];
       tex.addLayer(texture, CR_LEG_LOWER, layer);
