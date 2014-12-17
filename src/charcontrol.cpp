@@ -1444,12 +1444,14 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
 
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
-   /* if(iteminfos.valid && ! iteminfos.values.empty())
+/*
+    if(iteminfos.valid && ! iteminfos.values.empty())
     {
-      for(unsigned int i=0; i< iteminfos.values[0].size() ; i++)
-        std::cout << i << " " << iteminfos.values[0][i] << std::endl;
+      for(unsigned int i=0; i < iteminfos.values.size() ; i++)
+        for(unsigned int j=0; j < iteminfos.values[i].size() ; j++)
+          std::cout << i << " " << j << " " << iteminfos.values[i][j] << std::endl;
     }
-    */
+*/
 
     switch(slot)
     {
@@ -1573,10 +1575,21 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_PANTS:
     {
+      // some pants have specific lower leg texture for male / female,
+      // in that case, female is the forst one, and male the second one
+      // need to figure out if there is a better way to do that...
+      int valToUse = 0;
+      if(iteminfos.values.size() != 1)
+      {
+        RaceInfos infos;
+        if(getRaceInfosForCurrentModel(infos))
+          valToUse = (infos.sexid == 0)?1:0;
+      }
+
       cd.geosets[CG_KNEEPADS] = 1 + atoi(iteminfos.values[0][7].c_str());
       wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
       tex.addLayer(texture, CR_LEG_UPPER, layer);
-      texture = iteminfos.values[0][23] + iteminfos.values[0][24];
+      texture = iteminfos.values[valToUse][23] + iteminfos.values[valToUse][24];
       tex.addLayer(texture, CR_LEG_LOWER, layer);
       break;
     }
