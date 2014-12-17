@@ -8,7 +8,6 @@
 #include "TabardDetails.h"
 
 #include "enums.h"
-#include "CASCFile.h"
 #include "CASCFolder.h"
 
 
@@ -40,75 +39,40 @@ wxString TabardDetails::GetIconTex(int slot)
 int TabardDetails::GetMaxBackground()
 {
 	int i = 0;
-	CASCFile file;
-	while(1)
-	{
-	  file.openFile(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Background_%02d_TU_U.blp"), i).mb_str()));
-	  if(file.isEof())
-			break;
-	  file.close();
-		i ++;
-	}
+	while(CASCFOLDER.fileExists(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Background_%02d_TU_U.blp"), i).mb_str())))
+		i++;
 	return i;
 }
 
 int TabardDetails::GetMaxIcon()
 {
 	int i = 0;
-	CASCFile file;
-	while(1)
-	{
-	  file.openFile(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_00_TU_U.blp"), i).mb_str()));
-	  if(file.isEof())
-			break;
-	  file.close();
-		i ++;
-	}
+	while(CASCFOLDER.fileExists(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_00_TU_U.blp"), i).mb_str())))
+		i++;
 	return i;
 }
 
 int TabardDetails::GetMaxIconColor(int icon)
 {
 	int i = 0;
-	CASCFile file;
-	while(1)
-	{
-	  file.openFile(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TU_U.blp"), icon, i).mb_str()));
-	  if(file.isEof())
-			break;
-	  file.close();
-		i ++;
-	}
+	while(CASCFOLDER.fileExists(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Emblem_%02d_%02d_TU_U.blp"), icon, i).mb_str())))
+		i++;
 	return i;
 }
 
 int TabardDetails::GetMaxBorder()
 {
 	int i = 0;
-	CASCFile file;
-	while(1)
-	{
-	  file.openFile(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_00_TU_U.blp"), i).mb_str()));
-	  if(file.isEof())
-			break;
-	  file.close();
-		i ++;
-	}
+	while(CASCFOLDER.fileExists(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_00_TU_U.blp"), i).mb_str())))
+		i++;
 	return i;
 }
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
 	int i = 0;
-	CASCFile file;
-	while(1)
-	{
-	  file.openFile(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i).mb_str()));
-		if (CASCFOLDER.getFullPathForFile(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i)) == "")
-			break;
-		file.close();
-		i ++;
-	}
+	while(CASCFOLDER.fileExists(std::string(wxString::Format(wxT("Textures\\GuildEmblems\\Border_%02d_%02d_TU_U.blp"), border, i).mb_str())))
+		i++;
 	return i;
 }
 
