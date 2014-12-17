@@ -45,6 +45,7 @@ class CASCFolder
     std::string getFullPathForFile(std::string file);
     std::string getFullPathForFile(wxString file) { return getFullPathForFile(std::string(file.mb_str())); }
 
+    bool fileExists(std::string file);
 
     void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString) = CASCFolder::defaultFilterFunc);
 

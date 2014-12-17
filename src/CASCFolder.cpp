@@ -182,3 +182,23 @@ std::string CASCFolder::getFullPathForFile(std::string file)
   LOG_ERROR << __FUNCTION__ << file.c_str() << "Not found";
   return "";
 }
+
+
+bool CASCFolder::fileExists(std::string file)
+{
+  //LOG_INFO << __FUNCTION__ << " " << file.c_str();
+  if(!hStorage)
+    return false;
+
+  HANDLE dummy;
+
+  if(CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, &dummy))
+  {
+   // LOG_INFO << "OK";
+    CascCloseFile(dummy);
+    return true;
+  }
+
+ // LOG_ERROR << "Opening" << file.c_str() << "failed." << "Error" << GetLastError();
+  return false;
+}

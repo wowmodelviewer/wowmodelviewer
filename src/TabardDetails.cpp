@@ -49,7 +49,6 @@ int TabardDetails::GetMaxBackground()
 	  file.close();
 		i ++;
 	}
-	file.close();
 	return i;
 }
 
@@ -65,7 +64,6 @@ int TabardDetails::GetMaxIcon()
 	  file.close();
 		i ++;
 	}
-	file.close();
 	return i;
 }
 
@@ -81,7 +79,6 @@ int TabardDetails::GetMaxIconColor(int icon)
 	  file.close();
 		i ++;
 	}
-	file.close();
 	return i;
 }
 
@@ -97,7 +94,6 @@ int TabardDetails::GetMaxBorder()
 	  file.close();
 		i ++;
 	}
-	 file.close();
 	return i;
 }
 
@@ -113,7 +109,6 @@ int TabardDetails::GetMaxBorderColor(int border)
 		file.close();
 		i ++;
 	}
-	file.close();
 	return i;
 }
 

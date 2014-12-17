@@ -12,7 +12,7 @@
 #include <iostream>
 
 #include "logger/Logger.h"
-//#define DEBUG_READ
+// #define DEBUG_READ
 
 CASCFile::CASCFile()
 : GameFile(), m_handle(NULL),  m_filePath("")
@@ -51,7 +51,10 @@ bool CASCFile::open()
 
 bool CASCFile::close()
 {
-  return CascCloseFile(m_handle);
+  if(m_handle)
+    return CascCloseFile(m_handle);
+  else
+    return true;
 }
 
 void CASCFile::openFile(std::string filename)

@@ -290,7 +290,7 @@ public:
 		for(size_t j=0; j < b.nTimes; j++) {
 			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
 			uint32 *ptimes;
-			if (animfiles[j]->getSize() > pHeadTimes->ofsEntrys)
+			if (animfiles[j] && (animfiles[j]->getSize() > pHeadTimes->ofsEntrys))
 				ptimes = (uint32*)(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
 			else if (f.getSize() > pHeadTimes->ofsEntrys)
 				ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
@@ -305,7 +305,7 @@ public:
 			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
 			assert((D*)(f.getBuffer() + pHeadKeys->ofsEntrys));
 			D *keys;
-			if (animfiles[j]->getSize() > pHeadKeys->ofsEntrys)
+			if (animfiles[j] && (animfiles[j]->getSize() > pHeadKeys->ofsEntrys))
 				keys = (D*)(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
 			else if (f.getSize() > pHeadKeys->ofsEntrys)
 				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);

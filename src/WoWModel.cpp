@@ -777,54 +777,47 @@ void WoWModel::initAnimated(GameFile * f)
 
 	initCommon(f);
 
-	if (header.nAnimations > 0) {
+	if (header.nAnimations > 0)
+	{
 		anims = new ModelAnimation[header.nAnimations];
 
-		if (gameVersion < VERSION_WOTLK) {
-			memcpy(anims, f->getBuffer() + header.ofsAnimations, header.nAnimations * sizeof(ModelAnimation));
-		} else {
-			// or load anim files ondemand?
-			ModelAnimationWotLK animsWotLK;
-			wxString tempname;
-		//	if(g_modelViewer->gameFolder)
-			  //animfiles = new CASCFile[header.nAnimations];
-	//		else
-		//	  animfiles = new MPQFile[header.nAnimations];
+		ModelAnimationWotLK animsWotLK;
+		wxString tempname;
 
-			std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
+		std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
 
-			for(size_t i=0; i<header.nAnimations; i++) {
-				memcpy(&animsWotLK, f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimationWotLK), sizeof(ModelAnimationWotLK));
-				anims[i].animID = animsWotLK.animID;
-				anims[i].timeStart = 0;
-				anims[i].timeEnd = animsWotLK.length;
-				anims[i].moveSpeed = animsWotLK.moveSpeed;
-				anims[i].flags = animsWotLK.flags;
-				anims[i].probability = animsWotLK.probability;
-				anims[i].d1 = animsWotLK.d1;
-				anims[i].d2 = animsWotLK.d2;
-				anims[i].playSpeed = animsWotLK.playSpeed;
-				anims[i].boundSphere.min = animsWotLK.boundSphere.min;
-				anims[i].boundSphere.max = animsWotLK.boundSphere.max;
-				anims[i].boundSphere.radius = animsWotLK.boundSphere.radius;
-				anims[i].NextAnimation = animsWotLK.NextAnimation;
-				anims[i].Index = animsWotLK.Index;
+		for(size_t i=0; i<header.nAnimations; i++)
+		{
+		  memcpy(&animsWotLK, f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimationWotLK), sizeof(ModelAnimationWotLK));
+		  anims[i].animID = animsWotLK.animID;
+		  anims[i].timeStart = 0;
+		  anims[i].timeEnd = animsWotLK.length;
+		  anims[i].moveSpeed = animsWotLK.moveSpeed;
+		  anims[i].flags = animsWotLK.flags;
+		  anims[i].probability = animsWotLK.probability;
+		  anims[i].d1 = animsWotLK.d1;
+		  anims[i].d2 = animsWotLK.d2;
+		  anims[i].playSpeed = animsWotLK.playSpeed;
+		  anims[i].boundSphere.min = animsWotLK.boundSphere.min;
+		  anims[i].boundSphere.max = animsWotLK.boundSphere.max;
+		  anims[i].boundSphere.radius = animsWotLK.boundSphere.radius;
+		  anims[i].NextAnimation = animsWotLK.NextAnimation;
+		  anims[i].Index = animsWotLK.Index;
 
-				tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
-				// std::cout << "tempname = " << tempname.c_str() << std::endl;
-        // std::cout << "g_modelViewer->gameFolder = " << g_modelViewer->gameFolder << std::endl;
-				if(!CASCFOLDER.hStorage)
-				{
-			//	  if (MPQFile::exists(tempname))
-			//	    animfiles[i].openFile(tempname.c_str());
-				}
-				else
-				{
-				  CASCFile * newfile = new CASCFile(tempname.c_str());
-				  animfiles.push_back(newfile);
+		  tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
+		  // std::cout << "tempname = " << tempname.c_str() << std::endl;
+		  // std::cout << "g_modelViewer->gameFolder = " << g_modelViewer->gameFolder << std::endl;
 
-				}
-			}
+		  if(CASCFOLDER.fileExists(tempname.c_str()))
+		  {
+		    std::cout << "creating file" << std::endl;
+		    CASCFile * newfile = new CASCFile(tempname.c_str());
+		    animfiles.push_back(newfile);
+		  }
+		  else
+		  {
+		    animfiles.push_back(NULL);
+		  }
 		}
 
 		animManager = new AnimManager(anims);
@@ -857,7 +850,7 @@ void WoWModel::initAnimated(GameFile * f)
 		// free MPQFile
 		if (header.nAnimations > 0) {
 			for(size_t i=0; i<header.nAnimations; i++) {
-				if(animfiles[i]->getSize() > 0)
+				if(animfiles[i] && (animfiles[i]->getSize() > 0))
 					animfiles[i]->close();
 				delete animfiles[i];
 			}
