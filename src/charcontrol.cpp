@@ -1082,10 +1082,25 @@ void CharControl::RefreshModel()
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
 	{
 		CharSlots sn = slotOrder[i];
-	//std::cout << "cd.equipment[" << sn << "] = " << cd.equipment[sn] << std::endl;
 		if (cd.equipment[sn] != 0)
 			AddEquipment(sn, cd.equipment[sn], 10+i, tex);
 	}
+
+	LOG_INFO << "Current Equipement :"
+	         << "Head" << cd.equipment[CS_HEAD]
+	         << "Shoulder" << cd.equipment[CS_SHOULDER]
+	         << "Shirt" << cd.equipment[CS_SHIRT]
+	         << "Chest" << cd.equipment[CS_CHEST]
+	         << "Belt" << cd.equipment[CS_BELT]
+	         << "Legs" << cd.equipment[CS_PANTS]
+	         << "Boots" << cd.equipment[CS_BOOTS]
+	         << "Bracers" << cd.equipment[CS_BRACERS]
+	         << "Gloves" << cd.equipment[CS_GLOVES]
+	         << "Cape" << cd.equipment[CS_CAPE]
+	         << "Right Hand" << cd.equipment[CS_HAND_RIGHT]
+	         << "Left Hand" << cd.equipment[CS_HAND_LEFT]
+	         << "Quiver" << cd.equipment[CS_QUIVER]
+	         << "Tabard" << cd.equipment[CS_TABARD];
 
 	// reset geosets
 	for (size_t j=0; j<model->geosets.size(); j++) {
@@ -1102,7 +1117,6 @@ void CharControl::RefreshModel()
 
 		}
 	}
-
 
 	// finalize character texture
 	tex.compose(charTex);
