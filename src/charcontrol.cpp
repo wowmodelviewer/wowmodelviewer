@@ -535,9 +535,11 @@ void CharControl::OnSpin(wxSpinEvent &event)
 
 	  // update facial type based on skin chosen
 	  cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+	 /*
 	  std::cout << "--------------------------------------" << std::endl;
 	  std::cout << __FUNCTION__ << " => cd.maxFaceType = " << cd.maxFaceType << std::endl;
 	  std::cout << "--------------------------------------" << std::endl;
+	  */
 	  if(cd.faceType > cd.maxFaceType)
 	    cd.faceType = 0;
 
@@ -850,7 +852,6 @@ void CharControl::RefreshModel()
 	textures = getTextureNameForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
   if(textures.size() != 0 && textures[0] != "")
   {
-    std::cout << "textures[0] = " << textures[0] << std::endl;
     hairTex = texturemanager.add(textures[0].c_str());
     UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
   }
@@ -2213,7 +2214,7 @@ void CharControl::ClearItemDialog()
 
 void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const wxChar *caption)
 {
-  std::cout << __FUNCTION__ << " type = " << type << " / slot = " << slot << " / current = " << current << std::endl;
+  //std::cout << __FUNCTION__ << " type = " << type << " / slot = " << slot << " / current = " << current << std::endl;
 	if (items.items.size() == 0)
 		return;
 	ClearItemDialog();
@@ -2228,7 +2229,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	// collect all items for this slot, making note of the occurring subclasses
 	std::set<std::pair<int,int> > subclassesFound;
 	
-	std::cout << "item db size = " << items.items.size() << std::endl;
+	//std::cout << "item db size = " << items.items.size() << std::endl;
 
 	std::map<std::pair<int,int>, int> subclasslookup;
 
@@ -2281,7 +2282,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 				subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
 		}
 	}
-	std::cout << "choices size = " << choices.GetCount() << std::endl;
+	//std::cout << "choices size = " << choices.GetCount() << std::endl;
 
 	if (subclassesFound.size() > 1)
 		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);

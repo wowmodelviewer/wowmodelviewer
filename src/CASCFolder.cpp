@@ -100,7 +100,7 @@ void CASCFolder::initLocale()
 void CASCFolder::initVersion()
 {
   std::string buildinfofile = m_folder+"\\..\\.build.info";
-  std::cout << "buildinfofile = " << buildinfofile << std::endl;
+  LOG_INFO << "buildinfofile : " << buildinfofile.c_str();
   std::ifstream buildinfo(buildinfofile.c_str());
 
   if(!buildinfo.good())

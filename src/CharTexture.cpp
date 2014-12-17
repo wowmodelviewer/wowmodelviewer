@@ -191,7 +191,7 @@ void CharTexture::initRegions()
       coords.ypos = atoi(regions.values[r][2].c_str());
       coords.width = atoi(regions.values[r][3].c_str());
       coords.height = atoi(regions.values[r][4].c_str());
-      std::cout << atoi(regions.values[r][0].c_str())+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
+      //std::cout << atoi(regions.values[r][0].c_str())+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
       regionCoords[atoi(regions.values[r][0].c_str())+1] = coords;
 
     }

@@ -1143,14 +1143,14 @@ void ModelViewer::LoadItem(unsigned int id)
 	  string query = ss.str();
 
 	  sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
-	  std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
+	  //std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
 
 	  if(itemInfos.valid && !itemInfos.empty())
 	  {
 	    std::string model1 = itemInfos.values[0][0];
-	    std::cout << "model1 = " << model1 << std::endl;
+	    //std::cout << "model1 = " << model1 << std::endl;
 	    std::string texture1 = itemInfos.values[0][1];
-	    std::cout << "texture1 = " << texture1 << std::endl;
+	    //std::cout << "texture1 = " << texture1 << std::endl;
 
 	    model1 = CASCFOLDER.getFullPathForFile(model1);
 	    if(model1 == "") // try with .m2 at the end
@@ -1163,8 +1163,8 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	    texture1 = itemInfos.values[0][1] + itemInfos.values[0][2];
 
-	    std::cout << "FINAL - model1 = " << model1 << std::endl;
-	    std::cout << "FINAL - texture1 = " << texture1 << std::endl;
+	    //std::cout << "FINAL - model1 = " << model1 << std::endl;
+	    //std::cout << "FINAL - texture1 = " << texture1 << std::endl;
 	    if(model1 != "" && texture1 != "")
 	    {
 	      LoadModel(model1.c_str());

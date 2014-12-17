@@ -98,8 +98,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	if(stdname.find("_hd") != std::string::npos)
 	  isHD = true;
 
-	std::cout << __FUNCTION__ << "is HD ? " << boolalpha << isHD << std::endl;
-
 	// Initiate our model variables.
 	trans = 1.0f;
 	rad = 1.0f;
@@ -203,8 +201,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	}
 
 	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
-
-	std::cout << "animated = " << std::boolalpha << animated << std::endl;
 
 	if (gameVersion >= VERSION_WOTLK) {
 		modelname = tempname;
@@ -784,7 +780,7 @@ void WoWModel::initAnimated(GameFile * f)
 		ModelAnimationWotLK animsWotLK;
 		wxString tempname;
 
-		std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
+		//std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
 
 		for(size_t i=0; i<header.nAnimations; i++)
 		{
@@ -805,19 +801,11 @@ void WoWModel::initAnimated(GameFile * f)
 		  anims[i].Index = animsWotLK.Index;
 
 		  tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
-		  // std::cout << "tempname = " << tempname.c_str() << std::endl;
-		  // std::cout << "g_modelViewer->gameFolder = " << g_modelViewer->gameFolder << std::endl;
 
 		  if(CASCFOLDER.fileExists(tempname.c_str()))
-		  {
-		    std::cout << "creating file" << std::endl;
-		    CASCFile * newfile = new CASCFile(tempname.c_str());
-		    animfiles.push_back(newfile);
-		  }
+		    animfiles.push_back(new CASCFile(tempname.c_str()));
 		  else
-		  {
 		    animfiles.push_back(NULL);
-		  }
 		}
 
 		animManager = new AnimManager(anims);
