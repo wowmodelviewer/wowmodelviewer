@@ -809,7 +809,6 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	if (f->isEof()) {
 		tex->id = 0;
 		wxLogMessage(wxT("Error: Could not load the texture '%s'"), wxString(tex->name.c_str(), wxConvUTF8).c_str());
-		f->close();
 		return;
 	} else {
 		//tex->id = id; // I don't see the id being set anywhere,  should I set it now?
