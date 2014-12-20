@@ -284,15 +284,15 @@ void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event){
 
 void FilteredChoiceDialog::DoFilter()
 {
-	InitFilter();
-
 	m_indices.clear();
 
 	m_listctrl->DeleteAllItems();
 
 	wxListItem item; 
-	for(int i=0; i<(int)m_choices->GetCount(); ++i){
-		if (FilterFunc(i)) {
+	for(int i=0; i<(int)m_choices->GetCount(); ++i)
+	{
+		if (FilterFunc(i))
+		{
 			item.SetId(i); 
 			item.SetText(m_choices->Item(i));
 			m_indices.push_back((int)i);
@@ -306,27 +306,12 @@ void FilteredChoiceDialog::DoFilter()
 	}
 }
 
-void FilteredChoiceDialog::InitFilter()
-{
-	wxString f = wxT("^.*");
-    wxString pattern(m_pattern->GetValue());
-	for (size_t i=0; i<pattern.Length(); i++) {
-		char c = pattern[i];
-		if (c=='?') f.append(wxT("."));
-		else if (c=='*') f.append(wxT(".*"));
-		else f.append(1,c);
-	}
-	f.append(wxT(".*$"));
-
-	filter.Compile(f, wxRE_ICASE);
-}
-
 bool FilteredChoiceDialog::FilterFunc(int index)
 {
 	if (index==0 && keepFirst) 
 		return true;
 
-	return filter.Matches(m_choices->Item(index));
+	return m_choices->Item(index).Matches("*" + m_pattern->GetValue() + "*");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,24 +333,41 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl *dest, int type,
 						bool helpmsg):
 	FilteredChoiceDialog(dest, type, parent, message, caption, choices, quality, keepfirst), m_cats(cats)
 {
-	m_catlist = new wxCheckListBox(this, ID_CAT_LIST, wxDefaultPosition, wxDefaultSize, catnames, wxLB_HSCROLL);
-	for (size_t i=0; i<catnames.GetCount(); i++) 
+  wxArrayString realcatnames;
+  // filter catnames based on cats
+  for (size_t i=0; i<catnames.GetCount(); i++)
+  {
+    for(size_t j=keepfirst?1:0 ; j < m_cats.size() ; j++)
+    {
+      if(m_cats[j] == (int)i)
+      {
+        realcatnames.push_back(catnames[i]);
+        m_catsConvert[m_cats[j]] = realcatnames.size()-1;
+        break;
+      }
+    }
+  }
+
+	m_catlist = new wxCheckListBox(this, ID_CAT_LIST, wxDefaultPosition, wxDefaultSize, realcatnames, wxLB_HSCROLL);
+	for (size_t i=0; i<realcatnames.GetCount(); i++)
 		m_catlist->Check((unsigned int)i);
 
-	numcats = (int)catnames.GetCount();
+	std::cout << "m_cats.size() = " << m_cats.size() << std::endl;
+	std::cout << "realcatnames.size() = " << realcatnames.GetCount() << std::endl;
 
-    wxSizer *topsizer = GetSizer();
+	numcats = (int)realcatnames.GetCount();
 
-    topsizer->Prepend(m_catlist, 0, wxEXPAND | wxALL, 10);
+	wxSizer *topsizer = GetSizer();
 
-	if (helpmsg) {
+	topsizer->Prepend(m_catlist, 0, wxEXPAND | wxALL, 10);
+
+	if (helpmsg)
 		topsizer->Prepend(new wxStaticText(this, -1, wxT("Double-click to select only one category")), 0, wxEXPAND | wxTOP | wxLEFT, 10);
-	}
 
-    topsizer->SetSizeHints(this);
-    topsizer->Fit(this);
+	topsizer->SetSizeHints(this);
+	topsizer->Fit(this);
 
-    m_listbox->SetFocus();
+	m_listbox->SetFocus();
 }
 
 bool CategoryChoiceDialog::FilterFunc(int index)
@@ -373,7 +375,7 @@ bool CategoryChoiceDialog::FilterFunc(int index)
 	if (index==0 && keepFirst) 
 		return true;
 
-	return m_catlist->IsChecked(m_cats[index]) && FilteredChoiceDialog::FilterFunc(index);
+	return m_catlist->IsChecked(m_catsConvert[m_cats[index]]) && FilteredChoiceDialog::FilterFunc(index);
 }
 
 void CategoryChoiceDialog::OnCheck(wxCommandEvent &)

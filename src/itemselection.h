@@ -12,6 +12,7 @@
 #include <wx/listctrl.h>
 
 // stl
+#include <map>
 #include <vector>
 
 wxColour ItemQualityColour(int quality);
@@ -48,8 +49,6 @@ protected:
     
     DECLARE_EVENT_TABLE()
 
-	wxRegEx filter;
-
 public:
     enum{
         ID_FILTER_TEXT = 1000,
@@ -61,20 +60,19 @@ public:
 
 	bool keepFirst;
     
-    FilteredChoiceDialog(CharControl *dest, int type,
-	                       wxWindow *parent,
-                           const wxString& message,
-                           const wxString& caption,
-                           const wxArrayString& choices,
-						   const std::vector<int> *quality,
-						   bool keepfirst = true);
-    
-    virtual void OnFilter(wxCommandEvent& event);
-    virtual void OnImportNPC(wxCommandEvent& event);
-    virtual void OnImportItem(wxCommandEvent& event);
-    virtual int GetSelection() const { return m_indices[m_selection]; }
+	FilteredChoiceDialog(CharControl *dest, int type,
+	    wxWindow *parent,
+	    const wxString& message,
+	    const wxString& caption,
+	    const wxArrayString& choices,
+	    const std::vector<int> *quality,
+	    bool keepfirst = true);
 
-	virtual void InitFilter();
+	virtual void OnFilter(wxCommandEvent& event);
+	virtual void OnImportNPC(wxCommandEvent& event);
+	virtual void OnImportItem(wxCommandEvent& event);
+	virtual int GetSelection() const { return m_indices[m_selection]; }
+
 	virtual void DoFilter();
 	virtual	bool FilterFunc(int index);
 };
@@ -83,6 +81,7 @@ public:
 class CategoryChoiceDialog: public FilteredChoiceDialog {
 protected:
 	const std::vector<int> &m_cats;
+	std::map<int,unsigned int> m_catsConvert;
 
 	wxCheckListBox *m_catlist;
 	int numcats;

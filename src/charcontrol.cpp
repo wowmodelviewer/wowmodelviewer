@@ -2277,8 +2277,6 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	  }
 	}
 
-
-	int sel=0, ord=0;
 	for (std::vector<ItemRecord>::iterator it = items.items.begin(); it != items.items.end(); ++it) {
 		if (type == UPDATE_SINGLE_ITEM)
 		{
@@ -2300,13 +2298,11 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 			numbers.push_back(it->id);
 			quality.push_back(it->quality);
 
-			if (it->id == current) 
-				sel = ord;
-
-			ord++;
-
-			if (it->itemclass > 0) 
+			if (it->itemclass > 0)
+			{
 				subclassesFound.insert(std::pair<int,int>(it->itemclass,it->subclass));
+			}
+			cats.push_back(subclasslookup[std::pair<int,int>(it->itemclass, it->subclass)]);
 		}
 	}
 	//std::cout << "choices size = " << choices.GetCount() << std::endl;
@@ -2315,8 +2311,6 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);
 	else
 	  itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
-
-	itemDialog->SetSelection(sel);
 
 	wxSize s = itemDialog->GetSize();
 	const int w = 250;
