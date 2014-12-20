@@ -5,10 +5,11 @@
 #include <utility>
 #include <vector>
 
+#include "GameFile.h"
 #include "modelheaders.h"
-#include "mpq.h"
-#include "vec3d.h"
 #include "quaternion.h"
+#include "vec3d.h"
+
 
 // interpolation functions
 template<class T>

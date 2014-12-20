@@ -10,8 +10,9 @@
 
 #include "animated.h"
 #include "modelheaders.h"
-#include "mpq.h"
 #include "util.h"
+
+class GameFile;
 
 struct ModelTransparency {
 	AnimatedShort trans;

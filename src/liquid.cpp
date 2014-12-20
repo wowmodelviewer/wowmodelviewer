@@ -1,5 +1,6 @@
 #include "liquid.h"
-//#include "world.h"
+
+#include "GameFile.h"
 #include "shaders.h"
 
 struct LiquidVertex {
@@ -9,7 +10,7 @@ struct LiquidVertex {
 };
 
 
-void Liquid::initFromTerrain(MPQFile &f, int flags)
+void Liquid::initFromTerrain(GameFile &f, int flags)
 {
 	texRepeats = 4.0f;
 	/*
@@ -44,7 +45,7 @@ void Liquid::initFromTerrain(MPQFile &f, int flags)
 	trans = false;
 }
 
-void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
+void Liquid::initFromWMO(GameFile &f, WMOMaterial &mat, bool indoor)
 {
 	texRepeats = 4.0f;
 	ydir = -1.0f;
@@ -102,7 +103,7 @@ void Liquid::initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor)
 }
 
 
-void Liquid::initGeometry(MPQFile &f)
+void Liquid::initGeometry(GameFile &f)
 {
 	// assume: f is at the appropriate starting position
 

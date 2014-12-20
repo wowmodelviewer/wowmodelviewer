@@ -1,8 +1,11 @@
-#include "modelviewer.h"
-#include "globalvars.h"
 #include "maptile.h"
-#include "vec3d.h"
+
+#include "GameFile.h"
+#include "globalvars.h"
+#include "modelviewer.h"
 #include "shaders.h"
+#include "vec3d.h"
+
 #include <cassert>
 #include <algorithm>
 
@@ -307,6 +310,7 @@ http://madx.dk/wowdev/wiki/index.php?title=ADT
 */
 MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 {
+  /*
 	x = atoi((char *)filename.Mid(filename.Len()-9, 2).c_str());
 	z = atoi((char *)filename.Mid(filename.Len()-6, 2).c_str());
 	xbase = x * TILESIZE;
@@ -325,20 +329,18 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 	initDisplay();
 
 	 // [FLOW] DON'T REMOVE i use this file extraction method to debug the adt format
-/*
 	FILE* exFile = fopen( std::string(filename).substr( std::string(filename).find_last_of( "\\" ) +1 ).c_str(), "wb" );
 	if( exFile )
 	{
-		MPQFile ex(filename);
+		GameFile ex(filename);
 
 		fwrite( ex.getBuffer(), ex.getSize( filename ),1, exFile );
 
 		ex.close();
 		fclose( exFile );
 	}
-*/
 
-	MPQFile f(filename);
+	GameFile f(filename);
 	ok = !f.isEof();
 	if (!ok) {
 		wxLogMessage(wxT("Error: loading %s"),filename.c_str());
@@ -373,17 +375,17 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 		else if (strncmp(fourcc, "MHDR", 4) == 0) {
 		}
 		else if (strncmp(fourcc,"MCIN",4)==0) {
-			/*
-			Index for MCNK chunks. Contains 256 records of 16 bytes, which have the following format:
-			struct SMChunkInfo // 03-29-2005 By ObscuR
-			{
-			000h  MCNK* mcnk;				// absolute offset.
-			004h  UINT32 size;				// the size of the MCNK chunk, this is refering to.
-			008h  UINT32 Unused_flags;			// these two are always 0. only set in the client.
-			00Ch  UINT32 Unused_asyncId;
-			010h
-			};
-			*/
+
+			//Index for MCNK chunks. Contains 256 records of 16 bytes, which have the following format:
+			//struct SMChunkInfo // 03-29-2005 By ObscuR
+			//{
+			//000h  MCNK* mcnk;				// absolute offset.
+			//004h  UINT32 size;				// the size of the MCNK chunk, this is refering to.
+			//008h  UINT32 Unused_flags;			// these two are always 0. only set in the client.
+			//00Ch  UINT32 Unused_asyncId;
+			//010h
+			//};
+
 			// mapchunk offsets/sizes
 			if (size == CHUNKS_IN_TILE*CHUNKS_IN_TILE*16) {
 				for (size_t i=0; i<CHUNKS_IN_TILE*CHUNKS_IN_TILE; i++) {
@@ -395,10 +397,9 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 				wxLogMessage(wxT("Error: wrong MCIN chunk %d."), size);
 		}
 		else if (strncmp(fourcc,"MTEX",4)==0) {
-			/*
-			List of textures used by the terrain in this map tile.
-			A contiguous block of zero-terminated strings, that are complete filenames with paths. The textures will later be identified by their position in this list.
-			*/
+
+		//	List of textures used by the terrain in this map tile.
+		//	A contiguous block of zero-terminated strings, that are complete filenames with paths. The textures will later be identified by their position in this list.
 			// texture lists
 			char *buf = new char[size+1];
 			f.read(buf, size);
@@ -414,7 +415,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 					wxString texshader = texpath;
 					// load the specular texture instead
 					texshader.insert(texshader.length()-4,wxT("_s"));
-					if (MPQFile::exists(texshader))
+					if (GameFile::exists(texshader))
 						texpath = texshader;
 				}
 
@@ -424,167 +425,164 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 			delete[] buf;
 		}
 		else if (strncmp(fourcc,"MMDX",4)==0) {
-			/*
-			List of filenames for M2 models that appear in this map tile. A contiguous block of zero-terminated strings.
-			*/
+		//	List of filenames for M2 models that appear in this map tile. A contiguous block of zero-terminated strings.
 			// models ...
 			// MMID would be relative offsets for MMDX filenames
-			/*
-			// TODO
-			char *buf = new char[size+1];
-			f.read(buf, size);
-			buf[size] = 0;
-			char *p=buf;
-			int t=0;
-			while (p<buf+size) {
-				std::string path(p);
-				p+=strlen(p)+1;
-				fixname(path);
 
-				gWorld->modelmanager.add(path);
-				models.push_back(path);
-			}
-			delete[] buf;
-			*/
+			// TODO
+//			char *buf = new char[size+1];
+//			f.read(buf, size);
+//			buf[size] = 0;
+//			char *p=buf;
+//			int t=0;
+//			while (p<buf+size) {
+//				std::string path(p);
+//				p+=strlen(p)+1;
+//				fixname(path);
+//
+//				gWorld->modelmanager.add(path);
+//				models.push_back(path);
+//			}
+//			delete[] buf;
 		}
 		else if (strncmp(fourcc,"MMID",4)==0) {
-			/*
-			Lists the relative offsets of string beginnings in the above MMDX chunk. One 32-bit integer per offset.
-			This will be referenced in the offsets in MDDF --Cromon 16:38, 28 August 2009 (CEST)
-			*/
+
+//			Lists the relative offsets of string beginnings in the above MMDX chunk. One 32-bit integer per offset.
+//			This will be referenced in the offsets in MDDF --Cromon 16:38, 28 August 2009 (CEST)
+
 		}
 		else if (strncmp(fourcc,"MWMO",4)==0) {
-			/*
-			List of filenames for WMOs (world map objects) that appear in this map tile. A contiguous block of zero-terminated strings.
-			*/
+
+//			List of filenames for WMOs (world map objects) that appear in this map tile. A contiguous block of zero-terminated strings.
+
 			// map objects
 			// MWID would be relative offsets for MWMO filenames
-			/*
-			// TODO
-			char *buf = new char[size+1];
-			f.read(buf, size);
-			buf[size] = 0;
-			char *p=buf;
-			while (p<buf+size) {
-				std::string path(p);
-				p+=strlen(p)+1;
-				fixname(path);
 
-				gWorld->wmomanager.add(path);
-				wmos.push_back(path);
-			}
-			delete[] buf;
-			*/
+			// TODO
+//			char *buf = new char[size+1];
+//			f.read(buf, size);
+//			buf[size] = 0;
+//			char *p=buf;
+//			while (p<buf+size) {
+//				std::string path(p);
+//				p+=strlen(p)+1;
+//				fixname(path);
+//
+//				gWorld->wmomanager.add(path);
+//				wmos.push_back(path);
+//			}
+//			delete[] buf;
+
 		}
 		else if (strncmp(fourcc,"MWID",4)==0) {
-			/*
-			Lists the relative offsets of string beginnings in the above MWMO chunk. One 32-bit integer per offset.
-			Again referenced in MODF
-			*/
+
+//			Lists the relative offsets of string beginnings in the above MWMO chunk. One 32-bit integer per offset.
+//			Again referenced in MODF
+
 		}
 		else if (strncmp(fourcc,"MDDF",4)==0) {
-			/*
-			Placement information for doodads (M2 models). 36 bytes per model instance.
-			Offset 	Type 		Description
-			0x00 	uint32 		ID (index in the MMID list)
-			0x04 	uint32 		unique identifier for this instance
-			0x08 	Vec3F 		Position (X,Y,Z)
-			0x14 	Vec3F 		Orientation (A,B,C)
-			0x20 	uint16 		scale factor * 1024 (it's scale / 1024 for the other way around)
-			0x22 	uint16 		flags, known: &1 (sets the internal flags to 0x801 instead of 0x1. (WDOODADDEF.var0xC))
-			struct SMDoodadDef // 03-31-2005 By ObscuR
-			{
-			000h  UINT32 nameId;
-			004h  UINT32 uniqueId;		
-			008h  float pos[3];		
-			00Ch 
-			010h 
-			014h  float rot[3];		
-			018h  		
-			01Ch  		
-			020h  UINT16 scale;	
-			022h  UINT16 flags;
-			024h  
-			};
-			Flags:
-			&1 is set for biodomes in netherstorm. 
-			&2 is set for some clovers and shrubbery in northrend.
-			Both are only used in Expansion01 respective Northrend.
-			The instance information specifies the actual M2 model to use, its absolute position and orientation within the world. The orientation is defined by rotations (in degrees) about the 3 axes as such (this order of operations is for OpenGL, so the transformations "actually" happen in reverse):
-			Rotate around the Y axis by B-90
-			Rotate around the Z axis by -A
-			Rotate around the X axis by C
-			If you can't get those working, try these (The other ones didn't work for me, these does. My coordinate system is equal to WoW's (X is depth and Z is up))
-			Rotate around Z (up) by B + 180 (or minus if you will)
-			Rotate around X (depth) by +C
-			Rotate around Y by +A
-			-MaiN
-			*/
+
+//			Placement information for doodads (M2 models). 36 bytes per model instance.
+//			Offset 	Type 		Description
+//			0x00 	uint32 		ID (index in the MMID list)
+//			0x04 	uint32 		unique identifier for this instance
+//			0x08 	Vec3F 		Position (X,Y,Z)
+//			0x14 	Vec3F 		Orientation (A,B,C)
+//			0x20 	uint16 		scale factor * 1024 (it's scale / 1024 for the other way around)
+//			0x22 	uint16 		flags, known: &1 (sets the internal flags to 0x801 instead of 0x1. (WDOODADDEF.var0xC))
+//			struct SMDoodadDef // 03-31-2005 By ObscuR
+//			{
+//			000h  UINT32 nameId;
+//			004h  UINT32 uniqueId;
+//			008h  float pos[3];
+//			00Ch
+//			010h
+//			014h  float rot[3];
+//			018h
+//			01Ch
+//			020h  UINT16 scale;
+//			022h  UINT16 flags;
+//			024h
+//			};
+//			Flags:
+//			&1 is set for biodomes in netherstorm.
+//			&2 is set for some clovers and shrubbery in northrend.
+//			Both are only used in Expansion01 respective Northrend.
+//			The instance information specifies the actual M2 model to use, its absolute position and orientation within the world. The orientation is defined by rotations (in degrees) about the 3 axes as such (this order of operations is for OpenGL, so the transformations "actually" happen in reverse):
+//			Rotate around the Y axis by B-90
+//			Rotate around the Z axis by -A
+//			Rotate around the X axis by C
+//			If you can't get those working, try these (The other ones didn't work for me, these does. My coordinate system is equal to WoW's (X is depth and Z is up))
+//			Rotate around Z (up) by B + 180 (or minus if you will)
+//			Rotate around X (depth) by +C
+//			Rotate around Y by +A
+//			-MaiN
+
 			// model instance data
-			/*
+
 			// TODO
-			nMDX = (int)size / 36;
-			for (size_t i=0; i<nMDX; i++) {
-				int id;
-				f.read(&id, 4);
-				Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[id])];
-				ModelInstance inst(model, f);
-				modelis.push_back(inst);
-			}
-			*/
+//			nMDX = (int)size / 36;
+//			for (size_t i=0; i<nMDX; i++) {
+//				int id;
+//				f.read(&id, 4);
+//				Model *model = (Model*)gWorld->modelmanager.items[gWorld->modelmanager.get(models[id])];
+//				ModelInstance inst(model, f);
+//				modelis.push_back(inst);
+//			}
+
 		}
 		else if (strncmp(fourcc,"MODF",4)==0) {
-			/*
-			Placement information for WMOs. 64 bytes per WMO instance.
-			Offset 	Type 		Description
-			0x00 	uint32 		ID (index in the MWID list)
-			0x04 	uint32 		unique identifier for this instance
-			0x08 	3 floats 	Position (X,Y,Z)
-			0x14 	3 floats 	Orientation (A,B,C)
-			0x20 	3 floats 	Upper Extents
-			0x2C 	3 floats 	Lower Extents
-			0x38 	uint16 		flags
-			0x3A 	uint16 		Doodad set index
-			0x3C 	uint16 		name set?
-			0x3E 	uint16 		unknown
-			(old: 0x3C 	uint32 		Name set); it reads only a WORD into the WMAPOBJDEF structure. I don't know about the rest. Oo
-			To the flags: known: &1 (does something with the extends, no idea what exactely: paste, is set eg for World\wmo\Azeroth\Buildings\GuardTower\GuardTower.wmo and World\wmo\Azeroth\Buildings\GuardTower\GuardTower_destroyed.wmo in in DeathknightStart_43_27. Maybe used for Phasing?)
-			struct SMMapObjDef // 03-29-2005 By ObscuR
-			{
-			000h  UINT32 nameId;		
-			004h  UINT32 uniqueId;		
-			008h  float pos[3];
-			00Ch  		
-			010h  		
-			014h  float rot[3];
-			018h  	
-			01Ch  		
-			020h  float extents[6];
-			024h  	 
-			028h   	
-			02Ch 	
-			030h 		
-			034h  		
-			038h  UINT32 flags;		
-			03Ch  UINT16 doodadSet;
-			03Eh  UINT16 nameSet;
-			040h 
-			}; 
-			The positioning and orientation is done the same way as in the MDDF chunk. There is no scaling. Two additional positions and two integers are also given. They might or might not be used for lighting...?
-			The unique identifier is important for WMOs, because multiple map tiles might want to draw the same WMO. This identifier is used to ensure that each specific instance can only be drawn once. (a unique identifier is required because the model name is not usable for this purpose, since it is possible to have more than one instance of the same WMO, like some bridges in Darkshore)
-			*/
+
+//			Placement information for WMOs. 64 bytes per WMO instance.
+//			Offset 	Type 		Description
+//			0x00 	uint32 		ID (index in the MWID list)
+//			0x04 	uint32 		unique identifier for this instance
+//			0x08 	3 floats 	Position (X,Y,Z)
+//			0x14 	3 floats 	Orientation (A,B,C)
+//			0x20 	3 floats 	Upper Extents
+//			0x2C 	3 floats 	Lower Extents
+//			0x38 	uint16 		flags
+//			0x3A 	uint16 		Doodad set index
+//			0x3C 	uint16 		name set?
+//			0x3E 	uint16 		unknown
+//			(old: 0x3C 	uint32 		Name set); it reads only a WORD into the WMAPOBJDEF structure. I don't know about the rest. Oo
+//			To the flags: known: &1 (does something with the extends, no idea what exactely: paste, is set eg for World\wmo\Azeroth\Buildings\GuardTower\GuardTower.wmo and World\wmo\Azeroth\Buildings\GuardTower\GuardTower_destroyed.wmo in in DeathknightStart_43_27. Maybe used for Phasing?)
+//			struct SMMapObjDef // 03-29-2005 By ObscuR
+//			{
+//			000h  UINT32 nameId;
+//			004h  UINT32 uniqueId;
+//			008h  float pos[3];
+//			00Ch
+//			010h
+//			014h  float rot[3];
+//			018h
+//			01Ch
+//			020h  float extents[6];
+//			024h
+//			028h
+//			02Ch
+//			030h
+//			034h
+//			038h  UINT32 flags;
+//			03Ch  UINT16 doodadSet;
+//			03Eh  UINT16 nameSet;
+//			040h
+//			};
+//			The positioning and orientation is done the same way as in the MDDF chunk. There is no scaling. Two additional positions and two integers are also given. They might or might not be used for lighting...?
+//			The unique identifier is important for WMOs, because multiple map tiles might want to draw the same WMO. This identifier is used to ensure that each specific instance can only be drawn once. (a unique identifier is required because the model name is not usable for this purpose, since it is possible to have more than one instance of the same WMO, like some bridges in Darkshore)
+
 			// wmo instance data
-			/* 
+
 			// TODO
-			nWMO = (int)size / 64;
-			for (size_t i=0; i<nWMO; i++) {
-				int id;
-				f.read(&id, 4);
-				WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[id])];
-				WMOInstance inst(wmo, f);
-				wmois.push_back(inst);
-			}
-			*/
+//			nWMO = (int)size / 64;
+//			for (size_t i=0; i<nWMO; i++) {
+//				int id;
+//				f.read(&id, 4);
+//				WMO *wmo = (WMO*)gWorld->wmomanager.items[gWorld->wmomanager.get(wmos[id])];
+//				WMOInstance inst(wmo, f);
+//				wmois.push_back(inst);
+//			}
+
 		}
 		else if (strncmp(fourcc,"MH2O",4)==0) {
 			unsigned char *abuf = f.getPointer();
@@ -626,10 +624,10 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 					unsigned int w = mh2oi->w;
 					unsigned int h = mh2oi->h;
 
-					/*if( x >= 256 || y >= 256 || w >= 256 || h >= 256 )
-					{
-					while( false );
-					}*/
+//					if( x >= 256 || y >= 256 || w >= 256 || h >= 256 )
+//					{
+//					while( false );
+//					}
 
 					printf( " Layer %d: %d %d %f-%f %d-%d-%d-%d %X-%X", j,
 						mh2oi->flags,
@@ -709,30 +707,30 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 			// MCNK data will be processed separately ^_^
 		}
 		else if(strncmp(fourcc, "MFBO", 4) == 0) {
-			/*
-			A bounding box for flying.
-			This chunk is a "box" defining, where you can fly and where you can't. It also defines the height at which one you will fall into nowhere while your camera remains at the same position. Its actually two planes with 3*3 coordinates per plane.
-			Therefore the structure is:
-			struct plane{
-			short[3][3] height;
-			};
-			struct MFBO
-			{
-			plane maximum;
-			plane minimum;
-			};
-			*/
+
+//			A bounding box for flying.
+//			This chunk is a "box" defining, where you can fly and where you can't. It also defines the height at which one you will fall into nowhere while your camera remains at the same position. Its actually two planes with 3*3 coordinates per plane.
+//			Therefore the structure is:
+//			struct plane{
+//			short[3][3] height;
+//			};
+//			struct MFBO
+//			{
+//			plane maximum;
+//			plane minimum;
+//			};
+
 		}
 		else if(strncmp(fourcc, "MTFX", 4) == 0) {
-			/*
-			This chunk is an array of integers that are 1 or 0. 1 means that the texture at the same position in the MTEX array has to be handled differentely. The size of this chunk is always the same as there are entries in the MTEX chunk.
-			Simple as it is:
-			struct MTFX 
-			{
-			uint32 mode[nMTEX];
-			}
-			The textures with this extended rendering mode are no normal ones, but skyboxes. These skyboxes are getting added as a reflection layer on the terrain. This is used for icecubes reflecting clouds etc. The layer being the reflection one needs to have the 0x400 flag in the MCLY chunk.
-			*/
+
+//			This chunk is an array of integers that are 1 or 0. 1 means that the texture at the same position in the MTEX array has to be handled differentely. The size of this chunk is always the same as there are entries in the MTEX chunk.
+//			Simple as it is:
+//			struct MTFX
+//			{
+//			uint32 mode[nMTEX];
+//			}
+//			The textures with this extended rendering mode are no normal ones, but skyboxes. These skyboxes are getting added as a reflection layer on the terrain. This is used for icecubes reflecting clouds etc. The layer being the reflection one needs to have the 0x400 flag in the MCLY chunk.
+//
 		}
 		else {
 			wxLogMessage(wxT("No implement tile chunk %s [%d]."), fourcc, size);
@@ -756,6 +754,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 	topnode.setup(this);
 
 	f.close();
+	*/
 }
 
 MapTile::~MapTile()
@@ -986,7 +985,7 @@ void MapChunk::initTextures(wxString basename, int first, int last)
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
+void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 {
 	//Vec3D tn[mapbufsize], tv[mapbufsize];
 	
@@ -999,7 +998,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 
 	f.read(fcc,4); // MCNK
 	f.read(&size, 4);
-	flipcc(fcc);
+//	flipcc(fcc); // in former mpq.h
 	fcc[4] = 0;
 
 	if (strncmp(fcc, "MCNK", 4)!=0 || size == 0) {
@@ -1090,7 +1089,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 		size = 0;
 		f.read(fcc,4);
 		f.read(&size, 4);
-		flipcc(fcc);
+//		flipcc(fcc); // in former mpq.h
 		fcc[4] = 0;
 
 		//gLog("fcc: %s, size: %d, pos: %d, size: %d.\n", fcc, size, f.getPos(), f.getSize());
@@ -1099,7 +1098,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 			// MCAL always has wrong size....
 			if (strncmp(fcc, "MCAL", 4) == 0 && (size+8) != header.sizeAlpha) {
 				f.read(fcc,4);
-				flipcc(fcc);
+//				flipcc(fcc); // in former mpq.h
 				fcc[4] = 0;
 				size_t nextpos;
 				if (strncmp(fcc, "MCLQ", 4) == 0) {
@@ -1115,7 +1114,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 				break;
 			if (strncmp(fcc, "MCLQ", 4) == 0 && (size+8) != header.sizeLiquid) {
 				f.read(fcc,4);
-				flipcc(fcc);
+//				flipcc(fcc); // in former mpq.h
 				fcc[4] = 0;
 				size_t nextpos;
 				if (strncmp(fcc, "MCSE", 4) == 0) {
@@ -1124,7 +1123,7 @@ void MapChunk::init(MapTile* mt, MPQFile &f, bool bigAlpha)
 					nextpos = mcnk_pos+header.ofsSndEmitters;
 					f.seek((int)nextpos);
 					f.read(fcc, 4);
-					flipcc(fcc);
+//					flipcc(fcc); // in former mpq.h
 					fcc[4] = 0;
 					if (strncmp(fcc, "MCSE", 4) != 0)
 						break; // nothing behind MCLQ, just break;

@@ -10,7 +10,6 @@
 
 #include "animated.h"
 #include "modelheaders.h"
-#include "mpq.h"
 #include "util.h" // uint32
 #include "Vec3D.h"
 

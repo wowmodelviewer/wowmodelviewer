@@ -7,7 +7,6 @@ class RibbonEmitter;
 
 #include "WoWModel.h"
 #include "animated.h"
-#include "mpq.h"
 
 #include <list>
 

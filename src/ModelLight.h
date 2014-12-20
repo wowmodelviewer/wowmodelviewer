@@ -9,8 +9,9 @@
 #define _MODELLIGHT_H_
 
 #include "animated.h"
-#include "mpq.h"
 #include "Vec3D.h"
+
+class GameFile;
 
 #include "GL/glew.h" // GLuint
 

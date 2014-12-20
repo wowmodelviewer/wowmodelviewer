@@ -7,7 +7,6 @@
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelTransparency.h"
-#include "mpq.h"
 #include "TextureAnim.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -1723,7 +1722,6 @@ void ModelViewer::LoadWoW()
 {
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();
-    mpqArchives.Clear();
   }
 
   if(!CASCFOLDER.init(gamePath.c_str()))
@@ -2214,26 +2212,6 @@ void ModelViewer::ModelInfo()
 		return;
 	}
 
-	MPQFile f(m->modelname);
-	if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
-		wxLogMessage(wxT("Error: Unable to load model: [%s]"), m->modelname.c_str());
-		// delete this; //?
-		xml.close();
-		f.close();
-		return;
-	}
-
-	MPQFile g(m->lodname);
-	if (g.isEof() || (g.getSize() < sizeof(ModelView))) {
-		wxLogMessage(wxT("Error: Unable to load Lod: [%s]"), m->lodname.c_str());
-		// delete this; //?
-		xml.close();
-		f.close();
-		g.close();
-		return;
-	}
-	ModelView *view = (ModelView*)(g.getBuffer());
-
 	xml << "<m2>" << endl;
 	xml << "  <info>" << endl;
 	xml << "    <modelname>" <<m->modelname.c_str()  << "</modelname>" << endl;
@@ -2242,7 +2220,7 @@ void ModelViewer::ModelInfo()
 //	xml << "    <id>" << m->header.id << "</id>" << endl;
 	xml << "    <nameLength>" << m->header.nameLength << "</nameLength>" << endl;
 	xml << "    <nameOfs>" << m->header.nameOfs << "</nameOfs>" << endl;
-	xml << "    <name>" << f.getBuffer()+m->header.nameOfs << "</name>" << endl;
+//	xml << "    <name>" << f.getBuffer()+m->header.nameOfs << "</name>" << endl; // @TODO
 	xml << "    <GlobalModelFlags>" << m->header.GlobalModelFlags << "</GlobalModelFlags>" << endl;
 	xml << "    <nGlobalSequences>" << m->header.nGlobalSequences << "</nGlobalSequences>" << endl;
 	xml << "    <ofsGlobalSequences>" << m->header.ofsGlobalSequences << "</ofsGlobalSequences>" << endl;
@@ -2389,12 +2367,12 @@ void ModelViewer::ModelInfo()
 	}
 	xml << "  </Bones>" << endl;
 
-	xml << "  <BoneLookups size=\"" << m->header.nBoneLookup << "\">" << endl;
-	uint16 *boneLookup = (uint16 *)(f.getBuffer() + m->header.ofsBoneLookup);
-	for(size_t i=0; i<m->header.nBoneLookup; i++) {
-		xml << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
-	}
-	xml << "  </BoneLookups>" << endl;
+//	xml << "  <BoneLookups size=\"" << m->header.nBoneLookup << "\">" << endl;
+//	uint16 *boneLookup = (uint16 *)(f.getBuffer() + m->header.ofsBoneLookup);
+//	for(size_t i=0; i<m->header.nBoneLookup; i++) {
+//		xml << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
+//	}
+//	xml << "  </BoneLookups>" << endl;
 
 	xml << "  <KeyBoneLookups size=\"" << m->header.nKeyBoneLookup << "\">" << endl;
 	for(size_t i=0; i<m->header.nKeyBoneLookup; i++)
@@ -2405,24 +2383,24 @@ void ModelViewer::ModelInfo()
 
 	xml << "  <GeometryAndRendering>" << endl;
 
-	xml << "  <Vertices size=\"" << m->header.nVertices << "\">" << endl;
-	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + m->header.ofsVertices);
-	for(uint32 i=0; i<m->header.nVertices; i++) {
-		xml << "    <Vertice id=\"" << i << "\">" << endl;
-		xml << "      <pos>" << verts[i].pos << "</pos>" << endl; // TODO
-		xml << "    </Vertice>" << endl;
-	}
+//	xml << "  <Vertices size=\"" << m->header.nVertices << "\">" << endl;
+//	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + m->header.ofsVertices);
+//	for(uint32 i=0; i<m->header.nVertices; i++) {
+//		xml << "    <Vertice id=\"" << i << "\">" << endl;
+//		xml << "      <pos>" << verts[i].pos << "</pos>" << endl; // TODO
+//		xml << "    </Vertice>" << endl;
+//	}
 	xml << "  </Vertices>" << endl; // TODO
 	xml << "  <Views>" << endl;
 
-	xml << "  <Indices size=\"" << view->nIndex << "\">" << endl;
-	xml << "  </Indices>" << endl; // TODO
-	xml << "  <Triangles size=\""<< view->nTris << "\">" << endl;
-	xml << "  </Triangles>" << endl; // TODO
-	xml << "  <Properties size=\"" << view->nProps << "\">" << endl;
-	xml << "  </Properties>" << endl; // TODO
-	xml << "  <Subs size=\"" << view->nSub << "\">" << endl;
-	xml << "  </Subs>" << endl; // TODO
+//	xml << "  <Indices size=\"" << view->nIndex << "\">" << endl;
+//	xml << "  </Indices>" << endl; // TODO
+//	xml << "  <Triangles size=\""<< view->nTris << "\">" << endl;
+//	xml << "  </Triangles>" << endl; // TODO
+//	xml << "  <Properties size=\"" << view->nProps << "\">" << endl;
+//	xml << "  </Properties>" << endl; // TODO
+//	xml << "  <Subs size=\"" << view->nSub << "\">" << endl;
+//	xml << "  </Subs>" << endl; // TODO
 
 	xml << "	<RenderPasses size=\"" << m->passes.size() << "\">" << endl;
 	for (size_t i=0; i<m->passes.size(); i++) {
@@ -2475,25 +2453,25 @@ void ModelViewer::ModelInfo()
 	}
 	xml << "	</Geosets>" << endl;
 
-	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
-	xml << "	<TexUnits size=\"" << view->nTex << "\">" << endl;
-	for (size_t i=0; i<view->nTex; i++) {
-		xml << "	  <TexUnit id=\"" << i << "\">" << endl;
-		xml << "      <flags>" << tex[i].flags << "</flags>" << endl;
-		xml << "      <shading>" << tex[i].shading << "</shading>" << endl;
-		xml << "      <op>" << tex[i].op << "</op>" << endl;
-		xml << "      <op2>" << tex[i].op2 << "</op2>" << endl;
-		xml << "      <colorIndex>" << tex[i].colorIndex << "</colorIndex>" << endl;
-		xml << "      <flagsIndex>" << tex[i].flagsIndex << "</flagsIndex>" << endl;
-		xml << "      <texunit>" << tex[i].texunit << "</texunit>" << endl;
-		xml << "      <mode>" << tex[i].mode << "</mode>" << endl;
-		xml << "      <textureid>" << tex[i].textureid << "</textureid>" << endl;
-		xml << "      <texunit2>" << tex[i].texunit2 << "</texunit2>" << endl;
-		xml << "      <transid>" << tex[i].transid << "</transid>" << endl;
-		xml << "      <texanimid>" << tex[i].texanimid << "</texanimid>" << endl;
-		xml << "	  </TexUnit>" << endl;
-	}
-	xml << "	</TexUnits>" << endl;
+//	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
+//	xml << "	<TexUnits size=\"" << view->nTex << "\">" << endl;
+//	for (size_t i=0; i<view->nTex; i++) {
+//		xml << "	  <TexUnit id=\"" << i << "\">" << endl;
+//		xml << "      <flags>" << tex[i].flags << "</flags>" << endl;
+//		xml << "      <shading>" << tex[i].shading << "</shading>" << endl;
+//		xml << "      <op>" << tex[i].op << "</op>" << endl;
+//		xml << "      <op2>" << tex[i].op2 << "</op2>" << endl;
+//		xml << "      <colorIndex>" << tex[i].colorIndex << "</colorIndex>" << endl;
+//		xml << "      <flagsIndex>" << tex[i].flagsIndex << "</flagsIndex>" << endl;
+//		xml << "      <texunit>" << tex[i].texunit << "</texunit>" << endl;
+//		xml << "      <mode>" << tex[i].mode << "</mode>" << endl;
+//		xml << "      <textureid>" << tex[i].textureid << "</textureid>" << endl;
+//		xml << "      <texunit2>" << tex[i].texunit2 << "</texunit2>" << endl;
+//		xml << "      <transid>" << tex[i].transid << "</transid>" << endl;
+//		xml << "      <texanimid>" << tex[i].texanimid << "</texanimid>" << endl;
+//		xml << "	  </TexUnit>" << endl;
+//	}
+//	xml << "	</TexUnits>" << endl;
 
 	xml << "  </Views>" << endl;
 
@@ -2529,26 +2507,26 @@ void ModelViewer::ModelInfo()
 
 	xml << "  <TransparencyLookup></TransparencyLookup>" << endl;
 
-	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m->header.ofsTextures);
-	xml << "	<Textures size=\"" << m->header.nTextures << "\">" << endl;
-	for(size_t i=0; i<m->header.nTextures; i++) {
-		xml << "	  <Texture id=\"" << i << "\">" << endl;
-		xml << "      <type>" << texdef[i].type << "</type>" << endl;
-		xml << "      <flags>" << texdef[i].flags << "</flags>" << endl;
-		//xml << "      <nameLen>" << texdef[i].nameLen << "</nameLen>" << endl;
-		//xml << "      <nameOfs>" << texdef[i].nameOfs << "</nameOfs>" << endl;
-		if (texdef[i].type == TEXTURE_FILENAME)
-			xml << "		<name>" << f.getBuffer()+texdef[i].nameOfs  << "</name>" << endl;
-		xml << "	  </Texture>" << endl;
-	}
-	xml << "	</Textures>" << endl;
+//	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m->header.ofsTextures);
+//	xml << "	<Textures size=\"" << m->header.nTextures << "\">" << endl;
+//	for(size_t i=0; i<m->header.nTextures; i++) {
+//		xml << "	  <Texture id=\"" << i << "\">" << endl;
+//		xml << "      <type>" << texdef[i].type << "</type>" << endl;
+//		xml << "      <flags>" << texdef[i].flags << "</flags>" << endl;
+//		//xml << "      <nameLen>" << texdef[i].nameLen << "</nameLen>" << endl;
+//		//xml << "      <nameOfs>" << texdef[i].nameOfs << "</nameOfs>" << endl;
+//		if (texdef[i].type == TEXTURE_FILENAME)
+//			xml << "		<name>" << f.getBuffer()+texdef[i].nameOfs  << "</name>" << endl;
+//		xml << "	  </Texture>" << endl;
+//	}
+//	xml << "	</Textures>" << endl;
 
-	xml << "  <TexLookups size=\"" << m->header.nTexLookup << "\">" << endl;
-	uint16 *texLookup = (uint16 *)(f.getBuffer() + m->header.ofsTexLookup);
-	for(size_t i=0; i<m->header.nTexLookup; i++) {
-		xml << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
-	}
-	xml << "  </TexLookups>" << endl;
+//	xml << "  <TexLookups size=\"" << m->header.nTexLookup << "\">" << endl;
+//	uint16 *texLookup = (uint16 *)(f.getBuffer() + m->header.ofsTexLookup);
+//	for(size_t i=0; i<m->header.nTexLookup; i++) {
+//		xml << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
+//	}
+//	xml << "  </TexLookups>" << endl;
 
 	xml << "	<ReplacableTextureLookup></ReplacableTextureLookup>" << endl;
 
@@ -2608,11 +2586,11 @@ void ModelViewer::ModelInfo()
 	xml << "	</Attachments>" << endl;
 
 	xml << "  <AttachLookups size=\"" << m->header.nAttachLookup << "\">" << endl;
-	int16 *attachLookup = (int16 *)(f.getBuffer() + m->header.ofsAttachLookup);
-	for(size_t i=0; i<m->header.nAttachLookup; i++) {
-		xml << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
-	}
-	xml << "  </AttachLookups>" << endl;
+//	int16 *attachLookup = (int16 *)(f.getBuffer() + m->header.ofsAttachLookup);
+//	for(size_t i=0; i<m->header.nAttachLookup; i++) {
+//		xml << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
+//	}
+//	xml << "  </AttachLookups>" << endl;
 
 	xml << "	<Events size=\"" << m->header.nEvents << "\">" << endl;
 	if (m->events) {
@@ -2635,8 +2613,8 @@ void ModelViewer::ModelInfo()
 
 	xml << "</m2>" << endl;
 	xml.close();
-	f.close();
-	g.close();
+//	f.close();
+//	g.close();
 }
 
 

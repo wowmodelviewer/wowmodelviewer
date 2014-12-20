@@ -75,8 +75,6 @@ extern bool bShowParticle;
 extern bool bZeroParticle;
 extern bool bAlternate;
 
-extern wxArrayString mpqArchives;
-
 class UserSkins;
 extern UserSkins& gUserSkins;
 

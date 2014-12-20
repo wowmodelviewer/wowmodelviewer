@@ -9,12 +9,13 @@
 #define	CHUNKS_IN_TILE	16
 
 #include "video.h"
-#include "mpq.h"
 #include "wmo.h"
 #include "WoWModel.h"
 #include "liquid.h"
 #include <vector>
 #include <string>
+
+class GameFile;
 
 class MapTile;
 class MapChunk;
@@ -159,7 +160,7 @@ public:
 		}
 	}
 	
-	void init(MapTile* mt, MPQFile &f, bool bigAlpha);
+	void init(MapTile* mt, GameFile &f, bool bigAlpha);
 	void destroy();
 	void initStrip(int holes);
 

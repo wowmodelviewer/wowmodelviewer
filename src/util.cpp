@@ -16,8 +16,6 @@ wxString cfgPath;
 wxString bgImagePath;
 wxString armoryPath;
 
-wxArrayString mpqArchives;
-
 UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;;
 

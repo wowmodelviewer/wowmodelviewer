@@ -101,7 +101,6 @@ public:
 	Attachment *charAtt;
 	WoWModel *model;
 
-	wxString makeItemTexture(int region, const wxString name);
 	wxString customSkin;
 
 	void ClearItemDialog();

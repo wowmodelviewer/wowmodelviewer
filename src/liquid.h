@@ -5,8 +5,9 @@ class Liquid;
 
 #include <string>
 #include "video.h"
-#include "mpq.h"
 #include "maptile.h"
+
+class GameFile;
 
 const float LQ_DEFAULT_TILESIZE = CHUNKSIZE / 8.0f;
 
@@ -22,7 +23,7 @@ class Liquid {
 	float ydir;
 	float texRepeats;
 
-	void initGeometry(MPQFile &f);
+	void initGeometry(GameFile &f);
 	void initTextures(wxString basename, int first, int last);
 
 	int type;
@@ -43,9 +44,9 @@ public:
 	}
 	~Liquid();
 
-	//void init(MPQFile &f);
-	void initFromTerrain(MPQFile &f, int flags);
-	void initFromWMO(MPQFile &f, WMOMaterial &mat, bool indoor);
+	//void init(GameFile &f);
+	void initFromTerrain(GameFile &f, int flags);
+	void initFromWMO(GameFile &f, WMOMaterial &mat, bool indoor);
 
 	void draw();
 

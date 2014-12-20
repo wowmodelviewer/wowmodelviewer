@@ -1,7 +1,6 @@
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "WoWModel.h"
-#include "mpq.h"
 
 #include <cassert>
 #include <algorithm>
@@ -166,15 +165,8 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	IndiceToVerts = 0;
 	// --
 
-	GameFile * f;
-	if(CASCFOLDER.hStorage)
-	{
-	  f = new CASCFile(tempname.c_str());
-	}
-	else
-	{
-	  f = new MPQFile(tempname);
-	}
+	GameFile * f = new CASCFile(tempname.c_str());
+
 	g_modelViewer->SetStatusText(tempname);
 	ok = false;
 	if (f->isEof() || (f->getSize() < sizeof(ModelHeader))) {
@@ -977,15 +969,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
 	// remove suffix .M2
 	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
-	GameFile * g;
-	if(CASCFOLDER.hStorage)
-	{
-	  g = new CASCFile(lodname.c_str());
-	}
-	else
-	{
-	  g = new MPQFile(lodname);
-	}
+	GameFile * g = new CASCFile(lodname.c_str());
 
 	if (g->isEof()) {
 		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());

@@ -10,7 +10,6 @@
 
 #include "Vec3D.h"
 #include "modelheaders.h"
-#include "mpq.h"
 #include "util.h"
 
 class GameFile;

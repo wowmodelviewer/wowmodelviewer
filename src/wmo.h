@@ -9,7 +9,6 @@
 // Our headers
 #include "manager.h"
 #include "vec3d.h"
-#include "mpq.h"
 #include "WoWModel.h"
 #include "video.h"
 #include "displayable.h"
@@ -19,6 +18,8 @@ class WMO;
 class WMOGroup;
 class WMOInstance;
 class WMOManager;
+
+class GameFile;
 //class Liquid;
 
 struct WMOBatch {
@@ -64,7 +65,7 @@ public:
 
 	WMOGroup();
 	~WMOGroup();
-	void init(WMO *wmo, MPQFile &f, int num, char *names);
+	void init(WMO *wmo, GameFile &f, int num, char *names);
 	void initDisplayList();
 	void initLighting(int nLR, short *useLights);
 	void draw();
@@ -111,7 +112,7 @@ struct WMOLight {
 
 	Vec4D fcolor;
 
-	void init(MPQFile &f);
+	void init(GameFile &f);
 	void setup(GLint light);
 
 	static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
@@ -159,7 +160,7 @@ struct WMOFog {
 	unsigned int color2;
 	// read to here (0x30 bytes)
 	Vec4D color;
-	void init(MPQFile &f);
+	void init(GameFile &f);
 	void setup();
 };
 
@@ -181,7 +182,7 @@ public:
 	Vec3D lcol;
 
 	WMOModelInstance() {}
-    void init(char *fname, MPQFile &f);
+    void init(char *fname, GameFile &f);
 	void draw();
 
 	void loadModel(ModelManager &mm);
@@ -275,7 +276,7 @@ public:
 	int id, d2, d3;
 	int doodadset;
 
-	WMOInstance(WMO *wmo, MPQFile &f);
+	WMOInstance(WMO *wmo, GameFile &f);
 	void draw();
 	//void drawPortals();
 

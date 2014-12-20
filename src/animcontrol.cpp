@@ -1,10 +1,14 @@
 #include "animcontrol.h"
-#include "util.h"
-#include "globalvars.h"
-#include <wx/wx.h>
-#include "UserSkins.h"
-#include "logger/Logger.h"
+
+#include "FileTreeItem.h"
 #include "GameDatabase.h"
+#include "globalvars.h"
+#include "UserSkins.h"
+#include "util.h"
+
+#include "logger/Logger.h"
+
+#include <wx/wx.h>
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 
@@ -403,7 +407,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 		}
 	}
 
-
+	/*
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
 	sFilterDir = m->name.BeforeLast(wxT('.')).Lower();
@@ -417,6 +421,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 			skins.insert(grp);
 		}
 	}
+	*/
 
 	bool ret = false;
 

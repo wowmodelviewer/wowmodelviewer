@@ -1,7 +1,6 @@
 #include "modelcontrol.h"
 
 #include "Attachment.h"
-#include "mpq.h"
 
 #include "logger/Logger.h"
 
@@ -307,29 +306,29 @@ void ModelControl::OnCombo(wxCommandEvent &event)
 	int id = event.GetId();
 
 	if (id == ID_MODEL_LOD) {
-		int value = event.GetInt();
-
-		MPQFile f(model->name);
-		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
-			wxLogMessage(wxT("ERROR - unable to open MPQFile: [%s]"), model->name.c_str());
-			f.close();
-			return;
-		}
-
-		model->showModel = false;
-		model->setLOD(&f, value);
-		model->showModel = true;
-
-		/*
-		for (size_t i=0; i<model->geosets.size(); i++) {
-			int id = model->geosets[i].id;
-			model->showGeosets[i] = (id==0);
-		}
-
-		cc->RefreshModel();
-		*/
-
-		f.close();
+//		int value = event.GetInt();
+//
+//		MPQFile f(model->name);
+//		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
+//			wxLogMessage(wxT("ERROR - unable to open MPQFile: [%s]"), model->name.c_str());
+//			f.close();
+//			return;
+//		}
+//
+//		model->showModel = false;
+//		model->setLOD(&f, value);
+//		model->showModel = true;
+//
+//		/*
+//		for (size_t i=0; i<model->geosets.size(); i++) {
+//			int id = model->geosets[i].id;
+//			model->showGeosets[i] = (id==0);
+//		}
+//
+//		cc->RefreshModel();
+//		*/
+//
+//		f.close();
 	} else if (id == ID_MODEL_NAME) {
 		/* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
 		int CurrentSelection = modelname->GetCurrentSelection();

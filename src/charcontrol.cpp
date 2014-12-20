@@ -5,7 +5,6 @@
 #include "globalvars.h"
 #include "itemselection.h"
 #include "modelviewer.h"
-#include "mpq.h"
 #include "util.h"
 
 #include "logger/Logger.h"
@@ -2188,48 +2187,6 @@ void CharControl::RefreshCreatureItem(ssize_t slot)
 	}
 }
 
-wxString CharControl::makeItemTexture(int region, const wxString name)
-{
-	// just return an empty filename
-	if (name.Length() < 3)
-		return wxEmptyString;
-
-	wxChar leggings = name[name.Length() - 2];
-
-	// try prefered version first
-	wxString fn = regionPaths[region];
-	fn += name;
-	fn += wxT("_");
-
-	if (leggings == 'l' || leggings == 'L')
-		fn += wxT("U");
-	else
-		fn += cd.gender ? wxT("F") : wxT("M");
-
-	fn += wxT(".blp");
-	if (MPQFile::exists(fn))
-		return fn;
-
-	if (fn.Length() < 5)
-		return wxEmptyString;
-
-	// if that failed try alternate texture version
-	if (leggings == 'l' || leggings == 'L')
-		fn[fn.Length()-5] = cd.gender ? 'F' : 'M';
-	else
-		fn[fn.Length()-5] = 'U';
-
-	if (MPQFile::exists(fn))
-		return fn;
-
-	fn = regionPaths[region];
-	fn += name;
-	fn += wxT(".blp");
-
-	// return the default name, nothing else could be found.
-	return fn;
-}
-
 void CharControl::ClearItemDialog()
 {
 	if (itemDialog) {
@@ -2408,6 +2365,7 @@ bool filterCreatures(wxString fn)
 // TODO: Add an equivilant working version of this function for Linux / Mac OS X
 void CharControl::selectMount()
 {
+  /*
 	ClearItemDialog();
 
 	numbers.clear();
@@ -2467,6 +2425,7 @@ void CharControl::selectMount()
 	itemDialog->SetSizeHints(w,-1,-1,-1,-1,-1);
 	itemDialog->SetSize(w, -1); 
 	this->itemDialog = itemDialog;
+	*/
 }
 
 void CharControl::selectNPC(ssize_t type)

@@ -12,10 +12,11 @@
 #include "enums.h" // int16
 #include "matrix.h"
 #include "modelheaders.h" // ModelBoneDef
-#include "mpq.h" // MPQFile
 #include "Vec3D.h"
 
+class GameFile;
 class WoWModel;
+
 
 
 class Bone {

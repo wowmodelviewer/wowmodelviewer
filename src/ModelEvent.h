@@ -9,7 +9,8 @@
 #define _MODELEVENT_H_
 
 #include "modelheaders.h"
-#include "mpq.h"
+
+class GameFile;
 
 class ModelEvent {
 	ModelEventDef def;

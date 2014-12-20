@@ -1,6 +1,5 @@
 #include "modelviewer.h"
 #include "globalvars.h"
-#include "mpq.h"
 #include "CxImage/ximage.h"
 
 #include "logger/Logger.h"
@@ -113,12 +112,7 @@ void FileControl::Init(ModelViewer* mv)
 
 	filterString = filterStrings[filterMode];
 
-	if(!CASCFOLDER.hStorage)
-	  getFileLists(filelist, filterSearch);
-	else
-	{
-	 CASCFOLDER.initFileList(filelist, filterSearch);
-	}
+	CASCFOLDER.initFileList(filelist, filterSearch);
 
 	// Put all the viewable files into our File Tree.
 	TreeStack stack;
@@ -276,6 +270,7 @@ void FileControl::OnChoice(wxCommandEvent &event)
 // copy from ModelOpened::Export
 void FileControl::Export(wxString val, int select)
 {
+  /*
 	if (val.IsEmpty())
 		return;
 	MPQFile f(val);
@@ -302,6 +297,7 @@ void FileControl::Export(wxString val, int select)
 		fclose(hFile);
 	}
 	f.close();
+	*/
 }
 
 void FileControl::ExportPNG(wxString val, wxString suffix)
@@ -384,11 +380,6 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	if (temp.EndsWith(wxT("blp")))
 		infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));
 
-	infoMenu.AppendSeparator();
-	wxString archive = MPQFile::getArchive(tdata->fn);
-	infoMenu.Append(ID_FILELIST, archive, archive);
-//	wxString size = wxString::Format(wxT("Size: %d"), MPQFile::getSize(tdata->fn));
-//	infoMenu.Append(ID_FILELIST, size, size);
 	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, NULL, this);
 	PopupMenu(&infoMenu);
 }

@@ -17,8 +17,6 @@
 
 #include "AnimManager.h"
 
-#include "manager.h"
-#include "mpq.h"
 
 #include "modelheaders.h"
 #include "quaternion.h"
@@ -53,7 +51,6 @@ class WoWModel: public ManagedItem, public Displayable, public Model
 	GLuint dlist;
 	bool forceAnim;
 
-	void init(MPQFile &f);
 	void displayHeader(ModelHeader & a_header);
 
 	inline void drawModel();

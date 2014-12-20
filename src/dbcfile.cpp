@@ -4,7 +4,7 @@
 #include "enums.h"
 #include "globalvars.h"
 #include "modelviewer.h"
-#include "mpq.h"
+
 #include "util.h"
 
 #include "logger/Logger.h"
@@ -36,11 +36,7 @@ bool DBCFile::open()
 	}
 
 	g_modelViewer->SetStatusText(wxT("Initiating ")+filename+wxT(" Database..."));
-	GameFile * f = 0;
-	if(!CASCFOLDER.hStorage)
-	  f = new MPQFile(filename);
-	else
-	  f = new CASCFile(filename.c_str());
+	GameFile * f = new CASCFile(filename.c_str());
 	// Need some error checking, otherwise an unhandled exception error occurs
 	// if people screw with the data path.
 

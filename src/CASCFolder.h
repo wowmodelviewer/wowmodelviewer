@@ -8,6 +8,8 @@
 #ifndef _CASCFOLDER_H_
 #define _CASCFOLDER_H_
 
+#include "FileTreeItem.h"
+
 #include <map>
 #include <set>
 #include <string>
@@ -16,7 +18,7 @@
 #include <wx/wx.h>
 
 #include "casclib/src/CascLib.h"
-#include "mpq.h" // FileTreeItem
+
 
 #define CASCFOLDER CASCFolder::instance()
 

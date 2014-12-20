@@ -1,7 +1,7 @@
 #ifndef FILECONTROL_H
 #define FILECONTROL_H
 
-#include "mpq.h" // FileTreeItem
+#include "FileTreeItem.h"
 
 class ModelViewer;
 
