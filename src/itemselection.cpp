@@ -352,9 +352,6 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl *dest, int type,
 	for (size_t i=0; i<realcatnames.GetCount(); i++)
 		m_catlist->Check((unsigned int)i);
 
-	std::cout << "m_cats.size() = " << m_cats.size() << std::endl;
-	std::cout << "realcatnames.size() = " << realcatnames.GetCount() << std::endl;
-
 	numcats = (int)realcatnames.GetCount();
 
 	wxSizer *topsizer = GetSizer();
