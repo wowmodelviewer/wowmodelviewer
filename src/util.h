@@ -66,8 +66,6 @@ extern wxString cfgPath;
 extern wxString bgImagePath;
 extern wxString armoryPath;
 
-extern int gameVersion;
-
 extern bool useLocalFiles;
 extern bool useRandomLooks;
 extern bool bHideHelmet;

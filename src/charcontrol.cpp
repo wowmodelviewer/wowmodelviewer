@@ -433,9 +433,6 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 	cd.gender = gender;
 
 	// Enable the use of NPC skins if its a goblin.
-	if (race == RACE_GOBLIN && gameVersion < VERSION_CATACLYSM)
-		cd.useNPC=1;
-	else
 		cd.useNPC=0;
 
 	// Model Characteristics
@@ -597,47 +594,6 @@ void CharControl::OnCheck(wxCommandEvent &event)
 		cd.eyeGlowType = 1;
 	else if (ID==ID_CHAREYEGLOW_DEATHKNIGHT)
 		cd.eyeGlowType = 2;
-	else if (event.GetId()==ID_USE_NPCSKINS) {		
-		// All this extra checking is to modify the the 'bounds' of the max skins on the spin button.
-		size_t p1 = model->name.find_first_of('\\', 0);
-		size_t p2 = model->name.find_first_of('\\', p1+1);
-		size_t p3 = model->name.find_first_of('\\', p2+1);
-
-		wxString raceName = model->name.substr(p1+1,p2-p1-1);
-		wxString genderName = model->name.substr(p2+1,p3-p2-1);
-
-		size_t race, gender;
-
-		try {
-			CharRacesDB::Record raceRec = racedb.getByName(raceName);
-			race = raceRec.getUInt(CharRacesDB::RaceID);
-			gender = genderName.CmpNoCase(wxT("female")) == 0 ? GENDER_FEMALE : GENDER_MALE;
-		} catch (CharRacesDB::NotFound) {
-			// wtf
-			race = 0;
-			gender = GENDER_MALE;
-		}
-
-		// If the race is a goblin, then ignore this
-		if (race == RACE_GOBLIN && gameVersion < VERSION_CATACLYSM) {
-			g_modelViewer->optMenu->Check(ID_USE_NPCSKINS, true);
-			return;
-		}
-
-		//  set our flag
-		cd.useNPC = event.IsChecked();
-
-		cd.maxSkinColor = chardb.getColorsFor(race, gender, CharSectionsDB::SkinType, 0, cd.useNPC);
-		if (cd.maxSkinColor==0 && cd.useNPC==1) {
-			wxMessageBox(wxT("The selected character does not have any NPC skins!\nSwitching back to normal character skins."));
-			cd.useNPC = 0;
-			cd.maxSkinColor = chardb.getColorsFor(race, gender, CharSectionsDB::SkinType, 0, cd.useNPC);
-		} else {
-			cd.skinColor = 0;
-			spins[0]->SetValue(0);
-			spins[0]->SetRange(0, (int)(cd.maxSkinColor)-1);
-		}
-	}
 
 	//  Update controls associated
 	RefreshEquipment();
@@ -892,22 +848,9 @@ void CharControl::RefreshModel()
 		// facial feature geosets
 		try {
 			CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
-			// Buring Crusade & Vanilla
-			if (gameVersion < VERSION_WOTLK) {
-				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100BC);
-				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200BC);
-				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300BC);
-			// WotLK
-			} else if (gameVersion < VERSION_CATACLYSM) {
-				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100);
-				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200);
-				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300);
-			// Cataclysm & MoP
-			} else {
 				cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
 				cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
 				cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
-			}
 		} catch (CharFacialHairDB::NotFound) {
 			wxLogMessage(wxT("DBC facial feature geosets Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 		}
@@ -958,11 +901,7 @@ void CharControl::RefreshModel()
 	if (!showFacialHair) {		
 		try {
 			CharRacesDB::Record race = racedb.getById(cd.race);
-			wxString tmp;
-			if (gameVersion >= VERSION_CATACLYSM)
-				tmp = race.getString(CharRacesDB::GeoType1V400);
-			else
-				tmp = race.getString(CharRacesDB::GeoType1);
+			wxString tmp = race.getString(CharRacesDB::GeoType1V400);
 			if (tmp.Lower() == wxT("normal")) {
 				cd.geosets[CG_GEOSET100] = 1;
 				cd.geosets[CG_GEOSET200] = 1;
@@ -1287,31 +1226,14 @@ void CharControl::RefreshNPCModel()
 	// facial hair geosets
 	try {
 		CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
-		// Burning Crusade & Vanilla
-		if (gameVersion < VERSION_WOTLK) {
-			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100BC);
-			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200BC);
-			cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300BC);
-		// WotLK
-		} else if (gameVersion < VERSION_CATACLYSM) {
-			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100);
-			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200);
-			cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300);
-		// Cataclysm & MoP
-		} else {
-			cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
-			cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
-			cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
-		}
+		cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
+		cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
+		cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
 
 		// Hide facial fair if it isn't toggled and they don't have tusks, horns, etc.
 		if (showFacialHair == false) {		
 			CharRacesDB::Record race = racedb.getById(cd.race);
-			wxString tmp;
-			if (gameVersion >= VERSION_CATACLYSM)
-				tmp = race.getString(CharRacesDB::GeoType1V400);
-			else
-				tmp = race.getString(CharRacesDB::GeoType1);
+			wxString tmp = race.getString(CharRacesDB::GeoType1V400);
 			if (tmp.Lower() == wxT("normal")) {
 				cd.geosets[CG_GEOSET100] = 1;
 				cd.geosets[CG_GEOSET200] = 1;
@@ -2342,10 +2264,7 @@ void CharControl::selectStart()
 		if ((it->getByte(StartOutfitDB::Race) == cd.race) && (it->getByte(StartOutfitDB::Gender) == cd.gender)) {
 			try {
 				CharClassesDB::Record r = classdb.getById(it->getByte(StartOutfitDB::Class));
-				if (gameVersion >= VERSION_CATACLYSM)
-					choices.Add(CSConv(r.getString(CharClassesDB::NameV400 + langOffset)));
-				else
-					choices.Add(CSConv(r.getString(CharClassesDB::Name + langOffset)));
+				choices.Add(CSConv(r.getString(CharClassesDB::NameV400 + langOffset)));
 				numbers.push_back(it->getUInt(StartOutfitDB::StartOutfitID));
 			} catch (CharClassesDB::NotFound) {}
 		}

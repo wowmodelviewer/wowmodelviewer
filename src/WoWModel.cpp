@@ -194,21 +194,12 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 
 	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
 
-	if (gameVersion >= VERSION_WOTLK) {
-		modelname = tempname;
-		if (header.nameOfs != 304 && header.nameOfs != 320) {
-			wxLogMessage(wxT("Error:\t\tInvalid model nameOfs=%d/%d!  May be corrupted."), header.nameOfs, sizeof(ModelHeader));
-			//ok = false;
-			//f.close();
-			//return;
-		}
-	} else {
-		if (header.nameOfs != 336) {
-			wxLogMessage(wxT("Error:\t\tInvalid model nameOfs=%d/%d!  May be corrupted."), header.nameOfs, sizeof(ModelHeader));
-			//ok = false;
-			//f.close();
-			//return;
-		}
+	modelname = tempname;
+	if (header.nameOfs != 304 && header.nameOfs != 320) {
+	  wxLogMessage(wxT("Error:\t\tInvalid model nameOfs=%d/%d!  May be corrupted."), header.nameOfs, sizeof(ModelHeader));
+	  //ok = false;
+	  //f.close();
+	  //return;
 	}
 
 	// Error check
@@ -809,12 +800,8 @@ void WoWModel::initAnimated(GameFile * f)
 		ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
 		for (size_t i=0; i<header.nBones; i++) {
 			//if (i==0) mb[i].rotation.ofsRanges = 1.0f;
-			if (gameVersion >= VERSION_WOTLK) {
 				bones[i].model = this;
 				bones[i].initV3(*f, mb[i], globalSequences, animfiles);
-			} else {
-				bones[i].initV2(f, mb[i], globalSequences);
-			}
 		}
 
 		// Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
@@ -826,16 +813,13 @@ void WoWModel::initAnimated(GameFile * f)
 		}
 	}
 
-	if (gameVersion >= VERSION_WOTLK) {
-		// free MPQFile
-		if (header.nAnimations > 0) {
-			for(size_t i=0; i<header.nAnimations; i++) {
-				if(animfiles[i] && (animfiles[i]->getSize() > 0))
-					animfiles[i]->close();
-				delete animfiles[i];
-			}
-
-		}
+	// free MPQFile
+	if (header.nAnimations > 0) {
+	  for(size_t i=0; i<header.nAnimations; i++) {
+	    if(animfiles[i] && (animfiles[i]->getSize() > 0))
+	      animfiles[i]->close();
+	    delete animfiles[i];
+	  }
 	}
 
 	// Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.

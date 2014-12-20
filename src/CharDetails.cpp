@@ -82,13 +82,7 @@ void CharDetails::loadSet(ItemSetDB &sets, ItemDatabase &items, int setid)
 	try {
 		ItemSetDB::Record rec = sets.getById(setid);
 		for (size_t i=0; i<ItemSetDB::NumItems; i++) {
-			int id;
-			if (gameVersion >= VERSION_CATACLYSM)
-				id = rec.getInt(ItemSetDB::ItemIDBaseV400 + i);
-			else
-				id = rec.getInt(ItemSetDB::ItemIDBase + i);
-			//if (id==0)
-			//	continue;
+			int id = rec.getInt(ItemSetDB::ItemIDBaseV400 + i);
 
 			const ItemRecord &r = items.getById(id);
 			if (r.type > 0) {

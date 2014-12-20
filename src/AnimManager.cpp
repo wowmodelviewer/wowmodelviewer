@@ -122,8 +122,7 @@ void AnimManager::Next() {
 	//g_selModel->currentAnim = animList[PlayIndex].AnimID;
 
 	Frame = anims[animList[PlayIndex].AnimID].timeStart;
-	if (gameVersion >= VERSION_WOTLK)
-		TotalFrames = GetFrameCount();
+	TotalFrames = GetFrameCount();
 }
 
 void AnimManager::Prev() {
@@ -141,8 +140,7 @@ void AnimManager::Prev() {
 	}
 
 	Frame = anims[animList[PlayIndex].AnimID].timeEnd;
-	if (gameVersion >= VERSION_WOTLK)
-		TotalFrames = GetFrameCount();
+	TotalFrames = GetFrameCount();
 }
 
 int AnimManager::Tick(int time) {

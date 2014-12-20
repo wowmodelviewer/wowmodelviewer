@@ -116,17 +116,14 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	
 	// Effects
 	EVT_MENU(ID_ENCHANTS, ModelViewer::OnEffects)
-	EVT_MENU(ID_SPELLS, ModelViewer::OnEffects)
 	EVT_MENU(ID_EQCREATURE_R, ModelViewer::OnEffects)
 	EVT_MENU(ID_EQCREATURE_L, ModelViewer::OnEffects)
-	EVT_MENU(ID_SHADER_DEATH, ModelViewer::OnEffects)
 
 	// Options
 	EVT_MENU(ID_SAVE_CHAR, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_LOAD_CHAR, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_IMPORT_CHAR, ModelViewer::OnToggleCommand)
 
-	EVT_MENU(ID_USE_NPCSKINS, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_DEFAULT_DOODADS, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_ANTIALIAS, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_USE_HWACC, ModelViewer::OnToggleCommand)
@@ -445,19 +442,9 @@ void ModelViewer::InitMenu()
 		effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
 		effectsMenu->Append(ID_EQCREATURE_R, _("Creature Right-Hand"));
 		effectsMenu->Append(ID_EQCREATURE_L, _("Creature Left-Hand"));
-		if (gameVersion < VERSION_WOTLK) {
-			effectsMenu->Append(ID_SPELLS, _("Spell Effects"));
-			effectsMenu->Enable(ID_SPELLS, false);
-			effectsMenu->Append(ID_SHADER_DEATH, _("Death Effect"));
-			effectsMenu->Enable(ID_SHADER_DEATH, false);
-		}
 
 		// Options menu
 		optMenu = new wxMenu;
-		if (gameVersion < VERSION_WOTLK) {
-			optMenu->AppendCheckItem(ID_USE_NPCSKINS, _("Use npc character skins"));
-			optMenu->Check(ID_USE_NPCSKINS, false);
-		}
 		optMenu->AppendCheckItem(ID_DEFAULT_DOODADS, _("Always show default doodads in WMOs"));
 		optMenu->Check(ID_DEFAULT_DOODADS, true);
 		optMenu->AppendSeparator();
@@ -1630,13 +1617,6 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 		if (isChar)
 			enchants->Display();
 
-	} else if (id == ID_SPELLS) {
-		wxSingleChoiceDialog spellsDialog(this, wxT("Choose"), wxT("Select a Spell Effect"), spelleffects);
-
-		if (spellsDialog.ShowModal() == wxID_OK) {
-			// TODO: Finish adding support for spells.
-		}
-
 	} else if (id == ID_EQCREATURE_R) { // R for righthand
 		WoWModel *m = static_cast<WoWModel*>(canvas->root->model);
 		if (!m)
@@ -1668,9 +1648,6 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 				}
 			}
 		}
-	} else if (id==ID_SHADER_DEATH) {
-		//Shader test("Shaders\\Pixel\\FFXDeath.bls");
-		//test.Load();
 	}
 }
 
@@ -1732,7 +1709,6 @@ void ModelViewer::LoadWoW()
   }
 
   // init game version
-  gameVersion = atoi(CASCFOLDER.version().c_str());
   SetStatusText(wxString(CASCFOLDER.version()), 1);
 
   // init game locale
@@ -2658,10 +2634,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	if(result)
 	{
 	  CharRacesDB::Record racer = racedb.getById(result->raceId);
-	  if (gameVersion == 30100)
-	    result->race = racer.getString(CharRacesDB::NameV310);
-	  else
-	    result->race = racer.getString(CharRacesDB::Name);
+	  result->race = racer.getString(CharRacesDB::Name);
 	  //wxLogMessage(wxT("RaceID: %i, Race: %s\n          GenderID: %i, Gender: %s"),raceID,race,genderID,gender);
 
 		// Load the model

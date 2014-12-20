@@ -94,12 +94,9 @@ enum ObjectID {
 	ID_ZOOM_OUT,
 
 	ID_ENCHANTS,
-	ID_SPELLS,
 	ID_EQCREATURE_R,
 	ID_EQCREATURE_L,
-	ID_SHADER_DEATH,
 
-	ID_USE_NPCSKINS,
 	ID_DEFAULT_DOODADS,
 	ID_USE_ANTIALIAS,
 	ID_USE_ENVMAP,
@@ -779,12 +776,6 @@ enum SheathTypes
     SHEATHETYPE_SHIELD                 = 4
 };
 
-enum Version
-{
-	VERSION_WOTLK = 3,
-	VERSION_CATACLYSM = 4,
-	VERSION_MOP = 5
-};
 
 #endif
 

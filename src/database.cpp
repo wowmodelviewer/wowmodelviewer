@@ -83,16 +83,9 @@ int CharSectionsDB::getColorsFor(size_t race, size_t gender, size_t type, size_t
 	int n = 0;
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
-		// don't allow NPC skins ;(
-		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(SectionBC)==section && i->getUInt(IsNPCBC)==npc) {
-				n++;
-			}
-		} else {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section) {
-				n++;
-			}
-		}
+	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section) {
+	    n++;
+	  }
 	}
 
     return n;
@@ -103,15 +96,9 @@ int CharSectionsDB::getSectionsFor(size_t race, size_t gender, size_t type, size
 	int n = 0;
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
-		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(ColorBC)==color && i->getUInt(IsNPCBC)==npc) {
-				n++;
-			}
-		} else {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Color)==color) {
-				n++;
-			}
-		}
+	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Color)==color) {
+	    n++;
+	  }
 	}
     return n;
 }
@@ -120,13 +107,8 @@ CharSectionsDB::Record CharSectionsDB::getByParams(size_t race, size_t gender, s
 {
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
-		if (gameVersion < VERSION_WOTLK) {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(SectionBC)==section && i->getUInt(ColorBC)==color && i->getUInt(IsNPCBC)==npc)
-				return (*i);
-		} else {
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(Color)==color)
-				return (*i);
-		}
+	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(Color)==color)
+	    return (*i);
 	}
 	//wxLogMessage(wxT("NotFound: %s:%s#%d race:%d, gender:%d, type:%d, section:%d, color:%d"), __FILE__, __FUNCTION__, __LINE__, race, gender, type, section, color);
 	throw NotFound();
@@ -136,11 +118,7 @@ CharSectionsDB::Record CharSectionsDB::getByParams(size_t race, size_t gender, s
 CharRacesDB::Record CharRacesDB::getByName(wxString name)
 {
 	for(Iterator i=begin(); i!=end(); ++i) {
-		wxString r;
-		if (gameVersion == 30100)
-			r = i->getString(NameV310);
-		else
-			r = i->getString(Name);
+		wxString r = i->getString(Name);
 		if (name.IsSameAs(r, false) == true)
 			return (*i);
 	}
@@ -163,19 +141,11 @@ CharRacesDB::Record CharRacesDB::getById(size_t id)
 
 CharFacialHairDB::Record CharFacialHairDB::getByParams(unsigned int race, unsigned int gender, unsigned int style)
 {
-	if (gameVersion >= VERSION_CATACLYSM) {
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender && i->getUInt(StyleV400)==style)
-				return (*i);
-		}
-	} else {
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Style)==style)
-				return (*i);
-		}
-	}
+  for(Iterator i=begin(); i!=end(); ++i)
+  {
+    if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender && i->getUInt(StyleV400)==style)
+      return (*i);
+  }
 	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
@@ -183,20 +153,11 @@ CharFacialHairDB::Record CharFacialHairDB::getByParams(unsigned int race, unsign
 int CharFacialHairDB::getStylesFor(unsigned int race, unsigned int gender)
 {
 	int n = 0;
-	if (gameVersion >= VERSION_CATACLYSM) {
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender) {
-				n++;
-			}
-		}
-	} else {
-		for(Iterator i=begin(); i!=end(); ++i)
-		{
-			if (i->getUInt(Race)==race && i->getUInt(Gender)==gender) {
-				n++;
-			}
-		}
+	for(Iterator i=begin(); i!=end(); ++i)
+	{
+	  if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender) {
+	    n++;
+	  }
 	}
 	return n;
 }
@@ -335,11 +296,7 @@ void ItemSetDB::cleanup(ItemDatabase &p_itemdb)
 {
 	for(Iterator i=begin(); i!=end(); ++i) {
 		for (size_t j=0; j<NumItems; j++) {
-			int id;
-			if (gameVersion >= VERSION_CATACLYSM)
-				id = i->getUInt(ItemIDBaseV400+j);
-			else
-				id = i->getUInt(ItemIDBase+j);
+			int id = i->getUInt(ItemIDBaseV400+j);
 			if (id > 0) {
 				const ItemRecord &r = p_itemdb.getById(id);
 				if (r.type > 0) {
@@ -436,13 +393,8 @@ ItemSubClassDB::Record ItemSubClassDB::getById(int id, int subid)
 {
 	for(Iterator i=begin(); i!=end(); ++i)
 	{
-		if (gameVersion >= VERSION_CATACLYSM) {
-			if (i->getInt(ClassIDV400)==id && i->getInt(SubClassIDV400)==subid)
-				return (*i);
-		} else {
-			if (i->getInt(ClassID)==id && i->getInt(SubClassID)==subid)
-				return (*i);
-		}
+	  if (i->getInt(ClassIDV400)==id && i->getInt(SubClassIDV400)==subid)
+	    return (*i);
 	}
 	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();

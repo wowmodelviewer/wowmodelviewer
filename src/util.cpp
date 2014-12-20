@@ -17,9 +17,8 @@ wxString bgImagePath;
 wxString armoryPath;
 
 UserSkins userSkins;
-UserSkins& gUserSkins = userSkins;;
+UserSkins& gUserSkins = userSkins;
 
-int gameVersion = 0;
 
 bool useLocalFiles = false;
 bool useRandomLooks = true;

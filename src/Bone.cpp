@@ -97,22 +97,3 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<Gam
 	scale.fix(fixCoordSystem2);
 }
 
-void Bone::initV2(GameFile * f, ModelBoneDef &b, uint32 *global)
-{
-	calc = false;
-
-	parent = b.parent;
-	pivot = fixCoordSystem(b.pivot);
-	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
-	//billboard = false;
-
-	boneDef = b;
-
-	trans.init(b.translation, f, global);
-	rot.init(b.rotation, f, global);
-	scale.init(b.scaling, f, global);
-	trans.fix(fixCoordSystem);
-	rot.fix(fixCoordSystemQuat);
-	scale.fix(fixCoordSystem2);
-}
-

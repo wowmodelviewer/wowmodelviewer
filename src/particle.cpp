@@ -39,22 +39,15 @@ void ParticleSystem::init(GameFile * f, ModelParticleEmitterDef &mta, uint32 *gl
 	deacceleration.init (mta.Gravity2, f, globals);
 	enabled.init (mta.en, f, globals);
 
-	if (gameVersion >= VERSION_WOTLK) {
-		Vec3D colors2[3];
-		memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
-		for (size_t i=0; i<3; i++) {
-			float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
-			colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f, colors2[i].z/255.0f, opacity/32767.0f);
-			sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
-		}
-		mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
-	} else {
-		for (size_t i=0; i<3; i++) {
-			// colors[i] = fromARGB(mta.p.colors[i]);
-			// sizes[i] = mta.p.sizes[i] * mta.p.scales[i];
-		}
-		// mid = mta.p.mid;
+
+	Vec3D colors2[3];
+	memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
+	for (size_t i=0; i<3; i++) {
+	  float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
+	  colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f, colors2[i].z/255.0f, opacity/32767.0f);
+	  sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
 	}
+	mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
 		
 	slowdown = mta.p.slowdown;
 	rotation = mta.p.rotation;

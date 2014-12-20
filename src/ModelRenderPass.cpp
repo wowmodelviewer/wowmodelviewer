@@ -147,17 +147,12 @@ bool ModelRenderPass::init(WoWModel *m)
 
 	// emissive colors
 	if (color!=-1 && m->colors && m->colors[color].color.uses(0)) {
-		Vec3D c;
-		if (gameVersion >= VERSION_WOTLK) {
-			/* Alfred 2008.10.02 buggy opacity make model invisable, TODO */
-			c = m->colors[color].color.getValue(0,m->animtime);
-			if (m->colors[color].opacity.uses(m->anim)) {
-				ocol.w = m->colors[color].opacity.getValue(m->anim,m->animtime);
-			}
-		} else {
-			c = m->colors[color].color.getValue(m->anim,m->animtime);
-			ocol.w = m->colors[color].opacity.getValue(m->anim,m->animtime);
-		}
+	  Vec3D c;
+	  /* Alfred 2008.10.02 buggy opacity make model invisable, TODO */
+	  c = m->colors[color].color.getValue(0,m->animtime);
+	  if (m->colors[color].opacity.uses(m->anim)) {
+	    ocol.w = m->colors[color].opacity.getValue(m->anim,m->animtime);
+	  }
 
 		if (unlit) {
 			ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
@@ -171,12 +166,9 @@ bool ModelRenderPass::init(WoWModel *m)
 
 	// opacity
 	if (opacity!=-1) {
-		if (gameVersion >= VERSION_WOTLK) {
 			/* Alfred 2008.10.02 buggy opacity make model invisable, TODO */
 			if (m->transparency && m->transparency[opacity].trans.uses(0))
 				ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
-		} else
-			ocol.w *= m->transparency[opacity].trans.getValue(m->anim, m->animtime);
 	}
 
 	// exit and return false before affecting the opengl render state

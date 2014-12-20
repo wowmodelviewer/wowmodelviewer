@@ -31,7 +31,7 @@ bool DBCFile::open()
 		FT_WDB2,
 	};
 	int db_type = FT_UNK;
-	if (filename.Lower().EndsWith(wxT("item.dbc")) && gameVersion >= VERSION_CATACLYSM) {
+	if (filename.Lower().EndsWith(wxT("item.dbc"))) {
 		filename = filename.BeforeLast('.') + wxT(".db2");
 	}
 
