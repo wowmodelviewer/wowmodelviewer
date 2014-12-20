@@ -311,7 +311,7 @@ bool FilteredChoiceDialog::FilterFunc(int index)
 	if (index==0 && keepFirst) 
 		return true;
 
-	return m_choices->Item(index).Matches("*" + m_pattern->GetValue() + "*");
+	return m_choices->Item(index).Lower().Matches("*" + m_pattern->GetValue().Lower() + "*");
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
