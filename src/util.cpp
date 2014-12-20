@@ -163,8 +163,9 @@ void getGamePath()
 		if (l == ERROR_SUCCESS) {
 			s = sizeof(path);
 			l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t,(LPBYTE)path, &s);
-			if (l == ERROR_SUCCESS && wxDir::Exists(path)) {
-				sNames.Add(path);
+			wxString spath(path);
+			if (l == ERROR_SUCCESS && wxDir::Exists(path) && sNames.Index(spath) == wxNOT_FOUND) {
+				sNames.Add(spath);
 			}
 			RegCloseKey(key);
 		}
