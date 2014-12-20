@@ -1776,9 +1776,6 @@ void CharControl::RefreshItem(ssize_t slot)
 	if (!charAtt)
 		return;
 
-	if (slot==CS_HEAD && bHideHelmet == true)
-		return;
-
 	// delete all attachments in that slot
 	charAtt->delSlot(slot);
 

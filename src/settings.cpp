@@ -37,12 +37,9 @@ Settings_Page1::Settings_Page1(wxWindow* parent, wxWindowID id)
 		return;
 	}
 
-	chkbox[CHECK_ALTERNATE] = new wxCheckBox(this, ID_SETTINGS_ALTERNATE, _("Alternate"), wxPoint(5,25), wxDefaultSize, 0);
 	chkbox[CHECK_SHOWPARTICLE] = new wxCheckBox(this, ID_SETTINGS_SHOWPARTICLE, _("Show Particle"), wxPoint(5,50), wxDefaultSize, 0);
 	chkbox[CHECK_ZEROPARTICLE] = new wxCheckBox(this, ID_SETTINGS_ZEROPARTICLE, _("Zero Particle"), wxPoint(5,75), wxDefaultSize, 0);
-	chkbox[CHECK_LOCALFILES] = new wxCheckBox(this, ID_SETTINGS_LOCALFILES, _("Use Local Files"), wxPoint(5,100), wxDefaultSize, 0);
 	chkbox[CHECK_RANDOMSKIN] = new wxCheckBox(this, ID_SETTINGS_RANDOMSKIN, _("Random Skins"), wxPoint(150,50), wxDefaultSize, 0);
-	chkbox[CHECK_HIDEHELMET] = new wxCheckBox(this, ID_SETTINGS_HIDEHELMET, _("Hide Helmet"), wxPoint(150,75), wxDefaultSize, 0);
 }
 
 
@@ -52,27 +49,18 @@ void Settings_Page1::OnCheck(wxCommandEvent &event)
 
 	if (id==ID_SETTINGS_RANDOMSKIN) {
 		useRandomLooks = event.IsChecked();
-	} else if (id==ID_SETTINGS_LOCALFILES) {
-		useLocalFiles = event.IsChecked();
-	} else if (id==ID_SETTINGS_HIDEHELMET) {
-		bHideHelmet = event.IsChecked();
 	} else if (id==ID_SETTINGS_SHOWPARTICLE) {
 		bShowParticle = event.IsChecked();
 	} else if (id==ID_SETTINGS_ZEROPARTICLE) {
 		bZeroParticle = event.IsChecked();
-	} else if (id==ID_SETTINGS_ALTERNATE) {
-		bAlternate = event.IsChecked();
 	}
 }
 
 void Settings_Page1::Update()
 {
 	chkbox[CHECK_RANDOMSKIN]->SetValue(useRandomLooks);
-	chkbox[CHECK_HIDEHELMET]->SetValue(bHideHelmet);
-	chkbox[CHECK_LOCALFILES]->SetValue(useLocalFiles);
 	chkbox[CHECK_SHOWPARTICLE]->SetValue(bShowParticle);
 	chkbox[CHECK_ZEROPARTICLE]->SetValue(bZeroParticle);
-	chkbox[CHECK_ALTERNATE]->SetValue(bAlternate);
 }
 
 Settings_Page2::Settings_Page2(wxWindow* parent, wxWindowID id)

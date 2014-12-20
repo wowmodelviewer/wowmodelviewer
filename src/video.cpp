@@ -771,36 +771,6 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	GLint format = 0;
 	char attr[4];
 
-	if (useLocalFiles) {
-		wxString texName(tex->name.c_str(), wxConvUTF8);
-		BYTE *buffer = NULL;
-		CxImage *image = NULL;
-
-		if ((TryLoadLocalTexture(texName, CXIMAGE_FORMAT_PNG, &image) || 
-			 TryLoadLocalTexture(texName, CXIMAGE_FORMAT_TGA, &image)) 
-			 && image) {
-			long size = image->GetWidth() * image->GetHeight() * 4;
-			if (image->Encode2RGBA(buffer, size, true)) {
-				tex->w = image->GetWidth();
-				tex->h = image->GetHeight();
-				tex->compressed = true;
-
-				GLuint texFormat = GL_TEXTURE_2D;
-				glBindTexture(texFormat, id);
-
-				glTexImage2D(texFormat, 0, GL_RGBA8, image->GetWidth(), image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-				glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
-				glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtering
-
-				wxDELETE(image);
-				wxDELETE(buffer);
-				return;
-			}
-		}
-
-	}
-
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	

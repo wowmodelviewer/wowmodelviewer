@@ -342,7 +342,6 @@ bool WowModelViewApp::LoadSettings()
 		pConfig->Read(wxT("Path"), &gamePath, wxEmptyString);
 		pConfig->Read(wxT("ArmoryPath"), &armoryPath, wxEmptyString);
 
-		pConfig->Read(wxT("UseLocalFiles"), &useLocalFiles, false);
 		pConfig->Read(wxT("SSCounter"), &ssCounter, 100);
 		//pConfig->Read(wxT("AntiAlias"), &useAntiAlias, true);
 		//pConfig->Read(wxT("DisableHWAcc"), &disableHWAcc, false);
@@ -367,7 +366,6 @@ void WowModelViewApp::SaveSettings()
 	pConfig->SetPath(wxT("/Settings"));
 	pConfig->Write(wxT("Path"), gamePath);
 	pConfig->Write(wxT("ArmoryPath"), armoryPath);
-	pConfig->Write(wxT("UseLocalFiles"), useLocalFiles);
 	pConfig->Write(wxT("SSCounter"), ssCounter);
 	//pConfig->Write(wxT("AntiAlias"), useAntiAlias);
 	//pConfig->Write(wxT("DisableHWAcc"), disableHWAcc);

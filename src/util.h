@@ -66,12 +66,9 @@ extern wxString cfgPath;
 extern wxString bgImagePath;
 extern wxString armoryPath;
 
-extern bool useLocalFiles;
 extern bool useRandomLooks;
-extern bool bHideHelmet;
 extern bool bShowParticle;
 extern bool bZeroParticle;
-extern bool bAlternate;
 
 class UserSkins;
 extern UserSkins& gUserSkins;

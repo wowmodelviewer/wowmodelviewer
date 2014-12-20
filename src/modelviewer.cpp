@@ -803,10 +803,8 @@ void ModelViewer::LoadSession()
 		
 		// boolean vars
 		pConfig->Read(wxT("RandomLooks"), &useRandomLooks, true);
-		pConfig->Read(wxT("HideHelmet"), &bHideHelmet, false);
 		pConfig->Read(wxT("ShowParticle"), &bShowParticle, true);
 		pConfig->Read(wxT("ZeroParticle"), &bZeroParticle, true);
-		pConfig->Read(wxT("Alternate"), &bAlternate, false);
 		pConfig->Read(wxT("DBackground"), &canvas->drawBackground, false);
 		pConfig->Read(wxT("BackgroundImage"), &bgImagePath, wxEmptyString);
 		if (!bgImagePath.IsEmpty()) {
@@ -855,10 +853,8 @@ void ModelViewer::SaveSession()
 		
 		// boolean vars
 		pConfig->Write(wxT("RandomLooks"), useRandomLooks);
-		pConfig->Write(wxT("HideHelmet"), bHideHelmet);
 		pConfig->Write(wxT("ShowParticle"), bShowParticle);
 		pConfig->Write(wxT("ZeroParticle"), bZeroParticle);
-		pConfig->Write(wxT("Alternate"), bAlternate);
 
 		pConfig->Write(wxT("DBackground"), canvas->drawBackground);
 		if (canvas->drawBackground)

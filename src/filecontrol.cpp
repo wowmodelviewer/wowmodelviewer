@@ -555,9 +555,6 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		wxString rootfn(data->fn);
-		if (bAlternate && rootfn.Lower().StartsWith(wxT("alternate"))) {
-			rootfn = rootfn.Mid(10);
-		}
 
 		// Check to make sure the selected item is a model (an *.m2 file).
 		modelviewer->isModel = (rootfn.Last() == '2');

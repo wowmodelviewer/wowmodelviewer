@@ -19,13 +19,9 @@ wxString armoryPath;
 UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;
 
-
-bool useLocalFiles = false;
 bool useRandomLooks = true;
-bool bHideHelmet = false;
 bool bShowParticle = true;
 bool bZeroParticle = true;
-bool bAlternate = false; // for zhCN alternate.MPQ
 
 long langID = -1;
 wxString langName;
