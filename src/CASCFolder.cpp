@@ -123,7 +123,7 @@ void CASCFolder::initVersion()
     std::string version =  m_version.substr (0, lastPointPos);
     std::string build = m_version.substr (lastPointPos +1, m_version.length()-1);
     m_version = version + " (" + build + ")";
-    LOG_INFO << "Version succesfully found :" << m_version.c_str();
+    LOG_INFO << "Version successfully found :" << m_version.c_str();
   }
   else
   {
