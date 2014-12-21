@@ -117,9 +117,18 @@ void CASCFolder::initVersion()
   }
 
   if(line.find_last_of("|") != std::string::npos)
+  {
     m_version = line.substr (line.find_last_of("|")+1, line.length()-1);
+    size_t lastPointPos = m_version.find_last_of(".");
+    std::string version =  m_version.substr (0, lastPointPos);
+    std::string build = m_version.substr (lastPointPos +1, m_version.length()-1);
+    m_version = version + " (" + build + ")";
+    LOG_INFO << "Version succesfully found :" << m_version.c_str();
+  }
   else
+  {
     LOG_ERROR << "Fail to grab game version info in .build.info file";
+  }
 }
 
 void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString)/* = CASCFolder::defaultFilterFunc*/)
