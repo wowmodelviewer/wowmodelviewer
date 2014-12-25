@@ -15,6 +15,7 @@
 
 // our headers
 #include "CharDetails.h"
+#include "CharDetailsFrame.h"
 #include "CharTexture.h"
 #include "database.h"
 #include "enums.h"
@@ -44,23 +45,17 @@ class CharControl: public wxWindow
 	DECLARE_CLASS(CharControl)
     DECLARE_EVENT_TABLE()
 
-	wxSpinButton *spins[NUM_SPIN_BTNS];
-	wxStaticText *spinLabels[NUM_SPIN_BTNS];
 	wxSpinButton *tabardSpins[NUM_TABARD_BTNS];
 	wxButton *buttons[NUM_CHAR_SLOTS];
 	wxStaticText *labels[NUM_CHAR_SLOTS];
 	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
+	CharDetailsFrame * cdFrame;
 
 	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup = true);
 	void UpdateTextureList(wxString texName, int special);
 
 	static std::map< std::string, RaceInfos> RACES;
 	bool getRaceInfosForCurrentModel(RaceInfos &);
-
-	std::vector<std::string> getTextureNameForSection(CharSectionsDB::SectionType);
-	int getNbValuesForSection(CharSectionsDB::SectionType type);
-
-	void refreshModelSpins();
 
 public:
 	// Item selection stuff
@@ -88,7 +83,6 @@ public:
 
 	bool bSheathe;
 
-	void OnSpin(wxSpinEvent &event);
 	void OnTabardSpin(wxSpinEvent &event);
 	void OnCheck(wxCommandEvent &event);
 	void OnButton(wxCommandEvent &event);
@@ -114,6 +108,8 @@ public:
 	const wxString selectCharModel();
 
 	static void initRaces();
+	int getNbValuesForSection(CharSectionsDB::SectionType type);
+	std::vector<std::string> getTextureNameForSection(CharSectionsDB::SectionType);
 
 };
 

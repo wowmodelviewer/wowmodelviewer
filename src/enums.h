@@ -259,13 +259,6 @@ enum ObjectID {
 	// --------------------------------------
 	// Char control frame
 	ID_CHAR_FRAME, // = 3400,
-	ID_SKIN_COLOR,
-	ID_FACE_TYPE,
-	ID_HAIR_COLOR,
-	ID_HAIR_STYLE,
-	ID_FACIAL_HAIR,
-	ID_FACIAL_COLOR,
-	ID_CHAR_RANDOMISE,
 
 	ID_TABARD_ICON,
 	ID_TABARD_ICONCOLOR,
@@ -489,16 +482,6 @@ enum {
 };
 
 // End Model Export Options
-enum {
-	SPIN_SKIN_COLOR,
-	SPIN_FACE_TYPE,
-	SPIN_HAIR_COLOR,
-	SPIN_HAIR_STYLE,
-	SPIN_FACIAL_HAIR,
-	//SPIN_FACIAL_COLOR,
-
-	NUM_SPIN_BTNS
-};
 
 enum {
 	SPIN_TABARD_ICON = 0,

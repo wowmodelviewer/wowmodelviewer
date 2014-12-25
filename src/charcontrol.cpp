@@ -73,13 +73,6 @@ static std::vector<bool> ridablelist;
 IMPLEMENT_CLASS(CharControl, wxWindow)
 
 BEGIN_EVENT_TABLE(CharControl, wxWindow)
-	EVT_SPIN(ID_SKIN_COLOR, CharControl::OnSpin)
-	EVT_SPIN(ID_FACE_TYPE, CharControl::OnSpin)
-	EVT_SPIN(ID_HAIR_COLOR, CharControl::OnSpin)
-	EVT_SPIN(ID_HAIR_STYLE, CharControl::OnSpin)
-	EVT_SPIN(ID_FACIAL_HAIR, CharControl::OnSpin)
-//	EVT_SPIN(ID_FACIAL_COLOR, CharControl::OnSpin)
-
 	EVT_SPIN(ID_TABARD_ICON, CharControl::OnTabardSpin)
 	EVT_SPIN(ID_TABARD_ICONCOLOR, CharControl::OnTabardSpin)
 	EVT_SPIN(ID_TABARD_BORDER, CharControl::OnTabardSpin)
@@ -119,26 +112,9 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	}
 
 	wxFlexGridSizer *top = new wxFlexGridSizer(1);
-	top->AddGrowableCol(0);
 
-	wxFlexGridSizer *gs = new wxFlexGridSizer(3, 5, 4);
-
-	#define ADD_CONTROLS(type, id, caption) \
-	gs->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
-	gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL)); \
-	gs->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
-
-	ADD_CONTROLS(SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color"))
-	ADD_CONTROLS(SPIN_FACE_TYPE, ID_FACE_TYPE, _("Face type"))
-	ADD_CONTROLS(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color"))
-	ADD_CONTROLS(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style"))
-	ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature"))
-	//ADD_CONTROLS(SPIN_FACIAL_COLOR, ID_FACIAL_COLOR, _("Facial color"))
-	#undef ADD_CONTROLS
-	
-	//gs->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Proportion(0).Expand());
-
-	top->Add(gs,wxSizerFlags().Proportion(1).Expand().Border(wxALL, 10));
+	cdFrame = new CharDetailsFrame(this,cd);
+	top->Add(cdFrame);
 
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		buttons[i] = NULL;
@@ -180,7 +156,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	wxGridSizer *gs3 = new wxGridSizer(3);
 	#define ADD_CONTROLS(type, id, caption) \
 	gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
-	gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL)); \
+	gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
 	gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
 
 	ADD_CONTROLS(SPIN_TABARD_ICON, ID_TABARD_ICON, _("Icon"))
@@ -242,29 +218,6 @@ bool CharControl::Init()
 	td.maxIconColor = td.GetMaxIconColor(0);
 
 	return true;
-}
-
-void CharControl::refreshModelSpins()
-{
-  if (cd.maxFaceType==0) cd.maxFaceType = 1;
-  if (cd.maxSkinColor==0) cd.maxSkinColor = 1;
-  if (cd.maxHairColor==0) cd.maxHairColor = 1;
-  if (cd.maxHairStyle==0) cd.maxHairStyle = 1;
-  if (cd.maxFacialHair==0) cd.maxFacialHair = 1;
-
-  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)cd.maxSkinColor-1);
-  spins[SPIN_FACE_TYPE]->SetRange(0, (int)cd.maxFaceType-1);
-  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
-  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)cd.maxHairStyle-1);
-  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)cd.maxFacialHair-1);
-//  spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
-
-  spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
-  spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
-  spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
-  spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
-  spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
- // spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 }
 
 //void CharControl::UpdateModel(Model *m)
@@ -337,7 +290,7 @@ void CharControl::UpdateModel(Attachment *a)
 	cd.race = infos.raceid;
 	cd.gender = infos.sexid;
 
-	refreshModelSpins();
+	cdFrame->refresh();
 
 	td.Icon = randint(0, td.maxIcon);
 	td.IconColor = randint(0, td.maxIconColor);
@@ -358,14 +311,14 @@ void CharControl::UpdateModel(Attachment *a)
 	tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
 	tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, td.maxBackground);
 
-	for (size_t i=0; i<NUM_SPIN_BTNS; i++) 
-		spins[i]->Refresh(false);
+	//for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+	//	spins[i]->Refresh(false);
 	for (size_t i=0; i<NUM_TABARD_BTNS; i++) {
 		tabardSpins[i]->Refresh(false);
 		spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
 	}
-	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
+	//for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+//		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
 
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
 	{
@@ -377,7 +330,7 @@ void CharControl::UpdateModel(Attachment *a)
 	}
 
 	if (useRandomLooks)
-		RandomiseChar();
+		cdFrame->randomiseChar();
 
 	LOG_INFO << "Current model config :"
 	         << "skinColor" << cd.skinColor
@@ -511,68 +464,6 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 	*/
 }
 
-void CharControl::OnSpin(wxSpinEvent &event)
-{
-	if (!g_canvas)
-		return;
-
-	if (event.GetId()==ID_SKIN_COLOR) 
-	{
-	  cd.skinColor = event.GetPosition();
-	  // check if underwear texture is available for this color
-		// if no, uncheck option, and make menu unavailable
-	  if(getTextureNameForSection(model->isHD?CharSectionsDB::UnderwearHDType:CharSectionsDB::UnderwearType).size() == 0)
-	  {
-	    cd.showUnderwear = false;
-	    g_modelViewer->charMenu->Check(ID_SHOW_UNDERWEAR, false);
-	    g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-	  }
-	  else
-	  {
-	    g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, true);
-	  }
-
-	  // update facial type based on skin chosen
-	  cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
-	 /*
-	  std::cout << "--------------------------------------" << std::endl;
-	  std::cout << __FUNCTION__ << " => cd.maxFaceType = " << cd.maxFaceType << std::endl;
-	  std::cout << "--------------------------------------" << std::endl;
-	  */
-	  if(cd.faceType > cd.maxFaceType)
-	    cd.faceType = 0;
-
-	  refreshModelSpins();
-	}
-
-	if(g_canvas->model->modelType == MT_NPC)
-		return;
-
-	if (event.GetId()==ID_FACE_TYPE) 
-		cd.faceType = event.GetPosition();
-	else if (event.GetId()==ID_HAIR_COLOR) {
-		cd.hairColor = event.GetPosition();
-		cd.facialColor = event.GetPosition();
-	} else if (event.GetId()==ID_HAIR_STYLE) 
-		cd.hairStyle = event.GetPosition();
-	else if (event.GetId()==ID_FACIAL_HAIR) 
-		cd.facialHair = event.GetPosition();
-	//else if (event.GetId()==ID_FACIAL_COLOR)
-	//	cd.facialColor = event.GetPosition();
-
-	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
-
-	LOG_INFO << "Current model config :"
-	         << "skinColor" << cd.skinColor
-	         << "faceType" << cd.faceType
-	         << "hairColor" << cd.hairColor
-	         << "hairStyle" << cd.hairStyle
-	         << "facialHair" << cd.facialHair;
-	RefreshModel();
-
-}
-
 void CharControl::OnCheck(wxCommandEvent &event)
 {
 	int ID = event.GetId();
@@ -606,24 +497,6 @@ bool slotHasModel(size_t i)
 	return (i==CS_HEAD || i==CS_SHOULDER || i==CS_HAND_LEFT || i==CS_HAND_RIGHT || i==CS_QUIVER);
 }
 
-inline void CharControl::RandomiseChar()
-{
-	// Choose random values for the looks! ^_^
-	cd.skinColor = randint(0, (int)cd.maxSkinColor-1);
-	cd.faceType = randint(0, (int)cd.maxFaceType-1);
-	cd.hairColor = randint(0, (int)cd.maxHairColor-1);
-	cd.hairStyle = randint(0, (int)cd.maxHairStyle-1);
-	cd.facialHair = randint(0, (int)cd.maxFacialHair-1);
-	cd.facialColor = cd.hairColor;
-
-	spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
-	spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
-	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
-	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
-	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
-}
-
 void CharControl::RefreshEquipment()
 {
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
@@ -648,11 +521,7 @@ void CharControl::OnButton(wxCommandEvent &event)
 
 	//if (dir.Last() != '\\')
 	//	dir.Append('\\');
-
-	if (event.GetId()==ID_CHAR_RANDOMISE) {
-		RandomiseChar();
-		
-	} else if (event.GetId()==ID_SAVE_EQUIPMENT) {
+	if (event.GetId()==ID_SAVE_EQUIPMENT) {
 		wxFileDialog dialog(this, wxT("Save equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
 		if (dialog.ShowModal()==wxID_OK) {
 			wxString s(dialog.GetPath());
@@ -663,6 +532,7 @@ void CharControl::OnButton(wxCommandEvent &event)
 		}
 
 	} else if (event.GetId()==ID_LOAD_EQUIPMENT) {
+/*
 		wxFileDialog dialog(this, wxT("Load equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN|wxFD_FILE_MUST_EXIST, wxDefaultPosition);
 		if (dialog.ShowModal()==wxID_OK) {
 			wxString s(dialog.GetPath());
@@ -680,8 +550,9 @@ void CharControl::OnButton(wxCommandEvent &event)
 
 			// Save directory path
 			dir = dialog.GetDirectory();
-		}
 
+		}
+*/
 	} else if (event.GetId()==ID_CLEAR_EQUIPMENT) {
 		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) 
 			cd.equipment[i] = 0;
@@ -1073,7 +944,7 @@ void CharControl::RefreshModel()
 	*/
 
 	// Alfred 2009.07.18 show max value
-	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+/*	for (size_t i=0; i<NUM_SPIN_BTNS; i++)
 		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
 
 	spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
@@ -1082,7 +953,7 @@ void CharControl::RefreshModel()
 	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
 	//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
-
+*/
 	/*
 	// Eye Glows
 	for(size_t i=0; i<model->passes.size(); i++) {
