@@ -8,6 +8,7 @@
 #include "CharDetailsFrame.h"
 
 #include "enums.h"
+#include "GameDatabase.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 #include "modelviewer.h"
@@ -51,8 +52,8 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature"))
   #undef ADD_CONTROLS
 
-  gs->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Proportion(0).Expand());
-  top->Add(gs,wxSizerFlags().Proportion(1).Expand().Border(wxALL, 1));
+  top->Add(gs,wxEXPAND);
+  top->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER));
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);
@@ -62,6 +63,43 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
 void CharDetailsFrame::refresh()
 {
   std::cout << __FUNCTION__ << std::endl;
+
+  m_details.maxFaceType  = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+  m_details.maxSkinColor = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
+  m_details.maxHairColor = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
+
+  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
+                     .arg(m_details.race)
+                     .arg(m_details.gender);
+
+  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(hairStyles.valid && !hairStyles.values.empty())
+  {
+    m_details.maxHairStyle = atoi(hairStyles.values[0][0].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of hair styles for model" << g_canvas->model->name.c_str();
+    m_details.maxHairStyle = 0;
+  }
+
+
+  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
+                         .arg(m_details.race)
+                         .arg(m_details.gender);
+
+  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+  if(facialHairStyles.valid && !facialHairStyles.values.empty())
+  {
+    m_details.maxFacialHair = atoi(facialHairStyles.values[0][0].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of facial hair styles for model" << g_canvas->model->name.c_str();
+    m_details.maxFacialHair = 0;
+  }
+
   if (m_details.maxFaceType == 0) m_details.maxFaceType = 1;
   if (m_details.maxSkinColor == 0) m_details.maxSkinColor = 1;
   if (m_details.maxHairColor == 0) m_details.maxHairColor = 1;

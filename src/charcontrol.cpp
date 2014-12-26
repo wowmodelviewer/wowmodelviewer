@@ -241,51 +241,14 @@ void CharControl::UpdateModel(Attachment *a)
 		model->showGeosets[i] = (model->geosets[i].id==0);
 	}
 
-	cd.maxSkinColor = getNbValuesForSection(model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
-	cd.maxFaceType  = getNbValuesForSection(model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
-	cd.maxHairColor = getNbValuesForSection(model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
-
 	RaceInfos infos;
-	if(getRaceInfosForCurrentModel(infos))
-	{
-	  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
-	        .arg(infos.raceid)
-	        .arg(infos.sexid);
-
-	  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
-
-	  if(hairStyles.valid && !hairStyles.values.empty())
-	  {
-	    cd.maxHairStyle = atoi(hairStyles.values[0][0].c_str());
-	  }
-	  else
-	  {
-	    LOG_ERROR << "Unable to collect number of hair styles for model" << model->name.c_str();
-	    cd.maxHairStyle = 0;
-	  }
-
-
-	  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
-              .arg(infos.raceid)
-              .arg(infos.sexid);
-
-	  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
-	  if(facialHairStyles.valid && !facialHairStyles.values.empty())
-	  {
-	    cd.maxFacialHair = atoi(facialHairStyles.values[0][0].c_str());
-	  }
-	  else
-	  {
-	    LOG_ERROR << "Unable to collect number of facial hair styles for model" << model->name.c_str();
-	    cd.maxFacialHair = 0;
-	  }
-
-	}
-
-	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
+	getRaceInfosForCurrentModel(infos);
 
 	cd.race = infos.raceid;
 	cd.gender = infos.sexid;
+
+	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
+
 
 	cdFrame->refresh();
 
@@ -329,12 +292,6 @@ void CharControl::UpdateModel(Attachment *a)
 	if (useRandomLooks)
 		cdFrame->randomiseChar();
 
-	LOG_INFO << "Current model config :"
-	         << "skinColor" << cd.skinColor
-	         << "faceType" << cd.faceType
-	         << "hairColor" << cd.hairColor
-	         << "hairStyle" << cd.hairStyle
-	         << "facialHair" << cd.facialHair;
 	RefreshModel();
 }
 
