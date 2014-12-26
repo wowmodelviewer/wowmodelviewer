@@ -90,7 +90,6 @@ void ModelBankControl::LoadModel()
 
 	if (cd.modelType==MT_CHAR && g_charControl) {
 		g_charControl->cd.faceType = cd.faceType;
-		g_charControl->cd.facialColor = cd.facialColor;
 		g_charControl->cd.facialHair = cd.facialHair;
 		g_charControl->cd.gender = cd.gender;
 		g_charControl->cd.hairColor = cd.hairColor;
@@ -155,7 +154,6 @@ void ModelBankControl::AddModel()
 			cd.equipment[i] = g_charControl->cd.equipment[i];
 
 		cd.faceType = g_charControl->cd.faceType;
-		cd.facialColor = g_charControl->cd.facialColor;
 		cd.facialHair = g_charControl->cd.facialHair;
 		cd.gender = g_charControl->cd.gender;
 		cd.hairColor = g_charControl->cd.hairColor;
@@ -273,9 +271,6 @@ void ModelBankControl::SaveList()
 				file.Write(&bankList[i].hairStyle, sizeof(unsigned int));
 				// Facial Features style
 				file.Write(&bankList[i].facialHair, sizeof(unsigned int));
-				// Facial Features Colour
-				file.Write(&bankList[i].facialColor, sizeof(unsigned int));
-
 				// Race
 				file.Write(&bankList[i].race, sizeof(unsigned int));
 				// Gender
@@ -379,9 +374,6 @@ void ModelBankControl::LoadList()
 			file.Read(&cd.hairStyle, sizeof(unsigned int));
 			// Facial Features style
 			file.Read(&cd.facialHair, sizeof(unsigned int));
-			// Facial Features Colour
-			file.Read(&cd.facialColor, sizeof(unsigned int));
-
 			// Race
 			file.Read(&cd.race, sizeof(unsigned int));
 			// Gender

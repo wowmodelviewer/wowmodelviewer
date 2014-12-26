@@ -31,7 +31,6 @@ struct ModelBank
 	size_t hairColor;
 	size_t hairStyle;
 	size_t facialHair;
-	size_t facialColor;
 	size_t race, gender;
 	size_t useNPC;
 	bool showUnderwear, showEars, showHair, showFacialHair, showFeet;

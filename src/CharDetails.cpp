@@ -21,7 +21,7 @@ void CharDetails::save(wxString fn, TabardDetails *td)
 	if (!output.IsOk())
 		return;
 	f << (int)race << wxT(" ") << (int)gender << endl;
-	f << (int)skinColor << wxT(" ") << (int)faceType << wxT(" ") << (int)hairColor << wxT(" ") << (int)hairStyle << wxT(" ") << (int)facialHair << wxT(" ") << (int)facialColor << endl;
+	f << (int)skinColor << wxT(" ") << (int)faceType << wxT(" ") << (int)hairColor << wxT(" ") << (int)hairStyle << wxT(" ") << (int)facialHair << endl;
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f << equipment[i] << endl;
 	}
@@ -51,7 +51,7 @@ bool CharDetails::load(wxString fn, TabardDetails *td)
 
 	if (r==race && g==gender) {
 #if defined _WINDOWS
-		f >> skinColor >> faceType >> hairColor >> hairStyle >> facialHair >> facialColor;
+		f >> skinColor >> faceType >> hairColor >> hairStyle >> facialHair;
 #endif
 		same = true;
 	} else {
@@ -146,8 +146,6 @@ void CharDetails::print()
 	std::cout << "hairColor = " << hairColor << std::endl;
 	std::cout << "hairStyle = " << hairStyle << std::endl;
 	std::cout << "facialHair = " << facialHair << std::endl;
-	std::cout << "facialColor = " << facialColor << std::endl;
-	std::cout << "maxFacialColor = " << maxFacialColor << std::endl;
 	std::cout << "maxHairStyle = " << maxHairColor << std::endl;
 	std::cout << "maxHairColor = " << maxHairColor << std::endl;
 	std::cout << "maxSkinColor = " << maxSkinColor << std::endl;

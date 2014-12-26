@@ -207,8 +207,6 @@ bool CharControl::Init()
 	cd.showHair = true;
 	cd.showFacialHair = true;
 	cd.showUnderwear = true;
-	
-	cd.facialColor = 0; // 2009.07.30 Alfred
 
 	// set max values for custom tabard
 	td.maxBackground = td.GetMaxBackground();
@@ -283,7 +281,6 @@ void CharControl::UpdateModel(Attachment *a)
 	  }
 
 	}
-	cd.maxFacialColor = 0;
 
 	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
@@ -395,7 +392,6 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 		cd.hairColor = npcrec.getUInt(NPCDB::HairColor);
 		cd.hairStyle = npcrec.getUInt(NPCDB::HairStyle);
 		cd.facialHair = npcrec.getUInt(NPCDB::FacialHair);
-		cd.facialColor = cd.hairColor;
 	} catch (...) {
 		wxLogMessage(wxT("Exception Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 	}
@@ -410,14 +406,12 @@ void CharControl::UpdateNPCModel(Attachment *a, size_t id)
 	spins[SPIN_HAIR_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
 	spins[SPIN_HAIR_STYLE]->SetRange(0, (int)cd.maxHairStyle-1);
 	spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)cd.maxFacialHair-1);
-	spins[SPIN_FACIAL_COLOR]->SetRange(0, (int)cd.maxHairColor-1);
 
 	spins[SPIN_SKIN_COLOR]->SetValue((int)cd.skinColor);
 	spins[SPIN_FACE_TYPE]->SetValue((int)cd.faceType);
 	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 
 	tabardSpins[SPIN_TABARD_ICON]->SetValue((int)td.Icon);
 	tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue((int)td.IconColor);
@@ -542,7 +536,6 @@ void CharControl::OnButton(wxCommandEvent &event)
 				spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 				spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 				spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-				//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.hairColor);
 				for (size_t i=0; i<NUM_SPIN_BTNS; i++) 
 					spins[i]->Refresh(false);
 			}
@@ -952,7 +945,6 @@ void CharControl::RefreshModel()
 	spins[SPIN_HAIR_COLOR]->SetValue((int)cd.hairColor);
 	spins[SPIN_HAIR_STYLE]->SetValue((int)cd.hairStyle);
 	spins[SPIN_FACIAL_HAIR]->SetValue((int)cd.facialHair);
-	//spins[SPIN_FACIAL_COLOR]->SetValue((int)cd.facialColor);
 */
 	/*
 	// Eye Glows
@@ -1050,7 +1042,7 @@ void CharControl::RefreshNPCModel()
 			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 1);
 
 			// facial hair
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FacialHairType, cd.facialHair, cd.facialColor, 0);
+			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FacialHairType, cd.facialHair, cd.hairColor, 0);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_FACE_LOWER, 2);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 2);
 		} 

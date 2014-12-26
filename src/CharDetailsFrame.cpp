@@ -24,7 +24,6 @@ BEGIN_EVENT_TABLE(CharDetailsFrame, wxWindow)
   EVT_SPIN(ID_HAIR_COLOR, CharDetailsFrame::onSpin)
   EVT_SPIN(ID_HAIR_STYLE, CharDetailsFrame::onSpin)
   EVT_SPIN(ID_FACIAL_HAIR, CharDetailsFrame::onSpin)
-  EVT_SPIN(ID_FACIAL_COLOR, CharDetailsFrame::onSpin)
 
   EVT_BUTTON(ID_CHAR_RANDOMISE, CharDetailsFrame::onRandomise)
 END_EVENT_TABLE()
@@ -50,7 +49,6 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   ADD_CONTROLS(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color"))
   ADD_CONTROLS(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style"))
   ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature"))
-  //ADD_CONTROLS(SPIN_FACIAL_COLOR, ID_FACIAL_COLOR, _("Facial color"))
   #undef ADD_CONTROLS
 
   gs->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Proportion(0).Expand());
@@ -127,13 +125,10 @@ void CharDetailsFrame::onSpin(wxSpinEvent &event)
     m_details.faceType = event.GetPosition();
   else if (event.GetId()==ID_HAIR_COLOR) {
     m_details.hairColor = event.GetPosition();
-    m_details.facialColor = event.GetPosition();
   } else if (event.GetId()==ID_HAIR_STYLE)
     m_details.hairStyle = event.GetPosition();
   else if (event.GetId()==ID_FACIAL_HAIR)
     m_details.facialHair = event.GetPosition();
-  //else if (event.GetId()==ID_FACIAL_COLOR)
-  //  cd.facialColor = event.GetPosition();
 
   for (size_t i=0; i<NUM_SPIN_BTNS; i++)
     spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
@@ -161,7 +156,6 @@ void CharDetailsFrame::randomiseChar()
   m_details.hairColor = randint(0, (int)m_details.maxHairColor-1);
   m_details.hairStyle = randint(0, (int)m_details.maxHairStyle-1);
   m_details.facialHair = randint(0, (int)m_details.maxFacialHair-1);
-  m_details.facialColor = m_details.hairColor;
 
   refresh();
 }

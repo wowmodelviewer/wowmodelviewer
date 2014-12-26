@@ -16,7 +16,6 @@ struct TabardDetails;
 struct CharDetails
 {
 	size_t skinColor, faceType, hairColor, hairStyle, facialHair;
-	size_t facialColor, maxFacialColor;
 	size_t maxHairStyle, maxHairColor, maxSkinColor, maxFaceType, maxFacialHair;
 
 	size_t race, gender;
