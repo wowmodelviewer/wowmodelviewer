@@ -1699,7 +1699,8 @@ void ModelViewer::LoadWoW()
 
   if(!CASCFOLDER.init(gamePath.c_str()))
   {
-    wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("Fatal Error: Could not load your World of Warcraft Data folder."), wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
+    wxString message =  wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), CASCFOLDER.lastError());
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
     dial->ShowModal();
     return;
   }

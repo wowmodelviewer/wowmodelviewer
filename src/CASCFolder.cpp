@@ -17,7 +17,7 @@
 #include "logger/Logger.h"
 
 CASCFolder::CASCFolder()
- : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder("")
+ : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
 {
 
 }
@@ -34,7 +34,8 @@ bool CASCFolder::init(const std::string &folder)
   // Open the storage directory
   if(!CascOpenStorage(m_folder.c_str(), 0, &hStorage))
   {
-    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << GetLastError();
+    m_openError = GetLastError();
+    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << m_openError;
     return false;
   }
   else

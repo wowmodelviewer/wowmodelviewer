@@ -40,7 +40,7 @@ class CASCFolder
     std::string version() { return m_version; }
     int CASCLocale() { return m_currentCascLocale; }
     std::string folder() { return m_folder; }
-
+    int lastError() { return m_openError; }
 
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2
@@ -62,6 +62,7 @@ class CASCFolder
     std::string m_version;
     int m_currentCascLocale;
     std::string m_folder;
+    int m_openError;
 
     static bool defaultFilterFunc(wxString) { return true; }
 };
