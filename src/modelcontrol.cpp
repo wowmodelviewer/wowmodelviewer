@@ -13,7 +13,7 @@
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)
-	EVT_CHECKLISTBOX(ID_MODEL_GEOSETS, ModelControl::OnList)
+  EVT_TREE_KEY_DOWN(ID_MODEL_GEOSETS, ModelControl::OnList)
 
 	EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
 	EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
@@ -52,50 +52,95 @@ END_EVENT_TABLE()
 //		- Attach model
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
+ : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 500), 0,  wxT("ModelControlFrame"))
 {
 	model = NULL;
 	att = NULL;
 
 	wxLogMessage(wxT("Creating Model Control..."));
 
-	if (Create(parent, id, wxDefaultPosition, wxSize(160,460), 0, wxT("ModelControlFrame")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create a window for our ModelControl!"));
-		return;
-	}
+	wxFlexGridSizer *top = new wxFlexGridSizer(1);
+	modelname = new wxComboBox(this, ID_MODEL_NAME);//, wxEmptyString, wxPoint(5,5), wxSize(150,16), 0, NULL, wxCB_READONLY);
+	top->Add(modelname, 1, wxEXPAND);
 
-	try {
-		modelname = new wxComboBox(this, ID_MODEL_NAME, wxEmptyString, wxPoint(5,5), wxSize(150,16), 0, NULL, wxCB_READONLY);
-		
-		lblLod = new wxStaticText(this, wxID_ANY, wxT("View"), wxPoint(5,25), wxDefaultSize);
-		cbLod = new wxComboBox(this, ID_MODEL_LOD, wxEmptyString, wxPoint(5,40), wxSize(120,16), 0, NULL, wxCB_READONLY, wxDefaultValidator, wxT("LOD")); //|wxCB_SORT); //wxPoint(66,10)
-		//cbLod->Enable(false);
+	lblLod = new wxStaticText(this, wxID_ANY, wxT("View"));//, wxPoint(5,25), wxDefaultSize);
+	cbLod = new wxComboBox(this, ID_MODEL_LOD); //, wxEmptyString, wxPoint(5,40), wxSize(120,16), 0, NULL, wxCB_READONLY, wxDefaultValidator, wxT("LOD")); //|wxCB_SORT); //wxPoint(66,10)
+	top->Add(lblLod, 1, wxEXPAND);
+	top->Add(cbLod, 1, wxEXPAND);
 
-		lblAlpha = new wxStaticText(this, wxID_ANY, wxT("Alpha"), wxPoint(5,65), wxDefaultSize);
-		alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100, wxPoint(45, 65), wxSize(110, 30), wxSL_HORIZONTAL);
-		
-		lblScale = new wxStaticText(this, wxID_ANY, wxT("Scale"), wxPoint(5,90), wxDefaultSize);
-		scale = new wxSlider(this, ID_MODEL_SCALE, 100, 10, 300, wxPoint(45, 90), wxSize(110, 30), wxSL_HORIZONTAL);
-		txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.0"), wxPoint(30, 115), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	lblAlpha = new wxStaticText(this, wxID_ANY, wxT("Alpha"));//, wxPoint(5,65), wxDefaultSize);
+	alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100);//, wxPoint(45, 65), wxSize(110, 30), wxSL_HORIZONTAL);
+	top->Add(lblAlpha, 1, wxEXPAND);
+	top->Add(alpha, 1, wxEXPAND);
 
-		bones = new wxCheckBox(this, ID_MODEL_BONES, wxT("Bones"), wxPoint(5, 140), wxDefaultSize);
-		box = new wxCheckBox(this, ID_MODEL_BOUNDS, wxT("Bounds"), wxPoint(5, 160), wxDefaultSize);
-		render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"), wxPoint(5, 180), wxDefaultSize);
-		wireframe = new wxCheckBox(this, ID_MODEL_WIREFRAME, wxT("Wireframe"), wxPoint(75, 140), wxDefaultSize);
-		texture = new wxCheckBox(this, ID_MODEL_TEXTURE, wxT("Texture"), wxPoint(75, 160), wxDefaultSize);
-		particles = new wxCheckBox(this, ID_MODEL_PARTICLES, wxT("Particles"), wxPoint(75, 180), wxDefaultSize);
+	lblScale = new wxStaticText(this, wxID_ANY, wxT("Scale"));//, wxPoint(5,90), wxDefaultSize);
+	scale = new wxSlider(this, ID_MODEL_SCALE, 100, 10, 300);//, wxPoint(45, 90), wxSize(110, 30), wxSL_HORIZONTAL);
+	top->Add(lblScale, 1, wxEXPAND);
+	top->Add(scale, 1, wxEXPAND);
 
-		lblGeosets = new wxStaticText(this, wxID_ANY, wxT("Show Geosets"), wxPoint(5,200), wxDefaultSize);
-		clbGeosets = new wxCheckListBox(this, ID_MODEL_GEOSETS, wxPoint(5, 215), wxSize(150,120), 0, NULL, 0, wxDefaultValidator, wxT("GeosetsList"));
-		
-		lblXYZ = new wxStaticText(this, wxID_ANY, wxT("X\nY\nZ"), wxPoint(2,345), wxSize(30,60));
-		txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"), wxPoint(30,345), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-		txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"), wxPoint(30,365), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-		txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"), wxPoint(30,385), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-		rotXYZ = new wxStaticText(this, wxID_ANY, wxT("rX\nrY\nrZ"), wxPoint(2,405), wxSize(30,60));
-		rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"), wxPoint(30,405), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-		rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"), wxPoint(30,425), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-		rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"), wxPoint(30,445), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
-	} catch(...) {};
+	txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.0"));//, wxPoint(30, 115), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	top->Add(txtsize, 1, wxEXPAND);
+
+	wxGridSizer * gbox = new wxGridSizer(2,3);
+	bones = new wxCheckBox(this, ID_MODEL_BONES, wxT("Bones"));//, wxPoint(5, 140), wxDefaultSize);
+	wireframe = new wxCheckBox(this, ID_MODEL_WIREFRAME, wxT("Wireframe"));//, wxPoint(75, 140), wxDefaultSize);
+	gbox->Add(bones);
+	gbox->Add(wireframe);
+	box = new wxCheckBox(this, ID_MODEL_BOUNDS, wxT("Bounds"));//, wxPoint(5, 160), wxDefaultSize);
+	texture = new wxCheckBox(this, ID_MODEL_TEXTURE, wxT("Texture"));//, wxPoint(75, 160), wxDefaultSize);
+	gbox->Add(box);
+	gbox->Add(texture);
+	render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"));//, wxPoint(5, 180), wxDefaultSize);
+	particles = new wxCheckBox(this, ID_MODEL_PARTICLES, wxT("Particles"));//, wxPoint(75, 180), wxDefaultSize);
+	gbox->Add(render);
+	gbox->Add(particles);
+	top->Add(gbox, 1, wxEXPAND);
+
+	lblGeosets = new wxStaticText(this, wxID_ANY, wxT("Show Geosets"));//, wxPoint(5,200), wxDefaultSize);
+	top->Add(lblGeosets, 1, wxEXPAND);
+
+	//clbGeosets = new wxCheckListBox(this, ID_MODEL_GEOSETS, wxPoint(5, 215), wxSize(150,120), 0, NULL, 0, wxDefaultValidator, wxT("GeosetsList"));
+	clbGeosets = new wxTreeCtrl (this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,220) );//, wxPoint(5, 215), wxSize(150,220));
+	top->Add(clbGeosets, 1, wxEXPAND);
+
+	wxBoxSizer * hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("X")));
+	txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"));//, wxPoint(30,445), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(txtX);
+	top->Add(hbox, 1, wxEXPAND);
+	hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("Y")));
+	txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"));//, wxPoint(30,465), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(txtY);
+	top->Add(hbox, 1, wxEXPAND);
+	hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("Z")));
+	txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"));//, wxPoint(30,485), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(txtZ);
+	top->Add(hbox, 1, wxEXPAND);
+	hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rX")));
+	rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"));//, wxPoint(30,505), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(rotX);
+	top->Add(hbox, 1, wxEXPAND);
+	hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rY")));
+	rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"));//, wxPoint(30,525), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(rotY);
+	top->Add(hbox, 1, wxEXPAND);
+	hbox = new wxBoxSizer(wxHORIZONTAL);
+	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rZ")));
+	rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"));//, wxPoint(30,545), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	hbox->Add(rotZ);
+	top->Add(hbox, 1, wxEXPAND);
+
+	top->SetSizeHints(this);
+	Show(true);
+	SetAutoLayout(true);
+	SetSizer(top);
+	Layout();
+	//vbox->SetSizeHints(this);
+
 }
 
 ModelControl::~ModelControl()
@@ -241,21 +286,37 @@ void ModelControl::Update()
 		 wxT("Pants"), wxT("Pants2"), wxT("Tarbard"), wxT("Trousers"), wxT("Tarbard2"),
 		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
 
-	for (size_t i=0; i<model->geosets.size(); i++) {
-		size_t mesh = model->geosets[i].id / 100;
+	std::map <size_t,wxTreeItemId> geosetGroupsMap;
+	clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
+	wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
+	for (size_t i=0; i<model->geosets.size(); i++)
+	{
+	/*	size_t mesh = model->geosets[i].id / 100;
 		if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
-			geosetItems.Add(wxString::Format(wxT("%i [%s, %i]"), i, meshes[mesh].c_str(), model->geosets[i].id % 100), 1);
+			geosetItems.Add(wxString::Format(wxT("%i [%s, %i, %i]"), i, meshes[mesh].c_str(), model->geosets[i].id % 100, model->geosets[i].id), 1);
 		else
 		{
-			geosetItems.Add(wxString::Format(wxT("%i [%i, %i]"), i, mesh, (model->geosets[i].id % 100)), 1);
+			geosetItems.Add(wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id ), 1);
 		}
+		*/
+	  size_t mesh = model->geosets[i].id / 100;
+	  if(geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
+	  {
+	    if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
+	      geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, meshes[mesh]);
+	    else
+	      geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, wxString::Format(wxT("%i"),mesh));
+	  }
+	  GeosetTreeItemData * data = new GeosetTreeItemData();
+	  data->geosetId = i;
+	  wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i"), model->geosets[i].id % 100),-1,-1,data);
+	  if(model->showGeosets[i] == true)
+	    clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
 	}
-	//geosets->InsertItems(items, 0);
-	clbGeosets->Set(geosetItems, 0);
 
-	for (size_t i=0; i<model->geosets.size(); i++) {
-		clbGeosets->Check((unsigned int)i, model->showGeosets[i]);
-	}
+//	for (size_t i=0; i<model->geosets.size(); i++) {
+//		clbGeosets->Check((unsigned int)i, model->showGeosets[i]);
+//	}
 
 	bones->SetValue(model->showBones);
 	box->SetValue(model->showBounds);
@@ -343,16 +404,27 @@ void ModelControl::OnCombo(wxCommandEvent &event)
 	}
 }
 
-void ModelControl::OnList(wxCommandEvent &event)
+void ModelControl::OnList(wxTreeEvent &event)
 {
 	if (!init || !model)
 		return;
 
 	int id = event.GetId();
-	if (id == ID_MODEL_GEOSETS) {
-		for (size_t i=0; i<model->geosets.size(); i++) {
-			model->showGeosets[i] = clbGeosets->IsChecked((unsigned int)i);
-		}
+
+	if (id == ID_MODEL_GEOSETS)
+	{
+	  wxTreeItemId curItem = clbGeosets->GetSelection();
+	  GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(curItem);
+	  if(data)
+	  {
+	    size_t geosetIndex = data->geosetId;
+	    model->showGeosets[geosetIndex] = !model->showGeosets[geosetIndex];
+	    clbGeosets->SetItemBackgroundColour(curItem, (model->showGeosets[geosetIndex])?*wxGREEN:*wxWHITE);
+	  }
+	  else
+	  {
+	    std::cout << "data is null !!!" << std::endl;
+	  }
 	}
 }
 

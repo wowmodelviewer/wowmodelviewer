@@ -2,6 +2,7 @@
 #define MODELCONTROL_H
 
 #include <wx/wxprec.h>
+#include <wx/treectrl.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
@@ -30,12 +31,18 @@ class ModelControl: public wxWindow
 {
 	DECLARE_CLASS(ModelControl)
 	DECLARE_EVENT_TABLE()
+	class GeosetTreeItemData : public wxTreeItemData
+	{
+	  public:
+	    size_t geosetId;
+	};
 	
 	wxComboBox *cbLod, *modelname;
 	wxSlider *alpha, *scale;
 	wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles;
-	wxCheckListBox *clbGeosets;
-	wxStaticText *lblGeosets, *lblLod, *lblScale, *lblAlpha, *lblXYZ, *rotXYZ;
+	//wxCheckListBox *clbGeosets;
+	wxTreeCtrl * clbGeosets;
+	wxStaticText *lblGeosets, *lblLod, *lblScale, *lblAlpha;
 	wxTextCtrl *txtX, *txtY, *txtZ;
 	wxTextCtrl *rotX, *rotY, *rotZ;
 	wxTextCtrl *txtsize;
@@ -43,7 +50,6 @@ class ModelControl: public wxWindow
 	// List of models in the scene.
 	//std::vector<Model*> models;
 	std::vector<Attachment*> attachments;
-
 	bool init;
 	
 public:
@@ -59,7 +65,7 @@ public:
 	void RefreshModel(Attachment *root);
 	void OnCheck(wxCommandEvent &event);
 	void OnCombo(wxCommandEvent &event);
-	void OnList(wxCommandEvent &event);
+	void OnList(wxTreeEvent &event);
 	void OnSlider(wxScrollEvent &event);
 	void OnEnter(wxCommandEvent &event);
 };
