@@ -13,7 +13,7 @@
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)
-  EVT_TREE_KEY_DOWN(ID_MODEL_GEOSETS, ModelControl::OnList)
+  EVT_TREE_ITEM_ACTIVATED(ID_MODEL_GEOSETS, ModelControl::OnList)
 
 	EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
 	EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
@@ -52,85 +52,80 @@ END_EVENT_TABLE()
 //		- Attach model
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
- : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 500), 0,  wxT("ModelControlFrame"))
+ : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0,  wxT("ModelControlFrame"))
 {
 	model = NULL;
 	att = NULL;
 
 	wxLogMessage(wxT("Creating Model Control..."));
 
-	wxFlexGridSizer *top = new wxFlexGridSizer(1);
-	modelname = new wxComboBox(this, ID_MODEL_NAME);//, wxEmptyString, wxPoint(5,5), wxSize(150,16), 0, NULL, wxCB_READONLY);
+	wxFlexGridSizer *top = new wxFlexGridSizer(1,3);
+	modelname = new wxComboBox(this, ID_MODEL_NAME);
 	top->Add(modelname, 1, wxEXPAND);
 
-	lblLod = new wxStaticText(this, wxID_ANY, wxT("View"));//, wxPoint(5,25), wxDefaultSize);
-	cbLod = new wxComboBox(this, ID_MODEL_LOD); //, wxEmptyString, wxPoint(5,40), wxSize(120,16), 0, NULL, wxCB_READONLY, wxDefaultValidator, wxT("LOD")); //|wxCB_SORT); //wxPoint(66,10)
-	top->Add(lblLod, 1, wxEXPAND);
+	cbLod = new wxComboBox(this, ID_MODEL_LOD);
+	top->Add(new wxStaticText(this, wxID_ANY, wxT("View")), 1, wxEXPAND);
 	top->Add(cbLod, 1, wxEXPAND);
 
-	lblAlpha = new wxStaticText(this, wxID_ANY, wxT("Alpha"));//, wxPoint(5,65), wxDefaultSize);
-	alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100);//, wxPoint(45, 65), wxSize(110, 30), wxSL_HORIZONTAL);
-	top->Add(lblAlpha, 1, wxEXPAND);
+	alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100);
+	top->Add(new wxStaticText(this, wxID_ANY, wxT("Alpha")), 1, wxEXPAND);
 	top->Add(alpha, 1, wxEXPAND);
 
-	lblScale = new wxStaticText(this, wxID_ANY, wxT("Scale"));//, wxPoint(5,90), wxDefaultSize);
-	scale = new wxSlider(this, ID_MODEL_SCALE, 100, 10, 300);//, wxPoint(45, 90), wxSize(110, 30), wxSL_HORIZONTAL);
-	top->Add(lblScale, 1, wxEXPAND);
+	scale = new wxSlider(this, ID_MODEL_SCALE, 100, 10, 300);
+	top->Add(new wxStaticText(this, wxID_ANY, wxT("Scale")), 1, wxEXPAND);
 	top->Add(scale, 1, wxEXPAND);
 
-	txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.0"));//, wxPoint(30, 115), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	txtsize = new wxTextCtrl(this, ID_MODEL_SIZE, wxT("1.0"));
 	top->Add(txtsize, 1, wxEXPAND);
 
 	wxGridSizer * gbox = new wxGridSizer(2,3);
-	bones = new wxCheckBox(this, ID_MODEL_BONES, wxT("Bones"));//, wxPoint(5, 140), wxDefaultSize);
-	wireframe = new wxCheckBox(this, ID_MODEL_WIREFRAME, wxT("Wireframe"));//, wxPoint(75, 140), wxDefaultSize);
+	bones = new wxCheckBox(this, ID_MODEL_BONES, wxT("Bones"));
+	wireframe = new wxCheckBox(this, ID_MODEL_WIREFRAME, wxT("Wireframe"));
 	gbox->Add(bones);
 	gbox->Add(wireframe);
-	box = new wxCheckBox(this, ID_MODEL_BOUNDS, wxT("Bounds"));//, wxPoint(5, 160), wxDefaultSize);
-	texture = new wxCheckBox(this, ID_MODEL_TEXTURE, wxT("Texture"));//, wxPoint(75, 160), wxDefaultSize);
+	box = new wxCheckBox(this, ID_MODEL_BOUNDS, wxT("Bounds"));
+	texture = new wxCheckBox(this, ID_MODEL_TEXTURE, wxT("Texture"));
 	gbox->Add(box);
 	gbox->Add(texture);
-	render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"));//, wxPoint(5, 180), wxDefaultSize);
-	particles = new wxCheckBox(this, ID_MODEL_PARTICLES, wxT("Particles"));//, wxPoint(75, 180), wxDefaultSize);
+	render = new wxCheckBox(this, ID_MODEL_RENDER, wxT("Render"));
+	particles = new wxCheckBox(this, ID_MODEL_PARTICLES, wxT("Particles"));
 	gbox->Add(render);
 	gbox->Add(particles);
 	top->Add(gbox, 1, wxEXPAND);
 
-	lblGeosets = new wxStaticText(this, wxID_ANY, wxT("Show Geosets"));//, wxPoint(5,200), wxDefaultSize);
-	top->Add(lblGeosets, 1, wxEXPAND);
+	top->Add(new wxStaticText(this, wxID_ANY, wxT("Double click to toggle on/off")), 1, wxEXPAND);
 
-	//clbGeosets = new wxCheckListBox(this, ID_MODEL_GEOSETS, wxPoint(5, 215), wxSize(150,120), 0, NULL, 0, wxDefaultValidator, wxT("GeosetsList"));
-	clbGeosets = new wxTreeCtrl (this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,220) );//, wxPoint(5, 215), wxSize(150,220));
+	clbGeosets = new wxTreeCtrl(this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,220));
 	top->Add(clbGeosets, 1, wxEXPAND);
 
 	wxBoxSizer * hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("X")));
-	txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"));//, wxPoint(30,445), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"));
 	hbox->Add(txtX);
 	top->Add(hbox, 1, wxEXPAND);
 	hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("Y")));
-	txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"));//, wxPoint(30,465), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"));
 	hbox->Add(txtY);
 	top->Add(hbox, 1, wxEXPAND);
 	hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("Z")));
-	txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"));//, wxPoint(30,485), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"));
 	hbox->Add(txtZ);
 	top->Add(hbox, 1, wxEXPAND);
 	hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rX")));
-	rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"));//, wxPoint(30,505), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"));
 	hbox->Add(rotX);
 	top->Add(hbox, 1, wxEXPAND);
 	hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rY")));
-	rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"));//, wxPoint(30,525), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"));
 	hbox->Add(rotY);
 	top->Add(hbox, 1, wxEXPAND);
 	hbox = new wxBoxSizer(wxHORIZONTAL);
 	hbox->Add(new wxStaticText(this, wxID_ANY, wxT("rZ")));
-	rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"));//, wxPoint(30,545), wxDefaultSize, wxTE_PROCESS_ENTER, wxDefaultValidator);
+	rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"));
 	hbox->Add(rotZ);
 	top->Add(hbox, 1, wxEXPAND);
 
@@ -139,7 +134,6 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 	SetAutoLayout(true);
 	SetSizer(top);
 	Layout();
-	//vbox->SetSizeHints(this);
 
 }
 
@@ -162,7 +156,6 @@ ModelControl::~ModelControl()
 	rotX->Destroy();
 	rotY->Destroy();
 	rotZ->Destroy();
-	txtsize->Destroy();
 }
 
 // Iterates through all the models counting and creating a list
@@ -287,6 +280,7 @@ void ModelControl::Update()
 		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
 
 	std::map <size_t,wxTreeItemId> geosetGroupsMap;
+	clbGeosets->DeleteAllItems();
 	clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
 	wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
 	for (size_t i=0; i<model->geosets.size(); i++)
@@ -309,7 +303,7 @@ void ModelControl::Update()
 	  }
 	  GeosetTreeItemData * data = new GeosetTreeItemData();
 	  data->geosetId = i;
-	  wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i"), model->geosets[i].id % 100),-1,-1,data);
+	  wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id ),-1,-1,data);
 	  if(model->showGeosets[i] == true)
 	    clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
 	}

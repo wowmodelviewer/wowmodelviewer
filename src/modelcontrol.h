@@ -41,8 +41,7 @@ class ModelControl: public wxWindow
 	wxSlider *alpha, *scale;
 	wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles;
 	//wxCheckListBox *clbGeosets;
-	wxTreeCtrl * clbGeosets;
-	wxStaticText *lblGeosets, *lblLod, *lblScale, *lblAlpha;
+	wxTreeCtrl *clbGeosets;
 	wxTextCtrl *txtX, *txtY, *txtZ;
 	wxTextCtrl *rotX, *rotY, *rotZ;
 	wxTextCtrl *txtsize;
