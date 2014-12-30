@@ -39,7 +39,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   top->AddGrowableCol(0);
 
   wxGridSizer *gs = new wxGridSizer(3);
-
+  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(200,20), wxALIGN_CENTER), wxSizerFlags().Border(wxBOTTOM, 5));
   #define ADD_CONTROLS(type, id, caption) \
 		gs->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
 		gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
@@ -53,7 +53,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   #undef ADD_CONTROLS
 
   top->Add(gs,wxEXPAND);
-  top->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER));
+  top->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);

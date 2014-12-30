@@ -121,13 +121,13 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 		labels[i] = NULL;
 	}
 	
-	top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200,20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 10));
+	top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200,20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 5));
 	wxFlexGridSizer *gs2 = new wxFlexGridSizer(2, 5, 5);
 	gs2->AddGrowableCol(1);
 
 	#define ADD_CONTROLS(type, caption) \
 	gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
-	gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----")), wxSizerFlags().Proportion(1).Expand().Align(wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 10));
+	gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----")), wxSizerFlags().Proportion(1).Expand().Align(wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 	
 	ADD_CONTROLS(CS_HEAD, _("Head"))
 	//ADD_CONTROLS(CS_NECK, wxT("Neck"))
@@ -169,7 +169,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
 	top->Add(new wxStaticText(this, -1, _("Tabard details")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxALL, 1));
 	top->Add(gs3, wxEXPAND);
-	top->Add(new wxButton(this, ID_MOUNT, _("Choose mount")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxTOP, 15));
+	top->Add(new wxButton(this, ID_MOUNT, _("Choose mount")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxTOP, 5));
 
 	//p->SetSizer(top);
 	
@@ -606,6 +606,13 @@ void CharControl::RefreshModel()
 	  tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 1);
 	}
 
+	// facial hair
+	textures = getTextureNameForSection(model->isHD?CharSectionsDB::FacialHairHDType:CharSectionsDB::FacialHairType);
+	if(textures.size() != 0)
+	{
+	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 2);
+	}
+
   // select hairstyle geoset(s)
 	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
 	                  .arg(infos.raceid)
@@ -640,7 +647,7 @@ void CharControl::RefreshModel()
   }
 
   // select hairstyle geoset(s)
-  query = QString("SELECT GeoSet1,GeoSet2,GeoSet3 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+  query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
                           .arg(cd.facialHair);
@@ -651,11 +658,13 @@ void CharControl::RefreshModel()
   {
     LOG_INFO << "Facial GeoSets : " << atoi(facialHairStyle.values[0][0].c_str())
         << " " << atoi(facialHairStyle.values[0][1].c_str())
-        << " " << atoi(facialHairStyle.values[0][2].c_str());
+        << " " << atoi(facialHairStyle.values[0][2].c_str())
+        << " " << atoi(facialHairStyle.values[0][3].c_str())
+        << " " << atoi(facialHairStyle.values[0][4].c_str());
 
     cd.geosets[CG_GEOSET100] = atoi(facialHairStyle.values[0][0].c_str());
-    cd.geosets[CG_GEOSET200] = atoi(facialHairStyle.values[0][1].c_str());
-    cd.geosets[CG_GEOSET300] = atoi(facialHairStyle.values[0][2].c_str());
+    cd.geosets[CG_GEOSET200] = atoi(facialHairStyle.values[0][2].c_str());
+    cd.geosets[CG_GEOSET300] = atoi(facialHairStyle.values[0][1].c_str());
   }
   else
   {
@@ -2671,6 +2680,16 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
               .arg(cd.hairColor)
               .arg(type);
       break;
+    case CharSectionsDB::FacialHairType:
+    case CharSectionsDB::FacialHairHDType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+                  (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(cd.facialHair)
+                  .arg(cd.hairColor)
+                  .arg(type);
+      break;
     default:
       query = "";
   }
@@ -2709,14 +2728,14 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
   {
     case CharSectionsDB::SkinType:
     case CharSectionsDB::SkinHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3 AND Flags=17")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(type);
       break;
     case CharSectionsDB::FaceType:
     case CharSectionsDB::FaceHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4 AND Flags=1")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.skinColor)
@@ -2724,7 +2743,7 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
       break;
     case CharSectionsDB::HairType:
     case CharSectionsDB::HairHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
+      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4 AND Flags=17")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(cd.hairStyle)

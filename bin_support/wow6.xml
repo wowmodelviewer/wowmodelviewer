@@ -292,6 +292,7 @@
     <field type="uint" name="VariationID" />
     <field type="uint" name="VariationType" />
     <field type="uint" name="GeoSetID" />
+    <field type="uint" name="GeoSetType" />
     <field type="uint" name="ShowScalp" />
     <field type="uint" name="ColorIndex" />
   </CharHairGeoSets>

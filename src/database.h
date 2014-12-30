@@ -167,15 +167,15 @@ public:
 	/// Types
 	enum SectionType{
 		SkinType = 0,
-		FaceType,
-		FacialHairType,
-		HairType,
-		UnderwearType,
-		SkinHDType,
-		FaceHDType,
-		FacialHairHDType,
-		HairHDType,
-		UnderwearHDType
+		FaceType = 1,
+		FacialHairType = 2,
+		HairType = 3,
+		UnderwearType = 4,
+		SkinHDType = 5,
+		FaceHDType = 6,
+		FacialHairHDType = 7,
+		HairHDType = 8,
+		UnderwearHDType = 9
 	};
 	/*
 	static const size_t SkinType = 0;
