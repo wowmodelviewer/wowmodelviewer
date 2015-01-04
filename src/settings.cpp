@@ -4,6 +4,8 @@
 #include "util.h"
 #include "app.h"
 
+#include "CASCFolder.h"
+
 #include "globalvars.h"
 
 IMPLEMENT_CLASS(Settings_Page1, wxWindow)
@@ -12,16 +14,14 @@ IMPLEMENT_CLASS(SettingsControl, wxWindow)
 
 BEGIN_EVENT_TABLE(Settings_Page1, wxWindow)
 	EVT_CHECKBOX(ID_SETTINGS_RANDOMSKIN, Settings_Page1::OnCheck)
-	EVT_CHECKBOX(ID_SETTINGS_HIDEHELMET, Settings_Page1::OnCheck)
 	EVT_CHECKBOX(ID_SETTINGS_SHOWPARTICLE, Settings_Page1::OnCheck)
 	EVT_CHECKBOX(ID_SETTINGS_ZEROPARTICLE, Settings_Page1::OnCheck)
-	EVT_CHECKBOX(ID_SETTINGS_LOCALFILES, Settings_Page1::OnCheck)
-	EVT_CHECKBOX(ID_SETTINGS_ALTERNATE, Settings_Page1::OnCheck)
+	EVT_BUTTON(ID_SETTINGS_PAGE1_APPLY, Settings_Page1::OnButton)
 END_EVENT_TABLE()
 
 
 BEGIN_EVENT_TABLE(Settings_Page2, wxWindow)
-	EVT_BUTTON(ID_SETTINGS_APPLY, Settings_Page2::OnButton)
+	EVT_BUTTON(ID_SETTINGS_PAGE2_APPLY, Settings_Page2::OnButton)
 END_EVENT_TABLE()
 
 
@@ -38,8 +38,12 @@ Settings_Page1::Settings_Page1(wxWindow* parent, wxWindowID id)
 	}
 
 	chkbox[CHECK_SHOWPARTICLE] = new wxCheckBox(this, ID_SETTINGS_SHOWPARTICLE, _("Show Particle"), wxPoint(5,50), wxDefaultSize, 0);
-	chkbox[CHECK_ZEROPARTICLE] = new wxCheckBox(this, ID_SETTINGS_ZEROPARTICLE, _("Zero Particle"), wxPoint(5,75), wxDefaultSize, 0);
-	chkbox[CHECK_RANDOMSKIN] = new wxCheckBox(this, ID_SETTINGS_RANDOMSKIN, _("Random Skins"), wxPoint(150,50), wxDefaultSize, 0);
+	chkbox[CHECK_ZEROPARTICLE] = new wxCheckBox(this, ID_SETTINGS_ZEROPARTICLE, _("Zero Particle"), wxPoint(145,50), wxDefaultSize, 0);
+	chkbox[CHECK_RANDOMSKIN] = new wxCheckBox(this, ID_SETTINGS_RANDOMSKIN, _("Random Skins"), wxPoint(285,50), wxDefaultSize, 0);
+
+	new wxStaticText(this, wxID_ANY, _("Game path (including final \\Data statement - ie C:\\Games\\WoW\\Data)"),  wxPoint(5,90), wxDefaultSize, 0);
+  gamePathCtrl =  new wxTextCtrl(this, wxID_ANY, gamePath, wxPoint(5,115), wxSize(300,-1), 0);
+  new wxButton(this, ID_SETTINGS_PAGE1_APPLY, _("Apply"), wxPoint(315,110), wxDefaultSize, 0);
 }
 
 
@@ -61,6 +65,20 @@ void Settings_Page1::Update()
 	chkbox[CHECK_RANDOMSKIN]->SetValue(useRandomLooks);
 	chkbox[CHECK_SHOWPARTICLE]->SetValue(bShowParticle);
 	chkbox[CHECK_ZEROPARTICLE]->SetValue(bZeroParticle);
+	gamePathCtrl->SetValue(gamePath);
+}
+
+void Settings_Page1::OnButton(wxCommandEvent &event)
+{
+  if ( event.GetId() == ID_SETTINGS_PAGE1_APPLY)
+  {
+    if(std::string(gamePath.mb_str()) != CASCFOLDER.folder())
+    {
+      gamePath = gamePathCtrl->GetValue();
+      wxMessageBox(wxT("WoW Game Path changed.\nYou need to restart WoW Model Viewer to take it into account"), wxT("Settings Changed"), wxICON_INFORMATION);
+      g_modelViewer->SaveSession();
+    }
+  }
 }
 
 Settings_Page2::Settings_Page2(wxWindow* parent, wxWindowID id)
@@ -100,7 +118,7 @@ Settings_Page2::Settings_Page2(wxWindow* parent, wxWindowID id)
 
 	top->Add(gs,wxSizerFlags().Proportion(1).Expand().Border(wxALL, 10));
 
-	top->Add(new wxButton(this, ID_SETTINGS_APPLY, _("Apply Settings"), wxDefaultPosition, wxDefaultSize, 0), wxSizerFlags()/*.Expand()*/.Border(wxALL, 10).Align(wxALIGN_LEFT|wxALIGN_BOTTOM));
+	top->Add(new wxButton(this, ID_SETTINGS_PAGE2_APPLY, _("Apply Settings"), wxDefaultPosition, wxDefaultSize, 0), wxSizerFlags()/*.Expand()*/.Border(wxALL, 10).Align(wxALIGN_LEFT|wxALIGN_BOTTOM));
 	
 	top->SetMinSize(350, 350);
 	//top->SetMaxSize(400, 400);
@@ -200,7 +218,7 @@ void Settings_Page2::OnButton(wxCommandEvent &event)
 {
 	int id = event.GetId();
 	
-	if (id == ID_SETTINGS_APPLY) {
+	if (id == ID_SETTINGS_PAGE2_APPLY) {
 		if ((oglMode->GetSelection() != video.capIndex) && video.GetCompatibleWinMode(video.capsList[oglMode->GetSelection()])) {
 			wxLogMessage(wxT("Info: Graphics display mode changed.  Requires restart to take effect."));
 			wxMessageBox(wxT("Graphics display settings changed.\nWoW Model Viewer requires restarting to take effect."), wxT("Settings Changed"), wxICON_INFORMATION);
