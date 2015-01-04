@@ -23,6 +23,7 @@
 #include "modelcanvas.h"
 #include "TabardDetails.h"
 
+#include "metaclasses/Observer.h"
 
 // forward class declarations
 class ChoiceDialog;
@@ -40,7 +41,7 @@ class RaceInfos
 };
 
 
-class CharControl: public wxWindow
+class CharControl: public wxWindow, public Observer
 {
 	DECLARE_CLASS(CharControl)
     DECLARE_EVENT_TABLE()
@@ -56,6 +57,8 @@ class CharControl: public wxWindow
 
 	static std::map< std::string, RaceInfos> RACES;
 	bool getRaceInfosForCurrentModel(RaceInfos &);
+
+	void onEvent(Event *);
 
 public:
 	// Item selection stuff

@@ -1933,7 +1933,7 @@ void ModelViewer::SaveChar(wxString fn)
 #endif
 	f << canvas->model->name << endl;
 	f << charControl->cd.race << " " << charControl->cd.gender << endl;
-	f << charControl->cd.skinColor << " " << charControl->cd.faceType << " " << charControl->cd.hairColor << " " << charControl->cd.hairStyle << " " << charControl->cd.facialHair << " " << charControl->cd.eyeGlowType << endl;
+	f << charControl->cd.skinColor() << " " << charControl->cd.faceType() << " " << charControl->cd.hairColor() << " " << charControl->cd.hairStyle() << " " << charControl->cd.facialHair() << " " << charControl->cd.eyeGlowType << endl;
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f << charControl->cd.equipment[i] << endl;
 	}
@@ -1976,7 +1976,8 @@ void ModelViewer::LoadChar(wxString fn)
 	canvas->model->modelType = MT_CHAR;
 
 	f >> charControl->cd.race >> charControl->cd.gender; // race and gender
-	f >> charControl->cd.skinColor >> charControl->cd.faceType >> charControl->cd.hairColor >> charControl->cd.hairStyle >> charControl->cd.facialHair;
+	// @ TODO : to repair
+	//f >> charControl->cd.skinColor >> charControl->cd.faceType >> charControl->cd.hairColor >> charControl->cd.hairStyle >> charControl->cd.facialHair;
 	
 	// If Eyeglow is in char file...
 	if (f.peek() != wxT('\n')){

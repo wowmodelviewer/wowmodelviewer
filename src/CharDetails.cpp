@@ -10,6 +10,12 @@
 #include "TabardDetails.h"
 #include "util.h" // correctType
 
+#include "CharDetailsEvent.h"
+#include "GameDatabase.h"
+#include "globalvars.h"
+#include "logger/Logger.h"
+#include "modelviewer.h"
+
 #include <wx/wfstream.h>
 
 void CharDetails::save(wxString fn, TabardDetails *td)
@@ -21,7 +27,7 @@ void CharDetails::save(wxString fn, TabardDetails *td)
 	if (!output.IsOk())
 		return;
 	f << (int)race << wxT(" ") << (int)gender << endl;
-	f << (int)skinColor << wxT(" ") << (int)faceType << wxT(" ") << (int)hairColor << wxT(" ") << (int)hairStyle << wxT(" ") << (int)facialHair << endl;
+	f << (int)m_skinColor << wxT(" ") << (int)m_faceType << wxT(" ") << (int)m_hairColor << wxT(" ") << (int)m_hairStyle << wxT(" ") << (int)m_facialHair << endl;
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f << equipment[i] << endl;
 	}
@@ -51,7 +57,7 @@ bool CharDetails::load(wxString fn, TabardDetails *td)
 
 	if (r==race && g==gender) {
 #if defined _WINDOWS
-		f >> skinColor >> faceType >> hairColor >> hairStyle >> facialHair;
+		f >> m_skinColor >> m_faceType >> m_hairColor >> m_hairStyle >> m_facialHair;
 #endif
 		same = true;
 	} else {
@@ -95,7 +101,7 @@ void CharDetails::loadSet(ItemSetDB &sets, ItemDatabase &items, int setid)
 				}
 			}
 		}
-	} catch (ItemSetDB::NotFound) {}
+	} catch (ItemSetDB::NotFound &) {}
 }
 
 void CharDetails::loadStart(StartOutfitDB &start, ItemDatabase &items, int setid)
@@ -116,16 +122,16 @@ void CharDetails::loadStart(StartOutfitDB &start, ItemDatabase &items, int setid
 				}
 			}
 		}
-	} catch (ItemSetDB::NotFound) {}
+	} catch (ItemSetDB::NotFound &) {}
 }
 
 void CharDetails::reset()
 {
-	skinColor = 0;
-	faceType = 0;
-	hairColor = 0;
-	hairStyle = 0;
-	facialHair = 0;
+	m_skinColor = 0;
+	m_faceType = 0;
+	m_hairColor = 0;
+	m_hairStyle = 0;
+	m_facialHair = 0;
 
 	showUnderwear = true;
 	showHair = true;
@@ -138,26 +144,103 @@ void CharDetails::reset()
 	}
 }
 
-void CharDetails::print()
+void CharDetails::setSkinColor(size_t val)
 {
-	std::cout << "CharDetails::print()" << std::endl;
-	std::cout << "skinColor = " << skinColor << std::endl;
-	std::cout << "faceType = " << faceType << std::endl;
-	std::cout << "hairColor = " << hairColor << std::endl;
-	std::cout << "hairStyle = " << hairStyle << std::endl;
-	std::cout << "facialHair = " << facialHair << std::endl;
-	std::cout << "maxHairStyle = " << maxHairColor << std::endl;
-	std::cout << "maxHairColor = " << maxHairColor << std::endl;
-	std::cout << "maxSkinColor = " << maxSkinColor << std::endl;
-	std::cout << "maxFaceType = " << maxFaceType << std::endl;
-	std::cout << "maxFacialHair = " << maxFacialHair << std::endl;
-	std::cout << "race = " << race << std::endl;
-	std::cout << "gender = " << gender << std::endl;
-	std::cout << "useNPC = " << useNPC << std::endl;
-	std::cout << "eyeGlowType = " << eyeGlowType << std::endl;
-	std::cout << "showUnderwear = " << showUnderwear << std::endl;
-	std::cout << "showEars = " << showEars << std::endl;
-	std::cout << "showHair = " << showHair << std::endl;
-	std::cout << "showFacialHair = " << showFacialHair << std::endl;
-	std::cout << "showFeet = " << showFeet << std::endl;
+  if(val != m_skinColor)
+  {
+    m_skinColor = val;
+    updateMaxValues();
+    CharDetailsEvent event(this, CharDetailsEvent::SKINCOLOR_CHANGED);
+    notify(event);
+  }
 }
+
+void CharDetails::setFaceType(size_t val)
+{
+  if(val != m_faceType)
+  {
+    m_faceType = val;
+    updateMaxValues();
+    CharDetailsEvent event(this, CharDetailsEvent::FACETYPE_CHANGED);
+    notify(event);
+  }
+}
+
+void CharDetails::setHairColor(size_t val)
+{
+  if(val != m_hairColor)
+  {
+    m_hairColor = val;
+    updateMaxValues();
+    CharDetailsEvent event(this, CharDetailsEvent::HAIRCOLOR_CHANGED);
+    notify(event);
+  }
+}
+
+void CharDetails::setHairStyle(size_t val)
+{
+  if(val != m_hairStyle)
+  {
+    m_hairStyle = val;
+    updateMaxValues();
+    CharDetailsEvent event(this, CharDetailsEvent::HAIRSTYLE_CHANGED);
+    notify(event);
+  }
+}
+
+void CharDetails::setFacialHair(size_t val)
+{
+  if(val != m_facialHair)
+  {
+    m_facialHair = val;
+    updateMaxValues();
+    CharDetailsEvent event(this, CharDetailsEvent::FACIALHAIR_CHANGED);
+    notify(event);
+  }
+}
+
+void CharDetails::updateMaxValues()
+{
+  m_faceTypeMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
+  m_skinColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
+  m_hairColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
+
+  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
+                        .arg(race)
+                        .arg(gender);
+
+  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(hairStyles.valid && !hairStyles.values.empty())
+  {
+    m_hairStyleMax = atoi(hairStyles.values[0][0].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of hair styles for model" << g_canvas->model->name.c_str();
+    m_hairStyleMax = 0;
+  }
+
+
+  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
+                            .arg(race)
+                            .arg(gender);
+
+  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+  if(facialHairStyles.valid && !facialHairStyles.values.empty())
+  {
+    m_facialHairMax = atoi(facialHairStyles.values[0][0].c_str());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of facial hair styles for model" << g_canvas->model->name.c_str();
+    m_facialHairMax = 0;
+  }
+
+  if (m_faceTypeMax == 0) m_faceTypeMax = 1;
+  if (m_skinColorMax == 0) m_skinColorMax = 1;
+  if (m_hairColorMax == 0) m_hairColorMax = 1;
+  if (m_hairStyleMax == 0) m_hairStyleMax = 1;
+  if (m_facialHairMax == 0) m_facialHairMax = 1;
+}
+

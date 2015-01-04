@@ -14,6 +14,8 @@
 
 #include "CharDetails.h"
 
+#include "metaclasses/Observer.h"
+
 enum {
   SPIN_SKIN_COLOR,
   SPIN_FACE_TYPE,
@@ -31,13 +33,17 @@ enum {
   ID_CHAR_RANDOMISE,
 };
 
-class CharDetailsFrame : public wxWindow
+class CharDetailsFrame : public wxWindow, public Observer
 {
   public:
     CharDetailsFrame(wxWindow* parent, CharDetails &);
 
     void refresh();
     void randomiseChar();
+
+
+  protected:
+
 
   private:
     DECLARE_CLASS(CharDetailsFrame)
@@ -48,6 +54,8 @@ class CharDetailsFrame : public wxWindow
 
     void onSpin(wxSpinEvent &event);
     void onRandomise(wxCommandEvent &event);
+
+    virtual void onEvent(Event *);
 
     CharDetails & m_details;
 };

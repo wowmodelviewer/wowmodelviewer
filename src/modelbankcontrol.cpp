@@ -89,12 +89,12 @@ void ModelBankControl::LoadModel()
 		return;
 
 	if (cd.modelType==MT_CHAR && g_charControl) {
-		g_charControl->cd.faceType = cd.faceType;
-		g_charControl->cd.facialHair = cd.facialHair;
+		g_charControl->cd.setFaceType(cd.faceType);
+		g_charControl->cd.setFacialHair(cd.facialHair);
 		g_charControl->cd.gender = cd.gender;
-		g_charControl->cd.hairColor = cd.hairColor;
-		g_charControl->cd.hairStyle = cd.hairStyle;
-		g_charControl->cd.skinColor = cd.skinColor;
+		g_charControl->cd.setHairColor(cd.hairColor);
+		g_charControl->cd.setHairStyle(cd.hairStyle);
+		g_charControl->cd.setSkinColor(cd.skinColor);
 		g_charControl->cd.race = cd.race;
 
 		g_charControl->cd.showEars = cd.showEars;
@@ -153,21 +153,19 @@ void ModelBankControl::AddModel()
 		for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
 			cd.equipment[i] = g_charControl->cd.equipment[i];
 
-		cd.faceType = g_charControl->cd.faceType;
-		cd.facialHair = g_charControl->cd.facialHair;
+		cd.faceType = g_charControl->cd.faceType();
+		cd.facialHair = g_charControl->cd.facialHair();
 		cd.gender = g_charControl->cd.gender;
-		cd.hairColor = g_charControl->cd.hairColor;
-		cd.hairStyle = g_charControl->cd.hairStyle;
+		cd.hairColor = g_charControl->cd.hairColor();
+		cd.hairStyle = g_charControl->cd.hairStyle();
 		cd.race = g_charControl->cd.race;
-		cd.skinColor = g_charControl->cd.skinColor;
+		cd.skinColor = g_charControl->cd.skinColor();
 
 		cd.showEars = g_charControl->cd.showEars;
 		cd.showFacialHair = g_charControl->cd.showFacialHair;
 		cd.showFeet = g_charControl->cd.showFeet;
 		cd.showHair = g_charControl->cd.showHair;
 		cd.showUnderwear = g_charControl->cd.showUnderwear;
-
-		cd.useNPC = g_charControl->cd.useNPC;
 
 	} else if (cd.modelType == MT_WMO) {
 	
@@ -212,6 +210,7 @@ void ModelBankControl::UpdateList()
 
 void ModelBankControl::SaveList()
 {
+  /*
 	if (bankList.size() == 0)
 		return;
 
@@ -294,10 +293,12 @@ void ModelBankControl::SaveList()
 	}
 
 	file.Close();
+	*/
 }
 
 void ModelBankControl::LoadList()
 {
+  /*
 	if (!wxFile::Exists(wxT("modelbank.dat")))
 		return;
 
@@ -397,6 +398,7 @@ void ModelBankControl::LoadList()
 	}
 
 	UpdateList();
+	*/
 }
 
 // --

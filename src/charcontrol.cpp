@@ -183,6 +183,8 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	itemDialog = 0;
 	model = 0;
 	charAtt = 0;
+
+	cd.attach(this);
 }
 
 CharControl::~CharControl()
@@ -202,7 +204,6 @@ bool CharControl::Init()
 	td.showCustom = false;
 	bSheathe = false;
 
-	cd.useNPC = 0;
 	cd.showEars = true;
 	cd.showHair = true;
 	cd.showFacialHair = true;
@@ -617,7 +618,7 @@ void CharControl::RefreshModel()
 	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
 	                  .arg(infos.raceid)
 	                  .arg(infos.sexid)
-	                  .arg(cd.hairStyle);
+	                  .arg(cd.hairStyle());
 
 	sqlResult hairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
 
@@ -629,13 +630,13 @@ void CharControl::RefreshModel()
 	  for (size_t j=0; j<model->geosets.size(); j++) {
 	    if (model->geosets[j].id == geosetId)
 	      model->showGeosets[j] = showHair;
-	    else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.maxHairStyle+1))
+	    else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.hairStyleMax()+1))
 	      model->showGeosets[j] = false;
 	  }
 	}
 	else
 	{
-	  LOG_ERROR << "Unable to collect number of hair style" << cd.hairStyle << "for model" << model->name.c_str();
+	  LOG_ERROR << "Unable to collect number of hair style" << cd.hairStyle() << "for model" << model->name.c_str();
 	}
 
   // Hair texture
@@ -650,7 +651,7 @@ void CharControl::RefreshModel()
   query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
-                          .arg(cd.facialHair);
+                          .arg(cd.facialHair());
 
   sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
 
@@ -668,7 +669,7 @@ void CharControl::RefreshModel()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair << "for model" << model->name.c_str();
+    LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair() << "for model" << model->name.c_str();
   }
 
 
@@ -975,11 +976,11 @@ void CharControl::RefreshNPCModel()
 	CharSectionsDB::Record rec = chardb.getRecord(0);
 	// It is VITAL that this record can be retrieved to display the NPC
 	try {
-		rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::SkinType, 0, cd.skinColor, cd.useNPC);
+		rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::SkinType, 0, cd.skinColor(), /*cd.useNPC*/ 0);
 	} catch (...) {
 		wxLogMessage(wxT("DBC Error: %s : line #%i : %s\n\tAttempting to use character base colour."), __FILE__, __LINE__, __FUNCTION__);
 		try {
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::SkinType, 0, 0, cd.useNPC);
+			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::SkinType, 0, 0, /* cd.useNPC */ 0);
 		} catch (...) {
 			wxLogMessage(wxT("Exception Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
 			return;
@@ -997,18 +998,18 @@ void CharControl::RefreshNPCModel()
 			//UpdateTextureList(baseTexName, TEXTURE_BODY);
 
 			if (cd.showUnderwear) {
-				rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::UnderwearType, 0, cd.skinColor, cd.useNPC);
+				rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::UnderwearType, 0, cd.skinColor(), /* cd.useNPC */ 0);
 				tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_PELVIS_UPPER, 1); // panties
 				tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_PELVIS_UPPER, 1); // panties
 			}
 
 			// face
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FaceType, cd.faceType, cd.skinColor, cd.useNPC);
+			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FaceType, cd.faceType(), cd.skinColor(), /* cd.useNPC */ 0);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_FACE_LOWER, 1);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 1);
 
 			// facial hair
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FacialHairType, cd.facialHair, cd.hairColor, 0);
+			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::FacialHairType, cd.facialHair(), cd.hairColor(), 0);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex1), CR_FACE_LOWER, 2);
 			tex.addLayer(rec.getString(CharSectionsDB::Tex2), CR_FACE_UPPER, 2);
 		} 
@@ -1026,12 +1027,12 @@ void CharControl::RefreshNPCModel()
 
 	// hair
 	try {
-		CharSectionsDB::Record rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::HairType, cd.hairStyle, cd.hairColor, cd.useNPC);
+		CharSectionsDB::Record rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::HairType, cd.hairStyle(), cd.hairColor(), /*cd.useNPC*/ 0);
 		wxString hairTexfn = rec.getString(CharSectionsDB::Tex1);
 		if (!hairTexfn.IsEmpty()) {
 			hairTex = texturemanager.add(hairTexfn);
 		} else {
-			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::HairType, 1, cd.hairColor, cd.useNPC);
+			rec = chardb.getByParams(cd.race, cd.gender, CharSectionsDB::HairType, 1, cd.hairColor(), /*cd.useNPC*/ 0);
 			hairTexfn = rec.getString(CharSectionsDB::Tex1);
 			if (!hairTexfn.IsEmpty()) {
 				hairTex = texturemanager.add(hairTexfn);
@@ -1054,7 +1055,7 @@ void CharControl::RefreshNPCModel()
 
 	// facial hair geosets
 	try {
-		CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair);
+		CharFacialHairDB::Record frec = facialhairdb.getByParams((unsigned int)cd.race, (unsigned int)cd.gender, (unsigned int)cd.facialHair());
 		cd.geosets[CG_GEOSET100] = frec.getUInt(CharFacialHairDB::Geoset100V400);
 		cd.geosets[CG_GEOSET200] = frec.getUInt(CharFacialHairDB::Geoset200V400);
 		cd.geosets[CG_GEOSET300] = frec.getUInt(CharFacialHairDB::Geoset300V400);
@@ -1081,9 +1082,9 @@ void CharControl::RefreshNPCModel()
 			if (id!=0) {
 				for (size_t j=0; j<model->geosets.size(); j++) {
 					if (model->geosets[j].id == id)
-						model->showGeosets[j] = (cd.hairStyle==section) && showHair;
+						model->showGeosets[j] = (cd.hairStyle()==section) && showHair;
 				}
-			} else if (cd.hairStyle==section) 
+			} else if (cd.hairStyle()==section)
 				bald = true;
 		}
 	}
@@ -1833,7 +1834,7 @@ void CharControl::RefreshItem(ssize_t slot)
 				cd.equipment[slot] = 0; // no such model? :(
 			}
 
-		} catch (ItemDisplayDB::NotFound) {}
+		} catch (ItemDisplayDB::NotFound &) {}
 	}
 }
 
@@ -2641,7 +2642,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
   std::cout << "----------------------------------------------" << std::endl;
   std::cout << "infos.raceid = " << infos.raceid << std::endl;
   std::cout << "infos.sexid = " << infos.sexid << std::endl;
-  std::cout << "cd.skinColor = " << cd.skinColor << std::endl;
+  std::cout << "cd.skinColor() = " << cd.skinColor() << std::endl;
   std::cout << "type = " << type << std::endl;
 
   std::cout << "----------------------------------------------" << std::endl;
@@ -2657,7 +2658,7 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
               (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(cd.skinColor)
+              .arg(cd.skinColor())
               .arg(type);
       break;
     case CharSectionsDB::FaceType:
@@ -2666,8 +2667,8 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
               (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(cd.skinColor)
-              .arg(cd.faceType)
+              .arg(cd.skinColor())
+              .arg(cd.faceType())
               .arg(type);
       break;
     case CharSectionsDB::HairType:
@@ -2676,8 +2677,8 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
               (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(cd.hairStyle)
-              .arg(cd.hairColor)
+              .arg(cd.hairStyle())
+              .arg(cd.hairColor())
               .arg(type);
       break;
     case CharSectionsDB::FacialHairType:
@@ -2686,8 +2687,8 @@ std::vector<std::string> CharControl::getTextureNameForSection(CharSectionsDB::S
                   (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
                   .arg(infos.raceid)
                   .arg(infos.sexid)
-                  .arg(cd.facialHair)
-                  .arg(cd.hairColor)
+                  .arg(cd.facialHair())
+                  .arg(cd.hairColor())
                   .arg(type);
       break;
     default:
@@ -2738,7 +2739,7 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
       query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4 AND Flags=1")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(cd.skinColor)
+              .arg(cd.skinColor())
               .arg(type);
       break;
     case CharSectionsDB::HairType:
@@ -2746,7 +2747,7 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
       query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4 AND Flags=17")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(cd.hairStyle)
+              .arg(cd.hairStyle())
               .arg(type);
       break;
     default:
@@ -2766,3 +2767,9 @@ int CharControl::getNbValuesForSection(CharSectionsDB::SectionType type)
 
   return result;
 }
+
+void CharControl::onEvent(Event *)
+{
+  RefreshModel();
+}
+

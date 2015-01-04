@@ -58,66 +58,23 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   top->SetSizeHints(this);
   SetSizer(top);
   Layout();
+
+  m_details.attach(this);
 }
 
 void CharDetailsFrame::refresh()
 {
-  std::cout << __FUNCTION__ << std::endl;
+  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details.skinColorMax()-1);
+  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details.faceTypeMax()-1);
+  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details.hairColorMax()-1);
+  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details.hairStyleMax()-1);
+  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details.facialHairMax()-1);
 
-  m_details.maxFaceType  = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
-  m_details.maxSkinColor = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
-  m_details.maxHairColor = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
-
-  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
-                     .arg(m_details.race)
-                     .arg(m_details.gender);
-
-  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
-
-  if(hairStyles.valid && !hairStyles.values.empty())
-  {
-    m_details.maxHairStyle = atoi(hairStyles.values[0][0].c_str());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of hair styles for model" << g_canvas->model->name.c_str();
-    m_details.maxHairStyle = 0;
-  }
-
-
-  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
-                         .arg(m_details.race)
-                         .arg(m_details.gender);
-
-  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
-  if(facialHairStyles.valid && !facialHairStyles.values.empty())
-  {
-    m_details.maxFacialHair = atoi(facialHairStyles.values[0][0].c_str());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of facial hair styles for model" << g_canvas->model->name.c_str();
-    m_details.maxFacialHair = 0;
-  }
-
-  if (m_details.maxFaceType == 0) m_details.maxFaceType = 1;
-  if (m_details.maxSkinColor == 0) m_details.maxSkinColor = 1;
-  if (m_details.maxHairColor == 0) m_details.maxHairColor = 1;
-  if (m_details.maxHairStyle == 0) m_details.maxHairStyle = 1;
-  if (m_details.maxFacialHair == 0) m_details.maxFacialHair = 1;
-
-
-  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details.maxSkinColor-1);
-  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details.maxFaceType-1);
-  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details.maxHairColor-1);
-  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details.maxHairStyle-1);
-  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details.maxFacialHair-1);
-
-  spins[SPIN_SKIN_COLOR]->SetValue((int)m_details.skinColor);
-  spins[SPIN_FACE_TYPE]->SetValue((int)m_details.faceType);
-  spins[SPIN_HAIR_COLOR]->SetValue((int)m_details.hairColor);
-  spins[SPIN_HAIR_STYLE]->SetValue((int)m_details.hairStyle);
-  spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details.facialHair);
+  spins[SPIN_SKIN_COLOR]->SetValue((int)m_details.skinColor());
+  spins[SPIN_FACE_TYPE]->SetValue((int)m_details.faceType());
+  spins[SPIN_HAIR_COLOR]->SetValue((int)m_details.hairColor());
+  spins[SPIN_HAIR_STYLE]->SetValue((int)m_details.hairStyle());
+  spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details.facialHair());
 
   for (size_t i=0; i<NUM_SPIN_BTNS; i++)
     spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
@@ -128,12 +85,9 @@ void CharDetailsFrame::refresh()
 
 void CharDetailsFrame::onSpin(wxSpinEvent &event)
 {
-  if (!g_canvas)
-    return;
-
+/*
   if (event.GetId()==ID_SKIN_COLOR)
   {
-    m_details.skinColor = event.GetPosition();
     // check if underwear texture is available for this color
     // if no, uncheck option, and make menu unavailable
     if(g_modelViewer->charControl->getTextureNameForSection(g_canvas->model->isHD?CharSectionsDB::UnderwearHDType:CharSectionsDB::UnderwearType).size() == 0)
@@ -152,48 +106,55 @@ void CharDetailsFrame::onSpin(wxSpinEvent &event)
 
     if(m_details.faceType > m_details.maxFaceType)
       m_details.faceType = 0;
+  }
+*/
 
-    refresh();
+
+  switch(event.GetId())
+  {
+  case ID_SKIN_COLOR:
+    m_details.setSkinColor(event.GetPosition());
+    break;
+  case ID_FACE_TYPE:
+    m_details.setFaceType(event.GetPosition());
+    break;
+  case ID_HAIR_COLOR:
+    m_details.setHairColor(event.GetPosition());
+    break;
+  case ID_HAIR_STYLE:
+    m_details.setHairStyle(event.GetPosition());
+    break;
+  case ID_FACIAL_HAIR:
+    m_details.setFacialHair(event.GetPosition());
+    break;
+  default:
+    break;
   }
 
-  if(g_canvas->model->modelType == MT_NPC)
-    return;
-
-  if (event.GetId()==ID_FACE_TYPE)
-    m_details.faceType = event.GetPosition();
-  else if (event.GetId()==ID_HAIR_COLOR) {
-    m_details.hairColor = event.GetPosition();
-  } else if (event.GetId()==ID_HAIR_STYLE)
-    m_details.hairStyle = event.GetPosition();
-  else if (event.GetId()==ID_FACIAL_HAIR)
-    m_details.facialHair = event.GetPosition();
-
-  for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-    spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
-
   LOG_INFO << "Current model config :"
-           << "skinColor" << m_details.skinColor
-           << "faceType" << m_details.faceType
-           << "hairColor" << m_details.hairColor
-           << "hairStyle" << m_details.hairStyle
-           << "facialHair" << m_details.facialHair;
-  g_modelViewer->charControl->RefreshModel();
+           << "skinColor" << m_details.skinColor()
+           << "faceType" << m_details.faceType()
+           << "hairColor" << m_details.hairColor()
+           << "hairStyle" << m_details.hairStyle()
+           << "facialHair" << m_details.facialHair();
 }
 
 void CharDetailsFrame::onRandomise(wxCommandEvent &event)
 {
   randomiseChar();
-  g_modelViewer->charControl->RefreshModel();
 }
 
 void CharDetailsFrame::randomiseChar()
 {
   // Choose random values for the looks! ^_^
-  m_details.skinColor = randint(0, (int)m_details.maxSkinColor-1);
-  m_details.faceType = randint(0, (int)m_details.maxFaceType-1);
-  m_details.hairColor = randint(0, (int)m_details.maxHairColor-1);
-  m_details.hairStyle = randint(0, (int)m_details.maxHairStyle-1);
-  m_details.facialHair = randint(0, (int)m_details.maxFacialHair-1);
+  m_details.setSkinColor(randint(0, (int)m_details.skinColorMax()-1));
+  m_details.setFaceType(randint(0, (int)m_details.faceTypeMax()-1));
+  m_details.setHairColor(randint(0, (int)m_details.hairColorMax()-1));
+  m_details.setHairStyle(randint(0, (int)m_details.hairStyleMax()-1));
+  m_details.setFacialHair(randint(0, (int)m_details.facialHairMax()-1));
+}
 
+void CharDetailsFrame::onEvent(Event *)
+{
   refresh();
 }

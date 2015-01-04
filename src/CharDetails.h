@@ -11,33 +11,62 @@
 #include "database.h"
 #include "enums.h"
 
+#include "metaclasses/Observable.h"
+
 struct TabardDetails;
 
-struct CharDetails
+class CharDetails : public Observable
 {
-	size_t skinColor, faceType, hairColor, hairStyle, facialHair;
-	size_t maxHairStyle, maxHairColor, maxSkinColor, maxFaceType, maxFacialHair;
+  public:
+    size_t eyeGlowType;
+    size_t race, gender;
 
-	size_t race, gender;
+    bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
 
-	size_t useNPC;
-	size_t eyeGlowType;
+    int equipment[NUM_CHAR_SLOTS];
+    int geosets[NUM_GEOSETS];
 
-	bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
+    // save + load equipment
+    void save(wxString fn, TabardDetails *td);
+    bool load(wxString fn, TabardDetails *td);
 
-	int equipment[NUM_CHAR_SLOTS];
-	int geosets[NUM_GEOSETS];
+    void loadSet(ItemSetDB &sets, ItemDatabase &items, int setid);
+    void loadStart(StartOutfitDB &start, ItemDatabase &items, int cls);
 
-	// save + load equipment
-	void save(wxString fn, TabardDetails *td);
-	bool load(wxString fn, TabardDetails *td);
+    void reset();
 
-	void loadSet(ItemSetDB &sets, ItemDatabase &items, int setid);
-	void loadStart(StartOutfitDB &start, ItemDatabase &items, int cls);
+    void print();
 
-	void reset();
+    // accessors to customization
+    size_t skinColor() { return m_skinColor; }
+    size_t skinColorMax() { return m_skinColorMax; }
+    void setSkinColor(size_t);
 
-	void print();
+    size_t faceType() { return m_faceType; }
+    size_t faceTypeMax() { return m_faceTypeMax; }
+    void setFaceType(size_t);
+
+    size_t hairColor() { return m_hairColor; }
+    size_t hairColorMax() { return m_hairColorMax; }
+    void setHairColor(size_t);
+
+    size_t hairStyle() { return m_hairStyle; }
+    size_t hairStyleMax() { return m_hairStyleMax; }
+    void setHairStyle(size_t);
+
+    size_t facialHair() { return m_facialHair; }
+    size_t facialHairMax() { return m_facialHairMax; }
+    void setFacialHair(size_t);
+
+  private:
+    size_t m_skinColor, m_skinColorMax;
+    size_t m_faceType, m_faceTypeMax;
+    size_t m_hairColor, m_hairColorMax;
+    size_t m_hairStyle, m_hairStyleMax;
+    size_t m_facialHair, m_facialHairMax;
+
+    void updateMaxValues();
+
 };
 
 

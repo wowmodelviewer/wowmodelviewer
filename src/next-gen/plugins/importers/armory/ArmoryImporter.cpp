@@ -91,13 +91,16 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     // Character Details
     result->cd.race = result->raceId;
     result->cd.gender = result->genderId;
+    /*
+    @TODO : to repair
     wxJSONValue app = root[wxT("appearance")];
-    result->cd.skinColor = app[wxT("skinColor")].AsInt();
-    result->cd.faceType = app[wxT("faceVariation")].AsInt();
-    result->cd.hairColor = app[wxT("hairColor")].AsInt();
-    result->cd.hairStyle = app[wxT("hairVariation")].AsInt();
-    result->cd.facialHair = app[wxT("featureVariation")].AsInt();
+    result->cd.setSkinColor(app[wxT("skinColor")].AsInt());
+    result->cd.setFaceType(app[wxT("faceVariation")].AsInt());
+    result->cd.setHairColor(app[wxT("hairColor")].AsInt());
+    result->cd.setHairStyle(app[wxT("hairVariation")].AsInt());
+    result->cd.setFacialHair(app[wxT("featureVariation")].AsInt());
 
+*/
     // Gather Items
     result->hasTransmogGear = false;
     wxJSONValue items = root[wxT("items")];
