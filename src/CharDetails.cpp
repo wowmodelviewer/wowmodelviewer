@@ -142,6 +142,8 @@ void CharDetails::reset()
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		equipment[i] = 0;
 	}
+
+	updateMaxValues();
 }
 
 void CharDetails::setSkinColor(size_t val)
