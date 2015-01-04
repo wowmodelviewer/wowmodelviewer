@@ -110,7 +110,7 @@ GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".alpha12";
+  m_versionSpecialExtend = ".alpha13";
 
 }
 
