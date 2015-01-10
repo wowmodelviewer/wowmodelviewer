@@ -1976,9 +1976,19 @@ void ModelViewer::LoadChar(wxString fn)
 	canvas->model->modelType = MT_CHAR;
 
 	f >> charControl->cd.race >> charControl->cd.gender; // race and gender
-	// @ TODO : to repair
-	//f >> charControl->cd.skinColor >> charControl->cd.faceType >> charControl->cd.hairColor >> charControl->cd.hairStyle >> charControl->cd.facialHair;
 	
+	size_t value;
+	f >> value;
+	charControl->cd.setSkinColor(value);
+	f >> value;
+	charControl->cd.setFaceType(value);
+	f >> value;
+	charControl->cd.setHairColor(value);
+	f >> value;
+	charControl->cd.setHairStyle(value);
+	f >> value;
+	charControl->cd.setFacialHair(value);
+
 	// If Eyeglow is in char file...
 	if (f.peek() != wxT('\n')){
 		f >> charControl->cd.eyeGlowType;
