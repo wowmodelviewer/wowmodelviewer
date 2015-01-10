@@ -106,6 +106,7 @@
   <ItemSparse>
   	<gamefile name="DBFilesClient\Item-sparse.db2" />
   	<field primary="yes" type="uint" name="ID" index="0" />
+  	<field type="uint" name="Quality" index="1" />
   	<field type="text" name="Name" index="70" />
   </ItemSparse>
   <ItemDisplayInfo>

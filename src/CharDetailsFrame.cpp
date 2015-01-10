@@ -85,31 +85,6 @@ void CharDetailsFrame::refresh()
 
 void CharDetailsFrame::onSpin(wxSpinEvent &event)
 {
-/*
-  if (event.GetId()==ID_SKIN_COLOR)
-  {
-    // check if underwear texture is available for this color
-    // if no, uncheck option, and make menu unavailable
-    if(g_modelViewer->charControl->getTextureNameForSection(g_canvas->model->isHD?CharSectionsDB::UnderwearHDType:CharSectionsDB::UnderwearType).size() == 0)
-    {
-      m_details.showUnderwear = false;
-      g_modelViewer->charMenu->Check(ID_SHOW_UNDERWEAR, false);
-      g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-    }
-    else
-    {
-      g_modelViewer->charMenu->Enable(ID_SHOW_UNDERWEAR, true);
-    }
-
-    // update facial type based on skin chosen
-    m_details.maxFaceType  = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
-
-    if(m_details.faceType > m_details.maxFaceType)
-      m_details.faceType = 0;
-  }
-*/
-
-
   switch(event.GetId())
   {
   case ID_SKIN_COLOR:

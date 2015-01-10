@@ -331,7 +331,7 @@ StartOutfitDB::Record StartOutfitDB::getById(unsigned int id)
 ItemRecord::ItemRecord(const std::vector<std::string> & vals)
   : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
-  if(vals.size() < 6)
+  if(vals.size() < 7)
       return;
 
   id = atoi(vals[0].c_str());
@@ -339,6 +339,7 @@ ItemRecord::ItemRecord(const std::vector<std::string> & vals)
   itemclass = atoi(vals[3].c_str());
   subclass = atoi(vals[4].c_str());
   model = 1;
+  quality = atoi(vals[6].c_str());
   switch(atoi(vals[5].c_str()))
   {
     case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;

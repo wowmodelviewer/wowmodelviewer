@@ -581,7 +581,7 @@ void ModelViewer::InitDatabase()
 	}
 
 	{
-	  sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
+	  sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath, ItemSparse.Quality FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
 
 	  if(item.valid && !item.empty())
 	  {
@@ -2637,7 +2637,14 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 		// Load the model
 		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");
-		LoadModel(strModel);
+		wxString strModelHD = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT("_hd.m2");
+
+		// try with hd model first
+		if(CASCFOLDER.fileExists(std::string(strModelHD.mb_str())))
+		  LoadModel(strModelHD);
+		else
+		  LoadModel(strModel);
+
 		if (!g_canvas->model)
 			return;
 
@@ -2648,7 +2655,20 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		}
 
 		// Update the model
-		g_charControl->cd = result->cd;
+		g_charControl->cd.race = result->raceId;
+		g_charControl->cd.gender = result->genderId;
+		g_charControl->cd.setSkinColor(result->skinColor);
+		g_charControl->cd.setFaceType(result->faceType);
+		g_charControl->cd.setHairColor(result->hairColor);
+		g_charControl->cd.setHairStyle(result->hairStyle);
+		g_charControl->cd.setFacialHair(result->facialHair);
+
+		g_charControl->td.Icon = result->tabardIcon;
+		g_charControl->td.Border = result->tabardBorder;
+
+		for(int i=0 ; i < NUM_CHAR_SLOTS ; i++)
+		  g_charControl->cd.equipment[i] = result->equipment[i];
+
 		g_charControl->RefreshModel();
 		g_charControl->RefreshEquipment();
 

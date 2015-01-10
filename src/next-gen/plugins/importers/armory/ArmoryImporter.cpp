@@ -88,145 +88,152 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     result->race = wxT("Human");
     result->gender = (result->genderId == 0) ? wxT("Male") : wxT("Female");
 
-    // Character Details
-    result->cd.race = result->raceId;
-    result->cd.gender = result->genderId;
-    /*
-    @TODO : to repair
     wxJSONValue app = root[wxT("appearance")];
-    result->cd.setSkinColor(app[wxT("skinColor")].AsInt());
-    result->cd.setFaceType(app[wxT("faceVariation")].AsInt());
-    result->cd.setHairColor(app[wxT("hairColor")].AsInt());
-    result->cd.setHairStyle(app[wxT("hairVariation")].AsInt());
-    result->cd.setFacialHair(app[wxT("featureVariation")].AsInt());
+    result->skinColor = app[wxT("skinColor")].AsInt();
+    result->faceType = app[wxT("faceVariation")].AsInt();
+    result->hairColor = app[wxT("hairColor")].AsInt();
+    result->hairStyle = app[wxT("hairVariation")].AsInt();
+    result->facialHair = app[wxT("featureVariation")].AsInt();
 
-*/
     // Gather Items
     result->hasTransmogGear = false;
     wxJSONValue items = root[wxT("items")];
     if (items[wxT("back")].Size()>0)
     {
-      result->cd.equipment[CS_CAPE] = items[wxT("back")][wxT("id")].AsInt();
+      result->equipment[CS_CAPE] = items[wxT("back")][wxT("id")].AsInt();
       if (items[wxT("back")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_CAPE] = items[wxT("back")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_CAPE] = items[wxT("back")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("chest")].Size()>0)
     {
-      result->cd.equipment[CS_CHEST] = items[wxT("chest")][wxT("id")].AsInt();
+      result->equipment[CS_CHEST] = items[wxT("chest")][wxT("id")].AsInt();
       if (items[wxT("chest")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_CHEST] = items[wxT("chest")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_CHEST] = items[wxT("chest")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("feet")].Size()>0)
     {
-      result->cd.equipment[CS_BOOTS] = items[wxT("feet")][wxT("id")].AsInt();
+      result->equipment[CS_BOOTS] = items[wxT("feet")][wxT("id")].AsInt();
       if (items[wxT("feet")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_BOOTS] = items[wxT("feet")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_BOOTS] = items[wxT("feet")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("hands")].Size()>0)
     {
-      result->cd.equipment[CS_GLOVES] = items[wxT("hands")][wxT("id")].AsInt();
+      result->equipment[CS_GLOVES] = items[wxT("hands")][wxT("id")].AsInt();
       if (items[wxT("hands")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_GLOVES] = items[wxT("hands")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_GLOVES] = items[wxT("hands")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("head")].Size()>0)
     {
-      result->cd.equipment[CS_HEAD] = items[wxT("head")][wxT("id")].AsInt();
+      result->equipment[CS_HEAD] = items[wxT("head")][wxT("id")].AsInt();
       if (items[wxT("head")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_HEAD] = items[wxT("head")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_HEAD] = items[wxT("head")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("legs")].Size()>0)
     {
-      result->cd.equipment[CS_PANTS] = items[wxT("legs")][wxT("id")].AsInt();
+      result->equipment[CS_PANTS] = items[wxT("legs")][wxT("id")].AsInt();
       if (items[wxT("legs")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_PANTS] = items[wxT("legs")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_PANTS] = items[wxT("legs")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("mainHand")].Size()>0)
     {
-      result->cd.equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("id")].AsInt();
+      result->equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("id")].AsInt();
       if (items[wxT("mainHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("offHand")].Size()>0)
     {
-      result->cd.equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("id")].AsInt();
+      result->equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("id")].AsInt();
       if (items[wxT("offHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("shirt")].Size()>0)
     {
-      result->cd.equipment[CS_SHIRT] = items[wxT("shirt")][wxT("id")].AsInt();
+      result->equipment[CS_SHIRT] = items[wxT("shirt")][wxT("id")].AsInt();
       if (items[wxT("shirt")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_SHIRT] = items[wxT("shirt")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_SHIRT] = items[wxT("shirt")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("shoulder")].Size()>0)
     {
-      result->cd.equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("id")].AsInt();
+      result->equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("id")].AsInt();
       if (items[wxT("shoulder")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("tabard")].Size()>0)
     {
-      result->cd.equipment[CS_TABARD] = items[wxT("tabard")][wxT("id")].AsInt();
+      result->equipment[CS_TABARD] = items[wxT("tabard")][wxT("id")].AsInt();
       if (items[wxT("tabard")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_TABARD] = items[wxT("tabard")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_TABARD] = items[wxT("tabard")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("waist")].Size()>0)
     {
-      result->cd.equipment[CS_BELT] = items[wxT("waist")][wxT("id")].AsInt();
+      result->equipment[CS_BELT] = items[wxT("waist")][wxT("id")].AsInt();
       if (items[wxT("waist")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_BELT] = items[wxT("waist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_BELT] = items[wxT("waist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
     if (items[wxT("wrist")].Size()>0)
     {
-      result->cd.equipment[CS_BRACERS] = items[wxT("wrist")][wxT("id")].AsInt();
+      result->equipment[CS_BRACERS] = items[wxT("wrist")][wxT("id")].AsInt();
       if (items[wxT("wrist")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
       {
-        result->cd.equipment[CS_BRACERS] = items[wxT("wrist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
+        result->equipment[CS_BRACERS] = items[wxT("wrist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
         result->hasTransmogGear = true;
       }
     }
 
     // Set proper eyeglow
     if (root[wxT("class")].AsInt() == CLASS_DEATH_KNIGHT)
-      result->cd.eyeGlowType = EGT_DEATHKNIGHT;
+      result->eyeGlowType = EGT_DEATHKNIGHT;
     else
-      result->cd.eyeGlowType = EGT_DEFAULT;
+      result->eyeGlowType = EGT_DEFAULT;
+
+    // tabard (useful if guild tabard)
+    wxJSONValue guild = root[wxT("guild")];
+    if(guild.Size() > 0)
+    {
+      wxJSONValue tabard = guild[wxT("emblem")];
+      if(tabard.Size() > 0)
+      {
+        result->tabardIcon = tabard[wxT("icon")].AsInt();
+        result->tabardBorder = tabard[wxT("border")].AsInt();
+      }
+    }
+
 
     wxUninitialize();
   }
@@ -353,7 +360,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       LOG_INFO << "Loading Battle.Net Armory. Site: " << strDomain.c_str() << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
 
       apiPage = wxT("http://") + strDomain;
-      apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items");
+      apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items,guild");
       break;
     }
     case ITEM:

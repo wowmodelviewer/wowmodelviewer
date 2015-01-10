@@ -459,7 +459,7 @@ void CharControl::RefreshEquipment()
 	  {
 			if (labels[i])
 			{
-				labels[i]->SetLabel(CSConv(items.getById(cd.equipment[i]).name));
+				labels[i]->SetLabel(items.getById(cd.equipment[i]).name);
 				labels[i]->SetForegroundColour(ItemQualityColour(items.getById(cd.equipment[i]).quality));
 			}
 		}
@@ -2011,7 +2011,6 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 			cats.push_back(subclasslookup[std::pair<int,int>(it->itemclass, it->subclass)]);
 		}
 	}
-	//std::cout << "choices size = " << choices.GetCount() << std::endl;
 
 	if (subclassesFound.size() > 1)
 		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);
@@ -2196,7 +2195,7 @@ void CharControl::selectNPC(ssize_t type)
 	{
 	  for(int i=0, imax=npccats.values.size() ; i < imax ; i++)
 	  {
-	    catnames.Add(CSConv(npccats.values[i][1]));
+	    catnames.Add(npccats.values[i][1]);
 	    typeLookup[atoi(npccats.values[i][0].c_str())] = (int)catnames.size()-1;
 	  }
 	}
@@ -2254,9 +2253,9 @@ void CharControl::OnUpdateItem(int type, int id)
 		cd.equipment[choosingSlot] = numbers[id];
 		if (slotHasModel(choosingSlot))
 			RefreshItem(choosingSlot);
+
 		labels[choosingSlot]->SetLabel(items.getById(cd.equipment[choosingSlot]).name);
 		labels[choosingSlot]->SetForegroundColour(ItemQualityColour(items.getById(cd.equipment[choosingSlot]).quality));
-
 		break;
 
 	case UPDATE_SET:
@@ -2401,67 +2400,67 @@ void CharControl::OnUpdateItem(int type, int id)
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::HelmID));
 				cd.equipment[CS_HEAD] = itemid;
 				if (slotHasModel(CS_HEAD)) RefreshItem(CS_HEAD);
-				if (itemid) labels[CS_HEAD]->SetLabel(CSConv(items.getById(cd.equipment[CS_HEAD]).name));
+				if (itemid) labels[CS_HEAD]->SetLabel(items.getById(cd.equipment[CS_HEAD]).name);
 				else labels[CS_HEAD]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::ShoulderID));
 				cd.equipment[CS_SHOULDER] = itemid;
 				if (slotHasModel(CS_SHOULDER)) RefreshItem(CS_SHOULDER);
-				if (itemid) labels[CS_SHOULDER]->SetLabel(CSConv(items.getById(cd.equipment[CS_SHOULDER]).name));
+				if (itemid) labels[CS_SHOULDER]->SetLabel(items.getById(cd.equipment[CS_SHOULDER]).name);
 				else labels[CS_SHOULDER]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::ShirtID));
 				cd.equipment[CS_SHIRT] = itemid;
 				//if (slotHasModel(CS_SHIRT)) RefreshItem(CS_SHIRT);
-				if (itemid) labels[CS_SHIRT]->SetLabel(CSConv(items.getById(cd.equipment[CS_SHIRT]).name));
+				if (itemid) labels[CS_SHIRT]->SetLabel(items.getById(cd.equipment[CS_SHIRT]).name);
 				else labels[CS_SHIRT]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::ChestID));
 				cd.equipment[CS_CHEST] = itemid;
 				//if (slotHasModel(CS_CHEST)) RefreshItem(CS_CHEST);
-				if (itemid) labels[CS_CHEST]->SetLabel(CSConv(items.getById(cd.equipment[CS_CHEST]).name));
+				if (itemid) labels[CS_CHEST]->SetLabel(items.getById(cd.equipment[CS_CHEST]).name);
 				else labels[CS_CHEST]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::BeltID));
 				cd.equipment[CS_BELT] = itemid;
 				//if (slotHasModel(CS_BELT)) RefreshItem(CS_BELT);
-				if (itemid) labels[CS_BELT]->SetLabel(CSConv(items.getById(cd.equipment[CS_BELT]).name));
+				if (itemid) labels[CS_BELT]->SetLabel(items.getById(cd.equipment[CS_BELT]).name);
 				else labels[CS_BELT]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::PantsID));
 				cd.equipment[CS_PANTS] = itemid;
 				//if (slotHasModel(CS_PANTS)) RefreshItem(CS_PANTS);
-				if (itemid) labels[CS_PANTS]->SetLabel(CSConv(items.getById(cd.equipment[CS_PANTS]).name));
+				if (itemid) labels[CS_PANTS]->SetLabel(items.getById(cd.equipment[CS_PANTS]).name);
 				else labels[CS_PANTS]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::BootsID));
 				cd.equipment[CS_BOOTS] = itemid;
 				//if (slotHasModel(CS_BOOTS)) RefreshItem(CS_BOOTS);
-				if (itemid) labels[CS_BOOTS]->SetLabel(CSConv(items.getById(cd.equipment[CS_BOOTS]).name));
+				if (itemid) labels[CS_BOOTS]->SetLabel(items.getById(cd.equipment[CS_BOOTS]).name);
 				else labels[CS_BOOTS]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::BracersID));
 				cd.equipment[CS_BRACERS] = itemid;
 				//if (slotHasModel(CS_BRACERS)) RefreshItem(CS_BRACERS);
-				if (itemid) labels[CS_BRACERS]->SetLabel(CSConv(items.getById(cd.equipment[CS_BRACERS]).name));
+				if (itemid) labels[CS_BRACERS]->SetLabel(items.getById(cd.equipment[CS_BRACERS]).name);
 				else labels[CS_BRACERS]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::GlovesID));
 				cd.equipment[CS_GLOVES] = itemid;
 				//if (slotHasModel(CS_GLOVES)) RefreshItem(CS_GLOVES);
-				if (itemid) labels[CS_GLOVES]->SetLabel(CSConv(items.getById(cd.equipment[CS_GLOVES]).name));
+				if (itemid) labels[CS_GLOVES]->SetLabel(items.getById(cd.equipment[CS_GLOVES]).name);
 				else labels[CS_GLOVES]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::TabardID));
 				cd.equipment[CS_TABARD] = itemid;
 				//if (slotHasModel(CS_TABARD)) RefreshItem(CS_TABARD);
-				if (itemid) labels[CS_TABARD]->SetLabel(CSConv(items.getById(cd.equipment[CS_TABARD]).name));
+				if (itemid) labels[CS_TABARD]->SetLabel(items.getById(cd.equipment[CS_TABARD]).name);
 				else labels[CS_TABARD]->SetLabel(_("---- None ----"));
 
 				itemid = items.getItemIDByModel(npcrec.getUInt(NPCDB::CapeID));
 				cd.equipment[CS_CAPE] = itemid;
 				if (slotHasModel(CS_CAPE)) RefreshItem(CS_CAPE);
-				if (itemid) labels[CS_CAPE]->SetLabel(CSConv(items.getById(cd.equipment[CS_CAPE]).name));
+				if (itemid) labels[CS_CAPE]->SetLabel(items.getById(cd.equipment[CS_CAPE]).name);
 				else labels[CS_CAPE]->SetLabel(_("---- None ----"));
 				//wxLogMessage(wxT("npcdb.getByNPCID good: %d"), npcrec.getUInt(NPCDB::HelmID));
 			} catch (...) {

@@ -36,7 +36,6 @@
 #include <wx/string.h>
 
 // Other libraries
-#include "CharDetails.h"
 
 // Current library
 
@@ -64,7 +63,21 @@ class CharInfos
     wxString race;
     wxString gender;
     bool hasTransmogGear;
-    CharDetails cd;
+    size_t skinColor;
+    size_t faceType;
+    size_t hairColor;
+    size_t hairStyle;
+    size_t facialHair;
+
+    size_t eyeGlowType;
+
+    int tabardIcon;
+    int IconColor;
+    int tabardBorder;
+    int BorderColor;
+    int Background;
+
+    int equipment[NUM_CHAR_SLOTS];
 
   protected :
     // Constants / Enums
