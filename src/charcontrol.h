@@ -52,7 +52,9 @@ class CharControl: public wxWindow, public Observer
 	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
 	CharDetailsFrame * cdFrame;
 
-	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup = true);
+	// if itemid == true, itemnum corresponds to Item database ID
+	// if itemid == false, itemnum corresponds to ItemDisplayInfo ID
+	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid = true);
 	void UpdateTextureList(wxString texName, int special);
 
 	static std::map< std::string, RaceInfos> RACES;

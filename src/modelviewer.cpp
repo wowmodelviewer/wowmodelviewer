@@ -1093,6 +1093,40 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  else
 	  {
 	    LoadModel(r.values[0][0] + r.values[0][1]);
+
+	    query = "SELECT * FROM CreatureDisplayInfoExtra WHERE ID = ";
+	    query += r.values[0][5];
+
+	    r = GAMEDATABASE.sqlQuery(query);
+
+	    if(r.valid && !r.empty())
+	    {
+	      g_charControl->cd.race = atoi(r.values[0][1].c_str());
+	      g_charControl->cd.gender = atoi(r.values[0][2].c_str());
+	      g_charControl->cd.setSkinColor(atoi(r.values[0][3].c_str()));
+	      g_charControl->cd.setFaceType(atoi(r.values[0][4].c_str()));
+	      g_charControl->cd.setHairColor(atoi(r.values[0][6].c_str()));
+	      g_charControl->cd.setHairStyle(atoi(r.values[0][5].c_str()));
+	      g_charControl->cd.setFacialHair(atoi(r.values[0][7].c_str()));
+
+	      g_charControl->cd.equipment[CS_HEAD] = atoi(r.values[0][8].c_str());
+	      g_charControl->cd.equipment[CS_SHOULDER] = atoi(r.values[0][9].c_str());
+	      g_charControl->cd.equipment[CS_SHIRT] = atoi(r.values[0][10].c_str());
+	      g_charControl->cd.equipment[CS_CHEST] = atoi(r.values[0][11].c_str());
+	      g_charControl->cd.equipment[CS_BELT] = atoi(r.values[0][12].c_str());
+	      g_charControl->cd.equipment[CS_PANTS] = atoi(r.values[0][13].c_str());
+	      g_charControl->cd.equipment[CS_BOOTS] = atoi(r.values[0][14].c_str());
+	      g_charControl->cd.equipment[CS_BRACERS] = atoi(r.values[0][15].c_str());
+	      g_charControl->cd.equipment[CS_GLOVES] = atoi(r.values[0][16].c_str());
+	      g_charControl->cd.equipment[CS_TABARD] = atoi(r.values[0][17].c_str());
+	      g_charControl->cd.equipment[CS_CAPE] = atoi(r.values[0][18].c_str());
+
+	      g_charControl->cd.isNPC = true;
+
+	      g_charControl->RefreshModel();
+	      g_charControl->RefreshEquipment();
+	    }
+
 	  }
 	}
 

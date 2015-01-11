@@ -75,6 +75,7 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab) const
   wxInitialize();
   NPCInfos * result = NULL;
 
+  // TODO: rewrite this part with Qt to handle UTF8 correctly
   wxURL url(urlToGrab);
   if(url.GetError()==wxURL_NOERR)
   {

@@ -139,6 +139,8 @@ void CharDetails::reset()
 	showEars = true;
 	showFeet = false;
 
+	isNPC = false;
+
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		equipment[i] = 0;
 	}

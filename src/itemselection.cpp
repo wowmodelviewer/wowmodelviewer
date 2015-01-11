@@ -6,6 +6,10 @@
 #include "ModelViewer.h"
 #include "NPCimporterDialog.h"
 
+#include <QString>
+
+#include "GameDatabase.h"
+
 // HACK: this is the ID for the single choice dialog listbox in the wx src
 // - if it changes this code may break
 #define wxID_LISTBOX 3000
@@ -228,7 +232,6 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 	NPCimporterDialog *dlg = new NPCimporterDialog();
 	if ( dlg->ShowModal() == wxID_OK ) {
 		int modelid = dlg->getImportedId();
-
 		if(modelid != -1) {
 			int id = 0;
 			bool found = false;
@@ -244,9 +247,10 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 				if (rec.model > 0) {
 					npcs.push_back(rec);
 					id = npcs.size()-1;
+					QString query = QString("INSERT INTO Creature(ID,CreatureTypeID,DisplayID,Name) VALUES (%1,%2,%3,\"%4\")").arg(modelid).arg(rec.type).arg(rec.model).arg(CSConv(rec.name).mb_str());
+					GAMEDATABASE.sqlQuery(query.toStdString());
 				}
 			}
-
 
 			if (cc)
 				cc->OnUpdateItem(UPDATE_NPC, id );

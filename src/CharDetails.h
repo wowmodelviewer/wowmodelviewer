@@ -23,6 +23,8 @@ class CharDetails : public Observable
 
     bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
 
+    bool isNPC;
+
     int equipment[NUM_CHAR_SLOTS];
     int geosets[NUM_GEOSETS];
 

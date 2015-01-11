@@ -852,7 +852,7 @@ void CharControl::RefreshModel()
 	{
 		CharSlots sn = slotOrder[i];
 		if (cd.equipment[sn] != 0)
-			AddEquipment(sn, cd.equipment[sn], 10+i, tex);
+			AddEquipment(sn, cd.equipment[sn], 10+i, tex, !cd.isNPC);
 	}
 
 	LOG_INFO << "Current Equipement :"
@@ -1181,12 +1181,12 @@ void CharControl::RefreshNPCModel()
 	model->replaceTextures[TEXTURE_GAMEOBJECT1] = gobTex;
 }
 
-void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool lookup)
+void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid)
 {
-	//if (slot==CS_PANTS && cd.geosets[CG_TROUSERS]==2)
-		//return; // if we are wearing a robe, no pants for us! ^_^
+  QString query;
 
-	QString query = QString("SELECT Model1,Model2, \
+  if(itemid)
+    query = QString("SELECT Model1,Model2, \
 	    FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
 	    FD11.path AS Model2TexPath, FD11.name AS Model2TexName, \
 	    GeosetGroup1, GeosetGroup2, GeosetGroup3, \
@@ -1212,8 +1212,37 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
 	    LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
 	    LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
 	    LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
-	     WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))")
-	    .arg(itemnum);
+	    WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))")
+	     .arg(itemnum);
+  else
+    query = QString("SELECT Model1,Model2, \
+      FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
+      FD11.path AS Model2TexPath, FD11.name AS Model2TexName, \
+      GeosetGroup1, GeosetGroup2, GeosetGroup3, \
+      HelmetGeoSetVis1,HelmetGeoSetVis2, \
+      FD1.path AS UpperArmTexPath, FD1.name AS UpperArmTexName, \
+      FD2.path AS LowerArmTexPath, FD2.name AS LowerArmTexName, \
+      FD3.path AS HandsTexPath, FD3.name AS HandsTexName, \
+      FD4.path AS UpperTorsoTexPath, FD4.name AS UpperTorsoTexName, \
+      FD5.path AS LowerTorsoTexPath, FD5.name AS LowerTorsoTexName, \
+      FD6.path AS UpperLegTexPath, FD6.name AS UpperLegTexName, \
+      FD7.path AS LowerLegTexPath, FD7.name AS LowerLegTexName, \
+      FD8.path AS FootTexPath, FD8.name AS FootTexName, \
+      FD9.path AS AccessoryTexPath, FD9.name AS AccessoryTexName \
+      FROM ItemDisplayInfo \
+      LEFT JOIN TextureFileData TFD1 ON TFD1.TextureItemID = TextureID1 LEFT JOIN FileData FD1 ON TFD1.FileDataID = FD1.ID \
+      LEFT JOIN TextureFileData TFD2 ON TFD2.TextureItemID = TextureID2 LEFT JOIN FileData FD2 ON TFD2.FileDataID = FD2.ID \
+      LEFT JOIN TextureFileData TFD3 ON TFD3.TextureItemID = TextureID3 LEFT JOIN FileData FD3 ON TFD3.FileDataID = FD3.ID \
+      LEFT JOIN TextureFileData TFD4 ON TFD4.TextureItemID = TextureID4 LEFT JOIN FileData FD4 ON TFD4.FileDataID = FD4.ID \
+      LEFT JOIN TextureFileData TFD5 ON TFD5.TextureItemID = TextureID5 LEFT JOIN FileData FD5 ON TFD5.FileDataID = FD5.ID \
+      LEFT JOIN TextureFileData TFD6 ON TFD6.TextureItemID = TextureID6 LEFT JOIN FileData FD6 ON TFD6.FileDataID = FD6.ID \
+      LEFT JOIN TextureFileData TFD7 ON TFD7.TextureItemID = TextureID7 LEFT JOIN FileData FD7 ON TFD7.FileDataID = FD7.ID \
+      LEFT JOIN TextureFileData TFD8 ON TFD8.TextureItemID = TextureID8 LEFT JOIN FileData FD8 ON TFD8.FileDataID = FD8.ID \
+      LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
+      LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
+      LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
+      WHERE ItemDisplayInfo.ID = %1")
+       .arg(itemnum);
 
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
@@ -2195,7 +2224,7 @@ void CharControl::selectNPC(ssize_t type)
 	{
 	  for(int i=0, imax=npccats.values.size() ; i < imax ; i++)
 	  {
-	    catnames.Add(npccats.values[i][1]);
+	    catnames.Add(CSConv(npccats.values[i][1]));
 	    typeLookup[atoi(npccats.values[i][0].c_str())] = (int)catnames.size()-1;
 	  }
 	}
