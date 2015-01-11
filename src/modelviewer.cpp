@@ -137,7 +137,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 
 	EVT_MENU(ID_LOAD_SET, ModelViewer::OnSetEquipment)
 	EVT_MENU(ID_LOAD_START, ModelViewer::OnSetEquipment)
-	EVT_MENU(ID_LOAD_NPC_START, ModelViewer::OnSetEquipment)
 
 	EVT_MENU(ID_SHOW_UNDERWEAR, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_SHOW_EARS, ModelViewer::OnCharToggle)
@@ -415,7 +414,6 @@ void ModelViewer::InitMenu()
 		charMenu->AppendSeparator();
 		charMenu->Append(ID_LOAD_SET, _("Load Item Set"));
 		charMenu->Append(ID_LOAD_START, _("Load Start Outfit"));
-		charMenu->Append(ID_LOAD_NPC_START, _("Load NPC Outfit"));
 		charMenu->AppendSeparator();
 		charMenu->Append(ID_MOUNT_CHARACTER, _("Mount a character..."));
 		charMenu->Append(ID_CHAR_RANDOMISE, _("Randomise Character\tF10"));
@@ -434,7 +432,6 @@ void ModelViewer::InitMenu()
 		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
-		charMenu->Enable(ID_LOAD_NPC_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 
@@ -604,9 +601,6 @@ void ModelViewer::InitDatabase()
 	// init Race informations
 	CharControl::initRaces();
 
-
-
-
 	if (!skyboxdb.open()) {
 		initDB = false;
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
@@ -622,46 +616,15 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not open the Item Visuals DB."));
 	}
 
-	if(!hairdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Hair Geoset DB."));
-	}
-
-	if(!chardb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Character DB."));
-	}
-
-	if(!racedb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Char Races DB."));
-	}
-
-	if(!classdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Char Classes DB."));
-	}
-
-	if(!facialhairdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Char Facial Hair DB."));
-	}
-
 	if(!visualdb.open())
 		wxLogMessage(wxT("Error: Could not open the ItemVisuals DB."));
 
 	if(!effectdb.open())
 		wxLogMessage(wxT("Error: Could not open the ItemVisualEffects DB."));
 
-	if(!subclassdb.open())
-		wxLogMessage(wxT("Error: Could not open the Item Subclasses DB."));
-
 	if(!startdb.open())
 		wxLogMessage(wxT("Error: Could not open the Start Outfit Sets DB."));
 	//if(!helmetdb.open()) return false;
-
-	if(!npcdb.open())
-		wxLogMessage(wxT("Error: Could not open the Start Outfit NPC DB."));
 
 	if(!camcinemadb.open())
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
@@ -1001,7 +964,6 @@ void ModelViewer::LoadModel(const wxString fn)
 		charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
 		charMenu->Enable(ID_LOAD_SET, true);
 		charMenu->Enable(ID_LOAD_START, true);
-		charMenu->Enable(ID_LOAD_NPC_START, true);
 		charMenu->Enable(ID_MOUNT_CHARACTER, true);
 		charMenu->Enable(ID_CHAR_RANDOMISE, true);
 
@@ -1025,7 +987,6 @@ void ModelViewer::LoadModel(const wxString fn)
 		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
-		charMenu->Enable(ID_LOAD_NPC_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}
@@ -1209,7 +1170,6 @@ void ModelViewer::LoadItem(unsigned int id)
 		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		charMenu->Enable(ID_LOAD_SET, false);
 		charMenu->Enable(ID_LOAD_START, false);
-		charMenu->Enable(ID_LOAD_NPC_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 
@@ -2062,7 +2022,6 @@ void ModelViewer::LoadChar(wxString fn)
 	charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
 	charMenu->Enable(ID_LOAD_SET, true);
 	charMenu->Enable(ID_LOAD_START, true);
-	charMenu->Enable(ID_LOAD_NPC_START, true);
 	charMenu->Enable(ID_MOUNT_CHARACTER, true);
 	charMenu->Enable(ID_CHAR_RANDOMISE, true);
 
@@ -2650,9 +2609,7 @@ void ModelViewer::UpdateControls()
 	if (!canvas || !canvas->model || !canvas->root)
 		return;
 
-	if (canvas->model->modelType == MT_NPC)
-		charControl->RefreshNPCModel();
-	else if (canvas->model->modelType == MT_CHAR)
+	if (canvas->model->modelType == MT_CHAR)
 		charControl->RefreshModel();
 	
 	modelControl->RefreshModel(canvas->root);
@@ -2675,9 +2632,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 	if(result)
 	{
-	  CharRacesDB::Record racer = racedb.getById(result->raceId);
-	  result->race = racer.getString(CharRacesDB::Name);
-	  //wxLogMessage(wxT("RaceID: %i, Race: %s\n          GenderID: %i, Gender: %s"),raceID,race,genderID,gender);
+	  // retrieve race name from DB
+	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
+	  sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	  result->race = r.values[0][0].c_str();
 
 		// Load the model
 		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");

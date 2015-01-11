@@ -367,7 +367,7 @@ bool filterDir(wxString fn)
 
 bool AnimControl::UpdateItemModel(WoWModel *m)
 {
-
+/*
 	wxString fn = m->name;
 
 	// change M2 to mdx
@@ -407,7 +407,6 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 		}
 	}
 
-	/*
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
 	sFilterDir = m->name.BeforeLast(wxT('.')).Lower();
@@ -421,7 +420,6 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 			skins.insert(grp);
 		}
 	}
-	*/
 
 	bool ret = false;
 
@@ -435,6 +433,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	}
 
 	return ret;
+	*/
+  return false;
 }
 
 

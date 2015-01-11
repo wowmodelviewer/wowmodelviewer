@@ -21,6 +21,9 @@ void GetSpellEffects(){
 // 10 for rhand, 11 for lhand)
 void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow *parent)
 {
+  /*
+     @TODO : TO REPAIR
+
 	cc->ClearItemDialog();
 	cc->numbers.clear();
 	cc->choices.Clear();
@@ -38,7 +41,7 @@ void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow
 
 			ord++;
 
-			if (it->itemclass > 0) 
+			if (it->itemclass > 0)
 				subclassesFound.insert(pair<int,int>(it->itemclass, it->subclass));
 		}
 	}
@@ -91,6 +94,7 @@ void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow
 	cc->itemDialog->Move(parent->GetPosition() + wxPoint(4,64));
 	cc->itemDialog->Show();
 	cc->choosingSlot = slot;
+	*/
 }
 
 // Enchants Dialog

@@ -205,9 +205,9 @@ void CharDetails::setFacialHair(size_t val)
 
 void CharDetails::updateMaxValues()
 {
-  m_faceTypeMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::FaceHDType:CharSectionsDB::FaceType);
-  m_skinColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::SkinHDType:CharSectionsDB::SkinType);
-  m_hairColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharSectionsDB::HairHDType:CharSectionsDB::HairType);
+  m_faceTypeMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::FaceHDType:CharControl::FaceType);
+  m_skinColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::SkinHDType:CharControl::SkinType);
+  m_hairColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::HairHDType:CharControl::HairType);
 
   QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
                         .arg(race)

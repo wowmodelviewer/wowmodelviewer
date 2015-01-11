@@ -12,20 +12,11 @@ std::vector<NPCRecord> npcs;
 // --
 HelmGeosetDB		helmetdb;
 ItemVisualEffectDB	effectdb;
-ItemDisplayDB		itemdisplaydb;
 StartOutfitDB		startdb;
-ItemSubClassDB		subclassdb;
 ItemVisualDB		visualdb;
 ItemSetDB			setsdb;
 
-// --
-CharHairGeosetsDB	hairdb;
-CharSectionsDB		chardb;
-CharClassesDB		classdb;
-CharFacialHairDB	facialhairdb;
-CharRacesDB			racedb;
 //--
-NPCDB				npcdb;
 LightSkyBoxDB			skyboxdb;
 SpellItemEnchantmentDB	spellitemenchantmentdb;
 ItemVisualsDB			itemvisualsdb;
@@ -49,132 +40,6 @@ CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)
 	throw NotFound();
 }
 
-// --
-// CHARDB.H
-// HairGeosets
-
-CharHairGeosetsDB::Record CharHairGeosetsDB::getByParams(unsigned int race, unsigned int gender, unsigned int section)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Section)==section)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-int CharHairGeosetsDB::getGeosetsFor(unsigned int race, unsigned int gender)
-{
-	int n = 0;
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(Race)==race && i->getUInt(Gender)==gender) {
-			n++;
-		}
-	}
-    return n;
-}
-
-// Sections
-
-int CharSectionsDB::getColorsFor(size_t race, size_t gender, size_t type, size_t section, size_t npc)
-{
-	int n = 0;
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section) {
-	    n++;
-	  }
-	}
-
-    return n;
-}
-
-int CharSectionsDB::getSectionsFor(size_t race, size_t gender, size_t type, size_t color, size_t npc)
-{
-	int n = 0;
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Color)==color) {
-	    n++;
-	  }
-	}
-    return n;
-}
-
-CharSectionsDB::Record CharSectionsDB::getByParams(size_t race, size_t gender, size_t type, size_t section, size_t color, size_t npc)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-	  if (i->getUInt(Race)==race && i->getUInt(Gender)==gender && i->getUInt(Type)==type && i->getUInt(Section)==section && i->getUInt(Color)==color)
-	    return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d race:%d, gender:%d, type:%d, section:%d, color:%d"), __FILE__, __FUNCTION__, __LINE__, race, gender, type, section, color);
-	throw NotFound();
-}
-
-// Races
-CharRacesDB::Record CharRacesDB::getByName(wxString name)
-{
-	for(Iterator i=begin(); i!=end(); ++i) {
-		wxString r = i->getString(Name);
-		if (name.IsSameAs(r, false) == true)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-CharRacesDB::Record CharRacesDB::getById(size_t id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(RaceID)==id) return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-
-// FacialHair
-
-CharFacialHairDB::Record CharFacialHairDB::getByParams(unsigned int race, unsigned int gender, unsigned int style)
-{
-  for(Iterator i=begin(); i!=end(); ++i)
-  {
-    if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender && i->getUInt(StyleV400)==style)
-      return (*i);
-  }
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-int CharFacialHairDB::getStylesFor(unsigned int race, unsigned int gender)
-{
-	int n = 0;
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-	  if (i->getUInt(RaceV400)==race && i->getUInt(GenderV400)==gender) {
-	    n++;
-	  }
-	}
-	return n;
-}
-
-
-// Classes
-CharClassesDB::Record CharClassesDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ClassID)==id) return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-
 // Head and Helmet display info
 HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 {
@@ -189,74 +54,14 @@ HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 // --
 
 
-CreatureTypeDB::Record CreatureTypeDB::getByID(unsigned int id)
-{
-	/// Brute force search for now
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if(i->getUInt(ID) == id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-// --
-
-
-
 // --
 // ITEMDB.H
 //
 // --------------------------------
 // Item Database Stuff
 // --------------------------------
-/*
-const char* ItemTypeNames[NUM_ITEM_TYPES] = {
-	"All",
-	"Helmets",
-	"Neck",
-	"Shoulder armor",
-	"Shirts",
-	"Chest armor",
-	"Belts",
-	"Pants",
-	"Boots",
-	"Bracers",
-	"Gloves",
-	"Rings",
-	"Accessories",
-	"Daggers",
-	"Shields",
-	"Bows",
-	"Capes",
-	"Two-handed weapons",
-	"Quivers",
-	"Tabards",
-	"Robes",
-	"One-handed weapons",
-	"Offhand weapons",
-	"Holdable",
-	"Ammo",
-	"Thrown",
-	"Guns and wands",
-	"Unknown",
-	"Relic"
-};
-*/
 
 // ItemDisplayInfo
-
-ItemDisplayDB::Record ItemDisplayDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ItemDisplayID)==id)
-			return (*i);
-	}
-	wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
 
 
 ItemVisualDB::Record ItemVisualDB::getById(unsigned int id)
@@ -371,35 +176,6 @@ const ItemRecord& ItemDatabase::getById(int id)
   return items[0];
 }
 
-const ItemRecord& ItemDatabase::getByPos(int id)
-{
-	return items[id];
-}
-
-bool ItemDatabase::avaiable(int id)
-{
-	return (itemLookup.find(id)!=itemLookup.end());
-}
-
-int ItemDatabase::getItemNum(int displayid)
-{
-	for (std::vector<ItemRecord>::iterator it = items.begin(); it != items.end(); ++it)
-		if(it->model == displayid) return it->id;
-    
-	return 0;
-}
-
-
-ItemSubClassDB::Record ItemSubClassDB::getById(int id, int subid)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-	  if (i->getInt(ClassIDV400)==id && i->getInt(SubClassIDV400)==subid)
-	    return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
 // ============================================================
 // =============================================================
 
@@ -413,8 +189,7 @@ NPCRecord::NPCRecord(wxString line)
 	model = wxAtoi(line.BeforeFirst(','));
 	line = line.AfterFirst(',');
 	type = wxAtoi(line.BeforeFirst(','));
-	line = line.AfterFirst(',');
-	name.Printf(wxT("%s [%d] [%d]"), line.c_str(), id, model);
+	name = line.AfterFirst(',');
 }
 
 

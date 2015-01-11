@@ -469,7 +469,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, true);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, true);
 		modelviewer->charMenu->Enable(ID_LOAD_START, true);
-		modelviewer->charMenu->Enable(ID_LOAD_NPC_START, true);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, true);
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, true);
 	}else if (modelviewer->isADT == true){
@@ -486,7 +485,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
-		modelviewer->charMenu->Enable(ID_LOAD_NPC_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}else if (modelviewer->isWMO == true){
@@ -503,7 +501,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
-		modelviewer->charMenu->Enable(ID_LOAD_NPC_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}else{
@@ -520,7 +517,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
-		modelviewer->charMenu->Enable(ID_LOAD_NPC_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 	}

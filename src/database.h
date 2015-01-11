@@ -32,7 +32,6 @@
 
 // wmv database
 class ItemDatabase;
-class NPCDatabase;
 class NPCRecord;
 
 extern ItemDatabase items;
@@ -41,18 +40,9 @@ extern std::vector<NPCRecord> npcs;
 // game database
 class HelmGeosetDB;
 class ItemVisualEffectDB;
-class ItemDisplayDB;
 class ItemSetDB;
 class StartOutfitDB;
-class ItemSubClassDB;
 class ItemVisualDB;
-class CharHairGeosetsDB;
-class CharSectionsDB;
-class CharClassesDB;
-class CharFacialHairDB;
-class CharRacesDB;
-class NPCDB;
-class CreatureTypeDB;
 class LightSkyBoxDB;
 class SpellItemEnchantmentDB;
 class ItemVisualsDB;
@@ -60,17 +50,9 @@ class CamCinematicDB;
 
 extern HelmGeosetDB	helmetdb;
 extern ItemVisualEffectDB effectdb;
-extern ItemDisplayDB itemdisplaydb;
 extern ItemSetDB setsdb;
 extern StartOutfitDB startdb;
-extern ItemSubClassDB subclassdb;
 extern ItemVisualDB visualdb;
-extern CharHairGeosetsDB hairdb;
-extern CharSectionsDB chardb;
-extern CharClassesDB classdb;
-extern CharFacialHairDB	facialhairdb;
-extern CharRacesDB racedb;
-extern NPCDB npcdb;
 extern LightSkyBoxDB skyboxdb;
 extern SpellItemEnchantmentDB spellitemenchantmentdb;
 extern ItemVisualsDB itemvisualsdb;
@@ -112,173 +94,6 @@ public:
 };
 
 // ============
-
-class CharHairGeosetsDB: public DBCFile
-{
-public:
-	CharHairGeosetsDB(): DBCFile(wxT("DBFilesClient\\CharHairGeosets.dbc")) {}
-	~CharHairGeosetsDB() {}
-
-	// Fields
-	static const size_t CharHairGeosetID = 0;	// uint
-	static const size_t Race = 1;				// uint
-	static const size_t Gender = 2;				// uint, 0 = Male, 1 = Female
-	static const size_t Section = 3;			// uint, ID unique between race, and gender.
-	static const size_t Geoset = 4;				// uint, Defines hairstyle, each number should be unique for that race / gender combo.
-	static const size_t Bald = 5;				// uint, If this hairstyle bald or not.
-
-	// Mists of Pandaria
-	static const size_t Geosetv500 = 5;			// uint, Defines hairstyle, each number should be unique for that race / gender combo.
-	static const size_t Baldv500 = 7;			// uint, If this hairstyle bald or not.
-	//static const size_t Value6 = 6;			// Usually 0, but is 19 when it's not.
-	//static const size_t Value8 = 8;			// -1, unless Value6 is not 0
-
-	Record getByParams(unsigned int race, unsigned int gender, unsigned int section);
-	int getGeosetsFor(unsigned int race, unsigned int gender);
-};
-
-// As specified in http://www.pxr.dk/wowdev/wiki/index.php?title=CharSections.dbc
-class CharSectionsDB: public DBCFile
-{
-public:
-	CharSectionsDB(): DBCFile(wxT("DBFilesClient\\CharSections.dbc")) {}
-	~CharSectionsDB() {}
-
-	/// Fields
-	static const size_t SectonID = 0;	// uint
-	static const size_t Race = 1;		// uint
-	static const size_t Gender = 2;		// uint
-	static const size_t Type = 3;		// uint
-	static const size_t Tex1 = 4;		// string
-	static const size_t Tex2 = 5;		// string
-	static const size_t Tex3 = 6;		// string
-	static const size_t IsNPC = 7;		// Flags, uint, IsNPC = 0x1 ?, IsDeathKnight?
-	static const size_t Section = 8;	// uint
-	static const size_t Color = 9;		// uint
-
-	// Burning Crusade & Vanilla
-	static const size_t SectionBC = 4;	// uint
-	static const size_t ColorBC = 5;	// uint
-	static const size_t Tex1BC = 6;		// string
-	static const size_t Tex2BC = 7;		// string
-	static const size_t Tex3BC = 8;		// string
-	static const size_t IsNPCBC = 9;	// uint | 1 for npc
-
-	/// Types
-	enum SectionType{
-		SkinType = 0,
-		FaceType = 1,
-		FacialHairType = 2,
-		HairType = 3,
-		UnderwearType = 4,
-		SkinHDType = 5,
-		FaceHDType = 6,
-		FacialHairHDType = 7,
-		HairHDType = 8,
-		UnderwearHDType = 9
-	};
-	/*
-	static const size_t SkinType = 0;
-	static const size_t FaceType = 1;
-	static const size_t FacialHairType = 2;
-	static const size_t HairType = 3;
-	static const size_t UnderwearType = 4;*/
-
-	Record getByParams(size_t race, size_t gender, size_t type, size_t section, size_t color, size_t npc);
-	int getColorsFor(size_t race, size_t gender, size_t type, size_t section, size_t npc);
-	int getSectionsFor(size_t race, size_t gender, size_t type, size_t color, size_t npc);
-};
-
-
-class CharRacesDB: public DBCFile
-{
-public:
-	CharRacesDB(): DBCFile(wxT("DBFilesClient\\ChrRaces.dbc")) 	{}
-
-	~CharRacesDB() {}
-
-	// Correct for WotLK v3.3.x
-	static const size_t RaceID = 0;			// uint
-	static const size_t maleModeID = 4;		// unit
-	static const size_t femaleModeID = 5;	// unit
-	static const size_t ShortName = 6;		// string, Name, represented by only 2 chars
-	static const size_t Name = 11;			// string, Model name, 10048 to 11
-	//static const size_t FullName = 14;		// string, localization, Name with spaces & such.
-	static const size_t GeoType1 = 65;		// string, Facial Feature Type for Men
-	//static const size_t GeoType2 = 66;		// string, Facial Feature Type for Women
-	//static const size_t GeoType3 = 67;		// string, Changes Hair to this value. (IE: Hair for everyone, but Horns for Tauren)
-
-	// -= GeoType Values =-
-	// Normal: Default Geotype. Facial Hair for Men, no known value for Women.
-	// Peircings: Women Only. Earrings, noserings, eyebrow peircings, etc.
-	// Earrings: Gnome Women Only. Just Earrings.
-	// Features: Forsaken(Scourge) Only. Indicates a model change for the face.
-	// Horns: Taurens & Draenei Females Only. Horns.
-	// Tusks: Trolls Only. Tusks.
-	// Markings: Night Elf Women Only. Facial Markings.
-	// None: No Changable Geotypes. Currently only found on Goblin Women.
-
-
-	static const size_t NameV310 = 12;		// string, model name, 10048 to 11
-	
-	static const size_t GeoType1V400 = 17;
-	//static const size_t GeoType2V400 = 18;
-	//static const size_t GeoType3V400 = 19;
-
-	Record getByName(wxString name);
-	Record getById(size_t id);
-};
-
-
-class CharFacialHairDB: public DBCFile
-{
-public:
-	CharFacialHairDB(): DBCFile(wxT("DBFilesClient\\CharacterFacialHairStyles.dbc")) {}
-	~CharFacialHairDB() {}
-
-	// Fields
-	static const size_t Race = 0;				// uint
-	static const size_t Gender = 1;				// uint
-	static const size_t Style = 2;				// uint
-	static const size_t Geoset100 = 3;			// uint
-	static const size_t Geoset300 = 4;			// uint
-	static const size_t Geoset200 = 5;			// uint
-
-	// Burning Crusade & Vanilla
-	static const size_t Geoset100BC = 6;		// uint
-	static const size_t Geoset300BC = 7;		// uint
-	static const size_t Geoset200BC = 8;		// uint
-
-	// Cataclysm & Mists of Pandaria
-	static const size_t RaceV400 = 1;				// uint
-	static const size_t GenderV400 = 2;				// uint
-	static const size_t StyleV400 = 3;				// uint
-	static const size_t Geoset100V400 = 4;			// uint
-	static const size_t Geoset300V400 = 5;			// uint
-	static const size_t Geoset200V400 = 6;			// uint
-	
-	Record getByParams(unsigned int race, unsigned int gender, unsigned int style);
-	int getStylesFor(unsigned int race, unsigned int gender);
-};
-
-
-class CharClassesDB: public DBCFile
-{
-public:
-	CharClassesDB(): DBCFile(wxT("DBFilesClient\\ChrClasses.dbc")) {}
-	~CharClassesDB() {}
-
-	/// Fields
-	static const size_t ClassID = 0;	// uint
-	static const size_t Name = 4;		// string, localization - english name
-	//static const size_t RawName = 14;	// string
-
-	Record getById(unsigned int id);
-	
-	static const size_t NameV400 = 3;	// string, localization - english name
-};
-
-
 class HelmGeosetDB: public DBCFile
 {
 public:
@@ -305,49 +120,6 @@ public:
 // -----------------------------------
 
 class ItemDatabase;
-
-extern const char* ItemTypeNames[NUM_ITEM_TYPES];
-
-class ItemDisplayDB: public DBCFile
-{
-public:
-	ItemDisplayDB(): DBCFile(wxT("DBFilesClient\\ItemDisplayInfo.dbc")) {}
-	~ItemDisplayDB() {}
-
-	/// Fields
-	static const size_t ItemDisplayID = 0;	// uint
-	static const size_t Model = 1;			// string, modelleft
-	static const size_t Model2 = 2;			// string, modelright
-	static const size_t Skin = 3;			// string, textureleft
-	static const size_t Skin2 = 4;			// string, textureright
-	//static const size_t Icon = 5;			// string
-	//static const size_t Texture = 6;			// string
-	static const size_t GloveGeosetFlags = 7;		// uint, (0,1,2,3,4,5)
-	static const size_t BracerGeosetFlags = 8;		// uint, (0,1,2,3)
-	static const size_t RobeGeosetFlags = 9;		// uint, (0,1)
-	static const size_t BootsGeosetFlags = 10;		// uint, (0,1,2,4,6)
-	//static const size_t Unknown = 11;		// uint
-	//static const size_t ItemGroupSounds = 12;			// uint
-	//static const size_t GeosetVisID1 = 13;	// uint, HelmetGeosetVisData.dbc
-	//static const size_t GeosetVisID2 = 14;	// uint, HelmetGeosetVisData.dbc
-	static const size_t TexArmUpper = 15;	// string
-	static const size_t TexArmLower = 16;	// string
-	static const size_t TexHands = 17;		// string
-	static const size_t TexChestUpper = 18;	// string
-	static const size_t TexChestLower = 19;	// string
-	static const size_t TexLegUpper = 20;	// string
-	static const size_t TexLegLower = 21;	// string
-	static const size_t TexFeet = 22;		// string
-	static const size_t Visuals = 23;		// uint
-	//static const size_t ParticleColor = 24;	// uint
-
-	Record getById(unsigned int id);
-	bool hasId(unsigned int id);
-
-private:
-
-};
-
 
 class ItemVisualDB: public DBCFile
 {
@@ -439,47 +211,6 @@ public:
 	std::map<int, int> itemLookup;
 
 	const ItemRecord& getById(int id);
-	const ItemRecord& getByPos(int id);
-	int getItemIDByModel(int id);
-	bool avaiable(int id);
-	int getItemNum(int displayid);
-};
-
-/*
-class ItemClassDB: public DBCFile
-{
-public:
-	ItemClassDB(): DBCFile("DBFilesClient\\ItemClass.dbc") {}
-	~ItemClassDB() {}
-
-	/// Fields
-	static const size_t ClassID = 0;	// uint
-	static const size_t Name = 3;		// string
-
-	//Record getById(unsigned int id);
-};
-*/
-
-class ItemSubClassDB: public DBCFile
-{
-public:
-	ItemSubClassDB(): DBCFile(wxT("DBFilesClient\\ItemSubClass.dbc")) {}
-	~ItemSubClassDB() {}
-
-	/// Fields
-	static const size_t ClassID = 0;	// int
-	static const size_t SubClassID = 1;	// int
-	//static const size_t Flags = 4;		// uint
-	// ...
-	static const size_t Hands = 9;		// int
-	static const size_t Name = 10;		// string
-
-	Record getById(int id, int subid);
-
-	static const size_t ClassIDV400 = 1;	// int
-	static const size_t SubClassIDV400 = 2;	// int
-	static const size_t HandsV400 = 10;		// int
-	static const size_t NameV400 = 11;		// string
 };
 
 // ============/////////////////=================/////////////////
@@ -521,52 +252,6 @@ public:
 
 
 // ===============================================
-class CreatureTypeDB: public DBCFile
-{
-public:
-	CreatureTypeDB(): DBCFile(wxT("DBFilesClient\\CreatureType.dbc")) {}
-	~CreatureTypeDB() {}
-	
-	// Fields
-	static const size_t ID = 0;			// uint
-	static const size_t Name = 1;		// string
-
-	Record getByID(unsigned int id);
-};
-
-class NPCDB: public DBCFile
-{
-public:
-	NPCDB(): DBCFile(wxT("DBFilesClient\\CreatureDisplayInfoExtra.dbc")) {}
-	~NPCDB() {}
-
-	/// Fields
-	static const size_t NPCID = 0;			// uint
-	static const size_t RaceID = 1;			// uint
-	static const size_t Gender = 2;			// bool
-	static const size_t SkinColor = 3;		// uint
-	static const size_t Face = 4;			// uint
-	static const size_t HairStyle = 5;		// uint
-	static const size_t HairColor = 6;		// uint
-	static const size_t FacialHair = 7;		// uint
-	static const size_t HelmID = 8;			// uint, Slot1
-	static const size_t ShoulderID = 9;		// uint, Slot3
-	static const size_t ShirtID = 10;		// uint, Slot4
-	static const size_t ChestID = 11;		// uint, Slot5
-	static const size_t BeltID = 12;		// uint, Slot6
-	static const size_t PantsID = 13;		// uint, Slot7
-	static const size_t BootsID = 14;		// uint, Slot8
-	static const size_t BracersID = 15;		// uint, Slot9
-	static const size_t GlovesID = 16;		// uint, Slot10
-	static const size_t TabardID = 17;		// uint, Slot19
-	static const size_t CapeID = 18;		// uint, Slot16
-	//static const size_t CanEquip = 19;		// bool
-	static const size_t Filename = 20;		// string. an index offset to the filename.
-
-	Record getByFilename(wxString fn);
-	Record getByNPCID(size_t id);
-
-};
 
 class CamCinematicDB: public DBCFile
 {

@@ -35,14 +35,6 @@ struct EnchantsRec {
 	}
 };
 
-/*
-struct SpellRec {
-	unsigned int index;
-	unsigned int id;
-	wxString name;
-
-};
-*/
 
 class EnchantsDialog : public wxDialog {
     DECLARE_EVENT_TABLE()

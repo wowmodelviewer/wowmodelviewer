@@ -40,7 +40,6 @@ class RaceInfos
     std::string prefix;
 };
 
-
 class CharControl: public wxWindow, public Observer
 {
 	DECLARE_CLASS(CharControl)
@@ -63,6 +62,21 @@ class CharControl: public wxWindow, public Observer
 	void onEvent(Event *);
 
 public:
+
+	// Types
+	enum SectionType{
+	  SkinType = 0,
+	  FaceType = 1,
+	  FacialHairType = 2,
+	  HairType = 3,
+	  UnderwearType = 4,
+	  SkinHDType = 5,
+	  FaceHDType = 6,
+	  FacialHairHDType = 7,
+	  HairHDType = 8,
+	  UnderwearHDType = 9
+	};
+
 	// Item selection stuff
 	ChoiceDialog *itemDialog;
 	ssize_t choosingSlot;
@@ -73,14 +87,9 @@ public:
 	~CharControl();
 
 	bool Init();
-	//void UpdateModel(Model *m);
 	void UpdateModel(Attachment *a);
-	void UpdateNPCModel(Attachment *a, size_t id);
 	
 	void RefreshModel();
-	void RefreshNPCModel();
-	void RefreshItem(ssize_t slot);
-	void RefreshCreatureItem(ssize_t slot);
 	void RefreshEquipment();
 	inline void RandomiseChar();
 
@@ -113,8 +122,8 @@ public:
 	const wxString selectCharModel();
 
 	static void initRaces();
-	int getNbValuesForSection(CharSectionsDB::SectionType type);
-	std::vector<std::string> getTextureNameForSection(CharSectionsDB::SectionType);
+	int getNbValuesForSection(SectionType type);
+	std::vector<std::string> getTextureNameForSection(SectionType);
 
 };
 
