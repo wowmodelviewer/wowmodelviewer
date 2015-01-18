@@ -13,6 +13,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include <wx/string.h>
 #include <wx/wx.h>
@@ -37,6 +38,7 @@ class CASCFolder
     HANDLE hStorage;
 
     std::string locale() { return m_currentLocale; }
+    std::vector<std::string> localesFound() { return m_localesFound; }
     std::string version() { return m_version; }
     int CASCLocale() { return m_currentCascLocale; }
     std::string folder() { return m_folder; }
@@ -51,14 +53,16 @@ class CASCFolder
 
     void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString) = CASCFolder::defaultFilterFunc);
 
+    void setLocale(std::string);
 
   private:
     CASCFolder();
     CASCFolder(const CASCFolder &);
 
-    void initLocale();
+    void initLocales();
     void initVersion();
     std::string m_currentLocale;
+    std::vector<std::string> m_localesFound;
     std::string m_version;
     int m_currentCascLocale;
     std::string m_folder;

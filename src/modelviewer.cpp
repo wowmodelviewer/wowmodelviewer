@@ -1703,7 +1703,25 @@ void ModelViewer::LoadWoW()
   SetStatusText(wxString(CASCFOLDER.version()), 1);
 
   // init game locale
+  std::vector<std::string> localesFound = CASCFOLDER.localesFound();
+
+  if(localesFound.size() > 1)
+  {
+    wxString availableLocales[localesFound.size()];
+    for(size_t i=0;i<localesFound.size();i++)
+      availableLocales[i] = wxString(localesFound[i].c_str());
+
+    long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), WXSIZEOF(availableLocales), availableLocales);
+    if (id != -1)
+      CASCFOLDER.setLocale(localesFound[id]);
+  }
+  else
+  {
+    CASCFOLDER.setLocale(localesFound[0]);
+  }
+
   langName = CASCFOLDER.locale();
+
   SetStatusText(wxString(CASCFOLDER.locale()), 2);
 
   InitDatabase();

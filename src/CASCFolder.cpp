@@ -42,16 +42,54 @@ bool CASCFolder::init(const std::string &folder)
   else
   {
     LOG_INFO << "Succesfully opened. ";
-    initLocale();
+    initLocales();
     initVersion();
     return true;
   }
 }
 
-void CASCFolder::initLocale()
+void CASCFolder::initLocales()
 {
   LOG_INFO << "Determining Locale for:" << m_folder.c_str();
 
+  std::string buildinfofile = m_folder+"\\..\\.build.info";
+  std::ifstream buildinfo(buildinfofile.c_str());
+
+  if(!buildinfo.good())
+  {
+    LOG_ERROR << "Fail to open .build.info to determine locale";
+    return;
+  }
+
+  std::string line, prevline;
+
+  while(!buildinfo.eof())
+  {
+    buildinfo >> line;
+    if(!prevline.empty() && prevline.find("text?") == std::string::npos)
+    {
+      if(line.find("text?") != std::string::npos)
+        m_localesFound.push_back(prevline);
+    }
+    prevline = line;
+  }
+
+  if(m_localesFound.empty())
+  {
+    LOG_ERROR << "Fail to grab locale in .build.info file";
+  }
+  else
+  {
+    for(size_t i = 0; i < m_localesFound.size(); i++)
+    {
+      LOG_INFO << "locale found : " << m_localesFound[i].c_str();
+    }
+  }
+}
+
+
+void CASCFolder::setLocale(std::string locale)
+{
   // init map based on CASCLib
   std::map<std::string,int> locales;
   locales["frFR"] = CASC_LOCALE_FRFR;
@@ -70,18 +108,9 @@ void CASCFolder::initLocale()
   locales["zhCN"] = CASC_LOCALE_ZHCN;
   locales["zhTW"] = CASC_LOCALE_ZHTW;
 
-  HKEY key;
-  if(ERROR_SUCCESS == RegOpenKeyEx((HKEY)HKEY_CURRENT_USER, "Software\\Blizzard Entertainment\\Battle.net\\Launch Options\\WoW", 0, KEY_QUERY_VALUE, &key))
+  if(!locale.empty())
   {
-    DWORD dummy;
-    char value[1024];
-    if(ERROR_SUCCESS ==  RegQueryValueEx(key, "LOCALE", 0, &dummy,(LPBYTE)value, &dummy))
-        m_currentLocale = std::string(value);
-  }
-
-  if(!m_currentLocale.empty())
-  {
-    std::map<std::string,int>::iterator it = locales.find(m_currentLocale);
+    std::map<std::string,int>::iterator it = locales.find(locale);
 
     if(it != locales.end())
     {
@@ -91,43 +120,14 @@ void CASCFolder::initLocale()
       {
         CascCloseFile(dummy);
         m_currentCascLocale = it->second;
-        LOG_INFO << "Locale succesfully found:" << m_currentLocale.c_str();
+        m_currentLocale = locale;
+        LOG_INFO << "Locale succesfully set:" << m_currentLocale.c_str();
       }
       else
       {
-        LOG_ERROR << "Determining Locale for folder (CASC) " << m_folder.c_str() << "failed";
+        LOG_ERROR << "Setting Locale" << locale.c_str() << "for folder" << m_folder.c_str() << "failed";
       }
     }
-  }
-
-  if(CASC_LOCALE_NONE == m_currentCascLocale)
-  {
-    LOG_ERROR << "Determining Locale for folder (Registry) " << m_folder.c_str() << "failed, trying from CASC folder itself.";
-    HANDLE dummy;
-
-    //search for current locale for this folder
-    // => look at Interface\FrameXML\Localization.lua file
-    std::map<std::string,int>::iterator it = locales.begin();
-    for( ; it != locales.end() ; ++it)
-    {
-      if(CascOpenFile(hStorage,"Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
-      {
-        CascCloseFile(dummy);
-        break;
-      }
-    }
-
-    if(it != locales.end())
-    {
-      m_currentLocale = it->first;
-      m_currentCascLocale = it->second;
-      LOG_INFO << "Locale succesfully found:" << m_currentLocale.c_str();
-    }
-    else
-    {
-      LOG_ERROR << "Determining Locale for folder (CASC) " << m_folder.c_str() << "failed.";
-    }
-
   }
 }
 
