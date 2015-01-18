@@ -1,5 +1,6 @@
 #include "animcontrol.h"
 
+#include "CASCFolder.h"
 #include "FileTreeItem.h"
 #include "GameDatabase.h"
 #include "globalvars.h"
@@ -172,13 +173,11 @@ void AnimControl::UpdateModel(WoWModel *m)
 	// Find any textures that exist for the model
 	bool res = false;
 
-	/*
 	wxString fn = m->name.Lower();
 	if (fn.substr(0,4) != wxT("char")) {
 		if (fn.substr(0,4) == wxT("item"))
 			res = UpdateItemModel(m);
 	}
-	*/
 
 	skinList->Show(res);
 
@@ -367,7 +366,6 @@ bool filterDir(wxString fn)
 
 bool AnimControl::UpdateItemModel(WoWModel *m)
 {
-/*
 	wxString fn = m->name;
 
 	// change M2 to mdx
@@ -384,57 +382,77 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	
 	TextureSet skins;
 
-	for (ItemDisplayDB::Iterator it=itemdisplaydb.begin(); it!=itemdisplaydb.end(); ++it) {
-		if (fn.IsSameAs(it->getString(ItemDisplayDB::Model), false)) {
-            TextureGroup grp;
-			grp.base = TEXTURE_ITEM;
-			grp.count = 1;
-			wxString skin = it->getString(ItemDisplayDB::Skin);
-			grp.tex[0] = skin;
-			if (grp.tex[0].length() > 0) 
-				skins.insert(grp);
-		}
-		
-		//if (!strcmp(it->getString(ItemDisplayDB::Model2), fn.c_str())) {
-		if (fn.IsSameAs(it->getString(ItemDisplayDB::Model2), false)) {
-            TextureGroup grp;
-			grp.base = TEXTURE_ITEM;
-			grp.count = 1;
-			wxString skin = it->getString(ItemDisplayDB::Skin2);
-			grp.tex[0] = skin;
-			if (grp.tex[0].length() > 0) 
-				skins.insert(grp);
-		}
+	// query textures for model1
+	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\"").arg(fn.mb_str());
+	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	if(r.valid && !r.empty())
+	{
+	  for(size_t i = 0 ; i < r.values.size() ; i++)
+	  {
+	    TextureGroup grp;
+	    grp.base = TEXTURE_ITEM;
+	    grp.count = 1;
+	    std::string tex = r.values[i][0] + r.values[i][1];
+	    wxString skin = tex.c_str();
+	    grp.tex[0] = skin;
+	    if (grp.tex[0].length() > 0)
+	      skins.insert(grp);
+	  }
+	}
+
+	// do the same for model2
+	query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model2 = \"%1\"").arg(fn.mb_str());
+	r = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	if(r.valid && !r.empty())
+	{
+	  for(size_t i = 0 ; i < r.values.size() ; i++)
+	  {
+	    TextureGroup grp;
+	    grp.base = TEXTURE_ITEM;
+	    grp.count = 1;
+	    std::string tex = r.values[i][0] + r.values[i][1];
+	    wxString skin = tex.c_str();
+	    grp.tex[0] = skin;
+	    if (grp.tex[0].length() > 0)
+	      skins.insert(grp);
+	  }
 	}
 
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
+	CASCFOLDER.initFileList(filelist);
+
 	sFilterDir = m->name.BeforeLast(wxT('.')).Lower();
-	getFileLists(filelist, filterDir);
-	if (filelist.begin() != filelist.end()) {
+	if (filelist.begin() != filelist.end())
+	{
 		TextureGroup grp;
 		grp.base = TEXTURE_ITEM;
 		grp.count = 1;
-		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-			grp.tex[0] = (*it).displayName.BeforeLast(wxT('.')).AfterLast(SLASH);
-			skins.insert(grp);
+		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it)
+		{
+		  if(sFilterDir == it->fileName.BeforeLast(wxT('.')).Lower() && it->fileName.AfterLast(wxT('.')) == "blp")
+		  {
+		    grp.tex[0] = it->displayName;
+		    skins.insert(grp);
+		  }
 		}
 	}
-
 	bool ret = false;
 
-	if (!skins.empty()) {
+	if (!skins.empty())
+	{
 		ret = FillSkinSelector(skins);
 
-		if (ret) { // Don't call SetSkin without a skin
+		if (ret)
+		{ // Don't call SetSkin without a skin
 			int mySkin = randomSkins ? randint(0, (int)skins.size()-1) : 0;
 			SetSkin(mySkin);
 		}
 	}
 
 	return ret;
-	*/
-  return false;
 }
 
 
@@ -445,7 +463,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 		// fill our skin selector
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
 			wxString texname = it->tex[0];
-			skinList->Append(texname);
+			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
 			texname = g_selModel->name.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
 			wxLogMessage(wxT("Info: Added %s to the TextureList[%i] via FillSkinSelector."), texname.c_str(), g_selModel->TextureList.size());
 			g_selModel->TextureList.push_back(texname);

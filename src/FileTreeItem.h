@@ -11,8 +11,9 @@
 #include <wx/string.h>
 
 struct FileTreeItem {
-    wxString displayName;
+  wxString displayName;
   wxString fileName;
+
   int color;
 
   /// Comparison
