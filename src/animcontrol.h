@@ -65,6 +65,7 @@ class AnimControl: public wxWindow
 	wxButton *btnPlay, *btnPause, *btnStop, *btnClear, *btnPrev, *btnNext;
 	wxCheckBox *oldStyle;
 
+	bool UpdateCreatureModel(WoWModel *m);
 	bool UpdateItemModel(WoWModel *m);
 	bool FillSkinSelector(TextureSet &skins);
 
