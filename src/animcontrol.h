@@ -16,36 +16,57 @@ extern float animSpeed;
 // AnimationData.dbc
 #define	ANIM_STAND	0
 
-struct TextureGroup {
-	static const size_t num = 3;
-	size_t count;
-	int base;
-	wxString tex[num];
-	TextureGroup()
-	{
-		for (size_t i=0; i<num; i++) {
-			tex[i] = wxT("");
-		}
-	}
+class TextureGroup
+{
+  public:
+    static const size_t num = 3;
+    size_t count;
+    int base;
+    wxString tex[num];
+    TextureGroup() : base(0)
+    {
+      for (size_t i=0; i<num; i++)
+      {
+        tex[i] = wxT("");
+      }
+    }
 
-	// default copy constr
-	TextureGroup(const TextureGroup &grp)
-	{
-		for (size_t i=0; i<num; i++) {
-			tex[i] = grp.tex[i];
-		}
-		base = grp.base;
-		count = grp.count;
-	}
+    // default copy constr
+    TextureGroup(const TextureGroup &grp)
+    {
+      for (size_t i=0; i<num; i++)
+      {
+        tex[i] = grp.tex[i];
+      }
+      base = grp.base;
+      count = grp.count;
+    }
 
-	bool operator<(const TextureGroup &grp) const
-	{
-		for (size_t i=0; i<num; i++) {
-			if (tex[i]<grp.tex[i]) return true;
-			if (tex[i]>grp.tex[i]) return false;
-		}
-		return false;
-	}
+    bool operator<(const TextureGroup &grp) const
+    {
+      for (size_t i=0; i<num; i++)
+      {
+        if (tex[i]<grp.tex[i]) return true;
+        if (tex[i]>grp.tex[i]) return false;
+      }
+      return false;
+    }
+
+    bool operator==(const TextureGroup &grp) const
+    {
+      for (size_t i=0; i<num; i++)
+      {
+        if(tex[i] != grp.tex[i])
+          return false;
+      }
+      return true;
+    }
+
+    bool operator!=(const TextureGroup &grp) const
+    {
+      return !((*this) == grp);
+    }
+
 };
 
 typedef std::set<TextureGroup> TextureSet;

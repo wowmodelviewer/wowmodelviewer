@@ -377,39 +377,47 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
 
   TextureSet skins;
-/*
   // see if this model has skins
-  wxLogMessage(wxT("Searching skins for '%s'"), m->name.c_str());
-  try {
-    CreatureModelDB::Record rec = modeldb.getByFilename(fn);
-    // for character models, don't use skins
-    if (rec.getUInt(CreatureModelDB::Type) != 4) {
-      //TextureSet skins;
-      unsigned int modelid = rec.getUInt(CreatureModelDB::ModelID);
+  LOG_INFO << "Searching skins for" << m->name.c_str();
 
-      wxLogMessage(wxT("Found model in CreatureModelDB, id: %u"), modelid);
+  QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path FROM CreatureDisplayInfo \
+		                   LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID \
+		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( m->name.AfterLast(SLASH).c_str());
 
-      for (CreatureSkinDB::Iterator it = skindb.begin();  it!=skindb.end();  ++it) {
-        if (it->getUInt(CreatureSkinDB::ModelID) == modelid) {
-          TextureGroup grp;
-          int count = 0;
-          for (size_t i=0; i<TextureGroup::num; i++) {
-            wxString skin(it->getString(CreatureSkinDB::Skin1 + i));
-            if (skin != wxEmptyString) {
-              grp.tex[i] = skin;
-              count++;
-            }
-          }
-          grp.base = TEXTURE_GAMEOBJECT1;
-          grp.count = count;
-          if (grp.tex[0].length() > 0)
-            skins.insert(grp);
+  sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  std::set<wxString> alreadyUsedTextures;
+
+  if(r.valid && !r.values.empty())
+  {
+    for(size_t i = 0 ; i < r.values.size() ; i++)
+    {
+      TextureGroup grp;
+      int count = 0;
+      for (size_t skin=0; skin<TextureGroup::num; skin++)
+      {
+        if(!r.values[i][skin].empty())
+        {
+          std::string texfullname = r.values[i][3] + r.values[i][skin] + ".blp";
+          wxString texture(texfullname.c_str());
+          texture.MakeLower();
+          alreadyUsedTextures.insert(texture);
+          texture = texfullname.c_str();
+          grp.tex[skin] = texture;
+          count++;
         }
       }
+
+      grp.base = TEXTURE_GAMEOBJECT1;
+      grp.count = count;
+
+      if(grp.tex[0].length() > 0 && std::find(skins.begin(),skins.end(),grp) == skins.end())
+        skins.insert(grp);
     }
-  } catch (CreatureModelDB::NotFound) {
-    wxLogMessage(wxT("CreatureModelDB not found !!!"));
   }
+
+
+/*
 
   wxString lwrName = fn;
   lwrName.MakeLower();
@@ -427,30 +435,48 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 */
   int count = (int)skins.size();
 
-  // Search the same directory for BLPs
-  std::set<FileTreeItem> filelist;
-  sFilterDir = fn.BeforeLast(SLASH)+SLASH;
-  sFilterDir.MakeLower();
-  CASCFOLDER.initFileList(filelist,filterDir);
-  if (filelist.begin() != filelist.end()) {
-    TextureGroup grp;
-    grp.base = TEXTURE_GAMEOBJECT1;
-    grp.count = 1;
-    for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-      grp.tex[0] = (*it).displayName;
-      skins.insert(grp);
+  // if aready found some info from database, then check if model is a multi textured one
+  // if it is the case, does not make sense to search for specific texture (as alone, rendering will be bad)
+  // we search for file in folder onyl if :
+  // - we didn't find anything yet (from database)
+  // - we found something AND what we found only use 1 texture
+  if(count == 0 || (count != 0 && (skins.begin())->count == 1))
+  {
+    // Search the same directory for BLPs
+    std::set<FileTreeItem> filelist;
+    sFilterDir = fn.BeforeLast(SLASH)+SLASH;
+    sFilterDir.MakeLower();
+    CASCFOLDER.initFileList(filelist,filterDir);
+    if (filelist.begin() != filelist.end())
+    {
+      TextureGroup grp;
+      grp.base = TEXTURE_GAMEOBJECT1;
+      grp.count = 1;
+      for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it)
+      {
+        wxString texname = (*it).displayName;
+        texname.MakeLower();
+
+        // use this alone texture only if not already used from database infos
+        if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname) == alreadyUsedTextures.end())
+        {
+          grp.tex[0] =  (*it).displayName;;
+          skins.insert(grp);
+        }
+      }
     }
   }
-
   bool ret = false;
 
-  if (!skins.empty()) {
+  if (!skins.empty())
+  {
     ret = FillSkinSelector(skins);
 
     if (count == 0) // No entries on .dbc and skins.txt
       count = (int)skins.size();
 
-    if (ret) { // Don't call SetSkin without a skin
+    if (ret)
+    { // Don't call SetSkin without a skin
       int mySkin = randomSkins ? randint(0, (int)count-1) : 0;
       SetSkin(mySkin);
     }
