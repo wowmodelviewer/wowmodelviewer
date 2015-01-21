@@ -369,24 +369,22 @@ bool filterDir(wxString fn)
 
 bool AnimControl::UpdateCreatureModel(WoWModel *m)
 {
+  std::set<wxString> alreadyUsedTextures;
+  TextureSet skins;
+
+  // see if this model has skins
+  LOG_INFO << "Searching skins for" << m->name.c_str();
 
   wxString fn = m->name;
 
   // remove extension
   fn = fn.BeforeLast(wxT('.'));
 
-
-  TextureSet skins;
-  // see if this model has skins
-  LOG_INFO << "Searching skins for" << m->name.c_str();
-
   QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path FROM CreatureDisplayInfo \
 		                   LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID \
 		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( m->name.AfterLast(SLASH).c_str());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
-
-  std::set<wxString> alreadyUsedTextures;
 
   if(r.valid && !r.values.empty())
   {
@@ -400,9 +398,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         {
           std::string texfullname = r.values[i][3] + r.values[i][skin] + ".blp";
           wxString texture(texfullname.c_str());
-          texture.MakeLower();
-          alreadyUsedTextures.insert(texture);
-          texture = texfullname.c_str();
+          alreadyUsedTextures.insert(texture.Lower());
           grp.tex[skin] = texture;
           count++;
         }
@@ -416,24 +412,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
     }
   }
 
-
-/*
-
-  wxString lwrName = fn;
-  lwrName.MakeLower();
-  if (gUserSkins.AddUserSkins(lwrName, skins))
-    wxLogMessage(wxT("Found user skins"));
-
-#ifdef  DEBUG
-  wxLogMessage(wxT("Found %d skins:"), skins.size());
-  for (TextureSet::iterator i=skins.begin(); i!=skins.end(); ++i) {
-    wxLogMessage(wxT("- * %s"), i->tex[0].c_str());
-    wxLogMessage(wxT("  * %s"), i->tex[1].c_str());
-    wxLogMessage(wxT("  * %s"), i->tex[2].c_str());
-  }
-#endif
-*/
   int count = (int)skins.size();
+
+  LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
   // if aready found some info from database, then check if model is a multi textured one
   // if it is the case, does not make sense to search for specific texture (as alone, rendering will be bad)
@@ -455,12 +436,11 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it)
       {
         wxString texname = (*it).displayName;
-        texname.MakeLower();
 
         // use this alone texture only if not already used from database infos
-        if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname) == alreadyUsedTextures.end())
+        if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname.Lower()) == alreadyUsedTextures.end())
         {
-          grp.tex[0] =  (*it).displayName;;
+          grp.tex[0] =  texname;
           skins.insert(grp);
         }
       }
@@ -470,6 +450,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
   if (!skins.empty())
   {
+    LOG_INFO << "Found" << skins.size() << "skins (total)";
     ret = FillSkinSelector(skins);
 
     if (count == 0) // No entries on .dbc and skins.txt
@@ -487,6 +468,11 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
 bool AnimControl::UpdateItemModel(WoWModel *m)
 {
+  std::set<wxString> alreadyUsedTextures;
+  TextureSet skins;
+
+  LOG_INFO << "Searching skins for" << m->name.c_str();
+
 	wxString fn = m->name;
 
 	// change M2 to mdx
@@ -501,8 +487,6 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	// just get the file name, exclude the path.
 	fn = fn.AfterLast(MPQ_SLASH);
 	
-	TextureSet skins;
-
 	// query textures for model1
 	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\"").arg(fn.mb_str());
 	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
@@ -516,6 +500,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	    grp.count = 1;
 	    std::string tex = r.values[i][0] + r.values[i][1];
 	    wxString skin = tex.c_str();
+	    alreadyUsedTextures.insert(skin.Lower());
 	    grp.tex[0] = skin;
 	    if (grp.tex[0].length() > 0)
 	      skins.insert(grp);
@@ -535,11 +520,14 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	    grp.count = 1;
 	    std::string tex = r.values[i][0] + r.values[i][1];
 	    wxString skin = tex.c_str();
+	    alreadyUsedTextures.insert(skin.Lower());
 	    grp.tex[0] = skin;
 	    if (grp.tex[0].length() > 0)
 	      skins.insert(grp);
 	  }
 	}
+
+	LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
@@ -553,14 +541,20 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 		grp.count = 1;
 		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it)
 		{
-		  grp.tex[0] = it->displayName;
-		  skins.insert(grp);
+		  wxString texname = (*it).displayName;
+		  // use this alone texture only if not already used from database infos
+		  if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname.Lower()) == alreadyUsedTextures.end())
+		  {
+		    grp.tex[0] = texname;
+		    skins.insert(grp);
+		  }
 		}
 	}
 	bool ret = false;
 
 	if (!skins.empty())
 	{
+	  LOG_INFO << "Found" << skins.size() << "skins (Total)";
 		ret = FillSkinSelector(skins);
 
 		if (ret)
