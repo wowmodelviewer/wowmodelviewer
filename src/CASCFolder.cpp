@@ -23,29 +23,15 @@ CASCFolder::CASCFolder()
 
 }
 
-bool CASCFolder::init(const std::string &folder)
+void CASCFolder::init(const std::string &folder)
 {
   m_folder = folder;
 
   if(m_folder.find_last_of("\\") == m_folder.length()-1)
     m_folder = m_folder.substr (0,m_folder.length()-1);
 
-  LOG_INFO << "Loading Game Folder:" << m_folder.c_str();
-
-  // Open the storage directory
-  if(!CascOpenStorage(m_folder.c_str(), 0, &hStorage))
-  {
-    m_openError = GetLastError();
-    LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << m_openError;
-    return false;
-  }
-  else
-  {
-    LOG_INFO << "Succesfully opened. ";
-    initLocales();
-    initVersion();
-    return true;
-  }
+  initLocales();
+  initVersion();
 }
 
 void CASCFolder::initLocales()
@@ -88,7 +74,7 @@ void CASCFolder::initLocales()
 }
 
 
-void CASCFolder::setLocale(std::string locale)
+bool CASCFolder::setLocale(std::string locale)
 {
   // init map based on CASCLib
   std::map<std::string,int> locales;
@@ -115,7 +101,15 @@ void CASCFolder::setLocale(std::string locale)
     if(it != locales.end())
     {
       HANDLE dummy;
+      LOG_INFO << "Loading Game Folder:" << m_folder.c_str();
       // locale found => try to open it
+      if(!CascOpenStorage(m_folder.c_str(), it->second, &hStorage))
+      {
+        m_openError = GetLastError();
+        LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << m_openError;
+        return false;
+      }
+
       if(CascOpenFile(hStorage,"Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
       {
         CascCloseFile(dummy);
@@ -126,9 +120,11 @@ void CASCFolder::setLocale(std::string locale)
       else
       {
         LOG_ERROR << "Setting Locale" << locale.c_str() << "for folder" << m_folder.c_str() << "failed";
+        return false;
       }
     }
   }
+  return true;
 }
 
 

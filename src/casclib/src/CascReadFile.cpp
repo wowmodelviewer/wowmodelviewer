@@ -169,6 +169,8 @@ static int EnsureHeaderAreaIsLoaded(TCascFile * hf)
 
         // Load the size of the frame headers
         hf->HeaderSize = ConvertBytesToInteger_4(pbHeaderArea);
+        if(hf->HeaderSize & 0x80000000)
+            return ERROR_BAD_FORMAT;
         pbHeaderArea += sizeof(DWORD);
 
         // Read the header size
@@ -384,6 +386,7 @@ bool WINAPI CascReadFile(HANDLE hFile, void * pvBuffer, DWORD dwBytesToRead, PDW
     DWORD dwStartPointer = 0;
     DWORD dwFilePointer = 0;
     DWORD dwEndPointer = 0;
+    DWORD dwFrameSize;
     DWORD cbOutBuffer;
     bool bReadResult;
     int nError = ERROR_SUCCESS;
@@ -464,7 +467,7 @@ bool WINAPI CascReadFile(HANDLE hFile, void * pvBuffer, DWORD dwBytesToRead, PDW
                 // Load the raw file data to memory
                 FileOffset = pFrame->FrameArchiveOffset;
                 bReadResult = FileStream_Read(hf->pStream, &FileOffset, pbRawData, pFrame->CompressedSize);
-
+                
                 // Note: The raw file data size could be less than expected
                 // Happened in WoW build 19342 with the ROOT file. MD5 in the frame header
                 // is zeroed, which means it should not be checked
@@ -474,16 +477,16 @@ bool WINAPI CascReadFile(HANDLE hFile, void * pvBuffer, DWORD dwBytesToRead, PDW
                 // File Size:  0x027134FC
                 if(bReadResult == false && GetLastError() == ERROR_HANDLE_EOF && !IsValidMD5(pFrame->md5))
                 {
-                  // Get the size of the remaining file
-                  FileStream_GetSize(hf->pStream, &StreamSize);
-                  DWORD dwFrameSize = (DWORD)(StreamSize - FileOffset);
+                    // Get the size of the remaining file
+                    FileStream_GetSize(hf->pStream, &StreamSize);
+                    dwFrameSize = (DWORD)(StreamSize - FileOffset);
 
-                  // If the frame offset is before EOF and frame end is beyond EOF, correct it
-                  if(FileOffset < StreamSize && dwFrameSize < pFrame->CompressedSize)
-                  {
-                    memset(pbRawData + dwFrameSize, 0, (pFrame->CompressedSize - dwFrameSize));
-                    bReadResult = true;
-                  }
+                    // If the frame offset is before EOF and frame end is beyond EOF, correct it
+                    if(FileOffset < StreamSize && dwFrameSize < pFrame->CompressedSize)
+                    {
+                        memset(pbRawData + dwFrameSize, 0, (pFrame->CompressedSize - dwFrameSize));
+                        bReadResult = true;
+                    }
                 }
 
                 // If the read result failed, we cannot finish reading it

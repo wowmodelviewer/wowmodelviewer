@@ -1691,19 +1691,23 @@ void ModelViewer::LoadWoW()
     getGamePath();
   }
 
-  if(!CASCFOLDER.init(gamePath.c_str()))
-  {
-    wxString message =  wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), CASCFOLDER.lastError());
-    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
-    dial->ShowModal();
-    return;
-  }
+  CASCFOLDER.init(gamePath.c_str());
 
   // init game version
   SetStatusText(wxString(CASCFOLDER.version()), 1);
 
   // init game locale
   std::vector<std::string> localesFound = CASCFOLDER.localesFound();
+
+  if(localesFound.empty())
+  {
+    wxString message =  wxString::Format(wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft No locale found"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
+
+  std::string locale = localesFound[0];
 
   if(localesFound.size() > 1)
   {
@@ -1713,12 +1717,17 @@ void ModelViewer::LoadWoW()
 
     long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), WXSIZEOF(availableLocales), availableLocales);
     if (id != -1)
-      CASCFOLDER.setLocale(localesFound[id]);
+      locale = localesFound[id];
   }
-  else
+
+  if(!CASCFOLDER.setLocale(locale))
   {
-    CASCFOLDER.setLocale(localesFound[0]);
+    wxString message =  wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), CASCFOLDER.lastError());
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
   }
+
 
   langName = CASCFOLDER.locale();
 

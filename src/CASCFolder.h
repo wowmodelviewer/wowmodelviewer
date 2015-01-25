@@ -33,7 +33,7 @@ class CASCFolder
       return m_instance;
     }
 
-    bool init(const std::string & path);
+    void init(const std::string & path);
 
     HANDLE hStorage;
 
@@ -53,7 +53,7 @@ class CASCFolder
 
     void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString) = CASCFolder::defaultFilterFunc);
 
-    void setLocale(std::string);
+    bool setLocale(std::string);
 
   private:
     CASCFolder();

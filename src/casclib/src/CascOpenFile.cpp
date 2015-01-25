@@ -69,109 +69,41 @@ PCASC_ENCODING_ENTRY FindEncodingEntry(TCascStorage * hs, PQUERY_KEY pEncodingKe
 }
 
 // Also used in CascSearchFile
-PCASC_ROOT_ENTRY FindFirstRootEntry(TCascStorage * hs, const char * szFileName, size_t * PtrIndex)
+PCASC_ROOT_ENTRY FindRootEntry(TCascStorage * hs, const char * szFileName, DWORD * PtrTableIndex)
 {
-    PCASC_ROOT_ENTRY pFoundEntry = NULL;
     PCASC_ROOT_ENTRY pRootEntry;
     ULONGLONG FileNameHash;
+    DWORD TableIndex;
     uint32_t dwHashHigh = 0;
     uint32_t dwHashLow = 0;
-    size_t StartEntry = 0;
-    size_t MidlEntry = 0;
-    size_t EndEntry = hs->nRootEntries;
 
     // Calculate the HASH value of the normalized file name
     hashlittle2(szFileName, strlen(szFileName), &dwHashHigh, &dwHashLow);
     FileNameHash = ((ULONGLONG)dwHashHigh << 0x20) | dwHashLow;
 
-    // Perform binary search
-    while(StartEntry < EndEntry)
-    {
-        // Calculate the middle of the interval
-        MidlEntry = StartEntry + ((EndEntry - StartEntry) / 2);
-        pRootEntry = hs->ppRootEntries[MidlEntry];
+    // Get the first table index
+    TableIndex = (DWORD)(FileNameHash & (hs->RootTable.TableSize - 1));
+    assert(hs->RootTable.ItemCount < hs->RootTable.TableSize);
 
-        // Did we find it?
+    // Search the proper entry
+    for(;;)
+    {
+        // Does the has match?
+        pRootEntry = hs->RootTable.TablePtr + TableIndex;
         if(pRootEntry->FileNameHash == FileNameHash)
         {
-            pFoundEntry = pRootEntry;
-            break;
+            if(PtrTableIndex != NULL)
+                PtrTableIndex[0] = TableIndex;
+            return pRootEntry;
         }
 
-        // Move the interval to the left or right
-        (FileNameHash < pRootEntry->FileNameHash) ? EndEntry = MidlEntry : StartEntry = MidlEntry + 1;
+        // If the entry is free, the file is not there
+        if(pRootEntry->FileNameHash == 0 && pRootEntry->SumValue == 0)
+            return NULL;
+
+        // Move to the next entry
+        TableIndex = (DWORD)((TableIndex + 1) & (hs->RootTable.TableSize - 1));
     }
-
-    // Move the pointer back to the first entry with that hash
-    if(pFoundEntry != NULL)
-    {
-        while(MidlEntry > 0 && hs->ppRootEntries[MidlEntry - 1]->FileNameHash == FileNameHash)
-        {
-            pFoundEntry = hs->ppRootEntries[MidlEntry - 1];
-            MidlEntry--;
-        }
-    }
-
-    // Return what we found
-    if(PtrIndex != NULL)
-        *PtrIndex = MidlEntry;
-    return pFoundEntry;
-}
-
-// Check the root directory for that hash
-PCASC_ROOT_ENTRY FindRootEntryLocale(TCascStorage * hs, char * szFileName, DWORD Locale)
-{
-    PCASC_ROOT_ENTRY pThatEntry = NULL;
-    PCASC_ROOT_ENTRY pENUSEntry = NULL;
-    PCASC_ROOT_ENTRY pENGBEntry = NULL;
-    PCASC_ROOT_ENTRY pAnyEntry = NULL;
-    PCASC_ROOT_ENTRY pEndEntry = NULL;
-    PCASC_ROOT_ENTRY pRootEntry = NULL;
-    ULONGLONG FileNameHash;
-    size_t EntryIndex = 0;
-    size_t EndEntry = hs->nRootEntries;
-
-    // Find a root entry with the given name hash
-    pRootEntry = FindFirstRootEntry(hs, szFileName, &EntryIndex);
-    if(pRootEntry != NULL)
-    {
-        // Rememeber the file name hash
-        pEndEntry = hs->pRootEntries + hs->nRootEntries;
-        FileNameHash = pRootEntry->FileNameHash;
-
-        // Find all suitable root entries
-        while(EntryIndex < EndEntry)
-        {
-            // Get the root entry
-            pRootEntry = hs->ppRootEntries[EntryIndex++];
-            if(pRootEntry->FileNameHash != FileNameHash)
-                break;
-
-            // If a locale has been given, check it
-            if(pThatEntry == NULL && Locale != 0 && (Locale & pRootEntry->Locales))
-                pThatEntry = pRootEntry;
-            if(pENUSEntry == NULL && (pRootEntry->Locales & CASC_LOCALE_ENUS))
-                pENUSEntry = pRootEntry;
-            if(pENGBEntry == NULL && (pRootEntry->Locales & CASC_LOCALE_ENGB))
-                pENGBEntry = pRootEntry;
-            if(pAnyEntry == NULL)
-                pAnyEntry = pRootEntry;
-            
-            // Move to the next one
-            pRootEntry++;
-        }
-
-        // Return the key by priority
-        if(pThatEntry != NULL)
-            return pThatEntry;
-        if(pENGBEntry != NULL)
-            return pENGBEntry;
-        if(pENUSEntry != NULL)
-            return pENUSEntry;
-    }
-
-    // Return whatever we got
-    return pAnyEntry;
 }
 
 static TCascFile * CreateFileHandle(TCascStorage * hs, PCASC_INDEX_ENTRY pIndexEntry)
@@ -333,8 +265,10 @@ bool WINAPI CascOpenFile(HANDLE hStorage, const char * szFileName, DWORD dwLocal
     TCascStorage * hs;
     QUERY_KEY EncodingKey;
     char * szStrippedName;
-    char * szFileName2;
+    char szFileName2[MAX_PATH+1];
     int nError = ERROR_SUCCESS;
+
+    CASCLIB_UNUSED(dwLocale);
 
     // Validate the storage handle
     hs = IsValidStorageHandle(hStorage);
@@ -351,73 +285,63 @@ bool WINAPI CascOpenFile(HANDLE hStorage, const char * szFileName, DWORD dwLocal
         return false;
     }
 
-    // Create the copy of the file name
-    szFileName2 = NewStr(szFileName, 0);
-    if(szFileName2 != NULL)
+    // If the storage has a MNDX root directory, use it to search the entry
+    if(hs->pMndxInfo != NULL)
     {
-        // If the storage has a MNDX root directory, use it to search the entry
-        if(hs->pMndxInfo != NULL)
+        // Convert the file name to lowercase + slashes
+        NormalizeFileName_LowerSlash(szFileName2, szFileName, MAX_PATH);
+
+        // Find the package number
+        pPackage = FindMndxPackage(hs, szFileName2);
+        if(pPackage != NULL)
         {
-            // Convert the file name to lowercase + slashes
-            NormalizeFileName_LowerSlash(szFileName2);
+            // Cut the package name off the full path
+            szStrippedName = szFileName2 + pPackage->nLength;
+            while(szStrippedName[0] == '/')
+                szStrippedName++;
 
-            // Find the package number
-            pPackage = FindMndxPackage(hs, szFileName2);
-            if(pPackage != NULL)
+            nError = SearchMndxInfo(hs->pMndxInfo, szStrippedName, (DWORD)(pPackage - hs->pPackages->Packages), &pRootEntryMndx);
+            if(nError == ERROR_SUCCESS)
             {
-                // Cut the package name off the full path
-                szStrippedName = szFileName2 + pPackage->nLength;
-                while(szStrippedName[0] == '/')
-                    szStrippedName++;
-
-                nError = SearchMndxInfo(hs->pMndxInfo, szStrippedName, (DWORD)(pPackage - hs->pPackages->Packages), &pRootEntryMndx);
-                if(nError == ERROR_SUCCESS)
-                {
-                    // Prepare the encoding key
-                    EncodingKey.pbData = pRootEntryMndx->EncodingKey;
-                    EncodingKey.cbData = MD5_HASH_SIZE;
-                }
-            }
-            else
-            {
-                nError = ERROR_FILE_NOT_FOUND;
+                // Prepare the encoding key
+                EncodingKey.pbData = pRootEntryMndx->EncodingKey;
+                EncodingKey.cbData = MD5_HASH_SIZE;
             }
         }
         else
         {
-            // Convert the file name to lowercase + slashes
-            NormalizeFileName_UpperBkSlash(szFileName2, szFileName2);
-
-            // Check the root directory for that hash
-            pRootEntry = FindRootEntryLocale(hs, szFileName2, dwLocale);
-            if(pRootEntry != NULL)
-            {
-                // Prepare the root key
-                EncodingKey.pbData = pRootEntry->EncodingKey;
-                EncodingKey.cbData = MD5_HASH_SIZE;
-                nError = ERROR_SUCCESS;
-            }
-            else
-            {
-                nError = ERROR_FILE_NOT_FOUND;
-            }
+            nError = ERROR_FILE_NOT_FOUND;
         }
-
-        // Use the root key to find the file in the encoding table entry
-        if(nError == ERROR_SUCCESS)
-        {
-            if(!OpenFileByEncodingKey(hs, &EncodingKey, dwFlags, (TCascFile **)phFile))
-            {
-                assert(GetLastError() != ERROR_SUCCESS);
-                nError = GetLastError();
-            }
-        }
-
-        // Delete the file name copy
-        CASC_FREE(szFileName2);
     }
     else
-        nError = ERROR_NOT_ENOUGH_MEMORY;
+    {
+        // Convert the file name to lowercase + slashes
+        NormalizeFileName_UpperBkSlash(szFileName2, szFileName, MAX_PATH);
+
+        // Check the root directory for that hash
+        pRootEntry = FindRootEntry(hs, szFileName2, NULL);
+        if(pRootEntry != NULL)
+        {
+            // Prepare the root key
+            EncodingKey.pbData = (LPBYTE)pRootEntry->EncodingKey;
+            EncodingKey.cbData = MD5_HASH_SIZE;
+            nError = ERROR_SUCCESS;
+        }
+        else
+        {
+            nError = ERROR_FILE_NOT_FOUND;
+        }
+    }
+
+    // Use the root key to find the file in the encoding table entry
+    if(nError == ERROR_SUCCESS)
+    {
+        if(!OpenFileByEncodingKey(hs, &EncodingKey, dwFlags, (TCascFile **)phFile))
+        {
+            assert(GetLastError() != ERROR_SUCCESS);
+            nError = GetLastError();
+        }
+    }
 
 #ifdef CASCLIB_TEST
     if(phFile[0] != NULL && pRootEntryMndx != NULL)
