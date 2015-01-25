@@ -72,7 +72,7 @@ void Settings_Page1::OnButton(wxCommandEvent &event)
 {
   if ( event.GetId() == ID_SETTINGS_PAGE1_APPLY)
   {
-    if(std::string(gamePath.mb_str()) != CASCFOLDER.folder())
+    if(gamePath !=  gamePathCtrl->GetValue())
     {
       gamePath = gamePathCtrl->GetValue();
       wxMessageBox(wxT("WoW Game Path changed.\nYou need to restart WoW Model Viewer to take it into account"), wxT("Settings Changed"), wxICON_INFORMATION);
