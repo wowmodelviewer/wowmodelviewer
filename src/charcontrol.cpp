@@ -913,6 +913,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
     {
     case CS_HEAD:
     {
+      charAtt->delSlot(CS_HEAD);
       Attachment *att = NULL;
       WoWModel *m = NULL;
       GLuint tex;
@@ -955,6 +956,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_SHOULDER:
     {
+      charAtt->delSlot(CS_SHOULDER);
       Attachment *att = NULL;
       WoWModel *m = NULL;
       GLuint tex;
@@ -1091,6 +1093,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_HAND_RIGHT:
     {
+      charAtt->delSlot(CS_HAND_RIGHT);
       Attachment *att = NULL;
       WoWModel *m = NULL;
       GLuint tex;
@@ -1122,6 +1125,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_HAND_LEFT:
     {
+      charAtt->delSlot(CS_HAND_LEFT);
       Attachment *att = NULL;
       WoWModel *m = NULL;
       GLuint tex;
@@ -1516,9 +1520,12 @@ void CharControl::OnUpdateItem(int type, int id)
 		else if (choosingSlot == CS_HAND_RIGHT)
 			model->charModelDetails.closeRHand = false;
 
+		// special case : we previously have a model, but not anymore => remove it
+		// @TODO : need better management of this...
+		if (slotHasModel(choosingSlot) && cd.equipment[choosingSlot] != 0 && numbers[id] == 0)
+		  charAtt->delSlot(choosingSlot);
+
 		cd.equipment[choosingSlot] = numbers[id];
-//		if (slotHasModel(choosingSlot))
-//			RefreshItem(choosingSlot);
 
 		labels[choosingSlot]->SetLabel(items.getById(cd.equipment[choosingSlot]).name);
 		labels[choosingSlot]->SetForegroundColour(ItemQualityColour(items.getById(cd.equipment[choosingSlot]).quality));
