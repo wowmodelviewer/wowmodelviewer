@@ -64,11 +64,11 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
 
 void CharDetailsFrame::refresh()
 {
-  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details.skinColorMax()-1);
-  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details.faceTypeMax()-1);
-  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details.hairColorMax()-1);
-  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details.hairStyleMax()-1);
-  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details.facialHairMax()-1);
+  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details.skinColorMax());
+  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details.faceTypeMax());
+  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details.hairColorMax());
+  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details.hairStyleMax());
+  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details.facialHairMax());
 
   spins[SPIN_SKIN_COLOR]->SetValue((int)m_details.skinColor());
   spins[SPIN_FACE_TYPE]->SetValue((int)m_details.faceType());
@@ -122,11 +122,11 @@ void CharDetailsFrame::onRandomise(wxCommandEvent &event)
 void CharDetailsFrame::randomiseChar()
 {
   // Choose random values for the looks! ^_^
-  m_details.setSkinColor(randint(0, (int)m_details.skinColorMax()-1));
-  m_details.setFaceType(randint(0, (int)m_details.faceTypeMax()-1));
-  m_details.setHairColor(randint(0, (int)m_details.hairColorMax()-1));
-  m_details.setHairStyle(randint(0, (int)m_details.hairStyleMax()-1));
-  m_details.setFacialHair(randint(0, (int)m_details.facialHairMax()-1));
+  m_details.setSkinColor(randint(0, (int)m_details.skinColorMax()));
+  m_details.setFaceType(randint(0, (int)m_details.faceTypeMax()));
+  m_details.setHairColor(randint(0, (int)m_details.hairColorMax()));
+  m_details.setHairStyle(randint(0, (int)m_details.hairStyleMax()));
+  m_details.setFacialHair(randint(0, (int)m_details.facialHairMax()));
 }
 
 void CharDetailsFrame::onEvent(Event *)

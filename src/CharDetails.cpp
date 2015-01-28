@@ -205,13 +205,17 @@ void CharDetails::setFacialHair(size_t val)
 
 void CharDetails::updateMaxValues()
 {
-  m_faceTypeMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::FaceHDType:CharControl::FaceType);
-  m_skinColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::SkinHDType:CharControl::SkinType);
-  m_hairColorMax = g_modelViewer->charControl->getNbValuesForSection(g_canvas->model->isHD?CharControl::HairHDType:CharControl::HairType);
+  m_faceTypeMax = getNbValuesForSection(FaceType);
+  m_skinColorMax = getNbValuesForSection(SkinType);
+  m_hairColorMax = getNbValuesForSection(HairType);
 
-  QString query = QString("SELECT COUNT(*) FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2")
+  RaceInfos infos;
+  RaceInfos::getCurrent(std::string(g_modelViewer->charControl->model->name.mb_str()), infos);
+
+  QString query = QString("SELECT MAX(VariationIndex) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
                         .arg(race)
-                        .arg(gender);
+                        .arg(gender)
+                        .arg(infos.isHD?8:3);
 
   sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
 
@@ -226,7 +230,7 @@ void CharDetails::updateMaxValues()
   }
 
 
-  query = QString("SELECT COUNT(*) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
+  query = QString("SELECT MAX(VariationID) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
                             .arg(race)
                             .arg(gender);
 
@@ -248,3 +252,147 @@ void CharDetails::updateMaxValues()
   if (m_facialHairMax == 0) m_facialHairMax = 1;
 }
 
+std::vector<std::string> CharDetails::getTextureNameForSection(SectionType section)
+{
+  std::vector<std::string> result;
+
+  RaceInfos infos;
+  if(!RaceInfos::getCurrent(std::string(g_modelViewer->charControl->model->name.mb_str()), infos))
+    return result;
+
+/*
+  std::cout << __FUNCTION__ << std::endl;
+  std::cout << "----------------------------------------------" << std::endl;
+  std::cout << "infos.raceid = " << infos.raceid << std::endl;
+  std::cout << "infos.sexid = " << infos.sexid << std::endl;
+  std::cout << "infos.textureLayoutID = " << infos.textureLayoutID << std::endl;
+  std::cout << "infos.isHD = " << infos.isHD << std::endl;
+  std::cout << "cd.skinColor() = " << skinColor() << std::endl;
+  std::cout << "section = " << section << std::endl;
+
+  std::cout << "----------------------------------------------" << std::endl;
+*/
+
+  size_t type = section;
+
+  if(infos.isHD) // HD layout
+    type+=5;
+
+  QString query;
+  switch(section)
+  {
+    case SkinType:
+    case UnderwearType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(skinColor())
+              .arg(type);
+      break;
+    case FaceType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(skinColor())
+              .arg(faceType())
+              .arg(type);
+      break;
+    case HairType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(hairStyle()?hairStyle():1)
+              .arg(hairColor())
+              .arg(type);
+      break;
+    case FacialHairType:
+      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
+                  (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(facialHair())
+                  .arg(hairColor())
+                  .arg(type);
+      break;
+    default:
+      query = "";
+  }
+
+  //LOG_INFO << query;
+
+  if(query != "")
+  {
+    sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+    if(vals.valid && !vals.values.empty())
+    {
+      result.push_back(vals.values[0][0]);
+      result.push_back(vals.values[0][1]);
+      result.push_back(vals.values[0][2]);
+    }
+    else
+    {
+      LOG_ERROR << "Unable to collect infos for model";
+      LOG_ERROR << query;
+    }
+  }
+
+  return result;
+}
+
+int CharDetails::getNbValuesForSection(SectionType section)
+{
+  int result = 0;
+
+  RaceInfos infos;
+  if(!RaceInfos::getCurrent(std::string(g_modelViewer->charControl->model->name.mb_str()), infos))
+    return result;
+
+  size_t type = section;
+
+  if(infos.isHD)
+    type+=5;
+
+  QString query;
+  switch(section)
+  {
+    case SkinType:
+      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(type);
+      break;
+    case FaceType:
+      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(skinColor())
+              .arg(type);
+      break;
+    case HairType:
+      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
+              .arg(infos.raceid)
+              .arg(infos.sexid)
+              .arg(hairStyle())
+              .arg(type);
+      break;
+    default:
+      query = "";
+  }
+
+  sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(vals.valid && !vals.values.empty())
+  {
+    result = atoi(vals.values[0][0].c_str());
+
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of customization for model" << g_modelViewer->charControl->model->name.c_str();
+  }
+
+  return result;
+}

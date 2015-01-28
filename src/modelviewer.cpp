@@ -27,6 +27,7 @@
 #include "CASCFile.h"
 #include "CASCFolder.h"
 #include "GameDatabase.h"
+#include "RaceInfos.h"
 
 #include "Logger/Logger.h"
 
@@ -599,7 +600,7 @@ void ModelViewer::InitDatabase()
 	CharTexture::initRegions();
 
 	// init Race informations
-	CharControl::initRaces();
+	RaceInfos::init();
 
 	if (!skyboxdb.open()) {
 		initDB = false;

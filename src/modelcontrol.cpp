@@ -277,7 +277,7 @@ void ModelControl::Update()
 	wxString meshes[NUM_GEOSETS] = {wxT("Hairstyles"), wxT("Facial1"), wxT("Facial2"), wxT("Facial3"), wxT("Braces"),
 		wxT("Boots"), wxEmptyString, wxT("Ears"), wxT("Wristbands"),  wxT("Kneepads"),
 		 wxT("Pants"), wxT("Pants2"), wxT("Tarbard"), wxT("Trousers"), wxT("Tarbard2"),
-		  wxT("Cape"), wxEmptyString, wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
+		  wxT("Cape"), wxT("Feet"), wxT("Eyeglows"), wxT("Belt"), wxT("Tail") };
 
 	std::map <size_t,wxTreeItemId> geosetGroupsMap;
 	clbGeosets->DeleteAllItems();

@@ -31,15 +31,6 @@ class ModelViewer;
 
 bool slotHasModel(size_t i);
 
-class RaceInfos
-{
-  public:
-    int raceid;
-    int sexid; // 0 male / 1 female
-    int textureLayoutID;
-    std::string prefix;
-};
-
 class CharControl: public wxWindow, public Observer
 {
 	DECLARE_CLASS(CharControl)
@@ -56,27 +47,9 @@ class CharControl: public wxWindow, public Observer
 	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid = true);
 	void UpdateTextureList(wxString texName, int special);
 
-	static std::map< std::string, RaceInfos> RACES;
-	bool getRaceInfosForCurrentModel(RaceInfos &);
-
 	void onEvent(Event *);
 
 public:
-
-	// Types
-	enum SectionType{
-	  SkinType = 0,
-	  FaceType = 1,
-	  FacialHairType = 2,
-	  HairType = 3,
-	  UnderwearType = 4,
-	  SkinHDType = 5,
-	  FaceHDType = 6,
-	  FacialHairHDType = 7,
-	  HairHDType = 8,
-	  UnderwearHDType = 9
-	};
-
 	// Item selection stuff
 	ChoiceDialog *itemDialog;
 	ssize_t choosingSlot;
@@ -120,11 +93,6 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
-
-	static void initRaces();
-	int getNbValuesForSection(SectionType type);
-	std::vector<std::string> getTextureNameForSection(SectionType);
-
 };
 
 

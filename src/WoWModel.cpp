@@ -83,8 +83,7 @@ void glInitAll()
 
 WoWModel::WoWModel(wxString name, bool forceAnim) :
     ManagedItem(name),
-    forceAnim(forceAnim),
-    isHD(false)
+    forceAnim(forceAnim)
 {
 	if (name == wxT(""))
 		return;
@@ -92,10 +91,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	// replace .MDX with .M2
 	wxString tempname(name);
 	tempname = tempname.BeforeLast(wxT('.')) + wxT(".m2");
-
-	std::string stdname = tempname.c_str();
-	if(stdname.find("_hd") != std::string::npos)
-	  isHD = true;
 
 	// Initiate our model variables.
 	trans = 1.0f;
@@ -703,7 +698,7 @@ void WoWModel::initCommon(GameFile * f)
 		// TODO: Add support for selecting the LOD.
 		// int viewLOD = 0; // sets LOD to worst
 		// int viewLOD = header.nViews - 1; // sets LOD to best
-		setLOD(f, 0); // Set the default Level of Detail to the best possible. 
+		setLOD(f, 0); // Set the default Level of Detail to the best possible.
 	}
 
 	// build indice to vert array.
@@ -964,6 +959,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
 	ModelView *view = (ModelView*)(g->getBuffer());
 
+
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N') {
 		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
 		g->close();
@@ -990,11 +986,15 @@ void WoWModel::setLOD(GameFile * f, int index)
 	int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
 	wxDELETEA(showGeosets);
+
 	showGeosets = new bool[view->nSub];
 
-
+	uint32 start = 0;
 	for (size_t i=0; i<view->nSub; i++) {
-		geosets.push_back(ops[i]);
+	  ModelGeosetHD hdgeo(ops[i]);
+	  hdgeo.istart = start;
+	  start += hdgeo.icount;
+		geosets.push_back(hdgeo);
 		showGeosets[i] = true;
 	}
 
@@ -1016,10 +1016,10 @@ void WoWModel::setLOD(GameFile * f, int index)
 		
 		pass.geoset = (int)geoset;
 
-		pass.indexStart = ops[geoset].istart;
-		pass.indexCount = ops[geoset].icount;
-		pass.vertexStart = ops[geoset].vstart;
-		pass.vertexEnd = pass.vertexStart + ops[geoset].vcount;
+		pass.indexStart = geosets[geoset].istart;
+		pass.indexCount = geosets[geoset].icount;
+		pass.vertexStart = geosets[geoset].vstart;
+		pass.vertexEnd = pass.vertexStart + geosets[geoset].vcount;
 
 		//TextureID texid = textures[texlookup[tex[j].textureid]];
 		//pass.texture = texid;

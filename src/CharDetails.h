@@ -13,17 +13,30 @@
 
 #include "metaclasses/Observable.h"
 
+#include "RaceInfos.h"
+
 struct TabardDetails;
 
 class CharDetails : public Observable
 {
   public:
+    // Types
+    enum SectionType{
+      SkinType = 0,
+      FaceType = 1,
+      FacialHairType = 2,
+      HairType = 3,
+      UnderwearType = 4
+    };
+
     size_t eyeGlowType;
     size_t race, gender;
 
     bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
 
     bool isNPC;
+
+    RaceInfos infos;
 
     int equipment[NUM_CHAR_SLOTS];
     int geosets[NUM_GEOSETS];
@@ -38,6 +51,10 @@ class CharDetails : public Observable
     void reset();
 
     void print();
+
+    int getNbValuesForSection(SectionType type);
+    std::vector<std::string> getTextureNameForSection(SectionType);
+
 
     // accessors to customization
     size_t skinColor() { return m_skinColor; }

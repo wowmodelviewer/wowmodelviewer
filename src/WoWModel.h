@@ -102,7 +102,7 @@ public:
 	wxString lodname;
 	
 	std::vector<ModelRenderPass> passes;
-	std::vector<ModelGeoset> geosets;
+	std::vector<ModelGeosetHD> geosets;
 
 	// ===============================
 	// Toggles
@@ -127,7 +127,6 @@ public:
 	bool isWMO;
 	bool isMount;
 	bool animated;
-	bool isHD;
 
 	// Misc values
 	float rad;

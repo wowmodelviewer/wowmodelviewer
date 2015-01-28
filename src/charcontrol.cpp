@@ -11,10 +11,9 @@
 
 #include "CASCFolder.h"
 #include "GameDatabase.h"
+#include "RaceInfos.h"
 
 #include <wx/txtstrm.h>
-
-std::map< std::string, RaceInfos> CharControl::RACES;
 
 CharSlots slotOrder[] = {
 	CS_SHIRT,
@@ -243,7 +242,7 @@ void CharControl::UpdateModel(Attachment *a)
 	}
 
 	RaceInfos infos;
-	getRaceInfosForCurrentModel(infos);
+	RaceInfos::getCurrent(std::string(model->name.mb_str()), infos);
 
 	cd.race = infos.raceid;
 	cd.gender = infos.sexid;
@@ -436,12 +435,12 @@ void CharControl::RefreshModel()
 		cd.geosets[CG_EARS] = 2;
 
 	RaceInfos infos;
-	if(!getRaceInfosForCurrentModel(infos))
+	if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
 	  return;
 
 	CharTexture tex(infos.textureLayoutID);
 
-	std::vector<std::string> textures = getTextureNameForSection(model->isHD?SkinHDType:SkinType);
+	std::vector<std::string> textures = cd.getTextureNameForSection(CharDetails::SkinType);
 
 	tex.addLayer(textures[0].c_str(), CR_BASE, 0);
 
@@ -453,25 +452,22 @@ void CharControl::RefreshModel()
 	  UpdateTextureList(furTexName, TEXTURE_FUR);
 	}
 
-	// Hair related boolean flags
-  //	bool bald = false;
-  	bool showHair = cd.showHair;
-//	bool showFacialHair = cd.showFacialHair;
-
 	// Display underwear on the model?
 	if (cd.showUnderwear)
 	{
-	  textures = getTextureNameForSection(model->isHD?UnderwearHDType:UnderwearType);
+	  textures = cd.getTextureNameForSection(CharDetails::UnderwearType);
+	  if(!textures.empty())
+	  {
+	    if(!textures[0].empty())
+	      tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
 
-	  if(textures[0] != "")
-	    tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
-
-	  if(textures[1] != "")
-	    tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
+	    if(!textures[1].empty())
+	      tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
+	  }
 	}
 
 	// face
-	textures = getTextureNameForSection(model->isHD?FaceHDType:FaceType);
+	textures = cd.getTextureNameForSection(CharDetails::FaceType);
 	if(textures.size() != 0)
 	{
 	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 1);
@@ -479,7 +475,7 @@ void CharControl::RefreshModel()
 	}
 
 	// facial hair
-	textures = getTextureNameForSection(model->isHD?FacialHairHDType:FacialHairType);
+	textures = cd.getTextureNameForSection(CharDetails::FacialHairType);
 	if(textures.size() != 0)
 	{
 	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 2);
@@ -496,29 +492,31 @@ void CharControl::RefreshModel()
 	if(hairStyle.valid && !hairStyle.values.empty())
 	{
 	  unsigned int geosetId = atoi(hairStyle.values[0][0].c_str());
-	  // bald =
-
 	  for (size_t j=0; j<model->geosets.size(); j++) {
 	    if (model->geosets[j].id == geosetId)
-	      model->showGeosets[j] = showHair;
-	    else if (model->geosets[j].id >= 1 && model->geosets[j].id <= (cd.hairStyleMax()+1))
+	      model->showGeosets[j] = cd.showHair;
+	    else if (model->geosets[j].id >= 1 && model->geosets[j].id < 100)
 	      model->showGeosets[j] = false;
 	  }
 	}
 	else
 	{
-	  LOG_ERROR << "Unable to collect number of hair style" << cd.hairStyle() << "for model" << model->name.c_str();
+	  LOG_ERROR << "Unable to collect hair style" << cd.hairStyle() << "for model" << model->name.c_str();
 	}
 
   // Hair texture
-	textures = getTextureNameForSection(model->isHD?HairHDType:HairType);
+	textures = cd.getTextureNameForSection(CharDetails::HairType);
   if(textures.size() != 0 && textures[0] != "")
   {
     hairTex = texturemanager.add(textures[0].c_str());
     UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
   }
+  else
+  {
+    hairTex = 0;
+  }
 
-  // select hairstyle geoset(s)
+  // select facial geoset(s)
   query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
@@ -526,7 +524,7 @@ void CharControl::RefreshModel()
 
   sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
 
-  if(facialHairStyle.valid && !facialHairStyle.values.empty())
+  if(facialHairStyle.valid && !facialHairStyle.values.empty() && cd.showFacialHair)
   {
     LOG_INFO << "Facial GeoSets : " << atoi(facialHairStyle.values[0][0].c_str())
         << " " << atoi(facialHairStyle.values[0][1].c_str())
@@ -541,6 +539,18 @@ void CharControl::RefreshModel()
   else
   {
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair() << "for model" << model->name.c_str();
+  }
+
+  // Hair texture
+  textures = cd.getTextureNameForSection(CharDetails::HairType);
+  if(textures.size() != 0 && textures[0] != "")
+  {
+    hairTex = texturemanager.add(textures[0].c_str());
+    UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+  }
+  else
+  {
+    hairTex = 0;
   }
 
 
@@ -907,7 +917,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       WoWModel *m = NULL;
       GLuint tex;
       RaceInfos infos;
-      if(!getRaceInfosForCurrentModel(infos))
+      if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
         break;
       std::string model = iteminfos.values[0][0];
       // remove .mdx
@@ -1028,7 +1038,7 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       if(iteminfos.values.size() != 1)
       {
         RaceInfos infos;
-        if(getRaceInfosForCurrentModel(infos))
+        if(RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
           valToUse = (infos.sexid == 0)?1:0;
       }
 
@@ -1184,91 +1194,6 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     }
 
-
-	  /*
-		const ItemRecord &item = items.getById(itemnum);
-		int type = item.type;
-		int itemID = 0;
-
-		if (lookup)
-			itemID = item.model;
-		else
-			itemID = itemnum;
-
-		ItemDisplayDB::Record r = itemdisplaydb.getById(itemID);
-		
-		// Just a rough check to make sure textures are only being added to where they're suppose to.
-		if (slot == CS_CHEST || slot == CS_SHIRT)
-		{
-			cd.geosets[CG_WRISTBANDS] = 1 + r.getUInt(ItemDisplayDB::GloveGeosetFlags);
-
-			tex.addLayer(makeItemTexture(CR_ARM_UPPER, r.getString(ItemDisplayDB::TexArmUpper)), CR_ARM_UPPER, layer);
-			tex.addLayer(makeItemTexture(CR_ARM_LOWER, r.getString(ItemDisplayDB::TexArmLower)), CR_ARM_LOWER, layer);
-
-			tex.addLayer(makeItemTexture(CR_TORSO_UPPER, r.getString(ItemDisplayDB::TexChestUpper)), CR_TORSO_UPPER, layer);
-			tex.addLayer(makeItemTexture(CR_TORSO_LOWER, r.getString(ItemDisplayDB::TexChestLower)), CR_TORSO_LOWER, layer);
-
-			if (type == IT_ROBE || r.getUInt(ItemDisplayDB::RobeGeosetFlags)==1)
-			{
-				tex.addLayer(makeItemTexture(CR_LEG_UPPER, r.getString(ItemDisplayDB::TexLegUpper)), CR_LEG_UPPER, layer);
-				tex.addLayer(makeItemTexture(CR_LEG_LOWER, r.getString(ItemDisplayDB::TexLegLower)), CR_LEG_LOWER, layer);
-			}
-		}
-		else if (slot == CS_BELT)
-		{
-			// Alfred 2009.08.15 add torso_lower for Titan-Forged Waistguard of Triumph
-			tex.addLayer(makeItemTexture(CR_TORSO_LOWER, r.getString(ItemDisplayDB::TexChestLower)), CR_TORSO_LOWER, layer);
-			tex.addLayer(makeItemTexture(CR_LEG_UPPER, r.getString(ItemDisplayDB::TexLegUpper)), CR_LEG_UPPER, layer);
-		}
-		else if (slot == CS_BRACERS)
-		{
-			tex.addLayer(makeItemTexture(CR_ARM_LOWER, r.getString(ItemDisplayDB::TexArmLower)), CR_ARM_LOWER, layer);
-		}
-		else if (slot == CS_PANTS)
-		{
-			cd.geosets[CG_KNEEPADS] = 1 + r.getUInt(ItemDisplayDB::BracerGeosetFlags);
-
-			tex.addLayer(makeItemTexture(CR_LEG_UPPER, r.getString(ItemDisplayDB::TexLegUpper)), CR_LEG_UPPER, layer);
-			tex.addLayer(makeItemTexture(CR_LEG_LOWER, r.getString(ItemDisplayDB::TexLegLower)), CR_LEG_LOWER, layer);
-		}
-		else if (slot == CS_GLOVES)
-		{
-			cd.geosets[CG_GLOVES] = 1 + r.getUInt(ItemDisplayDB::GloveGeosetFlags);
-
-			tex.addLayer(makeItemTexture(CR_HAND, r.getString(ItemDisplayDB::TexHands)), CR_HAND, layer);
-			tex.addLayer(makeItemTexture(CR_ARM_LOWER, r.getString(ItemDisplayDB::TexArmLower)), CR_ARM_LOWER, layer);
-		}
-		else if (slot == CS_BOOTS)
-		{
-			cd.geosets[CG_BOOTS] = 1 + r.getUInt(ItemDisplayDB::GloveGeosetFlags);
-
-			tex.addLayer(makeItemTexture(CR_LEG_LOWER, r.getString(ItemDisplayDB::TexLegLower)), CR_LEG_LOWER, layer);
-			if (!cd.showFeet)
-				tex.addLayer(makeItemTexture(CR_FOOT, r.getString(ItemDisplayDB::TexFeet)), CR_FOOT, layer);
-		}
-		else if (slot==CS_TABARD && td.showCustom)
-		{ // Display our customised tabard
-			cd.geosets[CG_TARBARD] = 2;
-			tex.addLayer(td.GetBackgroundTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-			tex.addLayer(td.GetBackgroundTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
-			tex.addLayer(td.GetIconTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-			tex.addLayer(td.GetIconTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
-			tex.addLayer(td.GetBorderTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-			tex.addLayer(td.GetBorderTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
-
-		}
-		else if (slot==CS_TABARD)
-		{ // if its just a normal tabard then do the usual
-			cd.geosets[CG_TARBARD] = 2;
-			tex.addLayer(makeItemTexture(CR_TORSO_UPPER, r.getString(ItemDisplayDB::TexChestUpper)), CR_TORSO_UPPER, layer);
-			tex.addLayer(makeItemTexture(CR_TORSO_LOWER, r.getString(ItemDisplayDB::TexChestLower)), CR_TORSO_LOWER, layer);
-		
-		}
-		else if (slot==CS_CAPE)
-		{ // capes
-
-		}
-*/
 		// gloves - this is so gloves have preference over shirt sleeves.
 		if (cd.geosets[CG_GLOVES] > 1) 
 			cd.geosets[CG_WRISTBANDS] = 0;
@@ -1823,206 +1748,6 @@ const wxString CharControl::selectCharModel()
 	
 */
 	return wxT("");
-}
-
-void CharControl::initRaces()
-{
-  sqlResult races = GAMEDATABASE.sqlQuery(" \
-  SELECT FDM.name as malemodel, ClientPrefix, CharComponentTexLayoutID, \
-  FDF.name AS femalemodel, ClientPrefix, CharComponentTexLayoutID, \
-  FDMHD.name as malemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, \
-  FDFHD.name AS femalemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, \
-  ChrRaces.ID FROM ChrRaces \
-  LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID LEFT JOIN FileData FDM ON CMDM.FileDataID = FDM.ID \
-  LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID LEFT JOIN FileData FDF ON CMDF.FileDataID = FDF.ID \
-  LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID LEFT JOIN FileData FDMHD ON CMDMHD.FileDataID = FDMHD.ID \
-  LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID LEFT JOIN FileData FDFHD ON CMDFHD.FileDataID = FDFHD.ID");
-
-  if(!races.valid || races.empty())
-  {
-    LOG_ERROR << "Unable to collect race information from game database";
-    return;
-  }
-
-  for(int i=0, imax = races.values.size() ; i < imax ; i++)
-  {
-    for(int r = 0; r <12 ; r+=3)
-    {
-      if(races.values[i][r] != "")
-      {
-        RaceInfos infos;
-        infos.prefix = races.values[i][r+1];
-        infos.textureLayoutID = atoi(races.values[i][r+2].c_str());
-        infos.raceid = atoi(races.values[i][12].c_str());
-        infos.sexid = (r == 0 || r == 6)?0:1;
-        std::string modelname = races.values[i][r];
-        std::transform(modelname.begin(), modelname.end(), modelname.begin(), ::tolower);
-        if(RACES.find(modelname) == RACES.end())
-          RACES[modelname] = infos;
-      }
-    }
-  }
-
-}
-
-bool CharControl::getRaceInfosForCurrentModel(RaceInfos & result)
-{
-  // find informations from curent model
-  std::string modelName = model->name.c_str();
-  size_t lastSlashPos = modelName.find_last_of("\\");
-  if(lastSlashPos != std::string::npos)
-  {
-    modelName = modelName.substr(lastSlashPos+1, modelName.length());
-  }
-  std::transform(modelName.begin(), modelName.end(), modelName.begin(), ::tolower);
-
-  std::map< std::string, RaceInfos>::iterator raceInfosIt = RACES.find(modelName);
-  if(raceInfosIt != RACES.end())
-  {
-    result = raceInfosIt->second;
-    return true;
-  }
-
-  LOG_ERROR << "Unable to retrieve race infos for model" << model->name.c_str();
-  return false;
-}
-
-std::vector<std::string> CharControl::getTextureNameForSection(SectionType type)
-{
-  std::vector<std::string> result;
-
-  RaceInfos infos;
-  if(!getRaceInfosForCurrentModel(infos))
-    return result;
-/*
-  std::cout << __FUNCTION__ << std::endl;
-  std::cout << "----------------------------------------------" << std::endl;
-  std::cout << "infos.raceid = " << infos.raceid << std::endl;
-  std::cout << "infos.sexid = " << infos.sexid << std::endl;
-  std::cout << "cd.skinColor() = " << cd.skinColor() << std::endl;
-  std::cout << "type = " << type << std::endl;
-
-  std::cout << "----------------------------------------------" << std::endl;
-  */
-  QString query;
-  switch(type)
-  {
-    case SkinType:
-    case SkinHDType:
-    case UnderwearType:
-    case UnderwearHDType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(cd.skinColor())
-              .arg(type);
-      break;
-    case FaceType:
-    case FaceHDType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(cd.skinColor())
-              .arg(cd.faceType())
-              .arg(type);
-      break;
-    case HairType:
-    case HairHDType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(cd.hairStyle())
-              .arg(cd.hairColor())
-              .arg(type);
-      break;
-    case FacialHairType:
-    case FacialHairHDType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-                  (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
-                  .arg(cd.facialHair())
-                  .arg(cd.hairColor())
-                  .arg(type);
-      break;
-    default:
-      query = "";
-  }
-
-  //LOG_INFO << query;
-
-  if(query != "")
-  {
-    sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
-    if(vals.valid && !vals.values.empty())
-    {
-      result.push_back(vals.values[0][0]);
-      result.push_back(vals.values[0][1]);
-      result.push_back(vals.values[0][2]);
-    }
-    else
-    {
-      LOG_ERROR << "Unable to collect infos for model";
-      LOG_ERROR << query;
-    }
-  }
-
-  return result;
-}
-
-int CharControl::getNbValuesForSection(SectionType type)
-{
-  int result = 0;
-
-  RaceInfos infos;
-  if(!getRaceInfosForCurrentModel(infos))
-    return result;
-
-  QString query;
-  switch(type)
-  {
-    case SkinType:
-    case SkinHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3 AND Flags=17")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(type);
-      break;
-    case FaceType:
-    case FaceHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4 AND Flags=1")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(cd.skinColor())
-              .arg(type);
-      break;
-    case HairType:
-    case HairHDType:
-      query = QString("SELECT COUNT(*) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4 AND Flags=17")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(cd.hairStyle())
-              .arg(type);
-      break;
-    default:
-      query = "";
-  }
-
-  sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
-
-  if(vals.valid && !vals.values.empty())
-  {
-    result = atoi(vals.values[0][0].c_str());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of customization for model" << model->name.c_str();
-  }
-
-  return result;
 }
 
 void CharControl::onEvent(Event *)
