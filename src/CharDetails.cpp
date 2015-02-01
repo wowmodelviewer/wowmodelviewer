@@ -300,8 +300,8 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
               .arg(type);
       break;
     case HairType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+        query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections \
+              WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
               .arg(hairStyle()?hairStyle():1)
@@ -328,9 +328,9 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
     sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
     if(vals.valid && !vals.values.empty())
     {
-      result.push_back(vals.values[0][0]);
-      result.push_back(vals.values[0][1]);
-      result.push_back(vals.values[0][2]);
+      for(size_t i = 0; i < vals.values[0].size() ; i++)
+        if(!vals.values[0][i].empty())
+          result.push_back(vals.values[0][i]);
     }
     else
     {

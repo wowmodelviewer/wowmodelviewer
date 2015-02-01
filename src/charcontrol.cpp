@@ -424,6 +424,7 @@ void CharControl::RefreshModel()
 	furTex = 0;
 	gobTex = 0;
 	capeTex = 0;
+	bool showScalp = true;
 
 	// Reset geosets
 	for (size_t i=0; i<NUM_GEOSETS; i++) 
@@ -479,6 +480,8 @@ void CharControl::RefreshModel()
 	if(textures.size() != 0)
 	{
 	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 2);
+	  if(textures.size() > 1)
+	    tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 2);
 	}
 
   // select hairstyle geoset(s)
@@ -491,6 +494,7 @@ void CharControl::RefreshModel()
 
 	if(hairStyle.valid && !hairStyle.values.empty())
 	{
+	  showScalp = (bool)atoi(hairStyle.values[0][1].c_str());
 	  unsigned int geosetId = atoi(hairStyle.values[0][0].c_str());
 	  for (size_t j=0; j<model->geosets.size(); j++) {
 	    if (model->geosets[j].id == geosetId)
@@ -510,6 +514,23 @@ void CharControl::RefreshModel()
   {
     hairTex = texturemanager.add(textures[0].c_str());
     UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+
+    if(infos.isHD)
+    {
+      if(!showScalp && textures.size() > 1 && !textures[1].empty())
+        tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 3);
+    }
+    else
+    {
+      if(!showScalp)
+      {
+        if(textures.size() > 1)
+          tex.addLayer(textures[1].c_str(), CR_FACE_LOWER, 3);
+
+        if(textures.size() > 2)
+          tex.addLayer(textures[2].c_str(), CR_FACE_UPPER, 3);
+      }
+    }
   }
   else
   {
@@ -540,21 +561,6 @@ void CharControl::RefreshModel()
   {
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair() << "for model" << model->name.c_str();
   }
-
-  // Hair texture
-  textures = cd.getTextureNameForSection(CharDetails::HairType);
-  if(textures.size() != 0 && textures[0] != "")
-  {
-    hairTex = texturemanager.add(textures[0].c_str());
-    UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
-  }
-  else
-  {
-    hairTex = 0;
-  }
-
-
-
 
 /*
 		// facial feature geosets
@@ -755,10 +761,6 @@ void CharControl::RefreshModel()
 	// reset geosets
 	for (size_t j=0; j<model->geosets.size(); j++) {
 		int id = model->geosets[j].id;
-
-		// hide top-of-head if we have hair.
-	//	if (id == 1)
-	//		model->showGeosets[j] = bald;
 
 		for (size_t i=1; i<NUM_GEOSETS; i++) {
 			int a = (int)i*100, b = ((int)i+1) * 100;
