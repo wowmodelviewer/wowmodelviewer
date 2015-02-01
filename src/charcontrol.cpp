@@ -837,10 +837,11 @@ void CharControl::RefreshModel()
 
 void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid)
 {
-  QString query;
+  RaceInfos infos;
+  if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
+    return;
 
-  if(itemid)
-    query = QString("SELECT Model1,Model2, \
+  QString query = QString("SELECT Model1,Model2, \
 	    FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
 	    FD11.path AS Model2TexPath, FD11.name AS Model2TexName, \
 	    GeosetGroup1, GeosetGroup2, GeosetGroup3, \
@@ -855,47 +856,24 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
 	    FD8.path AS FootTexPath, FD8.name AS FootTexName, \
 	    FD9.path AS AccessoryTexPath, FD9.name AS AccessoryTexName \
 	    FROM ItemDisplayInfo \
-	    LEFT JOIN TextureFileData TFD1 ON TFD1.TextureItemID = TextureID1 LEFT JOIN FileData FD1 ON TFD1.FileDataID = FD1.ID \
-	    LEFT JOIN TextureFileData TFD2 ON TFD2.TextureItemID = TextureID2 LEFT JOIN FileData FD2 ON TFD2.FileDataID = FD2.ID \
-	    LEFT JOIN TextureFileData TFD3 ON TFD3.TextureItemID = TextureID3 LEFT JOIN FileData FD3 ON TFD3.FileDataID = FD3.ID \
-	    LEFT JOIN TextureFileData TFD4 ON TFD4.TextureItemID = TextureID4 LEFT JOIN FileData FD4 ON TFD4.FileDataID = FD4.ID \
-	    LEFT JOIN TextureFileData TFD5 ON TFD5.TextureItemID = TextureID5 LEFT JOIN FileData FD5 ON TFD5.FileDataID = FD5.ID \
-	    LEFT JOIN TextureFileData TFD6 ON TFD6.TextureItemID = TextureID6 LEFT JOIN FileData FD6 ON TFD6.FileDataID = FD6.ID \
-	    LEFT JOIN TextureFileData TFD7 ON TFD7.TextureItemID = TextureID7 LEFT JOIN FileData FD7 ON TFD7.FileDataID = FD7.ID \
-	    LEFT JOIN TextureFileData TFD8 ON TFD8.TextureItemID = TextureID8 LEFT JOIN FileData FD8 ON TFD8.FileDataID = FD8.ID \
-	    LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
-	    LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
-	    LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
-	    WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))")
+	    LEFT JOIN TextureFileData TFD1 ON TFD1.TextureItemID = TextureID1 AND TFD1.TextureType != %2 LEFT JOIN FileData FD1 ON TFD1.FileDataID = FD1.ID \
+	    LEFT JOIN TextureFileData TFD2 ON TFD2.TextureItemID = TextureID2 AND TFD2.TextureType != %2 LEFT JOIN FileData FD2 ON TFD2.FileDataID = FD2.ID \
+	    LEFT JOIN TextureFileData TFD3 ON TFD3.TextureItemID = TextureID3 AND TFD3.TextureType != %2 LEFT JOIN FileData FD3 ON TFD3.FileDataID = FD3.ID \
+	    LEFT JOIN TextureFileData TFD4 ON TFD4.TextureItemID = TextureID4 AND TFD4.TextureType != %2 LEFT JOIN FileData FD4 ON TFD4.FileDataID = FD4.ID \
+	    LEFT JOIN TextureFileData TFD5 ON TFD5.TextureItemID = TextureID5 AND TFD5.TextureType != %2 LEFT JOIN FileData FD5 ON TFD5.FileDataID = FD5.ID \
+	    LEFT JOIN TextureFileData TFD6 ON TFD6.TextureItemID = TextureID6 AND TFD6.TextureType != %2 LEFT JOIN FileData FD6 ON TFD6.FileDataID = FD6.ID \
+	    LEFT JOIN TextureFileData TFD7 ON TFD7.TextureItemID = TextureID7 AND TFD7.TextureType != %2 LEFT JOIN FileData FD7 ON TFD7.FileDataID = FD7.ID \
+	    LEFT JOIN TextureFileData TFD8 ON TFD8.TextureItemID = TextureID8 AND TFD8.TextureType != %2 LEFT JOIN FileData FD8 ON TFD8.FileDataID = FD8.ID \
+	    LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 AND TFD9.TextureType != %2 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
+	    LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 AND TFD10.TextureType != %2 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
+	    LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 AND TFD11.TextureType != %2 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID ")
+    .arg((infos.sexid == 0)?1:0);
+
+  if(itemid)
+    query += QString("WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))")
 	     .arg(itemnum);
   else
-    query = QString("SELECT Model1,Model2, \
-      FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
-      FD11.path AS Model2TexPath, FD11.name AS Model2TexName, \
-      GeosetGroup1, GeosetGroup2, GeosetGroup3, \
-      HelmetGeoSetVis1,HelmetGeoSetVis2, \
-      FD1.path AS UpperArmTexPath, FD1.name AS UpperArmTexName, \
-      FD2.path AS LowerArmTexPath, FD2.name AS LowerArmTexName, \
-      FD3.path AS HandsTexPath, FD3.name AS HandsTexName, \
-      FD4.path AS UpperTorsoTexPath, FD4.name AS UpperTorsoTexName, \
-      FD5.path AS LowerTorsoTexPath, FD5.name AS LowerTorsoTexName, \
-      FD6.path AS UpperLegTexPath, FD6.name AS UpperLegTexName, \
-      FD7.path AS LowerLegTexPath, FD7.name AS LowerLegTexName, \
-      FD8.path AS FootTexPath, FD8.name AS FootTexName, \
-      FD9.path AS AccessoryTexPath, FD9.name AS AccessoryTexName \
-      FROM ItemDisplayInfo \
-      LEFT JOIN TextureFileData TFD1 ON TFD1.TextureItemID = TextureID1 LEFT JOIN FileData FD1 ON TFD1.FileDataID = FD1.ID \
-      LEFT JOIN TextureFileData TFD2 ON TFD2.TextureItemID = TextureID2 LEFT JOIN FileData FD2 ON TFD2.FileDataID = FD2.ID \
-      LEFT JOIN TextureFileData TFD3 ON TFD3.TextureItemID = TextureID3 LEFT JOIN FileData FD3 ON TFD3.FileDataID = FD3.ID \
-      LEFT JOIN TextureFileData TFD4 ON TFD4.TextureItemID = TextureID4 LEFT JOIN FileData FD4 ON TFD4.FileDataID = FD4.ID \
-      LEFT JOIN TextureFileData TFD5 ON TFD5.TextureItemID = TextureID5 LEFT JOIN FileData FD5 ON TFD5.FileDataID = FD5.ID \
-      LEFT JOIN TextureFileData TFD6 ON TFD6.TextureItemID = TextureID6 LEFT JOIN FileData FD6 ON TFD6.FileDataID = FD6.ID \
-      LEFT JOIN TextureFileData TFD7 ON TFD7.TextureItemID = TextureID7 LEFT JOIN FileData FD7 ON TFD7.FileDataID = FD7.ID \
-      LEFT JOIN TextureFileData TFD8 ON TFD8.TextureItemID = TextureID8 LEFT JOIN FileData FD8 ON TFD8.FileDataID = FD8.ID \
-      LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
-      LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
-      LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
-      WHERE ItemDisplayInfo.ID = %1")
+    query += QString("WHERE ItemDisplayInfo.ID = %1")
        .arg(itemnum);
 
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
@@ -917,9 +895,6 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       Attachment *att = NULL;
       WoWModel *m = NULL;
       GLuint tex;
-      RaceInfos infos;
-      if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
-        break;
       std::string model = iteminfos.values[0][0];
       // remove .mdx
       model = model.substr(0, model.length()-4);
@@ -1033,21 +1008,10 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       break;
     case CS_PANTS:
     {
-      // some pants have specific lower/upper leg textures for male / female,
-      // in that case, female is the forst one, and male the second one
-      // need to figure out if there is a better way to do that...
-      int valToUse = 0;
-      if(iteminfos.values.size() != 1)
-      {
-        RaceInfos infos;
-        if(RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
-          valToUse = (infos.sexid == 0)?1:0;
-      }
-
       cd.geosets[CG_KNEEPADS] = 1 + atoi(iteminfos.values[0][7].c_str());
-      wxString texture = iteminfos.values[valToUse][21] + iteminfos.values[valToUse][22];
+      wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
       tex.addLayer(texture, CR_LEG_UPPER, layer);
-      texture = iteminfos.values[valToUse][23] + iteminfos.values[valToUse][24];
+      texture = iteminfos.values[0][23] + iteminfos.values[0][24];
       tex.addLayer(texture, CR_LEG_LOWER, layer);
       break;
     }

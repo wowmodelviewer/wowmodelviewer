@@ -155,7 +155,7 @@
   	<field primary="yes" type="uint" name="ID" />
     <field type="uint" name="TextureItemID" />
   	<field type="uint" name="col2" />
-  	<field type="uint" name="col3" />
+  	<field type="uint" name="TextureType" />
   	<field type="uint" name="FileDataID" />
   </TextureFileData>
   <Item>
