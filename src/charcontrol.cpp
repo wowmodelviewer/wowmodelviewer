@@ -1015,6 +1015,10 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       tex.addLayer(texture, CR_LEG_UPPER, layer);
       texture = iteminfos.values[0][23] + iteminfos.values[0][24];
       tex.addLayer(texture, CR_LEG_LOWER, layer);
+
+      if (atoi(iteminfos.values[0][8].c_str())==1)
+        cd.geosets[CG_TROUSERS] = 1 + atoi(iteminfos.values[0][8].c_str());
+
       break;
     }
     case CS_SHIRT:
