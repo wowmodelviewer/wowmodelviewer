@@ -1104,7 +1104,8 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       model = model.substr(0, model.length()-4); // remove .mdx
       model += ".m2"; // add .m2
       model = CASCFOLDER.getFullPathForFile(model);
-      att = charAtt->addChild(model, ATT_LEFT_PALM, slot);
+      const ItemRecord &item = items.getById(itemnum);
+      att = charAtt->addChild(model, (item.type == IT_SHIELD)?ATT_LEFT_WRIST:ATT_LEFT_PALM, slot);
       if (att)
       {
         m = static_cast<WoWModel*>(att->model);
