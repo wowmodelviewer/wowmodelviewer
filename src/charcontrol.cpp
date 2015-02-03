@@ -770,6 +770,76 @@ void CharControl::RefreshModel()
 		}
 	}
 
+	if(cd.equipment[CS_HEAD] != 0)
+	{
+	  QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
+	    "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
+	    "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
+	  .arg((infos.sexid == 0)?"HelmetGeosetVis1":"HelmetGeosetVis2")
+	  .arg(cd.equipment[CS_HEAD]);
+
+	sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
+
+	if(helmetInfos.valid)
+	{
+	  // hair styles
+	  if(atoi(helmetInfos.values[0][0].c_str()) != 0)
+    {
+      for (size_t i=0; i<model->geosets.size(); i++)
+      {
+        int id = model->geosets[i].id;
+        if(id > 0 && id < 100)
+          model->showGeosets[i] = false;
+      }
+    }
+
+	  // facial 1
+	  if(atoi(helmetInfos.values[0][1].c_str()) != 0)
+	  {
+	    for (size_t i=0; i<model->geosets.size(); i++)
+	    {
+	      int id = model->geosets[i].id;
+	      if(id > 100 && id < 200)
+	        model->showGeosets[i] = false;
+	    }
+	  }
+
+	  // facial 2
+	  if(atoi(helmetInfos.values[0][2].c_str()) != 0)
+	  {
+	    for (size_t i=0; i<model->geosets.size(); i++)
+	    {
+	      int id = model->geosets[i].id;
+	      if(id > 200 && id < 300)
+	        model->showGeosets[i] = false;
+	    }
+	  }
+
+	  // facial 3
+	  if(atoi(helmetInfos.values[0][3].c_str()) != 0)
+	  {
+	    for (size_t i=0; i<model->geosets.size(); i++)
+	    {
+	      int id = model->geosets[i].id;
+	      if(id > 300 && id < 400)
+	        model->showGeosets[i] = false;
+	    }
+	  }
+
+	  // ears
+	  if(atoi(helmetInfos.values[0][4].c_str()) != 0)
+	  {
+	    for (size_t i=0; i<model->geosets.size(); i++)
+	    {
+	      int id = model->geosets[i].id;
+	      if(id > 700 && id < 800)
+	        model->showGeosets[i] = false;
+	    }
+	  }
+	}
+}
+
+
 	// finalize character texture
 	tex.compose(charTex);
 	
@@ -927,8 +997,9 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
           m->replaceTextures[TEXTURE_CAPE] = tex;
         }
       }
-    }
+
       break;
+    }
     case CS_NECK:
       break;
     case CS_SHOULDER:
