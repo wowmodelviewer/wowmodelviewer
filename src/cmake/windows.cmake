@@ -24,8 +24,8 @@ include_directories(${CMAKE_SOURCE_DIR}
   
 add_definitions(-D_WINDOWS)
 add_definitions(-D_MINGW)
-#add_definitions(-D_BETAVERSION) # comment if you are building a released version
-add_definitions(-D_ALPHAVERSION) # comment if you are building a released version
+add_definitions(-D_BETAVERSION) # comment if you are building a released version
+#add_definitions(-D_ALPHAVERSION) # comment if you are building a released version
 if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
   message("Release build : Final exe will be stripped")
   set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
