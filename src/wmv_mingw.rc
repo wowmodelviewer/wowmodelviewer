@@ -2,4 +2,4 @@ IDI_ICON1               ICON                    "..\\bin_support\\icons\\wmv.ico
 MAINICON                ICON                    "..\\bin_support\\icons\\wmv.ico"
 ABOUTICON				RCDATA					"..\\bin_support\\icons\\wmv.xpm"
 IDI_ICON2               ICON                    "..\\bin_support\\icons\\chrFile.ico"
-SPLASH					RCDATA					"..\\bin_support\\Splash\\Splash_002.png"
+SPLASH					RCDATA					"..\\bin_support\\Splash\\Splash_003.png"
