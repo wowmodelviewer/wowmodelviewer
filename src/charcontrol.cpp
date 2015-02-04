@@ -784,14 +784,14 @@ void CharControl::RefreshModel()
 	{
 	  // hair styles
 	  if(atoi(helmetInfos.values[0][0].c_str()) != 0)
-    {
-      for (size_t i=0; i<model->geosets.size(); i++)
-      {
-        int id = model->geosets[i].id;
-        if(id > 0 && id < 100)
-          model->showGeosets[i] = false;
-      }
-    }
+	  {
+	    for (size_t i=0; i<model->geosets.size(); i++)
+	    {
+	      int id = model->geosets[i].id;
+	      if(id > 0 && id < 100)
+	        model->showGeosets[i] = false;
+	    }
+	  }
 
 	  // facial 1
 	  if(atoi(helmetInfos.values[0][1].c_str()) != 0)
@@ -1139,13 +1139,31 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       WoWModel *m = NULL;
       GLuint tex;
 
-      std::string model = iteminfos.values[0][0];
-      model = model.substr(0, model.length()-4); // remove .mdx
-      model += ".m2"; // add .m2
-      model = CASCFOLDER.getFullPathForFile(model);
-      att = charAtt->addChild(model, ATT_RIGHT_PALM, slot);
+      std::string itemModel = iteminfos.values[0][0];
+      itemModel = itemModel.substr(0, itemModel.length()-4); // remove .mdx
+      itemModel += ".m2"; // add .m2
+      itemModel = CASCFOLDER.getFullPathForFile(itemModel);
+      int attachement = ATT_RIGHT_PALM;
+      const ItemRecord &item = items.getById(itemnum);
+      if(bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+      {
+        // make the weapon cross
+        if (item.sheath == ATT_LEFT_BACK_SHEATH)
+          attachement = ATT_RIGHT_BACK_SHEATH;
+        if (item.sheath == ATT_LEFT_BACK)
+          attachement = ATT_RIGHT_BACK;
+        if (item.sheath == ATT_LEFT_HIP_SHEATH)
+          attachement = ATT_RIGHT_HIP_SHEATH;
+      }
+
+      att = charAtt->addChild(itemModel, attachement, slot);
       if (att)
       {
+        if(bSheathe)
+          model->charModelDetails.closeRHand = false;
+        else
+          model->charModelDetails.closeRHand = true;
+
         m = static_cast<WoWModel*>(att->model);
         if (m->ok)
         {
@@ -1171,14 +1189,27 @@ void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, C
       WoWModel *m = NULL;
       GLuint tex;
 
-      std::string model = iteminfos.values[0][0];
-      model = model.substr(0, model.length()-4); // remove .mdx
-      model += ".m2"; // add .m2
-      model = CASCFOLDER.getFullPathForFile(model);
+      std::string itemModel = iteminfos.values[0][0];
+      itemModel = itemModel.substr(0, itemModel.length()-4); // remove .mdx
+      itemModel += ".m2"; // add .m2
+      itemModel = CASCFOLDER.getFullPathForFile(itemModel);
       const ItemRecord &item = items.getById(itemnum);
-      att = charAtt->addChild(model, (item.type == IT_SHIELD)?ATT_LEFT_WRIST:ATT_LEFT_PALM, slot);
+      int attachement = ATT_LEFT_PALM;
+
+      if(item.type == IT_SHIELD)
+        attachement = ATT_LEFT_WRIST;
+
+      if(bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+        attachement = item.sheath;
+
+      att = charAtt->addChild(itemModel, attachement, slot);
       if (att)
       {
+        if(bSheathe || item.type == IT_SHIELD)
+          model->charModelDetails.closeLHand = false;
+        else
+          model->charModelDetails.closeLHand = true;
+
         m = static_cast<WoWModel*>(att->model);
         if (m->ok)
         {
