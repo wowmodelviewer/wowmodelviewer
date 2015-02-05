@@ -790,7 +790,7 @@ void CharControl::RefreshModel()
 	  }
 
 	  // facial 1
-	  if(atoi(helmetInfos.values[0][1].c_str()) != 0)
+	  if(atoi(helmetInfos.values[0][1].c_str()) != 0 && infos.customization[0] != "FEATURES")
 	  {
 	    for (size_t i=0; i<model->geosets.size(); i++)
 	    {
@@ -801,7 +801,7 @@ void CharControl::RefreshModel()
 	  }
 
 	  // facial 2
-	  if(atoi(helmetInfos.values[0][2].c_str()) != 0)
+	  if(atoi(helmetInfos.values[0][2].c_str()) != 0  && infos.customization[0] != "FEATURES")
 	  {
 	    for (size_t i=0; i<model->geosets.size(); i++)
 	    {
