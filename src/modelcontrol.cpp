@@ -212,7 +212,7 @@ void ModelControl::RefreshModel(Attachment *root)
 		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
 			m = static_cast<WoWModel*>((*it)->model);
 			if (m) {
-				tmp = m->name;
+				tmp = m->wxname;
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
 			}
 		}
@@ -243,7 +243,7 @@ void ModelControl::UpdateModel(Attachment *a)
 		model = m;
 		att = a;
 
-		modelname->SetLabel(m->name);
+		modelname->SetLabel(m->wxname);
 
 		Update();
 	}

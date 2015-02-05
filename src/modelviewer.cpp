@@ -828,7 +828,7 @@ void ModelViewer::SaveSession()
 
 		// model file
 		if (canvas->model)
-			pConfig->Write(wxT("Model"), wxString(canvas->model->name.c_str(), wxConvUTF8));
+			pConfig->Write(wxT("Model"), wxString(canvas->model->wxname.c_str(), wxConvUTF8));
 	}
 
 	// character details
@@ -1953,7 +1953,7 @@ void ModelViewer::SaveChar(wxString fn)
 #else
 	ofstream f(fn.char_str(), ios_base::out|ios_base::trunc);
 #endif
-	f << canvas->model->name << endl;
+	f << canvas->model->wxname << endl;
 	f << charControl->cd.race << " " << charControl->cd.gender << endl;
 	f << charControl->cd.skinColor() << " " << charControl->cd.faceType() << " " << charControl->cd.hairColor() << " " << charControl->cd.hairStyle() << " " << charControl->cd.facialHair() << " " << charControl->cd.eyeGlowType << endl;
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {

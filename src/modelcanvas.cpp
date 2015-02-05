@@ -1747,9 +1747,9 @@ void ModelCanvas::ResetView()
 	model->rot = Vec3D(0,-90.0f,0);
 	model->pos = Vec3D(0, 0, 5.0f);
 
-	bool isSkyBox = (model->name.substr(0,3)==wxT("Env"));
+	bool isSkyBox = (model->wxname.substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {
-		if (model->name.find(wxT("SkyBox"))<model->name.length())
+		if (model->wxname.find(wxT("SkyBox"))<model->wxname.length())
 			isSkyBox = true;
 	}
 
@@ -1769,7 +1769,7 @@ void ModelCanvas::ResetView()
 
 	modelsize = model->rad * 2.0f;
 	
-	if (model->name.substr(0,4)==wxT("Item")) 
+	if (model->wxname.substr(0,4)==wxT("Item"))
 		model->rot.y = 0; // items look better facing right by default
 }
 

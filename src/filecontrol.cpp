@@ -545,7 +545,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 	if (filterMode == FILE_FILTER_MODEL) {
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model && !modelviewer->canvas->model->name.empty() && modelviewer->canvas->model->name == data->fn)
+		if (modelviewer->canvas->model && !modelviewer->canvas->model->wxname.empty() && modelviewer->canvas->model->wxname == data->fn)
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();

@@ -24,8 +24,8 @@
 class ManagedItem {
 	int refcount;
 public:
-	wxString name;
-	ManagedItem(wxString n): refcount(0), name(n) { }
+	wxString wxname;
+	ManagedItem(wxString n): refcount(0), wxname(n) { }
 	virtual ~ManagedItem() {}
 
 	void addref()
@@ -72,7 +72,7 @@ public:
 #endif
 
 			doDelete(id);
-			names.erase(names.find(i->name));
+			names.erase(names.find(i->wxname));
 			items.erase(items.find(id));
 
 			wxDELETE(i);

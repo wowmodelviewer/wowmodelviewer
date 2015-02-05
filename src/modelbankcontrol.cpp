@@ -130,7 +130,7 @@ void ModelBankControl::AddModel()
 
 	ModelBank cd;
 
-	cd.fileName = wxString(g_canvas->model->name);
+	cd.fileName = wxString(g_canvas->model->wxname);
 	cd.name = txtName->GetValue();
 
 	cd.pos = g_canvas->model->pos;

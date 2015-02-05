@@ -242,7 +242,7 @@ void CharControl::UpdateModel(Attachment *a)
 	}
 
 	RaceInfos infos;
-	RaceInfos::getCurrent(std::string(model->name.mb_str()), infos);
+	RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos);
 
 	cd.race = infos.raceid;
 	cd.gender = infos.sexid;
@@ -436,7 +436,7 @@ void CharControl::RefreshModel()
 		cd.geosets[CG_EARS] = 2;
 
 	RaceInfos infos;
-	if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
+	if(!RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos))
 	  return;
 
 	CharTexture tex(infos.textureLayoutID);
@@ -501,7 +501,7 @@ void CharControl::RefreshModel()
 	}
 	else
 	{
-	  LOG_ERROR << "Unable to collect hair style" << cd.hairStyle() << "for model" << model->name.c_str();
+	  LOG_ERROR << "Unable to collect hair style" << cd.hairStyle() << "for model" << model->wxname.c_str();
 	}
 
   // Hair texture
@@ -555,7 +555,7 @@ void CharControl::RefreshModel()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair() << "for model" << model->name.c_str();
+    LOG_ERROR << "Unable to collect number of facial hair style" << cd.facialHair() << "for model" << model->wxname.c_str();
   }
 
 /*
@@ -906,7 +906,7 @@ void CharControl::RefreshModel()
 void CharControl::AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid)
 {
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(std::string(model->name.mb_str()), infos))
+  if(!RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos))
     return;
 
   QString query = QString("SELECT Model1,Model2, \
