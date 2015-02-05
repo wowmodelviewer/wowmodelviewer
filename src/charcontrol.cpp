@@ -443,12 +443,12 @@ void CharControl::RefreshModel()
 
 	std::vector<std::string> textures = cd.getTextureNameForSection(CharDetails::SkinType);
 
-	tex.addLayer(textures[0].c_str(), CR_BASE, 0);
+	if(textures.size() > 0)
+	  tex.addLayer(textures[0].c_str(), CR_BASE, 0);
 
-	wxString furTexName = textures[1].c_str();
-
-	if(!furTexName.IsEmpty())
+	if(textures.size() > 1)
 	{
+	  wxString furTexName = textures[1].c_str();
 	  furTex = texturemanager.add(furTexName);
 	  UpdateTextureList(furTexName, TEXTURE_FUR);
 	}
@@ -457,32 +457,28 @@ void CharControl::RefreshModel()
 	if (cd.showUnderwear)
 	{
 	  textures = cd.getTextureNameForSection(CharDetails::UnderwearType);
-	  if(!textures.empty())
-	  {
-	    if(!textures[0].empty())
-	      tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
+	  if(textures.size() > 0)
+	    tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
 
-	    if(!textures[1].empty())
-	      tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
-	  }
+	  if(textures.size() > 1)
+	    tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
 	}
 
 	// face
 	textures = cd.getTextureNameForSection(CharDetails::FaceType);
-	if(textures.size() != 0)
-	{
+	if(textures.size() > 0)
 	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 1);
+
+	if(textures.size() > 1)
 	  tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 1);
-	}
 
 	// facial hair
 	textures = cd.getTextureNameForSection(CharDetails::FacialHairType);
-	if(textures.size() != 0)
-	{
+	if(textures.size() > 0)
 	  tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 2);
-	  if(textures.size() > 1)
-	    tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 2);
-	}
+
+	if(textures.size() > 1)
+	  tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 2);
 
   // select hairstyle geoset(s)
 	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
@@ -510,14 +506,14 @@ void CharControl::RefreshModel()
 
   // Hair texture
 	textures = cd.getTextureNameForSection(CharDetails::HairType);
-  if(textures.size() != 0 && textures[0] != "")
+  if(textures.size() > 0)
   {
     hairTex = texturemanager.add(textures[0].c_str());
     UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
 
     if(infos.isHD)
     {
-      if(!showScalp && textures.size() > 1 && !textures[1].empty())
+      if(!showScalp && textures.size() > 1)
         tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 3);
     }
     else
@@ -780,7 +776,7 @@ void CharControl::RefreshModel()
 
 	sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
-	if(helmetInfos.valid)
+	if(helmetInfos.valid && !helmetInfos.values.empty())
 	{
 	  // hair styles
 	  if(atoi(helmetInfos.values[0][0].c_str()) != 0)
