@@ -145,12 +145,12 @@ void CharTexture::compose(TextureID texID)
 
 
 	// debug write texture on disk
-
+/*
 	static int texIndex=0;
 	QString name = QString("./ComposedTexture%1.png").arg(texIndex++);
 	QImage FinalTexture(destbuf,layoutInfos.first.width, layoutInfos.first.height,QImage::Format_RGBA8888);
 	FinalTexture.save(name);
-
+*/
 	free(destbuf);
 }
 

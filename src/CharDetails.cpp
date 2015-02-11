@@ -130,24 +130,24 @@ void CharDetails::reset(WoWModel * model)
   m_model = model;
 
   m_skinColor = 0;
-	m_faceType = 0;
-	m_hairColor = 0;
-	m_hairStyle = 0;
-	m_facialHair = 0;
+  m_faceType = 0;
+  m_hairColor = 0;
+  m_hairStyle = 0;
+  m_facialHair = 0;
 
-	showUnderwear = true;
-	showHair = true;
-	showFacialHair = true;
-	showEars = true;
-	showFeet = false;
+  showUnderwear = true;
+  showHair = true;
+  showFacialHair = true;
+  showEars = true;
+  showFeet = false;
 
-	isNPC = false;
+  isNPC = false;
 
-	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-		equipment[i] = 0;
-	}
+  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
+    equipment[i] = 0;
+  }
 
-	updateMaxValues();
+  updateMaxValues();
 }
 
 void CharDetails::setSkinColor(size_t val)
