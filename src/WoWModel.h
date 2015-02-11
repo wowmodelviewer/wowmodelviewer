@@ -7,8 +7,11 @@
 //#include <crtdbg.h>
 
 // Our files
-#include "video.h"
+#include "CharDetails.h"
+#include "CharTexture.h"
 #include "displayable.h"
+#include "video.h"
+
 
 #include "vec3d.h"
 
@@ -24,6 +27,7 @@
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
 #include "ModelRenderPass.h"
+#include "WoWItem.h"
 
 #include "animated.h"
 #include "particle.h"
@@ -31,6 +35,7 @@
 #include "enums.h"
 
 #include "core/Model.h"
+#include "metaclasses/Container.h"
 
 class Bone;
 struct ModelColor;
@@ -41,7 +46,7 @@ class TextureAnim;
 class GameFile;
 class CASCFile;
 
-class WoWModel: public ManagedItem, public Displayable, public Model
+class WoWModel: public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
 	// VBO Data
 	GLuint vbuf, nbuf, tbuf;
@@ -66,6 +71,7 @@ class WoWModel: public ManagedItem, public Displayable, public Model
 	void lightsOff(GLuint lbase);
 
 	uint16 *boundTris;
+
 
 public:
 	bool animGeometry,animTextures,animBones;
@@ -131,6 +137,7 @@ public:
 	// Misc values
 	float rad;
 	float trans;
+
 	// -------------------------------
 
 	// ===============================
@@ -166,6 +173,7 @@ public:
 	int specialTextures[TEXTURE_MAX];
 	GLuint replaceTextures[TEXTURE_MAX];
 	bool useReplaceTextures[TEXTURE_MAX];
+	CharTexture tex;
 	// -------------------------------
 
 	// ===============================
@@ -193,8 +201,12 @@ public:
 
 	ModelType modelType;
 	CharModelDetails charModelDetails;
+	CharDetails cd;
 
 	friend struct ModelRenderPass;
+
+  WoWItem * getItem(CharSlots slot);
+
 };
 
 

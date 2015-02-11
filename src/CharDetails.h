@@ -15,6 +15,7 @@
 
 #include "RaceInfos.h"
 
+class WoWModel;
 struct TabardDetails;
 
 class CharDetails : public Observable
@@ -48,7 +49,7 @@ class CharDetails : public Observable
     void loadSet(ItemSetDB &sets, ItemDatabase &items, int setid);
     void loadStart(StartOutfitDB &start, ItemDatabase &items, int cls);
 
-    void reset();
+    void reset(WoWModel *);
 
     void print();
 
@@ -84,7 +85,11 @@ class CharDetails : public Observable
     size_t m_hairStyle, m_hairStyleMax;
     size_t m_facialHair, m_facialHairMax;
 
+    WoWModel * m_model;
+
     void updateMaxValues();
+
+
 
 };
 

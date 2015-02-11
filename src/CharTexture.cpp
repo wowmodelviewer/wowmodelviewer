@@ -21,6 +21,7 @@ std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::L
 
 void CharTexture::addLayer(wxString fn, int region, int layer)
 {
+  //std::cout << __FUNCTION__ << " " << fn.mb_str() << " " << region << " " << layer << std::endl;
   if (!fn || fn.length()==0)
     return;
 
@@ -29,6 +30,12 @@ void CharTexture::addLayer(wxString fn, int region, int layer)
   ct.region = region;
   ct.layer = layer;
   m_components.push_back(ct);
+}
+
+void CharTexture::reset(size_t _layoutSizeId)
+{
+  m_components.clear();
+  layoutSizeId = _layoutSizeId;
 }
 
 // 2007.07.03 Alfred, enlarge buf size and make it static to prevent stack overflow
@@ -42,7 +49,7 @@ void CharTexture::compose(TextureID texID)
   //std::cout << __FUNCTION__ << " " << __LINE__ << " " << layoutInfos.first.width << "x" << layoutInfos.first.height << std::endl;
 
 	// if we only have one texture then don't bother with compositing
-  //std::cout << "nb component = " << m_components.size() << std::endl;
+  // std::cout << "nb component = " << m_components.size() << std::endl;
 	if (m_components.size()==1)
 	{
 		Texture temp(m_components[0].name);
@@ -138,12 +145,12 @@ void CharTexture::compose(TextureID texID)
 
 
 	// debug write texture on disk
-/*
+
 	static int texIndex=0;
 	QString name = QString("./ComposedTexture%1.png").arg(texIndex++);
 	QImage FinalTexture(destbuf,layoutInfos.first.width, layoutInfos.first.height,QImage::Format_RGBA8888);
 	FinalTexture.save(name);
-*/
+
 	free(destbuf);
 }
 

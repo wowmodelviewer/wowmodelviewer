@@ -20,6 +20,8 @@
 
 #include "CASCFolder.h"
 
+#include "metaclasses/Iterator.h"
+
 size_t globalTime = 0;
 extern ModelViewer *g_modelViewer;
 
@@ -142,7 +144,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	anim = 0;
 	anims = 0;
 	animLookups = 0;
-	animManager = NULL;
+	animManager = 0;
 	bones = 0;
 	bounds = 0;
 	boundTris = 0;
@@ -158,6 +160,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	events = 0;
 	modelType = MT_NORMAL;
 	IndiceToVerts = 0;
+
 	// --
 
 	GameFile * f = new CASCFile(tempname.c_str());
@@ -1511,5 +1514,15 @@ void WoWModel::drawParticles()
 	}
 }
 
+WoWItem * WoWModel::getItem(CharSlots slot)
+{
+  Iterator<WoWItem> itemIt(this);
+  for(itemIt.begin(); !itemIt.ended() ; itemIt++)
+    {
+     if((*itemIt)->slot() == slot)
+       return *itemIt;
+    }
 
+  return 0;
+}
 

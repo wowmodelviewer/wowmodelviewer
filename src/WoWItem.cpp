@@ -1,0 +1,485 @@
+/*----------------------------------------------------------------------*\
+| This file is part of WoW Model Viewer                                  |
+|                                                                        |
+| WoW Model Viewer is free software: you can redistribute it and/or      |
+| modify it under the terms of the GNU General Public License as         |
+| published by the Free Software Foundation, either version 3 of the     |
+| License, or (at your option) any later version.                        |
+|                                                                        |
+| WoW Model Viewer is distributed in the hope that it will be useful,    |
+| but WITHOUT ANY WARRANTY; without even the implied warranty of         |
+| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          |
+| GNU General Public License for more details.                           |
+|                                                                        |
+| You should have received a copy of the GNU General Public License      |
+| along with WoW Model Viewer.                                           |
+| If not, see <http://www.gnu.org/licenses/>.                            |
+\*----------------------------------------------------------------------*/
+
+/*
+ * WoWItem.cpp
+ *
+ *  Created on: 5 feb. 2015
+ *      Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
+ */
+
+#include "WoWItem.h"
+
+#include "CASCFolder.h"
+#include "GameDatabase.h"
+#include "RaceInfos.h"
+#include "WoWModel.h"
+
+#include "logger/Logger.h"
+
+#include "Attachment.h"
+#include "database.h" // items
+#include "globalvars.h"
+#include "modelviewer.h"
+
+#include <QString>
+
+map<int,int> create_map()
+{
+  map<int,int> m;
+  m[1] = 2;
+  m[3] = 4;
+  m[5] = 6;
+  return m;
+}
+
+map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
+
+
+
+
+
+WoWItem::WoWItem(CharSlots slot)
+: m_model(0), m_id(-1), m_displayId(-1), m_slot(slot)
+{
+}
+
+void WoWItem::setId(int id)
+{
+ // if(id != m_id)
+  {
+    m_id = id;
+
+    QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1)")
+           .arg(id);
+
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
+
+    if(iteminfos.valid && !iteminfos.values.empty())
+      m_displayId = atoi(iteminfos.values[0][0].c_str());
+
+    setName(items.getById(id).name.c_str());
+    load();
+  }
+}
+
+void WoWItem::setDisplayId(int id)
+{
+ // if(m_displayId != id)
+  {
+    m_id = -1;
+    m_displayId = id; // to update from database;
+    load();
+  }
+}
+
+void WoWItem::onParentSet(Component * parent)
+{
+  m_model = dynamic_cast<WoWModel *>(parent);
+}
+
+std::map<CharSlots,int> WoWItem::initSlotLayers()
+{
+  std::map<CharSlots,int> result;
+  result[CS_SHIRT] = 10;
+  result[CS_HEAD] = 11;
+  result[CS_NECK] = 12;
+  result[CS_SHOULDER] = 13;
+  result[CS_PANTS] = 14;
+  result[CS_BOOTS] = 15;
+  result[CS_CHEST] = 16;
+  result[CS_TABARD] = 17;
+  result[CS_BELT] = 18;
+  result[CS_BRACERS] = 19;
+  result[CS_GLOVES] = 20;
+  result[CS_HAND_RIGHT] = 21;
+  result[CS_HAND_LEFT] = 22;
+  result[CS_CAPE] = 23;
+  result[CS_QUIVER] = 24;
+
+  return result;
+}
+
+
+void WoWItem::load()
+{
+
+  if(!m_model) // no parent => give up
+    return;
+
+  if(m_id == 0) // no equipment, just return
+    return;
+
+  RaceInfos infos;
+  if(!RaceInfos::getCurrent(std::string(m_model->wxname.mb_str()), infos))
+    return;
+
+  int layer = SLOT_LAYERS[m_slot];
+
+  QString query = QString("SELECT Model1,Model2, \
+       FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
+       FD11.path AS Model2TexPath, FD11.name AS Model2TexName, \
+       GeosetGroup1, GeosetGroup2, GeosetGroup3, \
+       HelmetGeoSetVis1,HelmetGeoSetVis2, \
+       FD1.path AS UpperArmTexPath, FD1.name AS UpperArmTexName, \
+       FD2.path AS LowerArmTexPath, FD2.name AS LowerArmTexName, \
+       FD3.path AS HandsTexPath, FD3.name AS HandsTexName, \
+       FD4.path AS UpperTorsoTexPath, FD4.name AS UpperTorsoTexName, \
+       FD5.path AS LowerTorsoTexPath, FD5.name AS LowerTorsoTexName, \
+       FD6.path AS UpperLegTexPath, FD6.name AS UpperLegTexName, \
+       FD7.path AS LowerLegTexPath, FD7.name AS LowerLegTexName, \
+       FD8.path AS FootTexPath, FD8.name AS FootTexName, \
+       FD9.path AS AccessoryTexPath, FD9.name AS AccessoryTexName \
+       FROM ItemDisplayInfo \
+       LEFT JOIN TextureFileData TFD1 ON TFD1.TextureItemID = TextureID1 AND TFD1.TextureType != %1 LEFT JOIN FileData FD1 ON TFD1.FileDataID = FD1.ID \
+       LEFT JOIN TextureFileData TFD2 ON TFD2.TextureItemID = TextureID2 AND TFD2.TextureType != %1 LEFT JOIN FileData FD2 ON TFD2.FileDataID = FD2.ID \
+       LEFT JOIN TextureFileData TFD3 ON TFD3.TextureItemID = TextureID3 AND TFD3.TextureType != %1 LEFT JOIN FileData FD3 ON TFD3.FileDataID = FD3.ID \
+       LEFT JOIN TextureFileData TFD4 ON TFD4.TextureItemID = TextureID4 AND TFD4.TextureType != %1 LEFT JOIN FileData FD4 ON TFD4.FileDataID = FD4.ID \
+       LEFT JOIN TextureFileData TFD5 ON TFD5.TextureItemID = TextureID5 AND TFD5.TextureType != %1 LEFT JOIN FileData FD5 ON TFD5.FileDataID = FD5.ID \
+       LEFT JOIN TextureFileData TFD6 ON TFD6.TextureItemID = TextureID6 AND TFD6.TextureType != %1 LEFT JOIN FileData FD6 ON TFD6.FileDataID = FD6.ID \
+       LEFT JOIN TextureFileData TFD7 ON TFD7.TextureItemID = TextureID7 AND TFD7.TextureType != %1 LEFT JOIN FileData FD7 ON TFD7.FileDataID = FD7.ID \
+       LEFT JOIN TextureFileData TFD8 ON TFD8.TextureItemID = TextureID8 AND TFD8.TextureType != %1 LEFT JOIN FileData FD8 ON TFD8.FileDataID = FD8.ID \
+       LEFT JOIN TextureFileData TFD9 ON TFD9.TextureItemID = TextureID9 AND TFD9.TextureType != %1 LEFT JOIN FileData FD9 ON TFD9.FileDataID = FD9.ID \
+       LEFT JOIN TextureFileData TFD10 ON TFD10.TextureItemID = TextureItemID1 AND TFD10.TextureType != %1 LEFT JOIN FileData FD10 ON TFD10.FileDataID = FD10.ID \
+       LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 AND TFD11.TextureType != %1 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
+       WHERE ItemDisplayInfo.ID = %2")
+     .arg((infos.sexid == 0)?1:0)
+     .arg(m_displayId);
+
+  sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
+
+  if(!iteminfos.valid || iteminfos.values.empty())
+    return;
+
+  switch(m_slot)
+  {
+  case CS_HEAD:
+  {
+    g_modelViewer->charControl->charAtt->delSlot(CS_HEAD);
+    Attachment *att = NULL;
+    WoWModel *m = NULL;
+    GLuint tex;
+    std::string model = iteminfos.values[0][0];
+    // remove .mdx
+    model = model.substr(0, model.length()-4);
+    // add race prefix
+    model += "_";
+    model += infos.prefix;
+    // add sex suffix
+    model += ((infos.sexid == 0)?"M":"F");
+    // add .m2
+    model += ".m2";
+    model = CASCFOLDER.getFullPathForFile(model);
+    att = g_modelViewer->charControl->charAtt->addChild(model, ATT_HELMET, m_slot);
+    if (att)
+    {
+      m = static_cast<WoWModel*>(att->model);
+      if (m->ok)
+      {
+        std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+        tex = texturemanager.add(texture);
+        for (size_t x=0;x<m->TextureList.size();x++)
+        {
+          if (m->TextureList[x] == wxString(wxT("Special_2")))
+          {
+            wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+            m->TextureList[x] = texture;
+          }
+        }
+        m->replaceTextures[TEXTURE_CAPE] = tex;
+      }
+    }
+
+    break;
+  }
+  case CS_NECK:
+    break;
+  case CS_SHOULDER:
+  {
+    g_modelViewer->charControl->charAtt->delSlot(CS_SHOULDER);
+    Attachment *att = NULL;
+    WoWModel *m = NULL;
+    GLuint tex;
+
+    // left shoulder
+    std::string model = iteminfos.values[0][0];
+    model = model.substr(0, model.length()-4); // remove .mdx
+    model += ".m2"; // add .m2
+    model = CASCFOLDER.getFullPathForFile(model);
+    att = g_modelViewer->charControl->charAtt->addChild(model, ATT_LEFT_SHOULDER, m_slot);
+    if (att)
+    {
+      m = static_cast<WoWModel*>(att->model);
+      if (m->ok)
+      {
+        std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+        tex = texturemanager.add(texture);
+        for (size_t x=0;x<m->TextureList.size();x++)
+        {
+          if (m->TextureList[x] == wxString(wxT("Special_2")))
+          {
+            wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+            m->TextureList[x] = texture;
+          }
+        }
+        m->replaceTextures[TEXTURE_CAPE] = tex;
+      }
+    }
+
+    // right shoulder
+    model = iteminfos.values[0][1];
+    model = model.substr(0, model.length()-4); // remove .mdx
+    model += ".m2"; // add .m2
+    model = CASCFOLDER.getFullPathForFile(model);
+    att = g_modelViewer->charControl->charAtt->addChild(model, ATT_RIGHT_SHOULDER, m_slot);
+    if (att)
+    {
+      m = static_cast<WoWModel*>(att->model);
+      if (m->ok)
+      {
+        std::string texture = iteminfos.values[0][4] + iteminfos.values[0][5];
+        tex = texturemanager.add(texture);
+        for (size_t x=0;x<m->TextureList.size();x++)
+        {
+          if (m->TextureList[x] == wxString(wxT("Special_2")))
+          {
+            wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+            m->TextureList[x] = texture;
+          }
+        }
+        m->replaceTextures[TEXTURE_CAPE] = tex;
+      }
+    }
+  }
+  break;
+  case CS_BOOTS:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_BOOTS] = 1 + atoi(iteminfos.values[0][6].c_str());
+
+    wxString texture = iteminfos.values[0][23] + iteminfos.values[0][24];
+    m_model->tex.addLayer(texture, CR_LEG_LOWER, layer);
+    if (!m_model->cd.showFeet)
+    {
+      texture = iteminfos.values[0][25] + iteminfos.values[0][26];
+      m_model->tex.addLayer(texture, CR_FOOT, layer);
+    }
+  }
+  break;
+  case CS_BELT:
+  {
+    wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
+    m_model->tex.addLayer(texture, CR_LEG_UPPER, layer);
+  }
+  break;
+  case CS_PANTS:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_KNEEPADS] = 1 + atoi(iteminfos.values[0][7].c_str());
+    wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
+    m_model->tex.addLayer(texture, CR_LEG_UPPER, layer);
+    texture = iteminfos.values[0][23] + iteminfos.values[0][24];
+    m_model->tex.addLayer(texture, CR_LEG_LOWER, layer);
+
+    if (atoi(iteminfos.values[0][8].c_str())==1)
+      g_modelViewer->charControl->model->cd.geosets[CG_TROUSERS] = 1 + atoi(iteminfos.values[0][8].c_str());
+
+    break;
+  }
+  case CS_SHIRT:
+  case CS_CHEST:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_WRISTBANDS] = 1 + atoi(iteminfos.values[0][6].c_str());
+    wxString texture = iteminfos.values[0][11] + iteminfos.values[0][12];
+    m_model->tex.addLayer(texture, CR_ARM_UPPER, layer);
+    texture = iteminfos.values[0][13] + iteminfos.values[0][14];
+    m_model->tex.addLayer(texture, CR_ARM_LOWER, layer);
+    texture = iteminfos.values[0][17] + iteminfos.values[0][18];
+    m_model->tex.addLayer(texture, CR_TORSO_UPPER, layer);
+    texture = iteminfos.values[0][19] + iteminfos.values[0][20];
+    m_model->tex.addLayer(texture, CR_TORSO_LOWER, layer);
+
+    const ItemRecord &item = items.getById(m_id);
+
+    if (item.type == IT_ROBE || atoi(iteminfos.values[0][8].c_str())==1)
+    {
+      g_modelViewer->charControl->model->cd.geosets[CG_TROUSERS] = 1 + atoi(iteminfos.values[0][8].c_str());
+      wxString texture = iteminfos.values[0][21] + iteminfos.values[0][22];
+      m_model->tex.addLayer(texture, CR_LEG_UPPER, layer);
+      texture = iteminfos.values[0][23] + iteminfos.values[0][24];
+      m_model->tex.addLayer(texture, CR_LEG_LOWER, layer);
+    }
+  }
+  break;
+  case CS_BRACERS:
+  {
+    wxString texture = iteminfos.values[0][13] + iteminfos.values[0][14];
+    m_model->tex.addLayer(texture, CR_ARM_LOWER, layer);
+  }
+  break;
+  case CS_GLOVES:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_GLOVES] = 1 + atoi(iteminfos.values[0][6].c_str());
+    wxString texture = iteminfos.values[0][13] + iteminfos.values[0][14];
+    m_model->tex.addLayer(texture, CR_ARM_LOWER, layer);
+    texture = iteminfos.values[0][15] + iteminfos.values[0][16];
+    m_model->tex.addLayer(texture, CR_HAND, layer);
+  }
+  break;
+  case CS_HAND_RIGHT:
+  {
+    g_modelViewer->charControl->charAtt->delSlot(CS_HAND_RIGHT);
+    Attachment *att = NULL;
+    WoWModel *m = NULL;
+    GLuint tex;
+
+    std::string itemModel = iteminfos.values[0][0];
+    itemModel = itemModel.substr(0, itemModel.length()-4); // remove .mdx
+    itemModel += ".m2"; // add .m2
+    itemModel = CASCFOLDER.getFullPathForFile(itemModel);
+    int attachement = ATT_RIGHT_PALM;
+    const ItemRecord &item = items.getById(m_id);
+    if(g_modelViewer->charControl->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+    {
+      // make the weapon cross
+      if (item.sheath == ATT_LEFT_BACK_SHEATH)
+        attachement = ATT_RIGHT_BACK_SHEATH;
+      if (item.sheath == ATT_LEFT_BACK)
+        attachement = ATT_RIGHT_BACK;
+      if (item.sheath == ATT_LEFT_HIP_SHEATH)
+        attachement = ATT_RIGHT_HIP_SHEATH;
+    }
+
+    att = g_modelViewer->charControl->charAtt->addChild(itemModel, attachement, m_slot);
+    if (att)
+    {
+      if(g_modelViewer->charControl->bSheathe)
+        m_model->charModelDetails.closeRHand = false;
+      else
+        m_model->charModelDetails.closeRHand = true;
+
+      m = static_cast<WoWModel*>(att->model);
+      if (m->ok)
+      {
+        std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+        tex = texturemanager.add(texture);
+        for (size_t x=0;x<m->TextureList.size();x++)
+        {
+          if (m->TextureList[x] == wxString(wxT("Special_2")))
+          {
+            wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+            m->TextureList[x] = texture;
+          }
+        }
+        m->replaceTextures[TEXTURE_CAPE] = tex;
+      }
+    }
+  }
+  break;
+  case CS_HAND_LEFT:
+  {
+    g_modelViewer->charControl->charAtt->delSlot(CS_HAND_LEFT);
+    Attachment *att = NULL;
+    WoWModel *m = NULL;
+    GLuint tex;
+
+    std::string itemModel = iteminfos.values[0][0];
+    itemModel = itemModel.substr(0, itemModel.length()-4); // remove .mdx
+    itemModel += ".m2"; // add .m2
+    itemModel = CASCFOLDER.getFullPathForFile(itemModel);
+    const ItemRecord &item = items.getById(m_id);
+    int attachement = ATT_LEFT_PALM;
+
+    if(item.type == IT_SHIELD)
+      attachement = ATT_LEFT_WRIST;
+
+    if(g_modelViewer->charControl->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+      attachement = item.sheath;
+
+    att = g_modelViewer->charControl->charAtt->addChild(itemModel, attachement, m_slot);
+    if (att)
+    {
+      if(g_modelViewer->charControl->bSheathe || item.type == IT_SHIELD)
+        m_model->charModelDetails.closeLHand = false;
+      else
+        m_model->charModelDetails.closeLHand = true;
+
+      m = static_cast<WoWModel*>(att->model);
+      if (m->ok)
+      {
+        std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+        tex = texturemanager.add(texture);
+        for (size_t x=0;x<m->TextureList.size();x++)
+        {
+          if (m->TextureList[x] == wxString(wxT("Special_2")))
+          {
+            wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+            m->TextureList[x] = texture;
+          }
+        }
+        m->replaceTextures[TEXTURE_CAPE] = tex;
+      }
+    }
+  }
+  break;
+  case CS_CAPE:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_CAPE] = 1 + atoi(iteminfos.values[0][6].c_str());
+    wxString texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+    g_modelViewer->charControl->capeTex = texturemanager.add(texture);
+    g_modelViewer->charControl->UpdateTextureList(texture, TEXTURE_CAPE);
+  }
+  break;
+  case CS_TABARD:
+  {
+    g_modelViewer->charControl->model->cd.geosets[CG_TARBARD] = 2;
+    if(m_id == 5976) // guild tabard
+        {
+      LOG_INFO << "Current tabard config :"
+          << "Icon" << g_modelViewer->charControl->td.Icon
+          << "IconColor" << g_modelViewer->charControl->td.IconColor
+          << "Border" << g_modelViewer->charControl->td.Border
+          << "BorderColor" << g_modelViewer->charControl->td.BorderColor
+          << "Background" << g_modelViewer->charControl->td.Background;
+      g_modelViewer->charControl->td.showCustom = true;
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetIconTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetIconTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
+      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
+        }
+    else
+    {
+      g_modelViewer->charControl->td.showCustom = false;
+      wxString texture = iteminfos.values[0][17] + iteminfos.values[0][18];
+      m_model->tex.addLayer(texture, CR_TORSO_UPPER, layer);
+      texture = iteminfos.values[0][19] + iteminfos.values[0][20];
+      m_model->tex.addLayer(texture, CR_TORSO_LOWER, layer);
+    }
+  }
+  break;
+  case CS_QUIVER:
+    break;
+  default:
+    break;
+  }
+}
+
+void WoWItem::refresh()
+{
+
+}

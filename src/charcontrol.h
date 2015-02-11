@@ -42,11 +42,6 @@ class CharControl: public wxWindow, public Observer
 	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
 	CharDetailsFrame * cdFrame;
 
-	// if itemid == true, itemnum corresponds to Item database ID
-	// if itemid == false, itemnum corresponds to ItemDisplayInfo ID
-	void AddEquipment(CharSlots slot, ssize_t itemnum, ssize_t layer, CharTexture &tex, bool itemid = true);
-	void UpdateTextureList(wxString texName, int special);
-
 	void onEvent(Event *);
 
 public:
@@ -76,7 +71,6 @@ public:
 
 	void OnUpdateItem(int type, int id);
 
-	CharDetails cd;
 	TabardDetails td;
 
 	Attachment *charAtt;
@@ -93,6 +87,8 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
+
+	void UpdateTextureList(wxString texName, int special);
 };
 
 

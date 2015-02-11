@@ -37,13 +37,15 @@ struct CharTextureComponent
 class CharTexture
 {
   public:
-    CharTexture(size_t _layoutSizeId)
+    CharTexture(size_t _layoutSizeId = 0)
         : layoutSizeId(_layoutSizeId)
       {}
 
     void addLayer(wxString fn, int region, int layer);
 
     void compose(TextureID texID);
+
+    void reset(size_t _layoutSizeId);
 
     static void initRegions();
 

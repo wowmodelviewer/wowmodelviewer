@@ -89,21 +89,21 @@ void ModelBankControl::LoadModel()
 		return;
 
 	if (cd.modelType==MT_CHAR && g_charControl) {
-		g_charControl->cd.setFaceType(cd.faceType);
-		g_charControl->cd.setFacialHair(cd.facialHair);
-		g_charControl->cd.gender = cd.gender;
-		g_charControl->cd.setHairColor(cd.hairColor);
-		g_charControl->cd.setHairStyle(cd.hairStyle);
-		g_charControl->cd.setSkinColor(cd.skinColor);
-		g_charControl->cd.race = cd.race;
+		g_charControl->model->cd.setFaceType(cd.faceType);
+		g_charControl->model->cd.setFacialHair(cd.facialHair);
+		g_charControl->model->cd.gender = cd.gender;
+		g_charControl->model->cd.setHairColor(cd.hairColor);
+		g_charControl->model->cd.setHairStyle(cd.hairStyle);
+		g_charControl->model->cd.setSkinColor(cd.skinColor);
+		g_charControl->model->cd.race = cd.race;
 
-		g_charControl->cd.showEars = cd.showEars;
-		g_charControl->cd.showFacialHair = cd.showFacialHair;
-		g_charControl->cd.showFeet = cd.showFeet;
-		g_charControl->cd.showHair = cd.showHair;
+		g_charControl->model->cd.showEars = cd.showEars;
+		g_charControl->model->cd.showFacialHair = cd.showFacialHair;
+		g_charControl->model->cd.showFeet = cd.showFeet;
+		g_charControl->model->cd.showHair = cd.showHair;
 
 		for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-			g_charControl->cd.equipment[i] = cd.equipment[i];
+			g_charControl->model->cd.equipment[i] = cd.equipment[i];
 
 		g_charControl->RefreshModel();
 		g_charControl->RefreshEquipment();
@@ -151,21 +151,21 @@ void ModelBankControl::AddModel()
 	} else if (cd.modelType == MT_CHAR) {
 
 		for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-			cd.equipment[i] = g_charControl->cd.equipment[i];
+			cd.equipment[i] = g_charControl->model->cd.equipment[i];
 
-		cd.faceType = g_charControl->cd.faceType();
-		cd.facialHair = g_charControl->cd.facialHair();
-		cd.gender = g_charControl->cd.gender;
-		cd.hairColor = g_charControl->cd.hairColor();
-		cd.hairStyle = g_charControl->cd.hairStyle();
-		cd.race = g_charControl->cd.race;
-		cd.skinColor = g_charControl->cd.skinColor();
+		cd.faceType = g_charControl->model->cd.faceType();
+		cd.facialHair = g_charControl->model->cd.facialHair();
+		cd.gender = g_charControl->model->cd.gender;
+		cd.hairColor = g_charControl->model->cd.hairColor();
+		cd.hairStyle = g_charControl->model->cd.hairStyle();
+		cd.race = g_charControl->model->cd.race;
+		cd.skinColor = g_charControl->model->cd.skinColor();
 
-		cd.showEars = g_charControl->cd.showEars;
-		cd.showFacialHair = g_charControl->cd.showFacialHair;
-		cd.showFeet = g_charControl->cd.showFeet;
-		cd.showHair = g_charControl->cd.showHair;
-		cd.showUnderwear = g_charControl->cd.showUnderwear;
+		cd.showEars = g_charControl->model->cd.showEars;
+		cd.showFacialHair = g_charControl->model->cd.showFacialHair;
+		cd.showFeet = g_charControl->model->cd.showFeet;
+		cd.showHair = g_charControl->model->cd.showHair;
+		cd.showUnderwear = g_charControl->model->cd.showUnderwear;
 
 	} else if (cd.modelType == MT_WMO) {
 	

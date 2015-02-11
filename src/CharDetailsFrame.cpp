@@ -30,8 +30,8 @@ BEGIN_EVENT_TABLE(CharDetailsFrame, wxWindow)
 END_EVENT_TABLE()
 
 
-CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
-  : wxWindow(parent, wxID_ANY), m_details(details)
+CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
+  : wxWindow(parent, wxID_ANY)
 {
   wxLogMessage(wxT("Creating CharDetailsFrame..."));
 
@@ -58,23 +58,31 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent, CharDetails & details)
   top->SetSizeHints(this);
   SetSizer(top);
   Layout();
-
-  m_details.attach(this);
 }
+
+void CharDetailsFrame::setModel(CharDetails & details)
+{
+  m_details = &details;
+  m_details->attach(this);
+}
+
 
 void CharDetailsFrame::refresh()
 {
-  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details.skinColorMax());
-  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details.faceTypeMax());
-  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details.hairColorMax());
-  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details.hairStyleMax());
-  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details.facialHairMax());
+  if(!m_details)
+    return;
 
-  spins[SPIN_SKIN_COLOR]->SetValue((int)m_details.skinColor());
-  spins[SPIN_FACE_TYPE]->SetValue((int)m_details.faceType());
-  spins[SPIN_HAIR_COLOR]->SetValue((int)m_details.hairColor());
-  spins[SPIN_HAIR_STYLE]->SetValue((int)m_details.hairStyle());
-  spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details.facialHair());
+  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details->skinColorMax());
+  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details->faceTypeMax());
+  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details->hairColorMax());
+  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details->hairStyleMax());
+  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details->facialHairMax());
+
+  spins[SPIN_SKIN_COLOR]->SetValue((int)m_details->skinColor());
+  spins[SPIN_FACE_TYPE]->SetValue((int)m_details->faceType());
+  spins[SPIN_HAIR_COLOR]->SetValue((int)m_details->hairColor());
+  spins[SPIN_HAIR_STYLE]->SetValue((int)m_details->hairStyle());
+  spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details->facialHair());
 
   for (size_t i=0; i<NUM_SPIN_BTNS; i++)
     spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
@@ -85,33 +93,36 @@ void CharDetailsFrame::refresh()
 
 void CharDetailsFrame::onSpin(wxSpinEvent &event)
 {
+  if(!m_details)
+    return;
+
   switch(event.GetId())
   {
   case ID_SKIN_COLOR:
-    m_details.setSkinColor(event.GetPosition());
+    m_details->setSkinColor(event.GetPosition());
     break;
   case ID_FACE_TYPE:
-    m_details.setFaceType(event.GetPosition());
+    m_details->setFaceType(event.GetPosition());
     break;
   case ID_HAIR_COLOR:
-    m_details.setHairColor(event.GetPosition());
+    m_details->setHairColor(event.GetPosition());
     break;
   case ID_HAIR_STYLE:
-    m_details.setHairStyle(event.GetPosition());
+    m_details->setHairStyle(event.GetPosition());
     break;
   case ID_FACIAL_HAIR:
-    m_details.setFacialHair(event.GetPosition());
+    m_details->setFacialHair(event.GetPosition());
     break;
   default:
     break;
   }
 
   LOG_INFO << "Current model config :"
-           << "skinColor" << m_details.skinColor()
-           << "faceType" << m_details.faceType()
-           << "hairColor" << m_details.hairColor()
-           << "hairStyle" << m_details.hairStyle()
-           << "facialHair" << m_details.facialHair();
+           << "skinColor" << m_details->skinColor()
+           << "faceType" << m_details->faceType()
+           << "hairColor" << m_details->hairColor()
+           << "hairStyle" << m_details->hairStyle()
+           << "facialHair" << m_details->facialHair();
 }
 
 void CharDetailsFrame::onRandomise(wxCommandEvent &event)
@@ -121,12 +132,15 @@ void CharDetailsFrame::onRandomise(wxCommandEvent &event)
 
 void CharDetailsFrame::randomiseChar()
 {
+  if(!m_details)
+    return;
+
   // Choose random values for the looks! ^_^
-  m_details.setSkinColor(randint(0, (int)m_details.skinColorMax()));
-  m_details.setFaceType(randint(0, (int)m_details.faceTypeMax()));
-  m_details.setHairColor(randint(0, (int)m_details.hairColorMax()));
-  m_details.setHairStyle(randint(0, (int)m_details.hairStyleMax()));
-  m_details.setFacialHair(randint(0, (int)m_details.facialHairMax()));
+  m_details->setSkinColor(randint(0, (int)m_details->skinColorMax()));
+  m_details->setFaceType(randint(0, (int)m_details->faceTypeMax()));
+  m_details->setHairColor(randint(0, (int)m_details->hairColorMax()));
+  m_details->setHairStyle(randint(0, (int)m_details->hairStyleMax()));
+  m_details->setFacialHair(randint(0, (int)m_details->facialHairMax()));
 }
 
 void CharDetailsFrame::onEvent(Event *)

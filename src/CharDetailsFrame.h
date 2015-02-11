@@ -36,10 +36,11 @@ enum {
 class CharDetailsFrame : public wxWindow, public Observer
 {
   public:
-    CharDetailsFrame(wxWindow* parent, CharDetails &);
+    CharDetailsFrame(wxWindow* parent);
 
     void refresh();
     void randomiseChar();
+    void setModel(CharDetails & details);
 
 
   protected:
@@ -57,7 +58,7 @@ class CharDetailsFrame : public wxWindow, public Observer
 
     virtual void onEvent(Event *);
 
-    CharDetails & m_details;
+    CharDetails * m_details;
 };
 
 

@@ -381,17 +381,20 @@ void ModelViewer::InitMenu()
 		charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_NONE, _("None"));
 		charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_DEFAULT, _("Default"));
 		charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_DEATHKNIGHT, _("Death Knight"));
-		if (charControl->cd.eyeGlowType){
-			size_t egt = charControl->cd.eyeGlowType;
-			if (egt == EGT_NONE)
-				charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
-			else if (egt == EGT_DEATHKNIGHT)
-				charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
-			else
-				charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
-		}else{
-			charControl->cd.eyeGlowType = EGT_DEFAULT;
-			charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+		if(charControl->model)
+		{
+		  if (charControl->model->cd.eyeGlowType){
+		    size_t egt = charControl->model->cd.eyeGlowType;
+		    if (egt == EGT_NONE)
+		      charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
+		    else if (egt == EGT_DEATHKNIGHT)
+		      charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
+		    else
+		      charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+		  }else{
+		    charControl->model->cd.eyeGlowType = EGT_DEFAULT;
+		    charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+		}
 		}
 		charMenu->Append(ID_CHAREYEGLOW, _("Eye Glow"), charGlowMenu);
 
@@ -910,7 +913,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		}
 
 		canvas->model->modelType = MT_CHAR;
-
+		canvas->model->cd.reset(canvas->model);
 	}
 	else
 	{
@@ -1063,27 +1066,27 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	    if(r.valid && !r.empty())
 	    {
-	      g_charControl->cd.race = atoi(r.values[0][1].c_str());
-	      g_charControl->cd.gender = atoi(r.values[0][2].c_str());
-	      g_charControl->cd.setSkinColor(atoi(r.values[0][3].c_str()));
-	      g_charControl->cd.setFaceType(atoi(r.values[0][4].c_str()));
-	      g_charControl->cd.setHairColor(atoi(r.values[0][6].c_str()));
-	      g_charControl->cd.setHairStyle(atoi(r.values[0][5].c_str()));
-	      g_charControl->cd.setFacialHair(atoi(r.values[0][7].c_str()));
+	      g_charControl->model->cd.race = atoi(r.values[0][1].c_str());
+	      g_charControl->model->cd.gender = atoi(r.values[0][2].c_str());
+	      g_charControl->model->cd.setSkinColor(atoi(r.values[0][3].c_str()));
+	      g_charControl->model->cd.setFaceType(atoi(r.values[0][4].c_str()));
+	      g_charControl->model->cd.setHairColor(atoi(r.values[0][6].c_str()));
+	      g_charControl->model->cd.setHairStyle(atoi(r.values[0][5].c_str()));
+	      g_charControl->model->cd.setFacialHair(atoi(r.values[0][7].c_str()));
 
-	      g_charControl->cd.equipment[CS_HEAD] = atoi(r.values[0][8].c_str());
-	      g_charControl->cd.equipment[CS_SHOULDER] = atoi(r.values[0][9].c_str());
-	      g_charControl->cd.equipment[CS_SHIRT] = atoi(r.values[0][10].c_str());
-	      g_charControl->cd.equipment[CS_CHEST] = atoi(r.values[0][11].c_str());
-	      g_charControl->cd.equipment[CS_BELT] = atoi(r.values[0][12].c_str());
-	      g_charControl->cd.equipment[CS_PANTS] = atoi(r.values[0][13].c_str());
-	      g_charControl->cd.equipment[CS_BOOTS] = atoi(r.values[0][14].c_str());
-	      g_charControl->cd.equipment[CS_BRACERS] = atoi(r.values[0][15].c_str());
-	      g_charControl->cd.equipment[CS_GLOVES] = atoi(r.values[0][16].c_str());
-	      g_charControl->cd.equipment[CS_TABARD] = atoi(r.values[0][17].c_str());
-	      g_charControl->cd.equipment[CS_CAPE] = atoi(r.values[0][18].c_str());
+	      g_charControl->model->cd.equipment[CS_HEAD] = atoi(r.values[0][8].c_str());
+	      g_charControl->model->cd.equipment[CS_SHOULDER] = atoi(r.values[0][9].c_str());
+	      g_charControl->model->cd.equipment[CS_SHIRT] = atoi(r.values[0][10].c_str());
+	      g_charControl->model->cd.equipment[CS_CHEST] = atoi(r.values[0][11].c_str());
+	      g_charControl->model->cd.equipment[CS_BELT] = atoi(r.values[0][12].c_str());
+	      g_charControl->model->cd.equipment[CS_PANTS] = atoi(r.values[0][13].c_str());
+	      g_charControl->model->cd.equipment[CS_BOOTS] = atoi(r.values[0][14].c_str());
+	      g_charControl->model->cd.equipment[CS_BRACERS] = atoi(r.values[0][15].c_str());
+	      g_charControl->model->cd.equipment[CS_GLOVES] = atoi(r.values[0][16].c_str());
+	      g_charControl->model->cd.equipment[CS_TABARD] = atoi(r.values[0][17].c_str());
+	      g_charControl->model->cd.equipment[CS_CAPE] = atoi(r.values[0][18].c_str());
 
-	      g_charControl->cd.isNPC = true;
+	      g_charControl->model->cd.isNPC = true;
 
 	      g_charControl->RefreshModel();
 	      g_charControl->RefreshEquipment();
@@ -1372,7 +1375,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 			if (loadDialog.ShowModal()==wxID_OK) {
 				wxLogMessage(wxT("\nLoading character from a save file: %s\n"), loadDialog.GetPath().c_str());
 				for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-					charControl->cd.equipment[i] = 0;
+					charControl->model->cd.equipment[i] = 0;
 				
 				LoadChar(loadDialog.GetPath());
 			}
@@ -1954,14 +1957,14 @@ void ModelViewer::SaveChar(wxString fn)
 	ofstream f(fn.char_str(), ios_base::out|ios_base::trunc);
 #endif
 	f << canvas->model->wxname << endl;
-	f << charControl->cd.race << " " << charControl->cd.gender << endl;
-	f << charControl->cd.skinColor() << " " << charControl->cd.faceType() << " " << charControl->cd.hairColor() << " " << charControl->cd.hairStyle() << " " << charControl->cd.facialHair() << " " << charControl->cd.eyeGlowType << endl;
+	f << charControl->model->cd.race << " " << charControl->model->cd.gender << endl;
+	f << charControl->model->cd.skinColor() << " " << charControl->model->cd.faceType() << " " << charControl->model->cd.hairColor() << " " << charControl->model->cd.hairStyle() << " " << charControl->model->cd.facialHair() << " " << charControl->model->cd.eyeGlowType << endl;
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {
-		f << charControl->cd.equipment[i] << endl;
+		f << charControl->model->cd.equipment[i] << endl;
 	}
 
 	// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-	if ((charControl->cd.equipment[CS_TABARD] == 5976) || (charControl->cd.equipment[CS_TABARD] == 69209) || (charControl->cd.equipment[CS_TABARD] == 69210)) {
+	if ((charControl->model->cd.equipment[CS_TABARD] == 5976) || (charControl->model->cd.equipment[CS_TABARD] == 69209) || (charControl->model->cd.equipment[CS_TABARD] == 69210)) {
 		f << charControl->td.Background << " " << charControl->td.Border << " " << charControl->td.BorderColor << " " << charControl->td.Icon << " " << charControl->td.IconColor << endl;
 	}
 
@@ -1997,37 +2000,37 @@ void ModelViewer::LoadChar(wxString fn)
 	LoadModel(wxString(modelname.c_str(), wxConvUTF8));
 	canvas->model->modelType = MT_CHAR;
 
-	f >> charControl->cd.race >> charControl->cd.gender; // race and gender
+	f >> charControl->model->cd.race >> charControl->model->cd.gender; // race and gender
 	
 	size_t value;
 	f >> value;
-	charControl->cd.setSkinColor(value);
+	charControl->model->cd.setSkinColor(value);
 	f >> value;
-	charControl->cd.setFaceType(value);
+	charControl->model->cd.setFaceType(value);
 	f >> value;
-	charControl->cd.setHairColor(value);
+	charControl->model->cd.setHairColor(value);
 	f >> value;
-	charControl->cd.setHairStyle(value);
+	charControl->model->cd.setHairStyle(value);
 	f >> value;
-	charControl->cd.setFacialHair(value);
+	charControl->model->cd.setFacialHair(value);
 
 	// If Eyeglow is in char file...
 	if (f.peek() != wxT('\n')){
-		f >> charControl->cd.eyeGlowType;
+		f >> charControl->model->cd.eyeGlowType;
 	}else{
 		// Otherwise, default to this value
-		charControl->cd.eyeGlowType = EGT_DEFAULT;
+		charControl->model->cd.eyeGlowType = EGT_DEFAULT;
 	}
 
 	while (!f.eof()) {
 		for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {
-			f >> charControl->cd.equipment[i];
+			f >> charControl->model->cd.equipment[i];
 		}
 		break;
 	}
 
 	// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-	if (((charControl->cd.equipment[CS_TABARD] == 5976) || (charControl->cd.equipment[CS_TABARD] == 69209) || (charControl->cd.equipment[CS_TABARD] == 69210)) && !f.eof()) {
+	if (((charControl->model->cd.equipment[CS_TABARD] == 5976) || (charControl->model->cd.equipment[CS_TABARD] == 69209) || (charControl->model->cd.equipment[CS_TABARD] == 69210)) && !f.eof()) {
 		f >> charControl->td.Background >> charControl->td.Border >> charControl->td.BorderColor >> charControl->td.Icon >> charControl->td.IconColor;
 		charControl->td.showCustom = true;
 	}
@@ -2686,19 +2689,19 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		}
 
 		// Update the model
-		g_charControl->cd.race = result->raceId;
-		g_charControl->cd.gender = result->genderId;
-		g_charControl->cd.setSkinColor(result->skinColor);
-		g_charControl->cd.setFaceType(result->faceType);
-		g_charControl->cd.setHairColor(result->hairColor);
-		g_charControl->cd.setHairStyle(result->hairStyle);
-		g_charControl->cd.setFacialHair(result->facialHair);
+		g_charControl->model->cd.race = result->raceId;
+		g_charControl->model->cd.gender = result->genderId;
+		g_charControl->model->cd.setSkinColor(result->skinColor);
+		g_charControl->model->cd.setFaceType(result->faceType);
+		g_charControl->model->cd.setHairColor(result->hairColor);
+		g_charControl->model->cd.setHairStyle(result->hairStyle);
+		g_charControl->model->cd.setFacialHair(result->facialHair);
 
 		g_charControl->td.Icon = result->tabardIcon;
 		g_charControl->td.Border = result->tabardBorder;
 
 		for(int i=0 ; i < NUM_CHAR_SLOTS ; i++)
-		  g_charControl->cd.equipment[i] = result->equipment[i];
+		  g_charControl->model->cd.equipment[i] = result->equipment[i];
 
 		g_charControl->RefreshModel();
 		g_charControl->RefreshEquipment();
