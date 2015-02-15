@@ -339,58 +339,88 @@ void CharControl::OnButton(wxCommandEvent &event)
 
 	//if (dir.Last() != '\\')
 	//	dir.Append('\\');
-	if (event.GetId()==ID_SAVE_EQUIPMENT) {
-		wxFileDialog dialog(this, wxT("Save equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-		if (dialog.ShowModal()==wxID_OK) {
-			wxString s(dialog.GetPath());
-			model->cd.save(s, &td);
+	switch(event.GetId())
+	{
+	case ID_SAVE_EQUIPMENT:
+	{
+	  wxFileDialog dialog(this, wxT("Save equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
+	  if (dialog.ShowModal()==wxID_OK)
+	  {
+	    wxString s(dialog.GetPath());
+	    model->cd.save(s, &td);
 
-			// Save directory path
-			dir = dialog.GetDirectory();
-		}
-
-	} else if (event.GetId()==ID_LOAD_EQUIPMENT) {
+	    // Save directory path
+	    dir = dialog.GetDirectory();
+	  }
+	  break;
+	}
+	case ID_LOAD_EQUIPMENT:
+	{
 /*
-		wxFileDialog dialog(this, wxT("Load equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN|wxFD_FILE_MUST_EXIST, wxDefaultPosition);
-		if (dialog.ShowModal()==wxID_OK) {
-			wxString s(dialog.GetPath());
-			if (model->cd.load(s, &td)) {
-				spins[SPIN_SKIN_COLOR]->SetValue((int)model->cd.skinColor);
-				spins[SPIN_FACE_TYPE]->SetValue((int)model->cd.faceType);
-				spins[SPIN_HAIR_COLOR]->SetValue((int)model->cd.hairColor);
-				spins[SPIN_HAIR_STYLE]->SetValue((int)model->cd.hairStyle);
-				spins[SPIN_FACIAL_HAIR]->SetValue((int)model->cd.facialHair);
-				for (size_t i=0; i<NUM_SPIN_BTNS; i++) 
-					spins[i]->Refresh(false);
-			}
-			RefreshEquipment();
+	  wxFileDialog dialog(this, wxT("Load equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN|wxFD_FILE_MUST_EXIST, wxDefaultPosition);
+	  if (dialog.ShowModal()==wxID_OK) {
+	    wxString s(dialog.GetPath());
+	    if (model->cd.load(s, &td)) {
+	      spins[SPIN_SKIN_COLOR]->SetValue((int)model->cd.skinColor);
+	      spins[SPIN_FACE_TYPE]->SetValue((int)model->cd.faceType);
+	      spins[SPIN_HAIR_COLOR]->SetValue((int)model->cd.hairColor);
+	      spins[SPIN_HAIR_STYLE]->SetValue((int)model->cd.hairStyle);
+	      spins[SPIN_FACIAL_HAIR]->SetValue((int)model->cd.facialHair);
+	      for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+	        spins[i]->Refresh(false);
+	    }
+	    RefreshEquipment();
 
-			// Save directory path
-			dir = dialog.GetDirectory();
+	    // Save directory path
+	    dir = dialog.GetDirectory();
 
-		}
-*/
-	} else if (event.GetId()==ID_CLEAR_EQUIPMENT) {
-		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
-		{
-		  WoWItem * item = model->getItem((CharSlots)i);
-		  if(item)
-		    item->setId(0);
-		}
-		RefreshEquipment();
-	} else if (event.GetId()==ID_LOAD_SET) {
-		selectSet();
-	} else if (event.GetId()==ID_LOAD_START) {
-		selectStart();
-	} else if (event.GetId()==ID_MOUNT) {
-		selectMount();
-	} else {
-		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-			if (buttons[i] && (wxButton*)event.GetEventObject()==buttons[i]) {
-				selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
-				break;
-			}
-		}
+	  }
+	*/
+	  break;
+	}
+	case ID_CLEAR_EQUIPMENT:
+	{
+	  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
+	  {
+	    WoWItem * item = model->getItem((CharSlots)i);
+	    if(item)
+	      item->setId(0);
+	  }
+	  RefreshEquipment();
+	  break;
+	}
+	case ID_LOAD_SET:
+	{
+	  selectSet();
+	  break;
+	}
+	case ID_LOAD_START:
+	{
+	  selectStart();
+	  break;
+	}
+	case ID_MOUNT:
+	{
+	  selectMount();
+	  break;
+	}
+	case ID_CHAR_RANDOMISE:
+	{
+	  cdFrame->randomiseChar();
+	  break;
+	}
+	default:
+	{
+	  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
+	  {
+	    if (buttons[i] && (wxButton*)event.GetEventObject()==buttons[i])
+	    {
+	      selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
+	      break;
+	    }
+	  }
+	  break;
+	}
 	}
 
 	RefreshModel();
