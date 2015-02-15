@@ -27,6 +27,7 @@
 #define _WOWITEM_H_
 
 #include <map>
+#include <string>
 
 #include "enums.h"
 
@@ -50,6 +51,10 @@ class WoWItem : public Component
 
   private:
     void load();
+    void unload();
+
+    bool isCustomizableTabard();
+
     WoWModel * m_model;
 
     int m_id;
@@ -59,6 +64,11 @@ class WoWItem : public Component
 
     static std::map<CharSlots,int> SLOT_LAYERS;
     static std::map<CharSlots,int> initSlotLayers();
+
+    std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
+    std::map<CharRegions, std::string> m_itemTextures;
+    std::map<CharGeosets, int> m_itemGeosets;
+
 };
 
 

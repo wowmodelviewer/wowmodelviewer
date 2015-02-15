@@ -214,8 +214,6 @@ void Attachment::delChildren()
 {
 	for (size_t i=0; i<children.size(); i++) {
 		children[i]->delChildren();
-
-		wxDELETE(children[i]->model);
 		wxDELETE(children[i]);
 	}
 
@@ -226,7 +224,6 @@ void Attachment::delSlot(int slot)
 {
 	for (size_t i=0; i<children.size(); ) {
 		if (children[i]->slot == slot) {
-			wxDELETE(children[i]);
 			children.erase(children.begin() + i);
 		} else i++;
 	}
