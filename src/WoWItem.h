@@ -49,8 +49,9 @@ class WoWItem : public Component
 
     void onParentSet(Component *);
 
-  private:
     void load();
+
+  private:
     void unload();
 
     bool isCustomizableTabard();

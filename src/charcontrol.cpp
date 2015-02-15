@@ -318,16 +318,13 @@ void CharControl::RefreshEquipment()
 {
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
 	{
-	//	if (slotHasModel(i))
-	//		RefreshItem(i);
-	  if (g_canvas->model->modelType != MT_NPC)
+	  if (labels[i])
 	  {
-			if (labels[i])
-			{
-				labels[i]->SetLabel(items.getById(model->cd.equipment[i]).name);
-				labels[i]->SetForegroundColour(ItemQualityColour(items.getById(model->cd.equipment[i]).quality));
-			}
-		}
+	    WoWItem * item = model->getItem((CharSlots)i);
+	    if(item)
+	      labels[i]->SetLabel(item->name());
+	    labels[i]->SetForegroundColour(ItemQualityColour(items.getById(model->cd.equipment[i]).quality));
+	  }
 	}
 }
 
@@ -1024,22 +1021,20 @@ void CharControl::OnUpdateItem(int type, int id)
 {
 	switch (type) {
 	case UPDATE_ITEM:
+	{
 		if (choosingSlot == CS_HAND_LEFT)
 			model->charModelDetails.closeLHand = false;
 		else if (choosingSlot == CS_HAND_RIGHT)
 			model->charModelDetails.closeRHand = false;
 
-		// special case : we previously have a model, but not anymore => remove it
-		// @TODO : need better management of this...
-		if (slotHasModel(choosingSlot) && model->cd.equipment[choosingSlot] != 0 && numbers[id] == 0)
-		  charAtt->delSlot(choosingSlot);
-
 		model->cd.equipment[choosingSlot] = numbers[id];
 
-		labels[choosingSlot]->SetLabel(items.getById(model->cd.equipment[choosingSlot]).name);
+		WoWItem * item = model->getItem((CharSlots)choosingSlot);
+		if(item)
+		  labels[choosingSlot]->SetLabel(item->name());
 		labels[choosingSlot]->SetForegroundColour(ItemQualityColour(items.getById(model->cd.equipment[choosingSlot]).quality));
 		break;
-
+	}
 	case UPDATE_SET:
 		id = numbers[id];
 
@@ -1224,6 +1219,10 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 	           << "Border" << td.Border
 	           << "BorderColor" << td.BorderColor
 	           << "Background" << td.Background;
+
+	WoWItem * tabardModel = model->getItem(CS_TABARD);
+	if(tabardModel)
+	  tabardModel->load();
 
 	RefreshModel();
 }

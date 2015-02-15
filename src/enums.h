@@ -315,7 +315,8 @@ enum CharRegions {
 	CR_TABARD_2,
 	CR_TABARD_3,
 	CR_TABARD_4,
-	CR_TABARD_5
+	CR_TABARD_5,
+	CR_TABARD_6
 };
 
 enum {

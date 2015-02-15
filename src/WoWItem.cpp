@@ -501,12 +501,6 @@ void WoWItem::load()
     m_itemGeosets[CG_TARBARD] = 2;
     if(isCustomizableTabard())
     {
-      LOG_INFO << "Current tabard config :"
-          << "Icon" << g_modelViewer->charControl->td.Icon
-          << "IconColor" << g_modelViewer->charControl->td.IconColor
-          << "Border" << g_modelViewer->charControl->td.Border
-          << "BorderColor" << g_modelViewer->charControl->td.BorderColor
-          << "Background" << g_modelViewer->charControl->td.Background;
       g_modelViewer->charControl->td.showCustom = true;
       std::string texture = g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_UPPER).mb_str();
       if(!texture.empty())
@@ -515,7 +509,7 @@ void WoWItem::load()
         m_itemTextures[CR_TABARD_1] = texture;
       }
 
-      texture = g_modelViewer->charControl->td.GetIconTex(CR_TORSO_LOWER).mb_str();
+      texture = g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_LOWER).mb_str();
       if(!texture.empty())
       {
         texturemanager.add(texture);
@@ -529,7 +523,7 @@ void WoWItem::load()
         m_itemTextures[CR_TABARD_3] = texture;
       }
 
-      texture = g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_LOWER).mb_str();
+      texture = g_modelViewer->charControl->td.GetIconTex(CR_TORSO_LOWER).mb_str();
       if(!texture.empty())
       {
         texturemanager.add(texture);
@@ -542,10 +536,17 @@ void WoWItem::load()
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_5] = texture;
       }
+
+      texture = g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_LOWER).mb_str();
+      if(!texture.empty())
+      {
+        texturemanager.add(texture);
+        m_itemTextures[CR_TABARD_6] = texture;
+      }
     }
     else
     {
-
+      g_modelViewer->charControl->td.showCustom = false;
       std::string texture = iteminfos.values[0][17] + iteminfos.values[0][18];
       if(!texture.empty())
       {
@@ -776,33 +777,45 @@ void WoWItem::refresh()
   }
   case CS_TABARD:
   {
-    /*
-    g_modelViewer->charControl->model->cd.geosets[CG_TARBARD] = 2;
-    if(m_id == 5976) // guild tabard
+    g_modelViewer->charControl->model->cd.geosets[CG_TARBARD] = m_itemGeosets[CG_TARBARD];
+
+    if(isCustomizableTabard())
     {
-      LOG_INFO << "Current tabard config :"
-          << "Icon" << g_modelViewer->charControl->td.Icon
-          << "IconColor" << g_modelViewer->charControl->td.IconColor
-          << "Border" << g_modelViewer->charControl->td.Border
-          << "BorderColor" << g_modelViewer->charControl->td.BorderColor
-          << "Background" << g_modelViewer->charControl->td.Background;
-      g_modelViewer->charControl->td.showCustom = true;
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBackgroundTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetIconTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetIconTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_UPPER), CR_TORSO_UPPER, layer);
-      m_model->tex.addLayer(g_modelViewer->charControl->td.GetBorderTex(CR_TORSO_LOWER), CR_TORSO_LOWER, layer);
+      std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TABARD_1);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TABARD_2);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TABARD_3);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TABARD_4);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TABARD_5);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TABARD_6);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+
     }
     else
     {
-      g_modelViewer->charControl->td.showCustom = false;
-      wxString texture = iteminfos.values[0][17] + iteminfos.values[0][18];
-      m_model->tex.addLayer(texture, CR_TORSO_UPPER, layer);
-      texture = iteminfos.values[0][19] + iteminfos.values[0][20];
-      m_model->tex.addLayer(texture, CR_TORSO_LOWER, layer);
+      std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TORSO_UPPER);
+      if(it != m_itemTextures.end())
+        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+
+      it = m_itemTextures.find(CR_TORSO_LOWER);
+           if(it != m_itemTextures.end())
+             m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
     }
-    */
     break;
   }
   default:
@@ -812,5 +825,7 @@ void WoWItem::refresh()
 
 bool WoWItem::isCustomizableTabard()
 {
-  return (m_id == 5976); // guild tabard
+  return (m_id == 5976  || // Guild Tabard
+          m_id == 69209 || // Illustrious Guild Tabard
+          m_id == 69210);  // Renowned Guild Tabard
 }
