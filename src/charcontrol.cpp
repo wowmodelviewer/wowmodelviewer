@@ -9,6 +9,8 @@
 
 #include "logger/Logger.h"
 
+#include "metaclasses/Iterator.h"
+
 #include "CASCFolder.h"
 #include "GameDatabase.h"
 #include "RaceInfos.h"
@@ -322,8 +324,10 @@ void CharControl::RefreshEquipment()
 	  {
 	    WoWItem * item = model->getItem((CharSlots)i);
 	    if(item)
+	    {
 	      labels[i]->SetLabel(item->name());
-	    labels[i]->SetForegroundColour(ItemQualityColour(items.getById(model->cd.equipment[i]).quality));
+	      labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
+	    }
 	  }
 	}
 }
@@ -367,8 +371,12 @@ void CharControl::OnButton(wxCommandEvent &event)
 		}
 */
 	} else if (event.GetId()==ID_CLEAR_EQUIPMENT) {
-		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) 
-			model->cd.equipment[i] = 0;
+		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
+		{
+		  WoWItem * item = model->getItem((CharSlots)i);
+		  if(item)
+		    item->setId(0);
+		}
 		RefreshEquipment();
 	} else if (event.GetId()==ID_LOAD_SET) {
 		selectSet();
@@ -379,7 +387,7 @@ void CharControl::OnButton(wxCommandEvent &event)
 	} else {
 		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 			if (buttons[i] && (wxButton*)event.GetEventObject()==buttons[i]) {
-				selectItem(UPDATE_ITEM, i, model->cd.equipment[i], buttons[i]->GetLabel().GetData());
+				selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
 				break;
 			}
 		}
@@ -541,35 +549,26 @@ void CharControl::RefreshModel()
     LOG_ERROR << "Unable to collect number of facial hair style" << model->cd.facialHair() << "for model" << model->wxname.c_str();
   }
 
-	// dressup
-	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
-	{
-		CharSlots sn = slotOrder[i];
-
-		WoWItem * item = model->getItem(sn);
-		if(item)
-		  (model->cd.isNPC)?item->setDisplayId(model->cd.equipment[sn]):item->setId(model->cd.equipment[sn]);
-/*
-		if (model->cd.equipment[sn] != 0)
-		  AddEquipment(sn, model->cd.equipment[sn], 10+i, model->tex, !model->cd.isNPC);
-*/
-	}
+	//refresh equipment
+  Iterator<WoWItem> itemsIt(model);
+  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
+    (*itemsIt)->refresh();
 
 	LOG_INFO << "Current Equipement :"
-	         << "Head" << model->cd.equipment[CS_HEAD]
-	         << "Shoulder" << model->cd.equipment[CS_SHOULDER]
-	         << "Shirt" << model->cd.equipment[CS_SHIRT]
-	         << "Chest" << model->cd.equipment[CS_CHEST]
-	         << "Belt" << model->cd.equipment[CS_BELT]
-	         << "Legs" << model->cd.equipment[CS_PANTS]
-	         << "Boots" << model->cd.equipment[CS_BOOTS]
-	         << "Bracers" << model->cd.equipment[CS_BRACERS]
-	         << "Gloves" << model->cd.equipment[CS_GLOVES]
-	         << "Cape" << model->cd.equipment[CS_CAPE]
-	         << "Right Hand" << model->cd.equipment[CS_HAND_RIGHT]
-	         << "Left Hand" << model->cd.equipment[CS_HAND_LEFT]
-	         << "Quiver" << model->cd.equipment[CS_QUIVER]
-	         << "Tabard" << model->cd.equipment[CS_TABARD];
+	         << "Head" << model->getItem(CS_HEAD)->id()
+	         << "Shoulder" << model->getItem(CS_SHOULDER)->id()
+	         << "Shirt" << model->getItem(CS_SHIRT)->id()
+	         << "Chest" << model->getItem(CS_CHEST)->id()
+	         << "Belt" << model->getItem(CS_BELT)->id()
+	         << "Legs" << model->getItem(CS_PANTS)->id()
+	         << "Boots" << model->getItem(CS_BOOTS)->id()
+	         << "Bracers" << model->getItem(CS_BRACERS)->id()
+	         << "Gloves" << model->getItem(CS_GLOVES)->id()
+	         << "Cape" << model->getItem(CS_CAPE)->id()
+	         << "Right Hand" << model->getItem(CS_HAND_RIGHT)->id()
+	         << "Left Hand" << model->getItem(CS_HAND_LEFT)->id()
+	         << "Quiver" << model->getItem(CS_QUIVER)->id()
+	         << "Tabard" << model->getItem(CS_TABARD)->id();
 
 	// reset geosets
 	for (size_t j=0; j<model->geosets.size(); j++) {
@@ -587,13 +586,15 @@ void CharControl::RefreshModel()
 	if(model->cd.geosets[CG_GLOVES] > 1)
 	  model->cd.geosets[CG_WRISTBANDS] = 0;
 
-	if(model->cd.equipment[CS_HEAD] != 0)
+	WoWItem * headItem = model->getItem(CS_HEAD);
+
+	if( headItem != 0 && headItem->id() != 0)
 	{
 	  QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
 	      "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
 	      "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
 	      .arg((infos.sexid == 0)?"HelmetGeosetVis1":"HelmetGeosetVis2")
-	      .arg(model->cd.equipment[CS_HEAD]);
+	      .arg(headItem->id());
 
 	  sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
@@ -718,7 +719,7 @@ void CharControl::ClearItemDialog()
 	}
 }
 
-void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const wxChar *caption)
+void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 {
   //std::cout << __FUNCTION__ << " type = " << type << " / slot = " << slot << " / current = " << current << std::endl;
 	if (items.items.size() == 0)
@@ -801,17 +802,6 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, ssize_t current, const 
 	itemDialog->Show();
 	choosingSlot = slot;
 }
-
-/*
-struct NumStringPair {
-	int id;
-	string name;
-
-	const bool operator< (const NumStringPair &p) const {
-		return name < p.name;
-	}
-};
-*/
 
 void CharControl::selectSet()
 {
@@ -1022,27 +1012,28 @@ void CharControl::OnUpdateItem(int type, int id)
 	switch (type) {
 	case UPDATE_ITEM:
 	{
-		if (choosingSlot == CS_HAND_LEFT)
-			model->charModelDetails.closeLHand = false;
-		else if (choosingSlot == CS_HAND_RIGHT)
-			model->charModelDetails.closeRHand = false;
-
-		model->cd.equipment[choosingSlot] = numbers[id];
-
-		WoWItem * item = model->getItem((CharSlots)choosingSlot);
-		if(item)
+	  WoWItem * item = model->getItem((CharSlots)choosingSlot);
+	  if(item)
+	  {
+	    item->setId(numbers[id]);
 		  labels[choosingSlot]->SetLabel(item->name());
-		labels[choosingSlot]->SetForegroundColour(ItemQualityColour(items.getById(model->cd.equipment[choosingSlot]).quality));
+		  labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+	  }
 		break;
 	}
 	case UPDATE_SET:
 		id = numbers[id];
 
 		if (id) {
+		  // @TODO : to repair
+		  /*
 			for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {
 				//if (i!=CS_HAND_LEFT && i!=CS_HAND_RIGHT) 
 				model->cd.equipment[i] = 0;
 			}
+			*/
+
+
 			model->cd.loadSet(setsdb, items, id);
 			RefreshEquipment();
 			RefreshModel();
@@ -1053,7 +1044,8 @@ void CharControl::OnUpdateItem(int type, int id)
 		id = numbers[id];
 
 		if (id) {
-			for (size_t i=0; i<NUM_CHAR_SLOTS; i++) model->cd.equipment[i] = 0;
+		  // @TODO : to repair
+			//for (size_t i=0; i<NUM_CHAR_SLOTS; i++) model->cd.equipment[i] = 0;
 			model->cd.loadStart(startdb, items, id);
 			RefreshEquipment();
 		}
@@ -1149,7 +1141,7 @@ void CharControl::OnUpdateItem(int type, int id)
 		break;
 
 	case UPDATE_CREATURE_ITEM:
-		model->cd.equipment[choosingSlot] = numbers[id];
+		//model->cd.equipment[choosingSlot] = numbers[id];
 		//RefreshCreatureItem(choosingSlot);
 		//RefreshItem(choosingSlot);
 		return;

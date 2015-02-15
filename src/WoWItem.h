@@ -41,9 +41,13 @@ class WoWItem : public Component
     WoWItem(CharSlots slot);
 
     void setId(int id);
+    int id() { return m_id; }
+
     void setDisplayId(int id);
 
     CharSlots slot() { return m_slot; }
+
+    int quality() { return m_quality; }
 
     void refresh();
 
@@ -60,6 +64,7 @@ class WoWItem : public Component
 
     int m_id;
     int m_displayId;
+    int m_quality;
 
     CharSlots m_slot;
 

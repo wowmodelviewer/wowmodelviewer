@@ -55,8 +55,9 @@ map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
 
 
 WoWItem::WoWItem(CharSlots slot)
-: m_model(0), m_id(-1), m_displayId(-1), m_slot(slot)
+: m_model(0), m_id(-1), m_displayId(-1), m_quality(0), m_slot(slot)
 {
+  setName("---- None ----");
 }
 
 void WoWItem::setId(int id)
@@ -64,6 +65,22 @@ void WoWItem::setId(int id)
   if(id != m_id)
   {
     m_id = id;
+
+    if(m_id == 0)
+    {
+      unload();
+      // reset name and quality
+      setName("---- None ----");
+      m_quality = 0;
+
+      if(m_slot == CS_HAND_RIGHT)
+        m_model->charModelDetails.closeRHand = false;
+
+      if(m_slot == CS_HAND_LEFT)
+        m_model->charModelDetails.closeLHand = false;
+
+      return;
+    }
 
     QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1)")
            .arg(id);
@@ -73,10 +90,11 @@ void WoWItem::setId(int id)
     if(iteminfos.valid && !iteminfos.values.empty())
       m_displayId = atoi(iteminfos.values[0][0].c_str());
 
-    setName(items.getById(id).name.c_str());
+    ItemRecord itemRcd = items.getById(id);
+    setName(itemRcd.name.c_str());
+    m_quality = itemRcd.quality;
     load();
   }
-  refresh();
 }
 
 void WoWItem::setDisplayId(int id)
@@ -88,7 +106,6 @@ void WoWItem::setDisplayId(int id)
     setName("NPC Item");
     load();
   }
-  refresh();
 }
 
 void WoWItem::onParentSet(Component * parent)
@@ -142,6 +159,9 @@ void WoWItem::unload()
 
   // clear map
   m_itemGeosets.clear();
+
+  // remove any existing attachement
+  g_modelViewer->charControl->charAtt->delSlot(m_slot);
 }
 
 void WoWItem::load()

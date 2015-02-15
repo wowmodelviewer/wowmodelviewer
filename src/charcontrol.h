@@ -80,7 +80,7 @@ public:
 
 	void ClearItemDialog();
 
-	void selectItem(ssize_t type, ssize_t slot, ssize_t current, const wxChar *caption=wxT("Item"));
+	void selectItem(ssize_t type, ssize_t slot, const wxChar *caption=wxT("Item"));
 	void selectSet();
 	void selectStart();
 	void selectMount();

@@ -28,7 +28,9 @@ void CharDetails::save(wxString fn, TabardDetails *td)
 		return;
 	f << (int)race << wxT(" ") << (int)gender << endl;
 	f << (int)m_skinColor << wxT(" ") << (int)m_faceType << wxT(" ") << (int)m_hairColor << wxT(" ") << (int)m_hairStyle << wxT(" ") << (int)m_facialHair << endl;
-	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
+
+	// @TODO : to repair
+	/* for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f << equipment[i] << endl;
 	}
 
@@ -36,13 +38,13 @@ void CharDetails::save(wxString fn, TabardDetails *td)
 	if ((equipment[CS_TABARD] == 5976) || (equipment[CS_TABARD] == 69209) || (equipment[CS_TABARD] == 69210)) {
 		f << td->Background << wxT(" ") << td->Border << wxT(" ") << td->BorderColor << wxT(" ") << td->Icon << wxT(" ") << td->IconColor << endl;
 	}
+	*/
 	output.Close();
 }
 
 bool CharDetails::load(wxString fn, TabardDetails *td)
 {
 	unsigned int r, g;
-	int tmp;
 	bool same = false;
 
 	// for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
@@ -65,10 +67,12 @@ bool CharDetails::load(wxString fn, TabardDetails *td)
 		for (size_t i=0; i<6; i++) f >> dummy;
 	}
 
+	// @TODO : to repair
+	/*
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f >> tmp;
 
-		//
+
 		if (tmp > 0)
 			equipment[i] = tmp;
 	}
@@ -78,7 +82,7 @@ bool CharDetails::load(wxString fn, TabardDetails *td)
 		f >> td->Background >> td->Border >> td->BorderColor >> td->Icon >> td->IconColor;
 		td->showCustom = true;
 	}
-
+  */
 	//input.Close();
 	return same;
 }
@@ -93,12 +97,15 @@ void CharDetails::loadSet(ItemSetDB &sets, ItemDatabase &items, int setid)
 			const ItemRecord &r = items.getById(id);
 			if (r.type > 0) {
 				// find a slot for it
+			  // @TODO : to repair
+			  /*
 				for (ssize_t s=0; s<NUM_CHAR_SLOTS; s++) {
 					if (correctType((ssize_t)r.type, s)) {
 						equipment[s] = id;
 						break;
 					}
 				}
+				*/
 			}
 		}
 	} catch (ItemSetDB::NotFound &) {}
@@ -114,12 +121,15 @@ void CharDetails::loadStart(StartOutfitDB &start, ItemDatabase &items, int setid
 			const ItemRecord &r = items.getById(id);
 			if (r.type > 0) {
 				// find a slot for it
+			  // @TODO : to repair
+			  /*
 				for (ssize_t s=0; s<NUM_CHAR_SLOTS; s++) {
 					if (correctType((ssize_t)r.type, s)) {
 						equipment[s] = id;
 						break;
 					}
 				}
+				*/
 			}
 		}
 	} catch (ItemSetDB::NotFound &) {}
@@ -142,10 +152,6 @@ void CharDetails::reset(WoWModel * model)
   showFeet = false;
 
   isNPC = false;
-
-  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-    equipment[i] = 0;
-  }
 
   updateMaxValues();
 }

@@ -382,6 +382,7 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 	model->addChild(new WoWItem(CS_HAND_RIGHT));
 	model->addChild(new WoWItem(CS_HAND_LEFT));
 	model->addChild(new WoWItem(CS_CAPE));
+	model->addChild(new WoWItem(CS_QUIVER));
 
 	ResetView();
 

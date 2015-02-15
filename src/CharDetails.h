@@ -39,7 +39,6 @@ class CharDetails : public Observable
 
     RaceInfos infos;
 
-    int equipment[NUM_CHAR_SLOTS];
     int geosets[NUM_GEOSETS];
 
     // save + load equipment

@@ -102,8 +102,9 @@ void ModelBankControl::LoadModel()
 		g_charControl->model->cd.showFeet = cd.showFeet;
 		g_charControl->model->cd.showHair = cd.showHair;
 
-		for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-			g_charControl->model->cd.equipment[i] = cd.equipment[i];
+		// @TODO : to repair
+		//for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
+		//	g_charControl->model->cd.equipment[i] = cd.equipment[i];
 
 		g_charControl->RefreshModel();
 		g_charControl->RefreshEquipment();
@@ -150,8 +151,9 @@ void ModelBankControl::AddModel()
 
 	} else if (cd.modelType == MT_CHAR) {
 
-		for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-			cd.equipment[i] = g_charControl->model->cd.equipment[i];
+	  // @TODO : to repair
+		//for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
+	  //  cd.equipment[i] = g_charControl->model->cd.equipment[i];
 
 		cd.faceType = g_charControl->model->cd.faceType();
 		cd.facialHair = g_charControl->model->cd.facialHair();
