@@ -12,6 +12,7 @@
 #include "util.h"
 
 #include "core/CharInfos.h"
+#include "core/ExporterPlugin.h"
 #include "core/GlobalSettings.h"
 #include "core/ImporterPlugin.h"
 #include "core/PluginManager.h"
@@ -171,6 +172,9 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_LOAD_TEMP3, ModelViewer::OnToggleCommand)
 	EVT_MENU(ID_LOAD_TEMP4, ModelViewer::OnToggleCommand)
 
+	// Export
+	EVT_MENU(ID_EXPORT_MODEL, ModelViewer::OnExport)
+
 END_EVENT_TABLE()
 
 ModelViewer::ModelViewer()
@@ -292,7 +296,27 @@ void ModelViewer::InitMenu()
 	fileMenu->AppendSeparator();
 
 	// --== Continue regular menu ==--
-	fileMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
+
+	// export menu
+	wxMenu *exportMenu = new wxMenu;
+	exportMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
+
+	Iterator<ExporterPlugin> pluginIt(PLUGINMANAGER);
+	int subMenuId = 10000;
+	for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++, subMenuId++)
+	{
+	  ExporterPlugin * plugin = *pluginIt;
+	  exportMenu->Append(subMenuId,plugin->menuLabel());
+	  Connect( subMenuId,
+	        wxEVT_COMMAND_MENU_SELECTED,
+	        wxCommandEventHandler(ModelViewer::OnExport) );
+	}
+	fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), exportMenu);
+
+
+
+
+
 
 	fileMenu->AppendSeparator();
 	fileMenu->Append(ID_FILE_RESETLAYOUT, _("Reset Layout"));
@@ -2775,3 +2799,17 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 	}
 }
+
+void ModelViewer::OnExport(wxCommandEvent &event)
+{
+  Iterator<ExporterPlugin> pluginIt(PLUGINMANAGER);
+  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+  {
+    ExporterPlugin * plugin = *pluginIt;
+    if(plugin->menuLabel() == exporterLabel)
+    {
+      plugin->exportModel(g_charControl->model, "test.obj");
+    }
+  }
+}
+
