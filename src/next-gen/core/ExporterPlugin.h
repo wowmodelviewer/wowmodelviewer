@@ -62,6 +62,8 @@ class ExporterPlugin : public Plugin
 
     // Methods
     virtual std::string menuLabel() const = 0;
+    virtual std::string fileSaveTitle() const = 0;
+    virtual std::string fileSaveFilter() const = 0;
 
     virtual bool exportModel(WoWModel *, std::string file) const = 0;
 

@@ -33,13 +33,13 @@
 
 // Qt
 
-// Irrlicht
-
 // Externals
 
 // Other libraries
 #include "WoWModel.h"
 
+#include "core/GlobalSettings.h"
+#include "logger/Logger.h"
 
 // Current library
 
@@ -61,20 +61,99 @@
 
 // Public methods
 //--------------------------------------------------------------------
- std::string OBJExporter::menuLabel() const
- {
-   return "OBJ...";
- }
+// Change a Vec3D so it now faces forwards
+void MakeModelFaceForwards(Vec3D &vect, bool flipZ = false){
+  Vec3D Temp;
 
- bool OBJExporter::exportModel(WoWModel * model, std::string file) const
- {
-   if(!model)
-     return false;
+  Temp.x = 0-vect.z;
+  Temp.y = vect.y;
+  Temp.z = vect.x;
+  if (flipZ==true){
+    Temp.z = -Temp.z;
+    Temp.x = -Temp.x;
+  }
 
-   std::cout << "exporting " << model->modelname << "in " << file << std::endl;
+  vect = Temp;
+}
 
-   return true;
- }
+
+
+std::string OBJExporter::menuLabel() const
+{
+  return "OBJ...";
+}
+
+std::string OBJExporter::fileSaveTitle() const
+{
+  return "Save OBJ file";
+}
+
+std::string OBJExporter::fileSaveFilter() const
+{
+  return "OBJ files (*.obj)|*.obj";
+}
+
+
+bool OBJExporter::exportModel(WoWModel * model, std::string target) const
+{
+  if(!model)
+    return false;
+
+  LOG_INFO << "exporting" << model->modelname.mb_str() << "in" << target.c_str();
+
+  std::ofstream file(target.c_str(),std::ofstream::out);
+
+  file << "# Wavefront OBJ exported by" << GLOBALSETTINGS.appName() << " " << GLOBALSETTINGS.appVersion() << std::endl;
+
+  /*
+  bool vertMsg = false;
+  // output all the vertice data
+  int vertics = 0;
+  for (size_t i=0; i<model->passes.size(); i++)
+  {
+    ModelRenderPass &p = model->passes[i];
+
+    if (p.init(model))
+    {
+      //f << "# Chunk Indice Count: " << p.indexCount << endl;
+
+      for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++)
+      {
+        uint16 a = model->indices[b];
+        Vec3D vert;
+        if ((model->animated == true) && (model->vertices))
+        {
+          if (vertMsg == false)
+          {
+            LOG_INFO << "Using Verticies";
+            vertMsg = true;
+          }
+          vert = model->vertices[a];
+        }
+        else
+        {
+          if (vertMsg == false)
+          {
+            LOG_INFO << "Using Original Verticies";
+            vertMsg = true;
+          }
+          vert = model->origVertices[a].pos;
+        }
+        MakeModelFaceForwards(vert,false);
+        vert *= 1.0;
+        file << wxString::Format(wxT("v %.06f %.06f %.06f"), vert.x, vert.y, vert.z).mb_str() << std::endl;
+
+        vertics ++;
+      }
+    }
+  }
+
+  file << "# " << vertics << " vertices" << std::endl << std::endl;
+  */
+  file.close();
+
+  return true;
+}
 
 // Protected methods
 //--------------------------------------------------------------------

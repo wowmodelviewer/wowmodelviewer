@@ -20,6 +20,7 @@
 
 #include <wx/app.h>
 #include <wx/busyinfo.h>
+#include <wx/filedlg.h>
 #include <wx/regex.h>
 #include <wx/tokenzr.h>
 #include <wx/txtstrm.h>
@@ -2802,13 +2803,28 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 void ModelViewer::OnExport(wxCommandEvent &event)
 {
+  if(!g_charControl->model)
+  {
+    wxMessageBox(wxT("You must prepare your model before trying to export it."),wxT("Export Error"), wxOK | wxICON_ERROR);
+    return;
+  }
+
+  std::string exporterLabel = fileMenu->GetLabel(event.GetId()).mb_str();
+
   Iterator<ExporterPlugin> pluginIt(PLUGINMANAGER);
   for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
   {
     ExporterPlugin * plugin = *pluginIt;
+
+    wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), "", "",
+        plugin->fileSaveFilter(), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+    if (saveFileDialog.ShowModal() == wxID_CANCEL)
+      return;
+
     if(plugin->menuLabel() == exporterLabel)
     {
-      plugin->exportModel(g_charControl->model, "test.obj");
+      plugin->exportModel(g_charControl->model, saveFileDialog.GetPath().mb_str());
     }
   }
 }

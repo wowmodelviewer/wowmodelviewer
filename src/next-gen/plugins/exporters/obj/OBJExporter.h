@@ -68,6 +68,9 @@ class OBJExporter : public QObject, public ExporterPlugin
     // Methods
    std::string menuLabel() const;
 
+   std::string fileSaveTitle() const;
+   std::string fileSaveFilter() const;
+
    bool exportModel(WoWModel *, std::string file) const;
 
     // Members
