@@ -54,7 +54,7 @@ class OBJExporter : public QObject, public ExporterPlugin
 {
     Q_INTERFACES(ExporterPlugin)
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.WowheadImporter" FILE "objexporter.json")
+    Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.OBJExporter" FILE "objexporter.json")
 
   public :
     // Constants / Enums

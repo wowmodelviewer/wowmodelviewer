@@ -22,8 +22,6 @@ file(GLOB src *.cpp )
 
 add_library(wowhead SHARED ${src})
 
-add_dependencies(wowhead core)
-
 target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core)
 
 if(WIN32)

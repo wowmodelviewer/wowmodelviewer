@@ -20,10 +20,10 @@
 
 #include "CASCFolder.h"
 
+#include "core/GlobalSettings.h"
 #include "metaclasses/Iterator.h"
 
 size_t globalTime = 0;
-extern ModelViewer *g_modelViewer;
 
 void
 glGetAll()
@@ -165,7 +165,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 
 	GameFile * f = new CASCFile(tempname.c_str());
 
-	g_modelViewer->SetStatusText(tempname);
 	ok = false;
 	if (f->isEof() || (f->getSize() < sizeof(ModelHeader))) {
 		wxLogMessage(wxT("Error: Unable to load model: [%s]"), tempname.c_str());
@@ -1441,7 +1440,7 @@ void WoWModel::lightsOff(GLuint lbase)
 // Updates our particles within models.
 void WoWModel::updateEmitters(float dt)
 {
-	if (!ok || !showParticles || !bShowParticle) 
+	if (!ok || !showParticles || !GLOBALSETTINGS.bShowParticle)
 		return;
 
 	for (size_t i=0; i<header.nParticleEmitters; i++) {

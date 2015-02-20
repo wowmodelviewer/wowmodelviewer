@@ -795,8 +795,8 @@ void ModelViewer::LoadSession()
 		
 		// boolean vars
 		pConfig->Read(wxT("RandomLooks"), &useRandomLooks, true);
-		pConfig->Read(wxT("ShowParticle"), &bShowParticle, true);
-		pConfig->Read(wxT("ZeroParticle"), &bZeroParticle, true);
+		pConfig->Read(wxT("ShowParticle"), &GLOBALSETTINGS.bShowParticle, true);
+		pConfig->Read(wxT("ZeroParticle"), &GLOBALSETTINGS.bZeroParticle, true);
 		pConfig->Read(wxT("DBackground"), &canvas->drawBackground, false);
 		pConfig->Read(wxT("BackgroundImage"), &bgImagePath, wxEmptyString);
 		if (!bgImagePath.IsEmpty()) {
@@ -845,8 +845,8 @@ void ModelViewer::SaveSession()
 		
 		// boolean vars
 		pConfig->Write(wxT("RandomLooks"), useRandomLooks);
-		pConfig->Write(wxT("ShowParticle"), bShowParticle);
-		pConfig->Write(wxT("ZeroParticle"), bZeroParticle);
+		pConfig->Write(wxT("ShowParticle"), GLOBALSETTINGS.bShowParticle);
+		pConfig->Write(wxT("ZeroParticle"), GLOBALSETTINGS.bZeroParticle);
 
 		pConfig->Write(wxT("DBackground"), canvas->drawBackground);
 		if (canvas->drawBackground)
@@ -961,6 +961,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		return;
 	}
 
+	SetStatusText(canvas->model->name());
 	canvas->model->charModelDetails.isChar = isChar;
 	
 	viewMenu->Enable(ID_USE_CAMERA, canvas->model->hasCamera);

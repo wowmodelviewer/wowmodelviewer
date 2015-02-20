@@ -74,7 +74,8 @@ PluginManager::PluginManager()
    for (int i=0;i<plugins.size();i++)
    {
      Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),logger);
-     addChild(newPlugin);
+     if(newPlugin)
+       addChild(newPlugin);
    }
    print();
  }

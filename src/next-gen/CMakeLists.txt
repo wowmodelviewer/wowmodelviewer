@@ -8,6 +8,9 @@ include_directories(.)
 # add core files compilation
 add_subdirectory(core)
 
+# add wow related files lib compilation
+add_subdirectory(games)
+
 # add plugins compilation
 add_subdirectory(plugins)
 

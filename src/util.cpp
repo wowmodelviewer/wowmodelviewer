@@ -20,8 +20,6 @@ UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;
 
 bool useRandomLooks = true;
-bool bShowParticle = true;
-bool bZeroParticle = true;
 
 long langID = -1;
 wxString langName;
@@ -50,21 +48,6 @@ wxString CSConv(wxString str)
 	return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
 	// old way
 	//return wxCSConv(langCSConv[langID]).cWC2WX(wxConvUTF8.cMB2WC(str));
-}
-
-float frand()
-{
-    return rand()/(float)RAND_MAX;
-}
-
-float randfloat(float lower, float upper)
-{
-	return lower + (upper-lower)*(rand()/(float)RAND_MAX);
-}
-
-int randint(int lower, int upper)
-{
-    return lower + (int)((upper+1-lower)*frand());
 }
 
 void fixname(wxString &name)
@@ -255,21 +238,6 @@ wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type,
   if((width != 0) && (height != 0))
 	newImage.Rescale(width,height);
   return new wxBitmap(newImage, -1);
-}
-
-Vec3D fixCoordSystem(Vec3D v)
-{
-	return Vec3D(v.x, v.z, -v.y);
-}
-
-Vec3D fixCoordSystem2(Vec3D v)
-{
-	return Vec3D(v.x, v.z, v.y);
-}
-
-Quaternion fixCoordSystemQuat(Quaternion v)
-{
-	return Quaternion(-v.x, -v.z, v.y, v.w);
 }
 
 bool correctType(ssize_t type, ssize_t slot)

@@ -24,7 +24,7 @@ add_library(objexporter SHARED ${src})
 
 add_dependencies(objexporter core)
 
-target_link_libraries(objexporter ${wxWidgets_LIBRARIES} Qt5::Core core)
+target_link_libraries(objexporter ${wxWidgets_LIBRARIES} Qt5::Core core wow)
 
 if(WIN32)
   install(TARGETS objexporter RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/plugins")

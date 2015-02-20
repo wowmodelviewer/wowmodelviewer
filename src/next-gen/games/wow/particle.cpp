@@ -3,6 +3,7 @@
 #include "Bone.h"
 #include "util.h"
 
+#include "core/GlobalSettings.h"
 #include "logger/Logger.h"
 
 #define MAX_PARTICLES 10000
@@ -137,7 +138,7 @@ void ParticleSystem::initTile(Vec2D *tc, int num)
 void ParticleSystem::update(float dt)
 {
 	size_t l_manim = manim;
-	if (bZeroParticle)
+	if (GLOBALSETTINGS.bZeroParticle)
 		l_manim = 0;
 	float grav = gravity.getValue(l_manim, mtime);
 	float deaccel = deacceleration.getValue(l_manim, mtime);
@@ -594,7 +595,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
 	p.life = 0;
 	size_t l_anim = anim;
-	if (bZeroParticle)
+	if (GLOBALSETTINGS.bZeroParticle)
 		l_anim = 0;
 	p.maxlife = sys->lifespan.getValue(l_anim, time);
 	if (p.maxlife == 0)
@@ -704,7 +705,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 
 	p.life = 0;
 	size_t l_anim = anim;
-	if (bZeroParticle)
+	if (GLOBALSETTINGS.bZeroParticle)
 		l_anim = 0;
 	p.maxlife = sys->lifespan.getValue(l_anim, time);
 	if (p.maxlife == 0)

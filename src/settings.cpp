@@ -5,6 +5,7 @@
 #include "app.h"
 
 #include "CASCFolder.h"
+#include "core/GlobalSettings.h"
 
 #include "globalvars.h"
 
@@ -54,17 +55,17 @@ void Settings_Page1::OnCheck(wxCommandEvent &event)
 	if (id==ID_SETTINGS_RANDOMSKIN) {
 		useRandomLooks = event.IsChecked();
 	} else if (id==ID_SETTINGS_SHOWPARTICLE) {
-		bShowParticle = event.IsChecked();
+	  GLOBALSETTINGS.bShowParticle = event.IsChecked();
 	} else if (id==ID_SETTINGS_ZEROPARTICLE) {
-		bZeroParticle = event.IsChecked();
+	  GLOBALSETTINGS.bZeroParticle = event.IsChecked();
 	}
 }
 
 void Settings_Page1::Update()
 {
 	chkbox[CHECK_RANDOMSKIN]->SetValue(useRandomLooks);
-	chkbox[CHECK_SHOWPARTICLE]->SetValue(bShowParticle);
-	chkbox[CHECK_ZEROPARTICLE]->SetValue(bZeroParticle);
+	chkbox[CHECK_SHOWPARTICLE]->SetValue(GLOBALSETTINGS.bShowParticle);
+	chkbox[CHECK_ZEROPARTICLE]->SetValue(GLOBALSETTINGS.bZeroParticle);
 	gamePathCtrl->SetValue(gamePath);
 }
 

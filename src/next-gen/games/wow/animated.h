@@ -393,4 +393,11 @@ public:
 
 typedef Animated<float,short,ShortToFloat> AnimatedShort;
 
+Vec3D fixCoordSystem(Vec3D v);
+Vec3D fixCoordSystem2(Vec3D v);
+Quaternion fixCoordSystemQuat(Quaternion v);
+
+float randfloat(float lower, float upper);
+int randint(int lower, int upper);
+
 #endif

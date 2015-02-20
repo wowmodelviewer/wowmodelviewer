@@ -153,7 +153,7 @@ ItemRecord::ItemRecord(const std::vector<std::string> & vals)
     case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
     default: sheath = SHEATHETYPE_NONE;
   }
-  name = CSConv(wxString(vals[1].c_str(), wxConvUTF8));
+  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[1].c_str(), wxConvUTF8).mb_str()));
 }
 
 // Alfred. prevent null items bug.
@@ -202,7 +202,7 @@ NPCRecord::NPCRecord(const std::vector<std::string> & vals)
   id = atoi(vals[0].c_str());
   model = atoi(vals[1].c_str());
   type = atoi(vals[2].c_str());
-  name = CSConv(wxString(vals[3].c_str(), wxConvUTF8));
+  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[3].c_str(), wxConvUTF8).mb_str()));
 }
 
 // --

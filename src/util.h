@@ -67,8 +67,6 @@ extern wxString bgImagePath;
 extern wxString armoryPath;
 
 extern bool useRandomLooks;
-extern bool bShowParticle;
-extern bool bZeroParticle;
 
 class UserSkins;
 extern UserSkins& gUserSkins;
@@ -93,8 +91,7 @@ extern wxString locales[];
 
 wxString fixMPQPath(wxString path);
 float frand();
-float randfloat(float lower, float upper);
-int randint(int lower, int upper);
+
 
 template <class T>
 bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
@@ -148,10 +145,6 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 #endif
 
 wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
-
-Vec3D fixCoordSystem(Vec3D v);
-Vec3D fixCoordSystem2(Vec3D v);
-Quaternion fixCoordSystemQuat(Quaternion v);
 
 bool correctType(ssize_t type, ssize_t slot);
 

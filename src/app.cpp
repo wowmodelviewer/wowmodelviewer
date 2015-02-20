@@ -76,6 +76,9 @@ bool WowModelViewApp::OnInit()
   // be carefull, LOGGER must be instanciated before plugin, to pass pointer to all plugins !
   PLUGINMANAGER.init("./plugins",&LOGGER);
 
+  GLOBALSETTINGS.bShowParticle = true;
+  GLOBALSETTINGS.bZeroParticle = true;
+
 	frame = NULL;
 	wxSplashScreen* splash = NULL;
 

@@ -73,6 +73,9 @@ class GlobalSettings
     bool isBeta() { return m_isBetaVersion; }
 
     // Members
+    // find a better way than a lot of members...
+    bool bShowParticle;
+    bool bZeroParticle;
 
   protected :
     // Constants / Enums

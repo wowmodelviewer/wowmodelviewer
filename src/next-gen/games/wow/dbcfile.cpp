@@ -2,7 +2,6 @@
 
 #include "CASCFile.h"
 #include "enums.h"
-#include "globalvars.h"
 #include "modelviewer.h"
 
 #include "util.h"
@@ -35,7 +34,6 @@ bool DBCFile::open()
 		filename = filename.BeforeLast('.') + wxT(".db2");
 	}
 
-	g_modelViewer->SetStatusText(wxT("Initiating ")+filename+wxT(" Database..."));
 	GameFile * f = new CASCFile(filename.c_str());
 	// Need some error checking, otherwise an unhandled exception error occurs
 	// if people screw with the data path.

@@ -21,7 +21,9 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${wxWidgets_INCLUDE_DIRS}
                     ${GLEW_INCLUDE_DIR}
                    )
-  
+
+include_directories(next-gen/games/wow)
+
 add_definitions(-D_WINDOWS)
 add_definitions(-D_MINGW)
 add_definitions(-D_BETAVERSION) # comment if you are building a released version
@@ -42,15 +44,11 @@ endif()
 
 find_package(Qt5Network)
 
-add_dependencies(wowmodelviewer cximage casc_static core)   
-  
 target_link_libraries(wowmodelviewer
-  cximage
   ${wxWidgets_LIBRARIES}
   ${EXTRA_LIBS}
-  jpeg
-  png
   core
+  wow
   Qt5::Xml
   Qt5::Gui
 )
@@ -87,7 +85,7 @@ set(EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/listfile.txt
 				${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/wow6.xml)
 
 set(MINGW_BIN_DIR ${WMV_SDK_BASEDIR}/MinGW/bin)
-set(MINGW_SYS_FILES ${MINGW_BIN_DIR}/jpeg62.dll)
+set(MINGW_SYS_FILES ${MINGW_BIN_DIR}/jpeg62.dll ${MINGW_BIN_DIR}/libpng3.dll ${MINGW_BIN_DIR}/zlib1.dll)
 
 set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES} ${EXTRA_FILES})
 set(platform_files ${QT_PLUGIN_SYS_FILES})			 

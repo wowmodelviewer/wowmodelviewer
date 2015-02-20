@@ -22,8 +22,6 @@ file(GLOB src *.cpp )
 
 add_library(armory SHARED ${src})
 
-add_dependencies(armory core)
-
 target_link_libraries(armory ${wxWidgets_LIBRARIES} core Qt5::Core)
 
 if(WIN32)

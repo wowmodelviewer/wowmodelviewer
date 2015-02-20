@@ -26,7 +26,6 @@ add_subdirectory(CxImage)
 
 # CascLib compilation
 add_subdirectory(casclib)
-set (EXTRA_LIBS ${EXTRA_LIBS} casc_static)
 
 # add global definitions : all warnings considered as errors
 add_definitions(-g -Wall -Werror)
