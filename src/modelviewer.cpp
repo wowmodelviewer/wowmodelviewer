@@ -1085,7 +1085,18 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  }
 	  else
 	  {
-	    LoadModel(r.values[0][0] + r.values[0][1]);
+	    std::string modelname = r.values[0][0] + r.values[0][1];
+	    std::size_t pos = modelname.find(".m2");
+	    if(pos != std::string::npos) // normally always true
+	    {
+	      // try hd model if it exists
+	      std::string modelnamehd = modelname.substr(0,pos) + "_hd.m2";
+	      if(CASCFOLDER.fileExists(modelnamehd))
+	        modelname= modelnamehd;
+	    }
+
+
+	    LoadModel(modelname);
 
 	    query = "SELECT * FROM CreatureDisplayInfoExtra WHERE ID = ";
 	    query += r.values[0][5];
