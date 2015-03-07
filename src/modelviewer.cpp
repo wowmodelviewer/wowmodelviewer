@@ -2838,7 +2838,10 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
     if(plugin->menuLabel() == exporterLabel)
     {
-      plugin->exportModel(g_charControl->model, saveFileDialog.GetPath().mb_str());
+      if(!plugin->exportModel(g_charControl->model, saveFileDialog.GetPath().mb_str()))
+        wxMessageBox(wxT("An error occured during export."),wxT("Export Error"), wxOK | wxICON_ERROR);
+      else
+        wxMessageBox(wxT("Export succesfully done."),wxT("Export done"), wxOK | wxICON_INFORMATION);
     }
   }
 }
