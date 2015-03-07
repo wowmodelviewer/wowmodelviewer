@@ -166,6 +166,11 @@ public:
 		return (float*)this;
 	}
 
+	static Vec3D nullVec()
+	{
+	  Vec3D result;
+	  return result;
+	}
 };
 
 

@@ -99,7 +99,7 @@ class OBJExporter : public QObject, public ExporterPlugin
     // Methods
      void exportGLTexture(GLuint id, std::string filename) const;
 
-     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity()) const;
+     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), Vec3D pos = Vec3D::nullVec()) const;
      bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
 
 

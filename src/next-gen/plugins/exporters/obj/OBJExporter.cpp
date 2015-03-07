@@ -175,12 +175,15 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target) const
 
         // find matrix
         int l = model->attLookup[it->first];
-        std::cout << "l = " << l << std::endl;
         Matrix m;
+        Vec3D pos;
         if (l>-1)
+        {
           m = model->bones[model->atts[l].bone].mat;
+          pos = model->atts[l].pos;
+        }
 
-        if(!exportModelVertices(itemModel, obj, counter, m))
+        if(!exportModelVertices(itemModel, obj, counter, m, pos))
         {
           LOG_ERROR << "Error during obj export for model" << itemModel->modelname.mb_str();
           return false;
@@ -206,7 +209,7 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target) const
 
 // Private methods
 //--------------------------------------------------------------------
-bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat) const
+bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, Vec3D pos) const
 {
   //@TODO : do better than that
   QString meshes[NUM_GEOSETS] =
@@ -214,8 +217,6 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       "Boots", "", "Ears", "Wristbands",  "Kneepads",
       "Pants", "Pants2", "Tarbard", "Trousers", "Tarbard2",
       "Cape", "Feet", "Eyeglows", "Belt", "Tail" };
-
-  file << "o " << model->modelname.mb_str() << "\n";
 
   bool vertMsg = false;
   // output all the vertice data
@@ -226,8 +227,6 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
     if (p.init(model))
     {
-      //file << "# Chunk Indice Count: " << p.indexCount << endl;
-
       for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++)
       {
         uint16 a = model->indices[b];
@@ -239,7 +238,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Verticies";
             vertMsg = true;
           }
-          vert = mat * model->vertices[a];
+          vert = mat * (model->vertices[a] + pos);
         }
         else
         {
@@ -248,7 +247,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Original Verticies";
             vertMsg = true;
           }
-          vert = mat * model->origVertices[a].pos;
+          vert = mat * (model->origVertices[a].pos + pos);
         }
         MakeModelFaceForwards(vert);
         vert *= 1.0;
@@ -274,7 +273,6 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
         uint16 a = model->indices[b];
         Vec2D tc =  model->origVertices[a].texcoords;
         file << QString(wxString::Format(wxT("vt %.06f %.06f"), tc.x, 1-tc.y)) << "\n";
-        //f << "vt " << m->origVertices[a].texcoords.x << " " << (1 - m->origVertices[a].texcoords.y) << endl;
         textures ++;
       }
     }
@@ -292,7 +290,6 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
         uint16 a = model->indices[b];
         Vec3D n = model->origVertices[a].normal;
         file << QString(wxString::Format(wxT("vn %.06f %.06f %.06f"), n.x, n.y, n.z)) << "\n";
-        //f << "vn " << m->origVertices[a].normal.x << " " << m->origVertices[a].normal.y << " " << m->origVertices[a].normal.z << endl;
         normals ++;
       }
     }
@@ -315,7 +312,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
       int g = p.geoset;
 
-      QString matName = QString(wxString::Format(wxT("Geoset_%03i"), g));
+      QString matName = QString(model->modelname.mb_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), g));
+      matName.replace("\\","_");
+      QString partName = matName;
 
       if (p.unlit == true)
         matName = matName + "_Lum";
@@ -325,9 +324,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
       // Part Names
       int mesh = model->geosets[g].id / 100;
-      QString partName = QString(wxString::Format(wxT("Geoset_%03i"), g));
 
-      if (model->modelType == MT_CHAR && mesh < 19 && meshes[mesh] != wxEmptyString)
+
+      if (model->modelType == MT_CHAR && mesh < 19 && meshes[mesh] != "")
       {
         QString msh = meshes[mesh];
         msh.replace(" ", "_");
@@ -375,8 +374,8 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       float amb = 0.25f;
       Vec4D diff = p.ocol;
 
-      QString material = QString(wxString::Format(wxT("Geoset_%03i"), p.geoset));
-
+      QString material = QString(model->modelname.mb_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), p.geoset));
+      material.replace("\\","_");
       if (p.unlit == true)
       {
         // Add Lum, just in case there's a non-luminous surface with the same name.
@@ -448,21 +447,8 @@ void OBJExporter::exportGLTexture(GLuint id, std::string filename) const
   }
   else
   {
-    QImage texture(pixels, width, height,QImage::Format_ARGB32);
+    QImage texture(pixels, width, height, QImage::Format_ARGB32);
     texture.save(filename.c_str());
   }
 
-  /*
-  // tga files, starcraft II needs 17th bytes as 8
-  if (fn.Last() == 'a') {
-    wxFFile f;
-    f.Open(fn, wxT("r+b"));
-    if (f.IsOpened()) {
-      f.Seek(17, wxFromStart);
-      char c=8;
-      f.Write(&c, sizeof(char));
-      f.Close();
-    }
-  }
-  */
 }
