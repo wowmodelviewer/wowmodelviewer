@@ -42,8 +42,9 @@ class QMessageLogContext;
 // Externals
 
 // Other libraries
+#include "core/GlobalSettings.h"
+#include "core/Plugin.h"
 #include "metaclasses/Container.h"
-
 
 // Current library
 #include "LogOutput.h"
@@ -54,12 +55,7 @@ class QMessageLogContext;
 
 // Class Declaration
 //--------------------------------------------------------------------
-#undef LOGGER
-#ifdef INCLUDE_FROM_PLUGIN
-  #define LOGGER (*m_logger)
-#else
-  #define LOGGER WMVLog::Logger::instance()
-#endif
+#define LOGGER WMVLog::Logger::instance()
 
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)
 #define LOG_ERROR LOGGER(WMVLog::Logger::ERROR_LOG)
@@ -95,8 +91,10 @@ class Logger : public Container<LogOutput>
 		// Methods
     static Logger & instance()
     {
-      static Logger m_instance;
-      return m_instance;
+      if(Logger::m_instance == 0)
+        Logger::m_instance = new Logger();
+
+      return *m_instance;
     }
 		
     static void init();
@@ -133,6 +131,7 @@ class Logger : public Container<LogOutput>
 		// Methods
 		
 		// Members
+    static Logger * m_instance;
 
 		// friend class declarations
 	

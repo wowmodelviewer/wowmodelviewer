@@ -9,13 +9,13 @@
 
 #include "enums.h"
 #include "WoWModel.h"
-#include "ModelColor.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
 
 #include "logger/Logger.h"
 
 #include "GL/glew.h"
+#include "ModelColor.h"
 
 void ModelRenderPass::deinit()
 {

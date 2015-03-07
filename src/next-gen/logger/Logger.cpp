@@ -33,7 +33,10 @@
 // STL
 #include <iostream>
 
-// Qt 
+// Qt
+#ifdef min
+  #undef min
+#endif
 #include <QDateTime>
 
 // Externals
@@ -50,6 +53,7 @@ using namespace WMVLog;
 
 // Beginning of implementation
 //====================================================================
+Logger * Logger::m_instance = 0;
 
 // Constructors 
 //--------------------------------------------------------------------

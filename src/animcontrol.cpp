@@ -1,4 +1,4 @@
-#include "animcontrol.h"
+#include "../../../animcontrol.h"
 
 #include "CASCFolder.h"
 #include "FileTreeItem.h"

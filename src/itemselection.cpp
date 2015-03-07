@@ -1,6 +1,5 @@
 
 #include "itemselection.h"
-#include "charcontrol.h"
 #include "globalvars.h"
 #include "ItemImporterDialog.h"
 #include "ModelViewer.h"
@@ -8,6 +7,7 @@
 
 #include <QString>
 
+#include "charcontrol.h"
 #include "GameDatabase.h"
 
 // HACK: this is the ID for the single choice dialog listbox in the wx src

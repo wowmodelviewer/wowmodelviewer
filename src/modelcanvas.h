@@ -18,7 +18,7 @@
 
 // our headers
 #include "WoWModel.h"
-#include "wmo.h"
+#include "next-gen/games/wow/wmo.h"
 #include "util.h"
 #include "maptile.h"
 //#include "viewcontrol.h"

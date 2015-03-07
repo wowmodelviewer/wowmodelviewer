@@ -40,9 +40,7 @@ class WoWModel;
 // Other libraries
 
 // Current library
-#define INCLUDE_FROM_PLUGIN
 #include "Plugin.h"
-#undef INCLUDE_FROM_PLUGIN
 
 // Namespaces used
 //--------------------------------------------------------------------

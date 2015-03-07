@@ -1,10 +1,8 @@
 #include "modelviewer.h"
 
 #include "app.h"
-#include "Attachment.h"
 #include "Bone.h"
 #include "globalvars.h"
-#include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
@@ -32,6 +30,8 @@
 #include "RaceInfos.h"
 
 #include "Logger/Logger.h"
+#include "next-gen/games/wow/Attachment.h"
+#include "next-gen/games/wow/ModelColor.h"
 
 // default colour values
 const static float def_ambience[4] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -184,6 +184,7 @@ ModelViewer::ModelViewer()
 	: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
 #endif
 {
+  PLUGINMANAGER.init("./plugins");
 	// our main class objects
 	animControl = NULL;
 	canvas = NULL;
@@ -274,6 +275,7 @@ ModelViewer::ModelViewer()
 
 void ModelViewer::InitMenu()
 {
+  std::cout << __FUNCTION__ << std::endl;
 	wxLogMessage(wxT("Initializing File Menu..."));
 
 	if (GetStatusBar() == NULL){

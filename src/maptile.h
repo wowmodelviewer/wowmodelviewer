@@ -9,7 +9,7 @@
 #define	CHUNKS_IN_TILE	16
 
 #include "video.h"
-#include "wmo.h"
+#include "next-gen/games/wow/wmo.h"
 #include "WoWModel.h"
 #include "liquid.h"
 #include <vector>

@@ -39,7 +39,7 @@
 #include <wx/url.h>
 
 // Other libraries
-#include "charcontrol.h"
+#include "../../../../charcontrol.h"
 #include "core/CharInfos.h"
 #include "database.h" // ItemRecord
 #include "globalvars.h"

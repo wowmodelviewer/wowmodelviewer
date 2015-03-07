@@ -206,6 +206,7 @@ public:
 	friend struct ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
+  void UpdateTextureList(wxString texName, int special);
 
 };
 

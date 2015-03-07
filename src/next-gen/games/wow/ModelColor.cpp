@@ -5,7 +5,7 @@
  *
  */
 
-#include "ModelColor.h"
+#include "next-gen/games/wow/ModelColor.h"
 
 #include "GameFile.h"
 

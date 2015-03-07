@@ -70,12 +70,6 @@ void WowModelViewApp::setInterfaceLocale()
 bool WowModelViewApp::OnInit()
 {
   // init next-gen stuff
-  LOGGER.addChild(new WMVLog::LogOutputConsole());
-  LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
-
-  // be carefull, LOGGER must be instanciated before plugin, to pass pointer to all plugins !
-  PLUGINMANAGER.init("./plugins",&LOGGER);
-
   GLOBALSETTINGS.bShowParticle = true;
   GLOBALSETTINGS.bZeroParticle = true;
 
@@ -114,19 +108,8 @@ bool WowModelViewApp::OnInit()
 	SetVendorName(wxT("WoWModelViewer"));
 	SetAppName(wxT("WoWModelViewer"));
 
-	// Just a little header to start off the log file.
-	wxLogMessage(wxString(wxT("Starting:\n")));
-	wxString l_logMess = std::string(GLOBALSETTINGS.appName() 
-	+ " " 
-	+ GLOBALSETTINGS.appVersion() 
-	+ " "
-	+ GLOBALSETTINGS.buildName() 
-	+ "\n\n").c_str();
-	wxLogMessage(l_logMess);
-
 	// set the config file path.
 	cfgPath = userPath+SLASH+wxT("Config.ini");
-
 	
 	bool loadfail = LoadSettings();
 	if (loadfail == true) {
@@ -146,7 +129,21 @@ bool WowModelViewApp::OnInit()
 			splash->Show(false);
 		return false;
 	}
-	
+
+	// be carefull, mus be done avec ModelViewer constructor call
+	LOGGER.addChild(new WMVLog::LogOutputConsole());
+	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
+
+  // Just a little header to start off the log file.
+  wxLogMessage(wxString(wxT("Starting:\n")));
+  wxString l_logMess = std::string(GLOBALSETTINGS.appName()
+  + " "
+  + GLOBALSETTINGS.appVersion()
+  + " "
+  + GLOBALSETTINGS.buildName()
+  + "\n\n").c_str();
+  wxLogMessage(l_logMess);
+
 	SetTopWindow(frame);
 	/*
 	There is a problem with drawing on surfaces that have previously not been showed.
@@ -172,7 +169,6 @@ bool WowModelViewApp::OnInit()
 	// --
 
 	// Point our global vars at the correct memory location
-	g_modelViewer = frame;
 	g_canvas = frame->canvas;
 	g_animControl = frame->animControl;
 	g_charControl = frame->charControl;

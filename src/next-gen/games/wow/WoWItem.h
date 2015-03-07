@@ -27,6 +27,7 @@
 #define _WOWITEM_H_
 
 #include <map>
+#include <set>
 #include <string>
 
 #include "enums.h"
@@ -55,6 +56,8 @@ class WoWItem : public Component
 
     void load();
 
+    std::map<POSITION_SLOTS, WoWModel *> itemModels;
+
   private:
     void unload();
 
@@ -71,7 +74,6 @@ class WoWItem : public Component
     static std::map<CharSlots,int> SLOT_LAYERS;
     static std::map<CharSlots,int> initSlotLayers();
 
-    std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
     std::map<CharRegions, std::string> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
 

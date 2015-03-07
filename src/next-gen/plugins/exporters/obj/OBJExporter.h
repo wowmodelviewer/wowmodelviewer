@@ -35,8 +35,11 @@
 #include <QtPlugin>
 
 // Externals
+#include "GL/glew.h"
 
 // Other libraries
+#include "matrix.h"
+
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "core/ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
@@ -94,6 +97,11 @@ class OBJExporter : public QObject, public ExporterPlugin
     // Destructors
 
     // Methods
+     void exportGLTexture(GLuint id, std::string filename) const;
+
+     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity()) const;
+     bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
+
 
     // Members
 

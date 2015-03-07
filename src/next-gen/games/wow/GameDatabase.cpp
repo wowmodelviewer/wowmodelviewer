@@ -16,6 +16,8 @@
 #include <QFile>
 #include <QString>
 
+GameDatabase * GameDatabase::m_instance = 0;
+
 GameDatabase::~GameDatabase()
 {
   if(m_db)

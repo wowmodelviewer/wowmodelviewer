@@ -1,9 +1,9 @@
 #include "effects.h"
 
-#include "Attachment.h"
 #include "database.h"
 #include "enums.h"
 #include "itemselection.h"
+#include "next-gen/games/wow/Attachment.h"
 
 wxArrayString spelleffects;
 SpellEffectsDB spelleffectsdb;

@@ -34,7 +34,7 @@ else()
 endif()
 
 add_dependencies(UpdateManager core)
-target_link_libraries(UpdateManager core Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(UpdateManager core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
 install(TARGETS UpdateManager 
           RUNTIME DESTINATION ${WMV_BASE_PATH}/../bin)

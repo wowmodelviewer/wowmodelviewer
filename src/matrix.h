@@ -53,6 +53,13 @@ public:
         m[0][0] = m[1][1] = m[2][2] = m[3][3] = 1.0f;
 	}
 
+	static Matrix identity()
+  {
+	  Matrix m;
+	  m.unit();
+	  return m;
+  }
+
 	void translation(const Vec3D& tr)
 	{
 		/*

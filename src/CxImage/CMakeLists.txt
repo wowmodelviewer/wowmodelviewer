@@ -53,6 +53,10 @@ if (WIN32)
 	add_definitions(-D_WIN32)
 endif()
 
-add_library(cximage STATIC ${SRC_FILES})
+add_library(cximage SHARED ${SRC_FILES})
+target_link_libraries(cximage png jpeg)
 
+if(WIN32)
+  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
+endif(WIN32)
 

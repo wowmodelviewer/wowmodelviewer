@@ -32,12 +32,12 @@
 
 #include "logger/Logger.h"
 
-#include "Attachment.h"
 #include "database.h" // items
 #include "globalvars.h"
 #include "modelviewer.h"
 
 #include <QString>
+#include "Attachment.h"
 
 map<int,int> create_map()
 {
@@ -138,14 +138,14 @@ std::map<CharSlots,int> WoWItem::initSlotLayers()
 void WoWItem::unload()
 {
   // delete models and clear map
-  for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.begin(),
-      itEnd = m_itemModels.end();
+  for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(),
+      itEnd = itemModels.end();
       it != itEnd ;
       ++it)
   {
     delete it->second;
   }
-  m_itemModels.clear();
+  itemModels.clear();
 
   // release textures and clear map
   for(std::map<CharRegions, std::string>::iterator it = m_itemTextures.begin(),
@@ -235,7 +235,7 @@ void WoWItem::load()
 
     if (m->ok)
     {
-      m_itemModels[ATT_HELMET] = m;
+      itemModels[ATT_HELMET] = m;
       std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
@@ -269,7 +269,7 @@ void WoWItem::load()
 
     if (m->ok)
     {
-      m_itemModels[ATT_LEFT_SHOULDER] = m;
+      itemModels[ATT_LEFT_SHOULDER] = m;
       std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
@@ -293,7 +293,7 @@ void WoWItem::load()
 
     if (m->ok)
     {
-      m_itemModels[ATT_RIGHT_SHOULDER] = m;
+      itemModels[ATT_RIGHT_SHOULDER] = m;
       std::string texture = iteminfos.values[0][4] + iteminfos.values[0][5];
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
@@ -458,7 +458,7 @@ void WoWItem::load()
 
     if (m->ok)
     {
-      m_itemModels[ATT_RIGHT_PALM] = m;
+      itemModels[ATT_RIGHT_PALM] = m;
 
       std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
       tex = texturemanager.add(texture);
@@ -488,7 +488,7 @@ void WoWItem::load()
 
     if (m->ok)
     {
-      m_itemModels[ATT_LEFT_PALM] = m;
+      itemModels[ATT_LEFT_PALM] = m;
 
       std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
       tex = texturemanager.add(texture);
@@ -600,8 +600,8 @@ void WoWItem::refresh()
   case CS_HEAD:
   {
     g_modelViewer->charControl->charAtt->delSlot(CS_HEAD);
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_HELMET);
-    if(it != m_itemModels.end())
+    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_HELMET);
+    if(it != itemModels.end())
       g_modelViewer->charControl->charAtt->addChild(it->second, ATT_HELMET, m_slot);
     break;
   }
@@ -609,13 +609,13 @@ void WoWItem::refresh()
   {
     g_modelViewer->charControl->charAtt->delSlot(CS_SHOULDER);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_SHOULDER);
-    if(it != m_itemModels.end())
+    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_SHOULDER);
+    if(it != itemModels.end())
       g_modelViewer->charControl->charAtt->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
 
-    it = m_itemModels.find(ATT_RIGHT_SHOULDER);
+    it = itemModels.find(ATT_RIGHT_SHOULDER);
 
-    if(it != m_itemModels.end())
+    if(it != itemModels.end())
       g_modelViewer->charControl->charAtt->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
 
     break;
@@ -624,8 +624,8 @@ void WoWItem::refresh()
   {
     g_modelViewer->charControl->charAtt->delSlot(CS_HAND_RIGHT);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_RIGHT_PALM);
-    if(it != m_itemModels.end())
+    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_RIGHT_PALM);
+    if(it != itemModels.end())
     {
       int attachement = ATT_RIGHT_PALM;
       const ItemRecord &item = items.getById(m_id);
@@ -653,8 +653,8 @@ void WoWItem::refresh()
   {
     g_modelViewer->charControl->charAtt->delSlot(CS_HAND_LEFT);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_PALM);
-    if(it != m_itemModels.end())
+    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_PALM);
+    if(it != itemModels.end())
     {
       const ItemRecord &item = items.getById(m_id);
       int attachement = ATT_LEFT_PALM;
@@ -791,7 +791,7 @@ void WoWItem::refresh()
     if(it != m_itemTextures.end())
     {
       g_modelViewer->charControl->capeTex = texturemanager.add(it->second);
-      g_modelViewer->charControl->UpdateTextureList(it->second, TEXTURE_CAPE);
+      g_modelViewer->charControl->model->UpdateTextureList(it->second, TEXTURE_CAPE);
     }
     break;
   }

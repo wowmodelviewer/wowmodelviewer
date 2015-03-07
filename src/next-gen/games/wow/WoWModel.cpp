@@ -10,7 +10,6 @@
 
 #include "Bone.h"
 #include "CASCFile.h"
-#include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelTransparency.h"
@@ -22,6 +21,7 @@
 
 #include "core/GlobalSettings.h"
 #include "metaclasses/Iterator.h"
+#include "ModelColor.h"
 
 size_t globalTime = 0;
 
@@ -1525,3 +1525,15 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   return 0;
 }
 
+void WoWModel::UpdateTextureList(wxString texName, int special)
+{
+  for (size_t i=0; i< header.nTextures; i++)
+  {
+    if (specialTextures[i] == special)
+    {
+      wxLogMessage(wxT("Updating %s to %s"), TextureList[i].c_str(),texName.c_str());
+      TextureList[i] = texName;
+      break;
+    }
+  }
+}

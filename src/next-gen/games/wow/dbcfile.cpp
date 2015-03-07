@@ -45,7 +45,6 @@ bool DBCFile::open()
 	unsigned int na,nb,es,ss;
 
 	f->read(header, 4); // File Header
-
 	if (strncmp(header, "WDBC", 4) == 0)
 		db_type = FT_WDBC;
 	else if (strncmp(header, "WDB2", 4) == 0)

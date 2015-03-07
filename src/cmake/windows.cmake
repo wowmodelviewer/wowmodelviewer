@@ -46,11 +46,9 @@ find_package(Qt5Network)
 
 target_link_libraries(wowmodelviewer
   ${wxWidgets_LIBRARIES}
-  ${EXTRA_LIBS}
-  core
   wow
-  Qt5::Xml
-  Qt5::Gui
+  cximage
+  casc
 )
 
 add_custom_target(release make install

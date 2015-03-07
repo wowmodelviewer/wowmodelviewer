@@ -20,7 +20,6 @@
 	}
 #endif
 
-extern ModelViewer *g_modelViewer;
 
 #ifdef _WINDOWS
 // Create an OpenGL pixel format descriptor
@@ -774,15 +773,14 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	
+
 	CASCFile * f = new CASCFile(tex->wxname.c_str());
 
 	if (f->isEof()) {
 		tex->id = 0;
-		wxLogMessage(wxT("Error: Could not load the texture '%s'"), wxString(tex->wxname.c_str(), wxConvUTF8).c_str());
 		return;
 	} else {
 		//tex->id = id; // I don't see the id being set anywhere,  should I set it now?
-		wxLogMessage(wxT("Loading texture: %s"), wxString(tex->wxname.c_str(), wxConvUTF8).c_str());
 	}
 
 	f->seek(4);

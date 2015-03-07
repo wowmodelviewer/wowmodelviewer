@@ -34,8 +34,10 @@ class GameDatabase
   public:
     static GameDatabase & instance()
     {
-      static GameDatabase m_instance;
-      return m_instance;
+      if(GameDatabase::m_instance == 0)
+        GameDatabase::m_instance = new GameDatabase();
+
+      return *m_instance;
     }
 
     bool initFromXML(const std::string & file);
@@ -58,6 +60,8 @@ class GameDatabase
     // std::map<TableName, [fieldID] <fieldName,fieldType> >
     // ie m_dbStruct["FileData"][0] => pair<"id","unit">
     std::map<std::string, std::map<int, std::pair<std::string, std::string> > >  m_dbStruct;
+
+    static GameDatabase * m_instance;
 
 };
 

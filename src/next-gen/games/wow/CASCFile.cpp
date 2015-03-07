@@ -37,6 +37,9 @@ bool CASCFile::open()
   bool result = false;
   if(CASCFOLDER.hStorage)
   {
+#ifdef DEBUG_READ
+    std::cout << "locale used : " <<  CASCFOLDER.CASCLocale() << std::endl;
+#endif
     result = CascOpenFile(CASCFOLDER.hStorage, m_filePath.c_str(), CASCFOLDER.CASCLocale(), 0, &m_handle);
     if(!result)
       LOG_ERROR << "Opening" << m_filePath.c_str() << "failed." << "Error" << GetLastError();

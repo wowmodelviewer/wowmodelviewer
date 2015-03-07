@@ -40,7 +40,7 @@
 // Other libraries
 
 // Current library
-
+#include "core/Plugin.h"
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -48,6 +48,7 @@
 
 // Beginning of implementation
 //====================================================================
+GlobalSettings * GlobalSettings::m_instance = 0;
 
 // Constructors 
 //--------------------------------------------------------------------
@@ -112,6 +113,8 @@ GlobalSettings::GlobalSettings()
   // set it to whatever you want if you are building a special version
   m_versionSpecialExtend = ".beta3";
 
+  bShowParticle = false;
+  bZeroParticle = false;
 }
 
 // Destructor

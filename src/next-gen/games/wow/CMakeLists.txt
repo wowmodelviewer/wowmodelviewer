@@ -6,7 +6,8 @@ include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
 message(STATUS "Building wow library")
 
-find_package(wxWidgets COMPONENTS net gl core base REQUIRED)
+# search for required package (wxwidgets)
+find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
 
 # Qt5 stuff
 find_package(Qt5Core)
@@ -25,6 +26,10 @@ add_definitions(-DGLEW_STATIC)
 
 include_directories(${CMAKE_SOURCE_DIR}/glew/include)
 
-add_library(wow STATIC ${src})
+add_library(wow SHARED ${src})
 
-target_link_libraries(wow ${wxWidgets_LIBRARIES} core casc_static cximage jpeg png Qt5::Core Qt5::Xml Qt5::Gui)
+target_link_libraries(wow ${wxWidgets_LIBRARIES} core casc cximage jpeg png Qt5::Core Qt5::Xml Qt5::Gui)
+
+if(WIN32)
+  install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
+endif(WIN32)

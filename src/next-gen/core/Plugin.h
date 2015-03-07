@@ -34,8 +34,10 @@
 // Qt
 
 // Externals
+class ModelViewer;
 
 // Other libraries
+#include "core/GlobalSettings.h"
 #include "logger/Logger.h"
 #include "metaclasses/Component.h"
 
@@ -66,14 +68,13 @@ class Plugin : public Component
     std::string version() const { return m_version; }
     std::string id() const { return (m_category + "_" + m_internalName); }
 
-    static Plugin * load(std::string path, WMVLog::Logger *);
-
+    static Plugin * load(std::string path, GlobalSettings &);
 
     // overload from component class
     void doPrint();
 
 		// Members
-		
+
 	protected :
 		// Constants / Enums
 	
@@ -84,7 +85,7 @@ class Plugin : public Component
 		// Methods
 		
 		// Members
-    WMVLog::Logger * m_logger;
+
 
 	private :
 		// Constants / Enums
@@ -94,7 +95,8 @@ class Plugin : public Component
 		// Destructors
 	
 		// Methods
-		
+    void transmitGlobalsFromCore(GlobalSettings &);
+
 		// Members
     std::string m_name;
     std::string m_internalName;
@@ -102,7 +104,10 @@ class Plugin : public Component
     std::string m_version;
     std::string m_coreVersionNeeded;
 		
+    static GlobalSettings * globalSettings;
+
 		// friend class declarations
+    friend class GlobalSettings;
 };
 
 // static members definition

@@ -1,7 +1,6 @@
 #include "modelcanvas.h"
 
 #include "animcontrol.h"
-#include "Attachment.h"
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
@@ -10,6 +9,7 @@
 #include "logger/Logger.h"
 
 #include "CxImage/ximage.h"
+#include "next-gen/games/wow/Attachment.h"
 
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
 

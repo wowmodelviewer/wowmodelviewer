@@ -38,6 +38,8 @@
 // Externals
 
 // Other libraries
+#include "globalvars.h"
+
 
 // Current library
 #include "PluginManager.h"
@@ -48,6 +50,7 @@
 
 // Beginning of implementation
 //====================================================================
+GlobalSettings * Plugin::globalSettings = 0;
 
 // Constructors 
 //--------------------------------------------------------------------
@@ -63,7 +66,7 @@ Plugin::Plugin()
 
 // Public methods
 //--------------------------------------------------------------------
-Plugin * Plugin::load(std::string path, WMVLog::Logger * logger)
+Plugin * Plugin::load(std::string path, GlobalSettings & settings)
 {
   QString pluginToLoad = QString::fromStdString(path);
   Plugin * newPlugin = NULL;
@@ -79,7 +82,9 @@ Plugin * Plugin::load(std::string path, WMVLog::Logger * logger)
     newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
     newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
     newPlugin->m_category = metaInfos.value("category").toString().toStdString();
-    newPlugin->m_logger = logger;
+
+    newPlugin->transmitGlobalsFromCore(settings);
+
     return newPlugin;
   }
   else
@@ -100,3 +105,7 @@ void Plugin::doPrint()
 
 // Private methods
 //--------------------------------------------------------------------
+void Plugin::transmitGlobalsFromCore(GlobalSettings & settings)
+{
+  Plugin::globalSettings = &settings;
+}

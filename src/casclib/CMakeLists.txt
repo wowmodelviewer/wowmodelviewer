@@ -89,9 +89,13 @@ if(WITH_TEST)
     target_link_libraries(casc_test casc)
 endif()
 
-message(STATUS "Building static CascLib")
-add_library(casc_static STATIC ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
-target_link_libraries(casc_static ${LINK_LIBS})
+message(STATUS "Building Shared CascLib")
+add_library(casc SHARED ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
+target_link_libraries(casc ${LINK_LIBS})
+
+if(WIN32)
+  install(TARGETS casc RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
+endif(WIN32)
 
 if(APPLE)
     set_target_properties(casc PROPERTIES FRAMEWORK true)

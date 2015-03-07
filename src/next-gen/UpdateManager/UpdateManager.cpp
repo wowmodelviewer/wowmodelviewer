@@ -52,6 +52,7 @@
 
 #include "metaclasses/Iterator.h"
 
+
 // Current library
 
 
@@ -67,7 +68,8 @@
 UpdateManager::UpdateManager()
 {
   LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/updateManagerLog.txt"));
-  PLUGINMANAGER.init("./plugins", &LOGGER);
+
+  PLUGINMANAGER.init("./plugins");
 
   // create main table
   m_table = new QTableWidget(0, 4, this);

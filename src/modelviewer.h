@@ -40,6 +40,11 @@
 
 #include "enums.h"
 
+namespace WMVLog
+{
+  class Logger;
+}
+
 class ModelViewer: public wxFrame
 {    
     DECLARE_CLASS(ModelViewer)
@@ -142,6 +147,7 @@ public:
 	void OnGameToggle(wxCommandEvent &event);
 	void OnViewLog(wxCommandEvent &event);
 	void LoadWoW();
+
 };
 
 #endif

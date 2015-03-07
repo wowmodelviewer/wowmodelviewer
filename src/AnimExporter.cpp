@@ -1,7 +1,6 @@
 
-#include "AnimExporter.h"
+#include "../../../AnimExporter.h"
 
-#include "Attachment.h"
 #include "globalvars.h"
 #include "Quantize.h"
 
@@ -11,6 +10,7 @@
 #include "CxImage/ximage.h"
 #include "CxImage/ximagif.h"
 #include "CxImage/ximabmp.h"
+#include "next-gen/games/wow/Attachment.h"
 
 IMPLEMENT_CLASS(CAnimationExporter, wxFrame)
 

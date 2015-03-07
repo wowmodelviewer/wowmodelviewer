@@ -5,8 +5,7 @@
  *
  */
 
-#include "ModelManager.h"
-
+#include "next-gen/games/wow/ModelManager.h"
 #include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's

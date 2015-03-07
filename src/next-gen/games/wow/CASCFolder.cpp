@@ -17,6 +17,8 @@
 
 #include "logger/Logger.h"
 
+CASCFolder * CASCFolder::m_instance = 0;
+
 CASCFolder::CASCFolder()
  : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
 {

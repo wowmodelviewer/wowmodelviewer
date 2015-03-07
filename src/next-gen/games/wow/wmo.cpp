@@ -1,5 +1,4 @@
-#include "wmo.h"
-
+#include "next-gen/games/wow/wmo.h"
 #include "GameFile.h"
 #include "util.h"
 

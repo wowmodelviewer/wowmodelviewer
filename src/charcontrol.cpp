@@ -1,7 +1,5 @@
-#include "charcontrol.h"
+#include "../../../charcontrol.h"
 
-// our headers
-#include "Attachment.h"
 #include "globalvars.h"
 #include "itemselection.h"
 #include "modelviewer.h"
@@ -16,6 +14,7 @@
 #include "RaceInfos.h"
 
 #include <wx/txtstrm.h>
+#include "next-gen/games/wow/Attachment.h"
 
 CharSlots slotOrder[] = {
 	CS_SHIRT,
@@ -426,19 +425,6 @@ void CharControl::OnButton(wxCommandEvent &event)
 	RefreshModel();
 }
 
-void CharControl::UpdateTextureList(wxString texName, int special)
-{
-	for (size_t i=0; i< model->header.nTextures; i++)
-	{
-		if (model->specialTextures[i] == special)
-		{
-			wxLogMessage(wxT("Updating %s to %s"),model->TextureList[i].c_str(),texName.c_str());
-			model->TextureList[i] = texName;
-			break;
-		}
-	}
-}
-
 void CharControl::RefreshModel()
 {
 	hairTex = 0;
@@ -471,7 +457,7 @@ void CharControl::RefreshModel()
 	{
 	  wxString furTexName = textures[1].c_str();
 	  furTex = texturemanager.add(furTexName);
-	  UpdateTextureList(furTexName, TEXTURE_FUR);
+	  model->UpdateTextureList(furTexName, TEXTURE_FUR);
 	}
 
 	// Display underwear on the model?
@@ -530,7 +516,7 @@ void CharControl::RefreshModel()
   if(textures.size() > 0)
   {
     hairTex = texturemanager.add(textures[0].c_str());
-    UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+    model->UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
 
     if(infos.isHD)
     {

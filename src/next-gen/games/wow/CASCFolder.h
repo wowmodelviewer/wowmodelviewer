@@ -20,6 +20,7 @@
 
 #include "casclib/src/CascLib.h"
 
+#include <iostream>
 
 #define CASCFOLDER CASCFolder::instance()
 
@@ -29,8 +30,9 @@ class CASCFolder
 
     static CASCFolder & instance()
     {
-      static CASCFolder m_instance;
-      return m_instance;
+      if(CASCFolder::m_instance == 0)
+        CASCFolder::m_instance = new CASCFolder();
+      return *m_instance;
     }
 
     void init(const std::string & path);
@@ -67,6 +69,8 @@ class CASCFolder
     int m_currentCascLocale;
     std::string m_folder;
     int m_openError;
+
+    static CASCFolder * m_instance;
 
     static bool defaultFilterFunc(wxString) { return true; }
 };

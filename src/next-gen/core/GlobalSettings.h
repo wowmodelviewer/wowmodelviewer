@@ -61,8 +61,10 @@ class GlobalSettings
     // Methods
     static GlobalSettings & instance()
     {
-      static GlobalSettings m_instance;
-      return m_instance;
+      if(GlobalSettings::m_instance == 0)
+        GlobalSettings::m_instance = new GlobalSettings();
+
+      return *m_instance;
     }
 
     std::string appVersion(std::string a_prefix = std::string(""));
@@ -113,9 +115,9 @@ class GlobalSettings
     bool m_isBetaVersion;
     bool m_isAlphaVersion;
 
+    static GlobalSettings * m_instance;
 
     // friend class declarations
-
 };
 
 // static members definition

@@ -5,8 +5,7 @@
  *
  */
 
-#include "Attachment.h"
-
+#include "next-gen/games/wow/Attachment.h"
 #include "logger/Logger.h"
 
 #include "modelcanvas.h"
