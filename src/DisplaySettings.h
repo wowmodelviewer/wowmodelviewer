@@ -14,6 +14,11 @@
     #include <wx/wx.h>
 #endif
 
+enum
+{
+  ID_DISPLAY_SETTINGS_APPLY
+};
+
 enum {
   CHECK_COMPRESSEDTEX,
   CHECK_MULTITEX,

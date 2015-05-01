@@ -14,6 +14,12 @@
     #include <wx/wx.h>
 #endif
 
+enum
+{
+  ID_SETTINGS_INIT_POSE_ONLY_EXPORT,
+  ID_EXPORT_SETTINGS_APPLY
+};
+
 enum {
   CHECK_INIT_POSE_ONLY_EXPORT,
   NUM_SETTINGS3_CHECK

@@ -8,7 +8,6 @@
 #include "ExportSettings.h"
 #include "globalvars.h"
 #include "modelViewer.h"
-#include "SettingsControl.h"
 
 #include "logger/Logger.h"
 
