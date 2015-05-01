@@ -34,11 +34,12 @@
 #include "util.h"
 #include "AnimExporter.h"
 #include "effects.h"
-#include "settings.h"
 #include "modelbankcontrol.h"
 #include "filecontrol.h"
 
 #include "enums.h"
+
+class SettingsControl;
 
 namespace WMVLog
 {

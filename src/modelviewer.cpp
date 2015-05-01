@@ -5,6 +5,7 @@
 #include "globalvars.h"
 #include "ModelEvent.h"
 #include "ModelTransparency.h"
+#include "SettingsControl.h"
 #include "TextureAnim.h"
 #include "UserSkins.h"
 #include "util.h"
