@@ -130,7 +130,7 @@ bool WowModelViewApp::OnInit()
 		return false;
 	}
 
-	// be carefull, mus be done avec ModelViewer constructor call
+	// be careful, must be done after ModelViewer constructor call
 	LOGGER.addChild(new WMVLog::LogOutputConsole());
 	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 

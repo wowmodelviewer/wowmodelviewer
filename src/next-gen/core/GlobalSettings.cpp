@@ -115,6 +115,7 @@ GlobalSettings::GlobalSettings()
 
   bShowParticle = false;
   bZeroParticle = false;
+  bInitPoseOnlyExport = false;
 }
 
 // Destructor

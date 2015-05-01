@@ -11,6 +11,7 @@
 
 IMPLEMENT_CLASS(Settings_Page1, wxWindow)
 IMPLEMENT_CLASS(Settings_Page2, wxWindow)
+IMPLEMENT_CLASS(Settings_Page3, wxWindow)
 IMPLEMENT_CLASS(SettingsControl, wxWindow)
 
 BEGIN_EVENT_TABLE(Settings_Page1, wxWindow)
@@ -23,6 +24,11 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(Settings_Page2, wxWindow)
 	EVT_BUTTON(ID_SETTINGS_PAGE2_APPLY, Settings_Page2::OnButton)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(Settings_Page3, wxWindow)
+  EVT_CHECKBOX(ID_SETTINGS_INIT_POSE_ONLY_EXPORT, Settings_Page3::OnCheck)
+  EVT_BUTTON(ID_SETTINGS_PAGE3_APPLY, Settings_Page3::OnButton)
 END_EVENT_TABLE()
 
 
@@ -236,6 +242,39 @@ void Settings_Page2::OnButton(wxCommandEvent &event)
 	}
 }
 
+Settings_Page3::Settings_Page3(wxWindow* parent, wxWindowID id)
+{
+  if (Create(parent, id, wxPoint(0,0), wxSize(400,400), 0, wxT("Settings_Page3")) == false) {
+    wxLogMessage(wxT("GUI Error: Settings_Page3"));
+    return;
+  }
+
+  chkbox[CHECK_INIT_POSE_ONLY_EXPORT] = new wxCheckBox(this, ID_SETTINGS_INIT_POSE_ONLY_EXPORT, _("Initial Pose Only Export"), wxPoint(5,50), wxDefaultSize, 0);
+  new wxButton(this, ID_SETTINGS_PAGE3_APPLY, _("Apply"), wxPoint(315,110), wxDefaultSize, 0);
+}
+
+void Settings_Page3::Update()
+{
+  chkbox[CHECK_INIT_POSE_ONLY_EXPORT]->SetValue(GLOBALSETTINGS.bInitPoseOnlyExport);
+}
+
+void Settings_Page3::OnCheck(wxCommandEvent &event)
+{
+  int id = event.GetId();
+
+  if (id==ID_SETTINGS_INIT_POSE_ONLY_EXPORT) {
+    GLOBALSETTINGS.bInitPoseOnlyExport = event.IsChecked();
+  }
+}
+
+void Settings_Page3::OnButton(wxCommandEvent &event)
+{
+  if (event.GetId() == ID_SETTINGS_PAGE3_APPLY) {
+    g_modelViewer->SaveSession();
+  }
+}
+
+
 SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
 {
 	wxLogMessage(wxT("Creating Settings Control..."));
@@ -250,10 +289,14 @@ SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
 	
 	page1 = new Settings_Page1(notebook, ID_SETTINGS_PAGE1);
 	page2 = new Settings_Page2(notebook, ID_SETTINGS_PAGE2);
+	page3 = new Settings_Page3(notebook, ID_SETTINGS_PAGE3);
 
 	notebook->AddPage(page1, _("Options"), false, -1);
 	notebook->AddPage(page2, _("Display"), false);
+	notebook->AddPage(page3, _("Export"), false);
 }
+
+
 
 
 SettingsControl::~SettingsControl()
@@ -270,6 +313,7 @@ void SettingsControl::Open()
 
 	page1->Update();
 	page2->Update();
+	page3->Update();
 }
 
 void SettingsControl::Close()

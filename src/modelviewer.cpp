@@ -275,7 +275,6 @@ ModelViewer::ModelViewer()
 
 void ModelViewer::InitMenu()
 {
-  std::cout << __FUNCTION__ << std::endl;
 	wxLogMessage(wxT("Initializing File Menu..."));
 
 	if (GetStatusBar() == NULL){
@@ -782,10 +781,16 @@ void ModelViewer::LoadSession()
 
 	// Application Config Settings
 	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"),wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+  pConfig->SetPath(wxT("/Session"));
+
+	pConfig->Read("RandomLooks", &useRandomLooks, true);
+	pConfig->Read("ShowParticle", &GLOBALSETTINGS.bShowParticle, true);
+	pConfig->Read("ZeroParticle", &GLOBALSETTINGS.bZeroParticle, true);
+	pConfig->Read("InitPoseOnlyExport", &GLOBALSETTINGS.bInitPoseOnlyExport , false);
 
 	// Other session settings
 	if (canvas) {
-		pConfig->SetPath(wxT("/Session"));
+
 		double c;
 		// Background Colour
 		pConfig->Read(wxT("bgR"), &c, 71.0/255);
@@ -796,9 +801,6 @@ void ModelViewer::LoadSession()
 		canvas->vecBGColor.z = c;
 		
 		// boolean vars
-		pConfig->Read(wxT("RandomLooks"), &useRandomLooks, true);
-		pConfig->Read(wxT("ShowParticle"), &GLOBALSETTINGS.bShowParticle, true);
-		pConfig->Read(wxT("ZeroParticle"), &GLOBALSETTINGS.bZeroParticle, true);
 		pConfig->Read(wxT("DBackground"), &canvas->drawBackground, false);
 		pConfig->Read(wxT("BackgroundImage"), &bgImagePath, wxEmptyString);
 		if (!bgImagePath.IsEmpty()) {
@@ -840,15 +842,16 @@ void ModelViewer::SaveSession()
 	// Attempt at saving colour values as 3 byte hex - loss of accuracy from float
 	//wxString temp(Vec3DToString(canvas->vecBGColor));
 
+	// boolean vars
+	pConfig->Write(wxT("RandomLooks"), useRandomLooks);
+	pConfig->Write(wxT("ShowParticle"), GLOBALSETTINGS.bShowParticle);
+	pConfig->Write(wxT("ZeroParticle"), GLOBALSETTINGS.bZeroParticle);
+	pConfig->Write(wxT("InitPoseOnlyExport"), GLOBALSETTINGS.bInitPoseOnlyExport);
+
 	if (canvas) {
 		pConfig->Write(wxT("bgR"), (double)canvas->vecBGColor.x);
 		pConfig->Write(wxT("bgG"), (double)canvas->vecBGColor.y);
 		pConfig->Write(wxT("bgB"), (double)canvas->vecBGColor.z);
-		
-		// boolean vars
-		pConfig->Write(wxT("RandomLooks"), useRandomLooks);
-		pConfig->Write(wxT("ShowParticle"), GLOBALSETTINGS.bShowParticle);
-		pConfig->Write(wxT("ZeroParticle"), GLOBALSETTINGS.bZeroParticle);
 
 		pConfig->Write(wxT("DBackground"), canvas->drawBackground);
 		if (canvas->drawBackground)

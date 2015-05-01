@@ -78,6 +78,7 @@ class GlobalSettings
     // find a better way than a lot of members...
     bool bShowParticle;
     bool bZeroParticle;
+    bool bInitPoseOnlyExport;
 
   protected :
     // Constants / Enums

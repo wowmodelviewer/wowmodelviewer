@@ -157,42 +157,45 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target) const
   }
 
   // export equipped items
-  Iterator<WoWItem> itemIt(model);
-  for(itemIt.begin(); !itemIt.ended() ; itemIt++)
+  if(!GLOBALSETTINGS.bInitPoseOnlyExport)
   {
-    std::map<POSITION_SLOTS, WoWModel *> itemModels = (*itemIt)->itemModels;
-    if(!itemModels.empty())
+    Iterator<WoWItem> itemIt(model);
+    for(itemIt.begin(); !itemIt.ended(); itemIt++)
     {
-      obj << "# " << "\n";
-      obj << "# " << QString::fromStdString((*itemIt)->name()) << "\n";
-      obj << "# " << "\n";
-      for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
-          it != itemModels.end();
-          ++it)
+      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*itemIt)->itemModels;
+      if(!itemModels.empty())
       {
-        WoWModel * itemModel = it->second;
-        LOG_INFO << "Exporting attached item" << itemModel->modelname.mb_str();
-
-        // find matrix
-        int l = model->attLookup[it->first];
-        Matrix m;
-        Vec3D pos;
-        if (l>-1)
+        obj << "# " << "\n";
+        obj << "# " << QString::fromStdString((*itemIt)->name()) << "\n";
+        obj << "# " << "\n";
+        for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
+            it != itemModels.end();
+            ++it)
         {
-          m = model->bones[model->atts[l].bone].mat;
-          pos = model->atts[l].pos;
-        }
+          WoWModel * itemModel = it->second;
+          LOG_INFO << "Exporting attached item" << itemModel->modelname.mb_str();
 
-        if(!exportModelVertices(itemModel, obj, counter, m, pos))
-        {
-          LOG_ERROR << "Error during obj export for model" << itemModel->modelname.mb_str();
-          return false;
-        }
+          // find matrix
+          int l = model->attLookup[it->first];
+          Matrix m;
+          Vec3D pos;
+          if (l>-1)
+          {
+            m = model->bones[model->atts[l].bone].mat;
+            pos = model->atts[l].pos;
+          }
 
-        if(!exportModelMaterials(itemModel, mtl, matFilename))
-        {
-          LOG_ERROR << "Error during materials export for model" << itemModel->modelname.mb_str();
-          return false;
+          if(!exportModelVertices(itemModel, obj, counter, m, pos))
+          {
+            LOG_ERROR << "Error during obj export for model" << itemModel->modelname.mb_str();
+            return false;
+          }
+
+          if(!exportModelMaterials(itemModel, mtl, matFilename))
+          {
+            LOG_ERROR << "Error during materials export for model" << itemModel->modelname.mb_str();
+            return false;
+          }
         }
       }
     }
@@ -231,7 +234,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       {
         uint16 a = model->indices[b];
         Vec3D vert;
-        if ((model->animated == true) && (model->vertices))
+        if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
         {
           if (vertMsg == false)
           {
