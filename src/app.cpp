@@ -17,6 +17,8 @@
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
 
+#include "GameDatabase.h"
+
 /*	THIS IS OUR MAIN "START UP" FILE.
 	App.cpp creates our wxApp class object.
 	the wxApp initiates our program (takes over the role of main())
@@ -223,7 +225,10 @@ bool WowModelViewApp::OnInit()
 				fn = wxT("ss_")+fn.AfterLast('\\').BeforeLast('.')+wxT(".png");
 				frame->canvas->Screenshot(fn);
 			}
-		} else {
+		} else if (cmd == wxT("-dbfromfile")) {
+			GAMEDATABASE.setFastMode();
+		}
+		else {
 			wxString tmp = cmd.AfterLast('.');
 			if (!tmp.IsNull() && !tmp.IsEmpty() && tmp.IsSameAs(wxT("chr"), false))
 				frame->LoadChar(cmd);

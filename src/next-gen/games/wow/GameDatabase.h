@@ -44,6 +44,8 @@ class GameDatabase
 
     sqlResult sqlQuery(const std::string &query);
 
+    void setFastMode() { m_fastMode = true; }
+
     ~GameDatabase();
 
   private:
@@ -60,6 +62,8 @@ class GameDatabase
     // std::map<TableName, [fieldID] <fieldName,fieldType> >
     // ie m_dbStruct["FileData"][0] => pair<"id","unit">
     std::map<std::string, std::map<int, std::pair<std::string, std::string> > >  m_dbStruct;
+
+    bool m_fastMode;
 
     static GameDatabase * m_instance;
 

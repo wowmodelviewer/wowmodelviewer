@@ -33,7 +33,12 @@ GameDatabase::GameDatabase()
 
 bool GameDatabase::initFromXML(const std::string & file)
 {
-   int rc = sqlite3_open(":memory:", &m_db);
+   int rc = 1;
+
+   if(m_fastMode)
+	  rc = sqlite3_open("./wowdb.sqlite", &m_db);
+   else
+	  rc = sqlite3_open(":memory:", &m_db);
 
    if( rc )
    {
@@ -92,6 +97,9 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
 
 bool GameDatabase::createDatabaseFromXML(const std::string & file)
 {
+  if(m_fastMode)
+	return true;
+
   QDomDocument doc;
 
   QFile f(file.c_str());
