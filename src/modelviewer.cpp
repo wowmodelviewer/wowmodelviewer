@@ -1452,11 +1452,14 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 			wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 			if (loadDialog.ShowModal()==wxID_OK) {
 				wxLogMessage(wxT("\nLoading character from a save file: %s\n"), loadDialog.GetPath().c_str());
-				for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
+				if(charControl->model) // if a model is already present, unload equipment
 				{
-				  WoWItem * item = charControl->model->getItem((CharSlots)i);
-				  if(item)
-				    item->setId(0);
+				  for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
+				  {
+				    WoWItem * item = charControl->model->getItem((CharSlots)i);
+				    if(item)
+				      item->setId(0);
+				  }
 				}
 				
 				LoadChar(loadDialog.GetPath());
