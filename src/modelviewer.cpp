@@ -2049,6 +2049,8 @@ void ModelViewer::SaveChar(wxString fn)
 	  WoWItem * item = charControl->model->getItem((CharSlots)i);
 	  if(item)
 	    f << item->id() << endl;
+	  else
+	    f << 0 << endl; // to stay comaptible with old way of reading, put a 0 when an item is not part of the list
 	}
 
 	WoWItem * tabard = charControl->model->getItem(CS_TABARD);
@@ -2104,6 +2106,11 @@ void ModelViewer::LoadChar(wxString fn)
 	charControl->model->cd.setHairStyle(value);
 	f >> value;
 	charControl->model->cd.setFacialHair(value);
+
+	if (f.peek() != wxT('\n')) // if facial color is present, just get rid of
+	{
+	  f >> value;
+	}
 
 	// If Eyeglow is in char file...
 	if (f.peek() != wxT('\n'))
