@@ -26,7 +26,7 @@ GameDatabase::~GameDatabase()
 
 
 GameDatabase::GameDatabase()
-: m_db(NULL)
+: m_db(NULL), m_fastMode(false)
 {
 
 }
@@ -97,9 +97,6 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
 
 bool GameDatabase::createDatabaseFromXML(const std::string & file)
 {
-  if(m_fastMode)
-	return true;
-
   QDomDocument doc;
 
   QFile f(file.c_str());
