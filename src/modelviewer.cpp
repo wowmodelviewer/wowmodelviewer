@@ -2035,7 +2035,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
 void ModelViewer::SaveChar(wxString fn)
 {
-	// FIXME: ofstream is not compitable with multibyte path name
+	// FIXME: ofstream is not compatible with multibyte path name
 #ifndef _MINGW
 	ofstream f(fn.fn_str(), ios_base::out|ios_base::trunc);
 #else
@@ -2050,7 +2050,7 @@ void ModelViewer::SaveChar(wxString fn)
 	  if(item)
 	    f << item->id() << endl;
 	  else
-	    f << 0 << endl; // to stay comaptible with old way of reading, put a 0 when an item is not part of the list
+	    f << 0 << endl; // to stay compatible with old way of reading, put a 0 when an item is not part of the list
 	}
 
 	WoWItem * tabard = charControl->model->getItem(CS_TABARD);
@@ -2065,7 +2065,7 @@ void ModelViewer::SaveChar(wxString fn)
 void ModelViewer::LoadChar(wxString fn)
 {
 	std::string modelname;
-	// FIXME: ifstream is not compitable with multibyte path name
+	// FIXME: ifstream is not compatible with multibyte path name
 #ifndef _MINGW
 	ifstream f(fn.fn_str());
 #else

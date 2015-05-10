@@ -56,7 +56,6 @@ bool CHECK_FRAMEBUFFER_STATUS()
 	return false;
 }
 
-#ifdef	_WINDOWS
 void RenderTexture::InitGL()
 {
 	video.InitGL();
@@ -65,11 +64,10 @@ void RenderTexture::InitGL()
 	glEnable(GL_DEPTH_TEST);
 }
 
-void RenderTexture::Init(HWND hWnd, int width, int height, bool fboMode)
+void RenderTexture::Init(int width, int height, bool fboMode)
 {
 	GLenum err;
 
-	canvas_hWnd = hWnd;
 	canvas_hDC = wglGetCurrentDC();
 	canvas_hRC = wglGetCurrentContext();
 
@@ -352,12 +350,6 @@ void RenderTexture::Shutdown()
 			m_hRC = NULL;
 		}
 
-		if (m_hDC) {
-			ReleaseDC(canvas_hWnd, m_hDC);
-			m_hDC = NULL;
-		}
-
 		wglMakeCurrent(canvas_hDC, canvas_hRC);
 	}
 }
-#endif

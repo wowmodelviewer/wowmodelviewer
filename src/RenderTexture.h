@@ -11,14 +11,12 @@
     #include <wx/wx.h>
 #endif
 
-#ifdef _WINDOWS
 class RenderTexture {
 protected:
 	HPBUFFERARB m_hPBuffer;
     HDC         m_hDC;
     HGLRC       m_hRC;
 
-	HWND		canvas_hWnd;
 	HDC         canvas_hDC;
     HGLRC       canvas_hRC;
 
@@ -52,7 +50,7 @@ public:
 			Shutdown();
 	}
 
-	void Init(HWND hWnd, int width, int height, bool fboMode);
+	void Init(int width, int height, bool fboMode);
 	void Shutdown();
 
 	void BeginRender();
@@ -62,12 +60,9 @@ public:
 	void ReleaseTexture();
 	GLenum GetTextureFormat() { return m_texFormat; };
 
-	void SwapBuffer() { ::SwapBuffers(m_hDC); };
-
 	void InitGL();
 
 };
-#endif
 
 #endif //RENDERTEXTURE_H
 

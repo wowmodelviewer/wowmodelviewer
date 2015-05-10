@@ -11,6 +11,9 @@
 #include "CxImage/ximage.h"
 #include "next-gen/games/wow/Attachment.h"
 
+#include <QImage>
+#include <QImageWriter>
+
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
 
 //float animSpeed = 1.0f;
@@ -1482,7 +1485,6 @@ inline void ModelCanvas::RenderADT()
 }
 
 
-#ifdef _WINDOWS
 inline void ModelCanvas::RenderWMOToBuffer()
 {
 	if (!rt)
@@ -1534,7 +1536,6 @@ inline void ModelCanvas::RenderWMOToBuffer()
 	root->draw(this);
 	//root->drawParticles(true);
 }
-#endif
 
 void ModelCanvas::RenderToBuffer()
 {
@@ -1578,13 +1579,11 @@ void ModelCanvas::RenderToBuffer()
 	glDisable(GL_ALPHA_TEST);
 	// --==--
 	
-#ifdef _WINDOWS
 	if (rt) {
 		glPushAttrib(GL_VIEWPORT_BIT);
 		glViewport(0, 0, rt->nWidth, rt->nHeight);
 		video.ResizeGLScene(rt->nWidth, rt->nHeight);
 	}
-#endif	
 
 	// Sets the "clear" colour.  Without this you get the "ghosting" effecting 
 	// as the buffer doesn't get set/cleared.
@@ -1692,10 +1691,8 @@ void ModelCanvas::RenderToBuffer()
 	if (model)
 		RenderObjects();
 
-#ifdef _WINDOWS
 	if (rt)
 		glPopAttrib();
-#endif
 }
 
 
@@ -1835,7 +1832,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 	GLuint texFormat = GL_TEXTURE_2D;
 
 	if (tmp == wxT("avi")) {
-#ifdef _WINDOWS
 #ifndef _MINGW
 		cAvi.SetFileName(filename.c_str());
 		cAvi.InitEngineForRead();
@@ -1851,7 +1847,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 #endif
 		drawBackground = true;
 		drawAVIBackground = true;
-#endif
 	} else {
 		unsigned int format;
 		if (tmp == wxT("bmp"))
@@ -2017,99 +2012,49 @@ void ModelCanvas::CheckMovement()
 // Our screenshot function which supports both PBO and FBO aswell as traditional older cards, eventually.
 void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 {
-	CxImage *newImage = NULL;
-#ifdef _WINDOWS
-	wxDELETE(rt);
-#endif
+//	CxImage *newImage = NULL;
 
-	if (!init)
-		InitGL();
+//	wxDELETE(rt);
+
+//	if (!init)
+//		InitGL();
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	wxFileName temp(fn, wxPATH_NATIVE);
 	
-	unsigned char *pixels = NULL;
 	int screenSize[4];
+	glGetIntegerv(GL_VIEWPORT, screenSize);
 
-#ifdef _WINDOWS
-	// Setup out buffers for offscreen rendering
-	if (video.supportPBO || video.supportFBO) {
-		rt = new RenderTexture();
+	// Make the BYTE array, factor of 3 because it's RBG.
+	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
 
-		if (!rt)
-			return;
-
-		rt->Init((HWND)this->GetHandle(), x, y, video.supportFBO);
-		
-		screenSize[2] = rt->nWidth;
-		screenSize[3] = rt->nHeight;
-		rt->BeginRender();
-
-		if (wmo)
-			RenderWMOToBuffer();
-		else if (model)
-			RenderToBuffer();
-
-		rt->BindTexture();
-
-	} else {		
-		glGetIntegerv(GL_VIEWPORT, screenSize);
-		glReadBuffer(GL_BACK);
-
-		if (wmo)
-			RenderWMOToBuffer();
-		else if (model)
-			RenderToBuffer();
-	}
-#endif
-
-	// (width*height*bytesPerPixel) - 32bit, 4 bytes
-	pixels = new unsigned char[screenSize[2]*screenSize[3]*4];
-
-	// read in the pixel data
 	glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
-	// read in the texture data
-	//glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
-	
-#ifdef _WINDOWS
-	if (rt) {
-		rt->ReleaseTexture();
-		rt->EndRender();
-		rt->Shutdown();
-		wxDELETE(rt);
+
+	std::cout << "final file to save : " << fn.c_str() << std::endl;
+
+	if(temp.GetExt() == wxT("tga") || temp.GetExt() == wxT("jpg")) // tga or jpg format, use CxImage (QImage needs a plugin to handle jpg, which is hard to use as WMV is not (yet) a Qt app)
+	{
+	  unsigned int format;
+	  if (temp.GetExt() == wxT("tga"))
+	    format = CXIMAGE_FORMAT_TGA;
+	  else
+	    format = CXIMAGE_FORMAT_JPG;
+
+	  CxImage newImage;
+	  newImage.AlphaCreate();  // Create the alpha layer
+	  newImage.IncreaseBpp(32);  // set image to 32bit
+	  newImage.CreateFromArray(pixels, screenSize[2], screenSize[3], 32, (screenSize[2]*4), false);
+	  newImage.Save(fn.fn_str(), format);
+	  newImage.Destroy();
 	}
-#endif
-
-	newImage = new CxImage(0);
-	newImage->AlphaCreate();	// Create the alpha layer
-	newImage->IncreaseBpp(32);	// set image to 32bit 
-	newImage->CreateFromArray(pixels, screenSize[2], screenSize[3], 32, (screenSize[2]*4), false);
+	else // other formats, let Qt do the job
+	{
+	  QImage imageFile(pixels, screenSize[2],  screenSize[3], QImage::Format_ARGB32);
+	  imageFile = imageFile.mirrored();
+	  imageFile.save(fn.c_str());
+	}
 	
-	bool succ = true;
-
-	// Save
-	if (temp.GetExt() == wxT("tga")) {
-		newImage->Save(fn.fn_str(), CXIMAGE_FORMAT_TGA);
-	} else if (temp.GetExt() == wxT("png")) {
-		newImage->Save(fn.fn_str(), CXIMAGE_FORMAT_PNG);
-	//} else if (temp.GetExt() == "jp2") {
-	//	newImage->Save(fn.fn_str(), CXIMAGE_FORMAT_JP2);
-	} else if (temp.GetExt() == wxT("jpg")) {
-		newImage->SetJpegQuality(100);
-		newImage->SetJpegScale(100);
-		newImage->Save(fn.fn_str(), CXIMAGE_FORMAT_JPG);
-	} else if (temp.GetExt() == wxT("bmp")) // Save Bitmap format
-		newImage->Save(fn.fn_str(), CXIMAGE_FORMAT_BMP);
-	else
-		succ = false;
-
-	if (succ)
-		wxLogMessage(wxT("Screenshot saved to: %s"), fn.c_str());
-
-	newImage->Destroy();
-	wxDELETE(newImage);
-
 	// free the memory
 	wxDELETEA(pixels);
 
