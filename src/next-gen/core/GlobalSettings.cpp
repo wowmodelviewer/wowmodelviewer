@@ -111,7 +111,7 @@ GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".beta4";
+  m_versionSpecialExtend = ".beta5";
 
   bShowParticle = false;
   bZeroParticle = false;
