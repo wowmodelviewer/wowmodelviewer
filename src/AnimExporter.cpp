@@ -173,11 +173,11 @@ void CAnimationExporter::CreateGif()
 		}
 	}
 
-#ifdef _WINDOWS
 	// CREATE OUR RENDERTOTEXTURE OBJECT
 	// -------------------------------------------
 	// if either are supported use our 'RenderTexture' object.
-	if (video.supportPBO || video.supportVBO) { 
+	if (video.supportPBO || video.supportVBO)
+	{
 		g_canvas->rt = new RenderTexture();
 
 		if (!g_canvas->rt) {
@@ -186,13 +186,13 @@ void CAnimationExporter::CreateGif()
 			return;
 		}
 
-		g_canvas->rt->Init((HWND)g_canvas->GetHandle(), 0, 0, video.supportFBO);
+		g_canvas->rt->Init(0, 0, video.supportFBO);
 		
 		m_iWidth = g_canvas->rt->nWidth;
 		m_iHeight = g_canvas->rt->nHeight;
 		g_canvas->rt->BeginRender();
-	} else 
-#endif
+	}
+	else
 	{
 		glReadBuffer(GL_BACK);
 		int screenSize[4];

@@ -294,6 +294,10 @@ void ModelViewer::InitMenu()
 	fileMenu->AppendSeparator();
 	fileMenu->Append(ID_FILE_SCREENSHOT, _("Save Screenshot\tF12"));
 	fileMenu->Append(ID_FILE_SCREENSHOTCONFIG, _("Save Sized Screenshot\tCTRL+S"));
+
+	// deactivate sized screenshot (needs a backbuffer rendering)
+	fileMenu->Enable(ID_FILE_SCREENSHOTCONFIG,false);
+
 	fileMenu->Append(ID_FILE_EXPORTGIF, _("GIF/Sequence Export"));
 	fileMenu->Append(ID_FILE_EXPORTAVI, _("Export AVI"));
 	fileMenu->AppendSeparator();

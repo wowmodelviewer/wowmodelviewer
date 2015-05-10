@@ -2031,7 +2031,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
 	glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 
-	std::cout << "final file to save : " << fn.c_str() << std::endl;
+	LOG_INFO << "Saving screenshot in : " << fn.c_str();
 
 	if(temp.GetExt() == wxT("tga") || temp.GetExt() == wxT("jpg")) // tga or jpg format, use CxImage (QImage needs a plugin to handle jpg, which is hard to use as WMV is not (yet) a Qt app)
 	{
