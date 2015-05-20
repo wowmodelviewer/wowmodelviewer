@@ -585,9 +585,15 @@ void ModelViewer::InitDatabase()
   wxBusyInfo info(_T("Please wait during game database analysis..."), this);
 
   if(!GAMEDATABASE.initFromXML("wow6.xml"))
+  {
+    initDB = false;
     LOG_ERROR << "Initializing failed !";
+    return;
+  }
   else
+  {
     LOG_INFO << "Initializing succeed.";
+  }
 
 	wxLogMessage(wxT("Initializing Databases..."));
 	SetStatusText(wxT("Initializing Databases..."));
@@ -608,7 +614,9 @@ void ModelViewer::InitDatabase()
 	  }
 	  else
 	  {
+	    initDB = false;
 	    LOG_ERROR << "Error during NPC detection from database.";
+	    return;
 	  }
 	}
 
@@ -626,7 +634,9 @@ void ModelViewer::InitDatabase()
 	  }
 	  else
 	  {
+	    initDB = false;
 	    LOG_ERROR << "Error during Item detection from database.";
+	    return;
 	  }
 	}
 
@@ -1831,8 +1841,8 @@ void ModelViewer::LoadWoW()
   // Error check
   if (!initDB)
   {
-    wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nPlease make sure you are loading the 'Locale-xxxx.MPQ' file.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
-    //fileControl->Disable();
+    wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
+    fileControl->Disable();
     SetStatusText(wxT("Some DBC files could not be loaded."));
   }
   else

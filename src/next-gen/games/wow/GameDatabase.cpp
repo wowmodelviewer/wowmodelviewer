@@ -124,11 +124,13 @@ bool GameDatabase::createDatabaseFromXML(const std::string & file)
         if(!fillTableFromGameFile(e.tagName().toStdString(), gamedbfile))
         {
           LOG_ERROR << "Error during filling of database" << e.tagName();
+          return false;
         }
       }
       else
       {
         LOG_ERROR << "Fail to find gamefile attribute";
+        return false;
       }
     }
 
@@ -195,7 +197,8 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
 bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::string & gamefile)
 {
   DBCFile dbc(gamefile.c_str());
-  dbc.open();
+  if(!dbc.open())
+    return false;
 
   std::map<int, std::pair<std::string, std::string> > tableStruct = m_dbStruct[table];
 
