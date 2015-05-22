@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0"?>
 <database>
   <FileData>
-    <gamefile name="DBFilesClient\FileData.dbc" />
+    <gamefile name="DBFilesClient\FileData.db2" />
     <field primary="yes" type="uint" name="id" />
     <field type="text" name="name" />
     <field type="text" name="path" />
   </FileData>
   <CreatureModelData>
-  	<gamefile name="DBFilesClient\CreatureModelData.dbc" />
+  	<gamefile name="DBFilesClient\CreatureModelData.db2" />
   	<field primary="yes" type="uint" name="ID" />
   	<field type="uint" name="Flags" />
   	<field type="uint" name="FileDataID" />
@@ -44,7 +44,7 @@
     <field type="float" name="HoverHeight" />
   </CreatureModelData>
   <CreatureDisplayInfo>
-    <gamefile name="DBFilesClient\CreatureDisplayInfo.dbc" />
+    <gamefile name="DBFilesClient\CreatureDisplayInfo.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="ModelID" />
     <field type="uint" name="SoundID" />
@@ -66,7 +66,7 @@
     <field type="uint" name="StateSpellVisualKitID" />  
   </CreatureDisplayInfo>
   <CreatureDisplayInfoExtra>
-    <gamefile name="DBFilesClient\CreatureDisplayInfoExtra.dbc" />
+    <gamefile name="DBFilesClient\CreatureDisplayInfoExtra.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="DisplayRaceID" />
     <field type="uint" name="DisplaySexID" />
@@ -98,7 +98,7 @@
     <field type="text" name="Name" index="14"/>
   </Creature>
   <CreatureType>
-  	<gamefile name="DBFilesClient\CreatureType.dbc" />
+  	<gamefile name="DBFilesClient\CreatureType.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="Name" />
     <field type="uint" name="Flags" />
@@ -110,7 +110,7 @@
   	<field type="text" name="Name" index="70" />
   </ItemSparse>
   <ItemDisplayInfo>
-    <gamefile name="DBFilesClient\ItemDisplayInfo.dbc" />
+    <gamefile name="DBFilesClient\ItemDisplayInfo.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="Model1" />
     <field type="text" name="Model2" />
@@ -171,14 +171,14 @@
   	<field type="uint" name="col8" />
   </Item>
   <ItemClass>
-    <gamefile name="DBFilesClient\ItemClass.dbc" />
+    <gamefile name="DBFilesClient\ItemClass.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="float" name="priceModifier" />
     <field type="text" name="Name" />
   </ItemClass>
   <AnimationData>
-    <gamefile name="DBFilesClient\AnimationData.dbc" />
+    <gamefile name="DBFilesClient\AnimationData.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="Name" />
     <field type="uint" name="Flags" />
@@ -187,7 +187,7 @@
     <field type="uint" name="BehaviorFly" />
   </AnimationData>
   <ItemSubClass>
-    <gamefile name="DBFilesClient\ItemSubClass.dbc" />
+    <gamefile name="DBFilesClient\ItemSubClass.db2" />
     <field primary="yes" type="uint" name="col0" />
     <field type="uint" name="ID" />
     <field type="uint" name="SubClassID" />
@@ -203,7 +203,7 @@
   	<field type="text" name="VerboseName" />
   </ItemSubClass>
   <CharComponentTextureSections>
-  	<gamefile name="DBFilesClient\CharComponentTextureSections.dbc" />
+  	<gamefile name="DBFilesClient\CharComponentTextureSections.db2" />
   	<field primary="yes" type="uint" name="ID" />
   	<field type="uint" name="LayoutID" />
   	<field type="uint" name="Section" />
@@ -213,13 +213,13 @@
   	<field type="uint" name="Height" />
   </CharComponentTextureSections>
   <CharComponentTextureLayouts>
-  	<gamefile name="DBFilesClient\CharComponentTextureLayouts.dbc" />
+  	<gamefile name="DBFilesClient\CharComponentTextureLayouts.db2" />
   	<field primary="yes" type="uint" name="ID" />
   	<field type="uint" name="Width" />
   	<field type="uint" name="Height" />
   </CharComponentTextureLayouts>
   <CharSections>
-  	<gamefile name="DBFilesClient\CharSections.dbc" />
+  	<gamefile name="DBFilesClient\CharSections.db2" />
   	<field primary="yes" type="uint" name="ID" />
   	<field type="uint" name="RaceID" />
   	<field type="uint" name="SexID" />
@@ -232,7 +232,7 @@
   	<field type="uint" name="ColorIndex" />
   </CharSections>
   <CharacterFacialHairStyles>
-  	<gamefile name="DBFilesClient\CharacterFacialHairStyles.dbc" />
+  	<gamefile name="DBFilesClient\CharacterFacialHairStyles.db2" />
   	<field primary="yes" type="uint" name="ID" />
     <field type="uint" name="RaceID" />
     <field type="uint" name="SexID" />
@@ -244,7 +244,7 @@
     <field type="uint" name="Geoset5" />
   </CharacterFacialHairStyles>
   <ChrRaces>
-  	<gamefile name="DBFilesClient\ChrRaces.dbc" />
+  	<gamefile name="DBFilesClient\ChrRaces.db2" />
   	<field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="uint" name="FactionID" />
@@ -286,7 +286,7 @@
 	<field type="uint" name="CharComponentTexLayoutHiResID" />
   </ChrRaces>
   <CharHairGeoSets>
-    <gamefile name="DBFilesClient\CharHairGeoSets.dbc" />
+    <gamefile name="DBFilesClient\CharHairGeoSets.db2" />
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="RaceID" />
     <field type="uint" name="SexID" />
@@ -298,7 +298,7 @@
     <field type="uint" name="ColorIndex" />
   </CharHairGeoSets>
   <HelmetGeosetVisData>
-  	<gamefile name="DBFilesClient\HelmetGeosetVisData.dbc" />
+  	<gamefile name="DBFilesClient\HelmetGeosetVisData.db2" />
   	<field primary="yes" type="uint" name="ID" />
   	<field type="int" name="HideGeoset1" />
   	<field type="int" name="HideGeoset2" />

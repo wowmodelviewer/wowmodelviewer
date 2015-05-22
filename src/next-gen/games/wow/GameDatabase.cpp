@@ -198,7 +198,21 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
 {
   DBCFile dbc(gamefile.c_str());
   if(!dbc.open())
-    return false;
+  {
+    wxString filename(gamefile.c_str());
+    if (filename.Lower().EndsWith(wxT(".db2"))) // if filename ends with db2, let's try with dbc if it fails
+    {
+      filename = filename.BeforeLast('.') + wxT(".dbc");
+      dbc.setFileName(filename);
+      if(!dbc.open())
+        return false;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
 
   std::map<int, std::pair<std::string, std::string> > tableStruct = m_dbStruct[table];
 

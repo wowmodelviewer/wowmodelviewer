@@ -146,6 +146,7 @@ public:
 	size_t getRecordCount() const { return recordCount; }
 	size_t getFieldCount() const { return fieldCount; }
 	wxString getFilename() { return filename; }
+	void setFileName(wxString name) { filename = name; }
 	size_t size() const { return recordCount; }
 
 private:
