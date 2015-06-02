@@ -18,7 +18,17 @@ class Displayable;
 class WoWModel;
 class ModelCanvas;
 
-struct Attachment {
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _ATTACHMENT_API_ __declspec(dllexport)
+#    else
+#        define _ATTACHMENT_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _ATTACHMENT_API_
+#endif
+
+struct _ATTACHMENT_API_ Attachment {
 	Attachment *parent;
 	Displayable *model;
 

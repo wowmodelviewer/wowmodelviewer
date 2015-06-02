@@ -52,7 +52,17 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class FileDownloader : public QObject
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _FILEDOWNLOADER_API_ __declspec(dllexport)
+#    else
+#        define _FILEDOWNLOADER_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _FILEDOWNLOADER_API_
+#endif
+
+class _FILEDOWNLOADER_API_ FileDownloader : public QObject
 {
     Q_OBJECT
 	public :

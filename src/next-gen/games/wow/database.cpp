@@ -6,21 +6,21 @@
 #include "logger/Logger.h"
 
 
-ItemDatabase		items;
-std::vector<NPCRecord> npcs;
+_DATABASE_API_ ItemDatabase		items;
+_DATABASE_API_ std::vector<NPCRecord> npcs;
 
 // --
-HelmGeosetDB		helmetdb;
-ItemVisualEffectDB	effectdb;
-StartOutfitDB		startdb;
-ItemVisualDB		visualdb;
-ItemSetDB			setsdb;
+_DATABASE_API_ HelmGeosetDB		helmetdb;
+_DATABASE_API_ ItemVisualEffectDB	effectdb;
+_DATABASE_API_ StartOutfitDB		startdb;
+_DATABASE_API_ ItemVisualDB		visualdb;
+_DATABASE_API_ ItemSetDB			setsdb;
 
 //--
-LightSkyBoxDB			skyboxdb;
-SpellItemEnchantmentDB	spellitemenchantmentdb;
-ItemVisualsDB			itemvisualsdb;
-CamCinematicDB		 camcinemadb;
+_DATABASE_API_ LightSkyBoxDB			skyboxdb;
+_DATABASE_API_ SpellItemEnchantmentDB	spellitemenchantmentdb;
+_DATABASE_API_ ItemVisualsDB			itemvisualsdb;
+_DATABASE_API_ CamCinematicDB		 camcinemadb;
 
 // --
 // CAMCINEMADB.H

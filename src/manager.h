@@ -99,7 +99,8 @@ public:
 
 	wxString get(IDTYPE id)
 	{
-		return names[id];
+	  return "";
+		//return names[id];
 	}
 
 	void clear()

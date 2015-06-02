@@ -8,6 +8,8 @@
 
 #include "animated.h"
 
+_ANIMATED_API_ size_t globalTime = 0;
+
 Vec3D fixCoordSystem(Vec3D v)
 {
   return Vec3D(v.x, v.z, -v.y);
@@ -33,7 +35,7 @@ float randfloat(float lower, float upper)
   return lower + (upper-lower)*(rand()/(float)RAND_MAX);
 }
 
-int randint(int lower, int upper)
+_ANIMATED_API_ int randint(int lower, int upper)
 {
     return lower + (int)((upper+1-lower)*frand());
 }

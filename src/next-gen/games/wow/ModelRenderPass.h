@@ -13,7 +13,18 @@
 
 class WoWModel;
 
-struct ModelRenderPass {
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _MODELRENDERPASS_API_ __declspec(dllexport)
+#    else
+#        define _MODELRENDERPASS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _MODELRENDERPASS_API_
+#endif
+
+
+struct _MODELRENDERPASS_API_ ModelRenderPass {
 	uint32 indexStart, indexCount, vertexStart, vertexEnd;
 	//TextureID texture, texture2;
 	int tex;

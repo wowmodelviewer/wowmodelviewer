@@ -48,7 +48,17 @@ class WoWModel;
 
 // Class Declaration
 //--------------------------------------------------------------------
-class ExporterPlugin : public Plugin
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _EXPORTERPLUGIN_API_ __declspec(dllexport)
+#    else
+#        define _EXPORTERPLUGIN_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _EXPORTERPLUGIN_API_
+#endif
+
+class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
 {
   public :
     // Constants / Enums
@@ -96,7 +106,7 @@ class ExporterPlugin : public Plugin
 // static members definition
 #ifdef _EXPORTERPLUGIN_CPP_
 Q_DECLARE_INTERFACE(ExporterPlugin,"wowmodelviewer.exporterplugin/1.0");
-#endif
 
+#endif
 
 #endif /* _EXPORTERPLUGIN_H_ */

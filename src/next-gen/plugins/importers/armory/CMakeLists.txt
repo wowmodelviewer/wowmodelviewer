@@ -22,7 +22,7 @@ file(GLOB src *.cpp )
 
 add_library(armory SHARED ${src})
 
-target_link_libraries(armory ${wxWidgets_LIBRARIES} core Qt5::Core)
+target_link_libraries(armory ${wxWidgets_LIBRARIES} core wow Qt5::Core)
 
 if(WIN32)
   install(TARGETS armory RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/plugins")

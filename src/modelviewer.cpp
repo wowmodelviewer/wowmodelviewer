@@ -1812,10 +1812,12 @@ void ModelViewer::LoadWoW()
 
   std::string locale = localesFound[0];
 
-  if(localesFound.size() > 1)
+  unsigned int nbLocales = localesFound.size();
+
+  if(nbLocales > 1)
   {
-    wxString availableLocales[localesFound.size()];
-    for(size_t i=0;i<localesFound.size();i++)
+    wxString * availableLocales = new wxString[nbLocales];
+    for(size_t i=0;i<nbLocales;i++)
       availableLocales[i] = wxString(localesFound[i].c_str());
 
     long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), WXSIZEOF(availableLocales), availableLocales);

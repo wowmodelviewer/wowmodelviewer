@@ -32,10 +32,21 @@
 
 // wmv database
 class ItemDatabase;
-class NPCRecord;
+struct NPCRecord;
 
-extern ItemDatabase items;
-extern std::vector<NPCRecord> npcs;
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _DATABASE_API_ __declspec(dllexport)
+#    else
+#        define _DATABASE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _DATABASE_API_
+#endif
+
+
+_DATABASE_API_ extern ItemDatabase items;
+_DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 // game database
 class HelmGeosetDB;
@@ -48,17 +59,18 @@ class SpellItemEnchantmentDB;
 class ItemVisualsDB;
 class CamCinematicDB;
 
-extern HelmGeosetDB	helmetdb;
-extern ItemVisualEffectDB effectdb;
-extern ItemSetDB setsdb;
-extern StartOutfitDB startdb;
-extern ItemVisualDB visualdb;
-extern LightSkyBoxDB skyboxdb;
-extern SpellItemEnchantmentDB spellitemenchantmentdb;
-extern ItemVisualsDB itemvisualsdb;
-extern CamCinematicDB camcinemadb;
+_DATABASE_API_ extern HelmGeosetDB	helmetdb;
+_DATABASE_API_ extern ItemVisualEffectDB effectdb;
+_DATABASE_API_ extern ItemSetDB setsdb;
+_DATABASE_API_ extern StartOutfitDB startdb;
+_DATABASE_API_ extern ItemVisualDB visualdb;
+_DATABASE_API_ extern LightSkyBoxDB skyboxdb;
+_DATABASE_API_ extern SpellItemEnchantmentDB spellitemenchantmentdb;
+_DATABASE_API_ extern ItemVisualsDB itemvisualsdb;
+_DATABASE_API_ extern CamCinematicDB camcinemadb;
 
-class SpellItemEnchantmentDB: public DBCFile
+
+class _DATABASE_API_ SpellItemEnchantmentDB: public DBCFile
 {
 public:
 	SpellItemEnchantmentDB(): DBCFile(wxT("DBFilesClient\\SpellItemEnchantment.dbc")) {}
@@ -71,7 +83,7 @@ public:
 	static const size_t VisualIDV400 = 15;
 };
 
-class ItemVisualsDB: public DBCFile
+class _DATABASE_API_ ItemVisualsDB: public DBCFile
 {
 public:
 	ItemVisualsDB(): DBCFile(wxT("DBFilesClient\\ItemVisuals.dbc")) {}
@@ -81,7 +93,7 @@ public:
 	static const size_t VisualID = 0;	// unit
 };
 
-class LightSkyBoxDB: public DBCFile
+class _DATABASE_API_ LightSkyBoxDB: public DBCFile
 {
 public:
 	LightSkyBoxDB(): DBCFile(wxT("DBFilesClient\\LightSkybox.dbc")) {}
@@ -94,7 +106,7 @@ public:
 };
 
 // ============
-class HelmGeosetDB: public DBCFile
+class _DATABASE_API_ HelmGeosetDB: public DBCFile
 {
 public:
 	HelmGeosetDB(): DBCFile(wxT("DBFilesClient\\HelmetGeosetVisData.dbc")) {}
@@ -121,7 +133,7 @@ public:
 
 class ItemDatabase;
 
-class ItemVisualDB: public DBCFile
+class _DATABASE_API_ ItemVisualDB: public DBCFile
 {
 public:
 	ItemVisualDB(): DBCFile(wxT("DBFilesClient\\ItemVisuals.dbc")) {}
@@ -138,7 +150,7 @@ public:
 	Record getById(unsigned int id);
 };
 
-class ItemVisualEffectDB: public DBCFile
+class _DATABASE_API_ ItemVisualEffectDB: public DBCFile
 {
 public:
 	ItemVisualEffectDB(): DBCFile(wxT("DBFilesClient\\ItemVisualEffects.dbc")) {}
@@ -152,7 +164,7 @@ public:
 };
 
 
-class ItemSetDB: public DBCFile
+class _DATABASE_API_ ItemSetDB: public DBCFile
 {
 	std::set<int> avail;
 
@@ -174,7 +186,7 @@ public:
 	static const size_t ItemIDBaseV400 = 2; // 10 * uint
 };
 
-class StartOutfitDB: public DBCFile
+class _DATABASE_API_ StartOutfitDB: public DBCFile
 {
 public:
 	StartOutfitDB(): DBCFile(wxT("DBFilesClient\\CharStartOutfit.dbc")) {}
@@ -194,7 +206,7 @@ public:
 	Record getById(unsigned int id);
 };
 
-struct ItemRecord {
+struct _DATABASE_API_ ItemRecord {
 	wxString name;
 	int id, itemclass, subclass, type, model, sheath, quality;
 
@@ -203,7 +215,7 @@ struct ItemRecord {
 	{}
 };
 
-class ItemDatabase {
+class _DATABASE_API_ ItemDatabase {
 public:
 	ItemDatabase();
 
@@ -219,7 +231,7 @@ public:
 // ------------------------------
 // NPC Stuff
 // -------------------------------
-struct NPCRecord 
+struct _DATABASE_API_ NPCRecord
 {
 	wxString name;
 	int id, model, type;
@@ -233,7 +245,7 @@ struct NPCRecord
 
 // =========================================
 
-class SpellEffectsDB: public DBCFile
+class _DATABASE_API_ SpellEffectsDB: public DBCFile
 {
 public:
 	SpellEffectsDB(): DBCFile(wxT("DBFilesClient\\SpellVisualEffectName.db2")) {}
@@ -253,7 +265,7 @@ public:
 
 // ===============================================
 
-class CamCinematicDB: public DBCFile
+class _DATABASE_API_ CamCinematicDB: public DBCFile
 {
 public:
 	CamCinematicDB(): DBCFile(wxT("DBFilesClient\\CinematicCamera.dbc")) {}

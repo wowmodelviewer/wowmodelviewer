@@ -46,7 +46,17 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class NPCInfos
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _NPCINFOS_API_ __declspec(dllexport)
+#    else
+#        define _NPCINFOS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _NPCINFOS_API_
+#endif
+
+class _NPCINFOS_API_ NPCInfos
 {
   public :
     // Constants / Enums
@@ -95,5 +105,4 @@ class NPCInfos
 #ifdef _NPCINFOS_CPP_
 
 #endif
-
 #endif /* _NPCINFOS_H_ */

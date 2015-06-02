@@ -46,9 +46,19 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _GLOBALSETTINGS_API_ __declspec(dllexport)
+#    else
+#        define _GLOBALSETTINGS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _GLOBALSETTINGS_API_
+#endif
+
 #define GLOBALSETTINGS GlobalSettings::instance()
 
-class GlobalSettings
+class _GLOBALSETTINGS_API_ GlobalSettings
 {
   public :
     // Constants / Enums

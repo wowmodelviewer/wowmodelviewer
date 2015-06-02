@@ -18,7 +18,17 @@
 class WoWModel;
 struct TabardDetails;
 
-class CharDetails : public Observable
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _CHARDETAILS_API_ __declspec(dllexport)
+#    else
+#        define _CHARDETAILS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _CHARDETAILS_API_
+#endif
+
+class _CHARDETAILS_API_ CharDetails : public Observable
 {
   public:
     // Types

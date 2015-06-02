@@ -19,6 +19,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
 include(cmake/policies.cmake)
 
 # search for required package (wxwidgets)
+set(wxWidgets_CONFIGURATION msw)
 find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
 
 # add cximage compilation 
@@ -28,7 +29,7 @@ add_subdirectory(CxImage)
 add_subdirectory(casclib)
 
 # add global definitions : all warnings considered as errors
-add_definitions(-g -Wall -Werror)
+# add_definitions(-g -Wall -Werror)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
@@ -38,7 +39,7 @@ include(cmake/sources.cmake)
 
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH $ENV{QT_CMAKE_DIR})
+set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS/5.3/msvc2012_opengl/lib/cmake)
 
 find_package(Qt5Core) 
 find_package(Qt5Xml)

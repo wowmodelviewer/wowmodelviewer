@@ -29,7 +29,17 @@ class sqlResult
     std::vector<std::vector<std::string> > values;
 };
 
-class GameDatabase
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _GAMEDATABASE_API_ __declspec(dllexport)
+#    else
+#        define _GAMEDATABASE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _GAMEDATABASE_API_
+#endif
+
+class _GAMEDATABASE_API_ GameDatabase
 {
   public:
     static GameDatabase & instance()

@@ -23,8 +23,6 @@
 #include "metaclasses/Iterator.h"
 #include "ModelColor.h"
 
-size_t globalTime = 0;
-
 void
 glGetAll()
 {

@@ -24,9 +24,9 @@
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#define _ITERATOR_CPP_
+#define _NPCINFOS_CPP_
 #include "NPCInfos.h"
-#undef _ITERATOR_CPP_
+#undef _NPCINFOS_CPP_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------

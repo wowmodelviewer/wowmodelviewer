@@ -675,8 +675,10 @@ inline void ModelCanvas::CreateTexture(wxString filename, GLuint texture)
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_TGA);
 	else if (tmp == wxT("jpg"))
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_JPG);
-	else if (tmp == wxT("png"))
+	// @TODO : to repair
+	/*else if (tmp == wxT("png"))
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_PNG);
+		*/
 	else 
 		return;
 
@@ -1855,8 +1857,9 @@ void ModelCanvas::LoadBackground(wxString filename)
 			format = CXIMAGE_FORMAT_TGA;
 		else if (tmp == wxT("jpg"))
 			format = CXIMAGE_FORMAT_JPG;
-		else if (tmp == wxT("png"))
-			format = CXIMAGE_FORMAT_PNG;
+		// @TODO : to repair
+		/*else if (tmp == wxT("png"))
+			format = CXIMAGE_FORMAT_PNG;*/
 		else 
 			return;
 			

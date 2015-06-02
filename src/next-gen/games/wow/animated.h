@@ -10,6 +10,16 @@
 #include "quaternion.h"
 #include "vec3d.h"
 
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _ANIMATED_API_ __declspec(dllexport)
+#    else
+#        define _ANIMATED_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _ANIMATED_API_
+#endif
+
 
 // interpolation functions
 template<class T>
@@ -59,8 +69,7 @@ inline Quaternion interpolate<Quaternion>(const float r, const Quaternion &v1, c
 typedef std::pair<size_t, size_t> AnimRange;
 
 // global time for global sequences
-extern size_t globalTime;
-extern size_t globalFrame;
+_ANIMATED_API_ extern size_t globalTime;
 
 enum Interpolations {
 	INTERPOLATION_NONE,
@@ -398,6 +407,6 @@ Vec3D fixCoordSystem2(Vec3D v);
 Quaternion fixCoordSystemQuat(Quaternion v);
 
 float randfloat(float lower, float upper);
-int randint(int lower, int upper);
+_ANIMATED_API_ int randint(int lower, int upper);
 
 #endif

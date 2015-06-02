@@ -46,7 +46,17 @@ class TextureAnim;
 class GameFile;
 class CASCFile;
 
-class WoWModel: public ManagedItem, public Displayable, public Model, public Container<WoWItem>
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _WOWMODEL_API_ __declspec(dllexport)
+#    else
+#        define _WOWMODEL_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _WOWMODEL_API_
+#endif
+
+class _WOWMODEL_API_ WoWModel: public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
 	// VBO Data
 	GLuint vbuf, nbuf, tbuf;

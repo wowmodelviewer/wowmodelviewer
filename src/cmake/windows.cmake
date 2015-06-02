@@ -3,12 +3,12 @@ string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
 #put here full path to your makensis cmd
 set(MAKENSISCMD ${WMV_SDK_BASEDIR}/NSIS/makensis.exe)
 
-set(RES_FILES "wmv_mingw.rc")
-set(CMAKE_RC_COMPILER_INIT windres)
-ENABLE_LANGUAGE(RC)
-SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
+#set(RES_FILES "wmv_mingw.rc")
+#set(CMAKE_RC_COMPILER_INIT windres)
+#ENABLE_LANGUAGE(RC)
+#SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
 
-message(STATUS "Using Windows MinGW version")
+message(STATUS "Using Windows version")
 
 message(STATUS "Using glew")
 include(glew/glew.cmake)
@@ -21,6 +21,8 @@ include_directories(${CMAKE_SOURCE_DIR}
                     ${wxWidgets_INCLUDE_DIRS}
                     ${GLEW_INCLUDE_DIR}
                    )
+
+
 
 include_directories(next-gen/games/wow)
 
@@ -48,7 +50,7 @@ target_link_libraries(wowmodelviewer
   ${wxWidgets_LIBRARIES}
   wow
   cximage
-  casc
+  CascLib
 )
 
 add_custom_target(release make install
@@ -60,7 +62,7 @@ install(TARGETS wowmodelviewer
   
 # additional files needed to let WMV correctly works
 set(QT_MINGW_DIR ${WMV_SDK_BASEDIR}/Qt/5.3/mingw482_32)
-set(QT_BIN_DIR ${QT_MINGW_DIR}/bin)
+set(QT_BIN_DIR D:/Programmes/QT_VS/5.3/msvc2012_opengl/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
   		     ${QT_BIN_DIR}/Qt5Gui.dll
   		     ${QT_BIN_DIR}/Qt5Network.dll
@@ -69,12 +71,9 @@ set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
   			 
 set(QT_SYS_FILES ${QT_BIN_DIR}/icudt52.dll
   			     ${QT_BIN_DIR}/icuin52.dll
-  			     ${QT_BIN_DIR}/icuuc52.dll
-  			     ${QT_BIN_DIR}/libgcc_s_dw2-1.dll
-  			     ${QT_BIN_DIR}/libstdc++-6.dll
-  			     ${QT_BIN_DIR}/libwinpthread-1.dll)
+  			     ${QT_BIN_DIR}/icuuc52.dll)
   				 
-set(QT_PLUGIN_DIR ${QT_MINGW_DIR}/plugins)
+set(QT_PLUGIN_DIR D:/Programmes/QT_VS/5.3/msvc2012_opengl/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)

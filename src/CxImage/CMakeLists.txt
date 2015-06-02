@@ -48,15 +48,15 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 if (WIN32)
-	add_definitions(-D_MINGW)
+  	include_directories(D:/sdk_new/include)
 	add_definitions(-D_WINDOWS)
 	add_definitions(-D_WIN32)
 endif()
 
-add_library(cximage SHARED ${SRC_FILES})
-target_link_libraries(cximage png jpeg)
+add_library(cximage STATIC ${SRC_FILES})
+target_link_libraries(cximage D:/sdk_new/lib/jpeg.lib D:/sdk_new/lib/libpng.lib)
 
-if(WIN32)
-  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
-endif(WIN32)
+#if(WIN32)
+#  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
+#endif(WIN32)
 

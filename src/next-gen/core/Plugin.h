@@ -48,8 +48,17 @@ class ModelViewer;
 
 // Class Declaration
 //--------------------------------------------------------------------
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _PLUGIN_API_ __declspec(dllexport)
+#    else
+#        define _PLUGIN_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _PLUGIN_API_
+#endif
 
-class Plugin : public Component
+class _PLUGIN_API_ Plugin : public Component
 {
 	public :
 		// Constants / Enums

@@ -18,6 +18,8 @@ set(CMAKE_AUTOMOC ON)
 
 file(GLOB src *.cpp ../metaclasses/*.cpp ../logger/*.cpp)
 
+add_definitions(-DBUILDING_CORE_DLL)
+
 add_library(core SHARED ${src})
 
 target_link_libraries(core ${wxWidgets_LIBRARIES} Qt5::Core Qt5::Network)

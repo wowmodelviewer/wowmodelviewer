@@ -316,7 +316,8 @@ void CAnimationExporter::CreateGif()
 		// Append PNG extension, save out PNG file with frame number
 		wxString filen = m_strFilename;
 		filen << wxT("_") << i << wxT(".png");
-		newImage->Save(filen.mb_str(), CXIMAGE_FORMAT_PNG);
+		// @TODO : to repair
+	//	newImage->Save(filen.mb_str(), CXIMAGE_FORMAT_PNG);
 		
 		//gifImages must not be empty
 		gifImages[i] = newImage;

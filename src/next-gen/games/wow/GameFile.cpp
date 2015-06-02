@@ -33,12 +33,12 @@ bool GameFile::isEof()
     return eof;
 }
 
-void GameFile::seek(ssize_t offset) {
+void GameFile::seek(size_t offset) {
   pointer = offset;
   eof = (pointer >= size);
 }
 
-void GameFile::seekRelative(ssize_t offset)
+void GameFile::seekRelative(size_t offset)
 {
   pointer += offset;
   eof = (pointer >= size);

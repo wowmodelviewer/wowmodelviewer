@@ -9,7 +9,18 @@
 
 #include <wx/wx.h>
 
-class DBCFile
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _DBCFILE_API_ __declspec(dllexport)
+#    else
+#        define _DBCFILE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _DBCFILE_API_
+#endif
+
+
+class _DBCFILE_API_ DBCFile
 {
 public:
 	DBCFile(const wxString &filename);

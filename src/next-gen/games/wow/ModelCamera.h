@@ -10,7 +10,17 @@
 
 #include "animated.h"
 
-struct ModelCamera {
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _MODELCAMERA_API_ __declspec(dllexport)
+#    else
+#        define _MODELCAMERA_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _MODELCAMERA_API_
+#endif
+
+struct _MODELCAMERA_API_ ModelCamera {
 	bool ok;
 
 	Vec3D pos, target;

@@ -10,7 +10,17 @@
 
 #include <wx/string.h>
 
-struct TabardDetails
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _TABARDDETAILS_API_ __declspec(dllexport)
+#    else
+#        define _TABARDDETAILS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _TABARDDETAILS_API_
+#endif
+
+struct _TABARDDETAILS_API_ TabardDetails
 {
 	int Icon;
 	int IconColor;

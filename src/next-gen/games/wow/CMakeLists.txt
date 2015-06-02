@@ -26,9 +26,11 @@ add_definitions(-DGLEW_STATIC)
 
 include_directories(${CMAKE_SOURCE_DIR}/glew/include)
 
+add_definitions(-DBUILDING_WOW_DLL)
+
 add_library(wow SHARED ${src})
 
-target_link_libraries(wow ${wxWidgets_LIBRARIES} core casc cximage jpeg png Qt5::Core Qt5::Xml Qt5::Gui)
+target_link_libraries(wow ${wxWidgets_LIBRARIES} core cximage CascLib Qt5::Core Qt5::Xml Qt5::Gui)
 
 if(WIN32)
   install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")

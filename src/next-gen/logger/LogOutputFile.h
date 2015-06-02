@@ -49,9 +49,20 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _LOGOUTPUTFILE_API_ __declspec(dllexport)
+#    else
+#        define _LOGOUTPUTFILE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _LOGOUTPUTFILE_API_
+#endif
+
+
 namespace WMVLog
 {
-class LogOutputFile : public LogOutput
+class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
 {
 	public :
 		// Constants / Enums

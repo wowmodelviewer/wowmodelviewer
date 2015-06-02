@@ -329,8 +329,11 @@ void FileControl::ExportPNG(wxString val, wxString suffix)
 	//wxLogMessage(wxT("Info: Exporting texture to %s..."), temp.c_str());
 	if (suffix == wxT("tga"))
 		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_TGA);
+	// @TODO : to repair
+	/*
 	else
 		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_PNG);
+		*/
 	free(tempbuf);
 	newImage->Destroy();
 	wxDELETE(newImage);

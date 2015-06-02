@@ -11,7 +11,17 @@
 #include <stdio.h>
 #include <string>
 
-class GameFile
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _GAMEFILE_API_ __declspec(dllexport)
+#    else
+#        define _GAMEFILE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _GAMEFILE_API_
+#endif
+
+class _GAMEFILE_API_ GameFile
 {
   public:
     GameFile():eof(true),buffer(0),pointer(0),size(0) {}
@@ -23,8 +33,8 @@ class GameFile
     unsigned char* getBuffer();
     unsigned char* getPointer();
     bool isEof();
-    void seek(ssize_t offset);
-    void seekRelative(ssize_t offset);
+    void seek(size_t offset);
+    void seekRelative(size_t offset);
     void close();
     virtual void openFile(std::string filename) = 0;
 

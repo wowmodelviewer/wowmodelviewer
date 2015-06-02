@@ -48,7 +48,17 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class Component
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _COMPONENT_API_ __declspec(dllexport)
+#    else
+#        define _COMPONENT_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _COMPONENT_API_
+#endif
+
+class _COMPONENT_API_ Component
 {
 	public :
 		// Constants / Enums
@@ -71,8 +81,8 @@ class Component
 		virtual unsigned int nbChildren() const {return 0; }
 
 		virtual int findChild(Component * /* component */,bool /* recursive */ ) const { return -1; }
-		virtual Component * getChild(int index) { return 0; }
-		virtual const Component * getChild(int index) const { return 0; }
+		virtual Component * getChild(unsigned int index) { return 0; }
+		virtual const Component * getChild(unsigned int index) const { return 0; }
 
 
 		// parent management

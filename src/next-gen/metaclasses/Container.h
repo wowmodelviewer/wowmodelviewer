@@ -71,8 +71,8 @@ class Container : public Component
 		unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
 
 		int findChild(DataType * child, bool recursive = false) const;
-		DataType * getChild(int index);
-		const DataType * getChild(int index) const;
+		DataType * getChild(unsigned int index);
+		const DataType * getChild(unsigned int index) const;
 		
 	protected :
 		// Constants / Enums
@@ -240,12 +240,12 @@ int Container<DataType>::findChild(DataType * child, bool recursive /* = false *
 }
 
 template<class DataType>
-DataType * Container<DataType>::getChild(int index)
+DataType * Container<DataType>::getChild(unsigned int index)
 {
 	DataType * l_p_result = 0;
-	if(index >= 0 && index < m_children.size())
+	if(index < m_children.size())
 	{
-		size_t l_index = 0;
+	  unsigned int l_index = 0;
 		typename std::list<DataType *>::iterator l_it;
     for(l_it = m_children.begin() ; l_index < index ;  l_index++)
 		{
@@ -257,12 +257,12 @@ DataType * Container<DataType>::getChild(int index)
 }
 
 template<class DataType>
-const DataType * Container<DataType>::getChild(int index) const
+const DataType * Container<DataType>::getChild(unsigned int index) const
 {
 	const DataType * l_p_result = 0;
-	if(index >= 0 && index < m_children.size())
+	if(index < m_children.size())
 	{
-		size_t l_index = 0;
+	  unsigned int l_index = 0;
 		typename std::list<DataType *>::const_iterator l_it;
         for(l_it = m_children.begin() ; l_index < index ; l_index++)
 		{

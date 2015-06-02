@@ -10,8 +10,18 @@
 
 typedef GLuint TextureID;
 
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _VIDEO_API_ __declspec(dllexport)
+#    else
+#        define _VIDEO_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _VIDEO_API_
+#endif
 
-class Texture : public ManagedItem {
+
+class _VIDEO_API_ Texture : public ManagedItem {
 public:
 	int w,h;
 	GLuint id;
@@ -22,7 +32,8 @@ public:
 
 };
 
-class TextureManager : public Manager<GLuint> {
+
+class _VIDEO_API_ TextureManager : public Manager<GLuint> {
 	
 public:
 	virtual GLuint add(wxString name);
@@ -44,7 +55,7 @@ struct VideoCaps
 	GLboolean doubleBuffer;	// double buffered?
 };
 
-class VideoSettings {
+class _VIDEO_API_ VideoSettings {
 
 public:
 	VideoSettings();
@@ -133,8 +144,8 @@ public:
 
 void getTextureData(GLuint tex, unsigned char *buf);
 
-extern VideoSettings video;
-extern TextureManager texturemanager;
+_VIDEO_API_ extern VideoSettings video;
+_VIDEO_API_ extern TextureManager texturemanager;
 
 void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest);
 

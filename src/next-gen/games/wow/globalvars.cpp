@@ -1,13 +1,13 @@
 
 #include "globalvars.h"
 
-ModelViewer *g_modelViewer = 0;
-ModelCanvas *g_canvas = 0;
-AnimControl *g_animControl = 0;
-CharControl *g_charControl = 0;
-FileControl *g_fileControl = 0;
+_GLOBALVARS_API_ ModelViewer *g_modelViewer = 0;
+_GLOBALVARS_API_ ModelCanvas *g_canvas = 0;
+_GLOBALVARS_API_ AnimControl *g_animControl = 0;
+_GLOBALVARS_API_ CharControl *g_charControl = 0;
+_GLOBALVARS_API_ FileControl *g_fileControl = 0;
 
-WoWModel *g_selModel = 0;
-WMO *g_selWMO = 0;
+_GLOBALVARS_API_ WoWModel *g_selModel = 0;
+_GLOBALVARS_API_ WMO *g_selWMO = 0;
 
 // --

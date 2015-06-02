@@ -4,7 +4,17 @@
 #include <map>
 #include <string>
 
-class RaceInfos
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _RACEINFOS_API_ __declspec(dllexport)
+#    else
+#        define _RACEINFOS_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _RACEINFOS_API_
+#endif
+
+class _RACEINFOS_API_ RaceInfos
 {
   public:
     int raceid;

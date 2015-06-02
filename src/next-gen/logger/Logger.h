@@ -55,6 +55,17 @@ class QMessageLogContext;
 
 // Class Declaration
 //--------------------------------------------------------------------
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _LOGGER_API_ __declspec(dllexport)
+#    else
+#        define _LOGGER_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _LOGGER_API_
+#endif
+
+
 #define LOGGER WMVLog::Logger::instance()
 
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)
@@ -72,7 +83,7 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-class Logger : public Container<LogOutput>
+class _LOGGER_API_ Logger : public Container<LogOutput>
 {
 	public :
 		// Constants / Enums

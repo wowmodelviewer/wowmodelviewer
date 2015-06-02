@@ -22,7 +22,7 @@ file(GLOB src *.cpp )
 
 add_library(wowhead SHARED ${src})
 
-target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core)
+target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core wow)
 
 if(WIN32)
   install(TARGETS wowhead RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/plugins")

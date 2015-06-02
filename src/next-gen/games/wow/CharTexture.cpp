@@ -203,7 +203,7 @@ void CharTexture::initRegions()
 
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
-    CharTexture::LAYOUTS[curLayout] = make_pair<LayoutSize, std::map<int,CharRegionCoords> >(texLayout,regionCoords);
+    CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);
   }
 
 }

@@ -3319,7 +3319,7 @@ int  CxImage::OptimalThreshold(long method, RECT * pBox, CxImage* pContrastMask)
 		}
 
 		//potential difference (based on Electrostatic Binarization method by J. Acharya & G. Sreechakra)
-		// L=-fabs(vdiff/vsum); è molto selettivo, sembra che L=-fabs(vdiff) o L=-(vsum)
+		// L=-fabs(vdiff/vsum); ï¿½ molto selettivo, sembra che L=-fabs(vdiff) o L=-(vsum)
 		// abbiano lo stesso valore di soglia... il che semplificherebbe molto la routine
 		double vdiff = 0;
 		for (k=gray_min;k<=i;k++)
@@ -3504,8 +3504,8 @@ bool CxImage::FloodFill(const long xStart, const long yStart, const RGBQUAD cFil
 	if (IsIndexed()){ //--- Generic indexed image, no tolerance OR Grayscale image with tolerance
 		BYTE idxRef = GetPixelIndex(xStart,yStart);
 		BYTE idxFill = GetNearestIndex(cFillColor);
-        BYTE idxMin = (BYTE)std::min(255, std::max(0,(int)(idxRef - nTolerance)));
-        BYTE idxMax = (BYTE)std::min(255, std::max(0,(int)(idxRef + nTolerance)));
+        BYTE idxMin = (BYTE)min(255, max(0,(int)(idxRef - nTolerance)));
+        BYTE idxMax = (BYTE)min(255, max(0,(int)(idxRef + nTolerance)));
 
 		while(!q.empty())
 		{
@@ -3541,12 +3541,12 @@ bool CxImage::FloodFill(const long xStart, const long yStart, const RGBQUAD cFil
 	} else { //--- RGB image
 		RGBQUAD cRef = GetPixelColor(xStart,yStart);
 		RGBQUAD cRefMin, cRefMax;
-        cRefMin.rgbRed   = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbRed   - nTolerance)));
-        cRefMin.rgbGreen = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbGreen - nTolerance)));
-        cRefMin.rgbBlue  = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbBlue  - nTolerance)));
-        cRefMax.rgbRed   = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbRed   + nTolerance)));
-        cRefMax.rgbGreen = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbGreen + nTolerance)));
-        cRefMax.rgbBlue  = (BYTE)std::min(255, std::max(0,(int)(cRef.rgbBlue  + nTolerance)));
+        cRefMin.rgbRed   = (BYTE)min(255, max(0,(int)(cRef.rgbRed   - nTolerance)));
+        cRefMin.rgbGreen = (BYTE)min(255, max(0,(int)(cRef.rgbGreen - nTolerance)));
+        cRefMin.rgbBlue  = (BYTE)min(255, max(0,(int)(cRef.rgbBlue  - nTolerance)));
+        cRefMax.rgbRed   = (BYTE)min(255, max(0,(int)(cRef.rgbRed   + nTolerance)));
+        cRefMax.rgbGreen = (BYTE)min(255, max(0,(int)(cRef.rgbGreen + nTolerance)));
+        cRefMax.rgbBlue  = (BYTE)min(255, max(0,(int)(cRef.rgbBlue  + nTolerance)));
 
 		while(!q.empty())
 		{

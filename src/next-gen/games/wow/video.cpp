@@ -1,5 +1,8 @@
 #include "modelviewer.h"
+
+#define _VIDEO_CPP_
 #include "video.h"
+#undef _VIDEO_CPP_
 
 #include "CxImage/ximage.h"
 
@@ -46,8 +49,8 @@ PIXELFORMATDESCRIPTOR pfd =						// pfd Tells Windows How We Want Things To Be
 };
 #endif
 
-VideoSettings video;
-TextureManager texturemanager;
+_VIDEO_API_ VideoSettings video;
+_VIDEO_API_ TextureManager texturemanager;
 
 VideoSettings::VideoSettings()
 {
@@ -741,26 +744,6 @@ GLuint TextureManager::add(wxString name)
 	return 0;
 }
 //#define SAVE_BLP
-
-bool TryLoadLocalTexture(const wxString& texName, int type, CxImage **imgptr)
-{
-	wxFileName fn = texName;
-	wxString fname = wxT("Import") + (SLASH + fn.GetName()); // wxT("...") + SLASH is wrong
-
-	if (type == CXIMAGE_FORMAT_PNG)
-		fname += wxT(".png");
-	else if (type == CXIMAGE_FORMAT_TGA)
-		fname += wxT(".tga");
-	else 
-		return false;
-
-	if (!wxFile::Exists(fname))
-		return false;
-		
-	*imgptr = new (std::nothrow) CxImage(fname.mb_str(), type);
-
-	return true;
-}
 
 void TextureManager::LoadBLP(GLuint id, Texture *tex)
 {

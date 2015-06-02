@@ -51,7 +51,17 @@ class FileDownloader;
 
 // Class Declaration
 //--------------------------------------------------------------------
-class VersionManager : public QObject
+#ifdef _WIN32
+#    ifdef BUILDING_CORE_DLL
+#        define _VERSIONMANAGER_API_ __declspec(dllexport)
+#    else
+#        define _VERSIONMANAGER_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _VERSIONMANAGER_API_
+#endif
+
+class _VERSIONMANAGER_API_ VersionManager : public QObject
 {
   Q_OBJECT
 
