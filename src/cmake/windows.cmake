@@ -61,18 +61,19 @@ install(TARGETS wowmodelviewer
         RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
   
 # additional files needed to let WMV correctly works
-set(QT_BIN_DIR D:/Programmes/QT_VS/5.3/msvc2013_opengl/bin)
+#set(QT_BIN_DIR D:/Programmes/QT_VS/5.3/msvc2013_opengl/bin)
+set(QT_BIN_DIR  D:/Programmes/QT_VS_5.4.2/5.4/msvc2013_opengl/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
   		     ${QT_BIN_DIR}/Qt5Gui.dll
   		     ${QT_BIN_DIR}/Qt5Network.dll
   		     ${QT_BIN_DIR}/Qt5Widgets.dll
   		     ${QT_BIN_DIR}/Qt5Xml.dll)
   			 
-set(QT_SYS_FILES ${QT_BIN_DIR}/icudt52.dll
-  			     ${QT_BIN_DIR}/icuin52.dll
-  			     ${QT_BIN_DIR}/icuuc52.dll)
+set(QT_SYS_FILES ${QT_BIN_DIR}/icudt53.dll
+  			     ${QT_BIN_DIR}/icuin53.dll
+  			     ${QT_BIN_DIR}/icuuc53.dll)
   				 
-set(QT_PLUGIN_DIR D:/Programmes/QT_VS/5.3/msvc2013_opengl/plugins)
+set(QT_PLUGIN_DIR D:/Programmes/QT_VS_5.4.2/5.4/msvc2013_opengl/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
