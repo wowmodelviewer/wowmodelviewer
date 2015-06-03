@@ -243,8 +243,8 @@ void initGlobalVBOs()
 		vt = temp;
 		int detail_size = 1;
 		const float detail_half = 0.5f * detail_size / 8.0f;
-		for (ssize_t j=0; j<17; j++) {
-			for (size_t i=0; i<((j%2)?8:9); i++) {
+		for (int j=0; j<17; j++) {
+			for (int i=0; i<((j%2)?8:9); i++) {
 				tx = detail_size / 8.0f * i;
 				ty = detail_size / 8.0f * j * 0.5f;
 				if (j%2) {
@@ -262,8 +262,8 @@ void initGlobalVBOs()
 		// init texture coordinates for alpha map:
 		vt = temp;
 		const float alpha_half = 0.5f * 1.0f / 8.0f;
-		for (ssize_t j=0; j<17; j++) {
-			for (size_t i=0; i<((j%2)?8:9); i++) {
+		for (int j=0; j<17; j++) {
+			for (int i=0; i<((j%2)?8:9); i++) {
 				tx = 1.0f / 8.0f * i;
 				ty = 1.0f / 8.0f * j * 0.5f;
 				if (j%2) {
@@ -1167,8 +1167,8 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 			Vec3D *ttv = tv;
 
 			// vertices
-			for (ssize_t j=0; j<17; j++) {
-				for (size_t i=0; i<((j%2)?8:9); i++) {
+			for (int j=0; j<17; j++) {
+				for (int i=0; i<((j%2)?8:9); i++) {
 					float h,xpos,zpos;
 					f.read(&h,4);
 					xpos = i * UNITSIZE;
@@ -1202,8 +1202,8 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 			// normal vectors
 			char nor[3];
 			Vec3D *ttn = tn;
-			for (ssize_t j=0; j<17; j++) {
-				for (size_t i=0; i<((j%2)?8:9); i++) {
+			for (int j=0; j<17; j++) {
+				for (int i=0; i<((j%2)?8:9); i++) {
 					f.read(nor,3);
 					// order Z,X,Y ?
 					//*ttn++ = Vec3D((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);

@@ -39,7 +39,7 @@ include(cmake/sources.cmake)
 
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS/5.3/msvc2012_opengl/lib/cmake)
+set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS/5.3/msvc2013_opengl/lib/cmake)
 
 find_package(Qt5Core) 
 find_package(Qt5Xml)

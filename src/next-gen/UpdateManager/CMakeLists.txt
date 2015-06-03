@@ -6,7 +6,7 @@ message(STATUS "Building UpdateManager")
 # define policies to avoid warnings
 include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
-#set(RES_FILES "UpdateManager.rc")
+set(RES_FILES "UpdateManager.rc")
 #set(CMAKE_RC_COMPILER_INIT windres)
 #ENABLE_LANGUAGE(RC)
 #SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
@@ -15,7 +15,7 @@ include_directories(.)
 include_directories(../)
 
 # Qt5 stuff
-set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS/5.3/msvc2012_opengl/lib/cmake)
+set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS/5.3/msvc2013_opengl/lib/cmake)
 find_package(Qt5Core)
 find_package(Qt5Gui)
 find_package(Qt5Widgets)

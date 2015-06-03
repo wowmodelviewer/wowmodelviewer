@@ -3,7 +3,7 @@ string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
 #put here full path to your makensis cmd
 set(MAKENSISCMD ${WMV_SDK_BASEDIR}/NSIS/makensis.exe)
 
-#set(RES_FILES "wmv_mingw.rc")
+set(RES_FILES "wmv_mingw.rc")
 #set(CMAKE_RC_COMPILER_INIT windres)
 #ENABLE_LANGUAGE(RC)
 #SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
@@ -53,7 +53,7 @@ target_link_libraries(wowmodelviewer
   CascLib
 )
 
-add_custom_target(release make install
+add_custom_target(release nmake install
                   COMMAND ${MAKENSISCMD} "../Installers/Windows/NSIS/WMVInstallerMUI.nsi")             
 
 
@@ -61,8 +61,7 @@ install(TARGETS wowmodelviewer
         RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)
   
 # additional files needed to let WMV correctly works
-set(QT_MINGW_DIR ${WMV_SDK_BASEDIR}/Qt/5.3/mingw482_32)
-set(QT_BIN_DIR D:/Programmes/QT_VS/5.3/msvc2012_opengl/bin)
+set(QT_BIN_DIR D:/Programmes/QT_VS/5.3/msvc2013_opengl/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
   		     ${QT_BIN_DIR}/Qt5Gui.dll
   		     ${QT_BIN_DIR}/Qt5Network.dll
@@ -73,7 +72,7 @@ set(QT_SYS_FILES ${QT_BIN_DIR}/icudt52.dll
   			     ${QT_BIN_DIR}/icuin52.dll
   			     ${QT_BIN_DIR}/icuuc52.dll)
   				 
-set(QT_PLUGIN_DIR D:/Programmes/QT_VS/5.3/msvc2012_opengl/plugins)
+set(QT_PLUGIN_DIR D:/Programmes/QT_VS/5.3/msvc2013_opengl/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
@@ -81,10 +80,8 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/listfile.txt
 				${CMAKE_CURRENT_SOURCE_DIR}/../bin_support/wow6.xml)
 
-set(MINGW_BIN_DIR ${WMV_SDK_BASEDIR}/MinGW/bin)
-set(MINGW_SYS_FILES ${MINGW_BIN_DIR}/jpeg62.dll ${MINGW_BIN_DIR}/libpng3.dll ${MINGW_BIN_DIR}/zlib1.dll)
 
-set(files ${QT_FILES} ${QT_SYS_FILES} ${MINGW_SYS_FILES} ${EXTRA_FILES})
+set(files ${QT_FILES} ${QT_SYS_FILES} ${EXTRA_FILES})
 set(platform_files ${QT_PLUGIN_SYS_FILES})			 
   				 
 install(FILES ${files} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin)

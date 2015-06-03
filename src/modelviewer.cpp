@@ -1820,7 +1820,7 @@ void ModelViewer::LoadWoW()
     for(size_t i=0;i<nbLocales;i++)
       availableLocales[i] = wxString(localesFound[i].c_str());
 
-    long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), WXSIZEOF(availableLocales), availableLocales);
+    long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbLocales, availableLocales);
     if (id != -1)
       locale = localesFound[id];
   }

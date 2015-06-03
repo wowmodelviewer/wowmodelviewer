@@ -15,4 +15,4 @@ add_subdirectory(games)
 add_subdirectory(plugins)
 
 # add update manager compilation
-# add_subdirectory(UpdateManager)        
+add_subdirectory(UpdateManager)        
