@@ -1,10 +1,14 @@
 #include "modelviewer.h"
 #include "globalvars.h"
-#include "CxImage/ximage.h"
 
 #include "logger/Logger.h"
 
+#include "CASCFile.h"
 #include "CASCFolder.h"
+
+#include <wx/msgdlg.h>
+
+#include <QImage>
 
 typedef std::pair<wxTreeItemId, wxString> TreeStackItem;
 typedef std::vector<TreeStackItem> TreeStack;
@@ -270,73 +274,81 @@ void FileControl::OnChoice(wxCommandEvent &event)
 // copy from ModelOpened::Export
 void FileControl::Export(wxString val, int select)
 {
-  /*
 	if (val.IsEmpty())
 		return;
-	MPQFile f(val);
-	if (f.isEof()) {
-		wxLogMessage(wxT("Error: Could not extract %s\n"), val.c_str());
+
+	CASCFile f(val.c_str());
+	if (f.isEof())
+	{
+		LOG_ERROR << "Could not extract" << val.c_str();
 		f.close();
 		return;
 	}
+
+	LOG_INFO << "Saving" << val.c_str();
+
 	wxFileName fn = fixMPQPath(val);
 
 	FILE *hFile = NULL;
 	wxString filename;
 	if (select == 1)
+	{
 		filename = wxFileSelector(wxT("Save..."), wxGetCwd(), fn.GetName(), fn.GetExt(), fn.GetExt().Upper()+wxT(" Files (.")+fn.GetExt().Lower()+wxT(")|*.")+fn.GetExt().Lower());
-	else {
+	}
+	else
+	{
 		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetFullName();
 	}
+
+	LOG_INFO << "Saving to" << filename.c_str();
+
 	if ( !filename.empty() )
 	{
 		hFile = fopen(filename.mb_str(), "wb");
 	}
-	if (hFile) {
+
+	if (hFile)
+	{
 		fwrite(f.getBuffer(), 1, f.getSize(), hFile);
 		fclose(hFile);
 	}
+	else
+	{
+	  LOG_ERROR << "Saving to" << filename.c_str() << "failed";
+	}
+
 	f.close();
-	*/
 }
 
-void FileControl::ExportPNG(wxString val, wxString suffix)
+wxString FileControl::ExportPNG(wxString val)
 {
 	if (val.IsEmpty())
-		return;
+		return "";
+
 	wxFileName fn(val);
 	if (fn.GetExt().Lower() != wxT("blp"))
-		return;
+		return "";
+
 	TextureID temptex = texturemanager.add(val);
 	Texture &tex = *((Texture*)texturemanager.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
-		return;
+		return "";
 
 	wxString filename;
-	filename = wxFileSelector(wxT("Save ") + suffix.Upper() + wxT("..."), wxGetCwd(), fn.GetName(), suffix, suffix.Upper()+wxT(" Files (.")+suffix.Lower()+wxT(")|*.")+suffix.Lower());
+	filename = wxFileSelector(wxT("Save PNG ..."), wxGetCwd(), fn.GetName(), "png",wxT("PNG Files (.png)|*.png"));
 
 	if ( filename.empty() ){
-		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".")+suffix.Lower();
+		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
 	}
 
 	unsigned char *tempbuf = (unsigned char*)malloc(tex.w*tex.h*4);
 	tex.getPixels(tempbuf, GL_BGRA_EXT);
 
-	CxImage *newImage = new CxImage(0);
-	newImage->AlphaCreate();	// Create the alpha layer
-	newImage->IncreaseBpp(32);	// set image to 32bit 
-	newImage->CreateFromArray(tempbuf, tex.w, tex.h, 32, (tex.w*4), true);
-	//wxLogMessage(wxT("Info: Exporting texture to %s..."), temp.c_str());
-	if (suffix == wxT("tga"))
-		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_TGA);
-	// @TODO : to repair
-	/*
-	else
-		newImage->Save(filename.mb_str(), CXIMAGE_FORMAT_PNG);
-		*/
+	QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
+	PNGFile.save(filename.mb_str());
+
 	free(tempbuf);
-	newImage->Destroy();
-	wxDELETE(newImage);
+	return filename;
 }
 
 void FileControl::OnPopupClick(wxCommandEvent &evt)
@@ -348,12 +360,18 @@ void FileControl::OnPopupClick(wxCommandEvent &evt)
 	if (id == ID_FILELIST_SAVE) { 
 		Export(val, 1);
 	} else if (id == ID_FILELIST_VIEW) {
-		ExportPNG(val, wxT("png"));
-		wxFileName fn(val);
-		wxString temp;
-		temp = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
+	  wxString temp = ExportPNG(val);
+
+	  if(!temp.IsEmpty())
+	  {
 	    ScrWindow *sw = new ScrWindow(temp);
 	    sw->Show(true);
+	  }
+	  else
+	  {
+	    wxMessageDialog dial(NULL, wxT("Error during file export."));
+	    dial.ShowModal();
+	  }
 	}
 }
 
@@ -605,7 +623,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 		// For Graphics
 		wxString val(data->fn);
-		ExportPNG(val, wxT("png"));
+		ExportPNG(val);
 		wxFileName fn(val);
 		wxString temp(wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png"));
 		modelviewer->canvas->LoadBackground(temp);

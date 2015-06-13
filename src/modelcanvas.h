@@ -72,7 +72,7 @@ class ModelCanvas:
 	//DWORD pauseTime;
 	SceneState sceneState[4]; // 4 scene states for F1-F4
 
-	void CreateTexture(wxString filename, GLuint texture);
+	//void CreateTexture(wxString filename, GLuint texture);
 
 	
 	// Special Effects Stuff
@@ -143,7 +143,7 @@ public:
 	void RenderObjects();
 	void RenderBackground();
 	void RenderGrid();
-	void GenerateShadowMap();
+	//void GenerateShadowMap();
 
 	void Screenshot(const wxString fn, int x=0, int y=0);
 	void SaveSceneState(int id);

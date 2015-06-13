@@ -16,11 +16,22 @@
 
 class CASCFolder;
 
-class CASCFile : public GameFile
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _CASCFILE_API_ __declspec(dllexport)
+#    else
+#        define _CASCFILE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _CASCFILE_API_
+#endif
+
+class _CASCFILE_API_ CASCFile : public GameFile
 {
   public:
     CASCFile();
     CASCFile(const std::string & path);
+    ~CASCFile() { close(); }
     bool open();
     bool close();
     void openFile(std::string filename);

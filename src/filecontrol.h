@@ -27,7 +27,7 @@ public:
 	void OnTreeMenu(wxTreeEvent &event);
 	void OnPopupClick(wxCommandEvent &evt);
 	void Export(wxString val, int select);
-	void ExportPNG(wxString val, wxString suffix);
+	wxString ExportPNG(wxString val);
 	void UpdateInterface();
 
 	wxTreeCtrl *fileTree;

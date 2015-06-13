@@ -656,6 +656,7 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	}
 }
 
+/*
 inline void ModelCanvas::CreateTexture(wxString filename, GLuint texture)
 {
 	BYTE *buffer = NULL;
@@ -675,10 +676,8 @@ inline void ModelCanvas::CreateTexture(wxString filename, GLuint texture)
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_TGA);
 	else if (tmp == wxT("jpg"))
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_JPG);
-	// @TODO : to repair
-	/*else if (tmp == wxT("png"))
+	else if (tmp == wxT("png"))
 		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_PNG);
-		*/
 	else 
 		return;
 
@@ -819,9 +818,9 @@ inline void ModelCanvas::GenerateShadowMap()
 	glClear( GL_DEPTH_BUFFER_BIT );
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 	glDisable(GL_POLYGON_OFFSET_FILL);
-	*/
 }
 
+*/
 inline void ModelCanvas::RenderGrid() 
 {
 	int count = 0;
