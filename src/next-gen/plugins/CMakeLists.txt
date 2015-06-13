@@ -4,3 +4,4 @@ add_subdirectory(importers/wowhead)
 
 #exporters
 add_subdirectory(exporters/obj)
+add_subdirectory(exporters/fbx)

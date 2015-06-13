@@ -2872,6 +2872,8 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         wxMessageBox(wxT("An error occurred during export."),wxT("Export Error"), wxOK | wxICON_ERROR);
       else
         wxMessageBox(wxT("Export successfully done."),wxT("Export done"), wxOK | wxICON_INFORMATION);
+
+      break;
     }
   }
 }
