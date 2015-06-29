@@ -6,11 +6,6 @@ message(STATUS "Building UpdateManager")
 # define policies to avoid warnings
 include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
-set(RES_FILES "UpdateManager.rc")
-#set(CMAKE_RC_COMPILER_INIT windres)
-#ENABLE_LANGUAGE(RC)
-#SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
-
 include_directories(.)
 include_directories(../)
 
@@ -27,12 +22,7 @@ set(CMAKE_AUTOMOC ON)
 
 file(GLOB src *.cpp)
 
-if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
-  add_executable(UpdateManager WIN32 ${src} ${RES_FILES} )
-else()
-  # non min size release case ( = dev) => let a console attached to app
-  add_executable(UpdateManager ${src} ${RES_FILES} )
-endif()
+add_executable(UpdateManager WIN32 ${src})
 
 add_dependencies(UpdateManager core)
 target_link_libraries(UpdateManager core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)

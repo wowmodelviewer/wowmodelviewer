@@ -142,56 +142,59 @@ AnimControl::~AnimControl()
 
 void AnimControl::UpdateModel(WoWModel *m)
 {
-	if (!m)
-		return;
-	
-	// Clear skin/texture data from previous model - if there is any.
-	if (g_selModel) {
-		for (size_t i=0; i<skinList->GetCount(); i++) {
-			TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
-			wxDELETE(grp);
-		}
-	}
-	// --
+  if (!m)
+    return;
 
-	wxLogMessage(wxT("Update model: %s"), m->wxname.c_str());
+  // Clear skin/texture data from previous model - if there is any.
+  if (g_selModel)
+  {
+    for (size_t i=0; i<skinList->GetCount(); i++)
+    {
+      TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
+      wxDELETE(grp);
+    }
+  }
+  // --
 
-	g_selModel = m;
+  wxLogMessage(wxT("Update model: %s"), m->wxname.c_str());
 
-	selectedAnim = 0;
-	selectedAnim2 = -1;
-	selectedAnim3 = -1;
+  g_selModel = m;
 
-	animCList->Clear();
-	animCList2->Clear();
-	animCList3->Clear();
+  selectedAnim = 0;
+  selectedAnim2 = -1;
+  selectedAnim3 = -1;
 
-	skinList->Clear();
+  animCList->Clear();
+  animCList2->Clear();
+  animCList3->Clear();
 
-	ssize_t useanim = -1;
+  skinList->Clear();
 
-	// Find any textures that exist for the model
-	bool res = false;
+  ssize_t useanim = -1;
 
-	wxString fn = m->wxname.Lower();
-	if (fn.substr(0,4) != wxT("char")) {
-	  if (fn.substr(0,8) == wxT("creature"))
-	        res = UpdateCreatureModel(m);
-	  else if (fn.substr(0,4) == wxT("item"))
-			res = UpdateItemModel(m);
-	}
+  // Find any textures that exist for the model
+  bool res = false;
 
-	skinList->Show(res);
+  wxString fn = m->wxname.Lower();
+  if (fn.substr(0,4) != wxT("char"))
+  {
+    if (fn.substr(0,8) == wxT("creature"))
+      res = UpdateCreatureModel(m);
+    else if (fn.substr(0,4) == wxT("item"))
+      res = UpdateItemModel(m);
+  }
 
-	// A small attempt at keeping the 'previous' animation that was selected when changing
-	// the selected model via the model control.
-/*
+  skinList->Show(res);
+
+  // A small attempt at keeping the 'previous' animation that was selected when changing
+  // the selected model via the model control.
+  /*
 	// Alfred 2009.07.19 keep currentAnim may crash others if it doesn't have, we should save the animID, not currentAnim
 	if (g_selModel->currentAnim > 0)
 		useanim = g_selModel->currentAnim;
-*/
+   */
 
-	/*
+  /*
 	if (g_selModel->charModelDetails.isChar) { // only display the "secondary" animation list if its a character
 		animCList2->Select(useanim);
 		animCList2->Show(true);
@@ -204,102 +207,79 @@ void AnimControl::UpdateModel(WoWModel *m)
 		loopList->Show(false);
 		btnAdd->Show(false);
 	}
-	*/
+   */
 
-	// Animation stuff
-	if (m->animated && m->anims)
-	{
-		wxString strName;
-		wxString strStand;
-		int selectAnim = 0;
+  // Animation stuff
 
-		std::string query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
-		std::stringstream ss;
-		for (size_t i=0; i<m->header.nAnimations; i++)
-		{
-		  ss <<  m->anims[i].animID;
-		  if(i < m->header.nAnimations -1)
-		    ss << ",";
-		  else
-		    ss << ")";
-		}
+  if (m->animated && m->anims)
+  {
+    wxString strName;
+    wxString strStand;
+    int selectAnim = 0;
 
-		query += ss.str();
+    map<int, string> animsVal = m->getAnimsMap();;
 
-		sqlResult anims = GAMEDATABASE.sqlQuery(query);
+    for (size_t i=0; i<m->header.nAnimations; i++)
+    {
+      std::stringstream label;
+      label << animsVal[m->anims[i].animID];
+      label << " [";
+      label << i;
+      label << "]";
+      wxString strName=label.str().c_str();
 
-		if(anims.valid && !anims.empty())
-		{
-		  LOG_INFO << "Found" << anims.values.size() << "animations for model";
+      if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
+      {
+        strStand = strName;
+        useanim = i;
+      }
 
-		  // remap database results on model header indexes
-		  std::map<int, string> animsVal;
-		  for(int i=0, imax=anims.values.size() ; i < imax ; i++)
-		  {
-		    animsVal[atoi(anims.values[i][0].c_str())] = anims.values[i][1];
-		  }
+      animCList->Append(strName);
+      animCList2->Append(strName);
+      animCList3->Append(strName);
+    }
 
-		  for (size_t i=0; i<m->header.nAnimations; i++)
-		  {
-		    std::stringstream label;
-		    label << animsVal[m->anims[i].animID];
-		    label << " [";
-		    label << i;
-		    label << "]";
-		    strName=label.str().c_str();
+    if (useanim != -1)
+    {
+      for(unsigned int i=0; i<animCList->GetCount(); i++)
+      {
+        strName = animCList->GetString(i);
+        if (strName == strStand)
+        {
+          selectAnim = i;
+          break;
+        }
+      }
+    }
 
-		    if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
-		    {
-		      strStand = strName;
-		      useanim = i;
-		    }
+    if (useanim==-1)
+      useanim = 0;
+    //return;
 
-		    animCList->Append(strName);
-		    animCList2->Append(strName);
-		    animCList3->Append(strName);
-		  }
-		}
+    g_selModel->currentAnim = useanim; // anim position in anims
+    animCList->Select(selectAnim); // anim position in selection
+    animCList->Show(true);
 
-		if (useanim != -1)
-		{
-			for(unsigned int i=0; i<animCList->GetCount(); i++)
-			{
-				strName = animCList->GetString(i);
-				if (strName == strStand)
-				{
-					selectAnim = i;
-					break;
-				}
-			}
-		}
+    frameSlider->SetRange(g_selModel->anims[useanim].timeStart, g_selModel->anims[useanim].timeEnd);
+    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
 
-		if (useanim==-1)
-			useanim = 0;
-			//return;
-
-		g_selModel->currentAnim = useanim; // anim position in anims
-		animCList->Select(selectAnim); // anim position in selection
-		animCList->Show(true);
-
-		frameSlider->SetRange(g_selModel->anims[useanim].timeStart, g_selModel->anims[useanim].timeEnd);
-		frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
-		
-		g_selModel->animManager->SetAnim(0, useanim, 0);
-		if (bNextAnims && g_selModel) {
-			int NextAnimation = useanim;
-			for(size_t i=1; i<4; i++) {
-				NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-				if (NextAnimation >= 0)
-					g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-				else
-					break;
-			}
-		}
-		g_selModel->animManager->Play();
-	}
-
-	wmoList->Show(false);
-	wmoLabel->Show(false);
+    g_selModel->animManager->SetAnim(0, useanim, 0);
+    if (bNextAnims && g_selModel)
+    {
+      int NextAnimation = useanim;
+      for(size_t i=1; i<4; i++)
+      {
+        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        if (NextAnimation >= 0)
+          g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+        else
+          break;
+      }
+    }
+    g_selModel->animManager->Play();
+  }
+  wmoList->Show(false);
+  wmoLabel->Show(false);
 }
 
 void AnimControl::UpdateWMO(WMO *w, int group)

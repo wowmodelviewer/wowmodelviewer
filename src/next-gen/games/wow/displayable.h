@@ -1,11 +1,17 @@
 #ifndef DISPLAYABLE_H
 #define DISPLAYABLE_H
 
-#if defined(_WINDOWS) && !defined(_MINGW)
-    #pragma warning( disable : 4100 )
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _DISPLAYABLE_API_ __declspec(dllexport)
+#    else
+#        define _DISPLAYABLE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _DISPLAYABLE_API_
 #endif
 
-class Displayable
+class _DISPLAYABLE_API_ Displayable
 {
 public:
 	virtual ~Displayable() {};

@@ -1,10 +1,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-#if defined(_WINDOWS) && !defined(_MINGW)
-    #pragma warning( disable : 4100 )
-#endif
-
 // wxWidgets
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -21,7 +17,17 @@
 
 // base class for manager objects
 
-class ManagedItem {
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _MANAGEDITEM_API_ __declspec(dllexport)
+#    else
+#        define _MANAGEDITEM_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _DISPLAYABLE_API_
+#endif
+
+class _MANAGEDITEM_API_ ManagedItem {
 	int refcount;
 public:
 	wxString wxname;

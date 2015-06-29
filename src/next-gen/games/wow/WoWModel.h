@@ -2,6 +2,7 @@
 #define _WOWMODEL_H
 
 // C++ files
+#include <map>
 #include <vector>
 //#include <stdlib.h>
 //#include <crtdbg.h>
@@ -66,7 +67,7 @@ class _WOWMODEL_API_ WoWModel: public ManagedItem, public Displayable, public Mo
 	GLuint dlist;
 	bool forceAnim;
 
-	void displayHeader(ModelHeader & a_header);
+
 
 	inline void drawModel();
 	void initCommon(GameFile * f);
@@ -112,7 +113,6 @@ public:
 	WoWModel(wxString name, bool forceAnim=false);
 	~WoWModel();
 
-	ModelHeader header;
 	std::vector<ModelCamera> cam;
 	wxString modelname;
 	wxString lodname;
@@ -212,11 +212,15 @@ public:
 	ModelType modelType;
 	CharModelDetails charModelDetails;
 	CharDetails cd;
+	ModelHeader header;
 
 	friend struct ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
   void UpdateTextureList(wxString texName, int special);
+  void displayHeader(ModelHeader & a_header);
+
+  std::map<int, std::string> getAnimsMap();
 
 };
 

@@ -29,14 +29,19 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <map>
+#include <string>
 
 // Qt
 #include <QObject>
 #include <QtPlugin>
 
 // Externals
+#include "fbxsdk.h"
 
 // Other libraries
+class WoWModel;
+
 
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "core/ExporterPlugin.h"
@@ -61,7 +66,7 @@ class FBXExporter : public QObject, public ExporterPlugin
     // Constants / Enums
 
     // Constructors
-    FBXExporter() {}
+    FBXExporter();
 
     // Destructors
     ~FBXExporter() {}
@@ -72,7 +77,7 @@ class FBXExporter : public QObject, public ExporterPlugin
    std::string fileSaveTitle() const;
    std::string fileSaveFilter() const;
 
-   bool exportModel(WoWModel *, std::string file) const;
+   bool exportModel(WoWModel *, std::string file);
 
     // Members
 
@@ -95,8 +100,21 @@ class FBXExporter : public QObject, public ExporterPlugin
     // Destructors
 
     // Methods
+    void createMaterials();
+    void createMesh();
+    void createSkeleton();
+    void reset();
+
 
     // Members
+    FbxManager * m_p_manager;
+    FbxScene   * m_p_scene;
+    WoWModel   * m_p_model;
+    FbxNode    * m_p_meshNode;
+
+    std::string m_filename;
+
+    std::map<std::string, GLuint> m_texturesToExport;
 
     // friend class declarations
 

@@ -17,12 +17,15 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
+include_directories(D:/sdk_new/include)
+
 file(GLOB src *.cpp )
 
 add_library(fbxexporter SHARED ${src})
 
-target_link_libraries(fbxexporter Qt5::Core core wow)
+target_link_libraries(fbxexporter Qt5::Core core wow D:/sdk_new/lib/libfbxsdk.lib)
 
 if(WIN32)
   install(TARGETS fbxexporter RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/plugins")
+  install(FILES D:/sdk_new/lib/libfbxsdk.dll DESTINATION "${WMV_BASE_PATH}/../bin")
 endif(WIN32)

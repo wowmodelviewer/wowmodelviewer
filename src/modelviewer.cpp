@@ -2866,12 +2866,22 @@ void ModelViewer::OnExport(wxCommandEvent &event)
     if (saveFileDialog.ShowModal() == wxID_CANCEL)
       return;
 
+    LOG_INFO << __FILE__ << __LINE__ << g_charControl->model;
+    LOG_INFO << __FILE__ << __LINE__ << g_charControl->model->header.nBones;
+    g_charControl->model->displayHeader(g_charControl->model->header);
+    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->header);
+    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->cd);
+    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->charModelDetails);
     if(plugin->menuLabel() == exporterLabel)
     {
-      if(!plugin->exportModel(g_charControl->model, saveFileDialog.GetPath().mb_str()))
+      if(!plugin->exportModel(canvas->model, saveFileDialog.GetPath().mb_str()))
+      {
         wxMessageBox(wxT("An error occurred during export."),wxT("Export Error"), wxOK | wxICON_ERROR);
+      }
       else
+      {
         wxMessageBox(wxT("Export successfully done."),wxT("Export done"), wxOK | wxICON_INFORMATION);
+      }
 
       break;
     }

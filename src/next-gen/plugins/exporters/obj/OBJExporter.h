@@ -35,7 +35,6 @@
 #include <QtPlugin>
 
 // Externals
-#include "GL/glew.h"
 
 // Other libraries
 #include "matrix.h"
@@ -74,7 +73,7 @@ class OBJExporter : public QObject, public ExporterPlugin
    std::string fileSaveTitle() const;
    std::string fileSaveFilter() const;
 
-   bool exportModel(WoWModel *, std::string file) const;
+   bool exportModel(WoWModel *, std::string file);
 
     // Members
 
@@ -97,7 +96,6 @@ class OBJExporter : public QObject, public ExporterPlugin
     // Destructors
 
     // Methods
-     void exportGLTexture(GLuint id, std::string filename) const;
 
      bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), Vec3D pos = Vec3D::nullVec()) const;
      bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;

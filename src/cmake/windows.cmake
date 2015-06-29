@@ -37,12 +37,18 @@ else()
   message("${CMAKE_BUILD_TYPE} build : Final exe will NOT be stripped")
 endif()
   
-if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
-  add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
-else()
-  # non min size release case ( = dev) => let a console attached to app
-  add_executable(wowmodelviewer ${WOWMV_SOURCES} ${RES_FILES} )
+# disable some visual studio annoying warnings
+# warning on stl class dll exporting
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
+# precompiler secure warnings (too much as WMV code is old)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+  
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
+  add_definitions(-DKEEP_CONSOLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /INCREMENTAL:NO")
 endif()
+  
+ add_executable(wowmodelviewer WIN32 ${WOWMV_SOURCES} ${RES_FILES} )
 
 find_package(Qt5Network)
 

@@ -61,10 +61,10 @@ class _MODEL_API_ Model
     // Constants / Enums
 
     // Constructors
-	Model();
+    Model() {};
 
     // Destructors
-	 ~Model() {}
+    virtual ~Model() = 0;
 
     // Methods
 

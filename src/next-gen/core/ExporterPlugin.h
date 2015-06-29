@@ -35,6 +35,8 @@
 #include <QObject>
 
 // Externals
+#include "GL/glew.h"
+
 class WoWModel;
 
 // Other libraries
@@ -73,7 +75,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     virtual std::string fileSaveTitle() const = 0;
     virtual std::string fileSaveFilter() const = 0;
 
-    virtual bool exportModel(WoWModel *, std::string file) const = 0;
+    virtual bool exportModel(WoWModel *, std::string file) = 0;
 
     // Members
 
@@ -85,6 +87,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // Destructors
 
     // Methods
+    void exportGLTexture(GLuint id, std::string filename) const;
 
     // Members
 

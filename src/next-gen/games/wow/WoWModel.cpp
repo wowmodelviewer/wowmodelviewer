@@ -23,6 +23,8 @@
 #include "metaclasses/Iterator.h"
 #include "ModelColor.h"
 
+#include "GameDatabase.h"
+
 void
 glGetAll()
 {
@@ -85,6 +87,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
     ManagedItem(name),
     forceAnim(forceAnim)
 {
+  LOG_INFO << __FILE__ << __LINE__;
 	if (name == wxT(""))
 		return;
 
@@ -190,6 +193,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
 
 	modelname = tempname;
+	setName(modelname.BeforeLast('.').AfterLast(SLASH).c_str());
 	if (header.nameOfs != 304 && header.nameOfs != 320) {
 	  wxLogMessage(wxT("Error:\t\tInvalid model nameOfs=%d/%d!  May be corrupted."), header.nameOfs, sizeof(ModelHeader));
 	  //ok = false;
@@ -243,6 +247,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 
 WoWModel::~WoWModel()
 {
+  LOG_INFO << __FILE__ << __LINE__;
 	if (ok) {
 #ifdef _DEBUG
 		wxLogMessage(wxT("Unloading model: %s\n"), name.c_str());
@@ -1534,4 +1539,38 @@ void WoWModel::UpdateTextureList(wxString texName, int special)
       break;
     }
   }
+}
+
+std::map<int, std::string> WoWModel::getAnimsMap()
+{
+  std::map<int, std::string> result;
+  if (animated && anims)
+  {
+    std::string query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
+    std::stringstream ss;
+    for (unsigned int i=0; i<header.nAnimations; i++)
+    {
+      ss <<  anims[i].animID;
+      if(i < header.nAnimations -1)
+        ss << ",";
+      else
+        ss << ")";
+    }
+
+    query += ss.str();
+
+    sqlResult animsResult = GAMEDATABASE.sqlQuery(query);
+
+    if(animsResult.valid && !animsResult.empty())
+    {
+      LOG_INFO << "Found" << animsResult.values.size() << "animations for model";
+
+      // remap database results on model header indexes
+      for(int i=0, imax=animsResult.values.size() ; i < imax ; i++)
+      {
+        result[atoi(animsResult.values[i][0].c_str())] = animsResult.values[i][1];
+      }
+    }
+  }
+  return result;
 }
