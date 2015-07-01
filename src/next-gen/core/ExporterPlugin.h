@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------
 // STL
 #include <string>
+#include <vector>
 
 // Qt
 #include <QObject>
@@ -66,7 +67,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // Constants / Enums
 
     // Constructors
-    ExporterPlugin() {}
+    ExporterPlugin() : m_canExportAnimation(false) {}
 
     // Destructors
 
@@ -76,6 +77,10 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     virtual std::string fileSaveFilter() const = 0;
 
     virtual bool exportModel(WoWModel *, std::string file) = 0;
+
+    bool canExportAnimation() const { return m_canExportAnimation; }
+
+    void setAnimationsToExport(std::vector<std::string> values) { m_animsToExport = values; }
 
     // Members
 
@@ -90,6 +95,8 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     void exportGLTexture(GLuint id, std::string filename) const;
 
     // Members
+    bool m_canExportAnimation;
+    std::vector<std::string> m_animsToExport;
 
   private :
     // Constants / Enums

@@ -2860,20 +2860,53 @@ void ModelViewer::OnExport(wxCommandEvent &event)
   {
     ExporterPlugin * plugin = *pluginIt;
 
-    wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), "", "",
-        plugin->fileSaveFilter(), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
-
-    if (saveFileDialog.ShowModal() == wxID_CANCEL)
-      return;
-
-    LOG_INFO << __FILE__ << __LINE__ << g_charControl->model;
-    LOG_INFO << __FILE__ << __LINE__ << g_charControl->model->header.nBones;
-    g_charControl->model->displayHeader(g_charControl->model->header);
-    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->header);
-    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->cd);
-    LOG_INFO << __FILE__ << __LINE__ << &(g_charControl->model->charModelDetails);
     if(plugin->menuLabel() == exporterLabel)
     {
+      wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), "", "",
+          plugin->fileSaveFilter(), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
+
+      if (saveFileDialog.ShowModal() == wxID_CANCEL)
+        return;
+
+      // START OF HACK
+      // @TODO : remove Hack
+      // ugly hack waiting for application to be full Qt, and being able to have qt pop up in plugins...
+      // today, creating wxDialog in Qt plugins simply crashes, and no qt app in executed to raised a Qt pop up...
+
+      // if exporter supports animations, we have to chose which one to export
+      if(plugin->canExportAnimation())
+      {
+        std::map<int, std::string> animsMap = canvas->model->getAnimsMap();
+        wxArrayString values;
+        wxArrayInt selection;
+        unsigned int i = 0;
+        for(std::map<int, std::string>::iterator it = animsMap.begin();
+           it != animsMap.end();
+           ++it, i++)
+        {
+          values.Add(it->second.c_str());
+          selection.Add(i);
+        }
+
+        wxMultiChoiceDialog animChoiceDlg(this, wxT("Select animations you want to export"), wxT("Animation Choice"),values);
+        animChoiceDlg.SetSelections(selection);
+        if(animChoiceDlg.ShowModal() == wxID_CANCEL)
+          return;
+
+        selection = animChoiceDlg.GetSelections();
+        vector<std::string> animsToExport;
+        animsToExport.reserve(selection.GetCount());
+        for(unsigned int i = 0 ; i < selection.GetCount() ; i++)
+        {
+          animsToExport.push_back(values[selection[i]].c_str());
+        }
+
+        plugin->setAnimationsToExport(animsToExport);
+
+      }
+
+      // END OF HACK
+
       if(!plugin->exportModel(canvas->model, saveFileDialog.GetPath().mb_str()))
       {
         wxMessageBox(wxT("An error occurred during export."),wxT("Export Error"), wxOK | wxICON_ERROR);
