@@ -80,7 +80,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
 
     bool canExportAnimation() const { return m_canExportAnimation; }
 
-    void setAnimationsToExport(std::vector<std::string> values) { m_animsToExport = values; }
+    void setAnimationsToExport(std::vector<int> values) { m_animsToExport = values; }
 
     // Members
 
@@ -96,7 +96,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
 
     // Members
     bool m_canExportAnimation;
-    std::vector<std::string> m_animsToExport;
+    std::vector<int> m_animsToExport;
 
   private :
     // Constants / Enums

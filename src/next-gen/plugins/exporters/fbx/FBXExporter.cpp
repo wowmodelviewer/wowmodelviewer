@@ -321,11 +321,13 @@ void FBXExporter::createSkeleton()
   skin->SetGeometry(m_p_meshNode->GetMesh());
   LOG_INFO << "Skeleton successfully created";
 
+
+
   std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
   for (unsigned int i=0; i<m_p_model->header.nAnimations; i++)
   {
     std::string anim_name = animsMap[m_p_model->anims[i].animID];
-    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), anim_name) == m_animsToExport.end())
+    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), m_p_model->anims[i].animID) == m_animsToExport.end())
          continue;
 
     // Animation stack and layer.

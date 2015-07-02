@@ -2879,12 +2879,14 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         std::map<int, std::string> animsMap = canvas->model->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
+        wxArrayInt ids;
         unsigned int i = 0;
         for(std::map<int, std::string>::iterator it = animsMap.begin();
            it != animsMap.end();
            ++it, i++)
         {
           values.Add(it->second.c_str());
+          ids.Add(it->first);
           selection.Add(i);
         }
 
@@ -2894,11 +2896,11 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           return;
 
         selection = animChoiceDlg.GetSelections();
-        vector<std::string> animsToExport;
+        vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for(unsigned int i = 0 ; i < selection.GetCount() ; i++)
         {
-          animsToExport.push_back(values[selection[i]].c_str());
+          animsToExport.push_back(ids[i]);
         }
 
         plugin->setAnimationsToExport(animsToExport);
