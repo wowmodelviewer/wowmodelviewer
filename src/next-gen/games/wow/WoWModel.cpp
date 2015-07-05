@@ -247,7 +247,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 
 WoWModel::~WoWModel()
 {
-  LOG_INFO << __FILE__ << __LINE__;
 	if (ok) {
 #ifdef _DEBUG
 		wxLogMessage(wxT("Unloading model: %s\n"), name.c_str());

@@ -1,5 +1,6 @@
 #include "modelviewer.h"
 
+#include "AnimationExportChoiceDialog.h"
 #include "app.h"
 #include "Bone.h"
 #include "globalvars.h"
@@ -2879,18 +2880,19 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         std::map<int, std::string> animsMap = canvas->model->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
-        wxArrayInt ids;
+        std::vector<int> ids;
+        ids.resize(animsMap.size());
         unsigned int i = 0;
         for(std::map<int, std::string>::iterator it = animsMap.begin();
            it != animsMap.end();
            ++it, i++)
         {
           values.Add(it->second.c_str());
-          ids.Add(it->first);
+          ids[i] = it->first;
           selection.Add(i);
         }
 
-        wxMultiChoiceDialog animChoiceDlg(this, wxT("Select animations you want to export"), wxT("Animation Choice"),values);
+        AnimationExportChoiceDialog animChoiceDlg(this, "", wxT("Animation Choice"),values);
         animChoiceDlg.SetSelections(selection);
         if(animChoiceDlg.ShowModal() == wxID_CANCEL)
           return;
@@ -2899,9 +2901,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for(unsigned int i = 0 ; i < selection.GetCount() ; i++)
-        {
-          animsToExport.push_back(ids[i]);
-        }
+          animsToExport.push_back(ids[selection[i]]);
 
         plugin->setAnimationsToExport(animsToExport);
 
