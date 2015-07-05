@@ -75,11 +75,11 @@ bool WowModelViewApp::OnInit()
   GLOBALSETTINGS.bShowParticle = true;
   GLOBALSETTINGS.bZeroParticle = true;
 
-//#if defined(_WINDOWS) && defined(KEEP_CONSOLE)
+#if defined(_WINDOWS) && defined(KEEP_CONSOLE)
   AllocConsole() ;
   AttachConsole( GetCurrentProcessId() ) ;
   freopen( "CON", "w", stdout ) ;
-//#endif
+#endif
 
 	frame = NULL;
 	wxSplashScreen* splash = NULL;
