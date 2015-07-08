@@ -50,10 +50,13 @@
     <field type="uint" name="SoundID" />
 	<field type="uint" name="ExtendedDisplayInfoID" />
 	<field type="float" name="CreatureModelScale" />
+	<field type="float" name="Col5" />
     <field type="uint" name="CreatureModelAlpha" />
     <field type="text" name="Texture1" />
     <field type="text" name="Texture2" />
     <field type="text" name="Texture3" />
+    <field type="text" name="PortraitTextureName" />
+	<field type="uint" name="PortraitCreatureDisplayInfoID" />
     <field type="uint" name="SizeClass" />
     <field type="uint" name="BloodID" />
     <field type="uint" name="NPCSoundID" />
