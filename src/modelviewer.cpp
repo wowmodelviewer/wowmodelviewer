@@ -2007,7 +2007,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
 	if (id == ID_BACKGROUND) {
 		if (event.IsChecked()) {
-			wxFileDialog dialog(this, wxT("Load Background"), dir.GetPath(wxPATH_GET_VOLUME), wxEmptyString, wxT("Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi"));
+			wxFileDialog dialog(this, wxT("Load Background"), dir.GetPath(wxPATH_GET_VOLUME), wxEmptyString, wxT("Bitmap Images (*.bmp)|*.bmp|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi"));
 			if (dialog.ShowModal() == wxID_OK) {
 				canvas->LoadBackground(dialog.GetPath());
 				dir.SetPath(dialog.GetPath());

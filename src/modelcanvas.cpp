@@ -1003,6 +1003,7 @@ inline void ModelCanvas::RenderBackground()
 	glEnable(GL_TEXTURE_2D);					// Enable 2D Texture Mapping
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
+	glEnable(GL_BLEND);
 	
 	glBindTexture(GL_TEXTURE_2D, uiBGTexture);
 
@@ -1829,10 +1830,13 @@ void ModelCanvas::LoadBackground(wxString filename)
 	wxString tmp = filename.AfterLast(wxT('.'));
 	tmp.MakeLower();
 
+	LOG_INFO << __FUNCTION__ << "filename :" << tmp.c_str();
+
 	//GLuint texFormat = GL_TEXTURE_RECTANGLE_ARB;
 	GLuint texFormat = GL_TEXTURE_2D;
 
-	if (tmp == wxT("avi")) {
+	if (tmp == wxT("avi"))
+	{
 #ifndef _MINGW
 		cAvi.SetFileName(filename.c_str());
 		cAvi.InitEngineForRead();
@@ -1848,26 +1852,12 @@ void ModelCanvas::LoadBackground(wxString filename)
 #endif
 		drawBackground = true;
 		drawAVIBackground = true;
-	} else {
-		unsigned int format;
-		if (tmp == wxT("bmp"))
-			format = CXIMAGE_FORMAT_BMP;
-		else if (tmp == wxT("tga"))
-			format = CXIMAGE_FORMAT_TGA;
-		else if (tmp == wxT("jpg"))
-			format = CXIMAGE_FORMAT_JPG;
-		// @TODO : to repair
-		/*else if (tmp == wxT("png"))
-			format = CXIMAGE_FORMAT_PNG;*/
-		else 
-			return;
-			
-		image = new CxImage(filename.mb_str(), format);
-		if (image == NULL)
-			return;
-
-		long size = image->GetWidth() * image->GetHeight() * 4;
-		image->Encode2RGBA(buffer, size);
+	}
+	else
+	{
+		 QImage texture(filename.c_str());
+		 texture = texture.mirrored();
+		 texture = texture.convertToFormat(QImage::Format_RGBA8888);
 
 		// Setup the OpenGL Texture stuff
 		glGenTextures(1, &uiBGTexture);
@@ -1876,9 +1866,11 @@ void ModelCanvas::LoadBackground(wxString filename)
 		glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 		glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtering
 		
-		glTexImage2D(texFormat, 0, GL_RGBA8, image->GetWidth(), image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		glTexImage2D(texFormat, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
 		drawBackground = true;
 	}
+
+	LOG_INFO << __FUNCTION__ << "exiting...";
 
 	wxDELETE(image);
 	wxDELETE(buffer);
