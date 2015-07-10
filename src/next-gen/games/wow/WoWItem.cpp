@@ -329,6 +329,33 @@ void WoWItem::load()
   break;
   case CS_BELT:
   {
+    {
+      WoWModel *m = NULL;
+      GLuint tex;
+
+      std::string model = iteminfos.values[0][0];
+      model = model.substr(0, model.length()-4); // remove .mdx
+      model += ".m2"; // add .m2
+      model = CASCFOLDER.getFullPathForFile(model);
+
+      m = new WoWModel(model, true);
+
+      if (m->ok)
+        itemModels[ATT_BELT_BUCKLE] = m;
+
+      std::string texture = iteminfos.values[0][2] + iteminfos.values[0][3];
+      tex = texturemanager.add(texture);
+      for (size_t x=0;x<m->TextureList.size();x++)
+      {
+        if (m->TextureList[x] == wxString(wxT("Special_2")))
+        {
+          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          m->TextureList[x] = texture;
+        }
+      }
+      m->replaceTextures[TEXTURE_CAPE] = tex;
+    }
+
     std::string texture = iteminfos.values[0][21] + iteminfos.values[0][22];
     if(!texture.empty())
     {
@@ -676,6 +703,14 @@ void WoWItem::refresh()
   }
   case CS_BELT:
   {
+    g_modelViewer->charControl->charAtt->delSlot(CS_BELT);
+
+    {
+      std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_BELT_BUCKLE);
+      if(it != itemModels.end())
+        g_modelViewer->charControl->charAtt->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
+    }
+
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
     if(it != m_itemTextures.end())
       m_model->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
