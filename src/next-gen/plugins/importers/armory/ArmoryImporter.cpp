@@ -77,7 +77,9 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
   CharInfos * result = NULL;
   wxJSONValue root;
 
-  if (readJSONValues(CHARACTER,url,root) == 0 && root.Size() != 0)
+  int readStatus = readJSONValues(CHARACTER,url,root);
+
+  if (readStatus == 0 && root.Size() != 0)
   {
     // No Gathering Errors Detected.
     result = new CharInfos();
@@ -238,6 +240,12 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     wxUninitialize();
   }
 
+  if(readStatus == 2) // malformed url, cacade to main app to display a pop up...
+  {
+    result = new CharInfos();
+    result->race = "malformed url";
+  }
+
   return result;
 }
 
@@ -343,11 +351,18 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       wxString strURL(url);
 
       // Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
-      if ((strURL.Mid(7).Find(wxT("simple"))<0)&&(strURL.Mid(7).Find(wxT("advanced"))<0))
+      LOG_INFO << __FUNCTION__;
+      LOG_INFO << strURL.Find(wxT("simple"));
+      LOG_INFO << strURL.Find(wxT("advanced"));
+      LOG_INFO << wxNOT_FOUND;
+      if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) ||
+          (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
       {
-        wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
+        // due to Qt plugin, this cause application crash
+        // temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
+        //wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
         LOG_INFO << wxT("Improperly Formatted URL. Lacks /simple and /advanced");
-        return -1;
+        return 2;
       }
       wxString strDomain = strURL.Mid(7).BeforeFirst('/');
       wxString strPage = strURL.Mid(7).Mid(strDomain.Len());

@@ -2789,6 +2789,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 	if(result)
 	{
+	  if(result->race == "malformed url")
+	  {
+	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
+	    return;
+	  }
 	  // retrieve race name from DB
 	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
 	  sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
@@ -2810,7 +2815,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 		if (result->hasTransmogGear == true)
 		{
-			wxLogMessage(wxT("Transmogrified Gear was found. Switching items..."));
+			LOG_INFO << "Transmogrified Gear was found. Switching items...";
 			wxMessageBox(wxT("We found Transmogrified gear on your character. The items your character is wearing will be exchanged for the items they look like."),wxT("Transmog Notice"));
 		}
 
@@ -2840,7 +2845,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	}
 	else
 	{
-		wxLogMessage(wxT("There were errors gathering the Armory page."));
+		LOG_ERROR << "There were errors gathering the Armory page.";
 		wxMessageBox(wxT("There was an error when gathering the Armory data.\nPlease try again later."),wxT("Armory Error"));
 
 	}
