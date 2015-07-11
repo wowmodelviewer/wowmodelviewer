@@ -87,7 +87,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
     ManagedItem(name),
     forceAnim(forceAnim)
 {
-  LOG_INFO << __FILE__ << __LINE__;
 	if (name == wxT(""))
 		return;
 
