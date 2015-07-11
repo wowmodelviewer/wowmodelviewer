@@ -355,7 +355,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       LOG_INFO << strURL.Find(wxT("simple"));
       LOG_INFO << strURL.Find(wxT("advanced"));
       LOG_INFO << wxNOT_FOUND;
-      if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) ||
+      if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) &&
           (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
       {
         // due to Qt plugin, this cause application crash
