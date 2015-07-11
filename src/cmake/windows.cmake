@@ -77,7 +77,9 @@ set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
   			 
 set(QT_SYS_FILES ${QT_BIN_DIR}/icudt53.dll
   			     ${QT_BIN_DIR}/icuin53.dll
-  			     ${QT_BIN_DIR}/icuuc53.dll)
+  			     ${QT_BIN_DIR}/icuuc53.dll
+  			     D:/sdk_new/bin_support/msvcp120.dll
+  			     D:/sdk_new/bin_support/msvcr120.dll)
   				 
 set(QT_PLUGIN_DIR D:/Programmes/QT_VS_5.4.2/5.4/msvc2013_opengl/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
