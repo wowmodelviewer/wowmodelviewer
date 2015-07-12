@@ -358,7 +358,14 @@ void WoWItem::load()
       m->replaceTextures[TEXTURE_CAPE] = tex;
     }
 
-    std::string texture = iteminfos.values[0][21] + iteminfos.values[0][22];
+    std::string texture = iteminfos.values[0][19] + iteminfos.values[0][20];
+    if(!texture.empty())
+    {
+      texturemanager.add(texture);
+      m_itemTextures[CR_TORSO_LOWER] = texture;
+    }
+
+    texture = iteminfos.values[0][21] + iteminfos.values[0][22];
     if(!texture.empty())
     {
       texturemanager.add(texture);
@@ -716,6 +723,10 @@ void WoWItem::refresh()
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
     if(it != m_itemTextures.end())
       m_model->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
+
+    it = m_itemTextures.find(CR_TORSO_LOWER);
+    if(it != m_itemTextures.end())
+      m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
     break;
   }
   case CS_BOOTS:
