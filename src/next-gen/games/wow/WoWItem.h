@@ -29,6 +29,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <vector>
 
 #include "enums.h"
 
@@ -76,7 +77,7 @@ class _WOWITEM_API_ WoWItem : public Component
     WoWModel * m_model;
 
     int m_id;
-    int m_displayId;
+    std::vector<int> m_displayId;
     int m_quality;
 
     CharSlots m_slot;

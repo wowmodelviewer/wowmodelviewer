@@ -100,6 +100,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     // Gather Items
     result->hasTransmogGear = false;
     wxJSONValue items = root[wxT("items")];
+
     if (items[wxT("back")].Size()>0)
     {
       result->equipment[CS_CAPE] = items[wxT("back")][wxT("id")].AsInt();
@@ -351,10 +352,6 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       wxString strURL(url);
 
       // Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
-      LOG_INFO << __FUNCTION__;
-      LOG_INFO << strURL.Find(wxT("simple"));
-      LOG_INFO << strURL.Find(wxT("advanced"));
-      LOG_INFO << wxNOT_FOUND;
       if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) &&
           (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
       {

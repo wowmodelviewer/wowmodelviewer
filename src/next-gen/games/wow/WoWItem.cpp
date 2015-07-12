@@ -55,8 +55,9 @@ map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
 
 
 WoWItem::WoWItem(CharSlots slot)
-: m_model(0), m_id(-1), m_displayId(-1), m_quality(0), m_slot(slot)
+: m_model(0), m_id(-1), m_quality(0), m_slot(slot)
 {
+  m_displayId.push_back(-1);
   setName("---- None ----");
 }
 
@@ -85,10 +86,11 @@ void WoWItem::setId(int id)
     QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1)")
            .arg(id);
 
+    LOG_INFO << query;
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
     if(iteminfos.valid && !iteminfos.values.empty())
-      m_displayId = atoi(iteminfos.values[0][0].c_str());
+      m_displayId[0] = atoi(iteminfos.values[0][0].c_str());
 
     ItemRecord itemRcd = items.getById(id);
     setName(itemRcd.name.c_str());
@@ -99,10 +101,10 @@ void WoWItem::setId(int id)
 
 void WoWItem::setDisplayId(int id)
 {
-  if(m_displayId != id)
+  if(m_displayId[0] != id)
   {
     m_id = -1;
-    m_displayId = id; // to update from database;
+    m_displayId[0] = id; // to update from database;
     setName("NPC Item");
     load();
   }
@@ -206,7 +208,7 @@ void WoWItem::load()
        LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 AND TFD11.TextureType != %1 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
        WHERE ItemDisplayInfo.ID = %2")
      .arg((infos.sexid == 0)?1:0)
-     .arg(m_displayId);
+     .arg(m_displayId[0]);
 
   sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
