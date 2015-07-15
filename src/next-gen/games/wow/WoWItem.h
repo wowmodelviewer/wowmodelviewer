@@ -56,6 +56,7 @@ class _WOWITEM_API_ WoWItem : public Component
     int id() { return m_id; }
 
     void setDisplayId(int id);
+    void setLevel(unsigned int level);
 
     CharSlots slot() { return m_slot; }
 
@@ -67,6 +68,8 @@ class _WOWITEM_API_ WoWItem : public Component
 
     void load();
 
+    unsigned int nbLevels() { return m_nbLevels; }
+
     std::map<POSITION_SLOTS, WoWModel *> itemModels;
 
   private:
@@ -77,8 +80,10 @@ class _WOWITEM_API_ WoWItem : public Component
     WoWModel * m_model;
 
     int m_id;
-    std::vector<int> m_displayId;
+    int m_displayId;
     int m_quality;
+    int m_level;
+    unsigned int m_nbLevels;
 
     CharSlots m_slot;
 
@@ -87,6 +92,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     std::map<CharRegions, std::string> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
+    std::map<int, int> m_levelDisplayMap;
 
 };
 

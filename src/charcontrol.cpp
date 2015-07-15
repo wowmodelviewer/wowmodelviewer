@@ -14,6 +14,7 @@
 #include "RaceInfos.h"
 
 #include <wx/txtstrm.h>
+#include <wx/combobox.h>
 #include "next-gen/games/wow/Attachment.h"
 
 CharSlots slotOrder[] = {
@@ -69,22 +70,36 @@ BEGIN_EVENT_TABLE(CharControl, wxWindow)
 	EVT_BUTTON(ID_EQUIPMENT + CS_HEAD, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_NECK, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_SHOULDER, CharControl::OnButton)
-	
 	EVT_BUTTON(ID_EQUIPMENT + CS_SHIRT, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_CHEST, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_BELT, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_PANTS, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_BOOTS, CharControl::OnButton)
-
 	EVT_BUTTON(ID_EQUIPMENT + CS_BRACERS, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_GLOVES, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_CAPE, CharControl::OnButton)
-
 	EVT_BUTTON(ID_EQUIPMENT + CS_HAND_RIGHT, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_HAND_LEFT, CharControl::OnButton)
-
 	EVT_BUTTON(ID_EQUIPMENT + CS_QUIVER, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_TABARD, CharControl::OnButton)
+
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_HEAD, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_NECK, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_SHOULDER, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_SHIRT, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_CHEST, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_BELT, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_PANTS, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_BOOTS, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_BRACERS, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_GLOVES, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_CAPE, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_HAND_RIGHT, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_HAND_LEFT, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_QUIVER, CharControl::OnItemLevelChange)
+	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_TABARD, CharControl::OnItemLevelChange)
+
+
 END_EVENT_TABLE()
 
 CharControl::CharControl(wxWindow* parent, wxWindowID id)
@@ -107,12 +122,17 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	}
 	
 	top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200,20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 5));
-	wxFlexGridSizer *gs2 = new wxFlexGridSizer(2, 5, 5);
+	wxFlexGridSizer *gs2 = new wxFlexGridSizer(3, 5, 5);
 	gs2->AddGrowableCol(1);
 
 	#define ADD_CONTROLS(type, caption) \
-	gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption), wxSizerFlags().Align(wxALIGN_CENTER_VERTICAL)); \
-	gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----")), wxSizerFlags().Proportion(1).Expand().Align(wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
+	{ \
+	gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption)); \
+	gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
+	levelboxes[type]->SetMinSize(wxSize(15, -1)); \
+	levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
+	gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"))); \
+  }
 	
 	ADD_CONTROLS(CS_HEAD, _("Head"))
 	//ADD_CONTROLS(CS_NECK, wxT("Neck"))
@@ -274,6 +294,10 @@ void CharControl::UpdateModel(Attachment *a)
 			labels[i]->SetLabel(_("---- None ----"));
 			labels[i]->SetForegroundColour(*wxBLACK);
 		}
+		if(levelboxes[i])
+		{
+		  levelboxes[i]->Enable(false);
+		}
 	}
 
 	if (useRandomLooks)
@@ -326,6 +350,19 @@ void CharControl::RefreshEquipment()
 	    {
 	      labels[i]->SetLabel(item->name());
 	      labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
+
+	      // refresh level combo box
+	      levelboxes[i]->Clear();
+	      if(item->nbLevels() > 1)
+	      {
+	        levelboxes[i]->Enable(true);
+	        for(unsigned int level = 0 ; level < item->nbLevels() ; level++)
+	          levelboxes[i]->Append(wxString::Format(wxT("%i"),level));
+	      }
+	      else
+	      {
+	        levelboxes[i]->Enable(false);
+	      }
 	    }
 	  }
 	}
@@ -423,6 +460,23 @@ void CharControl::OnButton(wxCommandEvent &event)
 	}
 
 	RefreshModel();
+}
+
+void CharControl::OnItemLevelChange(wxCommandEvent& event)
+{
+  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
+  {
+    if (levelboxes[i] && (wxComboBox*)event.GetEventObject()==levelboxes[i])
+    {
+      WoWItem * item = model->getItem((CharSlots)i);
+      if(item)
+      {
+        item->setLevel(levelboxes[i]->GetSelection());
+        g_modelViewer->UpdateControls();
+      }
+      break;
+    }
+  }
 }
 
 void CharControl::RefreshModel()
@@ -1034,6 +1088,19 @@ void CharControl::OnUpdateItem(int type, int id)
 	    item->setId(numbers[id]);
 		  labels[choosingSlot]->SetLabel(item->name());
 		  labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+
+		  // refresh level combo box
+		  levelboxes[choosingSlot]->Clear();
+		  if(item->nbLevels() > 1)
+		  {
+		    levelboxes[choosingSlot]->Enable(true);
+		    for(unsigned int i = 0 ; i < item->nbLevels() ; i++)
+		      levelboxes[choosingSlot]->Append(wxString::Format(wxT("%i"),i));
+		  }
+		  else
+		  {
+		    levelboxes[choosingSlot]->Enable(false);
+		  }
 	  }
 		break;
 	}

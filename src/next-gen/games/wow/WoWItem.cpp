@@ -55,9 +55,10 @@ map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
 
 
 WoWItem::WoWItem(CharSlots slot)
-: m_model(0), m_id(-1), m_quality(0), m_slot(slot)
+: m_model(0), m_id(-1), m_quality(0),
+  m_slot(slot), m_displayId(-1), m_level(0),
+  m_nbLevels(0)
 {
-  m_displayId.push_back(-1);
   setName("---- None ----");
 }
 
@@ -83,14 +84,48 @@ void WoWItem::setId(int id)
       return;
     }
 
-    QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1)")
-           .arg(id);
+    QString query = QString("SELECT ItemLevel, ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id);
+    sqlResult itemlevels = GAMEDATABASE.sqlQuery(query.toStdString());
 
-    LOG_INFO << query;
+    if(itemlevels.valid && !itemlevels.values.empty())
+    {
+      m_nbLevels = 0;
+      m_level = 0;
+      m_levelDisplayMap.clear();
+      for(unsigned int i = 0 ; i < itemlevels.values.size() ; i++)
+      {
+        int curid = atoi(itemlevels.values[i][1].c_str());
+
+        // if display id is null (case when item's look doesn't change with level)
+        if(curid == 0)
+          continue;
+
+        //check if display id already in the map (do not duplicate when look is the same)
+        bool found = false;
+        for (std::map<int, int>::iterator it = m_levelDisplayMap.begin(); it != m_levelDisplayMap.end(); ++it )
+        {
+          if (it->second == curid)
+          {
+           found = true;
+           break;
+          }
+        }
+
+        if(!found)
+        {
+          m_levelDisplayMap[m_nbLevels] = curid;
+          m_nbLevels++;
+        }
+      }
+    }
+
+    query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+               .arg(m_levelDisplayMap[m_level]);
+
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 
     if(iteminfos.valid && !iteminfos.values.empty())
-      m_displayId[0] = atoi(iteminfos.values[0][0].c_str());
+      m_displayId = atoi(iteminfos.values[0][0].c_str());
 
     ItemRecord itemRcd = items.getById(id);
     setName(itemRcd.name.c_str());
@@ -101,14 +136,36 @@ void WoWItem::setId(int id)
 
 void WoWItem::setDisplayId(int id)
 {
-  if(m_displayId[0] != id)
+  if(m_displayId != id)
   {
     m_id = -1;
-    m_displayId[0] = id; // to update from database;
+    m_displayId = id; // to update from database;
     setName("NPC Item");
     load();
   }
 }
+
+void WoWItem::setLevel(unsigned int level)
+{
+  if((m_nbLevels > 1) && (m_level != level))
+  {
+    m_level = level;
+
+    QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+                      .arg(m_levelDisplayMap[m_level]);
+
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
+
+    if(iteminfos.valid && !iteminfos.values.empty())
+      m_displayId = atoi(iteminfos.values[0][0].c_str());
+
+    ItemRecord itemRcd = items.getById(m_id);
+    setName(itemRcd.name.c_str());
+    m_quality = itemRcd.quality;
+    load();
+  }
+}
+
 
 void WoWItem::onParentSet(Component * parent)
 {
@@ -208,7 +265,7 @@ void WoWItem::load()
        LEFT JOIN TextureFileData TFD11 ON TFD11.TextureItemID = TextureItemID2 AND TFD11.TextureType != %1 LEFT JOIN FileData FD11 ON TFD11.FileDataID = FD11.ID \
        WHERE ItemDisplayInfo.ID = %2")
      .arg((infos.sexid == 0)?1:0)
-     .arg(m_displayId[0]);
+     .arg(m_displayId);
 
   sqlResult iteminfos = GAMEDATABASE.sqlQuery(query.toStdString());
 

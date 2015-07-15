@@ -38,6 +38,7 @@ class CharControl: public wxWindow, public Observer
 
 	wxSpinButton *tabardSpins[NUM_TABARD_BTNS];
 	wxButton *buttons[NUM_CHAR_SLOTS];
+	wxComboBox *levelboxes[NUM_CHAR_SLOTS];
 	wxStaticText *labels[NUM_CHAR_SLOTS];
 	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
 	CharDetailsFrame * cdFrame;
@@ -68,6 +69,7 @@ public:
 	void OnTabardSpin(wxSpinEvent &event);
 	void OnCheck(wxCommandEvent &event);
 	void OnButton(wxCommandEvent &event);
+	void OnItemLevelChange(wxCommandEvent& event);
 
 	void OnUpdateItem(int type, int id);
 
