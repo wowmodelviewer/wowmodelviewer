@@ -5,6 +5,8 @@
 #include "itemselection.h"
 #include "next-gen/games/wow/Attachment.h"
 
+#include "GameDatabase.h"
+
 wxArrayString spelleffects;
 
 
@@ -112,15 +114,18 @@ EnchantsDialog::EnchantsDialog(wxWindow *parent, CharControl *cc)
 
 void EnchantsDialog::OnClick(wxCommandEvent &event)
 {
-	if (event.GetId() == ID_ENCHANTSOK) {
-		wxString sel(effectsListbox->GetStringSelection());
+	if (event.GetId() == ID_ENCHANTSOK)
+	{
+		std::string sel = effectsListbox->GetStringSelection().c_str();
 
-		if (sel.IsEmpty()) {
+		if (sel == "")
+		{
 			Show(false);
 			return;
 		}
 
-		if (sel==wxT("NONE") || sel==wxT("None")) {
+		if (sel==wxT("NONE") || sel==wxT("None"))
+		{
 			if (slot->GetSelection() == 0)
 				RHandEnchant = -1;
 			else
@@ -128,9 +133,12 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 			Show(false);
 			return;
 		}
-		/*
-		for (std::vector<EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it) {
-			if (it->name == sel) {
+
+		for (std::map<int, EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it)
+		{
+			if (it->second.name == sel)
+			{
+			  EnchantsRec enchant = it->second;
 				int s = slot->GetSelection();
 				s += 10;
 
@@ -141,13 +149,15 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 					return;
 				
 				if (slot->GetSelection() == 0)
-					RHandEnchant = it->id;
+					RHandEnchant = it->first;
 				else
-					LHandEnchant = it->id;
+					LHandEnchant = it->first;
 
 				// children:
-				for (size_t i=0; i < charControl->charAtt->children.size(); i++) {
-					if (charControl->charAtt->children[i]->slot == s) {
+				for (size_t i=0; i < charControl->charAtt->children.size(); i++)
+				{
+					if (charControl->charAtt->children[i]->slot == s)
+					{
 						Attachment *att = charControl->charAtt->children[i];
 						if (att->children.size() > 0)
 							att->delChildren();
@@ -156,10 +166,10 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 						if (!m)
 							return;
 
-						for (ssize_t k=0; k<5; k++) {
-							if ((it->index[k] > 0) && (m->attLookup[k]>=0)) {
-								ItemVisualEffectDB::Record rec = effectdb.getById(it->index[k]);
-								att->addChild(rec.getString(ItemVisualEffectDB::Model), k, -1);
+						for (ssize_t k=0; k<5; k++)
+						{
+							if ((enchant.models[k] != "") && (m->attLookup[k]>=0)) {
+								att->addChild(enchant.models[k].c_str(), k, -1);
 							}
 						}
 						break;
@@ -170,9 +180,11 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 				return;
 			}
 		}
-		*/
-	} else if (event.GetId() == ID_ENCHANTSCANCEL)
+	}
+	else if (event.GetId() == ID_ENCHANTSCANCEL)
+	{
 		this->Show(false);
+	}
 }
 
 void EnchantsDialog::InitObjects()
@@ -192,54 +204,38 @@ void EnchantsDialog::InitObjects()
 
 void EnchantsDialog::InitEnchants()
 {
-  /*
-  SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5
-FROM SpellItemEnchantment
-LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID
-LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID
-LEFT JOIN ItemVisualEffects IVE2 ON ItemVisuals .itemVisualEffects1 = IVE2.ID
-LEFT JOIN ItemVisualEffects IVE3 ON ItemVisuals .itemVisualEffects3 = IVE3.ID
-LEFT JOIN ItemVisualEffects IVE4 ON ItemVisuals .itemVisualEffects4 = IVE4.ID
-LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID
-WHERE VisualID != 0
+  std::string query = "SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 \
+                   FROM SpellItemEnchantment \
+                   LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID \
+                   LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID \
+                   LEFT JOIN ItemVisualEffects IVE2 ON ItemVisuals .itemVisualEffects1 = IVE2.ID \
+                   LEFT JOIN ItemVisualEffects IVE3 ON ItemVisuals .itemVisualEffects3 = IVE3.ID \
+                   LEFT JOIN ItemVisualEffects IVE4 ON ItemVisuals .itemVisualEffects4 = IVE4.ID \
+                   LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID \
+                   WHERE VisualID != 0";
 
+  sqlResult enchantsInfos = GAMEDATABASE.sqlQuery(query);
 
+  if(!enchantsInfos.valid || enchantsInfos.values.empty())
+    return;
 
+  for(int i=0, imax=enchantsInfos.values.size() ; i < imax ; i++)
+  {
+    EnchantsRec rec;
+    rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].c_str(), wxConvUTF8).mb_str()));;
+    rec.models[0] = enchantsInfos.values[i][2];
+    rec.models[1] = enchantsInfos.values[i][3];
+    rec.models[2] = enchantsInfos.values[i][4];
+    rec.models[3] = enchantsInfos.values[i][5];
+    rec.models[4] = enchantsInfos.values[i][6];
+    enchants[atoi(enchantsInfos.values[i][0].c_str())] = rec;
+  }
 
-	EnchantsRec temp;
+  choices.Clear();
+  for (std::map<int, EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it)
+    choices.Add(it->second.name.c_str());
 
-	// Alfred 2009.07.17 rewrite, use system database
-	temp.id = 0;
-	temp.index[0] = 0;
-	temp.index[1] = 0;
-	temp.index[2] = 0;
-	temp.index[3] = 0;
-	temp.index[4] = 0;
-	temp.name = wxT("None");
-	enchants.push_back(temp);
-
-	for (SpellItemEnchantmentDB::Iterator it=spellitemenchantmentdb.begin();  it!=spellitemenchantmentdb.end(); ++it) {
-		int visualid = it->getInt(SpellItemEnchantmentDB::VisualIDV400);
-		if (visualid < 1)
-			continue;
-		for (ItemVisualsDB::Iterator it2=itemvisualsdb.begin();  it2!=itemvisualsdb.end(); ++it2) {
-			if (it2->getInt(ItemVisualsDB::VisualID) == visualid) {
-				temp.id = visualid;
-				for(size_t i=0; i<5; i++)
-					temp.index[i] = it2->getInt(ItemVisualsDB::VisualID+1+i);
-				temp.name = CSConv(it->getString(SpellItemEnchantmentDB::Name + langOffset));
-				enchants.push_back(temp);
-				break;
-			}
-		}
-	}
-
-	choices.Clear();
-	for (std::vector<EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it)
-		choices.Add(it->name);
-
-	EnchantsInitiated = true;
-	*/
+  EnchantsInitiated = true;
 }
 
 void EnchantsDialog::Display()
@@ -250,7 +246,8 @@ void EnchantsDialog::Display()
 	if (!Initiated)
 		InitObjects();
 
-	if (Initiated) {
+	if (Initiated)
+	{
 		Center();
 		Show(true);
 	}

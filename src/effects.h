@@ -9,6 +9,8 @@
 #include "charcontrol.h"
 #include "modelcanvas.h"
 
+#include <string>
+
 extern wxArrayString spelleffects;
 
 void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow *parent);
@@ -23,10 +25,8 @@ struct NumStringPair {
 };
 
 struct EnchantsRec {
-	unsigned int id;
-	unsigned int index[5];
 	wxString name;
-
+	std::string models[5];
 	bool operator< (const EnchantsRec &p) const {
 		return name < p.name;
 	}
@@ -50,7 +50,7 @@ class EnchantsDialog : public wxDialog {
 	bool Initiated;
 
 	wxArrayString choices;
-	std::vector<EnchantsRec> enchants;
+	std::map<int, EnchantsRec> enchants;
 	
 public:
     EnchantsDialog(wxWindow *parent, CharControl *cc);
