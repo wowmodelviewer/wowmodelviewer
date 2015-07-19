@@ -6,17 +6,7 @@
 #include "next-gen/games/wow/Attachment.h"
 
 wxArrayString spelleffects;
-SpellEffectsDB spelleffectsdb;
 
-void GetSpellEffects(){
-	for (SpellEffectsDB::Iterator it=spelleffectsdb.begin(); it!=spelleffectsdb.end(); ++it) {
-		wxString temp(it->getString(SpellEffectsDB::EffectName));
-		if (temp.StartsWith(wxT("zzOLD")))
-			spelleffects.Insert(temp, 0);
-	}
-
-	spelleffects.Sort();
-}
 
 // 10 for rhand, 11 for lhand)
 void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow *parent)
@@ -138,7 +128,7 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 			Show(false);
 			return;
 		}
-		
+		/*
 		for (std::vector<EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it) {
 			if (it->name == sel) {
 				int s = slot->GetSelection();
@@ -180,7 +170,7 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 				return;
 			}
 		}
-		
+		*/
 	} else if (event.GetId() == ID_ENCHANTSCANCEL)
 		this->Show(false);
 }
@@ -202,6 +192,20 @@ void EnchantsDialog::InitObjects()
 
 void EnchantsDialog::InitEnchants()
 {
+  /*
+  SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5
+FROM SpellItemEnchantment
+LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID
+LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID
+LEFT JOIN ItemVisualEffects IVE2 ON ItemVisuals .itemVisualEffects1 = IVE2.ID
+LEFT JOIN ItemVisualEffects IVE3 ON ItemVisuals .itemVisualEffects3 = IVE3.ID
+LEFT JOIN ItemVisualEffects IVE4 ON ItemVisuals .itemVisualEffects4 = IVE4.ID
+LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID
+WHERE VisualID != 0
+
+
+
+
 	EnchantsRec temp;
 
 	// Alfred 2009.07.17 rewrite, use system database
@@ -235,6 +239,7 @@ void EnchantsDialog::InitEnchants()
 		choices.Add(it->name);
 
 	EnchantsInitiated = true;
+	*/
 }
 
 void EnchantsDialog::Display()

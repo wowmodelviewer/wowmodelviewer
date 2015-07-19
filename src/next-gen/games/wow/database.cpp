@@ -11,15 +11,11 @@ _DATABASE_API_ std::vector<NPCRecord> npcs;
 
 // --
 _DATABASE_API_ HelmGeosetDB		helmetdb;
-_DATABASE_API_ ItemVisualEffectDB	effectdb;
 _DATABASE_API_ StartOutfitDB		startdb;
-_DATABASE_API_ ItemVisualDB		visualdb;
 _DATABASE_API_ ItemSetDB			setsdb;
 
 //--
 _DATABASE_API_ LightSkyBoxDB			skyboxdb;
-_DATABASE_API_ SpellItemEnchantmentDB	spellitemenchantmentdb;
-_DATABASE_API_ ItemVisualsDB			itemvisualsdb;
 _DATABASE_API_ CamCinematicDB		 camcinemadb;
 
 // --
@@ -60,31 +56,6 @@ HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 // --------------------------------
 // Item Database Stuff
 // --------------------------------
-
-// ItemDisplayInfo
-
-
-ItemVisualDB::Record ItemVisualDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(VisualID)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-ItemVisualEffectDB::Record ItemVisualEffectDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(EffectID)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
 
 ItemSetDB::Record ItemSetDB::getById(unsigned int id)
 {
@@ -204,49 +175,3 @@ NPCRecord::NPCRecord(const std::vector<std::string> & vals)
   type = atoi(vals[2].c_str());
   name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[3].c_str(), wxConvUTF8).mb_str()));
 }
-
-// --
-
-
-
-// --
-// SPELLDB.H
-//
-
-/*
-
-SpellVisualeffects.dbc
-column 1 = id, int
-column 2 = spell name, string
-column 3 = model name, string
-column 4 = number between 0 and 11, int
-column 5 = number 0 or 1,  1 entry is 50?, int.. possibly boolean.
-
-Column 3, ignore entries starting with "zzOLD__" ?
-Column 4, wtf are .mdl files? they're from warcraft 3?
-
-col 5 and 6? figure out what they're for.
-Column5 is either Spell Type,  or Spell slot or something similar
-*/
-SpellEffectsDB::Record SpellEffectsDB::getByName(const wxString name)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (name.IsSameAs(i->getString(EffectName), false) == true)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-
-SpellEffectsDB::Record SpellEffectsDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(ID)==id)
-			return (*i);
-	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
-	throw NotFound();
-}
-// --

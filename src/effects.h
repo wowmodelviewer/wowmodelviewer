@@ -6,14 +6,11 @@
     #include <wx/wx.h>
 #endif
 
-#include "database.h"
 #include "charcontrol.h"
 #include "modelcanvas.h"
 
 extern wxArrayString spelleffects;
-extern SpellEffectsDB spelleffectsdb;
 
-void GetSpellEffects();
 void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow *parent);
 
 struct NumStringPair {

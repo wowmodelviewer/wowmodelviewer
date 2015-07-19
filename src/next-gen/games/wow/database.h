@@ -50,48 +50,17 @@ _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 // game database
 class HelmGeosetDB;
-class ItemVisualEffectDB;
 class ItemSetDB;
 class StartOutfitDB;
-class ItemVisualDB;
 class LightSkyBoxDB;
-class SpellItemEnchantmentDB;
-class ItemVisualsDB;
 class CamCinematicDB;
 
 _DATABASE_API_ extern HelmGeosetDB	helmetdb;
-_DATABASE_API_ extern ItemVisualEffectDB effectdb;
 _DATABASE_API_ extern ItemSetDB setsdb;
 _DATABASE_API_ extern StartOutfitDB startdb;
-_DATABASE_API_ extern ItemVisualDB visualdb;
 _DATABASE_API_ extern LightSkyBoxDB skyboxdb;
-_DATABASE_API_ extern SpellItemEnchantmentDB spellitemenchantmentdb;
-_DATABASE_API_ extern ItemVisualsDB itemvisualsdb;
 _DATABASE_API_ extern CamCinematicDB camcinemadb;
 
-
-class _DATABASE_API_ SpellItemEnchantmentDB: public DBCFile
-{
-public:
-	SpellItemEnchantmentDB(): DBCFile(wxT("DBFilesClient\\SpellItemEnchantment.dbc")) {}
-	~SpellItemEnchantmentDB() {}
-
-	// Fields
-	static const size_t Name = 14;		// string, localization
-	static const size_t VisualID = 31;	// unit
-
-	static const size_t VisualIDV400 = 15;
-};
-
-class _DATABASE_API_ ItemVisualsDB: public DBCFile
-{
-public:
-	ItemVisualsDB(): DBCFile(wxT("DBFilesClient\\ItemVisuals.dbc")) {}
-	~ItemVisualsDB() {}
-
-	// Fields
-	static const size_t VisualID = 0;	// unit
-};
 
 class _DATABASE_API_ LightSkyBoxDB: public DBCFile
 {
@@ -132,36 +101,6 @@ public:
 // -----------------------------------
 
 class ItemDatabase;
-
-class _DATABASE_API_ ItemVisualDB: public DBCFile
-{
-public:
-	ItemVisualDB(): DBCFile(wxT("DBFilesClient\\ItemVisuals.dbc")) {}
-	~ItemVisualDB() {}
-
-	/// Fields
-	static const size_t VisualID = 0;	// uint
-	static const size_t Effect1 = 1;	// uint
-	//static const size_t Effect2 = 2;	// uint
-	//static const size_t Effect3 = 3;	// uint
-	//static const size_t Effect4 = 4;	// uint
-	//static const size_t Effect5 = 5;	// uint
-
-	Record getById(unsigned int id);
-};
-
-class _DATABASE_API_ ItemVisualEffectDB: public DBCFile
-{
-public:
-	ItemVisualEffectDB(): DBCFile(wxT("DBFilesClient\\ItemVisualEffects.dbc")) {}
-	~ItemVisualEffectDB() {}
-
-	/// Fields
-	static const size_t EffectID = 0;	// uint
-	static const size_t Model = 1;		// string
-
-	Record getById(unsigned int id);
-};
 
 
 class _DATABASE_API_ ItemSetDB: public DBCFile
@@ -242,26 +181,6 @@ struct _DATABASE_API_ NPCRecord
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 
 };
-
-// =========================================
-
-class _DATABASE_API_ SpellEffectsDB: public DBCFile
-{
-public:
-	SpellEffectsDB(): DBCFile(wxT("DBFilesClient\\SpellVisualEffectName.db2")) {}
-	~SpellEffectsDB() {}
-
-	/// Fields
-	static const size_t ID = 0;				// uint
-	static const size_t EffectName = 1;		// string
-	//static const size_t ModelName = 2;		// string
-	//static const size_t SpellType = 3;		// uint
-	//static const size_t UnknownValue2 = 4;	// uint
-
-	Record getById(unsigned int id);
-	Record getByName(wxString name);
-};
-
 
 // ===============================================
 

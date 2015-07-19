@@ -652,33 +652,12 @@ void ModelViewer::InitDatabase()
 		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
 	}
 
-	if (!spellitemenchantmentdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Spell Item Enchanement DB."));
-	}
-
-	if (!itemvisualsdb.open()) {
-		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the Item Visuals DB."));
-	}
-
-	if(!visualdb.open())
-		wxLogMessage(wxT("Error: Could not open the ItemVisuals DB."));
-
-	if(!effectdb.open())
-		wxLogMessage(wxT("Error: Could not open the ItemVisualEffects DB."));
-
 	if(!startdb.open())
 		wxLogMessage(wxT("Error: Could not open the Start Outfit Sets DB."));
 	//if(!helmetdb.open()) return false;
 
 	if(!camcinemadb.open())
 		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
-
-	if(spelleffectsdb.open())
-		GetSpellEffects();
-	else
-		wxLogMessage(wxT("Error: Could not open the SpellVisualEffects DB."));
 
   wxLogMessage(wxT("Finished initiating database files."));
   SetStatusText(wxT("Finished initiating database files."));;
