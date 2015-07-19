@@ -11,10 +11,6 @@
 
 #include <string>
 
-extern wxArrayString spelleffects;
-
-void SelectCreatureItem(ssize_t slot, ssize_t current, CharControl *cc, wxWindow *parent);
-
 struct NumStringPair {
 	int id;
 	wxString name;

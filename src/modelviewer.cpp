@@ -121,8 +121,6 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	
 	// Effects
 	EVT_MENU(ID_ENCHANTS, ModelViewer::OnEffects)
-	EVT_MENU(ID_EQCREATURE_R, ModelViewer::OnEffects)
-	EVT_MENU(ID_EQCREATURE_L, ModelViewer::OnEffects)
 
 	// Options
 	EVT_MENU(ID_SAVE_CHAR, ModelViewer::OnToggleCommand)
@@ -473,8 +471,6 @@ void ModelViewer::InitMenu()
 
 		wxMenu *effectsMenu = new wxMenu;
 		effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
-		effectsMenu->Append(ID_EQCREATURE_R, _("Creature Right-Hand"));
-		effectsMenu->Append(ID_EQCREATURE_L, _("Creature Left-Hand"));
 
 		// Options menu
 		optMenu = new wxMenu;
@@ -1169,7 +1165,9 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	fileControl->UpdateInterface();
 
 	// wxAUI
-	interfaceManager.GetPane(charControl).Show(false);
+	if(!g_charControl->model->charModelDetails.isChar)
+	  interfaceManager.GetPane(charControl).Show(false);
+
 	interfaceManager.Update();
 }
 
@@ -1685,42 +1683,11 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 {
 	int id = event.GetId();
 
-	if (id == ID_ENCHANTS) {
+	if (id == ID_ENCHANTS)
+	{
 		// Currently, only support enchanting character weapons
 		if (isChar)
 			enchants->Display();
-
-	} else if (id == ID_EQCREATURE_R) { // R for righthand
-		WoWModel *m = static_cast<WoWModel*>(canvas->root->model);
-		if (!m)
-			m = static_cast<WoWModel*>(canvas->model);
-
-		// make sure m is a valid pointer to a model
-		if (m) {
-			// This is an error check to make sure the creature can be equipped.
-			for(size_t k=0; k<m->ATT_MAX; k++){
-				if (m->attLookup[k] == ATT_RIGHT_PALM) {
-					SelectCreatureItem(CS_HAND_RIGHT, 0, charControl, canvas);
-					break;
-				}
-			}
-		}
-
-	} else if (id == ID_EQCREATURE_L) { // L for lefthand
-		WoWModel *m = static_cast<WoWModel*>(canvas->root->model);
-		if (!m)
-			m = static_cast<WoWModel*>(canvas->model);
-
-		// make sure m is a valid pointer to a model
-		if (m) {
-			// This is an error check to make sure the creature can be equipped.
-			for(size_t k=0; k<m->ATT_MAX; k++){
-				if (m->attLookup[k] == ATT_LEFT_PALM) {
-					SelectCreatureItem(CS_HAND_LEFT, 0, charControl, canvas);
-					break;
-				}
-			}
-		}
 	}
 }
 
