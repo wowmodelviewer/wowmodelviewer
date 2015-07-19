@@ -311,4 +311,34 @@
   	<field type="int" name="HideGeoset6" />
   	<field type="int" name="HideGeoset7" />
   </HelmetGeosetVisData>
+  <SpellItemEnchantment>
+    <gamefile name="DBFilesClient\SpellItemEnchantment.db2" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="Charges" />
+    <field type="uint" name="Effect1" />
+    <field type="uint" name="Effect2" />
+    <field type="uint" name="Effect3" />
+    <field type="uint" name="EffectPointsMin1" />
+    <field type="uint" name="EffectPointsMin2" />
+    <field type="uint" name="EffectPointsMin3" />
+    <field type="uint" name="EffectArg1" />
+    <field type="uint" name="EffectArg2" />
+    <field type="uint" name="EffectArg3" />
+    <field type="text" name="Name" />
+    <field type="uint" name="VisualID" />
+  </SpellItemEnchantment>
+  <ItemVisuals>
+    <gamefile name="DBFilesClient\ItemVisuals.db2" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="int" name="itemVisualEffects1" />
+    <field type="int" name="itemVisualEffects2" />
+    <field type="int" name="itemVisualEffects3" />
+    <field type="int" name="itemVisualEffects4" />
+    <field type="int" name="itemVisualEffects5" />
+  </ItemVisuals>
+  <ItemVisualEffects>
+  	<gamefile name="DBFilesClient\ItemVisualEffects.db2" />
+  	<field primary="yes" type="uint" name="ID" />
+  	<field type="text" name="path" />
+  </ItemVisualEffects>
 </database>
