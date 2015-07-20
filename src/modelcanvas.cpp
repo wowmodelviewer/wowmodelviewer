@@ -1004,12 +1004,10 @@ inline void ModelCanvas::RenderBackground()
 	GLboolean texture2DState = glIsEnabled(GL_TEXTURE_2D);
 	GLboolean depthTestState = glIsEnabled(GL_DEPTH_TEST);
 	GLboolean lightningState = glIsEnabled(GL_LIGHTING);
-	GLboolean blendState = glIsEnabled(GL_BLEND);
 
 	glEnable(GL_TEXTURE_2D);					// Enable 2D Texture Mapping
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
-	glEnable(GL_BLEND);
 	
 	glBindTexture(GL_TEXTURE_2D, uiBGTexture);
 
@@ -1020,19 +1018,12 @@ inline void ModelCanvas::RenderBackground()
 #endif
 
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
 	glBegin(GL_QUADS);
 		glTexCoord2f(0.0f, 0.0f); glVertex2f(0, 0);
 		glTexCoord2f(1.0f, 0.0f); glVertex2f(1, 0);
 		glTexCoord2f(1.0f, 1.0f); glVertex2f(1, 1);
 		glTexCoord2f(0.0f, 1.0f); glVertex2f(0, 1);
-
-		/*
-		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, 0);
-		glTexCoord2f(1.0f, 0.0f); glVertex2i(video.xRes, 0);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i(video.xRes, video.yRes);
-		glTexCoord2f(0.0f, 1.0f); glVertex2i(0,  video.yRes);
-		*/
-
 	glEnd();
 
 	// ModelView
@@ -1056,11 +1047,6 @@ inline void ModelCanvas::RenderBackground()
     glEnable(GL_LIGHTING);
   else
     glDisable(GL_LIGHTING);
-
-  if(blendState)
-    glEnable(GL_BLEND);
-  else
-    glDisable(GL_BLEND);
 
 	// Set back to modelview for rendering
 	glMatrixMode(GL_MODELVIEW);
