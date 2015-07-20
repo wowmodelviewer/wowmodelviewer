@@ -2020,30 +2020,55 @@ void ModelCanvas::CheckMovement()
 // Our screenshot function which supports both PBO and FBO aswell as traditional older cards, eventually.
 void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 {
-//	CxImage *newImage = NULL;
-
-//	wxDELETE(rt);
-
-//	if (!init)
-//		InitGL();
-
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	wxFileName temp(fn, wxPATH_NATIVE);
 	
 	int screenSize[4];
 	glGetIntegerv(GL_VIEWPORT, screenSize);
-/*
-	RenderTexture * rt = new (std::nothrow) RenderTexture();
 
-	if(!rt)
+	RenderTexture * rt = 0;
+
+	// Setup out buffers for offscreen rendering
+	if (video.supportPBO || video.supportFBO)
 	{
-	  LOG_ERROR << "Unable to initialise render texture to make screenshot";
-	  return;
+	  rt = new (std::nothrow) RenderTexture();
+
+	  if(!rt)
+	  {
+	    LOG_ERROR << "Unable to initialise render texture to make screenshot";
+	    return;
+	  }
+
+	  rt->Init(x, y, video.supportFBO);
+	  screenSize[2] = rt->nWidth;
+
+	  screenSize[3] = rt->nHeight;
+
+	  rt->BeginRender();
+
+	  if (model)
+	    RenderToBuffer();
+
+	  rt->BindTexture();
+	}
+	else
+	{
+    glGetIntegerv(GL_VIEWPORT, screenSize);
+    glReadBuffer(GL_BACK);
+    if(model)
+      RenderToBuffer();
 	}
 
-	rt->Init(screenSize[2], screenSize[3], video.supportFBO);
-*/
+	if (rt)
+	{
+	  rt->ReleaseTexture();
+	  rt->EndRender();
+	  rt->Shutdown();
+	  delete rt;
+	}
+
+
 	// Make the BYTE array, factor of 3 because it's RBG.
 	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
 

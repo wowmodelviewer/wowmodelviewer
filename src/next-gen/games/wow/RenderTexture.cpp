@@ -124,13 +124,13 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 			wxLogMessage(wxT("GFX Info: Initialising FrameBufferObject."));
 
 			// Generate our buffers and texture
-			glGenFramebuffersEXT(1, &m_frameBuffer );
-			glGenRenderbuffersEXT(1, &m_depthRenderBuffer );
+			glGenFramebuffers(1, &m_frameBuffer );
+			glGenRenderbuffers(1, &m_depthRenderBuffer );
 			glGenTextures(1, &m_texID);
-			// --
 
+			// --
 			// Bind frame buffer and texture
-			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_frameBuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER_EXT, m_frameBuffer);
 			glBindTexture(m_texFormat, m_texID);
 
 			// This is our dynamic texture, which will be loaded with new pixel data

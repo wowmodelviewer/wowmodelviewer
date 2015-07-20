@@ -102,13 +102,18 @@ VideoSettings::~VideoSettings()
 
 bool VideoSettings::Init()
 {
+  glewExperimental = GL_TRUE;
 	int glewErr = glewInit();
-    if (glewErr != GLEW_OK) {
-        // problem: glewInit failed, something is seriously wrong
-		wxLogMessage(wxT("Error: GLEW failed to initialise.\n\tGLEW Error: %s\n"), glewGetErrorString(glewErr));
-		return false;
-	}  else {
-		wxLogMessage(wxT("Info: GLEW successfully initiated.\n"));
+
+	if (glewErr != GLEW_OK)
+	{
+	  // problem: glewInit failed, something is seriously wrong
+	  wxLogMessage(wxT("Error: GLEW failed to initialise.\n\tGLEW Error: %s"), glewGetErrorString(glewErr));
+	  return false;
+	}
+	else
+	{
+	  wxLogMessage(wxT("Info: GLEW successfully initiated."));
 	}
 
 	// Now get some specifics on the card
@@ -149,6 +154,7 @@ bool VideoSettings::Init()
 	supportWGLPixelFormat = wglewIsSupported("WGL_ARB_pixel_format") == GL_TRUE ? true : false;
 #endif
 	supportFBO = glewIsSupported("GL_EXT_framebuffer_object") == GL_TRUE ? true : false;
+
 	supportTexRects = glewIsSupported("GL_ARB_texture_rectangle") == GL_TRUE ? true : false;
 
 	// Now output and log the info
@@ -206,7 +212,7 @@ bool VideoSettings::Init()
 	}
 	// Square
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize); 
-	wxLogMessage(wxT("Max Texture Size Supported: %i\n"), texSize);
+	wxLogMessage(wxT("Max Texture Size Supported: %i"), texSize);
 	
 
 	
@@ -226,7 +232,7 @@ bool VideoSettings::Init()
 
 void VideoSettings::InitGL()
 {
-	if (!init)
+	if (!Init())
 		return;
 
 	GLenum err = 0;
