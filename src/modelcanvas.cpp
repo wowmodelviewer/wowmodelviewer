@@ -2033,7 +2033,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	
 	int screenSize[4];
 	glGetIntegerv(GL_VIEWPORT, screenSize);
-
+/*
 	RenderTexture * rt = new (std::nothrow) RenderTexture();
 
 	if(!rt)
@@ -2043,7 +2043,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	}
 
 	rt->Init(screenSize[2], screenSize[3], video.supportFBO);
-
+*/
 	// Make the BYTE array, factor of 3 because it's RBG.
 	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
 
