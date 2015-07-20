@@ -1000,6 +1000,12 @@ inline void ModelCanvas::RenderBackground()
 	//glOrtho(0, video.xRes, 0, video.yRes, -1.0, 1.0);
 	gluOrtho2D(0, 1, 0, 1);
 
+	// save previous state
+	GLboolean texture2DState = glIsEnabled(GL_TEXTURE_2D);
+	GLboolean depthTestState = glIsEnabled(GL_DEPTH_TEST);
+	GLboolean lightningState = glIsEnabled(GL_LIGHTING);
+	GLboolean blendState = glIsEnabled(GL_BLEND);
+
 	glEnable(GL_TEXTURE_2D);					// Enable 2D Texture Mapping
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_LIGHTING);
@@ -1026,6 +1032,7 @@ inline void ModelCanvas::RenderBackground()
 		glTexCoord2f(1.0f, 1.0f); glVertex2i(video.xRes, video.yRes);
 		glTexCoord2f(0.0f, 1.0f); glVertex2i(0,  video.yRes);
 		*/
+
 	glEnd();
 
 	// ModelView
@@ -1034,6 +1041,27 @@ inline void ModelCanvas::RenderBackground()
 	glMatrixMode(GL_PROJECTION);
 	glPopMatrix();
 	
+	// restore state
+  if(texture2DState)
+    glEnable(GL_TEXTURE_2D);
+  else
+    glDisable(GL_TEXTURE_2D);
+
+  if(depthTestState)
+    glEnable(GL_DEPTH_TEST);
+  else
+    glDisable(GL_DEPTH_TEST);
+
+  if(lightningState)
+    glEnable(GL_LIGHTING);
+  else
+    glDisable(GL_LIGHTING);
+
+  if(blendState)
+    glEnable(GL_BLEND);
+  else
+    glDisable(GL_BLEND);
+
 	// Set back to modelview for rendering
 	glMatrixMode(GL_MODELVIEW);
 }
@@ -2019,6 +2047,16 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	
 	int screenSize[4];
 	glGetIntegerv(GL_VIEWPORT, screenSize);
+
+	RenderTexture * rt = new (std::nothrow) RenderTexture();
+
+	if(!rt)
+	{
+	  LOG_ERROR << "Unable to initialise render texture to make screenshot";
+	  return;
+	}
+
+	rt->Init(screenSize[2], screenSize[3], video.supportFBO);
 
 	// Make the BYTE array, factor of 3 because it's RBG.
 	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
