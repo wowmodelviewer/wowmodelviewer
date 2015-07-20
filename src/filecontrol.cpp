@@ -572,6 +572,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		wxString rootfn(data->fn);
+		LOG_INFO << "Selecting model in tree selector:" << rootfn.c_str();
 
 		// Check to make sure the selected item is a model (an *.m2 file).
 		modelviewer->isModel = (rootfn.Last() == '2');
