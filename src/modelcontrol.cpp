@@ -7,6 +7,8 @@
 #include <wx/ffile.h>
 #include <wx/textctrl.h>
 #include "Attachment.h"
+#include "metaclasses/Iterator.h"
+#include "WoWItem.h"
 
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
@@ -203,7 +205,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				}
 			}
 		}
-		
+
 		// update combo box with the list of models?
 		wxString tmp;
 		modelname->Clear();

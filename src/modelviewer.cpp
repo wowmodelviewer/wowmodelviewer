@@ -933,6 +933,22 @@ void ModelViewer::LoadModel(const wxString fn)
 			return;
 		}
 
+		// add children to manage items equipped
+		canvas->model->addChild(new WoWItem(CS_SHIRT));
+		canvas->model->addChild(new WoWItem(CS_HEAD));
+		canvas->model->addChild(new WoWItem(CS_SHOULDER));
+		canvas->model->addChild(new WoWItem(CS_PANTS));
+		canvas->model->addChild(new WoWItem(CS_BOOTS));
+		canvas->model->addChild(new WoWItem(CS_CHEST));
+		canvas->model->addChild(new WoWItem(CS_TABARD));
+		canvas->model->addChild(new WoWItem(CS_BELT));
+		canvas->model->addChild(new WoWItem(CS_BRACERS));
+		canvas->model->addChild(new WoWItem(CS_GLOVES));
+		canvas->model->addChild(new WoWItem(CS_HAND_RIGHT));
+		canvas->model->addChild(new WoWItem(CS_HAND_LEFT));
+		canvas->model->addChild(new WoWItem(CS_CAPE));
+		canvas->model->addChild(new WoWItem(CS_QUIVER));
+
 		canvas->model->modelType = MT_CHAR;
 		canvas->model->cd.reset(canvas->model);
 	}
@@ -946,7 +962,9 @@ void ModelViewer::LoadModel(const wxString fn)
 			wxLogMessage(wxT("Error: Failed to load the model - %s"), fn.c_str());
 			return;
 		}
-
+		// creature model, keep left/right hand only as equipment
+		canvas->model->addChild(new WoWItem(CS_HAND_RIGHT));
+		canvas->model->addChild(new WoWItem(CS_HAND_LEFT));
 		canvas->model->modelType = MT_NORMAL;
 	}
 
@@ -968,6 +986,7 @@ void ModelViewer::LoadModel(const wxString fn)
 	}
 	
 	// wxAUI
+	interfaceManager.GetPane(charControl).Show(isChar);
 	interfaceManager.GetPane(charControl).Show(isChar);
 	if (isChar)
 	{
@@ -997,8 +1016,7 @@ void ModelViewer::LoadModel(const wxString fn)
 	}
 	else
 	{
-		charControl->charAtt = modelAtt;
-		charControl->model = (WoWModel*)modelAtt->model;
+	  charControl->UpdateModel(modelAtt);
 
 		charMenu->Enable(ID_SAVE_CHAR, false);
 		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
@@ -1015,6 +1033,8 @@ void ModelViewer::LoadModel(const wxString fn)
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
+
+
 	}
 
 	// Update the model control
@@ -1165,6 +1185,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	fileControl->UpdateInterface();
 
 	// wxAUI
+	// hide charControl if current model is not a Character one.
 	if(!g_charControl->model->charModelDetails.isChar)
 	  interfaceManager.GetPane(charControl).Show(false);
 
@@ -1361,7 +1382,7 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
 		interfaceManager.GetPane(fileControl).Show(true);
 	} else if (id==ID_SHOW_ANIM) {
 		interfaceManager.GetPane(animControl).Show(true);
-	} else if (id==ID_SHOW_CHAR && isChar) {
+	} else if (id==ID_SHOW_CHAR) {
 		interfaceManager.GetPane(charControl).Show(true);
 	} else if (id==ID_SHOW_LIGHT) {
 		interfaceManager.GetPane(lightControl).Show(true);
@@ -2713,8 +2734,19 @@ void ModelViewer::UpdateControls()
 		return;
 
 	if (canvas->model->modelType == MT_CHAR)
-		charControl->RefreshModel();
-	
+	  charControl->RefreshModel();
+	else
+	{
+	  LOG_INFO << __FUNCTION__ << "before refresh item";
+	  //refresh equipment
+	  Iterator<WoWItem> itemsIt(canvas->model);
+	  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
+	  {
+	    LOG_INFO << __FUNCTION__ << "refresh item";
+	    (*itemsIt)->refresh();
+	  }
+	  LOG_INFO << __FUNCTION__ << "after refresh item";
+	}
 	modelControl->RefreshModel(canvas->root);
 }
 

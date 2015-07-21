@@ -363,22 +363,6 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 		model = NULL;
 		return NULL;
 	}
-	
-	// add children to manage items equipped
-	model->addChild(new WoWItem(CS_SHIRT));
-	model->addChild(new WoWItem(CS_HEAD));
-	model->addChild(new WoWItem(CS_SHOULDER));
-	model->addChild(new WoWItem(CS_PANTS));
-	model->addChild(new WoWItem(CS_BOOTS));
-	model->addChild(new WoWItem(CS_CHEST));
-	model->addChild(new WoWItem(CS_TABARD));
-	model->addChild(new WoWItem(CS_BELT));
-	model->addChild(new WoWItem(CS_BRACERS));
-	model->addChild(new WoWItem(CS_GLOVES));
-	model->addChild(new WoWItem(CS_HAND_RIGHT));
-	model->addChild(new WoWItem(CS_HAND_LEFT));
-	model->addChild(new WoWItem(CS_CAPE));
-	model->addChild(new WoWItem(CS_QUIVER));
 
 	ResetView();
 

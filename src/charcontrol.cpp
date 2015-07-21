@@ -225,70 +225,103 @@ void CharControl::UpdateModel(Attachment *a)
 
 	charAtt = a;
 	model = (WoWModel*)charAtt->model;
-	model->cd.showEars = true;
-	model->cd.showHair = true;
-	model->cd.showFacialHair = true;
-	model->cd.showUnderwear = true;
-
-  model->cd.attach(this);
-
-  cdFrame->setModel(model->cd);
-
-	// The following isn't actually needed, 
-	// pretty sure all this gets taken care of by TextureManager and CharTexture
-	charTex = 0;
-	if (charTex==0) 
-		glGenTextures(1, &charTex);
-
-	//model->cd.reset();
-	td.showCustom = false;
-
-	// hide most geosets
-	for (size_t i=0; i<model->geosets.size(); i++) {
-		model->showGeosets[i] = (model->geosets[i].id==0);
-	}
 
 	RaceInfos infos;
-	RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos);
+	if(RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos)) // fails if it is a creature
+	{
+	  cdFrame->Enable(true);
+	  tabardSpins[SPIN_TABARD_ICON]->Enable(true);
+	  tabardSpins[SPIN_TABARD_ICONCOLOR]->Enable(true);
+	  tabardSpins[SPIN_TABARD_BORDER]->Enable(true);
+	  tabardSpins[SPIN_TABARD_BORDERCOLOR]->Enable(true);
+	  tabardSpins[SPIN_TABARD_BACKGROUND]->Enable(true);
 
-	model->cd.race = infos.raceid;
-	model->cd.gender = infos.sexid;
+	  model->cd.showEars = true;
+	  model->cd.showHair = true;
+	  model->cd.showFacialHair = true;
+	  model->cd.showUnderwear = true;
 
-	g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
+	  model->cd.attach(this);
+
+	  cdFrame->setModel(model->cd);
+
+	  // The following isn't actually needed,
+	  // pretty sure all this gets taken care of by TextureManager and CharTexture
+	  charTex = 0;
+	  if (charTex==0)
+	    glGenTextures(1, &charTex);
+
+	  //model->cd.reset();
+	  td.showCustom = false;
+
+	  // hide most geosets
+	  for (size_t i=0; i<model->geosets.size(); i++) {
+	    model->showGeosets[i] = (model->geosets[i].id==0);
+	  }
+
+	  model->cd.race = infos.raceid;
+	  model->cd.gender = infos.sexid;
+
+	  g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
 
-	cdFrame->refresh();
+	  cdFrame->refresh();
 
-	td.Icon = randint(0, td.maxIcon);
-	td.IconColor = randint(0, td.maxIconColor);
-	td.Border = randint(0, td.maxBorder);
-  int maxColor = td.GetMaxBorderColor(td.Border);
-	td.BorderColor = randint(0, maxColor);
-	td.Background = randint(0, td.maxBackground);
+	  td.Icon = randint(0, td.maxIcon);
+	  td.IconColor = randint(0, td.maxIconColor);
+	  td.Border = randint(0, td.maxBorder);
+	  int maxColor = td.GetMaxBorderColor(td.Border);
+	  td.BorderColor = randint(0, maxColor);
+	  td.Background = randint(0, td.maxBackground);
 
-	tabardSpins[SPIN_TABARD_ICON]->SetValue(td.Icon);
-	tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(td.IconColor);
-	tabardSpins[SPIN_TABARD_BORDER]->SetValue(td.Border);
-	tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(td.BorderColor);
-	tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(td.Background);
+	  tabardSpins[SPIN_TABARD_ICON]->SetValue(td.Icon);
+	  tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(td.IconColor);
+	  tabardSpins[SPIN_TABARD_BORDER]->SetValue(td.Border);
+	  tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(td.BorderColor);
+	  tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(td.Background);
 
-	tabardSpins[SPIN_TABARD_ICON]->SetRange(0, td.maxIcon);
-	tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, td.maxIconColor);
-	tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, td.maxBorder);
-	tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
-	tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, td.maxBackground);
+	  tabardSpins[SPIN_TABARD_ICON]->SetRange(0, td.maxIcon);
+	  tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, td.maxIconColor);
+	  tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, td.maxBorder);
+	  tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
+	  tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, td.maxBackground);
 
-	//for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-	//	spins[i]->Refresh(false);
-	for (size_t i=0; i<NUM_TABARD_BTNS; i++) {
-		tabardSpins[i]->Refresh(false);
-		spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
+	  //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+	  //	spins[i]->Refresh(false);
+	  for (size_t i=0; i<NUM_TABARD_BTNS; i++) {
+	    tabardSpins[i]->Refresh(false);
+	    spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
+	  }
+	  //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+	  //		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
+
+	  if (useRandomLooks)
+	      cdFrame->randomiseChar();
 	}
-	//for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-//		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
+	else // creature
+	{
+	  cdFrame->Enable(false);
+	  tabardSpins[SPIN_TABARD_ICON]->Enable(false);
+	  tabardSpins[SPIN_TABARD_ICONCOLOR]->Enable(false);
+	  tabardSpins[SPIN_TABARD_BORDER]->Enable(false);
+	  tabardSpins[SPIN_TABARD_BORDERCOLOR]->Enable(false);
+	  tabardSpins[SPIN_TABARD_BACKGROUND]->Enable(false);
+	}
 
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
 	{
+	  WoWItem * item = model->getItem((CharSlots)i);
+	  if(item)
+	  {
+	    if(buttons[i])
+	      buttons[i]->Enable(true);
+	  }
+	  else
+	  {
+	    if(buttons[i])
+	      buttons[i]->Enable(false);
+	  }
+
 		if (labels[i])
 		{
 			labels[i]->SetLabel(_("---- None ----"));
@@ -299,9 +332,6 @@ void CharControl::UpdateModel(Attachment *a)
 		  levelboxes[i]->Enable(false);
 		}
 	}
-
-	if (useRandomLooks)
-		cdFrame->randomiseChar();
 
 	RefreshModel();
 }
