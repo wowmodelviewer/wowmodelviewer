@@ -94,7 +94,7 @@ class ModelCanvas:
 
 public:
 	ModelCanvas(wxWindow *parent, VideoCaps *cap = NULL);
-    ~ModelCanvas();
+	~ModelCanvas();
 
 	// GUI Control Panels
 	AnimControl *animControl;
@@ -102,21 +102,17 @@ public:
 
 	CCamera camera;
 
-#ifdef _WINDOWS
 	RenderTexture *rt;
-	//RenderTexture *rtt[2];
-#endif
-	//GLuint texShadowMap;
 
 	// Event Handlers
-    void OnPaint(wxPaintEvent& WXUNUSED(event));
-    void OnSize(wxSizeEvent& event);
-    void OnMouse(wxMouseEvent& event);
+	void OnPaint(wxPaintEvent& WXUNUSED(event));
+	void OnSize(wxSizeEvent& event);
+	void OnMouse(wxMouseEvent& event);
 	void OnKey(wxKeyEvent &event);
 
 	//void OnIdle(wxIdleEvent& event);
 	void OnEraseBackground(wxEraseEvent& event);
-    void OnTimer(wxTimerEvent& event);
+	void OnTimer(wxTimerEvent& event);
 	void tick();
 	wxTimer timer;
 

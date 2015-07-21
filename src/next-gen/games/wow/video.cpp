@@ -102,6 +102,9 @@ VideoSettings::~VideoSettings()
 
 bool VideoSettings::Init()
 {
+  if(init)
+    return true;
+
   glewExperimental = GL_TRUE;
 	int glewErr = glewInit();
 

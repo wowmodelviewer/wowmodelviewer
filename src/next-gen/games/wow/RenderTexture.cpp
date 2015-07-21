@@ -67,28 +67,33 @@ void RenderTexture::InitGL()
 void RenderTexture::Init(int width, int height, bool fboMode)
 {
 	GLenum err;
-
 	canvas_hDC = wglGetCurrentDC();
 	canvas_hRC = wglGetCurrentContext();
 
 	m_texID = 0;
 	m_FBO = fboMode;
 
-	if (width == 0 || height == 0) {
+	if (width == 0 || height == 0)
+	{
 		int screenSize[4];
 		glGetIntegerv(GL_VIEWPORT, screenSize);
 
 		nWidth = screenSize[2];
 		nHeight = screenSize[3];
-	} else {
+	}
+	else
+	{
 		nWidth = width;
 		nHeight = height;
 	}
 
 	// Find the (easiest) format to use
 	if (video.supportNPOT && video.supportTexRects && GL_TEXTURE_RECTANGLE_ARB)
+	{
 		m_texFormat = GL_TEXTURE_RECTANGLE_ARB;
-	else {
+	}
+	else
+	{
 		// If non-power-of-two textures aren't supported, force them to be power-of-two of the max texture size.
 		m_texFormat = GL_TEXTURE_2D;
 
@@ -99,13 +104,13 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		int curMax=0;
 
 		// Make sure its square and a power-of-two
-		for (size_t i=5; !end; i++) {
+		for (size_t i=5; !end; i++)
+		{
 			int iSize = powf(2,(float)i);
-			if (iSize < texSize) {
+			if (iSize < texSize)
 				curMax = iSize;
-			} else {
+			else
 				end = true;
-			}
 		}
 
 		// Divide by 2 to make sure they're no where near their max texture size
@@ -116,12 +121,14 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 	//m_texFormat = GL_TEXTURE_2D;
 
 
-	if (m_FBO) { // Frame Buffer OBject mode (newer, better, only supported by newer cards and drivers though)
+	if (m_FBO)
+	{ // Frame Buffer OBject mode (newer, better, only supported by newer cards and drivers though)
 		
 		// Reported crash in this section of the code by a user
 		// add exception handling to try and capture it for future versions.
-		try {
-			wxLogMessage(wxT("GFX Info: Initialising FrameBufferObject."));
+		try
+		{
+			LOG_INFO << "GFX Info: Initialising FrameBufferObject.";
 
 			// Generate our buffers and texture
 			glGenFramebuffers(1, &m_frameBuffer );
@@ -150,11 +157,15 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 			CHECK_FRAMEBUFFER_STATUS();
 
 			glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);	// Unbind the FBO for now
-		} catch (...) {
-			wxLogMessage(wxT("FrameBuffer Error: %s : line #%i : %s"), __FILE__, __LINE__, __FUNCTION__);
+		}
+		catch (...)
+		{
+			LOG_ERROR << "FrameBuffer Error:" << __FILE__ << ": line #" << __LINE__ << ":" << __FUNCTION__;
 		}
 
-	} else { // Pixel Buffer Mode
+	}
+	else
+	{ // Pixel Buffer Mode
 		wxLogMessage(wxT("Info: Attempting to create a PixelBuffer."));
 
 		//-------------------------------------------------------------------------
@@ -184,7 +195,8 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 		wglChoosePixelFormatARB(canvas_hDC, (const int*)pf_attr, NULL, 1, &iPixelFormat, &iCount);
 
-		if (iCount == 0){
+		if (iCount == 0)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x]\n\twglChoosePixelFormatARB() Failed! PixelBuffer could not find an acceptable pixel format!"), glGetError());
 			return;
 		}
@@ -203,21 +215,34 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 		// Error check
 		err = glGetError();
-		if (!m_hPBuffer) {
+		if (!m_hPBuffer)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x] Could not create the PixelBuffer."), err);
 			return;
-		} else if (err==GL_NO_ERROR) {
+		}
+		else if (err==GL_NO_ERROR)
+		{
 			wxLogMessage(wxT("OGL: Successfully created the PixelBuffer."));
-		} else if (err==GL_INVALID_ENUM) {
+		}
+		else if (err==GL_INVALID_ENUM)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x] Invalid Enum during PixelBuffer creation."), err);
-		} else if (err==GL_INVALID_VALUE) {
+		}
+		else if (err==GL_INVALID_VALUE)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x] Invalid Value during PixelBuffer creation."), err);
-		} else if (err==GL_INVALID_OPERATION) {
+		}
+		else if (err==GL_INVALID_OPERATION)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x] Invalid Operation during PixelBuffer creation."), err);
-		} else if (err==GL_OUT_OF_MEMORY) {
+		}
+		else if (err==GL_OUT_OF_MEMORY)
+		{
 			wxLogMessage(wxT("OGL Error: [0x%x] Critical error!  Out-of-Memory during PixelBuffer creation.\nPixelBuffer could not be created."), err);
 			return;
-		} else {
+		}
+		else
+		{
 			wxLogMessage(wxT("OpenGL Error: [0x%x] PixelBuffer created, but an unknown error occured."), err);
 		}
 
@@ -228,13 +253,15 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		wglQueryPbufferARB( m_hPBuffer, WGL_PBUFFER_HEIGHT_ARB, &h );
 		wglQueryPbufferARB( m_hPBuffer, WGL_PBUFFER_WIDTH_ARB, &w );
 
-		if (h!=nHeight || w!=nWidth) {
+		if (h!=nHeight || w!=nWidth)
+		{
 			wxLogMessage(wxT("Error: The width and height of the created PixelBuffer don't match the requirements.\n\tImage likely to come out distorted."));
 			nHeight = h;
 			nWidth = w;
 		}
 
-		if (!wglShareLists(canvas_hRC, m_hRC)) {
+		if (!wglShareLists(canvas_hRC, m_hRC))
+		{
 			err = glGetError();
 			wxLogMessage(wxT("OpenGL Error: [0x%x] Call to wglShareLists() failed for our PixelBuffer."), err);
 		}
@@ -242,7 +269,8 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		// We were successful in creating a p-buffer. We can now make its context 
 		// current and set it up just like we would a regular context 
 		// attached to a window.
-		if (!wglMakeCurrent(m_hDC, m_hRC)) {
+		if (!wglMakeCurrent(m_hDC, m_hRC))
+		{
 			err = glGetError();
 			wxLogMessage(wxT("OpenGL Error: [0x%x] wglMakeCurrent() Failed! Could not make the PBuffer's context current!"), err);
 		}
@@ -261,7 +289,8 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		//glTexParameteri(texFormat, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 
 		// Now set the current context back to original.
-		if (!wglMakeCurrent(canvas_hDC, canvas_hRC)) {
+		if (!wglMakeCurrent(canvas_hDC, canvas_hRC))
+		{
 			err = glGetError();
 			wxLogMessage(wxT("OpenGL Error: [0x%x] wglMakeCurrent() Failed! Could not return the context back to the wxGLCanvas!"), err);
 		}

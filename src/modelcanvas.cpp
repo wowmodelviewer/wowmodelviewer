@@ -87,14 +87,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	adt = 0;			// ADT
 	animControl = 0;
 	gifExporter = 0;
-#ifdef _WINDOWS
 	rt = 0;				// RenderToTexture class
-/*
-	for(int i=0; i<2; i++) {
-		rtt = 0;
-	}
-*/
-#endif
 	curAtt = 0;			// Current Attachment
 	root = 0;
 	sky = 0;
@@ -1595,9 +1588,9 @@ void ModelCanvas::RenderToBuffer()
 	glDisable(GL_ALPHA_TEST);
 	// --==--
 	
-	if (rt) {
+	if (rt)
+	{
 		glPushAttrib(GL_VIEWPORT_BIT);
-		glViewport(0, 0, rt->nWidth, rt->nHeight);
 		video.ResizeGLScene(rt->nWidth, rt->nHeight);
 	}
 
@@ -1844,8 +1837,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 	wxString tmp = filename.AfterLast(wxT('.'));
 	tmp.MakeLower();
 
-	LOG_INFO << __FUNCTION__ << "filename :" << tmp.c_str();
-
 	//GLuint texFormat = GL_TEXTURE_RECTANGLE_ARB;
 	GLuint texFormat = GL_TEXTURE_2D;
 
@@ -1883,8 +1874,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 		glTexImage2D(texFormat, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
 		drawBackground = true;
 	}
-
-	LOG_INFO << __FUNCTION__ << "exiting...";
 
 	wxDELETE(image);
 	wxDELETE(buffer);
@@ -2022,12 +2011,13 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 {
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
+	delete rt;
+	rt = 0;
+
 	wxFileName temp(fn, wxPATH_NATIVE);
 	
 	int screenSize[4];
 	glGetIntegerv(GL_VIEWPORT, screenSize);
-
-	RenderTexture * rt = 0;
 
 	// Setup out buffers for offscreen rendering
 	if (video.supportPBO || video.supportFBO)
@@ -2060,19 +2050,19 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
       RenderToBuffer();
 	}
 
+	// Make the BYTE array, factor of 3 because it's RBG.
+	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
+
+	glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+
 	if (rt)
 	{
 	  rt->ReleaseTexture();
 	  rt->EndRender();
 	  rt->Shutdown();
 	  delete rt;
+	  rt = 0;
 	}
-
-
-	// Make the BYTE array, factor of 3 because it's RBG.
-	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
-
-	glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 
 	LOG_INFO << "Saving screenshot in : " << fn.c_str();
 
