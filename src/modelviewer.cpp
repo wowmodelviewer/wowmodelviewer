@@ -1705,11 +1705,7 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 	int id = event.GetId();
 
 	if (id == ID_ENCHANTS)
-	{
-		// Currently, only support enchanting character weapons
-		if (isChar)
-			enchants->Display();
-	}
+	  enchants->Display();
 }
 
 Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
