@@ -16,7 +16,11 @@
 #include <QFile>
 #include <QString>
 
+#include "CASCFolder.h"
+
 GameDatabase * GameDatabase::m_instance = 0;
+
+const std::vector<std::string> POSSIBLE_DB_EXT = {".dbc", ".db2"};
 
 GameDatabase::~GameDatabase()
 {
@@ -196,23 +200,24 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
 
 bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::string & gamefile)
 {
-  DBCFile dbc(gamefile.c_str());
-  if(!dbc.open())
+  // loop over possible extension to check if file exists
+  std::string fileToOpen = "";
+  for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
-    wxString filename(gamefile.c_str());
-    if (filename.Lower().EndsWith(wxT(".db2"))) // if filename ends with db2, let's try with dbc if it fails
+    std::string filename = gamefile+POSSIBLE_DB_EXT[i];
+    if(CASCFOLDER.fileExists(filename.c_str()))
     {
-      filename = filename.BeforeLast('.') + wxT(".dbc");
-      dbc.setFileName(filename);
-      if(!dbc.open())
-        return false;
-    }
-    else
-    {
-      return false;
+      fileToOpen = filename;
+      break;
     }
   }
 
+  if(fileToOpen.empty())
+    return false;
+
+  DBCFile dbc(fileToOpen.c_str());
+  if(!dbc.open())
+    return false;
 
   std::map<int, std::pair<std::string, std::string> > tableStruct = m_dbStruct[table];
 
