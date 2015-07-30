@@ -67,10 +67,7 @@ set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
   		     ${QT_BIN_DIR}/Qt5Widgets.dll
   		     ${QT_BIN_DIR}/Qt5Xml.dll)
   			 
-set(QT_SYS_FILES ${QT_BIN_DIR}/icudt53.dll
-  			     ${QT_BIN_DIR}/icuin53.dll
-  			     ${QT_BIN_DIR}/icuuc53.dll
-  			     $ENV{WMV_SDK_BASEDIR}/bin_support/msvcp120.dll
+set(QT_SYS_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/msvcp120.dll
   			     $ENV{WMV_SDK_BASEDIR}/bin_support/msvcr120.dll)
   				 
 set(QT_PLUGIN_DIR $ENV{WMV_SDK_BASEDIR}/Qt/plugins)
