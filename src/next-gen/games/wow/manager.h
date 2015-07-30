@@ -73,10 +73,6 @@ public:
 			if (!i)
 				return;
 
-#ifdef _DEBUG
-				std::cout << "Unloading Texture: " << i->name.c_str();
-#endif
-
 			doDelete(id);
 			names.erase(names.find(i->wxname));
 			items.erase(items.find(id));

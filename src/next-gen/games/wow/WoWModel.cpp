@@ -247,10 +247,6 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 WoWModel::~WoWModel()
 {
 	if (ok) {
-#ifdef _DEBUG
-		wxLogMessage(wxT("Unloading model: %s\n"), name.c_str());
-#endif
-
 		// There is a small memory leak somewhere with the textures.
 		// Especially if the texture was built into the model.
 		// No matter what I try though I can't find the memory to unload.
