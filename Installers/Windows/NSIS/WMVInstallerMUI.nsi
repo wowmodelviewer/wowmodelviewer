@@ -36,7 +36,6 @@ setOutPath $INSTDIR
 !define wmvroot "..\..\..\"
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\UpdateManager.exe"
-File "${wmvroot}\bin\ridable.csv"
 File "${wmvroot}\bin\*.dll"
 File "${wmvroot}\bin_support\listfile.txt"
 File "${wmvroot}\bin_support\wow6.xml"
