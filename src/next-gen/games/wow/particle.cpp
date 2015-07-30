@@ -97,7 +97,7 @@ void ParticleSystem::init(GameFile * f, ModelParticleEmitterDef &mta, uint32 *gl
 		break;
 	case MODELPARTICLE_EMITTER_SPLINE: // Spline? (can't be bothered to find one)
 	default:
-		wxLogMessage(wxT("[Error] Unknown Emitter: %d\n"), EmitterType);
+		LOG_ERROR << "Unknown Emitter:" << EmitterType;
 		break;
 	}
 
@@ -280,7 +280,7 @@ void ParticleSystem::draw()
 	case BM_MODULATEX2:
 	default:
 	  break;
-		//wxLogMessage(wxT("blend unknown: %d"), blend);
+
 	}
 	
 	//glDisable(GL_LIGHTING);

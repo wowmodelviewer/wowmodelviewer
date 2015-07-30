@@ -29,30 +29,30 @@ void
 glGetAll()
 {
 	GLint bled;
-	wxLogMessage(wxT("glGetAll Information"));
-	wxLogMessage(wxT("GL_ALPHA_TEST: %d"), glIsEnabled(GL_ALPHA_TEST));
-	wxLogMessage(wxT("GL_BLEND: %d"), glIsEnabled(GL_BLEND));
-	wxLogMessage(wxT("GL_CULL_FACE: %d"), glIsEnabled(GL_CULL_FACE));
+	LOG_INFO << "glGetAll Information";
+	LOG_INFO << "GL_ALPHA_TEST:" << glIsEnabled(GL_ALPHA_TEST);
+	LOG_INFO << "GL_BLEND:" << glIsEnabled(GL_BLEND);
+	LOG_INFO << "GL_CULL_FACE:" << glIsEnabled(GL_CULL_FACE);
 	glGetIntegerv(GL_FRONT_FACE, &bled);
 	if (bled == GL_CW) {
-	    wxLogMessage(wxT("glFrontFace: GL_CW"));
+		LOG_INFO << "glFrontFace: GL_CW";
 	}
 	else if (bled == GL_CCW) {
-	    wxLogMessage(wxT("glFrontFace: GL_CCW"));
+		LOG_INFO << "glFrontFace: GL_CCW";
 	}
-	wxLogMessage(wxT("GL_DEPTH_TEST: %d"), glIsEnabled(GL_DEPTH_TEST));
-	wxLogMessage(wxT("GL_DEPTH_WRITEMASK: %d"), glIsEnabled(GL_DEPTH_WRITEMASK));
-	wxLogMessage(wxT("GL_COLOR_MATERIAL: %d"), glIsEnabled(GL_COLOR_MATERIAL));
-	wxLogMessage(wxT("GL_LIGHT0: %d"), glIsEnabled(GL_LIGHT0));
-	wxLogMessage(wxT("GL_LIGHT1: %d"), glIsEnabled(GL_LIGHT1));
-	wxLogMessage(wxT("GL_LIGHT2: %d"), glIsEnabled(GL_LIGHT2));
-	wxLogMessage(wxT("GL_LIGHT3: %d"), glIsEnabled(GL_LIGHT3));
-	wxLogMessage(wxT("GL_LIGHTING: %d"), glIsEnabled(GL_LIGHTING));
-	wxLogMessage(wxT("GL_TEXTURE_2D: %d"), glIsEnabled(GL_TEXTURE_2D));
+	LOG_INFO << "GL_DEPTH_TEST:" << glIsEnabled(GL_DEPTH_TEST);
+	LOG_INFO << "GL_DEPTH_WRITEMASK:" << glIsEnabled(GL_DEPTH_WRITEMASK);
+	LOG_INFO << "GL_COLOR_MATERIAL:" << glIsEnabled(GL_COLOR_MATERIAL);
+	LOG_INFO << "GL_LIGHT0:" << glIsEnabled(GL_LIGHT0);
+	LOG_INFO << "GL_LIGHT1:" << glIsEnabled(GL_LIGHT1);
+	LOG_INFO << "GL_LIGHT2:" << glIsEnabled(GL_LIGHT2);
+	LOG_INFO << "GL_LIGHT3:" << glIsEnabled(GL_LIGHT3);
+	LOG_INFO << "GL_LIGHTING:" << glIsEnabled(GL_LIGHTING);
+	LOG_INFO << "GL_TEXTURE_2D:" << glIsEnabled(GL_TEXTURE_2D);
 	glGetIntegerv(GL_BLEND_SRC, &bled);
-	wxLogMessage(wxT("GL_BLEND_SRC: 0x%x"), bled);
+	LOG_INFO << "GL_BLEND_SRC:" << bled;
 	glGetIntegerv(GL_BLEND_DST, &bled);
-	wxLogMessage(wxT("GL_BLEND_DST: 0x%x"), bled);
+	LOG_INFO << "GL_BLEND_DST:" << bled;
 }
 
 void glInitAll()
@@ -167,7 +167,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 
 	ok = false;
 	if (f->isEof() || (f->getSize() < sizeof(ModelHeader))) {
-		wxLogMessage(wxT("Error: Unable to load model: [%s]"), tempname.c_str());
+		LOG_ERROR << "Unable to load model:" << tempname.c_str();
 		// delete this; //?
 		f->close();
 		delete f;
@@ -177,12 +177,12 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	
 	memcpy(&header, f->getBuffer(), sizeof(ModelHeader));
 
-	wxLogMessage(wxT("Loading model: %s, size: %d\n"), tempname.c_str(), f->getSize());
+	LOG_INFO << "Loading model:" << tempname.c_str() << "size:" << f->getSize();
 
 	//displayHeader(header);
 
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0') {
-		wxLogMessage(wxT("Error:\t\tInvalid model!  May be corrupted."));
+		LOG_ERROR << "Invalid model!  May be corrupted.";
 		ok = false;
 		f->close();
 		delete f;
@@ -194,7 +194,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	modelname = tempname;
 	setName(modelname.BeforeLast('.').AfterLast(SLASH).c_str());
 	if (header.nameOfs != 304 && header.nameOfs != 320) {
-	  wxLogMessage(wxT("Error:\t\tInvalid model nameOfs=%d/%d!  May be corrupted."), header.nameOfs, sizeof(ModelHeader));
+	  LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
 	  //ok = false;
 	  //f.close();
 	  //return;
@@ -208,7 +208,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	// 4 1 0 0 = WoW 2.0 models
 	// 0 1 0 0 = WoW 1.0 models
 	if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
-		wxLogMessage(wxT("Error:\t\tModel version is incorrect!\n\t\tMake sure you are loading models from World of Warcraft 2.0.1 or newer client."));
+		LOG_ERROR << "Model version is incorrect! Make sure you are loading models from World of Warcraft 2.0.1 or newer client.";
 		ok = false;
 		f->close();
 
@@ -219,7 +219,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	}
 
 	if (f->getSize() < header.ofsParticleEmitters) {
-		wxLogMessage(wxT("Error: Unable to load the Model \"%s\", appears to be corrupted."), tempname.c_str());
+		LOG_ERROR << "Unable to load the Model \"" << tempname.c_str() << "\", appears to be corrupted.";
 	}
 	
 	if (header.nGlobalSequences) {
@@ -515,7 +515,7 @@ void WoWModel::initCommon(GameFile * f)
 
 			// Error check
 			if (i > TEXTURE_MAX-1) {
-				wxLogMessage(wxT("Critical Error: Model Texture %d over %d"), header.nTextures, TEXTURE_MAX);
+				LOG_ERROR << "Model Texture" << header.nTextures << "over" << TEXTURE_MAX;
 				break;
 			}
 			/*
@@ -548,7 +548,7 @@ void WoWModel::initCommon(GameFile * f)
 				wxString texname((char*)(f->getBuffer()+texdef[i].nameOfs), wxConvUTF8);
 				textures[i] = texturemanager.add(texname);
 				TextureList.push_back(texname);
-				wxLogMessage(wxT("Info: Added %s to the TextureList[%i]."), texname.c_str(), TextureList.size());
+				LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << TextureList.size() << "]";
 			} else {
 				// special texture - only on characters and such...
 				textures[i] = 0;
@@ -629,7 +629,7 @@ void WoWModel::initCommon(GameFile * f)
 				}
 				*/
 
-				wxLogMessage(wxT("Info: Added %s to the TextureList[%i] via specialTextures. Type: %i"), tex.c_str(), TextureList.size(), texdef[i].type);
+				LOG_INFO << "Added" << tex.c_str() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
 				TextureList.push_back(tex);
 
 				if (texdef[i].type < TEXTURE_MAX)
@@ -666,7 +666,7 @@ void WoWModel::initCommon(GameFile * f)
 	if (header.nAttachLookup) {
 		int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
 		if (header.nAttachLookup > ATT_MAX)
-			wxLogMessage(wxT("Critical Error: Model AttachLookup %d over %d"), header.nAttachLookup, ATT_MAX);
+			LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
 		for (size_t i=0; i<header.nAttachLookup; i++) {
 			if (i>ATT_MAX-1)
 				break;
@@ -803,7 +803,7 @@ void WoWModel::initAnimated(GameFile * f)
 			memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
 		} else {
 			memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
-			wxLogMessage(wxT("Error: keyBone number [%d] over [%d]"), header.nKeyBoneLookup, BONE_MAX);
+			LOG_ERROR << "KeyBone number" << header.nKeyBoneLookup << "over" << BONE_MAX;
 		}
 	}
 
@@ -950,7 +950,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 	GameFile * g = new CASCFile(lodname.c_str());
 
 	if (g->isEof()) {
-		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
+		LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
 		g->close();
 		delete g;
 		return;
@@ -960,7 +960,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
 
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N') {
-		wxLogMessage(wxT("Error: Unable to load Lods: [%s]"), lodname.c_str());
+		LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
 		g->close();
 		delete g;
 		return;
@@ -1252,7 +1252,7 @@ void WoWModel::animate(ssize_t anim)
 			// Something has been changed in the past couple of days that is causing nasty bugs
 			// this is an extra error check to prevent the program from crashing.
 			if (!vertices) {
-				wxLogMessage(wxT("Critical Error: void Model::animate(int anim), Vertex Buffer is null"));
+				LOG_ERROR << "void Model::animate(int anim), Vertex Buffer is null";
 				return;
 			}
 		}
@@ -1528,7 +1528,7 @@ void WoWModel::UpdateTextureList(wxString texName, int special)
   {
     if (specialTextures[i] == special)
     {
-      wxLogMessage(wxT("Updating %s to %s"), TextureList[i].c_str(),texName.c_str());
+      LOG_INFO << "Updating" << TextureList[i].c_str() << "to" << texName.c_str();
       TextureList[i] = texName;
       break;
     }

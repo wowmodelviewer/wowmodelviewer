@@ -53,7 +53,7 @@ bool DBCFile::open()
 	if (db_type == FT_UNK) {
 		f->close();
 		data = NULL;
-		wxLogMessage(wxT("Critical Error: An error occured while trying to read the DBCFile %s."), filename.c_str());
+		LOG_ERROR << "An error occured while trying to read the DBCFile" << filename.c_str();
 		return false;
 	}
 

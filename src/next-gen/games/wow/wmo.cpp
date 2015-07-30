@@ -12,12 +12,12 @@ WMO::WMO(wxString name): ManagedItem(name)
 	GameFile f(name);
 	ok = !f.isEof();
 	if (!ok) {
-		wxLogMessage(wxT("Error: Couldn't load WMO %s."), name.c_str());
+		LOG_ERROR << "Couldn't load WMO" << name.c_str();
 		f.close();
 		return;
 	}
 
-	wxLogMessage(wxT("Loading WMO %s"), name.c_str());
+	LOG_INFO << "Loading WMO" << name.c_str();
 
 	char fourcc[5];
 	uint32 size;
@@ -932,17 +932,16 @@ void WMOGroup::initDisplayList()
 			//gLog("CV: %d\n", size);
 			hascv = true;
 			cv = (unsigned int*)gf.getPointer();
-			wxLogMessage(wxT("Original Vertex Colors Gathered."));
+			LOG_INFO << "Original Vertex Colors Gathered.";
 
 			// Temp, until we get this fully working.
 			gf.seek(spos);
-			wxLogMessage(wxT("Gathering New Vertex Colors..."));
+			LOG_INFO << "Gathering New Vertex Colors...";
 			VertexColors = new WMOVertColor[nVertices];
 			memcpy(VertexColors, gf.getPointer(), size);
 //			for (size_t x=0;x<nVertices;x++){
 //				WMOVertColor vc;
 //				gf.read(&vc,4);
-//				//wxLogMessage("Vertex Colors Gathered. R:%03i, G:%03i, B:%03i, A:%03i",vc.r,vc.g,vc.b,vc.a);
 //				VertexColors.push_back(vc);
 //			}
 
@@ -991,13 +990,13 @@ void WMOGroup::initDisplayList()
 		WMOMaterial *mat = &wmo->mat[batch->texture];
 
 		// build indice to vert array.
-		//wxLogMessage("Indice to Vert Conversion Array for Batch %i:",b);
+		LOG_INFO << "Indice to Vert Conversion Array for Batch" << b;
 		for (size_t i=0;i<=batch->indexCount;i++){
 			size_t a = indices[batch->indexStart + i];
 			for (size_t j=batch->vertexStart;j<=batch->vertexEnd;j++){
 				if (vertices[a] == vertices[j]){
 					IndiceToVerts[batch->indexStart + i] = j;
-					//wxLogMessage(wxT("Indice %i = Vert %i"),batch->indexStart + i,j);
+					LOG_INFO << "Indice" << batch->indexStart + i << "=" << j;
 					break;
 				}
 			}

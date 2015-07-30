@@ -300,7 +300,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }
@@ -334,7 +334,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }
@@ -358,7 +358,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }
@@ -407,7 +407,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }
@@ -558,7 +558,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }
@@ -588,7 +588,7 @@ void WoWItem::load()
       {
         if (m->TextureList[x] == wxString(wxT("Special_2")))
         {
-          wxLogMessage(wxT("Replacing ID1's %s with %s"),m->TextureList[x].c_str(),texture.c_str());
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
           m->TextureList[x] = texture;
         }
       }

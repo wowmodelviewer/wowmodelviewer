@@ -203,7 +203,7 @@ Attachment* Attachment::addChild(wxString modelfn, int id, int slot, float scale
 
 Attachment* Attachment::addChild(Displayable *disp, int id, int slot, float scale, float rot, Vec3D pos)
 {
-	wxLogMessage(wxT("Attach on id %d slot %d scale %f rot %f pos (%f,%f,%f)"), id, slot, scale, rot, pos.x, pos.y, pos.z);
+	LOG_INFO << "Attach on id" << id << "slot" << slot << "scale" << scale << "rot" << rot << "pos (" << pos.x << "," << pos.y << "," << pos.z << ")";
 	Attachment *att = new Attachment(this, disp, id, slot, scale, rot, pos);
 	children.push_back(att);
 	return att;

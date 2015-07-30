@@ -22,17 +22,15 @@ _DATABASE_API_ CamCinematicDB		 camcinemadb;
 // CAMCINEMADB.H
 CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)
 {
-	wxLogMessage(wxT("Searching for CamModel..."));
+	LOG_INFO << "Searching for CamModel...";
 	// Brute force search for now
 	for (Iterator i=begin(); i!=end(); ++i)
 	{
-		//wxLogMessage(wxT("Iteration %i"),i);
 		wxString str(i->getString(CamModel));
-		wxLogMessage(wxT("CamModel: %s, VS %s"), str.c_str(), fn.c_str());
+		LOG_INFO << "CamModel:" << str.c_str() << "VS" <<  fn.c_str();
 		if(str.IsSameAs(fn, false) == true)
 			return (*i);
 	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
 
@@ -44,7 +42,6 @@ HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 		if (i->getUInt(TypeID)==id)
 			return (*i);
 	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
 // --
@@ -64,7 +61,6 @@ ItemSetDB::Record ItemSetDB::getById(unsigned int id)
 		if (i->getUInt(SetID)==id)
 			return (*i);
 	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
 
@@ -97,7 +93,6 @@ StartOutfitDB::Record StartOutfitDB::getById(unsigned int id)
 		if (i->getUInt(StartOutfitID)==id)
 			return (*i);
 	}
-	//wxLogMessage(wxT("NotFound: %s:%s#%d"), __FILE__, __FUNCTION__, __LINE__);
 	throw NotFound();
 }
 

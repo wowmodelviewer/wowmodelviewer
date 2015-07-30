@@ -269,7 +269,7 @@ bool ModelRenderPass::init(WoWModel *m)
 
 		break;
 	default:
-		wxLogMessage(wxT("[Error] Unknown blendmode: %d\n"), blendmode);
+		LOG_ERROR << "Unknown blendmode:" << blendmode;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
 	}

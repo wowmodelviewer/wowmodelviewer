@@ -40,7 +40,7 @@ void ModelLight::setup(size_t time, GLuint l)
 		p = Vec4D(tpos, 1.0f);
 	} else {
 		p = Vec4D(tpos, 1.0f);
-		wxLogMessage(wxT("Error: Light type %d is unknown."), type);
+		LOG_ERROR << "Light type" << type << "is unknown.";
 	}
 	//gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
 	glLightfv(l, GL_POSITION, p);
