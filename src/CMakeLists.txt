@@ -37,9 +37,13 @@ include(${wxWidgets_USE_FILE})
 # add wmv source files compilation
 include(cmake/sources.cmake)
 
+#clean up a bit weird backslashes in sdk path
+string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
+SET(ENV{WMV_SDK_BASEDIR} ${WMV_SDK_BASEDIR})
+
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH D:/Programmes/QT_VS_5.4.2/5.4/msvc2013_opengl/lib/cmake)
+set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
 
 find_package(Qt5Core) 
 find_package(Qt5Xml)
