@@ -20,7 +20,7 @@ END_EVENT_TABLE()
 DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
 {
   if (Create(parent, id, wxPoint(0,0), wxSize(400,400), 0, wxT("DisplaySettings")) == false) {
-    wxLogMessage(wxT("GUI Error: DisplaySettings"));
+    LOG_ERROR << "DisplaySettings";
     return;
   }
 
@@ -156,7 +156,7 @@ void DisplaySettings::OnButton(wxCommandEvent &event)
 
   if (id == ID_DISPLAY_SETTINGS_APPLY) {
     if ((oglMode->GetSelection() != video.capIndex) && video.GetCompatibleWinMode(video.capsList[oglMode->GetSelection()])) {
-      wxLogMessage(wxT("Info: Graphics display mode changed.  Requires restart to take effect."));
+      LOG_INFO << "Graphics display mode changed.  Requires restart to take effect.";
       wxMessageBox(wxT("Graphics display settings changed.\nWoW Model Viewer requires restarting to take effect."), wxT("Settings Changed"), wxICON_INFORMATION);
     }
 

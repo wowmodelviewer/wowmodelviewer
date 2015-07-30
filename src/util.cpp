@@ -94,14 +94,14 @@ float round(float input, int limit = 2){
 
 void MakeDirs(wxString PathBase, wxString ExtPaths){
 	wxString NewBase = PathBase;
-	//wxLogMessage("MKDIR Paths\nBasePath: %s\nOthers Paths: %s", PathBase, ExtPaths);
+	//LOG_INFO << "MKDIR Paths BasePath:" << PathBase << "Others Paths:" << ExtPaths;
 	wxString Paths[128];
 	size_t PathNum = 0;
 	while (ExtPaths.Find(SLASH)>0){
 		Paths[PathNum] = ExtPaths.BeforeFirst(SLASH);
 		wxString rep = Paths[PathNum]+SLASH;
 		ExtPaths.Replace(rep, wxEmptyString, true);
-		//wxLogMessage("\nBuilding Paths: %s\npaths:%s",Paths[PathNum],ExtPaths);
+		//LOG_INFO << "Building Paths:" << Paths[PathNum] << "paths:" << ExtPaths;
 		PathNum++;
 	}
 	Paths[PathNum] = ExtPaths;
@@ -110,7 +110,7 @@ void MakeDirs(wxString PathBase, wxString ExtPaths){
 	for (size_t x=0;x<PathNum;x++){
 		NewBase = wxString(NewBase << SLASH << Paths[x]);
 		if (wxDirExists(NewBase) == false){
-			//wxLogMessage("Attempting to create the following directory: %s",NewBase);
+			//LOG_INFO << "Attempting to create the following directory:" << NewBase;
 			wxMkdir(NewBase);
 		}
 	}

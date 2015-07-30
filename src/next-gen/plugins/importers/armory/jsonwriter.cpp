@@ -18,7 +18,6 @@
 #include <wx/sstream.h>
 #include <wx/mstream.h>
 #include <wx/debug.h>
-#include <wx/log.h>
 
 static const wxChar* writerTraceMask = _T("traceWriter");
 

@@ -104,10 +104,10 @@ END_EVENT_TABLE()
 
 CharControl::CharControl(wxWindow* parent, wxWindowID id)
 {
-	wxLogMessage(wxT("Creating Char Control..."));
+	LOG_INFO << "Creating Char Control...";
 
 	if(Create(parent, id, wxDefaultPosition, wxSize(100,700), 0, wxT("CharControl")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create a window frame for the Character Control!"));
+		LOG_ERROR << "Failed to create a window frame for the Character Control!";
 		return;
 	}
 
@@ -1005,7 +1005,7 @@ void CharControl::selectMount()
 					knownRidable.Add(tmp);
 			}
 		} else {
-			wxLogMessage(wxT("Can't Initiate ridable.csv ..."));
+			LOG_ERROR << "Can't Initiate ridable.csv ...";
 		}
 		
 		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
@@ -1278,23 +1278,23 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 {
 	if (!g_canvas || !g_canvas->model || g_canvas->model->modelType == MT_NPC)
 	{
-		wxLogMessage(wxT("Tabard Error: Model Not Present, or can't use a tabard."));
+		LOG_ERROR << "Model Not Present, or can't use a tabard.";
 		return;
 	}
 
 	switch (event.GetId())
 	{
 	case ID_TABARD_ICON:
-		wxLogMessage(wxT("Tabard Notice: Icon Change."));
+		LOG_INFO << "Tabard Notice: Icon Change.";
 		td.Icon = event.GetPosition();
 		break;
 	case ID_TABARD_ICONCOLOR:
-		wxLogMessage(wxT("Tabard Notice: Icon Color Change."));
+		LOG_INFO << "Tabard Notice: Icon Color Change.";
 		td.IconColor = event.GetPosition();
 		break;
 	case ID_TABARD_BORDER:
 	{
-		wxLogMessage(wxT("Tabard Notice: Border Change."));
+		LOG_INFO << "Tabard Notice: Border Change.";
         td.Border = event.GetPosition();
 		int maxColor = td.GetMaxBorderColor(td.Border);
 		if (maxColor < td.BorderColor)
@@ -1306,11 +1306,11 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 	}
 		break;
 	case ID_TABARD_BORDERCOLOR:
-		wxLogMessage(wxT("Tabard Notice: Border Color Change."));
+		LOG_INFO << "Tabard Notice: Border Color Change.";
 		td.BorderColor = event.GetPosition();
 		break;
 	case ID_TABARD_BACKGROUND:
-		wxLogMessage(wxT("Tabard Notice: Background Color Change."));
+		LOG_INFO << "Tabard Notice: Background Color Change.";
 		td.Background = event.GetPosition();
 		break;
 	}

@@ -42,11 +42,11 @@ END_EVENT_TABLE()
 
 AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 {
-	wxLogMessage(wxT("Creating Anim Control..."));
+	LOG_INFO << "Creating Anim Control...";
 
 	if(Create(parent, id, wxDefaultPosition, wxSize(700,120), 0, wxT("AnimControlFrame")) == false) {
 		wxMessageBox(wxT("Failed to create a window for our AnimControl!"), wxT("Error"));
-		wxLogMessage(wxT("GUI Error: Failed to create a window for our AnimControl!"));
+		LOG_ERROR << "Failed to create a window for our AnimControl!";
 		return;
 	}
 
@@ -156,7 +156,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   }
   // --
 
-  wxLogMessage(wxT("Update model: %s"), m->wxname.c_str());
+  LOG_INFO << "Update model:" << m->wxname.c_str();
 
   g_selModel = m;
 
@@ -557,7 +557,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 			wxString texname = it->tex[0];
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
 			texname = g_selModel->wxname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
-			wxLogMessage(wxT("Info: Added %s to the TextureList[%i] via FillSkinSelector."), texname.c_str(), g_selModel->TextureList.size());
+			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
 			g_selModel->TextureList.push_back(texname);
 			TextureGroup *grp = new TextureGroup(*it);
 			skinList->SetClientData(num++, grp);

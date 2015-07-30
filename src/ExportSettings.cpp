@@ -21,7 +21,7 @@ END_EVENT_TABLE()
 ExportSettings::ExportSettings(wxWindow* parent, wxWindowID id)
 {
   if (Create(parent, id, wxPoint(0,0), wxSize(400,400), 0, wxT("ExportSettings")) == false) {
-    wxLogMessage(wxT("GUI Error: ExportSettings"));
+    LOG_ERROR << "ExportSettings";
     return;
   }
 

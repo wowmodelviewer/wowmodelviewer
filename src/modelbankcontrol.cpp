@@ -18,7 +18,7 @@ END_EVENT_TABLE()
 
 ModelBankControl::ModelBankControl(wxWindow* parent, wxWindowID id)
 {
-	wxLogMessage(wxT("Creating Model Bank Control..."));
+	LOG_INFO << "Creating Model Bank Control...";
 
 	txtName = NULL;
 	lblName = NULL;
@@ -28,7 +28,7 @@ ModelBankControl::ModelBankControl(wxWindow* parent, wxWindowID id)
 	lstBank = NULL;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(270,280), 0, wxT("ModelBankControlFrame")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create a window for our ModelBankControl."));
+		LOG_ERROR << "Failed to create a window for our ModelBankControl.";
 		return;
 	}
 
@@ -219,7 +219,7 @@ void ModelBankControl::SaveList()
 	wxFFileOutputStream file(wxT("modelbank.dat"), wxT("w+b"));
 
 	if (!file.IsOk()) {
-		wxLogMessage(wxT("Error: Was unable to save the ModelBank data to the HDD."));
+		LOG_ERROR << "Was unable to save the ModelBank data to the HDD.";
 		return;
 	}
 

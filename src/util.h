@@ -33,7 +33,6 @@
 #include <wx/filename.h>
 #include <wx/fileconf.h>
 #include <wx/string.h>
-#include <wx/log.h>
 
 // Our other utility headers
 #include "vec3d.h"

@@ -23,7 +23,7 @@ END_EVENT_TABLE()
 GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 {
   if (Create(parent, id, wxPoint(0,0), wxSize(400,400), 0, wxT("GeneralSettings")) == false) {
-    wxLogMessage(wxT("GUI Error: GeneralSettings"));
+    LOG_ERROR << "GeneralSettings";
     return;
   }
 

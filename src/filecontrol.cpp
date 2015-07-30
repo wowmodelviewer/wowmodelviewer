@@ -62,7 +62,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 	filterMode = FILE_FILTER_MODEL;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(170,700), 0, wxT("ModelControlFrame")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create a window for our FileControl!"));
+		LOG_ERROR << "Failed to create a window for our FileControl!";
 		return;
 	}
 
@@ -109,7 +109,7 @@ void FileControl::Init(ModelViewer* mv)
 	if (modelviewer == NULL)
 		modelviewer = mv;
 
-	wxLogMessage(wxT("Initializing File Controls..."));
+	LOG_INFO << "Initializing File Controls...";
 	// Gets the list of files that meet the filter criteria
 	// and puts them into an array to be processed into out file tree
 	content = txtContent->GetValue().Lower().Trim();
@@ -447,8 +447,8 @@ void FileControl::ClearCanvas()
 #ifdef _DEBUG
 	GLenum err=glGetError();
 	if (err)
-		wxLogMessage(wxT("OGL Error: [0x%x] An error occured."), (uint32)err);
-	wxLogMessage(wxT("Clearing textures from previous model..."));
+		LOG_ERROR << "An OpenGL error occured." << err;
+	LOG_INFO << "Clearing textures from previous model...";
 #endif
 	// Texture clearing and debugging
 	texturemanager.clear();
@@ -456,7 +456,7 @@ void FileControl::ClearCanvas()
 #ifdef _DEBUG
 	err = glGetError();
 	if (err)
-		wxLogMessage(wxT("OpenGL Error: [0x%x] An error occured."), (uint32)err);
+		LOG_ERROR << "An OpenGL error occured." << err;
 #endif
 
 	modelviewer->isModel = false;

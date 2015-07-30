@@ -33,7 +33,7 @@ END_EVENT_TABLE()
 CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   : wxWindow(parent, wxID_ANY)
 {
-  wxLogMessage(wxT("Creating CharDetailsFrame..."));
+  LOG_INFO << "Creating CharDetailsFrame...";
 
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);

@@ -325,7 +325,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 	viewrot.z = 0;
 
 
-	wxLogMessage(wxT("Loading tile %s"),filename.c_str());
+	LOG_INFO << "Loading tile" << filename.c_str();
 	initDisplay();
 
 	 // [FLOW] DON'T REMOVE i use this file extraction method to debug the adt format
@@ -343,7 +343,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 	GameFile f(filename);
 	ok = !f.isEof();
 	if (!ok) {
-		wxLogMessage(wxT("Error: loading %s"),filename.c_str());
+		LOG_ERROR << "Loading" << filename.c_str() << "fails";
 		return;
 	}
 
@@ -394,7 +394,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 					f.seekRelative(8);
 				}
 			} else
-				wxLogMessage(wxT("Error: wrong MCIN chunk %d."), size);
+				LOG_ERROR << "wrong MCIN chunk" << size;
 		}
 		else if (strncmp(fourcc,"MTEX",4)==0) {
 
@@ -692,7 +692,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 					}
 					else if( mh2oi->ofsHeigthAlpha != 0 )
 					{
-						wxLogMessage(wxT("Unknown flag combination: %s."), filename.c_str());
+						LOG_ERROR << "Unknown flag combination:" << filename.c_str();
 					}
 
 					chunks[i/CHUNKS_IN_TILE][i%CHUNKS_IN_TILE].waterLayer.push_back( waterLayer );
@@ -733,7 +733,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 //
 		}
 		else {
-			wxLogMessage(wxT("No implement tile chunk %s [%d]."), fourcc, size);
+			LOG_ERROR << "No implement tile chunk" << fourcc << "[" << size << "]";
 		}
 
 		f.seek((int)nextpos);
@@ -761,7 +761,7 @@ MapTile::~MapTile()
 {
 	if (!ok) return;
 
-	wxLogMessage(wxT("Unloading tile %d,%d"), x, z);
+	LOG_INFO << "Unloading tile" << x << z;
 
 	topnode.cleanup();
 
@@ -1002,7 +1002,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 	fcc[4] = 0;
 
 	if (strncmp(fcc, "MCNK", 4)!=0 || size == 0) {
-		wxLogMessage(wxT("Error: mcnk main chunk %s [%d]."), fcc, size);
+		LOG_ERROR << "mcnk main chunk" << fcc << "[" << size << "].";
 		return;
 	}
 
@@ -1137,7 +1137,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 		size_t nextpos = f.getPos() + size;
 
 		if (fcc[0] != 'M' || f.getPos() > f.getSize()) {
-			wxLogMessage(wxT("Error: mcnk chunk initial error, fcc: %s, size: %d, pos: %d, size: %d."), fcc, size, f.getPos(), f.getSize());
+			LOG_ERROR << "mcnk chunk initial error, fcc:" << fcc << ", size:" << size << ", pos: " << f.getPos() << ", size:" << f.getSize();
 			break;
 		}
 
@@ -1521,7 +1521,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 			//gLog("No implement mcnk subchunk %s [%d].\n", fcc, size);
 		}
 		else {
-			wxLogMessage(wxT("No implement mcnk subchunk %s [%d]."), fcc, size);
+			LOG_ERROR << "No implement mcnk subchunk" << fcc << "[" << size << "]";
 		}
 		f.seek((int)nextpos);
 	}

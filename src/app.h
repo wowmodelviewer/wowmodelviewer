@@ -14,7 +14,6 @@
 // headers
 #include <wx/app.h>
 //#include <wx/debugrpt.h>
-#include <wx/log.h>
 #include <wx/tokenzr.h>
 #include <wx/dir.h>
 #include <wx/aui/aui.h>

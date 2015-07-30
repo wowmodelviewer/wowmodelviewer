@@ -14,10 +14,10 @@ END_EVENT_TABLE()
 
 SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
 {
-	wxLogMessage(wxT("Creating Settings Control..."));
+	LOG_INFO << "Creating Settings Control...";
 	
 	if (Create(parent, id, wxDefaultPosition, wxSize(405,440), wxDEFAULT_FRAME_STYLE, wxT("SettingsControlFrame")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create the window for our SettingsControl!"));
+		LOG_ERROR << "Failed to create the window for our SettingsControl!";
 		return;
 	}
 

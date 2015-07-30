@@ -57,7 +57,7 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 	model = NULL;
 	att = NULL;
 
-	wxLogMessage(wxT("Creating Model Control..."));
+	LOG_INFO << "Creating Model Control...";
 
 	wxFlexGridSizer *top = new wxFlexGridSizer(1,3);
 	modelname = new wxComboBox(this, ID_MODEL_NAME);
@@ -170,7 +170,7 @@ void ModelControl::RefreshModel(Attachment *root)
 			attachments.push_back(root);
 			if (!init)
 				UpdateModel(root);
-			wxLogMessage(wxT("ModelControl Refresh: Adding Model..."));
+			LOG_INFO << "ModelControl Refresh: Adding Model...";
 		}
 		
 		for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
@@ -180,7 +180,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				attachments.push_back((*it));
 				if (!init)
 					UpdateModel((*it));
-				wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 1..."));
+				LOG_INFO << "ModelControl Refresh: Adding Attachment Level 1...";
 			}
 
 			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
@@ -190,7 +190,7 @@ void ModelControl::RefreshModel(Attachment *root)
 					attachments.push_back((*it2));
 					if (!init)
 						UpdateModel((*it2));
-					wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 2..."));
+					LOG_INFO << "ModelControl Refresh: Adding Attachment Level 2...";
 				}
 
 				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
@@ -200,7 +200,7 @@ void ModelControl::RefreshModel(Attachment *root)
 						attachments.push_back((*it3));
 						if (!init)
 							UpdateModel((*it3));
-						wxLogMessage(wxT("ModelControl Refresh: Adding Attachment Level 3..."));
+						LOG_INFO << "ModelControl Refresh: Adding Attachment Level 3...";
 					}
 				}
 			}
@@ -216,13 +216,13 @@ void ModelControl::RefreshModel(Attachment *root)
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
 			}
 		}
-		wxLogMessage(wxT("ModelControl Refresh: Found %i Models..."),attachments.size());
+		LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
 
 		if (modelname->GetCount() > 0)
 			modelname->SetSelection(0);
 
 	} catch( ... ) {
-		wxLogMessage(wxT("Error: Problem occured in ModelControl::RefreshModel(Attachment *)"));
+		LOG_ERROR << "Problem occured in ModelControl::RefreshModel(Attachment *)";
 	}
 
 }
@@ -365,7 +365,7 @@ void ModelControl::OnCombo(wxCommandEvent &event)
 //
 //		MPQFile f(model->name);
 //		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
-//			wxLogMessage(wxT("ERROR - unable to open MPQFile: [%s]"), model->name.c_str());
+//			LOG_ERROR << "Unable to open MPQFile:" << model->name.c_str();
 //			f.close();
 //			return;
 //		}

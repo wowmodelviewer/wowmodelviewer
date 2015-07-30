@@ -257,25 +257,25 @@ ModelViewer::ModelViewer()
 			if (!video.render) // Something bad must of happened - find a new working display mode
 				video.GetAvailableMode();
 		} else {
-			wxLogMessage(wxT("Error: Failed to find a compatible graphics mode.  Finding first available display mode..."));
+			LOG_ERROR << "Failed to find a compatible graphics mode.  Finding first available display mode...";
 			video.GetAvailableMode(); // Get first available display mode that supports the current desktop colour bitdepth
 		}
 		*/
 		
-		wxLogMessage(wxT("Setting OpenGL render state..."));
+		LOG_INFO << "Setting OpenGL render state...";
 		SetStatusText(wxT("Setting OpenGL render state..."));
 		video.InitGL();
 
 		SetStatusText(wxEmptyString);
 	} else {
-		wxLogMessage(wxT("Critical Error: Unable to create the main window for the application."));
+		LOG_FATAL << "Unable to create the main window for the application.";
 		Close(true);
 	}
 }
 
 void ModelViewer::InitMenu()
 {
-	wxLogMessage(wxT("Initializing File Menu..."));
+	LOG_INFO << "Initializing File Menu...";
 
 	if (GetStatusBar() == NULL){
 		CreateStatusBar(3);
@@ -541,7 +541,7 @@ void ModelViewer::InitMenu()
 
 void ModelViewer::InitObjects()
 {
-	wxLogMessage(wxT("Initializing Objects..."));
+	LOG_INFO << "Initializing Objects...";
 
 	fileControl = new FileControl(this, ID_FILELIST_FRAME);
 
@@ -592,7 +592,7 @@ void ModelViewer::InitDatabase()
     LOG_INFO << "Initializing succeed.";
   }
 
-	wxLogMessage(wxT("Initializing Databases..."));
+	LOG_INFO << "Initializing Databases...";
 	SetStatusText(wxT("Initializing Databases..."));
 	initDB = true;
 
@@ -645,24 +645,24 @@ void ModelViewer::InitDatabase()
 
 	if (!skyboxdb.open()) {
 		initDB = false;
-		wxLogMessage(wxT("Error: Could not open the SkyBox DB."));
+		LOG_ERROR << "Could not open the SkyBox DB.";
 	}
 
 	if(!startdb.open())
-		wxLogMessage(wxT("Error: Could not open the Start Outfit Sets DB."));
+		LOG_ERROR << "Could not open the Start Outfit Sets DB.";
 	//if(!helmetdb.open()) return false;
 
 	if(!camcinemadb.open())
-		wxLogMessage(wxT("Error: Could not open the Cinema Camera DB."));
+		LOG_ERROR << "Could not open the Cinema Camera DB.";
 
-  wxLogMessage(wxT("Finished initiating database files."));
+  LOG_INFO << "Finished initiating database files.";
   SetStatusText(wxT("Finished initiating database files."));;
 
 }
 
 void ModelViewer::InitDocking()
 {
-	wxLogMessage(wxT("Initializing GUI Docking."));
+	LOG_INFO << "Initializing GUI Docking.";
 	
 	// wxAUI stuff
 	//interfaceManager.SetFrame(this); 
@@ -768,7 +768,7 @@ void ModelViewer::ResetLayout()
 
 void ModelViewer::LoadSession()
 {
-	wxLogMessage(wxT("Loading Session settings from: %s\n"), cfgPath.c_str());
+	LOG_INFO << "Loading Session settings from:" << cfgPath.c_str();
 
 	// Application Config Settings
 	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"),wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
@@ -875,7 +875,7 @@ void ModelViewer::LoadLayout()
 	// if the layout data exists,  load it.
 	if (!layout.IsNull() && !layout.IsEmpty()) {
 		if (!interfaceManager.LoadPerspective(layout, false)){
-			wxLogMessage(wxT("Error: Could not load the layout."));
+			LOG_ERROR << "Could not load the layout.";
 		}
 		else {
 			// No need to display these windows on startup
@@ -887,7 +887,7 @@ void ModelViewer::LoadLayout()
 #ifndef	_LINUX // buggy
 			interfaceManager.Update();
 #endif
-			wxLogMessage(wxT("Info: GUI Layout loaded from previous session."));
+			LOG_INFO << "GUI Layout loaded from previous session.";
 		}
 	}
 
@@ -905,7 +905,7 @@ void ModelViewer::SaveLayout()
 	wxString layout = interfaceManager.SavePerspective();
 	pConfig->Write(wxT("Layout"), layout);
 
-	wxLogMessage(wxT("Info: GUI Layout was saved."));
+	LOG_INFO << "GUI Layout was saved.";
 
 	wxDELETE(pConfig);
 }
@@ -929,7 +929,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		// error check
 		if (!modelAtt)
 		{
-			wxLogMessage(wxT("Error: Failed to load the model - %s"), fn.c_str());
+			LOG_ERROR << "Failed to load the model" << fn.c_str();
 			return;
 		}
 
@@ -959,7 +959,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		// error check
 		if (!modelAtt)
 		{
-			wxLogMessage(wxT("Error: Failed to load the model - %s"), fn.c_str());
+			LOG_ERROR << "Failed to load the model" << fn.c_str();
 			return;
 		}
 		// creature model, keep left/right hand only as equipment
@@ -971,7 +971,7 @@ void ModelViewer::LoadModel(const wxString fn)
 	// Error check,  make sure the model was actually loaded and set to canvas->model
 	if (!canvas->model)
 	{
-		wxLogMessage(wxT("Error: [ModelViewer::LoadModel()]  Model* Canvas::model is null!"));
+		LOG_ERROR << "[ModelViewer::LoadModel()]  Model* Canvas::model is null!";
 		return;
 	}
 
@@ -1307,7 +1307,7 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 
 ModelViewer::~ModelViewer()
 {
-	wxLogMessage(wxT("Shuting down the program...\n"));
+	LOG_INFO << "Shuting down the program...";
 
 	video.render = false;
 
@@ -1464,7 +1464,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 		{
 			wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_OPEN|wxFD_FILE_MUST_EXIST);
 			if (loadDialog.ShowModal()==wxID_OK) {
-				wxLogMessage(wxT("\nLoading character from a save file: %s\n"), loadDialog.GetPath().c_str());
+				LOG_INFO << "Loading character from a save file:" << loadDialog.GetPath().c_str();
 				if(charControl->model) // if a model is already present, unload equipment
 				{
 				  for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
@@ -1486,7 +1486,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 			wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
 			if (dialog.ShowModal() == wxID_OK){
 				armoryPath = dialog.GetValue();
-				wxLogMessage(wxT("\nImporting character from the Armory: %s\n"), armoryPath.c_str());
+				LOG_INFO << "Importing character from the Armory:" << armoryPath.c_str();
 				ImportArmoury(armoryPath);
 			}
 		}
@@ -2305,7 +2305,7 @@ void ModelViewer::ModelInfo()
 #endif
 
 	if (!xml.is_open()) {
-		wxLogMessage(wxT("Error: Unable to open file '%s'. Could not export model."), fn.c_str());
+		LOG_ERROR << "Unable to open file '" << fn.c_str() << "'. Could not export model.";
 		return;
 	}
 

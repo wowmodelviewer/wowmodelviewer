@@ -45,7 +45,7 @@ void OldinitShaders()
 		// init various shaders here
 		OldreloadShaders();
 	}
-	wxLogMessage(wxT("Shaders %s\n"), supportShaders?"enabled":"disabled");
+	LOG_INFO << "Shaders" << (supportShaders?"enabled":"disabled");
 	initedShaders = true;
 }
 
@@ -96,7 +96,7 @@ Shader::Shader(GLenum target, const char *program, bool fromFile):target(target)
 	if (glGetError() != 0) {
 		int errpos;
 		glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &errpos);
-		wxLogMessage(wxT("Error loading shader: %s\nError position: %d\n"), glGetString(GL_PROGRAM_ERROR_STRING_ARB), errpos);
+		LOG_ERROR << "Failed to load shader:" << glGetString(GL_PROGRAM_ERROR_STRING_ARB) << "Error position: " << errpos;
 		ok = false;
 	} else ok = true;
 

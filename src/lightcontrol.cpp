@@ -48,14 +48,14 @@ END_EVENT_TABLE()
 
 LightControl::LightControl(wxWindow* parent, wxWindowID id)
 {
-	wxLogMessage(wxT("Creating Light Control..."));
+	LOG_INFO << "Creating Light Control...";
 
 	activeLight = 0;
 	lights = NULL;
 	lights = new Light[MAX_LIGHTS];
 	
 	if(Create(parent, id, wxDefaultPosition, wxSize(160,430), 0, wxT("LightControlFrame")) == false) {
-		wxLogMessage(wxT("GUI Error: Failed to create a window frame for the LightControl!"));
+		LOG_ERROR << "Failed to create a window frame for the LightControl!";
 		return;
 	}
 
@@ -163,8 +163,8 @@ LightControl::~LightControl()
 void LightControl::Init()
 {
 	//glGetLightiv(GL_LIGHT0, GL_MAX_LIGHTS, maxlights);
-	//wxLogMessage("Max Lights Supported: %i", maxlights);
-	wxLogMessage(wxT("Max Lights used: %i"), MAX_LIGHTS);
+	//LOG_INFO << "Max Lights Supported:" << maxlights;
+	LOG_INFO << "Max Lights used:" << MAX_LIGHTS;
 
 	if (!lights)
 		return;

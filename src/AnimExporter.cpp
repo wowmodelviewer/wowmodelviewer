@@ -33,7 +33,7 @@ CAnimationExporter::CAnimationExporter(wxWindow* parent, wxWindowID id, const wx
 
 	if (Create(parent, id, title, pos, size, style|wxTAB_TRAVERSAL, wxT("GifExporterFrame")) == false) {
 		wxMessageBox(wxT("Failed to create the Gif Exporter window!"), wxT("Error"));
-		wxLogMessage(wxT("GUI Error: Failed to create the Gif Exporter window!"));
+		LOG_ERROR << "Failed to create the Gif Exporter window!";
 		this->Destroy();
 		return;
 	}
@@ -118,7 +118,7 @@ void CAnimationExporter::CreateGif()
 {
 	if (!g_canvas || !g_canvas->model || !g_canvas->model->animManager) {
 		wxMessageBox(wxT("Unable to create animated GIF!"), wxT("Error"));
-		wxLogMessage(wxT("Error: Unable to created animated GIF.  A required objects pointer was null!"));
+		LOG_ERROR << "Unable to created animated GIF.  A required objects pointer was null!";
 		Show(false);
 		return;
 	}
@@ -150,7 +150,7 @@ void CAnimationExporter::CreateGif()
 	// will crash program - prevent this from happening
 	if (m_iTotalFrames > m_iTotalAnimFrames) {
 		wxMessageBox(wxT("Impossible to make a gif with more frames than the model animation.\nClosing gif exporter."), wxT("Error"));
-		wxLogMessage(wxT("Error: Unable to make a gif with more frames than the model animation."));
+		LOG_ERROR << "Unable to make a gif with more frames than the model animation.";
 		this->Show(false);
 		return;
 	}
@@ -181,7 +181,7 @@ void CAnimationExporter::CreateGif()
 		g_canvas->rt = new RenderTexture();
 
 		if (!g_canvas->rt) {
-			wxLogMessage(wxT("Error: RenderToTexture object is null!"));
+			LOG_ERROR << "RenderToTexture object is null!";
 			this->Show(false);
 			return;
 		}
@@ -385,7 +385,7 @@ void CAnimationExporter::CreateGif()
 		m_pPal = NULL;
 	}
 
-	wxLogMessage(wxT("Info: GIF Animation successfully created."));
+	LOG_INFO << "GIF Animation successfully created.";
 
 	g_canvas->model->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
 	g_canvas->model->animManager->Play();
@@ -439,7 +439,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 
 	if (!g_canvas || !g_canvas->model || !g_canvas->model->animManager) {
 		wxMessageBox(wxT("Unable to create AVI animation!"), wxT("Error"));
-		wxLogMessage(wxT("Error: Unable to created AVI animation.  A required object pointer was null!"));
+		LOG_ERROR << "Unable to created AVI animation.  A required object pointer was null!";
 		return;
 	}
 
@@ -457,7 +457,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 		g_canvas->rt = new RenderTexture();
 
 		if (!g_canvas->rt) {
-			wxLogMessage(wxT("Error: RenderToTexture object is null!"));
+			LOG_ERROR << "RenderToTexture object is null!";
 			Show(false);
 			return;
 		}
@@ -481,7 +481,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	// will crash program - prevent this from happening
 	if (m_iTotalFrames > m_iTotalAnimFrames) {
 		wxMessageBox(wxT("Impossible to make a gif with more frames than the model animation.\nClosing gif exporter."), wxT("Error"));
-		wxLogMessage(wxT("Error: Unable to make a gif with more frames than the model animation."));
+		LOG_ERROR << "Unable to make a gif with more frames than the model animation.";
 		return;
 	}
 

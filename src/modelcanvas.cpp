@@ -70,7 +70,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"), attrib, wxNullPalette)
 #endif
 {
-	wxLogMessage(wxT("Creating OpenGL Canvas..."));
+	LOG_INFO << "Creating OpenGL Canvas...";
 
     init = false;
 	initShaders = false;
@@ -119,7 +119,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	//wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE
 #ifdef _WINDOWS
 	if(!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"))) {
-		wxLogMessage(wxT("Critcal Error: Unable to create a window to handle our OpenGL rendering.\n\tWon't be able to continue."));
+		LOG_ERROR << "Unable to create a window to handle our OpenGL rendering. Won't be able to continue.";
 		parent->Close();
 		return;
 	} else 
@@ -135,7 +135,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 		timer.Start(TIME_STEP);
 
 		// Initiate our default OpenGL settings
-		wxLogMessage(wxT("Initiating OpenGL..."));
+		LOG_INFO << "Initiating OpenGL...";
 #ifdef _WINDOWS
 		wxDisplay *disp = new wxDisplay(0);
 		int bpp = disp->GetCurrentMode().bpp;

@@ -23,7 +23,7 @@ ImageControl::ImageControl(wxWindow *parent, wxWindowID id, ModelCanvas *cc)
 	this->cc = cc;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(300,150), wxTAB_TRAVERSAL, wxT("ImageControlFrame")) == false) {
-		wxLogMessage(wxT("Serious Error: Failed to create a window for our ImageControl!"));
+		LOG_ERROR << "Failed to create a window for our ImageControl!";
 		return;
 	}
 

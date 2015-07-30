@@ -142,15 +142,10 @@ bool WowModelViewApp::OnInit()
 	LOGGER.addChild(new WMVLog::LogOutputConsole());
 	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
-  // Just a little header to start off the log file.
-  wxLogMessage(wxString(wxT("Starting:\n")));
-  wxString l_logMess = std::string(GLOBALSETTINGS.appName()
-  + " "
-  + GLOBALSETTINGS.appVersion()
-  + " "
-  + GLOBALSETTINGS.buildName()
-  + "\n\n").c_str();
-  wxLogMessage(l_logMess);
+    // Just a little header to start off the log file.
+    LOG_INFO << "Starting:" << GLOBALSETTINGS.appName().c_str()
+		  << GLOBALSETTINGS.appVersion().c_str()
+		  << GLOBALSETTINGS.buildName().c_str();
 
 	SetTopWindow(frame);
 	/*
@@ -244,7 +239,7 @@ bool WowModelViewApp::OnInit()
 	// Load previously saved layout
 	frame->LoadLayout();
 
-	wxLogMessage(wxT("WoW Model Viewer successfully loaded!\n----\n"));
+	LOG_INFO << "WoW Model Viewer successfully loaded!";
 
 	// check for last version
 	if(wxExecute("UpdateManager.exe --no-ui",wxEXEC_SYNC) < 0)

@@ -17,7 +17,6 @@
 #include <wx/mstream.h>
 #include <wx/sstream.h>
 #include <wx/debug.h>
-#include <wx/log.h>
 
 
 

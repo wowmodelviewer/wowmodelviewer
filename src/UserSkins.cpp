@@ -33,11 +33,11 @@ void UserSkins::LoadFile(const wxString &filename)
 	std::ifstream in(filename.char_str());
 
 	if (!in.is_open()) {
-		wxLogMessage(wxT("Failed to open '%s' while loading user skins"), filename.c_str());
+		LOG_ERROR << "Failed to open '" << filename.c_str() << "' while loading user skins";
 		return;
 	}
 
-	wxLogMessage(wxT("Loading user skins from '%s'"), filename.c_str());
+	LOG_INFO << "Loading user skins from " << filename.c_str();
 	// parse the file
 	// See the comment at the end of this file for the exact format
 	std::string line;
@@ -48,24 +48,24 @@ void UserSkins::LoadFile(const wxString &filename)
 		model.MakeLower();
 
 		if (!readline(in, line, lineNr)) {
-			wxLogMessage(wxT("Error - UserSkins: unexpected EOF after '%s' (line %d)"), model.c_str(), lineNr);
+			LOG_ERROR << "UserSkins: unexpected EOF after '" << model.c_str() << "' (line" << lineNr << ")";
 			return;
 		}
 
 		size_t numGroups = atoi(line.c_str());
 		if (numGroups < 0) {
-			wxLogMessage(wxT("Error - UserSkins: negativ number of groups specified in line %d"), lineNr);
+			LOG_ERROR << "UserSkins: negative number of groups specified in line" << lineNr;
 			return;
 		}
 		if (numGroups > SET_WARN_COUNT) 
-			wxLogMessage(wxT("Warning - UserSkins: very large number of groups (%d) specified in line %d"), numGroups, lineNr);
+			LOG_INFO << "UserSkins: very large number of groups (" << numGroups << ") specified in line" << lineNr;
 		
 		for (size_t g=0; g < numGroups; ++g) {
 			TextureGroup grp;
 			int count = 0;
 			for (size_t i=0; i < TextureGroup::num; ++i) {
 				if (!readline(in, line, lineNr)) {
-					wxLogMessage(wxT("Error - UserSkins: unexpected EOF at line %d"), lineNr);
+					LOG_ERROR << "UserSkins: unexpected EOF at line" << lineNr;
 					return;
 				}
 				grp.tex[i] = wxString(line.c_str(), wxConvUTF8);
@@ -80,7 +80,7 @@ void UserSkins::LoadFile(const wxString &filename)
 	}
 	// everything ok (-:
 	loaded = true;
-	wxLogMessage(wxT("User skins %s loaded"), filename.c_str());
+	LOG_INFO << "User skins" << filename.c_str() << "loaded";
 	in.close();
 }
 
