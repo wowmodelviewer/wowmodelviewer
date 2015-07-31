@@ -18,7 +18,7 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-file(GLOB src *.cpp )
+set(src WowheadImporter.cpp)
 
 add_library(wowhead SHARED ${src})
 

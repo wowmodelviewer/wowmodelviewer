@@ -16,7 +16,7 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-file(GLOB src *.cpp )
+set(src OBJExporter.cpp)
 
 add_library(objexporter SHARED ${src})
 

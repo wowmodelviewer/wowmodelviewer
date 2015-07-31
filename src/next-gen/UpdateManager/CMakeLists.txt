@@ -20,7 +20,8 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-file(GLOB src *.cpp)
+set(src main.cpp
+        UpdateManager.cpp)
 
 add_executable(UpdateManager WIN32 ${src})
 

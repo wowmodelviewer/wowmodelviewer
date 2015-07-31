@@ -17,7 +17,25 @@ find_package(Qt5Gui) # Qt5Gui is needed for QImage
 find_package(Qt5Network)
 set(CMAKE_AUTOMOC ON)
 
-file(GLOB src *.cpp ../metaclasses/*.cpp ../logger/*.cpp)
+set(src CharInfos.cpp
+        ExporterPlugin.cpp
+        FileDownloader.cpp
+        GlobalSettings.cpp
+        ImporterPlugin.cpp
+        Model.cpp
+        NPCInfos.cpp
+        Plugin.cpp
+        PluginManager.cpp
+        VersionManager.cpp
+        ../metaclasses/Component.cpp
+        ../metaclasses/ConstIterator.cpp
+        ../metaclasses/Event.cpp
+        ../metaclasses/Iterator.cpp
+        ../metaclasses/Observable.cpp
+        ../metaclasses/Observer.cpp
+        ../logger/Logger.cpp
+        ../logger/LogOutputConsole.cpp
+        ../logger/LogOutputFile.cpp)
 
 add_definitions(-DBUILDING_CORE_DLL)
 

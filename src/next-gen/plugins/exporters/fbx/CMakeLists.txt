@@ -19,7 +19,7 @@ add_definitions(-DQT_PLUGIN)
 
 include_directories($ENV{WMV_SDK_BASEDIR}/include)
 
-file(GLOB src *.cpp )
+set(src FBXExporter.cpp)
 
 add_library(fbxexporter SHARED ${src})
 

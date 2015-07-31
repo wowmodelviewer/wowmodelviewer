@@ -18,7 +18,10 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-file(GLOB src *.cpp )
+set(src ArmoryImporter.cpp 
+        jsonreader.cpp
+        jsonval.cpp
+        jsonwriter.cpp)
 
 add_library(armory SHARED ${src})
 
