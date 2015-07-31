@@ -29,11 +29,11 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <string>
 
 // Qt
 
 // Externals
-#include <wx/string.h>
 
 // Other libraries
 #include "enums.h"
@@ -72,8 +72,8 @@ class _CHARINFOS_API_ CharInfos
     // Members
     size_t raceId;
     size_t genderId;
-    wxString race;
-    wxString gender;
+    std::string race;
+    std::string gender;
     bool hasTransmogGear;
     size_t skinColor;
     size_t faceType;

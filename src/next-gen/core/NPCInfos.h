@@ -29,11 +29,11 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <string>
 
 // Qt
 
 // Externals
-#include <wx/string.h>
 
 // Other libraries
 
@@ -73,7 +73,7 @@ class _NPCINFOS_API_ NPCInfos
     int id;
     int displayId;
     int type;
-    wxString name;
+    std::string name;
 
   protected :
     // Constants / Enums

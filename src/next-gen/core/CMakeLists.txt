@@ -6,8 +6,6 @@ message(STATUS "Building nextgen Core")
 # define policies to avoid warnings
 include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
-find_package(wxWidgets COMPONENTS core base gl REQUIRED)
-
 include_directories(.)
 include_directories(../)
 
