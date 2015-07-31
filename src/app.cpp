@@ -156,7 +156,7 @@ bool WowModelViewApp::OnInit()
 
 	// Set the icon, different source location for the icon under Linux & Mac
 	wxIcon icon;
-#if defined (_WINDOWS) && !defined(_MINGW)
+#if defined (_WINDOWS)
 	if (icon.LoadFile(wxT("mainicon"),wxBITMAP_TYPE_ICO_RESOURCE) == false)
 		wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #elif defined (_LINUX)

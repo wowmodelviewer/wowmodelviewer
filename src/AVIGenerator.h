@@ -37,7 +37,6 @@
 
 #include <assert.h>
 
-#pragma message("     Adding library: vfw32.lib" ) 
 #pragma comment(lib, "vfw32.lib")
 
 /*! \brief A simple class to create AVI video stream.

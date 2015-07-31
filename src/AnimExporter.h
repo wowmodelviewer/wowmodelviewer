@@ -7,7 +7,7 @@
 #include <wx/wx.h>
 
 #include "modelcanvas.h"
-#if defined(_WINDOWS) && !defined(_MINGW)
+#if defined(_WINDOWS)
 #include "AVIGenerator.h"
 #endif
 

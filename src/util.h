@@ -42,7 +42,7 @@
 
 using namespace std;
 
-#if defined(_WINDOWS) && !defined(_MINGW)
+#if defined(_WINDOWS)
 	#define snprintf _snprintf
 	typedef unsigned char uint8;
 	typedef char int8;

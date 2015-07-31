@@ -1539,11 +1539,8 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
 				wxString fn = dialog.GetPath();
 
 				// FIXME: ofstream is not compitable with multibyte path name
-#ifndef _MINGW
 				ofstream f(fn.fn_str(), ios_base::out|ios_base::trunc);
-#else
-				ofstream f(fn.char_str(), ios_base::out|ios_base::trunc);
-#endif
+
 				f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
 				for (size_t i=0; i<MAX_LIGHTS; i++) {
 					f << lightControl->lights[i].ambience.x << " " << lightControl->lights[i].ambience.y << " " << lightControl->lights[i].ambience.z << " " << lightControl->lights[i].arc << " " << lightControl->lights[i].constant_int << " " << lightControl->lights[i].diffuse.x << " " << lightControl->lights[i].diffuse.y << " " << lightControl->lights[i].diffuse.z << " " << lightControl->lights[i].enabled << " " << lightControl->lights[i].linear_int << " " << lightControl->lights[i].pos.x << " " << lightControl->lights[i].pos.y << " " << lightControl->lights[i].pos.z << " " << lightControl->lights[i].quadradic_int << " " << lightControl->lights[i].relative << " " << lightControl->lights[i].specular.x << " " << lightControl->lights[i].specular.y << " " << lightControl->lights[i].specular.z << " " << lightControl->lights[i].target.x << " " << lightControl->lights[i].target.y << " " << lightControl->lights[i].target.z << " " << lightControl->lights[i].type << endl;
@@ -1561,11 +1558,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
 			if (dialog.ShowModal()==wxID_OK) {
 				wxString fn = dialog.GetFilename();
 				// FIXME: ifstream is not compitable with multibyte path name
-#ifndef _MINGW
 				ifstream f(fn.fn_str());
-#else
-				ifstream f(fn.char_str());
-#endif
 				
 				bool lightObj, lightTrue, lightDir, lightAmb, lightModel;
 
@@ -2016,11 +2009,8 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 void ModelViewer::SaveChar(wxString fn)
 {
 	// FIXME: ofstream is not compatible with multibyte path name
-#ifndef _MINGW
 	ofstream f(fn.fn_str(), ios_base::out|ios_base::trunc);
-#else
-	ofstream f(fn.char_str(), ios_base::out|ios_base::trunc);
-#endif
+
 	f << canvas->model->wxname << endl;
 	f << charControl->model->cd.race << " " << charControl->model->cd.gender << endl;
 	f << charControl->model->cd.skinColor() << " " << charControl->model->cd.faceType() << " " << charControl->model->cd.hairColor() << " " << charControl->model->cd.hairStyle() << " " << charControl->model->cd.facialHair() << " " << charControl->model->cd.eyeGlowType << endl;
@@ -2046,11 +2036,7 @@ void ModelViewer::LoadChar(wxString fn)
 {
 	std::string modelname;
 	// FIXME: ifstream is not compatible with multibyte path name
-#ifndef _MINGW
 	ifstream f(fn.fn_str());
-#else
-	ifstream f(fn.char_str());
-#endif
 	
 	f >> modelname; // model name
 
@@ -2298,11 +2284,7 @@ void ModelViewer::ModelInfo()
 	WoWModel *m = canvas->model;
 	wxString fn = wxT("ModelInfo.xml");
 	// FIXME: ofstream is not compitable with multibyte path name
-#ifndef _MINGW
 	ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
-#else
-	ofstream xml(fn.char_str(), ios_base::out | ios_base::trunc);
-#endif
 
 	if (!xml.is_open()) {
 		LOG_ERROR << "Unable to open file '" << fn.c_str() << "'. Could not export model.";

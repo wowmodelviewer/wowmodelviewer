@@ -345,7 +345,7 @@ void CAnimationExporter::CreateGif()
 	filen << wxT(".gif");
 
 	FILE *hFile = NULL;
-#if	defined(_WINDOWS) && !defined(_MINGW)
+#if	defined(_WINDOWS)
 	fopen_s(&hFile, filen.mb_str(), "wb");
 #else
 	hFile = fopen(filen.mb_str(), "wb");
@@ -433,7 +433,7 @@ void CAnimationExporter::OnCheck(wxCommandEvent &event)
 	}
 }
 
-#if defined(_WINDOWS) && !defined(_MINGW)
+#if defined(_WINDOWS)
 void CAnimationExporter::CreateAvi(wxString fn)
 {
 
@@ -462,7 +462,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 			return;
 		}
 
-		g_canvas->rt->Init((HWND)g_canvas->GetHandle(), 512, 512, video.supportFBO);
+		g_canvas->rt->Init(512, 512, video.supportFBO);
 		
 		m_iWidth = g_canvas->rt->nWidth;
 		m_iHeight = g_canvas->rt->nHeight;

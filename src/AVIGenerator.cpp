@@ -7,6 +7,7 @@
 // Temp openGL headers for testing to confirm that it works
 #include "OpenGLHeaders.h"
 
+#include "logger/Logger.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -74,7 +75,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 											// Name your file .avi -> very important
 
 	if (hr != AVIERR_OK) {
-		LOG_ERROR << "AVI Engine failed to initialize. Check filename" << m_sFile.c_str();
+		LOG_ERROR << "AVI Engine failed to initialize. Check filename" << m_sFile;
 		// Check it succeded.
 		switch(hr) {
 		case AVIERR_BADFORMAT: 

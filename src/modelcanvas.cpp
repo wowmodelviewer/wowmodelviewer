@@ -152,7 +152,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 ModelCanvas::~ModelCanvas()
 {
 	// Release our avi engine
-#if defined(_WINDOWS) && !defined(_MINGW)
+#if defined(_WINDOWS)
 	cAvi.ReleaseEngine();
 #endif
 
@@ -988,7 +988,7 @@ inline void ModelCanvas::RenderBackground()
 	
 	glBindTexture(GL_TEXTURE_2D, uiBGTexture);
 
-#if defined(_WINDOWS) && !defined(_MINGW)
+#if defined(_WINDOWS)
 	// If its an AVI background, increment the frame
 	if (drawAVIBackground)
 		cAvi.GetFrame();
@@ -1826,17 +1826,19 @@ void ModelCanvas::LoadBackground(wxString filename)
 
 	if (tmp == wxT("avi"))
 	{
-#ifndef _MINGW
+#ifdef _WINDOWS
 		cAvi.SetFileName(filename.c_str());
 		cAvi.InitEngineForRead();
 #endif
+
 		// Setup the OpenGL Texture stuff
 		glGenTextures(1, &uiBGTexture);
 		glBindTexture(texFormat, uiBGTexture);
 		
 		glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
 		glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtering
-#ifndef _MINGW
+
+#ifndef _WINDOWS
 		cAvi.GetFrame();
 #endif
 		drawBackground = true;

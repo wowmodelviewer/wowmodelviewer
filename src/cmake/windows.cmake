@@ -1,7 +1,4 @@
-set(RES_FILES "wmv_mingw.rc")
-#set(CMAKE_RC_COMPILER_INIT windres)
-#ENABLE_LANGUAGE(RC)
-#SET(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff -o <OBJECT> <SOURCE>")
+set(RES_FILES "wmv.rc")
 
 message(STATUS "Using Windows version")
 
@@ -20,9 +17,10 @@ include_directories(${CMAKE_SOURCE_DIR}
 include_directories(next-gen/games/wow)
 
 add_definitions(-D_WINDOWS)
-add_definitions(-D_MINGW)
+
 add_definitions(-D_BETAVERSION) # comment if you are building a released version
 #add_definitions(-D_ALPHAVERSION) # comment if you are building a released version
+
 if(${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
   message(STATUS "Release build : Final exe will be stripped")
   set(CMAKE_EXE_LINKER_FLAGS "-s") # strip exe
