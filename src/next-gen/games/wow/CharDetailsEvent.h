@@ -48,47 +48,47 @@
 //--------------------------------------------------------------------
 class CharDetailsEvent : public Event
 {
-	public :
-		// Constants / Enums
-		enum EventType
-		{
+  public :
+    // Constants / Enums
+    enum EventType
+    {
       SKINCOLOR_CHANGED = 0xFFFFF000,
       FACETYPE_CHANGED = 0xFFFFF001,
       HAIRCOLOR_CHANGED = 0xFFFFF002,
       HAIRSTYLE_CHANGED = 0xFFFFF003,
       FACIALHAIR_CHANGED = 0xFFFFF004
-		};
+    };
 
-		// Constructors
-		CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
+	// Constructors
+	CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
 
-		// Destructors
+	// Destructors
 
-		// Methods
+	// Methods
 
-	protected :
-		// Constants / Enums
+  protected :
+	// Constants / Enums
 
-		// Constructors
+	// Constructors
 
-		// Destructors
+	// Destructors
 
-		// Methods
+	// Methods
 
-		// Members
+	// Members
 
-	private :
-		// Constants / Enums
+  private :
+	// Constants / Enums
 
-		// Constructors
+	// Constructors
 
-		// Destructors
+	// Destructors
 
-		// Methods
+	// Methods
 
-		// Members
+	// Members
 
-		// friend class declarations
+	// friend class declarations
 };
 
 // static members definition

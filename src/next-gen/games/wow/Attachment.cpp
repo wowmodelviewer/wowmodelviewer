@@ -8,6 +8,8 @@
 #include "next-gen/games/wow/Attachment.h"
 #include "logger/Logger.h"
 
+#include <string>
+
 #include "modelcanvas.h"
 
 Attachment::~Attachment()
@@ -186,9 +188,9 @@ void Attachment::setupParticle()
 		parent->model->setupAtt2(id);
 }
 
-Attachment* Attachment::addChild(wxString modelfn, int id, int slot, float scale, float rot, Vec3D pos)
+Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float scale, float rot, Vec3D pos)
 {
-	if (!modelfn || modelfn.Len() == 0 || id<0)
+	if (modelfn.length() == 0 || id<0)
 		return 0;
 
 	WoWModel *m = new WoWModel(modelfn, true);

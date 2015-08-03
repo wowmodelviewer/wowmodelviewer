@@ -15,14 +15,16 @@
 
 #include "CxImage/ximage.h"
 
+#include <string>
+
 #include <QImage>
 
 std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 
-void CharTexture::addLayer(wxString fn, int region, int layer)
+void CharTexture::addLayer(std::string fn, int region, int layer)
 {
   //std::cout << __FUNCTION__ << " " << fn.mb_str() << " " << region << " " << layer << std::endl;
-  if (!fn || fn.length()==0)
+  if (fn.length()==0)
     return;
 
   CharTextureComponent ct;
@@ -32,7 +34,7 @@ void CharTexture::addLayer(wxString fn, int region, int layer)
   m_components.push_back(ct);
 }
 
-void CharTexture::reset(size_t _layoutSizeId)
+void CharTexture::reset(unsigned int _layoutSizeId)
 {
   m_components.clear();
   layoutSizeId = _layoutSizeId;
@@ -96,11 +98,12 @@ void CharTexture::compose(TextureID texID)
 				newImage->IncreaseBpp(32);	// set image to 32bit
 				newImage->CreateFromArray(tempbuf, tex->w, tex->h, 32, (tex->w*4), false);
 				newImage->Resample(coords.width, coords.height, 2); // 0: hight quality, 1: normal quality
-				wxDELETE(tempbuf);
+				delete tempbuf;
 				tempbuf = NULL;
 				long size = coords.width * coords.height * 4;
 				newImage->Encode2RGBA(tempbuf, size, false);
-				wxDELETE(newImage);
+				delete newImage;
+				newImage= NULL;
 			}
 			else
 			{
@@ -169,13 +172,13 @@ void CharTexture::initRegions()
   for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
   {
     LayoutSize texLayout;
-    int curLayout = atoi(layouts.values[i][0].c_str());
-    texLayout.width = atoi(layouts.values[i][1].c_str());
-    texLayout.height = atoi(layouts.values[i][2].c_str());
+    int curLayout = layouts.values[i][0].toInt();
+    texLayout.width = layouts.values[i][1].toInt();
+    texLayout.height = layouts.values[i][2].toInt();
 
     // search all regions for this layout
     QString query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
-    sqlResult regions = GAMEDATABASE.sqlQuery(query.toStdString());
+    sqlResult regions = GAMEDATABASE.sqlQuery(query);
 
     if(!regions.valid || regions.empty())
     {
@@ -194,13 +197,12 @@ void CharTexture::initRegions()
     for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
     {
       CharRegionCoords coords;
-      coords.xpos = atoi(regions.values[r][1].c_str());
-      coords.ypos = atoi(regions.values[r][2].c_str());
-      coords.width = atoi(regions.values[r][3].c_str());
-      coords.height = atoi(regions.values[r][4].c_str());
+      coords.xpos = regions.values[r][1].toInt();
+      coords.ypos = regions.values[r][2].toInt();
+      coords.width = regions.values[r][3].toInt();
+      coords.height = regions.values[r][4].toInt();
       //std::cout << atoi(regions.values[r][0].c_str())+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
-      regionCoords[atoi(regions.values[r][0].c_str())+1] = coords;
-
+      regionCoords[regions.values[r][0].toInt()+1] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
     CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);

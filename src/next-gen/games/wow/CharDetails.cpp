@@ -16,19 +16,18 @@
 #include "modelviewer.h"
 #include "WoWModel.h"
 
-#include <wx/wfstream.h>
+#include <iostream>
 
-void CharDetails::save(wxString fn, TabardDetails *td)
+void CharDetails::save(std::string fn, TabardDetails *td)
 {
 	// TODO: save/load as xml?
 	// wx/xml/xml.h says the api will change, do not use etc etc.
-	wxFFileOutputStream output( fn );
-    wxTextOutputStream f( output );
-	if (!output.IsOk())
-		return;
-	f << (int)race << wxT(" ") << (int)gender << endl;
-	f << (int)m_skinColor << wxT(" ") << (int)m_faceType << wxT(" ") << (int)m_hairColor << wxT(" ") << (int)m_hairStyle << wxT(" ") << (int)m_facialHair << endl;
-
+	std::ofstream f;
+	f.open(fn, std::ofstream::out | std::ofstream::app);
+	if(f.is_open())
+	{
+		f << (int)race << " " << (int)gender << endl;
+		f << (int)m_skinColor << " " << (int)m_faceType << " " << (int)m_hairColor << " " << (int)m_hairStyle << " " << (int)m_facialHair << endl;
 	// @TODO : to repair
 	/* for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f << equipment[i] << endl;
@@ -39,10 +38,11 @@ void CharDetails::save(wxString fn, TabardDetails *td)
 		f << td->Background << wxT(" ") << td->Border << wxT(" ") << td->BorderColor << wxT(" ") << td->Icon << wxT(" ") << td->IconColor << endl;
 	}
 	*/
-	output.Close();
+	  f.close();
+	}
 }
 
-bool CharDetails::load(wxString fn, TabardDetails *td)
+bool CharDetails::load(std::string fn, TabardDetails *td)
 {
 	unsigned int r, g;
 	bool same = false;
@@ -50,40 +50,39 @@ bool CharDetails::load(wxString fn, TabardDetails *td)
 	// for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
 			// equipment[i] = 0;
 
-	wxFFileInputStream input( fn );
-	if (!input.IsOk())
-		return false;
-	wxTextInputStream f( input );
+	std::ifstream f(fn.c_str());
 
-	f >> r >> g;
+	if(f.is_open())
+	{
+	  f >> r >> g;
 
-	if (r==race && g==gender) {
+	  if (r==race && g==gender) {
 #if defined _WINDOWS
 		f >> m_skinColor >> m_faceType >> m_hairColor >> m_hairStyle >> m_facialHair;
 #endif
 		same = true;
-	} else {
+	  } else {
 		int dummy;
 		for (size_t i=0; i<6; i++) f >> dummy;
-	}
+	  }
 
-	// @TODO : to repair
-	/*
-	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
+	  // @TODO : to repair
+	  /*
+		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		f >> tmp;
-
 
 		if (tmp > 0)
 			equipment[i] = tmp;
-	}
+		}
 
-	// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-	if (((equipment[CS_TABARD] == 5976) || (equipment[CS_TABARD] == 69209) || (equipment[CS_TABARD] == 69210)) && !input.Eof()) {
+		// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
+		if (((equipment[CS_TABARD] == 5976) || (equipment[CS_TABARD] == 69209) || (equipment[CS_TABARD] == 69210)) && !input.Eof()) {
 		f >> td->Background >> td->Border >> td->BorderColor >> td->Icon >> td->IconColor;
 		td->showCustom = true;
+		}
+	   */
+	  f.close();
 	}
-  */
-	//input.Close();
 	return same;
 }
 
@@ -228,11 +227,11 @@ void CharDetails::updateMaxValues()
                         .arg(gender)
                         .arg(infos.isHD?8:3);
 
-  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query);
 
   if(hairStyles.valid && !hairStyles.values.empty())
   {
-    m_hairStyleMax = atoi(hairStyles.values[0][0].c_str());
+    m_hairStyleMax = hairStyles.values[0][0].toInt();
   }
   else
   {
@@ -245,10 +244,10 @@ void CharDetails::updateMaxValues()
                             .arg(race)
                             .arg(gender);
 
-  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query.toStdString());
+  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query);
   if(facialHairStyles.valid && !facialHairStyles.values.empty())
   {
-    m_facialHairMax = atoi(facialHairStyles.values[0][0].c_str());
+    m_facialHairMax = facialHairStyles.values[0][0].toInt();
   }
   else
   {
@@ -336,12 +335,12 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
 
   if(query != "")
   {
-    sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+    sqlResult vals = GAMEDATABASE.sqlQuery(query);
     if(vals.valid && !vals.values.empty())
     {
       for(size_t i = 0; i < vals.values[0].size() ; i++)
-        if(!vals.values[0][i].empty())
-          result.push_back(vals.values[0][i]);
+        if(!vals.values[0][i].isEmpty())
+          result.push_back(vals.values[0][i].toStdString());
     }
     else
     {
@@ -393,11 +392,11 @@ int CharDetails::getNbValuesForSection(SectionType section)
       query = "";
   }
 
-  sqlResult vals = GAMEDATABASE.sqlQuery(query.toStdString());
+  sqlResult vals = GAMEDATABASE.sqlQuery(query);
 
   if(vals.valid && !vals.values.empty())
   {
-    result = atoi(vals.values[0][0].c_str());
+    result = vals.values[0][0].toInt();
 
   }
   else

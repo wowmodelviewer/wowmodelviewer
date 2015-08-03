@@ -26,10 +26,13 @@ CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)
 	// Brute force search for now
 	for (Iterator i=begin(); i!=end(); ++i)
 	{
+		// to repair
+		/*
 		wxString str(i->getString(CamModel));
 		LOG_INFO << "CamModel:" << str.c_str() << "VS" <<  fn.c_str();
 		if(str.IsSameAs(fn, false) == true)
 			return (*i);
+			*/
 	}
 	throw NotFound();
 }
@@ -99,19 +102,19 @@ StartOutfitDB::Record StartOutfitDB::getById(unsigned int id)
 
 
 ////////////////////
-ItemRecord::ItemRecord(const std::vector<std::string> & vals)
+ItemRecord::ItemRecord(const std::vector<QString> & vals)
   : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
   if(vals.size() < 7)
       return;
 
-  id = atoi(vals[0].c_str());
-  type = atoi(vals[2].c_str());
-  itemclass = atoi(vals[3].c_str());
-  subclass = atoi(vals[4].c_str());
+  id = vals[0].toInt();
+  type = vals[2].toInt();
+  itemclass = vals[3].toInt();
+  subclass = vals[4].toInt();
   model = 1;
-  quality = atoi(vals[6].c_str());
-  switch(atoi(vals[5].c_str()))
+  quality = vals[6].toInt();
+  switch(vals[5].toInt())
   {
     case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;
     case SHEATHETYPE_LARGEWEAPON: sheath = ATT_LEFT_BACK; break;
@@ -119,7 +122,7 @@ ItemRecord::ItemRecord(const std::vector<std::string> & vals)
     case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
     default: sheath = SHEATHETYPE_NONE;
   }
-  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[1].c_str(), wxConvUTF8).mb_str()));
+  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[1].toStdString().c_str(), wxConvUTF8).mb_str()));
 }
 
 // Alfred. prevent null items bug.
@@ -159,14 +162,14 @@ NPCRecord::NPCRecord(wxString line)
 }
 
 
-NPCRecord::NPCRecord(const std::vector<std::string> & vals)
+NPCRecord::NPCRecord(const std::vector<QString> & vals)
     : id(0), model(0), type(0)
 {
   if(vals.size() < 4)
     return;
 
-  id = atoi(vals[0].c_str());
-  model = atoi(vals[1].c_str());
-  type = atoi(vals[2].c_str());
-  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[3].c_str(), wxConvUTF8).mb_str()));
+  id = vals[0].toInt();
+  model = vals[1].toInt();
+  type = vals[2].toInt();
+  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[3].toStdString().c_str(), wxConvUTF8).mb_str()));
 }

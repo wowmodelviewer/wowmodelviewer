@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <QString>
 
 #include <wx/wx.h>
 
@@ -83,17 +84,7 @@ public:
 			assert(ofs < file.recordSize);
 			return *reinterpret_cast<unsigned char*>(offset+ofs);
 		}
-		wxString getString(size_t field) const
-		{
-			assert(field < file.fieldCount);
-			size_t stringOffset = getUInt(field);
-			if (stringOffset >= file.stringSize)
-				stringOffset = 0;
-			assert(stringOffset < file.stringSize);
-			//char * tmp = (char*)file.stringTable + stringOffset;
-			//unsigned char * tmp2 = file.stringTable + stringOffset;
-			return wxString(reinterpret_cast<char*>(file.stringTable + stringOffset), wxConvUTF8);
-		}
+
 
 		std::string getStdString(size_t field) const
 		{
@@ -106,7 +97,7 @@ public:
 		  return std::string(reinterpret_cast<char*>(file.stringTable + stringOffset));
 		}
 
-		std::vector<std::string> get(const std::map<int, std::pair<std::string, std::string> > & structure) const;
+		std::vector<std::string> get(const std::map<int, std::pair<QString, QString> > & structure) const;
 
 
 	private:

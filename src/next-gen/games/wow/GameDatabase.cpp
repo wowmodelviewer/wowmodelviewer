@@ -14,13 +14,12 @@
 #include <QDomElement>
 #include <QDomNamedNodeMap>
 #include <QFile>
-#include <QString>
 
 #include "CASCFolder.h"
 
 GameDatabase * GameDatabase::m_instance = 0;
 
-const std::vector<std::string> POSSIBLE_DB_EXT = {".dbc", ".db2"};
+const std::vector<QString> POSSIBLE_DB_EXT = {".dbc", ".db2"};
 
 GameDatabase::~GameDatabase()
 {
@@ -35,7 +34,7 @@ GameDatabase::GameDatabase()
 
 }
 
-bool GameDatabase::initFromXML(const std::string & file)
+bool GameDatabase::initFromXML(const QString & file)
 {
    int rc = 1;
 
@@ -57,15 +56,15 @@ bool GameDatabase::initFromXML(const std::string & file)
    return createDatabaseFromXML(file);
 }
 
-sqlResult GameDatabase::sqlQuery(const std::string & query)
+sqlResult GameDatabase::sqlQuery(const QString & query)
 {
   sqlResult result;
 
   char *zErrMsg = 0;
-  int rc = sqlite3_exec(m_db, query.c_str(), GameDatabase::treatQuery, (void *)&result, &zErrMsg);
+  int rc = sqlite3_exec(m_db, query.toStdString().c_str(), GameDatabase::treatQuery, (void *)&result, &zErrMsg);
   if( rc != SQLITE_OK )
   {
-    LOG_ERROR << "Querying in database" << query.c_str();
+    LOG_ERROR << "Querying in database" << query;
     LOG_ERROR << "SQL error:" << zErrMsg;
     sqlite3_free(zErrMsg);
     result.valid = false;
@@ -80,17 +79,15 @@ sqlResult GameDatabase::sqlQuery(const std::string & query)
 
 int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char ** cols)
 {
-  //std::cout << " !!!!! " <<  __FUNCTION__ << "!!!!!!" << std::endl;
-
   sqlResult * r = (sqlResult *)resultPtr;
   if(!r)
     return 1;
 
-  std::vector<std::string> values;
+  std::vector<QString> values;
   // update columns
   for(int i=0; i<nbcols; i++)
   {
-    values.push_back(QString(vals[i]).toStdString());
+    values.push_back(QString(vals[i]));
   }
 
   r->values.push_back(values);
@@ -99,11 +96,11 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
   return 0;
 }
 
-bool GameDatabase::createDatabaseFromXML(const std::string & file)
+bool GameDatabase::createDatabaseFromXML(const QString & file)
 {
   QDomDocument doc;
 
-  QFile f(file.c_str());
+  QFile f(file);
   f.open(QIODevice::ReadOnly);
   doc.setContent(&f);
   f.close();
@@ -121,11 +118,11 @@ bool GameDatabase::createDatabaseFromXML(const std::string & file)
     else
     {
       LOG_INFO << "Table creation succeed for" << e.tagName();
-      std::string gamedbfile = e.firstChildElement("gamefile").attributes().namedItem("name").nodeValue().toStdString();
+      QString gamedbfile = e.firstChildElement("gamefile").attributes().namedItem("name").nodeValue();
       if(gamedbfile != "")
       {
-        LOG_INFO << "Opening game database file" << gamedbfile.c_str();
-        if(!fillTableFromGameFile(e.tagName().toStdString(), gamedbfile))
+        LOG_INFO << "Opening game database file" << gamedbfile;
+        if(!fillTableFromGameFile(e.tagName(), gamedbfile))
         {
           LOG_ERROR << "Error during filling of database" << e.tagName();
           return false;
@@ -148,8 +145,8 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   QDomElement child = elem.firstChildElement();
   QDomElement lastChild = elem.lastChildElement();
 
-  std::string curTable = elem.nodeName().toStdString();
-  std::string create = "CREATE TABLE "+curTable+" (";
+  QString curTable = elem.nodeName();
+  QString create = "CREATE TABLE "+ curTable +" (";
 
   int curfield = 0;
   while (!child.isNull())
@@ -169,10 +166,10 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
       else
         fieldIndex = curfield++;
 
-      std::string fieldName = name.nodeValue().toStdString();
-      std::string fieldType = type.nodeValue().toStdString();
+      QString fieldName = name.nodeValue();
+      QString fieldType = type.nodeValue();
 
-     //std::cout << "fieldName = " << fieldName << " / fieldType = " << fieldType << " / fieldIndex = " << fieldIndex << std::endl;
+     //LOG_INFO << "fieldName = " << fieldName << " / fieldType = " << fieldType << " / fieldIndex = " << fieldIndex << std::endl;
 
       create += fieldName;
       create += " ";
@@ -187,8 +184,8 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   }
 
   // remove spurious "," at the end of string, if any
-  if(create.find_last_of(",") == create.length()-1)
-    create = create.substr (0,create.length()-1);
+  if(create.lastIndexOf(",") == create.length()-1)
+    create.remove(create.length()-1,1);
   create += ");";
 
   //std::cout << create << std::endl;
@@ -198,36 +195,36 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
   return r.valid;
 }
 
-bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::string & gamefile)
+bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & gamefile)
 {
   // loop over possible extension to check if file exists
-  std::string fileToOpen = "";
+  QString fileToOpen = "";
   for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
-    std::string filename = gamefile+POSSIBLE_DB_EXT[i];
-    if(CASCFOLDER.fileExists(filename.c_str()))
+    QString filename = gamefile+POSSIBLE_DB_EXT[i];
+    if(CASCFOLDER.fileExists(filename.toStdString()))
     {
       fileToOpen = filename;
       break;
     }
   }
 
-  if(fileToOpen.empty())
+  if(fileToOpen.isEmpty())
     return false;
 
-  DBCFile dbc(fileToOpen.c_str());
+  DBCFile dbc(fileToOpen.toStdString().c_str());
   if(!dbc.open())
     return false;
 
-  std::map<int, std::pair<std::string, std::string> > tableStruct = m_dbStruct[table];
+  std::map<int, std::pair<QString, QString> > tableStruct = m_dbStruct[table];
 
-  std::string query = "INSERT INTO ";
+  QString query = "INSERT INTO ";
   query += table;
   query += "(";
   int nbFields = tableStruct.size();
   //std::cout << __FUNCTION__ << " nb fields = " << nbFields << std::endl;
   int curfield = 0;
-  for(std::map<int, std::pair<std::string, std::string> >::iterator it = tableStruct.begin(), itEnd = tableStruct.end();
+  for(std::map<int, std::pair<QString, QString> >::iterator it = tableStruct.begin(), itEnd = tableStruct.end();
       it != itEnd ;
       ++it,curfield++)
   {
@@ -237,7 +234,7 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
   }
 
   query += ") VALUES";
-  std::string queryBase = query;
+  QString queryBase = query;
   int record = 0;
   int nbRecord = dbc.getRecordCount();
  // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
@@ -249,7 +246,7 @@ bool GameDatabase::fillTableFromGameFile(const std::string & table, const std::s
       if(field == 0)
         query += " (";
       query += "\"";
-      query += fields[field];
+      query += QString::fromStdString(fields[field]);
       query += "\"";
       if(field != nbfield-1)
         query += ",";

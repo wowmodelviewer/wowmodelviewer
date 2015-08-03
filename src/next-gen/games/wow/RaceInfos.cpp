@@ -54,14 +54,14 @@ void RaceInfos::init()
       if(races.values[i][r] != "")
       {
         RaceInfos infos;
-        infos.prefix = races.values[i][r+1];
-        infos.textureLayoutID = atoi(races.values[i][r+2].c_str());
-        infos.raceid = atoi(races.values[i][12].c_str());
+        infos.prefix = races.values[i][r+1].toStdString();
+        infos.textureLayoutID = races.values[i][r+2].toInt();
+        infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-        infos.customization[0] = races.values[i][13];
-        infos.customization[1] = races.values[i][14];
-        infos.customization[2] = races.values[i][15];
-        std::string modelname = races.values[i][r];
+        infos.customization[0] = races.values[i][13].toStdString();
+        infos.customization[1] = races.values[i][14].toStdString();
+        infos.customization[2] = races.values[i][15].toStdString();
+        std::string modelname = races.values[i][r].toStdString();
         std::transform(modelname.begin(), modelname.end(), modelname.begin(), ::tolower);
 
         if(modelname.find("_hd") != std::string::npos)

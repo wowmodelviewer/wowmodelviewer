@@ -413,7 +413,7 @@ void CharControl::OnButton(wxCommandEvent &event)
 	  if (dialog.ShowModal()==wxID_OK)
 	  {
 	    wxString s(dialog.GetPath());
-	    model->cd.save(s, &td);
+	    model->cd.save(s.c_str(), &td);
 
 	    // Save directory path
 	    dir = dialog.GetDirectory();
@@ -577,12 +577,12 @@ void CharControl::RefreshModel()
 	                  .arg(infos.sexid)
 	                  .arg(model->cd.hairStyle());
 
-	sqlResult hairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
 	if(hairStyle.valid && !hairStyle.values.empty())
 	{
-	  showScalp = (bool)atoi(hairStyle.values[0][1].c_str());
-	  unsigned int geosetId = atoi(hairStyle.values[0][0].c_str());
+	  showScalp = (bool)hairStyle.values[0][1].toInt();
+	  unsigned int geosetId = hairStyle.values[0][0].toInt();
 	  for (size_t j=0; j<model->geosets.size(); j++) {
 	    if (model->geosets[j].id == geosetId)
 	      model->showGeosets[j] = model->cd.showHair;
@@ -630,19 +630,19 @@ void CharControl::RefreshModel()
                           .arg(infos.sexid)
                           .arg(model->cd.facialHair());
 
-  sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query.toStdString());
+  sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
 
   if(facialHairStyle.valid && !facialHairStyle.values.empty() && model->cd.showFacialHair)
   {
-    LOG_INFO << "Facial GeoSets : " << atoi(facialHairStyle.values[0][0].c_str())
-        << " " << atoi(facialHairStyle.values[0][1].c_str())
-        << " " << atoi(facialHairStyle.values[0][2].c_str())
-        << " " << atoi(facialHairStyle.values[0][3].c_str())
-        << " " << atoi(facialHairStyle.values[0][4].c_str());
+    LOG_INFO << "Facial GeoSets : " << facialHairStyle.values[0][0].toInt()
+        << " " << facialHairStyle.values[0][1].toInt()
+        << " " << facialHairStyle.values[0][2].toInt()
+        << " " << facialHairStyle.values[0][3].toInt()
+        << " " << facialHairStyle.values[0][4].toInt();
 
-    model->cd.geosets[CG_GEOSET100] = atoi(facialHairStyle.values[0][0].c_str());
-    model->cd.geosets[CG_GEOSET200] = atoi(facialHairStyle.values[0][2].c_str());
-    model->cd.geosets[CG_GEOSET300] = atoi(facialHairStyle.values[0][1].c_str());
+    model->cd.geosets[CG_GEOSET100] = facialHairStyle.values[0][0].toInt();
+    model->cd.geosets[CG_GEOSET200] = facialHairStyle.values[0][2].toInt();
+    model->cd.geosets[CG_GEOSET300] = facialHairStyle.values[0][1].toInt();
   }
   else
   {
@@ -696,12 +696,12 @@ void CharControl::RefreshModel()
 	      .arg((infos.sexid == 0)?"HelmetGeosetVis1":"HelmetGeosetVis2")
 	      .arg(headItem->id());
 
-	  sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query.toStdString());
+	  sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
 
 	  if(helmetInfos.valid && !helmetInfos.values.empty())
 	  {
 	    // hair styles
-	    if(atoi(helmetInfos.values[0][0].c_str()) != 0)
+	    if(helmetInfos.values[0][0].toInt() != 0)
 	    {
 	      for (size_t i=0; i<model->geosets.size(); i++)
 	      {
@@ -712,7 +712,7 @@ void CharControl::RefreshModel()
 	    }
 
 	    // facial 1
-	    if(atoi(helmetInfos.values[0][1].c_str()) != 0 && infos.customization[0] != "FEATURES")
+	    if(helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
 	    {
 	      for (size_t i=0; i<model->geosets.size(); i++)
 	      {
@@ -723,7 +723,7 @@ void CharControl::RefreshModel()
 	    }
 
 	    // facial 2
-	    if(atoi(helmetInfos.values[0][2].c_str()) != 0  && infos.customization[1] != "FEATURES")
+	    if(helmetInfos.values[0][2].toInt() != 0  && infos.customization[1] != "FEATURES")
 	    {
 	      for (size_t i=0; i<model->geosets.size(); i++)
 	      {
@@ -734,7 +734,7 @@ void CharControl::RefreshModel()
 	    }
 
 	    // facial 3
-	    if(atoi(helmetInfos.values[0][3].c_str()) != 0)
+	    if(helmetInfos.values[0][3].toInt() != 0)
 	    {
 	      for (size_t i=0; i<model->geosets.size(); i++)
 	      {
@@ -745,7 +745,7 @@ void CharControl::RefreshModel()
 	    }
 
 	    // ears
-	    if(atoi(helmetInfos.values[0][4].c_str()) != 0)
+	    if(helmetInfos.values[0][4].toInt() != 0)
 	    {
 	      for (size_t i=0; i<model->geosets.size(); i++)
 	      {
@@ -847,13 +847,13 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 	  for(int i=0, imax=itemClasses.values.size() ; i < imax ; i++)
 	  {
 	    // first set verbose name
-	    wxString name = itemClasses.values[i][3].c_str();
+	    wxString name = itemClasses.values[i][3].toStdString().c_str();
 	    // if empty, fall back to normal one
 	    if(name.IsEmpty())
-	      name = itemClasses.values[i][2].c_str();
+	      name = itemClasses.values[i][2].toStdString().c_str();
 
 	    catnames.Add(CSConv(name));
-	    subclasslookup[std::pair<int,int>(atoi(itemClasses.values[i][0].c_str()),atoi(itemClasses.values[i][1].c_str()))] = (int)catnames.size()-1;
+	    subclasslookup[std::pair<int,int>(itemClasses.values[i][0].toInt(), itemClasses.values[i][1].toInt())] = (int)catnames.size()-1;
 	  }
 	}
 
@@ -922,7 +922,8 @@ void CharControl::selectSet()
 		if (setsdb.available(id)) {
 			NumStringPair p;
 			p.id = id;
-			p.name = CSConv(it->getString(ItemSetDB::Name + langOffset));
+			// to be rewritten
+		//	p.name = CSConv(it->getString(ItemSetDB::Name + langOffset));
 			items.push_back(p);
 		}
 	}
@@ -1061,8 +1062,8 @@ void CharControl::selectNPC(ssize_t type)
 	{
 	  for(int i=0, imax=npccats.values.size() ; i < imax ; i++)
 	  {
-	    catnames.Add(CSConv(npccats.values[i][1]));
-	    typeLookup[atoi(npccats.values[i][0].c_str())] = (int)catnames.size()-1;
+	    catnames.Add(CSConv(npccats.values[i][1].toStdString()));
+	    typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size()-1;
 	  }
 	}
 

@@ -1059,24 +1059,20 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	isChar = false;
 	isWMO = false;
 
-	stringstream ss;
-	ss << modelid;
-	string model = ss.str();
-
-	std::string query = "SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+	QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
 	    "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, CreatureDisplayInfo.ExtendedDisplayInfoID FROM Creature "
 	    "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
 	    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-	    "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = " + model + ";" ;
+	    "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = %1;").arg(modelid);
 
 	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if(r.valid && !r.empty())
 	{
 	  // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
-	  if(atoi(r.values[0][5].c_str()) == 0)
+	  if(r.values[0][5].toInt() == 0)
 	  {
-	    std::string modelname = r.values[0][0] + r.values[0][1];
+	    std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
 	    wxString name(modelname.c_str());
 	    LoadModel(name);
 	    canvas->model->modelType = MT_NORMAL;
@@ -1085,7 +1081,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    int count = 0;
 	    for(int i=0; i < 3; i++)
 	    {
-	      std::string tex = r.values[0][i+2];
+	      std::string tex = r.values[0][i+2].toStdString();
 	      tex = CASCFOLDER.getFullPathForFile(tex);
 
 	      grp.tex[i] = tex;
@@ -1099,7 +1095,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  }
 	  else
 	  {
-	    std::string modelname = r.values[0][0] + r.values[0][1];
+	    std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
 	    std::size_t pos = modelname.find(".m2");
 	    if(pos != std::string::npos) // normally always true
 	    {
@@ -1112,64 +1108,63 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	    LoadModel(modelname);
 
-	    query = "SELECT * FROM CreatureDisplayInfoExtra WHERE ID = ";
-	    query += r.values[0][5];
+	    query = QString("SELECT * FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(r.values[0][5]);
 
 	    r = GAMEDATABASE.sqlQuery(query);
 
 	    if(r.valid && !r.empty())
 	    {
-	      g_charControl->model->cd.race = atoi(r.values[0][1].c_str());
-	      g_charControl->model->cd.gender = atoi(r.values[0][2].c_str());
-	      g_charControl->model->cd.setSkinColor(atoi(r.values[0][3].c_str()));
-	      g_charControl->model->cd.setFaceType(atoi(r.values[0][4].c_str()));
-	      g_charControl->model->cd.setHairColor(atoi(r.values[0][6].c_str()));
-	      g_charControl->model->cd.setHairStyle(atoi(r.values[0][5].c_str()));
-	      g_charControl->model->cd.setFacialHair(atoi(r.values[0][7].c_str()));
+	      g_charControl->model->cd.race = r.values[0][1].toInt();
+	      g_charControl->model->cd.gender = r.values[0][2].toInt();
+	      g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
+	      g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
+	      g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
+	      g_charControl->model->cd.setHairStyle(r.values[0][5].toInt());
+	      g_charControl->model->cd.setFacialHair(r.values[0][7].toInt());
 
 	      WoWItem * item = g_charControl->model->getItem(CS_HEAD);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][8].c_str()));
+	        item->setDisplayId(r.values[0][8].toInt());
 
 	      item = g_charControl->model->getItem(CS_SHOULDER);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][9].c_str()));
+	        item->setDisplayId(r.values[0][9].toInt());
 
 	      item = g_charControl->model->getItem(CS_SHIRT);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][10].c_str()));
+	        item->setDisplayId(r.values[0][10].toInt());
 
 	      item = g_charControl->model->getItem(CS_CHEST);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][11].c_str()));
+	        item->setDisplayId(r.values[0][11].toInt());
 
 	      item = g_charControl->model->getItem(CS_BELT);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][12].c_str()));
+	        item->setDisplayId(r.values[0][12].toInt());
 
 	      item = g_charControl->model->getItem(CS_PANTS);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][13].c_str()));
+	        item->setDisplayId(r.values[0][13].toInt());
 
 	      item = g_charControl->model->getItem(CS_BOOTS);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][14].c_str()));
+	        item->setDisplayId(r.values[0][14].toInt());
 
 	      item = g_charControl->model->getItem(CS_BRACERS);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][15].c_str()));
+	        item->setDisplayId(r.values[0][15].toInt());
 
 	      item = g_charControl->model->getItem(CS_GLOVES);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][16].c_str()));
+	        item->setDisplayId(r.values[0][16].toInt());
 
 	      item = g_charControl->model->getItem(CS_TABARD);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][17].c_str()));
+	        item->setDisplayId(r.values[0][17].toInt());
 
 	      item = g_charControl->model->getItem(CS_CAPE);
 	      if(item)
-	        item->setDisplayId(atoi(r.values[0][18].c_str()));
+	        item->setDisplayId(r.values[0][18].toInt());
 
 
 
@@ -1204,35 +1199,32 @@ void ModelViewer::LoadItem(unsigned int id)
 	isWMO = false;
 
 	try {
-	  stringstream ss;
-	  ss << "SELECT Model1, Path, Name FROM ItemDisplayInfo \
-	      LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID \
-	      LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID \
-	      WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID =";
-	  ss << id;
-	  ss << "))";
-	  string query = ss.str();
+	  QString query = QString("SELECT Model1, Path, Name FROM ItemDisplayInfo"
+	      " LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID"
+	      " LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID"
+	      " WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID ="
+	      " (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
 	  sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
 	  //std::cout << __FILE__ << " " << __FUNCTION__ << " " << query << std::endl;
 
 	  if(itemInfos.valid && !itemInfos.empty())
 	  {
-	    std::string model1 = itemInfos.values[0][0];
+	    std::string model1 = itemInfos.values[0][0].toStdString();
 	    //std::cout << "model1 = " << model1 << std::endl;
-	    std::string texture1 = itemInfos.values[0][1];
+	    std::string texture1 = itemInfos.values[0][1].toStdString();
 	    //std::cout << "texture1 = " << texture1 << std::endl;
 
 	    model1 = CASCFOLDER.getFullPathForFile(model1);
 	    if(model1 == "") // try with .m2 at the end
 	    {
-	      model1 = itemInfos.values[0][0];
+	      model1 = itemInfos.values[0][0].toStdString();
 	      model1 = model1.substr(0, model1.length()-4); // remove .mdx
 	      model1 += ".m2"; // add .m2
 	      model1 = CASCFOLDER.getFullPathForFile(model1);
 	    }
 
-	    texture1 = itemInfos.values[0][1] + itemInfos.values[0][2];
+	    texture1 = itemInfos.values[0][1].toStdString() + itemInfos.values[0][2].toStdString();
 
 	    //std::cout << "FINAL - model1 = " << model1 << std::endl;
 	    //std::cout << "FINAL - texture1 = " << texture1 << std::endl;
@@ -1983,13 +1975,14 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 			// List of skybox models, LightSkybox.dbc
 			wxArrayString skyboxes;
 
+			// to be repaired
 			for (LightSkyBoxDB::Iterator it=skyboxdb.begin();  it!=skyboxdb.end(); ++it) {
-				wxString str(it->getString(LightSkyBoxDB::Name));
+				/*wxString str(it->getString(LightSkyBoxDB::Name));
 				str = str.BeforeLast('.');
 				str.Append(wxT(".m2"));
 
 				if (skyboxes.Index(str, false) == wxNOT_FOUND)
-					skyboxes.Add(str);
+					skyboxes.Add(str);*/
 			}
 			skyboxes.Add(wxT("World\\Outland\\PassiveDoodads\\SkyBox\\OutlandSkyBox.m2"));
 			skyboxes.Sort();
@@ -2384,12 +2377,10 @@ void ModelViewer::ModelInfo()
 			xml << "    <Animation id=\"" << i << "\">" << endl;
 			xml << "      <animID>"<< m->anims[i].animID << "</animID>" << endl;
 			wxString strName;
-			std::stringstream ss;
-			ss << "SELECT Name FROM AnimationData WHERE ID = ";
-			ss << m->anims[i].animID;
-			sqlResult anim = GAMEDATABASE.sqlQuery(ss.str());
+			QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m->anims[i].animID);
+			sqlResult anim = GAMEDATABASE.sqlQuery(query);
 			if(anim.valid && !anim.empty())
-			  strName = anim.values[0][0].c_str();
+			  strName = anim.values[0][0].toStdString().c_str();
 			else
 			  strName = wxT("???");
 			xml << "      <animName>"<< strName.c_str() << "</animName>" << endl;
@@ -2752,9 +2743,9 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	  }
 	  // retrieve race name from DB
 	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
-	  sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  result->race = r.values[0][0].c_str();
+	  result->race = r.values[0][0].toStdString().c_str();
 
 		// Load the model
 		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");

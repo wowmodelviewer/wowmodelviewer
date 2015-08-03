@@ -1540,18 +1540,15 @@ std::map<int, std::string> WoWModel::getAnimsMap()
   std::map<int, std::string> result;
   if (animated && anims)
   {
-    std::string query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
-    std::stringstream ss;
+    QString query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
     for (unsigned int i=0; i<header.nAnimations; i++)
     {
-      ss <<  anims[i].animID;
+      query += QString::number(anims[i].animID);
       if(i < header.nAnimations -1)
-        ss << ",";
+        query += ",";
       else
-        ss << ")";
+        query +=  ")";
     }
-
-    query += ss.str();
 
     sqlResult animsResult = GAMEDATABASE.sqlQuery(query);
 
@@ -1562,7 +1559,7 @@ std::map<int, std::string> WoWModel::getAnimsMap()
       // remap database results on model header indexes
       for(int i=0, imax=animsResult.values.size() ; i < imax ; i++)
       {
-        result[atoi(animsResult.values[i][0].c_str())] = animsResult.values[i][1];
+        result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdString();
       }
     }
   }

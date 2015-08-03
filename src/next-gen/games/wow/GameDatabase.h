@@ -11,10 +11,10 @@
 #include "sqlite3.h"
 
 #include <map>
-#include <string>
 #include <vector>
 
 class QDomElement;
+#include <QString>
 
 #define GAMEDATABASE GameDatabase::instance()
 
@@ -26,7 +26,7 @@ class sqlResult
     bool empty() { return values.size() == 0; }
     bool valid;
     int nbcols;
-    std::vector<std::vector<std::string> > values;
+    std::vector<std::vector<QString> > values;
 };
 
 #ifdef _WIN32
@@ -50,9 +50,9 @@ class _GAMEDATABASE_API_ GameDatabase
       return *m_instance;
     }
 
-    bool initFromXML(const std::string & file);
+    bool initFromXML(const QString & file);
 
-    sqlResult sqlQuery(const std::string &query);
+    sqlResult sqlQuery(const QString &query);
 
     void setFastMode() { m_fastMode = true; }
 
@@ -64,14 +64,14 @@ class _GAMEDATABASE_API_ GameDatabase
 
     static int treatQuery(void *NotUsed, int nbcols, char ** values , char ** cols);
 
-    bool createDatabaseFromXML(const std::string & file);
+    bool createDatabaseFromXML(const QString & file);
     bool createTableFromXML(const QDomElement &);
-    bool fillTableFromGameFile(const std::string & table, const std::string & gamefile);
+    bool fillTableFromGameFile(const QString & table, const QString & gamefile);
 
     sqlite3 *m_db;
     // std::map<TableName, [fieldID] <fieldName,fieldType> >
     // ie m_dbStruct["FileData"][0] => pair<"id","unit">
-    std::map<std::string, std::map<int, std::pair<std::string, std::string> > >  m_dbStruct;
+    std::map<QString, std::map<int, std::pair<QString, QString> > >  m_dbStruct;
 
     bool m_fastMode;
 

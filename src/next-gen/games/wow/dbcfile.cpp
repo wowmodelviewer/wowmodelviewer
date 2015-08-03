@@ -99,10 +99,10 @@ DBCFile::~DBCFile()
 }
 
 
-std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<std::string, std::string> > & structure) const
+std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QString, QString> > & structure) const
 {
   std::vector<std::string> result;
-  for(std::map<int, std::pair<std::string, std::string> >::const_iterator it = structure.begin(), itEnd = structure.end();
+  for(std::map<int, std::pair<QString, QString> >::const_iterator it = structure.begin(), itEnd = structure.end();
       it != itEnd ;
       ++it)
   {

@@ -364,7 +364,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 		                   LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID \
 		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( m->wxname.AfterLast(SLASH).c_str());
 
-  sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
   if(r.valid && !r.values.empty())
   {
@@ -374,9 +374,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       int count = 0;
       for (size_t skin=0; skin<TextureGroup::num; skin++)
       {
-        if(!r.values[i][skin].empty())
+        if(!r.values[i][skin].isEmpty())
         {
-          std::string texfullname = r.values[i][3] + r.values[i][skin] + ".blp";
+          std::string texfullname = r.values[i][3].toStdString() + r.values[i][skin].toStdString() + ".blp";
           wxString texture(texfullname.c_str());
           alreadyUsedTextures.insert(texture.Lower());
           grp.tex[skin] = texture;
@@ -469,7 +469,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	
 	// query textures for model1
 	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\"").arg(fn.mb_str());
-	sqlResult r = GAMEDATABASE.sqlQuery(query.toStdString());
+	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if(r.valid && !r.empty())
 	{
@@ -478,7 +478,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	    TextureGroup grp;
 	    grp.base = TEXTURE_ITEM;
 	    grp.count = 1;
-	    std::string tex = r.values[i][0] + r.values[i][1];
+	    std::string tex = r.values[i][0].toStdString() + r.values[i][1].toStdString();
 	    wxString skin = tex.c_str();
 	    alreadyUsedTextures.insert(skin.Lower());
 	    grp.tex[0] = skin;
@@ -489,7 +489,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
 	// do the same for model2
 	query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model2 = \"%1\"").arg(fn.mb_str());
-	r = GAMEDATABASE.sqlQuery(query.toStdString());
+	r = GAMEDATABASE.sqlQuery(query);
 
 	if(r.valid && !r.empty())
 	{
@@ -498,7 +498,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	    TextureGroup grp;
 	    grp.base = TEXTURE_ITEM;
 	    grp.count = 1;
-	    std::string tex = r.values[i][0] + r.values[i][1];
+	    std::string tex = r.values[i][0].toStdString() + r.values[i][1].toStdString();
 	    wxString skin = tex.c_str();
 	    alreadyUsedTextures.insert(skin.Lower());
 	    grp.tex[0] = skin;

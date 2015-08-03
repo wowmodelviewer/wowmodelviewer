@@ -122,7 +122,7 @@ void EnchantsDialog::InitObjects()
 
 void EnchantsDialog::InitEnchants()
 {
-  std::string query = "SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 \
+  QString query = "SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 \
                    FROM SpellItemEnchantment \
                    LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID \
                    LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID \
@@ -140,13 +140,13 @@ void EnchantsDialog::InitEnchants()
   for(int i=0, imax=enchantsInfos.values.size() ; i < imax ; i++)
   {
     EnchantsRec rec;
-    rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].c_str(), wxConvUTF8).mb_str()));;
-    rec.models[0] = enchantsInfos.values[i][2];
-    rec.models[1] = enchantsInfos.values[i][3];
-    rec.models[2] = enchantsInfos.values[i][4];
-    rec.models[3] = enchantsInfos.values[i][5];
-    rec.models[4] = enchantsInfos.values[i][6];
-    enchants[atoi(enchantsInfos.values[i][0].c_str())] = rec;
+    rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].toStdString().c_str(), wxConvUTF8).mb_str()));;
+    rec.models[0] = enchantsInfos.values[i][2].toStdString();
+    rec.models[1] = enchantsInfos.values[i][3].toStdString();
+    rec.models[2] = enchantsInfos.values[i][4].toStdString();
+    rec.models[3] = enchantsInfos.values[i][5].toStdString();
+    rec.models[4] = enchantsInfos.values[i][6].toStdString();
+    enchants[enchantsInfos.values[i][0].toInt()] = rec;
   }
 
   choices.Clear();

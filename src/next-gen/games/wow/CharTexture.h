@@ -10,8 +10,6 @@
 
 #include "video.h" // TextureID
 
-#include <wx/string.h>
-
 #include <map>
 
 struct CharRegionCoords {
@@ -24,14 +22,14 @@ struct LayoutSize {
 
 struct CharTextureComponent
 {
-	wxString name;
-	int region;
-	int layer;
+  std::string name;
+  int region;
+  int layer;
 
-	bool operator<(const CharTextureComponent& c) const
-	{
-		return layer < c.layer;
-	}
+  bool operator<(const CharTextureComponent& c) const
+  {
+	return layer < c.layer;
+  }
 };
 
 #ifdef _WIN32
@@ -47,22 +45,22 @@ struct CharTextureComponent
 class _CHARTEXTURE_API_ CharTexture
 {
   public:
-    CharTexture(size_t _layoutSizeId = 0)
+    CharTexture(unsigned int _layoutSizeId = 0)
         : layoutSizeId(_layoutSizeId)
       {}
 
-    void addLayer(wxString fn, int region, int layer);
+    void addLayer(std::string fn, int region, int layer);
 
     void compose(TextureID texID);
 
-    void reset(size_t _layoutSizeId);
+    void reset(unsigned int _layoutSizeId);
 
     static void initRegions();
 
   private:
-    size_t layoutSizeId;
-	  std::vector<CharTextureComponent> m_components;
-	  static std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
+    unsigned int layoutSizeId;
+	std::vector<CharTextureComponent> m_components;
+	static std::map<int, pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
 
 };
 
