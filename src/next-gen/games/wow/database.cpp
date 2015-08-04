@@ -122,7 +122,7 @@ ItemRecord::ItemRecord(const std::vector<QString> & vals)
     case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
     default: sheath = SHEATHETYPE_NONE;
   }
-  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[1].toStdString().c_str(), wxConvUTF8).mb_str()));
+  name = vals[1];
 }
 
 // Alfred. prevent null items bug.
@@ -171,5 +171,5 @@ NPCRecord::NPCRecord(const std::vector<QString> & vals)
   id = vals[0].toInt();
   model = vals[1].toInt();
   type = vals[2].toInt();
-  name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(vals[3].toStdString().c_str(), wxConvUTF8).mb_str()));
+  name = vals[3];
 }

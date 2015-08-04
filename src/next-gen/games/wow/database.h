@@ -146,7 +146,7 @@ public:
 };
 
 struct _DATABASE_API_ ItemRecord {
-	wxString name;
+	QString name;
 	int id, itemclass, subclass, type, model, sheath, quality;
 
 	ItemRecord(const std::vector<QString> &);
@@ -172,7 +172,7 @@ public:
 // -------------------------------
 struct _DATABASE_API_ NPCRecord
 {
-	wxString name;
+	QString name;
 	int id, model, type;
 
 	NPCRecord(wxString line);

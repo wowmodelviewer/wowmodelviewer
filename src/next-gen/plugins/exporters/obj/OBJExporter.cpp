@@ -165,7 +165,7 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
       if(!itemModels.empty())
       {
         obj << "# " << "\n";
-        obj << "# " << QString::fromStdString((*itemIt)->name()) << "\n";
+        obj << "# " << (*itemIt)->name() << "\n";
         obj << "# " << "\n";
         for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
             it != itemModels.end();

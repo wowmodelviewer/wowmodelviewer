@@ -92,14 +92,14 @@ void FBXExporter::createMesh()
   // Get the scene��s root node.
   FbxNode* root_node = m_p_scene->GetRootNode();
   // Create a node for the mesh.
-  m_p_meshNode = FbxNode::Create(m_p_manager, m_p_model->name().c_str());
+  m_p_meshNode = FbxNode::Create(m_p_manager, m_p_model->name().toStdString().c_str());
 
   // Set the node as a child of the scene��s root node.
   root_node->AddChild(m_p_meshNode);
 
   // Create mesh.
   size_t num_of_vertices = m_p_model->header.nVertices;
-  FbxMesh* mesh = FbxMesh::Create(m_p_manager, m_p_model->name().c_str());
+  FbxMesh* mesh = FbxMesh::Create(m_p_manager, m_p_model->name().toStdString().c_str());
   mesh->InitControlPoints((int)num_of_vertices);
   FbxVector4* vertices = mesh->GetControlPoints();
 
@@ -222,7 +222,7 @@ void FBXExporter::createSkeleton()
   // Get the scene��s root node.
   FbxNode* root_node = m_p_scene->GetRootNode();
 
-  FbxNode* bone_group_node = FbxNode::Create(m_p_scene, m_p_model->name().c_str());
+  FbxNode* bone_group_node = FbxNode::Create(m_p_scene, m_p_model->name().toStdString().c_str());
   FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(m_p_scene, "");
   bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
   bone_group_skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
@@ -263,7 +263,7 @@ void FBXExporter::createSkeleton()
     if (pid > -1)
       trans -= m_p_model->bones[pid].pivot;
 
-    FbxString bone_name(m_p_model->name().c_str());
+    FbxString bone_name(m_p_model->name().toStdString().c_str());
     bone_name += "_bone_";
     bone_name += static_cast<int>(i);
 
@@ -470,7 +470,7 @@ void FBXExporter::createMaterials()
     if (pass.init(m_p_model))
     {
       // Build material name.
-      FbxString mtrl_name = m_p_model->name().c_str();
+      FbxString mtrl_name = m_p_model->name().toStdString().c_str();
       mtrl_name.Append("_", 1);
       char tmp[32];
       _itoa((int)i, tmp, 10);

@@ -35,6 +35,7 @@
 #include <typeinfo> // for std::bad_cast in inherited classes
 
 // Qt 
+#include <Qstring>
 
 // Externals
 
@@ -99,8 +100,8 @@ class _COMPONENT_API_ Component
 		void unref();
 
 		// Name management
-		void setName(const std::string & name);
-		std::string name() const;
+		void setName(const QString & name);
+		QString name() const;
 		virtual void onNameChanged();
 
 		// misc
@@ -136,7 +137,7 @@ class _COMPONENT_API_ Component
 
 		unsigned int m_refCounter;
 
-		std::string m_name;
+		QString m_name;
 
 		// friend class declarations
 };

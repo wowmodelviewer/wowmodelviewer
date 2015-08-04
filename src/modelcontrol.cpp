@@ -10,6 +10,8 @@
 #include "metaclasses/Iterator.h"
 #include "WoWItem.h"
 
+#include "util.h" // CSConv
+
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)

@@ -206,7 +206,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
 		//item.m_mask=wxLIST_MASK_TEXT; 
 		item.SetId(i); 
 		//item.m_col=col; 
-		item.SetText(choices[i]);
+		item.SetText(CSConv(choices[i]));
 		/*
 		if (quality) {
 			item.SetTextColour(ItemQualityColour(quality->at(i)));

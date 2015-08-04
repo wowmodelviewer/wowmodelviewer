@@ -265,7 +265,9 @@ ItemRecord * ArmoryImporter::importItem(std::string url) const
     // Gather Race & Gender
     result->id = root[wxT("id")].AsInt();
     result->model = root[wxT("displayInfoId")].AsInt();
-    root[wxT("name")].AsString(result->name);
+    wxString name;
+    root[wxT("name")].AsString(name);
+    result->name = name.mb_str();
     result->itemclass = root[wxT("itemClass")].AsInt();
     result->subclass = root[wxT("itemSubClass")].AsInt();
     result->quality = root[wxT("quality")].AsInt();

@@ -128,7 +128,7 @@ void WoWItem::setId(int id)
       m_displayId = iteminfos.values[0][0].toInt();
 
     ItemRecord itemRcd = items.getById(id);
-    setName(itemRcd.name.c_str());
+    setName(itemRcd.name);
     m_quality = itemRcd.quality;
     load();
   }
@@ -160,7 +160,7 @@ void WoWItem::setLevel(unsigned int level)
       m_displayId = iteminfos.values[0][0].toInt();
 
     ItemRecord itemRcd = items.getById(m_id);
-    setName(itemRcd.name.c_str());
+    setName(itemRcd.name);
     m_quality = itemRcd.quality;
     load();
   }

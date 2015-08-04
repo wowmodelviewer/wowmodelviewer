@@ -6,9 +6,6 @@ include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
 message(STATUS "Building wow library")
 
-# search for required package (wxwidgets)
-find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
-
 # Qt5 stuff
 find_package(Qt5Core)
 find_package(Qt5Xml)
@@ -61,7 +58,7 @@ add_definitions(-DBUILDING_WOW_DLL)
 
 add_library(wow SHARED ${src})
 
-target_link_libraries(wow ${wxWidgets_LIBRARIES} core cximage CascLib Qt5::Core Qt5::Xml Qt5::Gui)
+target_link_libraries(wow core cximage CascLib Qt5::Core Qt5::Xml Qt5::Gui)
 
 if(WIN32)
   install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")

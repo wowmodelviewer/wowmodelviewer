@@ -45,9 +45,12 @@ wxString fixMPQPath(wxString path)
 // Convert UTF8 string to local string
 wxString CSConv(wxString str)
 {
-	return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
-	// old way
-	//return wxCSConv(langCSConv[langID]).cWC2WX(wxConvUTF8.cMB2WC(str));
+  return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
+}
+
+wxString CSConv(QString str)
+{
+  return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.toStdString().c_str()));
 }
 
 void fixname(wxString &name)

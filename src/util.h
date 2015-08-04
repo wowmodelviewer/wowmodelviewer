@@ -38,6 +38,7 @@
 #include "vec3d.h"
 #include "quaternion.h"
 
+#include <QString>
 
 
 using namespace std;
@@ -100,6 +101,7 @@ bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
 }
 
 wxString CSConv(wxString str);
+wxString CSConv(QString str);
 void fixname(wxString &name);
 void fixnamen(char *name, size_t len);
 wxString Vec3DToString(Vec3D vec);

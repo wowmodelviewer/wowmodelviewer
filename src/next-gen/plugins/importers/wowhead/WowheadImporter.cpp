@@ -181,7 +181,7 @@ ItemRecord * WowheadImporter::importItem(std::string urlToGrab) const
 
       result = new ItemRecord();
 
-      result->name = itemName;
+      result->name = QString::fromStdString(itemName);
       result->type = atoi(itemType.c_str());
       result->id = atoi(itemId.c_str());
       result->model = atoi(itemDisplayId.c_str());

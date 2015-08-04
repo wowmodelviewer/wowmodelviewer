@@ -378,7 +378,7 @@ void CharControl::RefreshEquipment()
 	    WoWItem * item = model->getItem((CharSlots)i);
 	    if(item)
 	    {
-	      labels[i]->SetLabel(item->name());
+	      labels[i]->SetLabel(CSConv(item->name()));
 	      labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
 
 	      // refresh level combo box
@@ -864,7 +864,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 		      it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
 		      it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN)
 		  {
-		    choices.Add(it->name);
+		    choices.Add(it->name.toStdString());
 		    numbers.push_back(it->id);
 		    quality.push_back(it->quality);
 
@@ -874,7 +874,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 		}
 		else if (correctType((ssize_t)it->type, slot))
 		{
-			choices.Add(it->name);
+			choices.Add(it->name.toStdString());
 			numbers.push_back(it->id);
 			quality.push_back(it->quality);
 
@@ -1062,7 +1062,7 @@ void CharControl::selectNPC(ssize_t type)
 	{
 	  for(int i=0, imax=npccats.values.size() ; i < imax ; i++)
 	  {
-	    catnames.Add(CSConv(npccats.values[i][1].toStdString()));
+	    catnames.Add(CSConv(npccats.values[i][1]));
 	    typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size()-1;
 	  }
 	}
@@ -1073,7 +1073,7 @@ void CharControl::selectNPC(ssize_t type)
 	{
 		if (it->model > 0)
 		{
-			choices.Add(it->name);
+			choices.Add(it->name.toStdString());
 			numbers.push_back(it->id);
 			quality.push_back(0);
 			
@@ -1117,7 +1117,8 @@ void CharControl::OnUpdateItem(int type, int id)
 	  if(item)
 	  {
 	    item->setId(numbers[id]);
-		  labels[choosingSlot]->SetLabel(item->name());
+
+		  labels[choosingSlot]->SetLabel(CSConv(item->name()));
 		  labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
 
 		  // refresh level combo box

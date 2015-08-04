@@ -975,7 +975,7 @@ void ModelViewer::LoadModel(const wxString fn)
 		return;
 	}
 
-	SetStatusText(canvas->model->name());
+	SetStatusText(canvas->model->name().toStdString());
 	canvas->model->charModelDetails.isChar = isChar;
 	
 	viewMenu->Enable(ID_USE_CAMERA, canvas->model->hasCamera);
