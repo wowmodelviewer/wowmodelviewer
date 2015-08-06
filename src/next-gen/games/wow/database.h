@@ -7,14 +7,6 @@
 // may aswell declare them as globals since pretty much most the
 // different objects need to access them at one point or another.
 
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
-// WX
-#include <wx/string.h>
-
 // STL
 #include <iostream>
 #include <fstream>
@@ -65,7 +57,7 @@ _DATABASE_API_ extern CamCinematicDB camcinemadb;
 class _DATABASE_API_ LightSkyBoxDB: public DBCFile
 {
 public:
-	LightSkyBoxDB(): DBCFile(wxT("DBFilesClient\\LightSkybox.dbc")) {}
+	LightSkyBoxDB(): DBCFile("DBFilesClient\\LightSkybox.dbc") {}
 	~LightSkyBoxDB() {}
 
 	// Fields
@@ -78,7 +70,7 @@ public:
 class _DATABASE_API_ HelmGeosetDB: public DBCFile
 {
 public:
-	HelmGeosetDB(): DBCFile(wxT("DBFilesClient\\HelmetGeosetVisData.dbc")) {}
+	HelmGeosetDB(): DBCFile("DBFilesClient\\HelmetGeosetVisData.dbc") {}
 	~HelmGeosetDB() {}
 
 	/// Fields
@@ -108,7 +100,7 @@ class _DATABASE_API_ ItemSetDB: public DBCFile
 	std::set<int> avail;
 
 public:
-	ItemSetDB(): DBCFile(wxT("DBFilesClient\\ItemSet.dbc")) {}
+	ItemSetDB(): DBCFile("DBFilesClient\\ItemSet.dbc") {}
 	~ItemSetDB() {}
 
 	static const size_t NumItems = 10;
@@ -128,7 +120,7 @@ public:
 class _DATABASE_API_ StartOutfitDB: public DBCFile
 {
 public:
-	StartOutfitDB(): DBCFile(wxT("DBFilesClient\\CharStartOutfit.dbc")) {}
+	StartOutfitDB(): DBCFile("DBFilesClient\\CharStartOutfit.dbc") {}
 	~StartOutfitDB() {}
 
 	static const size_t NumItems = 24;
@@ -175,7 +167,7 @@ struct _DATABASE_API_ NPCRecord
 	QString name;
 	int id, model, type;
 
-	NPCRecord(wxString line);
+	NPCRecord(QString line);
 	NPCRecord(const std::vector<QString> &);
 	NPCRecord(): id(0), model(0), type(0) {}
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
@@ -187,7 +179,7 @@ struct _DATABASE_API_ NPCRecord
 class _DATABASE_API_ CamCinematicDB: public DBCFile
 {
 public:
-	CamCinematicDB(): DBCFile(wxT("DBFilesClient\\CinematicCamera.dbc")) {}
+	CamCinematicDB(): DBCFile("DBFilesClient\\CinematicCamera.dbc") {}
 	~CamCinematicDB() {}
 
 	// WotLK Fields
@@ -200,7 +192,7 @@ public:
 	static const size_t Rot = 6;			// float
 
 	Record getById(unsigned int id);
-	Record getByCamModel(wxString fn);
+	Record getByCamModel(std::string fn);
 };
 
 

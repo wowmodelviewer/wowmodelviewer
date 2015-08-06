@@ -332,7 +332,7 @@ Attachment* ModelCanvas::LoadModel(wxString fn)
 
 	wxDELETE(wmo);
 
-	model = new WoWModel(fn, true);
+	model = new WoWModel(fn.c_str(), true);
 	if (!model->ok)
 	{
 		wxDELETE(model);
@@ -356,7 +356,7 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 	wxDELETE(wmo);
 
 	// Create new one
-	model = new WoWModel(fn, true);
+	model = new WoWModel(fn.c_str(), true);
 	if (!model->ok)
 	{
 		wxDELETE(model);
@@ -395,7 +395,7 @@ void ModelCanvas::LoadADT(wxString fn)
 void ModelCanvas::LoadWMO(wxString fn)
 {
 	if (!wmo) {
-		wmo = new WMO(fn);
+		wmo = new WMO(fn.c_str());
 		root->model = wmo;
 	}
 }
@@ -1753,10 +1753,10 @@ void ModelCanvas::ResetView()
 	model->rot = Vec3D(0,-90.0f,0);
 	model->pos = Vec3D(0, 0, 5.0f);
 
-	bool isSkyBox = (model->wxname.substr(0,3)==wxT("Env"));
+	bool isSkyBox = (wxString(model->name().toStdString()).substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {
-		if (model->wxname.find(wxT("SkyBox"))<model->wxname.length())
-			isSkyBox = true;
+	  if (model->name().indexOf(wxT("SkyBox")) != -1)
+	    isSkyBox = true;
 	}
 
 	if (isSkyBox) {
@@ -1775,7 +1775,7 @@ void ModelCanvas::ResetView()
 
 	modelsize = model->rad * 2.0f;
 	
-	if (model->wxname.substr(0,4)==wxT("Item"))
+	if (wxString(model->name().toStdString()).substr(0,4)==wxT("Item"))
 		model->rot.y = 0; // items look better facing right by default
 }
 

@@ -15,8 +15,6 @@
 #include <string>
 #include <vector>
 
-#include <wx/string.h>
-#include <wx/wx.h>
 
 #include "casclib/src/CascLib.h"
 
@@ -59,11 +57,10 @@ class _CASCFOLDER_API_ CASCFolder
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2
     std::string getFullPathForFile(std::string file);
-    std::string getFullPathForFile(wxString file) { return getFullPathForFile(std::string(file.mb_str())); }
 
     bool fileExists(std::string file);
 
-    void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString) = CASCFolder::defaultFilterFunc);
+    void initFileList(std::set<FileTreeItem> &dest, bool filterfunc(std::string) = CASCFolder::defaultFilterFunc);
 
     bool setLocale(std::string);
 
@@ -82,7 +79,7 @@ class _CASCFOLDER_API_ CASCFolder
 
     static CASCFolder * m_instance;
 
-    static bool defaultFilterFunc(wxString) { return true; }
+    static bool defaultFilterFunc(std::string) { return true; }
 };
 
 

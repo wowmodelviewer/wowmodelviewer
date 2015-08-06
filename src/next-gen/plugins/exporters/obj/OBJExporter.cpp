@@ -110,14 +110,14 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
     return false;
   }
 
-  LOG_INFO << "Exporting" << model->modelname.mb_str() << "in" << targetFile;
+  LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << targetFile;
 
   // prepare mtl file
   QString matFilename = QFileInfo(target.c_str()).completeBaseName();
   matFilename += ".mtl";
   matFilename = QFileInfo(target.c_str()).absolutePath () + "/" + matFilename;
 
-  LOG_INFO << "Exporting" << model->modelname.mb_str() << "materials in" << matFilename;
+  LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << matFilename;
 
   QFile matFile(matFilename);
   if (!matFile.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -145,13 +145,13 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
   // export main model
   if(!exportModelVertices(model, obj, counter))
   {
-    LOG_ERROR << "Error during obj export for model" << model->modelname.mb_str();
+    LOG_ERROR << "Error during obj export for model" << model->modelname.c_str();
     return false;
   }
 
   if(!exportModelMaterials(model, mtl, matFilename))
   {
-    LOG_ERROR << "Error during materials export for model" << model->modelname.mb_str();
+    LOG_ERROR << "Error during materials export for model" << model->modelname.c_str();
     return false;
   }
 
@@ -172,7 +172,7 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
             ++it)
         {
           WoWModel * itemModel = it->second;
-          LOG_INFO << "Exporting attached item" << itemModel->modelname.mb_str();
+          LOG_INFO << "Exporting attached item" << itemModel->modelname.c_str();
 
           // find matrix
           int l = model->attLookup[it->first];
@@ -186,13 +186,13 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
 
           if(!exportModelVertices(itemModel, obj, counter, m, pos))
           {
-            LOG_ERROR << "Error during obj export for model" << itemModel->modelname.mb_str();
+            LOG_ERROR << "Error during obj export for model" << itemModel->modelname.c_str();
             return false;
           }
 
           if(!exportModelMaterials(itemModel, mtl, matFilename))
           {
-            LOG_ERROR << "Error during materials export for model" << itemModel->modelname.mb_str();
+            LOG_ERROR << "Error during materials export for model" << itemModel->modelname.c_str();
             return false;
           }
         }
@@ -314,7 +314,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
       int g = p.geoset;
 
-      QString matName = QString(model->modelname.mb_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), g));
+      QString matName = QString(model->modelname.c_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), g));
       matName.replace("\\","_");
       QString partName = matName;
 
@@ -369,14 +369,14 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
     if (p.init(model))
     {
-      std::string tex = model->TextureList[p.tex].mb_str();
+      std::string tex = model->TextureList[p.tex].c_str();
       QString texfile = QFileInfo(tex.c_str()).completeBaseName();
       tex = QFileInfo(mtlFile).completeBaseName().toStdString() + "_" + texfile.toStdString() + ".png";
 
       float amb = 0.25f;
       Vec4D diff = p.ocol;
 
-      QString material = QString(model->modelname.mb_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), p.geoset));
+      QString material = QString(model->modelname.c_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), p.geoset));
       material.replace("\\","_");
       if (p.unlit == true)
       {
@@ -402,7 +402,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << QString::fromStdString(tex) << "\n";
       tex = QFileInfo(mtlFile).absolutePath().toStdString() + "\\" + tex;
-      texToExport[tex] = model->TextureList[p.tex].mb_str();
+      texToExport[tex] = model->TextureList[p.tex].c_str();
     }
   }
 

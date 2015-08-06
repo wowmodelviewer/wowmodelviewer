@@ -8,6 +8,9 @@
 #ifndef SRC_CHARDETAILSFRAME_H_
 #define SRC_CHARDETAILSFRAME_H_
 
+#ifndef WX_PRECOMP
+  #include <wx/wx.h>
+#endif
 #include <wx/window.h>
 #include <wx/spinbutt.h>
 #include <wx/stattext.h>

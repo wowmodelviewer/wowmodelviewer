@@ -164,7 +164,7 @@ void CASCFolder::initVersion()
   }
 }
 
-void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxString)/* = CASCFolder::defaultFilterFunc*/)
+void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(std::string)/* = CASCFolder::defaultFilterFunc*/)
 {
   std::ifstream listfile("listfile.txt");
 
@@ -182,7 +182,7 @@ void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(wxSt
 
     wxString line(lineStd.c_str(), wxConvUTF8);
 
-    if (filterfunc(line))
+    if (filterfunc(lineStd))
     {
       tmp.fileName = line;
       line.MakeLower();

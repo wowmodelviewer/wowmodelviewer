@@ -13,6 +13,8 @@
 #include <wx/textctrl.h>
 #include <wx/stattext.h>
 
+#include <QString>
+
 class NPCimporterDialog : public wxDialog
 {
   public:
@@ -20,7 +22,7 @@ class NPCimporterDialog : public wxDialog
 			 const wxPoint & position = wxDefaultPosition, const wxSize & size = wxSize(300, 300));
 
 	int getImportedId();
-	wxString getNPCLine();
+	QString getNPCLine();
 
   private:
 	wxTextCtrl * m_URLname;

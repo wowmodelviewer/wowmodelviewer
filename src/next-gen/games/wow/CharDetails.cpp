@@ -220,7 +220,7 @@ void CharDetails::updateMaxValues()
   m_hairColorMax = getNbValuesForSection(HairType);
 
   RaceInfos infos;
-  RaceInfos::getCurrent(std::string(m_model->wxname.mb_str()), infos);
+  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
 
   QString query = QString("SELECT MAX(VariationIndex) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
                         .arg(race)
@@ -235,7 +235,7 @@ void CharDetails::updateMaxValues()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of hair styles for model" << m_model->wxname.c_str();
+    LOG_ERROR << "Unable to collect number of hair styles for model" << m_model->name();
     m_hairStyleMax = 0;
   }
 
@@ -251,7 +251,7 @@ void CharDetails::updateMaxValues()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of facial hair styles for model" << m_model->wxname.c_str();
+    LOG_ERROR << "Unable to collect number of facial hair styles for model" << m_model->name();
     m_facialHairMax = 0;
   }
 
@@ -267,7 +267,7 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
   std::vector<std::string> result;
 
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(std::string(m_model->wxname.mb_str()), infos))
+  if(!RaceInfos::getCurrent(m_model->name().toStdString(), infos))
     return result;
 
 /*
@@ -357,7 +357,7 @@ int CharDetails::getNbValuesForSection(SectionType section)
   int result = 0;
 
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(std::string(m_model->wxname.mb_str()), infos))
+  if(!RaceInfos::getCurrent(m_model->name().toStdString(), infos))
     return result;
 
   size_t type = section;
@@ -401,7 +401,7 @@ int CharDetails::getNbValuesForSection(SectionType section)
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of customization for model" << m_model->wxname.c_str();
+    LOG_ERROR << "Unable to collect number of customization for model" << m_model->name();
   }
 
   return result;

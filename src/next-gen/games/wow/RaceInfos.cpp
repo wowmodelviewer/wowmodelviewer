@@ -17,6 +17,10 @@ bool RaceInfos::getCurrent(std::string modelName, RaceInfos & result)
   }
   std::transform(modelName.begin(), modelName.end(), modelName.begin(), ::tolower);
 
+  QString model = QString::fromStdString(modelName);
+  if(!model.contains(".m2", Qt::CaseInsensitive))
+	modelName += ".m2";
+
   std::map< std::string, RaceInfos>::iterator raceInfosIt = RACES.find(modelName);
   if(raceInfosIt != RACES.end())
   {
@@ -71,6 +75,7 @@ void RaceInfos::init()
 
         if(RACES.find(modelname) == RACES.end())
           RACES[modelname] = infos;
+
       }
     }
   }

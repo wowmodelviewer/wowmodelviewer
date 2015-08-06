@@ -5,12 +5,6 @@
 #include "OpenGLHeaders.h"
 #include "video.h"
 
-// WX
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _RENDERTEXTURE_API_ __declspec(dllexport)

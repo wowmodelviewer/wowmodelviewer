@@ -12,7 +12,7 @@
 
 #include <sstream>
 
-DBCFile::DBCFile(const wxString &filename) : filename(filename)
+DBCFile::DBCFile(const std::string &filename) : filename(filename)
 {
 	data = NULL;
 	stringTable = NULL;
@@ -30,9 +30,6 @@ bool DBCFile::open()
 		FT_WDB2,
 	};
 	int db_type = FT_UNK;
-	if (filename.Lower().EndsWith(wxT("item.dbc"))) {
-		filename = filename.BeforeLast('.') + wxT(".db2");
-	}
 
 	GameFile * f = new CASCFile(filename.c_str());
 	// Need some error checking, otherwise an unhandled exception error occurs

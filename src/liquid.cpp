@@ -307,7 +307,7 @@ void Liquid::initTextures(wxString basename, int first, int last)
 	wxString buf;
 	for (ssize_t i=first; i<=last; i++) {
 		buf = wxString::Format(wxT("%s.%d.blp"), basename.c_str(), i);
-		int tex = texturemanager.add(buf);
+		int tex = texturemanager.add(buf.c_str());
 		textures.push_back(tex);
 	}
 }

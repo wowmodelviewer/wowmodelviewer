@@ -1,12 +1,6 @@
 #ifndef MANAGER_H
 #define MANAGER_H
 
-// wxWidgets
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
 // STL
 #include <string>
 #include <map>
@@ -29,9 +23,9 @@
 
 class _MANAGEDITEM_API_ ManagedItem {
 	int refcount;
+	std::string m_itemName;
 public:
-	wxString wxname;
-	ManagedItem(wxString n): refcount(0), wxname(n) { }
+	ManagedItem(std::string n): refcount(0), m_itemName(n) { }
 	virtual ~ManagedItem() {}
 
 	void addref()
@@ -44,6 +38,7 @@ public:
 		return --refcount==0;
 	}
 	
+	std::string itemName() { return m_itemName; }
 };
 
 
@@ -51,14 +46,14 @@ public:
 template <class IDTYPE>
 class Manager {
 public:
-	std::map<wxString, IDTYPE> names;
+	std::map<std::string, IDTYPE> names;
 	std::map<IDTYPE, ManagedItem*> items;
 
 	Manager()
 	{
 	}
 
-	virtual IDTYPE add(wxString name) = 0;
+	virtual IDTYPE add(std::string name) = 0;
 
 	virtual void del(IDTYPE id)
 	{
@@ -74,14 +69,14 @@ public:
 				return;
 
 			doDelete(id);
-			names.erase(names.find(i->wxname));
+			names.erase(names.find(i->itemName()));
 			items.erase(items.find(id));
 
-			wxDELETE(i);
+			delete i;
 		}
 	}
 
-	void delbyname(wxString name)
+	void delbyname(std::string name)
 	{
 		if (has(name)) 
 			del(get(name));
@@ -89,17 +84,17 @@ public:
 
 	virtual void doDelete(IDTYPE) {}
 
-	bool has(wxString name)
+	bool has(std::string name)
 	{
 		return (names.find(name) != names.end());
 	}
 
-	IDTYPE get(wxString name)
+	IDTYPE get(std::string name)
 	{
 		return names[name];
 	}
 
-	wxString get(IDTYPE id)
+	std::string get(IDTYPE id)
 	{
 	  return "";
 		//return names[id];
@@ -107,14 +102,6 @@ public:
 
 	void clear()
 	{
-		/*
-		for (std::map<IDTYPE, ManagedItem*>::iterator it=items.begin(); it!=items.end(); ++it) {
-			ManagedItem *i = (*it);
-			
-			wxDELETE(i);
-		}
-		*/
-
 		for (size_t i=0; i<50; i++) {
 			if(items.find((const unsigned int)i) != items.end()) {
 				del((GLuint)i);
@@ -126,7 +113,7 @@ public:
 	}
 
 protected:
-	void do_add(wxString name, IDTYPE id, ManagedItem* item)
+	void do_add(std::string name, IDTYPE id, ManagedItem* item)
 	{
 		names[name] = id;
 		item->addref();

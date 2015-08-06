@@ -42,6 +42,12 @@
 
 #include "metaclasses/Iterator.h"
 
+#include <wx/wxprec.h>
+
+#ifndef WX_PRECOMP
+    #include <wx/wx.h>
+#endif
+
 #include <wx/arrstr.h>
 #include <wx/choicdlg.h>
 
@@ -453,10 +459,10 @@ wxString GetM2TextureName(WoWModel *m, ModelRenderPass p, size_t PassNumber)
 {
   wxString texName;
   if ((int)m->TextureList.size() > p.tex)
-    texName = m->TextureList[p.tex].BeforeLast(wxT('.')).AfterLast(SLASH);
+    texName = wxString(m->TextureList[p.tex]).BeforeLast(wxT('.')).AfterLast(SLASH);
 
   if (texName.Len() == 0)
-    texName = m->modelname.BeforeLast(wxT('.')).AfterLast(SLASH) + wxString::Format(wxT("_Image_%03i"),PassNumber);
+    texName = wxString(m->modelname).BeforeLast(wxT('.')).AfterLast(SLASH) + wxString::Format(wxT("_Image_%03i"),PassNumber);
 
   return texName;
 }

@@ -234,7 +234,7 @@ void WoWItem::load()
     return;
 
   RaceInfos infos;
-  RaceInfos::getCurrent(std::string(m_model->wxname.mb_str()), infos);
+  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
 
   QString query = QString("SELECT Model1,Model2, \
        FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \

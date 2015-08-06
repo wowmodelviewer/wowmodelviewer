@@ -143,18 +143,18 @@ int NPCimporterDialog::getImportedId()
 	return result;
 }
 
-wxString NPCimporterDialog::getNPCLine()
+QString NPCimporterDialog::getNPCLine()
 {
-	wxString result = "";
+	QString result = "";
 	if(m_idResult->GetLabel() != "No URL") // successful import
 	{
-		result = m_idResult->GetLabel();
+		result = m_idResult->GetLabel().c_str();
 		result += ",";
-		result += m_displayIdResult->GetLabel();
+		result += m_displayIdResult->GetLabel().c_str();
 		result += ",";
-		result += m_typeResult->GetLabel();
+		result += m_typeResult->GetLabel().c_str();
 		result += ",";
-		result += m_nameResult->GetLabel();
+		result += m_nameResult->GetLabel().c_str();
 	}
 
 	return result;

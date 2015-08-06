@@ -177,7 +177,7 @@ const size_t stripsize2 = 16*18 + 7*2 + 8*2;
 
 class MapTile: public Displayable {
 public:
-	wxArrayString textures;
+	std::vector<std::string> textures;
 	wxArrayString wmos;
 	wxArrayString models;
 

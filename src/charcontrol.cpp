@@ -227,7 +227,7 @@ void CharControl::UpdateModel(Attachment *a)
 	model = (WoWModel*)charAtt->model;
 
 	RaceInfos infos;
-	if(RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos)) // fails if it is a creature
+	if(RaceInfos::getCurrent(model->name().toStdString(), infos)) // fails if it is a creature
 	{
 	  cdFrame->Enable(true);
 	  tabardSpins[SPIN_TABARD_ICON]->Enable(true);
@@ -527,7 +527,7 @@ void CharControl::RefreshModel()
 		model->cd.geosets[CG_EARS] = 2;
 
 	RaceInfos infos;
-	if(!RaceInfos::getCurrent(std::string(model->wxname.mb_str()), infos))
+	if(!RaceInfos::getCurrent(model->name().toStdString(), infos))
 	  return;
 
 	model->tex.reset(infos.textureLayoutID);
@@ -539,9 +539,8 @@ void CharControl::RefreshModel()
 
 	if(textures.size() > 1)
 	{
-	  wxString furTexName = textures[1].c_str();
-	  furTex = texturemanager.add(furTexName);
-	  model->UpdateTextureList(furTexName, TEXTURE_FUR);
+	  furTex = texturemanager.add(textures[1]);
+	  model->UpdateTextureList(textures[1], TEXTURE_FUR);
 	}
 
 	// Display underwear on the model?
@@ -592,7 +591,7 @@ void CharControl::RefreshModel()
 	}
 	else
 	{
-	  LOG_ERROR << "Unable to collect hair style" << model->cd.hairStyle() << "for model" << model->wxname.c_str();
+	  LOG_ERROR << "Unable to collect hair style" << model->cd.hairStyle() << "for model" << model->name();
 	}
 
   // Hair texture
@@ -646,7 +645,7 @@ void CharControl::RefreshModel()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of facial hair style" << model->cd.facialHair() << "for model" << model->wxname.c_str();
+    LOG_ERROR << "Unable to collect number of facial hair style" << model->cd.facialHair() << "for model" << model->name();
   }
 
 	//refresh equipment
@@ -1188,7 +1187,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			}
 			g_animControl->UpdateModel(model);
 		} else {
-			WoWModel *m = new WoWModel(creaturemodels[id-1], false);
+			WoWModel *m = new WoWModel(creaturemodels[id-1].c_str(), false);
 			m->isMount = true;
 
 			// TODO: check if model is ridable

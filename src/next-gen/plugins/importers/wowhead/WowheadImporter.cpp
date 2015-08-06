@@ -36,6 +36,9 @@
 // Irrlicht
 
 // Externals
+#ifndef WX_PRECOMP
+  #include <wx/wx.h>
+#endif
 #include <wx/sstream.h>
 #include <wx/url.h>
 #include <wx/html/htmlpars.h>

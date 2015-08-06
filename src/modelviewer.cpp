@@ -852,7 +852,7 @@ void ModelViewer::SaveSession()
 
 		// model file
 		if (canvas->model)
-			pConfig->Write(wxT("Model"), wxString(canvas->model->wxname.c_str(), wxConvUTF8));
+			pConfig->Write(wxT("Model"), canvas->model->name().toStdString());
 	}
 
 	// character details
@@ -1990,7 +1990,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
 			wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
 			if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString) {
-				canvas->skyModel = new WoWModel(wxString(skyDialog.GetStringSelection()), false);
+				canvas->skyModel = new WoWModel(skyDialog.GetStringSelection().c_str(), false);
 				canvas->sky->model = canvas->skyModel;
 			}
 		}
@@ -2004,7 +2004,7 @@ void ModelViewer::SaveChar(wxString fn)
 	// FIXME: ofstream is not compatible with multibyte path name
 	ofstream f(fn.fn_str(), ios_base::out|ios_base::trunc);
 
-	f << canvas->model->wxname << endl;
+	f << canvas->model->name().toStdString() << endl;
 	f << charControl->model->cd.race << " " << charControl->model->cd.gender << endl;
 	f << charControl->model->cd.skinColor() << " " << charControl->model->cd.faceType() << " " << charControl->model->cd.hairColor() << " " << charControl->model->cd.hairStyle() << " " << charControl->model->cd.facialHair() << " " << charControl->model->cd.eyeGlowType << endl;
 	for (size_t i=0; i<NUM_CHAR_SLOTS; i++)

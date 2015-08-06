@@ -115,7 +115,7 @@ public:
 	bool randomSkins;
 	bool defaultDoodads;
 
-	wxString oldname;
+	std::string oldname;
 
 	int selectedAnim;
 	int selectedAnim2;

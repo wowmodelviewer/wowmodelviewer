@@ -156,7 +156,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   }
   // --
 
-  LOG_INFO << "Update model:" << m->wxname.c_str();
+  LOG_INFO << "Update model:" << m->name();
 
   g_selModel = m;
 
@@ -175,7 +175,8 @@ void AnimControl::UpdateModel(WoWModel *m)
   // Find any textures that exist for the model
   bool res = false;
 
-  wxString fn = m->wxname.Lower();
+  wxString fn = m->name().toStdString();
+  fn = fn.Lower();
   if (fn.substr(0,4) != wxT("char"))
   {
     if (fn.substr(0,8) == wxT("creature"))
@@ -284,11 +285,11 @@ void AnimControl::UpdateModel(WoWModel *m)
 
 void AnimControl::UpdateWMO(WMO *w, int group)
 {
-	if (!w || w->wxname.size()==0)
+	if (!w || w->itemName().size()==0)
 		return;
 
-	bool newwmo = (oldname != w->wxname);
-	oldname = w->wxname;
+	bool newwmo = (oldname != w->itemName());
+	oldname = w->itemName();
 
 	//Model *m = static_cast<Model*>(canvas->root->children[0]);
 
@@ -325,7 +326,8 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 
 	// get wmo name or current wmogroup name/descr
 	if (group>=-1 && group<(int)g_selWMO->nGroups) {
-		wxString label = w->wxname.AfterLast(MPQ_SLASH);
+		wxString label = w->itemName();
+		label = label.AfterLast(MPQ_SLASH);
 		if (group>=0) {
 			label += wxT(" - ") + g_selWMO->groups[group].name;
 			if (g_selWMO->groups[group].desc.length()) {
@@ -340,9 +342,10 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 }
 
 wxString sFilterDir;
-bool filterDir(wxString fn)
+bool filterDir(std::string fn)
 {
-	wxString tmp = fn.Lower();
+	wxString tmp = fn;
+	tmp = tmp.Lower();
 	return (tmp.StartsWith(sFilterDir) && tmp.EndsWith(wxT("blp")));
 }
 
@@ -353,16 +356,16 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   TextureSet skins;
 
   // see if this model has skins
-  LOG_INFO << "Searching skins for" << m->wxname.c_str();
+  LOG_INFO << "Searching skins for" << m->name();
 
-  wxString fn = m->wxname;
+  wxString fn = m->name().toStdString();
 
   // remove extension
   fn = fn.BeforeLast(wxT('.'));
 
   QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path FROM CreatureDisplayInfo \
 		                   LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID \
-		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( m->wxname.AfterLast(SLASH).c_str());
+		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( wxString(m->itemName()).AfterLast(SLASH).c_str());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -451,9 +454,9 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   std::set<wxString> alreadyUsedTextures;
   TextureSet skins;
 
-  LOG_INFO << "Searching skins for" << m->wxname.c_str();
+  LOG_INFO << "Searching skins for" << m->name();
 
-	wxString fn = m->wxname;
+	wxString fn = m->name().toStdString();
 
 	// change M2 to mdx
 	fn = fn.BeforeLast(wxT('.')) + wxT(".mdx");
@@ -511,7 +514,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
-	sFilterDir = m->wxname.BeforeLast(wxT('.')).Lower();
+	sFilterDir = m->name().toStdString();
+	sFilterDir = sFilterDir.BeforeLast(wxT('.')).Lower();
 	CASCFOLDER.initFileList(filelist,filterDir);
 
 	if (filelist.begin() != filelist.end())
@@ -556,9 +560,10 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
 			wxString texname = it->tex[0];
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-			texname = g_selModel->wxname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
+			texname = g_selModel->name().toStdString();
+			texname = texname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
 			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
-			g_selModel->TextureList.push_back(texname);
+			g_selModel->TextureList.push_back(texname.c_str());
 			TextureGroup *grp = new TextureGroup(*it);
 			skinList->SetClientData(num++, grp);
 		}
@@ -778,7 +783,7 @@ void AnimControl::SetSkin(int num)
 					break;
 				}
 			}
-			g_selModel->replaceTextures[grp->base+i] = texturemanager.add(skin);
+			g_selModel->replaceTextures[grp->base+i] = texturemanager.add(skin.c_str());
 		}
 	}
 

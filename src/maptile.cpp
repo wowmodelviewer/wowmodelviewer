@@ -979,7 +979,7 @@ void MapChunk::initTextures(wxString basename, int first, int last)
 	wxString buf;
 	for (ssize_t i=first; i<=last; i++) {
 		buf = wxString::Format(wxT("%s.%d.blp"), (char *)basename.c_str(), i);
-		wTextures.push_back(texturemanager.add(buf));
+		wTextures.push_back(texturemanager.add(buf.c_str()));
 	}
 }
 

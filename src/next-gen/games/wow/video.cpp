@@ -11,8 +11,7 @@
 #include "CASCFile.h"
 
 #include "globalvars.h" // g_selModel
-// wx
-#include <wx/display.h>
+
 // gl
 #include "OpenGLHeaders.h"
 
@@ -163,12 +162,15 @@ bool VideoSettings::Init()
 	LOG_INFO << "Driver Version:" << version;
 
 	
-	if (wxString(renderer, wxConvUTF8).IsSameAs(wxT("GDI Generic"), false)) {
-		LOG_INFO << "Warning: Running in software mode, this is not enough. Please try updating your video drivers.";
-		// bloody oath - wtb a graphics card
-		hasHardware = false;
-	} else {
-		hasHardware = true;
+	if (renderer == "GDI Generic")
+	{
+	  LOG_INFO << "Warning: Running in software mode, this is not enough. Please try updating your video drivers.";
+	  // bloody oath - wtb a graphics card
+	  hasHardware = false;
+	}
+	else
+	{
+	  hasHardware = true;
 	}
 
 	LOG_INFO << "Support wglPixelFormat:" << (supportWGLPixelFormat ? "true" : "false");
@@ -695,16 +697,18 @@ void VideoSettings::SwapBuffers()
 void VideoSettings::SetCurrent()
 {
 #ifdef _WINDOWS
-	if(!wglMakeCurrent(hDC, hRC)) {					// Try To Activate The Rendering Context
-		//wxMessageBox("Can't Activate The GL Rendering Context.","ERROR");
-		//render = false;
-	} else {
-		render = true;
+	if(!wglMakeCurrent(hDC, hRC))
+	{					// Try To Activate The Rendering Context
+	  render = false;
+	}
+	else
+	{
+	  render = true;
 	}
 #endif
 }
 
-GLuint TextureManager::add(wxString name)
+GLuint TextureManager::add(std::string name)
 {
 	GLuint id = 0;
 
@@ -747,7 +751,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	glBindTexture(GL_TEXTURE_2D, id);
 	
 
-	CASCFile * f = new CASCFile(tex->wxname.c_str());
+	CASCFile * f = new CASCFile(tex->itemName());
 
 	if (f->isEof()) {
 		tex->id = 0;
@@ -800,9 +804,12 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image->GetWidth(), image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
-		wxDELETE(image);
-		wxDELETE(buffer);
-		wxDELETE(buf);
+		delete image;
+		image = 0;
+		delete buffer;
+		buffer = 0;
+		delete buf;
+		buf = 0;
 	} else if (type == 1) {
 		if (attr[0] == 2) {
 			/*
@@ -865,9 +872,13 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 				h >>= 1;
 			}
 
-			wxDELETEA(buf);
-			if (!video.supportCompression) 
-				wxDELETEA(ucbuf);
+			delete buf;
+			buf = 0;
+			if (!video.supportCompression)
+			{
+				delete ucbuf;
+				ucbuf = 0;
+			}
 
 		} else if (attr[0]==1) {
 			/*
@@ -946,8 +957,10 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 				h >>= 1;
 			}
 
-			wxDELETEA(buf2);
-			wxDELETEA(buf);
+			delete buf2;
+			buf2 = 0;
+			delete buf;
+			buf = 0;
 		} else {
 			LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type=" << type << "attr[0]=" << attr[0];
 		}

@@ -79,15 +79,11 @@ void glInitAll()
 	glDepthFunc(GL_NEVER);
 }
 
-
-
-
-
-WoWModel::WoWModel(wxString name, bool forceAnim) :
+WoWModel::WoWModel(std::string name, bool forceAnim) :
     ManagedItem(name),
     forceAnim(forceAnim)
 {
-	if (name == wxT(""))
+	if (name == "")
 		return;
 
 	// replace .MDX with .M2
@@ -192,7 +188,7 @@ WoWModel::WoWModel(wxString name, bool forceAnim) :
 	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
 
 	modelname = tempname;
-	setName(modelname.BeforeLast('.').AfterLast(SLASH).c_str());
+	setName(tempname.BeforeLast('.').AfterLast(SLASH).c_str());
 	if (header.nameOfs != 304 && header.nameOfs != 320) {
 	  LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
 	  //ok = false;
@@ -545,7 +541,7 @@ void WoWModel::initCommon(GameFile * f)
 			*/
 
 			if (texdef[i].type == TEXTURE_FILENAME) {
-				wxString texname((char*)(f->getBuffer()+texdef[i].nameOfs), wxConvUTF8);
+				std::string texname((char*)(f->getBuffer()+texdef[i].nameOfs));
 				textures[i] = texturemanager.add(texname);
 				TextureList.push_back(texname);
 				LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << TextureList.size() << "]";
@@ -556,81 +552,19 @@ void WoWModel::initCommon(GameFile * f)
 				//if (texdef[i].type < TEXTURE_MAX)specialTextures[texdef[i].type] = (int)i;
 				specialTextures[i] = texdef[i].type;
 
-				
-				wxString tex = wxT("Special_");
-				tex << texdef[i].type;
+				QString tex = QString("Special_%1").arg(texdef[i].type);
 
 				if (modelType == MT_NORMAL){
 					if (texdef[i].type == TEXTURE_HAIR)
-						tex = wxT("Hair.blp");
+						tex = "Hair.blp";
 					else if(texdef[i].type == TEXTURE_BODY)
-						tex = wxT("Body.blp");
+						tex = "Body.blp";
 					else if(texdef[i].type == TEXTURE_FUR)
-						tex = wxT("Fur.blp");
+						tex = "Fur.blp";
 				}
 
-
-
-
-				//wxString tex = modelname.BeforeLast('.').AfterLast(SLASH) + wxT("_");
-				/*
-				if (modelType == MT_NORMAL){
-					if (texdef[i].type == TEXTURE_HAIR){
-						tex += wxT("Hair.blp");
-					}else if(texdef[i].type == TEXTURE_BODY){
-						tex += wxT("Body.blp");
-					}else if(texdef[i].type == TEXTURE_CAPE){
-						tex += wxT("Cape.blp");
-					}else if(texdef[i].type == TEXTURE_FUR){
-						tex += wxT("Fur.blp");
-					}else if(texdef[i].type == TEXTURE_ARMORREFLECT){
-						tex += wxT("Reflection.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT1){
-						tex += wxT("ChangableTexture1.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT2){
-						tex += wxT("ChangableTexture2.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT3){
-						tex += wxT("ChangableTexture3.blp");
-					}else if(texdef[i].type == TEXTURE_15){
-						tex += wxT("Texture15.blp");
-					}else if(texdef[i].type == TEXTURE_16){
-						tex += wxT("Texture16.blp");
-					}else if(texdef[i].type == TEXTURE_17){
-						tex += wxT("Texture17.blp");
-					}else{
-						tex += wxT("Unknown.blp");
-					}
-				}else{
-					if (texdef[i].type == TEXTURE_HAIR){
-						tex += wxT("NHair.blp");
-					}else if(texdef[i].type == TEXTURE_BODY){
-						tex += wxT("NBody.blp");
-					}else if(texdef[i].type == TEXTURE_CAPE){
-						tex += wxT("NCape.blp");
-					}else if(texdef[i].type == TEXTURE_FUR){
-						tex += wxT("NFur");
-					}else if(texdef[i].type == TEXTURE_ARMORREFLECT){
-						tex += wxT("NReflection.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT1){
-						tex += wxT("NChangableTexture1.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT2){
-						tex += wxT("NChangableTexture2.blp");
-					}else if(texdef[i].type == TEXTURE_GAMEOBJECT3){
-						tex += wxT("NChangableTexture3.blp");
-					}else if(texdef[i].type == TEXTURE_15){
-						tex += wxT("NTexture15.blp");
-					}else if(texdef[i].type == TEXTURE_16){
-						tex += wxT("NTexture16.blp");
-					}else if(texdef[i].type == TEXTURE_17){
-						tex += wxT("NTexture17.blp");
-					}else{
-						tex += wxT("NUnknown.blp");
-					}
-				}
-				*/
-
-				LOG_INFO << "Added" << tex.c_str() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
-				TextureList.push_back(tex);
+				LOG_INFO << "Added" << tex << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
+				TextureList.push_back(tex.toStdString());
 
 				if (texdef[i].type < TEXTURE_MAX)
 					useReplaceTextures[texdef[i].type] = true;
@@ -777,7 +711,8 @@ void WoWModel::initAnimated(GameFile * f)
 		  anims[i].NextAnimation = animsWotLK.NextAnimation;
 		  anims[i].Index = animsWotLK.Index;
 
-		  tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)modelname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
+		  tempname = modelname;
+		  tempname = wxString::Format(wxT("%s%04d-%02d.anim"), (char *)tempname.BeforeLast(wxT('.')).c_str(), anims[i].animID, animsWotLK.subAnimID);
 
 		  if(CASCFOLDER.fileExists(tempname.c_str()))
 		    animfiles.push_back(new CASCFile(tempname.c_str()));
@@ -946,7 +881,8 @@ void WoWModel::setLOD(GameFile * f, int index)
 	// Seems to only control the render order.  Which makes this function useless and not needed :(
 
 	// remove suffix .M2
-	lodname = modelname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
+	wxString tmpname = modelname;
+	lodname = tmpname.BeforeLast(wxT('.')) + wxString::Format(wxT("%02d.skin"), index); // Lods: 00, 01, 02, 03
 	GameFile * g = new CASCFile(lodname.c_str());
 
 	if (g->isEof()) {
@@ -1522,7 +1458,7 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   return 0;
 }
 
-void WoWModel::UpdateTextureList(wxString texName, int special)
+void WoWModel::UpdateTextureList(std::string texName, int special)
 {
   for (size_t i=0; i< header.nTextures; i++)
   {

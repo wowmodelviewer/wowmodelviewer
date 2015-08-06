@@ -61,7 +61,7 @@ public:
 	bool indoor, hascv, visible, ok;
 
 	bool outdoorLights;
-	wxString name, desc;
+	std::string name, desc;
 
 	WMOGroup();
 	~WMOGroup();
@@ -174,7 +174,7 @@ public:
 	unsigned int d1;
 	
 	WoWModel *model;
-	wxString filename;
+	std::string filename;
 	int id;
 	unsigned int scale;
 	int light;
@@ -235,8 +235,8 @@ public:
 	WMOMaterial *mat;
 	bool ok;
 	char *groupnames;
-	wxArrayString textures;
-	wxArrayString models;
+	std::vector<std::string> textures;
+	std::vector<std::string> models;
 	std::vector<WMOModelInstance> modelis;
 	ModelManager loadedModels;
 
@@ -254,7 +254,7 @@ public:
 	WoWModel *skybox;
 	int sbid;
 
-	WMO(wxString name);
+	WMO(std::string name);
 	~WMO();
 	
 	int doodadset;

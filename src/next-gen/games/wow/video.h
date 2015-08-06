@@ -27,7 +27,7 @@ public:
 	GLuint id;
 	bool compressed;
 
-	Texture(wxString name):ManagedItem(name), w(0), h(0), id(0), compressed(false) {}
+	Texture(std::string name):ManagedItem(name), w(0), h(0), id(0), compressed(false) {}
 	void getPixels(unsigned char *buff, unsigned int format=GL_RGBA);
 
 };
@@ -36,7 +36,7 @@ public:
 class _VIDEO_API_ TextureManager : public Manager<GLuint> {
 	
 public:
-	virtual GLuint add(wxString name);
+	virtual GLuint add(std::string name);
 	void doDelete(GLuint id);
 
 	void LoadBLP(GLuint id, Texture *tex);

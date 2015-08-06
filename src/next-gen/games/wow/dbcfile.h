@@ -8,8 +8,6 @@
 
 #include <QString>
 
-#include <wx/wx.h>
-
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _DBCFILE_API_ __declspec(dllexport)
@@ -24,7 +22,7 @@
 class _DBCFILE_API_ DBCFile
 {
 public:
-	DBCFile(const wxString &filename);
+	DBCFile(const std::string &filename);
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
@@ -36,20 +34,20 @@ public:
 	class Exception
 	{
 	public:
-		Exception(const wxString &message): message(message)
+		Exception(const std::string &message): message(message)
 		{ }
 		virtual ~Exception()
 		{ }
-		const wxString &getMessage() {return message;}
+		const std::string &getMessage() {return message;}
 	private:
-		wxString message;
+		std::string message;
 	};
 
 	// 
 	class NotFound: public Exception
 	{
 	public:
-		NotFound(): Exception(wxT("Key was not found"))
+		NotFound(): Exception("Key was not found")
 		{ }
 	};
 
@@ -147,12 +145,10 @@ public:
 	/// Trivial
 	size_t getRecordCount() const { return recordCount; }
 	size_t getFieldCount() const { return fieldCount; }
-	wxString getFilename() { return filename; }
-	void setFileName(wxString name) { filename = name; }
 	size_t size() const { return recordCount; }
 
 private:
-	wxString filename;
+	std::string filename;
 	size_t recordSize;
 	size_t recordCount;
 	size_t fieldCount;

@@ -12,7 +12,7 @@
 
 class ModelManager: public SimpleManager {
 public:
-	int add(wxString name);
+	int add(std::string name);
 
 	ModelManager() : v(0) {}
 

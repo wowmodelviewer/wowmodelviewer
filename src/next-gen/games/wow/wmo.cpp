@@ -6,7 +6,7 @@
 
 using namespace std;
 
-WMO::WMO(wxString name): ManagedItem(name)
+WMO::WMO(std::string name): ManagedItem(name)
 {
   /*
 	GameFile f(name);

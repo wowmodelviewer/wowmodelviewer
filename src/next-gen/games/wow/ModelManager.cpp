@@ -9,7 +9,7 @@
 #include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's
-int ModelManager::add(wxString name)
+int ModelManager::add(std::string name)
 {
 	int id;
 	if (names.find(name) != names.end()) {

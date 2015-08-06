@@ -86,14 +86,15 @@ FileControl::~FileControl()
 	choFilter->Destroy();
 }
 
-bool filterSearch(wxString s)
+bool filterSearch(std::string s)
 {
 	const size_t len = s.length();
 	if (len < 4) 
 		return false;
 
 	// filter suffix
-	wxString temp(s.Lower());
+	wxString temp = s;
+	temp = temp.Lower();
 	if (!filterString.IsEmpty() && !temp.EndsWith(filterString))
 		return false;
 
@@ -329,7 +330,7 @@ wxString FileControl::ExportPNG(wxString val)
 	if (fn.GetExt().Lower() != wxT("blp"))
 		return "";
 
-	TextureID temptex = texturemanager.add(val);
+	TextureID temptex = texturemanager.add(val.c_str());
 	Texture &tex = *((Texture*)texturemanager.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return "";
@@ -566,7 +567,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 	if (filterMode == FILE_FILTER_MODEL) {
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model && !modelviewer->canvas->model->wxname.empty() && modelviewer->canvas->model->wxname == data->fn)
+		if (modelviewer->canvas->model && !modelviewer->canvas->model->name().isEmpty() && modelviewer->canvas->model->name().toStdString() == std::string(data->fn.c_str()))
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();

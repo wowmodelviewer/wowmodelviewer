@@ -16,9 +16,6 @@
 
 #include "vec3d.h"
 
-#include <wx/txtstrm.h>
-
-
 #include "AnimManager.h"
 
 
@@ -106,16 +103,16 @@ public:
 	Vec2D *texCoords;
 	uint16 *indices;
 	uint32 nIndices;
-	wxArrayString TextureList;
+	std::vector<std::string> TextureList;
 	// --
 
 public:
-	WoWModel(wxString name, bool forceAnim=false);
+	WoWModel(std::string name, bool forceAnim=false);
 	~WoWModel();
 
 	std::vector<ModelCamera> cam;
-	wxString modelname;
-	wxString lodname;
+	std::string modelname;
+	std::string lodname;
 	
 	std::vector<ModelRenderPass> passes;
 	std::vector<ModelGeosetHD> geosets;
@@ -217,7 +214,7 @@ public:
 	friend struct ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
-  void UpdateTextureList(wxString texName, int special);
+  void UpdateTextureList(std::string texName, int special);
   void displayHeader(ModelHeader & a_header);
 
   std::map<int, std::string> getAnimsMap();

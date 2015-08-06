@@ -20,7 +20,7 @@ _DATABASE_API_ CamCinematicDB		 camcinemadb;
 
 // --
 // CAMCINEMADB.H
-CamCinematicDB::Record CamCinematicDB::getByCamModel(wxString fn)
+CamCinematicDB::Record CamCinematicDB::getByCamModel(std::string fn)
 {
 	LOG_INFO << "Searching for CamModel...";
 	// Brute force search for now
@@ -129,7 +129,7 @@ ItemRecord::ItemRecord(const std::vector<QString> & vals)
 ItemDatabase::ItemDatabase()
 {
 	ItemRecord all;
-	all.name=wxT("---- None ----");
+	all.name= "---- None ----";
 	all.type=IT_ALL;
 
 	items.push_back(all);
@@ -148,17 +148,18 @@ const ItemRecord& ItemDatabase::getById(int id)
 // ============================================================
 // =============================================================
 
-NPCRecord::NPCRecord(wxString line)
+NPCRecord::NPCRecord(QString line)
     : id(0), model(0), type(0)
 {
-	if (line.Len() <= 3)
+	QStringList values = line.split(',');
+
+	if (values.size() <= 3)
 	    return;
-	id = wxAtoi(line.BeforeFirst(','));
-	line = line.AfterFirst(',');
-	model = wxAtoi(line.BeforeFirst(','));
-	line = line.AfterFirst(',');
-	type = wxAtoi(line.BeforeFirst(','));
-	name = line.AfterFirst(',');
+
+	id = values[0].toInt();
+	model = values[1].toInt();
+	type = values[2].toInt();
+	name = values[3];
 }
 
 
