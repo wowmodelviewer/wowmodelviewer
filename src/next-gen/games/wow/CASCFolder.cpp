@@ -13,6 +13,8 @@
 #include <locale>
 #include <map>
 
+#include <QFile>
+
 #include "CASCFile.h"
 
 #include "logger/Logger.h"
@@ -166,32 +168,35 @@ void CASCFolder::initVersion()
 
 void CASCFolder::initFileList(std::set<FileTreeItem> &dest, bool filterfunc(std::string)/* = CASCFolder::defaultFilterFunc*/)
 {
-  std::ifstream listfile("listfile.txt");
+	QFile file("listfile.txt");
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		LOG_ERROR << "Fail to open listfile.txt.";
+		return;
+	}
 
-  if(!listfile.good())
-  {
-    LOG_ERROR << "Fail to open listfile.txt.";
-    return;
-  }
+	QTextStream in(&file);
 
-  std::string lineStd;
-  while(!listfile.eof())
-  {
-    listfile >> lineStd;
-    FileTreeItem tmp;
+	while (!in.atEnd())
+	{
+		QString line = in.readLine();
+		FileTreeItem tmp;
 
-    wxString line(lineStd.c_str(), wxConvUTF8);
-
-    if (filterfunc(lineStd))
+    if (filterfunc(line.toStdString()))
     {
-      tmp.fileName = line;
-      line.MakeLower();
-      line[0] = toupper(line.GetChar(0));
-      int ret = line.Find('\\');
+      tmp.fileName = line.toStdString();
+      line = line.toLower();
+      QString firstLetter = line[0];
+      firstLetter = firstLetter.toUpper();
+      line[0] = firstLetter[0];
+      int ret = line.indexOf('\\');
       if (ret>-1)
-        line[ret+1] = toupper(line.GetChar(ret+1));
-
-      tmp.displayName = line;
+      {
+      	firstLetter = line[ret+1];
+      	firstLetter = firstLetter.toUpper();
+        line[ret+1] = firstLetter[0];
+      }
+      tmp.displayName = line.toStdString();
       tmp.color = 0;
       dest.insert(tmp);
     }
