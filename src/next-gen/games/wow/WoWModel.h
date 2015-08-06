@@ -97,7 +97,6 @@ public:
 public:
 	// Raw Data
 	ModelVertex *origVertices;
-	size_t *IndiceToVerts;
 
 	Vec3D *vertices, *normals;
 	Vec2D *texCoords;

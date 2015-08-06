@@ -155,7 +155,6 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 	transparency = 0;
 	events = 0;
 	modelType = MT_NORMAL;
-	IndiceToVerts = 0;
 
 	// --
 
@@ -304,8 +303,6 @@ WoWModel::~WoWModel()
 			wxDELETEA(events);
 			wxDELETEA(particleSystems);
 			wxDELETEA(ribbons);
-			wxDELETEA(IndiceToVerts);
-
 		} else {
 			glDeleteLists(dlist, 1);
 		}
@@ -633,21 +630,6 @@ void WoWModel::initCommon(GameFile * f)
 		// int viewLOD = header.nViews - 1; // sets LOD to best
 		setLOD(f, 0); // Set the default Level of Detail to the best possible.
 	}
-
-	// build indice to vert array.
-	if (nIndices) {
-		IndiceToVerts = new size_t[nIndices+2];
-		for (size_t i=0;i<nIndices;i++){
-			size_t a = indices[i];
-			for (size_t j=0;j<header.nVertices;j++){
-				if (a < header.nVertices && origVertices[a].pos == origVertices[j].pos){
-					IndiceToVerts[i] = j;
-					break;
-				}
-			}
-		}
-	}
-	// zomg done
 }
 
 void WoWModel::initStatic(GameFile * f)
