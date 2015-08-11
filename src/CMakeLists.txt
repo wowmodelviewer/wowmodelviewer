@@ -1,69 +1,17 @@
-###################
-#   common part   #
-###################
-
-project(wowmodelviewer)
 cmake_minimum_required(VERSION 2.6)
+include(cmake/common.cmake)
 
-# set build type you want
-# availabke values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
-SET(CMAKE_BUILD_TYPE MinSizeRel)
-
-# define base repo path to use it cross folder
-set(WMV_BASE_PATH "${CMAKE_SOURCE_DIR}")
-
-# add wmv cmake directory to search path
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${CMAKE_SOURCE_DIR}/cmake")
-
-# define policies to avoid warnings
-include(cmake/policies.cmake)
-
-# search for required package (wxwidgets)
-set(wxWidgets_CONFIGURATION msw)
-find_package(wxWidgets COMPONENTS net gl aui xml adv core base REQUIRED)
-
-# add cximage compilation 
+# add external libraries compilation
 add_subdirectory(CxImage)
-
-# CascLib compilation
 add_subdirectory(casclib)
-
-# add global definitions : all warnings considered as errors
-# add_definitions(-g -Wall -Werror)
-
-# add wx widgets inclusions
-include(${wxWidgets_USE_FILE})
-
-# add wmv source files compilation
-include(cmake/sources.cmake)
-
-#clean up a bit weird backslashes in sdk path
-string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
-SET(ENV{WMV_SDK_BASEDIR} ${WMV_SDK_BASEDIR})
-
-# Qt5 stuff
-# init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
-
-find_package(Qt5Core) 
-find_package(Qt5Xml)
-find_package(Qt5Gui)
-
-
-include_directories(next-gen)
-
-#############################
-#  platform specific part   #
-#############################
-
-if(WIN32)
-  include(cmake/windows.cmake)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-  include(cmake/linux.cmake)
-elseif(APPLE)
-  include(cmake/macos.cmake)	  
-endif()
         
-# add compilation from next gen software
-# after legacy part, to ensure that glew inclusio, link, etc is well defined
-add_subdirectory(next-gen)
+# add internal libraries compilation 
+add_subdirectory(core)
+add_subdirectory(games)
+
+# then trigs executables compilation
+add_subdirectory(wowmodelviewer)
+add_subdirectory(UpdateManager)
+
+# add plugins compilation
+add_subdirectory(plugins)
