@@ -155,7 +155,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   }
   // --
 
-  LOG_INFO << "Update model:" << m->name();
+  LOG_INFO << "Update model:" << m->itemName().c_str();
 
   g_selModel = m;
 
@@ -174,7 +174,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   // Find any textures that exist for the model
   bool res = false;
 
-  wxString fn = m->name().toStdString();
+  wxString fn = m->itemName();
   fn = fn.Lower();
   LOG_INFO << __FUNCTION__ << fn.c_str();
 
@@ -364,9 +364,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   TextureSet skins;
 
   // see if this model has skins
-  LOG_INFO << "Searching skins for" << m->name();
+  LOG_INFO << "Searching skins for" << m->itemName().c_str();
 
-  wxString fn = m->name().toStdString();
+  wxString fn = m->itemName();
 
   // remove extension
   fn = fn.BeforeLast(wxT('.'));
@@ -416,7 +416,8 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   {
     // Search the same directory for BLPs
     std::set<FileTreeItem> filelist;
-    sFilterDir = m->name().toLower();
+    sFilterDir = QString::fromStdString(m->itemName());
+    sFilterDir.toLower();
     CASCFOLDER.filterFileList(filelist,filterDir);
     if (filelist.begin() != filelist.end())
     {
@@ -461,9 +462,9 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   std::set<wxString> alreadyUsedTextures;
   TextureSet skins;
 
-  LOG_INFO << "Searching skins for" << m->name();
+  LOG_INFO << "Searching skins for" << m->itemName().c_str();
 
-	wxString fn = m->name().toStdString();
+	wxString fn = m->itemName();
 
 	// change M2 to mdx
 	fn = fn.BeforeLast(wxT('.')) + wxT(".mdx");
@@ -521,7 +522,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
 	// Search the same directory for BLPs
 	std::set<FileTreeItem> filelist;
-	sFilterDir = m->name().toLower();
+	sFilterDir = QString::fromStdString(m->itemName());
+	sFilterDir.toLower();
 	CASCFOLDER.filterFileList(filelist,filterDir);
 	if (filelist.begin() != filelist.end())
 	{
@@ -565,7 +567,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
 			wxString texname = it->tex[0];
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-			texname = g_selModel->name().toStdString();
+			texname = g_selModel->itemName();
 			texname = texname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
 			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
 			g_selModel->TextureList.push_back(texname.c_str());
