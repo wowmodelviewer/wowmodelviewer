@@ -222,6 +222,8 @@ void CharControl::UpdateModel(Attachment *a)
 	charAtt = a;
 	model = dynamic_cast<WoWModel*>(charAtt->model());
 
+	Init();
+
 	RaceInfos infos;
 	if(RaceInfos::getCurrent(model->name().toStdString(), infos)) // fails if it is a creature
 	{

@@ -215,7 +215,6 @@ void AnimControl::UpdateModel(WoWModel *m)
    */
 
   // Animation stuff
-  LOG_INFO << __FUNCTION__ << m->animated << m->anims;
   if (m->animated && m->anims)
   {
     wxString strName;
