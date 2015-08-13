@@ -176,7 +176,6 @@ std::map<CharSlots,int> WoWItem::initSlotLayers()
   std::map<CharSlots,int> result;
   result[CS_SHIRT] = 10;
   result[CS_HEAD] = 11;
-  result[CS_NECK] = 12;
   result[CS_SHOULDER] = 13;
   result[CS_PANTS] = 14;
   result[CS_BOOTS] = 15;
@@ -308,8 +307,6 @@ void WoWItem::load()
 
     break;
   }
-  case CS_NECK:
-    break;
   case CS_SHOULDER:
   {
 
@@ -685,30 +682,30 @@ void WoWItem::refresh()
   {
   case CS_HEAD:
   {
-   m_modelAtt->delSlot(CS_HEAD);
+    m_modelAtt->delSlot(CS_HEAD);
     std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_HELMET);
     if(it != itemModels.end())
-     m_modelAtt->addChild(it->second, ATT_HELMET, m_slot);
+      m_modelAtt->addChild(it->second, ATT_HELMET, m_slot);
     break;
   }
   case CS_SHOULDER:
   {
-   m_modelAtt->delSlot(CS_SHOULDER);
+    m_modelAtt->delSlot(CS_SHOULDER);
 
     std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_SHOULDER);
     if(it != itemModels.end())
-     m_modelAtt->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
+      m_modelAtt->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
 
     it = itemModels.find(ATT_RIGHT_SHOULDER);
 
     if(it != itemModels.end())
-     m_modelAtt->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
+      m_modelAtt->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
 
     break;
   }
   case CS_HAND_RIGHT:
   {
-   m_modelAtt->delSlot(CS_HAND_RIGHT);
+    m_modelAtt->delSlot(CS_HAND_RIGHT);
 
     std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_RIGHT_PALM);
     if(it != itemModels.end())
@@ -731,13 +728,13 @@ void WoWItem::refresh()
       else
         m_model->charModelDetails.closeRHand = true;
 
-     m_modelAtt->addChild(it->second, attachement, m_slot);
+      m_modelAtt->addChild(it->second, attachement, m_slot);
     }
     break;
   }
   case CS_HAND_LEFT:
   {
-   m_modelAtt->delSlot(CS_HAND_LEFT);
+    m_modelAtt->delSlot(CS_HAND_LEFT);
 
     std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_PALM);
     if(it != itemModels.end())
@@ -756,13 +753,13 @@ void WoWItem::refresh()
       else
         m_model->charModelDetails.closeLHand = true;
 
-     m_modelAtt->addChild(it->second, attachement, m_slot);
+      m_modelAtt->addChild(it->second, attachement, m_slot);
     }
     break;
   }
   case CS_BELT:
   {
-   m_modelAtt->delSlot(CS_BELT);
+    m_modelAtt->delSlot(CS_BELT);
 
     {
       std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_BELT_BUCKLE);

@@ -136,7 +136,7 @@ Iterator<ItemType>::~Iterator()
 template<class ItemType>
 ItemType * Iterator<ItemType>::operator *()
 {
-	if(!this->ended())
+  if(!this->ended())
 	{
 		return this->m_items[this->m_index];
 	}

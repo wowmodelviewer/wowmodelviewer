@@ -330,29 +330,21 @@ Attachment* ModelCanvas::LoadModel(wxString fn)
 {
 	clearAttachments();
 	root->setModel(0);
-
 	wxDELETE(wmo);
+	model = new WoWModel(fn.c_str(), true);
 
-	try
-	{
-		model = new WoWModel(fn.c_str(), true);
-	}
-	catch(...)
-	{
-		LOG_ERROR << "ERROR...";
-	}
 	if (!model->ok)
 	{
 		wxDELETE(model);
 		model = NULL;
 		return NULL;
 	}
+
 	root->setModel(model);
 
 	curAtt = root;
 
 	ResetView();
-
 	return root;
 }
 
@@ -360,7 +352,6 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 {
 	clearAttachments();
 	root->setModel(0);
-
 	wxDELETE(wmo);
 
 	// Create new one
@@ -373,9 +364,9 @@ Attachment* ModelCanvas::LoadCharModel(wxString fn)
 	}
 
 	ResetView();
-
 	Attachment *att = root->addChild(model, 0, -1);
 	curAtt = att;
+
 	return att;
 }
 

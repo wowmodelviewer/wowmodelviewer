@@ -30,8 +30,7 @@ class BaseCanvas;
 class _ATTACHMENT_API_ Attachment
 {
 	public:
-		Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f)): parent(parent), m_model(model), id(id), slot(slot), scale(scale), rot(rot), pos(pos)
-		{}
+		Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f));
 
 		~Attachment();
 

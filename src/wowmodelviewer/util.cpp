@@ -250,7 +250,6 @@ bool correctType(ssize_t type, ssize_t slot)
 
 	switch (slot) {
 	case CS_HEAD:		return (type == IT_HEAD);
-	case CS_NECK:		return (type == IT_NECK);
 	case CS_SHOULDER:	return (type == IT_SHOULDER);
 	case CS_SHIRT:		return (type == IT_SHIRT);
 	case CS_CHEST:		return (type == IT_CHEST || type == IT_ROBE);

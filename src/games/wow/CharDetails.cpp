@@ -327,8 +327,6 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
       query = "";
   }
 
-  LOG_INFO << query;
-
   if(query != "")
   {
     sqlResult vals = GAMEDATABASE.sqlQuery(query);
@@ -341,7 +339,7 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
     else
     {
       LOG_ERROR << "Unable to collect infos for model";
-      LOG_ERROR << query;
+      LOG_ERROR << query << vals.valid << vals.values.size();
     }
   }
 

@@ -17,13 +17,24 @@
 
 std::map<Displayable*,Attachment*> Attachment::m_attMap = {};
 
+Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, float rot, Vec3D pos)
+: parent(parent), m_model(0), id(id), slot(slot), scale(scale), rot(rot), pos(pos)
+{
+	setModel(model);
+}
+
 Attachment::~Attachment()
 {
 	delChildren();
 
 	parent = NULL;
+
+	if(m_model)
+		Attachment::m_attMap.erase(Attachment::m_attMap.find(m_model));
+
 	delete m_model;
 	m_model = NULL;
+
 }
 
 void Attachment::draw(BaseCanvas *c)

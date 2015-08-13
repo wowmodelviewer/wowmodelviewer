@@ -10,7 +10,6 @@
 
 enum CharSlots {
 	CS_HEAD,
-	CS_NECK,
 	CS_SHOULDER,
 	CS_BOOTS,
 	CS_BELT,

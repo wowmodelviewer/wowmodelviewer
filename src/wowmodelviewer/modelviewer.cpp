@@ -923,7 +923,6 @@ void ModelViewer::LoadModel(const wxString fn)
 	if (isChar)
 	{
 		modelAtt = canvas->LoadCharModel(fn);
-
 		// error check
 		if (!modelAtt)
 		{
@@ -946,7 +945,6 @@ void ModelViewer::LoadModel(const wxString fn)
 		canvas->model->addChild(new WoWItem(CS_HAND_LEFT));
 		canvas->model->addChild(new WoWItem(CS_CAPE));
 		canvas->model->addChild(new WoWItem(CS_QUIVER));
-
 		canvas->model->modelType = MT_CHAR;
 		canvas->model->cd.reset(canvas->model);
 	}
@@ -1031,8 +1029,6 @@ void ModelViewer::LoadModel(const wxString fn)
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
-
-
 	}
 
 	// Update the model control
@@ -1041,7 +1037,6 @@ void ModelViewer::LoadModel(const wxString fn)
 
 	// Update the animations / skins
 	animControl->UpdateModel(canvas->model);
-
 	interfaceManager.Update();
 }
 

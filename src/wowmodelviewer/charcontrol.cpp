@@ -18,7 +18,6 @@
 CharSlots slotOrder[] = {
 	CS_SHIRT,
 	CS_HEAD,
-	CS_NECK,
 	CS_SHOULDER,
 	CS_PANTS,
 	CS_BOOTS,
@@ -36,7 +35,6 @@ CharSlots slotOrder[] = {
 CharSlots slotOrderWithRobe[] = {
 	CS_SHIRT,
 	CS_HEAD,
-	CS_NECK,
 	CS_SHOULDER,
 	CS_BOOTS,
 	CS_PANTS,
@@ -66,7 +64,6 @@ BEGIN_EVENT_TABLE(CharControl, wxWindow)
 	EVT_BUTTON(ID_MOUNT, CharControl::OnButton)
 
 	EVT_BUTTON(ID_EQUIPMENT + CS_HEAD, CharControl::OnButton)
-	EVT_BUTTON(ID_EQUIPMENT + CS_NECK, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_SHOULDER, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_SHIRT, CharControl::OnButton)
 	EVT_BUTTON(ID_EQUIPMENT + CS_CHEST, CharControl::OnButton)
@@ -82,7 +79,6 @@ BEGIN_EVENT_TABLE(CharControl, wxWindow)
 	EVT_BUTTON(ID_EQUIPMENT + CS_TABARD, CharControl::OnButton)
 
 	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_HEAD, CharControl::OnItemLevelChange)
-	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_NECK, CharControl::OnItemLevelChange)
 	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_SHOULDER, CharControl::OnItemLevelChange)
 	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_SHIRT, CharControl::OnItemLevelChange)
 	EVT_COMBOBOX(ID_EQUIPMENT + 1000 + CS_CHEST, CharControl::OnItemLevelChange)
@@ -133,7 +129,6 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   }
 	
 	ADD_CONTROLS(CS_HEAD, _("Head"))
-	//ADD_CONTROLS(CS_NECK, wxT("Neck"))
 	ADD_CONTROLS(CS_SHOULDER, _("Shoulder"))
 
 	ADD_CONTROLS(CS_SHIRT, _("Shirt"))
@@ -236,16 +231,13 @@ void CharControl::UpdateModel(Attachment *a)
 	  tabardSpins[SPIN_TABARD_BORDER]->Enable(true);
 	  tabardSpins[SPIN_TABARD_BORDERCOLOR]->Enable(true);
 	  tabardSpins[SPIN_TABARD_BACKGROUND]->Enable(true);
-
 	  model->cd.showEars = true;
 	  model->cd.showHair = true;
 	  model->cd.showFacialHair = true;
 	  model->cd.showUnderwear = true;
-
 	  model->cd.attach(this);
 
 	  cdFrame->setModel(model->cd);
-
 	  // The following isn't actually needed,
 	  // pretty sure all this gets taken care of by TextureManager and CharTexture
 	  model->charTex = 0;
@@ -259,12 +251,10 @@ void CharControl::UpdateModel(Attachment *a)
 	  for (size_t i=0; i<model->geosets.size(); i++) {
 	    model->showGeosets[i] = (model->geosets[i].id==0);
 	  }
-
 	  model->cd.race = infos.raceid;
 	  model->cd.gender = infos.sexid;
 
 	  g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
-
 
 	  cdFrame->refresh();
 
@@ -295,7 +285,6 @@ void CharControl::UpdateModel(Attachment *a)
 	  }
 	  //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
 	  //		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
-
 	  if (useRandomLooks)
 	      cdFrame->randomiseChar();
 	}
@@ -333,7 +322,6 @@ void CharControl::UpdateModel(Attachment *a)
 		  levelboxes[i]->Enable(false);
 		}
 	}
-
 	RefreshModel();
 }
 

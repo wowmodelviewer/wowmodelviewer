@@ -1466,7 +1466,7 @@ std::map<int, std::string> WoWModel::getAnimsMap()
       else
         query +=  ")";
     }
-    LOG_INFO << query;
+
     sqlResult animsResult = GAMEDATABASE.sqlQuery(query);
 
     if(animsResult.valid && !animsResult.empty())
