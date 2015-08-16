@@ -48,7 +48,6 @@ class _ATTACHMENT_API_ Attachment
 
 		void setModel(Displayable * newmodel);
 		Displayable * model() { return m_model;}
-		static Attachment * getAttachmentForModel(Displayable *);
 
 		Attachment *parent;
 
@@ -63,7 +62,6 @@ class _ATTACHMENT_API_ Attachment
 
 	private:
 		Displayable *m_model;
-		static std::map<Displayable*,Attachment*> m_attMap;
 };
 
 

@@ -182,7 +182,7 @@ void ModelControl::RefreshModel(Attachment *root)
 				attachments.push_back((*it));
 				if (!init)
 					UpdateModel((*it));
-				LOG_INFO << "ModelControl Refresh: Adding Attachment Level 1...";
+				LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 1...";
 			}
 
 			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
@@ -192,7 +192,7 @@ void ModelControl::RefreshModel(Attachment *root)
 					attachments.push_back((*it2));
 					if (!init)
 						UpdateModel((*it2));
-					LOG_INFO << "ModelControl Refresh: Adding Attachment Level 2...";
+					LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 2...";
 				}
 
 				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
@@ -202,7 +202,7 @@ void ModelControl::RefreshModel(Attachment *root)
 						attachments.push_back((*it3));
 						if (!init)
 							UpdateModel((*it3));
-						LOG_INFO << "ModelControl Refresh: Adding Attachment Level 3...";
+						LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 3...";
 					}
 				}
 			}
@@ -212,12 +212,13 @@ void ModelControl::RefreshModel(Attachment *root)
 		wxString tmp;
 		modelname->Clear();
 		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
-			m = static_cast<WoWModel*>((*it)->model());
+			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m) {
 				tmp = m->name().toStdString();
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
 			}
 		}
+
 		LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
 
 		if (modelname->GetCount() > 0)

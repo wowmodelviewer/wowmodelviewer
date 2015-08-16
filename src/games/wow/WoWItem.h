@@ -77,8 +77,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     bool isCustomizableTabard();
 
-    WoWModel * m_model;
-    Attachment * m_modelAtt;
+    WoWModel * m_charModel;
 
     int m_id;
     int m_displayId;

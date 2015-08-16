@@ -341,4 +341,17 @@
   	<field primary="yes" type="uint" name="ID" />
   	<field type="text" name="path" />
   </ItemVisualEffects>
+  <ItemSet>
+    <gamefile name="DBFilesClient\ItemSet" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="name" />
+    <field type="uint" name="item1" />
+    <field type="uint" name="item2" />
+    <field type="uint" name="item3" />
+    <field type="uint" name="item4" />
+    <field type="uint" name="item5" />
+    <field type="uint" name="item6" />
+    <field type="uint" name="item7" />
+    <field type="uint" name="item8" />
+  </ItemSet>
 </database>

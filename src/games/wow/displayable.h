@@ -11,6 +11,8 @@
 #    define _DISPLAYABLE_API_
 #endif
 
+class Attachment;
+
 class _DISPLAYABLE_API_ Displayable
 {
 public:
@@ -21,6 +23,7 @@ public:
 	virtual void draw() {};
 	virtual void reset() {};
 	virtual void update(int) {};
+	Attachment * attachment;
 };
 
 #endif

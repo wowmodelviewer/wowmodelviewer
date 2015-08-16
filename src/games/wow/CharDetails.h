@@ -53,8 +53,6 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     void save(std::string fn, TabardDetails *td);
     bool load(std::string fn, TabardDetails *td);
 
-    void loadSet(ItemSetDB &sets, ItemDatabase &items, int setid);
-    void loadStart(StartOutfitDB &start, ItemDatabase &items, int cls);
 
     void reset(WoWModel *);
 

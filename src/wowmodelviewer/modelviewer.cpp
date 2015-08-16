@@ -646,10 +646,6 @@ void ModelViewer::InitDatabase()
 		LOG_ERROR << "Could not open the SkyBox DB.";
 	}
 
-	if(!startdb.open())
-		LOG_ERROR << "Could not open the Start Outfit Sets DB.";
-	//if(!helmetdb.open()) return false;
-
 	if(!camcinemadb.open())
 		LOG_ERROR << "Could not open the Cinema Camera DB.";
 

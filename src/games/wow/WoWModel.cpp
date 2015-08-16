@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
-
+#include "Attachment.h"
 #include "GlobalSettings.h"
 #include "Bone.h"
 #include "CASCFile.h"
@@ -248,6 +248,9 @@ WoWModel::~WoWModel()
 {
 	if (ok)
 	{
+		if(attachment)
+			attachment->setModel(0);
+
 		// There is a small memory leak somewhere with the textures.
 		// Especially if the texture was built into the model.
 		// No matter what I try though I can't find the memory to unload.
@@ -863,7 +866,6 @@ void WoWModel::setLOD(GameFile * f, int index)
 	// remove suffix .M2
 	QString tmpname = QString::fromStdString(modelname).replace(".m2","");
 	lodname = QString("%1%2.skin").arg(tmpname).arg(index,2,10,QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
-	LOG_INFO << "lodname =" << lodname.c_str();
 	GameFile * g = new CASCFile(lodname);
 
 	if (g->isEof()) {

@@ -82,54 +82,6 @@ bool CharDetails::load(std::string fn, TabardDetails *td)
 	return same;
 }
 
-void CharDetails::loadSet(ItemSetDB &sets, ItemDatabase &items, int setid)
-{
-	try {
-		ItemSetDB::Record rec = sets.getById(setid);
-		for (size_t i=0; i<ItemSetDB::NumItems; i++) {
-			int id = rec.getInt(ItemSetDB::ItemIDBaseV400 + i);
-
-			const ItemRecord &r = items.getById(id);
-			if (r.type > 0) {
-				// find a slot for it
-			  // @TODO : to repair
-			  /*
-				for (ssize_t s=0; s<NUM_CHAR_SLOTS; s++) {
-					if (correctType((ssize_t)r.type, s)) {
-						equipment[s] = id;
-						break;
-					}
-				}
-				*/
-			}
-		}
-	} catch (ItemSetDB::NotFound &) {}
-}
-
-void CharDetails::loadStart(StartOutfitDB &start, ItemDatabase &items, int setid)
-{
-	try {
-		StartOutfitDB::Record rec = start.getById(setid);
-		for (size_t i=0; i<StartOutfitDB::NumItems; i++) {
-			int id = rec.getInt(StartOutfitDB::ItemIDBase + i);
-			if (id==0) continue;
-			const ItemRecord &r = items.getById(id);
-			if (r.type > 0) {
-				// find a slot for it
-			  // @TODO : to repair
-			  /*
-				for (ssize_t s=0; s<NUM_CHAR_SLOTS; s++) {
-					if (correctType((ssize_t)r.type, s)) {
-						equipment[s] = id;
-						break;
-					}
-				}
-				*/
-			}
-		}
-	} catch (ItemSetDB::NotFound &) {}
-}
-
 void CharDetails::reset(WoWModel * model)
 {
   m_model = model;

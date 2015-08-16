@@ -15,8 +15,6 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-std::map<Displayable*,Attachment*> Attachment::m_attMap = {};
-
 Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, float rot, Vec3D pos)
 : parent(parent), m_model(0), id(id), slot(slot), scale(scale), rot(rot), pos(pos)
 {
@@ -30,10 +28,7 @@ Attachment::~Attachment()
 	parent = NULL;
 
 	if(m_model)
-		Attachment::m_attMap.erase(Attachment::m_attMap.find(m_model));
-
-	delete m_model;
-	m_model = NULL;
+		m_model->attachment = NULL;
 
 }
 
@@ -266,20 +261,11 @@ WoWModel* Attachment::getModelFromSlot(int slot)
 void Attachment::setModel(Displayable * newmodel)
 {
 	if(m_model)
-		Attachment::m_attMap.erase(Attachment::m_attMap.find(m_model));
+		m_model->attachment = NULL;
 
 	m_model = newmodel;
 
 	if(m_model)
-		Attachment::m_attMap[m_model] = this;
-}
-
-Attachment * Attachment::getAttachmentForModel(Displayable * model)
-{
-	std::map<Displayable*,Attachment*>::iterator it = Attachment::m_attMap.find(model);
-	if(it != Attachment::m_attMap.end())
-		return it->second;
-
-	return NULL;
+		m_model->attachment = this;
 }
 

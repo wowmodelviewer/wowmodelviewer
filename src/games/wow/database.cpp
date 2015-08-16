@@ -10,8 +10,6 @@ _DATABASE_API_ std::vector<NPCRecord> npcs;
 
 // --
 _DATABASE_API_ HelmGeosetDB		helmetdb;
-_DATABASE_API_ StartOutfitDB		startdb;
-_DATABASE_API_ ItemSetDB			setsdb;
 
 //--
 _DATABASE_API_ LightSkyBoxDB			skyboxdb;
@@ -52,53 +50,6 @@ HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
 // --
 // ITEMDB.H
 //
-// --------------------------------
-// Item Database Stuff
-// --------------------------------
-
-ItemSetDB::Record ItemSetDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(SetID)==id)
-			return (*i);
-	}
-	throw NotFound();
-}
-
-void ItemSetDB::cleanup(ItemDatabase &p_itemdb)
-{
-	for(Iterator i=begin(); i!=end(); ++i) {
-		for (size_t j=0; j<NumItems; j++) {
-			int id = i->getUInt(ItemIDBaseV400+j);
-			if (id > 0) {
-				const ItemRecord &r = p_itemdb.getById(id);
-				if (r.type > 0) {
-					avail.insert(i->getUInt(SetID));
-					break;
-				}
-			}
-		}
-	}
-}
-
-bool ItemSetDB::available(unsigned int id)
-{
-	return (avail.find(id)!=avail.end());
-}
-
-
-StartOutfitDB::Record StartOutfitDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(StartOutfitID)==id)
-			return (*i);
-	}
-	throw NotFound();
-}
-
-
 
 ////////////////////
 ItemRecord::ItemRecord(const std::vector<QString> & vals)
@@ -122,6 +73,56 @@ ItemRecord::ItemRecord(const std::vector<QString> & vals)
     default: sheath = SHEATHETYPE_NONE;
   }
   name = vals[1];
+}
+
+int ItemRecord::slot()
+{
+	switch (type)
+	{
+		case IT_HEAD:
+			return CS_HEAD;
+		case IT_SHOULDER:
+			return CS_SHOULDER;
+		case IT_SHIRT:
+			return CS_SHIRT;
+		case IT_CHEST:
+		case IT_ROBE:
+			return CS_CHEST;
+		case IT_BELT:
+			return CS_BELT;
+		case IT_PANTS:
+			return CS_PANTS;
+		case IT_BOOTS:
+			return CS_BOOTS;
+		case IT_BRACERS:
+			return CS_BRACERS;
+		case IT_GLOVES:
+			return CS_GLOVES;
+		case IT_DAGGER:
+		case IT_RIGHTHANDED:
+		case IT_GUN:
+		case IT_THROWN:
+		case IT_2HANDED:
+		case IT_BOW:
+			return CS_HAND_RIGHT;
+		case IT_SHIELD:
+		case IT_LEFTHANDED:
+		case IT_OFFHAND:
+			return CS_HAND_LEFT;
+		case IT_CAPE:
+			return CS_CAPE;
+		case IT_TABARD:
+			return CS_TABARD;
+		case IT_RINGS:
+		case IT_ACCESSORY:
+		case IT_QUIVER:
+		case IT_AMMO:
+		case IT_UNUSED:
+		case IT_RELIC:
+		case IT_NECK:
+		default:
+			return -1;
+	}
 }
 
 // Alfred. prevent null items bug.

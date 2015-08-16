@@ -644,7 +644,7 @@ void CharControl::RefreshModel()
   for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
     (*itemsIt)->refresh();
 
-	LOG_INFO << "Current Equipement :"
+	LOG_INFO << "Current Equipment :"
 	         << "Head" << model->getItem(CS_HEAD)->id()
 	         << "Shoulder" << model->getItem(CS_SHOULDER)->id()
 	         << "Shirt" << model->getItem(CS_SHIRT)->id()
@@ -895,8 +895,6 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 
 void CharControl::selectSet()
 {
-	if (setsdb.size() == 0)
-		return;
 	ClearItemDialog();
 
 	std::vector<NumStringPair> items;
@@ -907,13 +905,15 @@ void CharControl::selectSet()
 	n.name = wxT("---- None ----");
 	items.push_back(n);
 
-	for (ItemSetDB::Iterator it = setsdb.begin(); it != setsdb.end(); ++it) {
-		int id = it->getUInt(ItemSetDB::SetID);
-		if (setsdb.available(id)) {
+	sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name FROM ItemSet");
+
+	if(itemSet.valid && !itemSet.empty())
+	{
+		for(int i=0, imax=itemSet.values.size() ; i < imax ; i++)
+		{
 			NumStringPair p;
-			p.id = id;
-			// to be rewritten
-		//	p.name = CSConv(it->getString(ItemSetDB::Name + langOffset));
+			p.id = itemSet.values[i][0].toInt();
+			p.name = itemSet.values[i][1].toStdString();
 			items.push_back(p);
 		}
 	}
@@ -1127,32 +1127,79 @@ void CharControl::OnUpdateItem(int type, int id)
 		break;
 	}
 	case UPDATE_SET:
+	{
 		id = numbers[id];
 
-		if (id) {
-		  // @TODO : to repair
-		  /*
-			for (size_t i=0; i<NUM_CHAR_SLOTS; i++) {
-				//if (i!=CS_HAND_LEFT && i!=CS_HAND_RIGHT) 
-				model->cd.equipment[i] = 0;
+		if (id && model)
+		{
+		  QString query = QString("SELECT item1, item2, item3, item4, item5, "
+		  		"item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id);
+
+			sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
+
+			if(itemSet.valid && !itemSet.empty())
+			{
+				// reset previously equipped items
+				Iterator<WoWItem> itemsIt(model);
+				  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
+				    (*itemsIt)->setId(0);
+
+				for(unsigned i = 0 ; i < 8; i++)
+				{
+					if(itemSet.values[0][i].toInt() == 0)
+						continue;
+
+					ItemRecord itemr = items.getById(itemSet.values[0][i].toInt());
+					if(itemr.name != items.items[0].name)
+					{
+						int itemSlot = itemr.slot();
+						if(itemSlot != -1)
+						{
+							WoWItem * item = model->getItem((CharSlots)itemSlot);
+							if(item)
+							{
+								item->setId(itemSet.values[0][i].toInt());
+								labels[itemSlot]->SetLabel(CSConv(item->name()));
+								labels[itemSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+
+								// refresh level combo box
+								levelboxes[itemSlot]->Clear();
+								if(item->nbLevels() > 1)
+								{
+									levelboxes[itemSlot]->Enable(true);
+									for(unsigned int i = 0 ; i < item->nbLevels() ; i++)
+										levelboxes[itemSlot]->Append(wxString::Format(wxT("%i"),i));
+								}
+								else
+								{
+									levelboxes[itemSlot]->Enable(false);
+								}
+							}
+						}
+						else
+						{
+							LOG_ERROR << "Cannot determine slot for object" << itemr.name;
+						}
+					}
+					else
+					{
+						LOG_ERROR << "Cannot retrieve item from database (id" << itemSet.values[0][i].toInt() << ")";
+					}
+				}
+				RefreshEquipment();
+				RefreshModel();
 			}
-			*/
-
-
-			model->cd.loadSet(setsdb, items, id);
-			RefreshEquipment();
-			RefreshModel();
 		}
 		break;
-
+	}
 	case UPDATE_START:
 		id = numbers[id];
 
 		if (id) {
 		  // @TODO : to repair
 			//for (size_t i=0; i<NUM_CHAR_SLOTS; i++) model->cd.equipment[i] = 0;
-			model->cd.loadStart(startdb, items, id);
-			RefreshEquipment();
+			//model->cd.loadStart(startdb, items, id);
+			//RefreshEquipment();
 		}
 		break;
 

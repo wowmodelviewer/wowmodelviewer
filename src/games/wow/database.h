@@ -40,14 +40,10 @@ _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 // game database
 class HelmGeosetDB;
-class ItemSetDB;
-class StartOutfitDB;
 class LightSkyBoxDB;
 class CamCinematicDB;
 
 _DATABASE_API_ extern HelmGeosetDB	helmetdb;
-_DATABASE_API_ extern ItemSetDB setsdb;
-_DATABASE_API_ extern StartOutfitDB startdb;
 _DATABASE_API_ extern LightSkyBoxDB skyboxdb;
 _DATABASE_API_ extern CamCinematicDB camcinemadb;
 
@@ -93,48 +89,6 @@ public:
 class ItemDatabase;
 
 
-class _DATABASE_API_ ItemSetDB: public DBCFile
-{
-	std::set<int> avail;
-
-public:
-	ItemSetDB(): DBCFile("DBFilesClient\\ItemSet.dbc") {}
-	~ItemSetDB() {}
-
-	static const size_t NumItems = 10;
-
-	/// Fields
-	static const size_t SetID = 0;	// uint
-	static const size_t Name = 1;	// string, Localization
-	static const size_t ItemIDBase = 18; // 10 * uint
-
-	Record getById(unsigned int id);
-	void cleanup(ItemDatabase &l_itemdb);
-	bool available(unsigned int id);
-	
-	static const size_t ItemIDBaseV400 = 2; // 10 * uint
-};
-
-class _DATABASE_API_ StartOutfitDB: public DBCFile
-{
-public:
-	StartOutfitDB(): DBCFile("DBFilesClient\\CharStartOutfit.dbc") {}
-	~StartOutfitDB() {}
-
-	static const size_t NumItems = 24;
-
-	/// Fields
-	static const size_t StartOutfitID = 0;	// uint
-	static const size_t Race = 4;	// byte offset
-	static const size_t Class = 5;	// byte offset
-	static const size_t Gender = 6;	// byte offset
-	static const size_t ItemIDBase = 2; // 24 * uint
-//	static const size_t ItemDisplayIDBase = 26; // 24 * uint
-//	static const size_t ItemTypeBase = 50; // 24 * uint
-
-	Record getById(unsigned int id);
-};
-
 struct _DATABASE_API_ ItemRecord {
 	QString name;
 	int id, itemclass, subclass, type, model, sheath, quality;
@@ -142,6 +96,8 @@ struct _DATABASE_API_ ItemRecord {
 	ItemRecord(const std::vector<QString> &);
 	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
 	{}
+
+	int slot();
 };
 
 class _DATABASE_API_ ItemDatabase {

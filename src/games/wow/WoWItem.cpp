@@ -53,7 +53,7 @@ map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
 
 
 WoWItem::WoWItem(CharSlots slot)
-: m_model(0), m_id(-1), m_quality(0),
+: m_charModel(0), m_id(-1), m_quality(0),
   m_slot(slot), m_displayId(-1), m_level(0),
   m_nbLevels(0)
 {
@@ -74,10 +74,10 @@ void WoWItem::setId(int id)
       m_quality = 0;
 
       if(m_slot == CS_HAND_RIGHT)
-        m_model->charModelDetails.closeRHand = false;
+        m_charModel->charModelDetails.closeRHand = false;
 
       if(m_slot == CS_HAND_LEFT)
-        m_model->charModelDetails.closeLHand = false;
+        m_charModel->charModelDetails.closeLHand = false;
 
       return;
     }
@@ -167,8 +167,7 @@ void WoWItem::setLevel(unsigned int level)
 
 void WoWItem::onParentSet(Component * parent)
 {
-  m_model = dynamic_cast<WoWModel *>(parent);
-  m_modelAtt = Attachment::getAttachmentForModel(m_model);
+  m_charModel = dynamic_cast<WoWModel *>(parent);
 }
 
 std::map<CharSlots,int> WoWItem::initSlotLayers()
@@ -218,21 +217,22 @@ void WoWItem::unload()
   m_itemGeosets.clear();
 
   // remove any existing attachement
-  m_modelAtt->delSlot(m_slot);
+  if(m_charModel->attachment)
+  	m_charModel->attachment->delSlot(m_slot);
 }
 
 void WoWItem::load()
 {
   unload();
 
-  if(!m_model) // no parent => give up
+  if(!m_charModel) // no parent => give up
     return;
 
   if(m_id == 0) // no equipment, just return
     return;
 
   RaceInfos infos;
-  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
+  RaceInfos::getCurrent(m_charModel->name().toStdString(), infos);
 
   QString query = QString("SELECT Model1,Model2, \
        FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
@@ -309,7 +309,6 @@ void WoWItem::load()
   }
   case CS_SHOULDER:
   {
-
     WoWModel *m = NULL;
     GLuint tex;
 
@@ -381,45 +380,51 @@ void WoWItem::load()
   break;
   case CS_BELT:
   {
-    {
-      WoWModel *m = NULL;
-      GLuint tex;
+  	WoWModel *m = NULL;
+  	GLuint tex;
 
-      QString model = iteminfos.values[0][0];
-      model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-      model = CASCFOLDER.getFullPathForFile(model);
+  	QString model = iteminfos.values[0][0];
+  	if(!model.isEmpty())
+  	{
+  		model.replace(".mdx", ".m2", Qt::CaseInsensitive);
+  		model = CASCFOLDER.getFullPathForFile(model);
 
-      m = new WoWModel(model.toStdString(), true);
+  		m = new WoWModel(model.toStdString(), true);
 
-      if (m->ok)
-        itemModels[ATT_BELT_BUCKLE] = m;
+  		if (m->ok)
+  		{
+  			itemModels[ATT_BELT_BUCKLE] = m;
+  			std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+  			tex = texturemanager.add(texture);
+  			for (size_t x=0;x<m->TextureList.size();x++)
+  			{
+  				if (m->TextureList[x] == "Special_2")
+  				{
+  					LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
+  					m->TextureList[x] = texture;
+  				}
+  			}
+  			m->replaceTextures[TEXTURE_CAPE] = tex;
+  		}
+  		else
+  			itemModels[ATT_BELT_BUCKLE] = 0;
+  	}
+  	else
+  		itemModels[ATT_BELT_BUCKLE] = 0;
 
-      std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
-      tex = texturemanager.add(texture);
-      for (size_t x=0;x<m->TextureList.size();x++)
-      {
-        if (m->TextureList[x] == "Special_2")
-        {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
-        }
-      }
-      m->replaceTextures[TEXTURE_CAPE] = tex;
-    }
+  	std::string texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
+  	if(!texture.empty())
+  	{
+  		texturemanager.add(texture);
+  		m_itemTextures[CR_TORSO_LOWER] = texture;
+  	}
 
-    std::string texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
-    if(!texture.empty())
-    {
-      texturemanager.add(texture);
-      m_itemTextures[CR_TORSO_LOWER] = texture;
-    }
-
-    texture = iteminfos.values[0][21].toStdString() + iteminfos.values[0][22].toStdString();
-    if(!texture.empty())
-    {
-      texturemanager.add(texture);
-      m_itemTextures[CR_LEG_UPPER] = texture;
-    }
+  	texture = iteminfos.values[0][21].toStdString() + iteminfos.values[0][22].toStdString();
+  	if(!texture.empty())
+  	{
+  		texturemanager.add(texture);
+  		m_itemTextures[CR_LEG_UPPER] = texture;
+  	}
   }
   break;
   case CS_PANTS:
@@ -604,43 +609,43 @@ void WoWItem::load()
     m_itemGeosets[CG_TARBARD] = 2;
     if(isCustomizableTabard())
     {
-    	m_model->td.showCustom = true;
-      std::string texture = m_model->td.GetBackgroundTex(CR_TORSO_UPPER).toStdString();
+    	m_charModel->td.showCustom = true;
+      std::string texture = m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_1] = texture;
       }
 
-      texture = m_model->td.GetBackgroundTex(CR_TORSO_LOWER).toStdString();
+      texture = m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_2] = texture;
       }
 
-      texture = m_model->td.GetIconTex(CR_TORSO_UPPER).toStdString();
+      texture = m_charModel->td.GetIconTex(CR_TORSO_UPPER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_3] = texture;
       }
 
-      texture = m_model->td.GetIconTex(CR_TORSO_LOWER).toStdString();
+      texture = m_charModel->td.GetIconTex(CR_TORSO_LOWER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_4] = texture;
       }
 
-      texture = m_model->td.GetBorderTex(CR_TORSO_UPPER).toStdString();
+      texture = m_charModel->td.GetBorderTex(CR_TORSO_UPPER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
         m_itemTextures[CR_TABARD_5] = texture;
       }
 
-      texture = m_model->td.GetBorderTex(CR_TORSO_LOWER).toStdString();
+      texture = m_charModel->td.GetBorderTex(CR_TORSO_LOWER).toStdString();
       if(!texture.empty())
       {
         texturemanager.add(texture);
@@ -649,7 +654,7 @@ void WoWItem::load()
     }
     else
     {
-    	m_model->td.showCustom = false;
+    	m_charModel->td.showCustom = false;
       std::string texture = iteminfos.values[0][17].toStdString() + iteminfos.values[0][18].toStdString();
       if(!texture.empty())
       {
@@ -682,115 +687,128 @@ void WoWItem::refresh()
   {
   case CS_HEAD:
   {
-    m_modelAtt->delSlot(CS_HEAD);
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_HELMET);
-    if(it != itemModels.end())
-      m_modelAtt->addChild(it->second, ATT_HELMET, m_slot);
-    break;
+  	if(m_charModel->attachment)
+  	{
+  		 m_charModel->attachment->delSlot(CS_HEAD);
+  		 std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_HELMET);
+  		 if(it != itemModels.end())
+  			 m_charModel->attachment->addChild(it->second, ATT_HELMET, m_slot);
+  	}
+  	break;
   }
   case CS_SHOULDER:
   {
-    m_modelAtt->delSlot(CS_SHOULDER);
+  	if(m_charModel->attachment)
+  	{
+  		m_charModel->attachment->delSlot(CS_SHOULDER);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_SHOULDER);
-    if(it != itemModels.end())
-      m_modelAtt->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
+  		std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_SHOULDER);
+  		if(it != itemModels.end())
+  			 m_charModel->attachment->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
 
-    it = itemModels.find(ATT_RIGHT_SHOULDER);
 
-    if(it != itemModels.end())
-      m_modelAtt->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
+  		it = itemModels.find(ATT_RIGHT_SHOULDER);
 
+  		if(it != itemModels.end())
+  			 m_charModel->attachment->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
+  	}
     break;
   }
   case CS_HAND_RIGHT:
   {
-    m_modelAtt->delSlot(CS_HAND_RIGHT);
+  	if(m_charModel->attachment)
+  	{
+  		 m_charModel->attachment->delSlot(CS_HAND_RIGHT);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_RIGHT_PALM);
-    if(it != itemModels.end())
-    {
-      int attachement = ATT_RIGHT_PALM;
-      const ItemRecord &item = items.getById(m_id);
-      if(m_model->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
-      {
-        // make the weapon cross
-        if (item.sheath == ATT_LEFT_BACK_SHEATH)
-          attachement = ATT_RIGHT_BACK_SHEATH;
-        if (item.sheath == ATT_LEFT_BACK)
-          attachement = ATT_RIGHT_BACK;
-        if (item.sheath == ATT_LEFT_HIP_SHEATH)
-          attachement = ATT_RIGHT_HIP_SHEATH;
-      }
+  		std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_RIGHT_PALM);
+  		if(it != itemModels.end())
+  		{
+  			int attachement = ATT_RIGHT_PALM;
+  			const ItemRecord &item = items.getById(m_id);
+  			if(m_charModel->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+  			{
+  				// make the weapon cross
+  				if (item.sheath == ATT_LEFT_BACK_SHEATH)
+  					attachement = ATT_RIGHT_BACK_SHEATH;
+  				if (item.sheath == ATT_LEFT_BACK)
+  					attachement = ATT_RIGHT_BACK;
+  				if (item.sheath == ATT_LEFT_HIP_SHEATH)
+  					attachement = ATT_RIGHT_HIP_SHEATH;
+  			}
 
-      if(m_model->bSheathe)
-        m_model->charModelDetails.closeRHand = false;
-      else
-        m_model->charModelDetails.closeRHand = true;
+  			if(m_charModel->bSheathe)
+  				m_charModel->charModelDetails.closeRHand = false;
+  			else
+  				m_charModel->charModelDetails.closeRHand = true;
 
-      m_modelAtt->addChild(it->second, attachement, m_slot);
+  			 m_charModel->attachment->addChild(it->second, attachement, m_slot);
+  		}
     }
     break;
   }
   case CS_HAND_LEFT:
   {
-    m_modelAtt->delSlot(CS_HAND_LEFT);
+  	if(m_charModel->attachment)
+  	{
+  		 m_charModel->attachment->delSlot(CS_HAND_LEFT);
 
-    std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_PALM);
-    if(it != itemModels.end())
-    {
-      const ItemRecord &item = items.getById(m_id);
-      int attachement = ATT_LEFT_PALM;
+  		std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_PALM);
+  		if(it != itemModels.end())
+  		{
+  			const ItemRecord &item = items.getById(m_id);
+  			int attachement = ATT_LEFT_PALM;
 
-      if(item.type == IT_SHIELD)
-        attachement = ATT_LEFT_WRIST;
+  			if(item.type == IT_SHIELD)
+  				attachement = ATT_LEFT_WRIST;
 
-      if(m_model->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
-        attachement = (POSITION_SLOTS)item.sheath;
+  			if(m_charModel->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
+  				attachement = (POSITION_SLOTS)item.sheath;
 
-      if(m_model->bSheathe || item.type == IT_SHIELD)
-        m_model->charModelDetails.closeLHand = false;
-      else
-        m_model->charModelDetails.closeLHand = true;
+  			if(m_charModel->bSheathe || item.type == IT_SHIELD)
+  				m_charModel->charModelDetails.closeLHand = false;
+  			else
+  				m_charModel->charModelDetails.closeLHand = true;
 
-      m_modelAtt->addChild(it->second, attachement, m_slot);
-    }
+  			 m_charModel->attachment->addChild(it->second, attachement, m_slot);
+  		}
+  	}
     break;
   }
   case CS_BELT:
   {
-    m_modelAtt->delSlot(CS_BELT);
+  	if(m_charModel->attachment)
+  	{
+  		 m_charModel->attachment->delSlot(CS_BELT);
 
-    {
       std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_BELT_BUCKLE);
       if(it != itemModels.end())
-       m_modelAtt->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
-    }
+      	 m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
-    if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
+      std::map<CharRegions, std::string>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
+      if(it2 != m_itemTextures.end())
+      	m_charModel->tex.addLayer(it2->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
-    it = m_itemTextures.find(CR_TORSO_LOWER);
-    if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
-    break;
+      it2 = m_itemTextures.find(CR_TORSO_LOWER);
+      if(it2 != m_itemTextures.end())
+      	m_charModel->tex.addLayer(it2->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+  	}
+  	break;
   }
   case CS_BOOTS:
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_BOOTS);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_BOOTS] = geoIt->second;
+      m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
 
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
-    if (!m_model->cd.showFeet)
+    if (!m_charModel->cd.showFeet)
     {
       it = m_itemTextures.find(CR_FOOT);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_FOOT, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_FOOT, SLOT_LAYERS[m_slot]);
     }
 
     break;
@@ -799,19 +817,19 @@ void WoWItem::refresh()
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_KNEEPADS);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_KNEEPADS] = geoIt->second;
+      m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
 
     geoIt = m_itemGeosets.find(CG_TROUSERS);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_TROUSERS] = geoIt->second;
+      m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
 
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
     it = m_itemTextures.find(CR_LEG_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
     break;
   }
@@ -820,37 +838,37 @@ void WoWItem::refresh()
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_WRISTBANDS] = geoIt->second;
+      m_charModel->cd.geosets[CG_WRISTBANDS] = geoIt->second;
 
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
 
     it = m_itemTextures.find(CR_ARM_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
 
     it = m_itemTextures.find(CR_TORSO_UPPER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
     it = m_itemTextures.find(CR_TORSO_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
 
 
     geoIt = m_itemGeosets.find(CG_TROUSERS);
     if(geoIt != m_itemGeosets.end())
     {
-      m_model->cd.geosets[CG_TROUSERS] = geoIt->second;
+      m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
 
       it = m_itemTextures.find(CR_LEG_UPPER);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_LEG_LOWER);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
     }
     break;
   }
@@ -858,78 +876,78 @@ void WoWItem::refresh()
   {
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
     break;
   }
   case CS_GLOVES:
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_GLOVES);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_GLOVES] = geoIt->second;
+      m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
 
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
 
     it = m_itemTextures.find(CR_HAND);
     if(it != m_itemTextures.end())
-      m_model->tex.addLayer(it->second, CR_HAND, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_HAND, SLOT_LAYERS[m_slot]);
     break;
   }
   case CS_CAPE:
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_CAPE);
     if(geoIt != m_itemGeosets.end())
-      m_model->cd.geosets[CG_CAPE] = geoIt->second;
+      m_charModel->cd.geosets[CG_CAPE] = geoIt->second;
 
     std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_CAPE);
     if(it != m_itemTextures.end())
     {
-    	m_model->capeTex = texturemanager.add(it->second);
-      m_model->UpdateTextureList(it->second, TEXTURE_CAPE);
+    	m_charModel->capeTex = texturemanager.add(it->second);
+      m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
     }
     break;
   }
   case CS_TABARD:
   {
-    m_model->cd.geosets[CG_TARBARD] = m_itemGeosets[CG_TARBARD];
+    m_charModel->cd.geosets[CG_TARBARD] = m_itemGeosets[CG_TARBARD];
 
     if(isCustomizableTabard())
     {
       std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TABARD_1);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TABARD_2);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TABARD_3);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TABARD_4);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TABARD_5);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TABARD_6);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
 
     }
     else
     {
       std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TORSO_UPPER);
       if(it != m_itemTextures.end())
-        m_model->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
+        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
       it = m_itemTextures.find(CR_TORSO_LOWER);
            if(it != m_itemTextures.end())
-             m_model->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
+             m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
     }
     break;
   }
