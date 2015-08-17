@@ -93,6 +93,7 @@ DBCFile::~DBCFile()
 std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QString, QString> > & structure) const
 {
   std::vector<std::string> result;
+  unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
   for(std::map<int, std::pair<QString, QString> >::const_iterator it = structure.begin(), itEnd = structure.end();
       it != itEnd ;
       ++it)
@@ -107,7 +108,7 @@ std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QStr
      // std::cout << field << std::endl;
       result.push_back(field);
     }
-    if(it->second.second == "int")
+    else if(it->second.second == "int")
     {
       // std::cout << "uint => " << it->first << " => ";
       std::stringstream ss;
@@ -131,6 +132,33 @@ std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QStr
       std::string field = ss.str();
      // std::cout << field << std::endl;
       result.push_back(field);
+    }
+    else if(it->second.second == "byte")
+    {
+    	unsigned int decal = 0;
+    	switch(offset)
+    	{
+    		case 0:
+    			decal = 24;
+    			break;
+    		case 1:
+    			decal = 16;
+    			break;
+    		case 2:
+    			decal = 8;
+    			break;
+    		default:
+    			decal = 0;
+    			break;
+    	}
+
+    	std::stringstream ss;
+    	unsigned int val = getUInt(it->first-offset);
+    	ss << ((val>>decal)&0x000000FF);
+    	std::string field = ss.str();
+    	// std::cout << field << std::endl;
+    	result.push_back(field);
+    	offset++;
     }
   }
   return result;

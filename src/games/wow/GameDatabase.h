@@ -69,7 +69,7 @@ class _GAMEDATABASE_API_ GameDatabase
 
     sqlite3 *m_db;
     // std::map<TableName, [fieldID] <fieldName,fieldType> >
-    // ie m_dbStruct["FileData"][0] => pair<"id","unit">
+    // ie m_dbStruct["FileData"][0] => pair<"id","uint">
     std::map<QString, std::map<int, std::pair<QString, QString> > >  m_dbStruct;
 
     bool m_fastMode;

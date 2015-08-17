@@ -44,6 +44,7 @@ class CharControl: public wxWindow, public Observer
 	CharDetailsFrame * cdFrame;
 
 	void onEvent(Event *);
+	void tryToEquipItem(int id);
 
 public:
 	// Item selection stuff

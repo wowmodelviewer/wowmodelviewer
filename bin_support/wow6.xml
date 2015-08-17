@@ -48,15 +48,15 @@
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="ModelID" />
     <field type="uint" name="SoundID" />
-	<field type="uint" name="ExtendedDisplayInfoID" />
-	<field type="float" name="CreatureModelScale" />
-	<field type="float" name="Col5" />
+    <field type="uint" name="ExtendedDisplayInfoID" />
+    <field type="float" name="CreatureModelScale" />
+    <field type="float" name="Col5" />
     <field type="uint" name="CreatureModelAlpha" />
     <field type="text" name="Texture1" />
     <field type="text" name="Texture2" />
     <field type="text" name="Texture3" />
     <field type="text" name="PortraitTextureName" />
-	<field type="uint" name="PortraitCreatureDisplayInfoID" />
+    <field type="uint" name="PortraitCreatureDisplayInfoID" />
     <field type="uint" name="SizeClass" />
     <field type="uint" name="BloodID" />
     <field type="uint" name="NPCSoundID" />
@@ -194,16 +194,16 @@
     <field primary="yes" type="uint" name="col0" />
     <field type="uint" name="ID" />
     <field type="uint" name="SubClassID" />
-	<field type="uint" name="col3" />
-	<field type="uint" name="col4" />
-	<field type="uint" name="col5" />
-	<field type="uint" name="col6" />
-	<field type="uint" name="col7" />
-	<field type="uint" name="col8" />
-	<field type="uint" name="col9" />
-  	<field type="uint" name="col10" />
-  	<field type="text" name="Name" />
-  	<field type="text" name="VerboseName" />
+    <field type="uint" name="col3" />
+    <field type="uint" name="col4" />
+    <field type="uint" name="col5" />
+    <field type="uint" name="col6" />
+    <field type="uint" name="col7" />
+    <field type="uint" name="col8" />
+    <field type="uint" name="col9" />
+    <field type="uint" name="col10" />
+    <field type="text" name="Name" />
+    <field type="text" name="VerboseName" />
   </ItemSubClass>
   <CharComponentTextureSections>
   	<gamefile name="DBFilesClient\CharComponentTextureSections" />
@@ -247,8 +247,8 @@
     <field type="uint" name="Geoset5" />
   </CharacterFacialHairStyles>
   <ChrRaces>
-  	<gamefile name="DBFilesClient\ChrRaces" />
-  	<field primary="yes" type="uint" name="ID" />
+    <gamefile name="DBFilesClient\ChrRaces" />
+    <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="uint" name="FactionID" />
     <field type="uint" name="ExplorationSoundID" />
@@ -260,33 +260,33 @@
     <field type="uint" name="ResSicknessSpellID" />
     <field type="uint" name="SplashSoundID" />
     <field type="text" name="ClientFileString" />
- 	<field type="uint" name="CinematicSequenceID" />
-  	<field type="uint" name="Alliance" />
- 	<field type="text" name="NameLang" />
- 	<field type="text" name="NameLangFemale" />
- 	<field type="text" name="NameLangMale" />
- 	<field type="text" name="FacialHairCustomization1" />
- 	<field type="text" name="FacialHairCustomization2" />
- 	<field type="text" name="HairCustomization" />
-  	<field type="uint" name="RaceRelated" />
-  	<field type="uint" name="UnalteredVisualRaceID" />
-  	<field type="uint" name="uaMaleCreatureSoundDataID" />
-  	<field type="uint" name="uaFemaleCreatureSoundDataID" />
-  	<field type="uint" name="CharComponentTexLayoutID" />
-  	<field type="uint" name="DefaultClassID" />
- 	<field type="uint" name="CreateScreenFileDataID" />
- 	<field type="uint" name="SelectScreenFileDataID" />
-  	<field type="float" name="MaleCustomizeOffset1" />
-  	<field type="float" name="MaleCustomizeOffset2" />
-  	<field type="float" name="MaleCustomizeOffset3" />
-  	<field type="float" name="FemaleCustomizeOffset1" />
-  	<field type="float" name="FemaleCustomizeOffset2" />
-  	<field type="float" name="FemaleCustomizeOffset3" />
-  	<field type="uint" name="NeutralRaceID" />
-	<field type="uint" name="LowResScreenFileDataID" />
-	<field type="uint" name="HighResMaleDisplayId" />
-	<field type="uint" name="HighResFemaleDisplayId" />
-	<field type="uint" name="CharComponentTexLayoutHiResID" />
+    <field type="uint" name="CinematicSequenceID" />
+    <field type="uint" name="Alliance" />
+    <field type="text" name="NameLang" />
+    <field type="text" name="NameLangFemale" />
+    <field type="text" name="NameLangMale" />
+    <field type="text" name="FacialHairCustomization1" />
+    <field type="text" name="FacialHairCustomization2" />
+    <field type="text" name="HairCustomization" />
+    <field type="uint" name="RaceRelated" />
+    <field type="uint" name="UnalteredVisualRaceID" />
+    <field type="uint" name="uaMaleCreatureSoundDataID" />
+    <field type="uint" name="uaFemaleCreatureSoundDataID" />
+    <field type="uint" name="CharComponentTexLayoutID" />
+    <field type="uint" name="DefaultClassID" />
+    <field type="uint" name="CreateScreenFileDataID" />
+    <field type="uint" name="SelectScreenFileDataID" />
+    <field type="float" name="MaleCustomizeOffset1" />
+    <field type="float" name="MaleCustomizeOffset2" />
+    <field type="float" name="MaleCustomizeOffset3" />
+    <field type="float" name="FemaleCustomizeOffset1" />
+    <field type="float" name="FemaleCustomizeOffset2" />
+    <field type="float" name="FemaleCustomizeOffset3" />
+    <field type="uint" name="NeutralRaceID" />
+    <field type="uint" name="LowResScreenFileDataID" />
+    <field type="uint" name="HighResMaleDisplayId" />
+    <field type="uint" name="HighResFemaleDisplayId" />
+    <field type="uint" name="CharComponentTexLayoutHiResID" />
   </ChrRaces>
   <CharHairGeoSets>
     <gamefile name="DBFilesClient\CharHairGeoSets" />
@@ -354,4 +354,89 @@
     <field type="uint" name="item7" />
     <field type="uint" name="item8" />
   </ItemSet>
+  <CharStartOutfit>
+    <gamefile name="DBFilesClient\CharStartOutfit" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="byte" name="unused" />
+    <field type="byte" name="sexID" />
+    <field type="byte" name="classID" />
+    <field type="byte" name="raceID" />
+    <field type="uint" name="item1" />
+    <field type="uint" name="item2" />
+    <field type="uint" name="item3" />
+    <field type="uint" name="item4" />
+    <field type="uint" name="item5" />
+    <field type="uint" name="item6" />
+    <field type="uint" name="item7" />
+    <field type="uint" name="item8" />
+    <field type="uint" name="item9" />
+    <field type="uint" name="item10" />
+    <field type="uint" name="item11" />
+    <field type="uint" name="item12" />
+    <field type="uint" name="item13" />
+    <field type="uint" name="item14" />
+    <field type="uint" name="item15" />
+    <field type="uint" name="item16" />
+    <field type="uint" name="item17" />
+    <field type="uint" name="item18" />
+    <field type="uint" name="item19" />
+    <field type="uint" name="item20" />
+    <field type="uint" name="item21" />
+    <field type="uint" name="item22" />
+    <field type="uint" name="item23" />
+    <field type="uint" name="item24" />
+    <field type="uint" name="ditem1" />
+    <field type="uint" name="ditem2" />
+    <field type="uint" name="ditem3" />
+    <field type="uint" name="ditem4" />
+    <field type="uint" name="ditem5" />
+    <field type="uint" name="ditem6" />
+    <field type="uint" name="ditem7" />
+    <field type="uint" name="ditem8" />
+    <field type="uint" name="ditem9" />
+    <field type="uint" name="ditem10" />
+    <field type="uint" name="ditem11" />
+    <field type="uint" name="ditem12" />
+    <field type="uint" name="ditem13" />
+    <field type="uint" name="ditem14" />
+    <field type="uint" name="ditem15" />
+    <field type="uint" name="ditem16" />
+    <field type="uint" name="ditem17" />
+    <field type="uint" name="ditem18" />
+    <field type="uint" name="ditem19" />
+    <field type="uint" name="ditem20" />
+    <field type="uint" name="ditem21" />
+    <field type="uint" name="ditem22" />
+    <field type="uint" name="ditem23" />
+    <field type="uint" name="ditem24" />
+    <field type="uint" name="iitem1" />
+    <field type="uint" name="iitem2" />
+    <field type="uint" name="iitem3" />
+    <field type="uint" name="iitem4" />
+    <field type="uint" name="iitem5" />
+    <field type="uint" name="iitem6" />
+    <field type="uint" name="iitem7" />
+    <field type="uint" name="iitem8" />
+    <field type="uint" name="iitem9" />
+    <field type="uint" name="iitem10" />
+    <field type="uint" name="iitem11" />
+    <field type="uint" name="iitem12" />
+    <field type="uint" name="iitem13" />
+    <field type="uint" name="iitem14" />
+    <field type="uint" name="iitem15" />
+    <field type="uint" name="iitem16" />
+    <field type="uint" name="iitem17" />
+    <field type="uint" name="iitem18" />
+    <field type="uint" name="iitem19" />
+    <field type="uint" name="iitem20" />
+    <field type="uint" name="iitem21" />
+    <field type="uint" name="iitem22" />
+    <field type="uint" name="iitem23" />
+    <field type="uint" name="iitem24" />
+  </CharStartOutfit>
+  <ChrClasses>
+    <gamefile name="DBFilesClient\ChrClasses" />
+    <field type="uint" name="ID" index="0" />
+    <field type="text" name="name" index="3" />
+  </ChrClasses>
 </database>
