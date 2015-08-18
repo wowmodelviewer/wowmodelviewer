@@ -641,11 +641,6 @@ void ModelViewer::InitDatabase()
 	// init Race informations
 	RaceInfos::init();
 
-	if (!skyboxdb.open()) {
-		initDB = false;
-		LOG_ERROR << "Could not open the SkyBox DB.";
-	}
-
 	if(!camcinemadb.open())
 		LOG_ERROR << "Could not open the Cinema Camera DB.";
 
@@ -1962,15 +1957,16 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 			// List of skybox models, LightSkybox.dbc
 			wxArrayString skyboxes;
 
-			// to be repaired
-			for (LightSkyBoxDB::Iterator it=skyboxdb.begin();  it!=skyboxdb.end(); ++it) {
-				/*wxString str(it->getString(LightSkyBoxDB::Name));
-				str = str.BeforeLast('.');
-				str.Append(wxT(".m2"));
+			sqlResult skyboxesInfos = GAMEDATABASE.sqlQuery("SELECT DISTINCT name FROM LightSkybox");
 
-				if (skyboxes.Index(str, false) == wxNOT_FOUND)
-					skyboxes.Add(str);*/
+			if(skyboxesInfos.valid && !skyboxesInfos.values.empty())
+			{
+				for(unsigned int i=0, imax = skyboxesInfos.values.size() ; i <imax ; i++)
+				{
+					skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx",".m2").toStdString());
+				}
 			}
+
 			skyboxes.Add(wxT("World\\Outland\\PassiveDoodads\\SkyBox\\OutlandSkyBox.m2"));
 			skyboxes.Sort();
 

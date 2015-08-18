@@ -9,7 +9,6 @@ _DATABASE_API_ ItemDatabase		items;
 _DATABASE_API_ std::vector<NPCRecord> npcs;
 
 //--
-_DATABASE_API_ LightSkyBoxDB			skyboxdb;
 _DATABASE_API_ CamCinematicDB		 camcinemadb;
 
 // --

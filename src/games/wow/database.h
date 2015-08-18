@@ -39,24 +39,9 @@ _DATABASE_API_ extern ItemDatabase items;
 _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 // game database
-class LightSkyBoxDB;
 class CamCinematicDB;
 
-_DATABASE_API_ extern LightSkyBoxDB skyboxdb;
 _DATABASE_API_ extern CamCinematicDB camcinemadb;
-
-
-class _DATABASE_API_ LightSkyBoxDB: public DBCFile
-{
-public:
-	LightSkyBoxDB(): DBCFile("DBFilesClient\\LightSkybox.dbc") {}
-	~LightSkyBoxDB() {}
-
-	// Fields
-	// static const size_t ID;
-	static const size_t Name = 1;		// string
-	// static const size_t Flags;
-};
 
 // ==============================================
 

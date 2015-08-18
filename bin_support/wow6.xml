@@ -439,4 +439,9 @@
     <field type="uint" name="ID" index="0" />
     <field type="text" name="name" index="3" />
   </ChrClasses>
+  <LightSkybox>
+    <gamefile name="DBFilesClient\LightSkybox" />
+    <field type="uint" name="ID" />
+    <field type="text" name="name" />
+  </LightSkybox>
 </database>
