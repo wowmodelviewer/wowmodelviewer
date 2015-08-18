@@ -8,27 +8,6 @@
 _DATABASE_API_ ItemDatabase		items;
 _DATABASE_API_ std::vector<NPCRecord> npcs;
 
-//--
-_DATABASE_API_ CamCinematicDB		 camcinemadb;
-
-// --
-// CAMCINEMADB.H
-CamCinematicDB::Record CamCinematicDB::getByCamModel(std::string fn)
-{
-	LOG_INFO << "Searching for CamModel...";
-	// Brute force search for now
-	for (Iterator i=begin(); i!=end(); ++i)
-	{
-		// to repair
-		/*
-		wxString str(i->getString(CamModel));
-		LOG_INFO << "CamModel:" << str.c_str() << "VS" <<  fn.c_str();
-		if(str.IsSameAs(fn, false) == true)
-			return (*i);
-			*/
-	}
-	throw NotFound();
-}
 
 // --
 // ITEMDB.H

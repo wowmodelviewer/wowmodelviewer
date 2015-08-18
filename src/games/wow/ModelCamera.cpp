@@ -15,11 +15,9 @@
 
 void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::string modelname)
 {
-	// @TODO : to repair
-	/*
 	LOG_INFO << "Using original Camera Model Definitions.";
 	ok = true;
-    nearclip = mcd.nearclip;
+	nearclip = mcd.nearclip;
 	farclip = mcd.farclip;
 	fov = mcd.fov;
 	pos = fixCoordSystem(mcd.pos);
@@ -29,39 +27,13 @@ void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::s
 	rot.init(mcd.rot, f, global);
 	tPos.fix(fixCoordSystem);
 	tTarget.fix(fixCoordSystem);
-
-	Vec3D wopos = Vec3D(0,0,0);
-	float worot = 0.0f;
-	if (modelname.Find(wxT("Cameras\\"))>-1) {
-		try {
-			LOG_INFO << "Trying Camera DB...";
-			wxString mn = modelname.BeforeLast(wxT('.')) + wxT(".mdx");
-			LOG_INFO << "ModelName:" << mn.c_str();
-			CamCinematicDB::Record r = camcinemadb.getByCamModel(mn.c_str());
-			LOG_INFO << "Setting variables..";
-			wopos = fixCoordSystem(Vec3D(r.getFloat(camcinemadb.PosX),r.getFloat(camcinemadb.PosY),r.getFloat(camcinemadb.PosZ)));
-			worot = r.getFloat(camcinemadb.Rot);
-		}
-		catch (CamCinematicDB::NotFound) {
-			LOG_ERROR << "DBFilesClient/CinematicCamera.dbc not found.";
-			wopos = Vec3D(0,0,0);
-			worot = 0.0f;
-		}
-		LOG_INFO << "WorldPos:" << wopos.x << wopos.y << wopos.z;
-		LOG_INFO << "WorldRot:" << worot;
-	}
-	WorldOffset = fixCoordSystem(wopos);
-	WorldRotation = worot;
-	*/
 }
 
 void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, std::string modelname)
 {
-	// @TODO : to repair
-	/*
 	LOG_INFO << "Using version 10 Camera Model Definitions.";
 	ok = true;
-    nearclip = mcd.nearclip;
+  nearclip = mcd.nearclip;
 	farclip = mcd.farclip;
 	pos = fixCoordSystem(mcd.pos);
 	target = fixCoordSystem(mcd.target);
@@ -71,30 +43,6 @@ void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, 
 	tPos.fix(fixCoordSystem);
 	tTarget.fix(fixCoordSystem);
 	fov = 0.95f;
-
-	Vec3D wopos = Vec3D(0,0,0);
-	float worot = 0.0f;
-	if (modelname.Find(wxT("Cameras\\"))>-1) {
-		try {
-			LOG_INFO << "Trying Camera DB...";
-			wxString mn = modelname.BeforeLast(wxT('.')) + wxT(".mdx");
-			LOG_INFO << "ModelName:" << mn.c_str();
-			CamCinematicDB::Record r = camcinemadb.getByCamModel(mn.c_str());
-			LOG_INFO << "Setting variables..";
-			wopos = fixCoordSystem(Vec3D(r.getFloat(camcinemadb.PosX),r.getFloat(camcinemadb.PosY),r.getFloat(camcinemadb.PosZ)));
-			worot = r.getFloat(camcinemadb.Rot);
-		}
-		catch (CamCinematicDB::NotFound) {
-			LOG_ERROR << "DBFilesClient/CinematicCamera.dbc not found.";
-			wopos = Vec3D(0,0,0);
-			worot = 0.0f;
-		}
-		LOG_INFO << "WorldPos:" << wopos.x << wopos.y << wopos.z;
-		LOG_INFO << "WorldRot:" << worot;
-	}
-	WorldOffset = fixCoordSystem(wopos);
-	WorldRotation = worot;
-	*/
 }
 
 void ModelCamera::setup(size_t time)

@@ -34,23 +34,16 @@ struct NPCRecord;
 #    define _DATABASE_API_
 #endif
 
+class ItemDatabase;
 
 _DATABASE_API_ extern ItemDatabase items;
 _DATABASE_API_ extern std::vector<NPCRecord> npcs;
-
-// game database
-class CamCinematicDB;
-
-_DATABASE_API_ extern CamCinematicDB camcinemadb;
 
 // ==============================================
 
 // -----------------------------------
 // Item Stuff
 // -----------------------------------
-
-class ItemDatabase;
-
 
 struct _DATABASE_API_ ItemRecord {
 	QString name;
@@ -90,28 +83,5 @@ struct _DATABASE_API_ NPCRecord
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 
 };
-
-// ===============================================
-
-class _DATABASE_API_ CamCinematicDB: public DBCFile
-{
-public:
-	CamCinematicDB(): DBCFile("DBFilesClient\\CinematicCamera.dbc") {}
-	~CamCinematicDB() {}
-
-	// WotLK Fields
-	static const size_t CamCineID = 0;		// uint
-	static const size_t CamModel = 1;		// string, ends in .mdx
-	static const size_t VoiceoverID = 2;	// uint
-	static const size_t PosX = 3;			// float
-	static const size_t PosZ = 4;			// float
-	static const size_t PosY = 5;			// float
-	static const size_t Rot = 6;			// float
-
-	Record getById(unsigned int id);
-	Record getByCamModel(std::string fn);
-};
-
-
 #endif
 

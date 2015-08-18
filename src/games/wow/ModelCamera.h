@@ -28,14 +28,13 @@ struct _MODELCAMERA_API_ ModelCamera {
 	float nearclip, farclip, fov;
 	Animated<Vec3D> tPos, tTarget;
 	Animated<float> rot;
-	Vec3D WorldOffset;
-	float WorldRotation;
 
 	void init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::string modelname);
 	void initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, std::string modelname);
 	void setup(size_t time=0);
 
-	ModelCamera():ok(false) {}
+	ModelCamera():ok(false), pos(Vec3D()), target(Vec3D()),
+			nearclip(0), farclip(0), fov(0) {}
 };
 
 

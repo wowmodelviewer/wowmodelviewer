@@ -641,12 +641,8 @@ void ModelViewer::InitDatabase()
 	// init Race informations
 	RaceInfos::init();
 
-	if(!camcinemadb.open())
-		LOG_ERROR << "Could not open the Cinema Camera DB.";
-
   LOG_INFO << "Finished initiating database files.";
   SetStatusText(wxT("Finished initiating database files."));;
-
 }
 
 void ModelViewer::InitDocking()
