@@ -8,9 +8,6 @@
 _DATABASE_API_ ItemDatabase		items;
 _DATABASE_API_ std::vector<NPCRecord> npcs;
 
-// --
-_DATABASE_API_ HelmGeosetDB		helmetdb;
-
 //--
 _DATABASE_API_ LightSkyBoxDB			skyboxdb;
 _DATABASE_API_ CamCinematicDB		 camcinemadb;
@@ -33,19 +30,6 @@ CamCinematicDB::Record CamCinematicDB::getByCamModel(std::string fn)
 	}
 	throw NotFound();
 }
-
-// Head and Helmet display info
-HelmGeosetDB::Record HelmGeosetDB::getById(unsigned int id)
-{
-	for(Iterator i=begin(); i!=end(); ++i)
-	{
-		if (i->getUInt(TypeID)==id)
-			return (*i);
-	}
-	throw NotFound();
-}
-// --
-
 
 // --
 // ITEMDB.H

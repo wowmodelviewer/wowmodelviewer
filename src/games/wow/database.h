@@ -39,11 +39,9 @@ _DATABASE_API_ extern ItemDatabase items;
 _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 
 // game database
-class HelmGeosetDB;
 class LightSkyBoxDB;
 class CamCinematicDB;
 
-_DATABASE_API_ extern HelmGeosetDB	helmetdb;
 _DATABASE_API_ extern LightSkyBoxDB skyboxdb;
 _DATABASE_API_ extern CamCinematicDB camcinemadb;
 
@@ -58,26 +56,6 @@ public:
 	// static const size_t ID;
 	static const size_t Name = 1;		// string
 	// static const size_t Flags;
-};
-
-// ============
-class _DATABASE_API_ HelmGeosetDB: public DBCFile
-{
-public:
-	HelmGeosetDB(): DBCFile("DBFilesClient\\HelmetGeosetVisData.dbc") {}
-	~HelmGeosetDB() {}
-
-	/// Fields
-	static const size_t TypeID = 0;		// uint
-	static const size_t Hair = 1;		// int Hair, 0 = show, anything else = don't show? eg: a value of 1020 won't hide night elf ears, but 999999 or -1 will.
-	static const size_t Facial1Flags = 2;		// int Beard or Tusks
-	static const size_t Facial2Flags = 3;		// int Earring
-	static const size_t Facial3Flags = 4;		// int, See ChrRaces, column 24 to 26 for information on what is what.
-	static const size_t EarsFlags = 5;		// int Ears
-	//static const size_t Field6 = 6;		// int
-	//static const size_t Field7 = 7;		// int
-
-	Record getById(unsigned int id);
 };
 
 // ==============================================
