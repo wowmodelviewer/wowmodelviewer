@@ -953,7 +953,7 @@ void CharControl::selectStart()
 	{
 		for(int i=0, imax=startOutfit.values.size() ; i < imax ; i++)
 		{
-			choices.Add(CSConv(startOutfit.values[i][0].toStdString()));
+			choices.Add(startOutfit.values[i][0].toStdString());
 			numbers.push_back(startOutfit.values[i][1].toInt());
 		}
 	}
