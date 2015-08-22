@@ -14,6 +14,7 @@
 #include "modelviewer.h"
 #include "util.h"
 #include "WoWModel.h"
+#include "wow_enums.h"
 
 CharSlots slotOrder[] = {
 	CS_SHIRT,
@@ -343,11 +344,11 @@ void CharControl::OnCheck(wxCommandEvent &event)
 	else if (ID==ID_SHOW_FEET) 
 		model->cd.showFeet = event.IsChecked();
 	else if (ID==ID_CHAREYEGLOW_NONE)
-		model->cd.eyeGlowType = 0;
+		model->cd.eyeGlowType = EGT_NONE;
 	else if (ID==ID_CHAREYEGLOW_DEFAULT)
-		model->cd.eyeGlowType = 1;
+		model->cd.eyeGlowType = EGT_DEFAULT;
 	else if (ID==ID_CHAREYEGLOW_DEATHKNIGHT)
-		model->cd.eyeGlowType = 2;
+		model->cd.eyeGlowType = EGT_DEATHKNIGHT;
 
 	//  Update controls associated
 	RefreshEquipment();
@@ -747,10 +748,9 @@ void CharControl::RefreshModel()
 	  }
 	}
 
-
 	// finalize character texture
 	model->tex.compose(model->charTex);
-	
+
 	// set replacable textures
 	model->replaceTextures[TEXTURE_BODY] = model->charTex;
 	model->replaceTextures[TEXTURE_CAPE] = model->capeTex;
@@ -758,46 +758,48 @@ void CharControl::RefreshModel()
 	model->replaceTextures[TEXTURE_FUR] = model->furTex;
 	model->replaceTextures[TEXTURE_GAMEOBJECT1] = model->gobTex;
 
+	size_t egt = model->cd.eyeGlowType;
 
-	/*
 	// Eye Glows
-	for(size_t i=0; i<model->passes.size(); i++) {
+	for(size_t i=0; i<model->passes.size(); i++)
+	{
 		ModelRenderPass &p = model->passes[i];
-		wxString texName = model->TextureList[p.tex].AfterLast('\\').Lower();
+		QStringList texsplit = QString::fromStdString(model->TextureList[p.tex]).split('\\');
+		wxString texName = texsplit[texsplit.size()-1].toLower().toStdString();
 
 		if (texName.Find(wxT("eyeglow")) == wxNOT_FOUND)
 			continue;
 
 		// Regular Eye Glow
-		if ((texName.Find(wxT("eyeglow")) != wxNOT_FOUND)&&(texName.Find(wxT("deathknight")) == wxNOT_FOUND)){
-			if (model->cd.eyeGlowType == EGT_NONE){					// If No EyeGlow
+		if ((texName.Find(wxT("eyeglow")) != wxNOT_FOUND)&&(texName.Find(wxT("deathknight")) == wxNOT_FOUND))
+		{
+			if (egt == EGT_NONE)				// If No EyeGlow
 				model->showGeosets[p.geoset] = false;
-			}else if (model->cd.eyeGlowType == EGT_DEATHKNIGHT){		// If DK EyeGlow
+			else if (egt == EGT_DEATHKNIGHT)		// If DK EyeGlow
 				model->showGeosets[p.geoset] = false;
-			}else{												// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
+			else										// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
 				model->showGeosets[p.geoset] = true;
-			}
 		}
+
 		// DeathKnight Eye Glow
-		if (texName.Find(wxT("deathknight")) != wxNOT_FOUND){
-			if (model->cd.eyeGlowType == EGT_NONE){					// If No EyeGlow
+		if (texName.Find(wxT("deathknight")) != wxNOT_FOUND)
+		{
+			if (egt == EGT_NONE)				// If No EyeGlow
 				model->showGeosets[p.geoset] = false;
-			}else if (model->cd.eyeGlowType == EGT_DATHKNIGHT){		// If DK EyeGlow
+			else if (egt == EGT_DEATHKNIGHT)		// If DK EyeGlow
 				model->showGeosets[p.geoset] = true;
-			}else{												// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
+			else											// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
 				model->showGeosets[p.geoset] = false;
-			}
 		}
 	}
+
 	// Update Eye Glow Menu
-	size_t egt = model->cd.eyeGlowType;
 	if (egt == EGT_NONE)
 		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
 	else if (egt == EGT_DEATHKNIGHT)
 		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
 	else
 		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
-		*/
 }
 
 void CharControl::ClearItemDialog()

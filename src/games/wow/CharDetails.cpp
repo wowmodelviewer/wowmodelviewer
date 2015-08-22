@@ -14,6 +14,15 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
+CharDetails::CharDetails() :
+eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
+showFacialHair(true), showFeet(true), isNPC(true), m_model(0), race(0), gender(0),
+m_skinColor(0), m_skinColorMax(0), m_faceType(0), m_faceTypeMax(0), m_hairColor(0),
+m_hairColorMax(0), m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialHairMax(0)
+{
+
+}
+
 void CharDetails::save(std::string fn, TabardDetails *td)
 {
 	// TODO: save/load as xml?

@@ -147,12 +147,12 @@ void CharTexture::compose(TextureID texID)
 
 
 	// debug write texture on disk
-/*
+	/*
 	static int texIndex=0;
 	QString name = QString("./ComposedTexture%1.png").arg(texIndex++);
 	QImage FinalTexture(destbuf,layoutInfos.first.width, layoutInfos.first.height,QImage::Format_RGBA8888);
 	FinalTexture.save(name);
-*/
+	 */
 	free(destbuf);
 }
 
@@ -200,7 +200,7 @@ void CharTexture::initRegions()
       coords.ypos = regions.values[r][2].toInt();
       coords.width = regions.values[r][3].toInt();
       coords.height = regions.values[r][4].toInt();
-      //std::cout << atoi(regions.values[r][0].c_str())+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
+      //LOG_INFO << regions.values[r][0].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
       regionCoords[regions.values[r][0].toInt()+1] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;

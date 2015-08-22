@@ -988,7 +988,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 	g->close();
 	delete g;
 	// transparent parts come later
-	//std::sort(passes.begin(), passes.end());
+	std::sort(passes.begin(), passes.end());
 }
 
 void WoWModel::calcBones(ssize_t anim, size_t time)

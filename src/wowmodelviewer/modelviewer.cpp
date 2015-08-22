@@ -2053,7 +2053,8 @@ void ModelViewer::LoadChar(wxString fn)
 	// If Eyeglow is in char file...
 	if (f.peek() != wxT('\n'))
 	{
-		f >> charControl->model->cd.eyeGlowType;
+		f >> value;
+		charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
 	}
 	else
 	{

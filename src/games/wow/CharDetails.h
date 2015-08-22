@@ -29,6 +29,8 @@ struct TabardDetails;
 class _CHARDETAILS_API_ CharDetails : public Observable
 {
   public:
+		CharDetails();
+
     // Types
     enum SectionType{
       SkinType = 0,
@@ -38,8 +40,8 @@ class _CHARDETAILS_API_ CharDetails : public Observable
       UnderwearType = 4
     };
 
-    size_t eyeGlowType;
-    size_t race, gender;
+    EyeGlowTypes eyeGlowType;
+    unsigned int race, gender;
 
     bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
 
@@ -63,32 +65,32 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
 
     // accessors to customization
-    size_t skinColor() { return m_skinColor; }
-    size_t skinColorMax() { return m_skinColorMax; }
-    void setSkinColor(size_t);
+    unsigned int skinColor() { return m_skinColor; }
+    unsigned int skinColorMax() { return m_skinColorMax; }
+    void setSkinColor(unsigned int);
 
-    size_t faceType() { return m_faceType; }
-    size_t faceTypeMax() { return m_faceTypeMax; }
-    void setFaceType(size_t);
+    unsigned int faceType() { return m_faceType; }
+    unsigned int faceTypeMax() { return m_faceTypeMax; }
+    void setFaceType(unsigned int);
 
-    size_t hairColor() { return m_hairColor; }
-    size_t hairColorMax() { return m_hairColorMax; }
-    void setHairColor(size_t);
+    unsigned int hairColor() { return m_hairColor; }
+    unsigned int hairColorMax() { return m_hairColorMax; }
+    void setHairColor(unsigned int);
 
-    size_t hairStyle() { return m_hairStyle; }
-    size_t hairStyleMax() { return m_hairStyleMax; }
-    void setHairStyle(size_t);
+    unsigned int hairStyle() { return m_hairStyle; }
+    unsigned int hairStyleMax() { return m_hairStyleMax; }
+    void setHairStyle(unsigned int);
 
-    size_t facialHair() { return m_facialHair; }
-    size_t facialHairMax() { return m_facialHairMax; }
-    void setFacialHair(size_t);
+    unsigned int facialHair() { return m_facialHair; }
+    unsigned int facialHairMax() { return m_facialHairMax; }
+    void setFacialHair(unsigned int);
 
   private:
-    size_t m_skinColor, m_skinColorMax;
-    size_t m_faceType, m_faceTypeMax;
-    size_t m_hairColor, m_hairColorMax;
-    size_t m_hairStyle, m_hairStyleMax;
-    size_t m_facialHair, m_facialHairMax;
+    unsigned int m_skinColor, m_skinColorMax;
+    unsigned int m_faceType, m_faceTypeMax;
+    unsigned int m_hairColor, m_hairColorMax;
+    unsigned int m_hairStyle, m_hairStyleMax;
+    unsigned int m_facialHair, m_facialHairMax;
 
     WoWModel * m_model;
 
