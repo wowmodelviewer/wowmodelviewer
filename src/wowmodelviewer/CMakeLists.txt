@@ -91,13 +91,16 @@ set(QT_PLUGIN_DIR $ENV{WMV_SDK_BASEDIR}/Qt/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
-
+                   
+set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
+                          ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
+                        
 set(EXTRA_FILES $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
         $ENV{WMV_BASE_PATH}/bin_support/wow6.xml)
 
 
 set(files ${QT_FILES} ${QT_SYS_FILES} ${EXTRA_FILES})
-set(platform_files ${QT_PLUGIN_SYS_FILES})       
-           
+
 install(FILES ${files} DESTINATION $ENV{WMV_BASE_PATH}/bin)
-install(FILES ${platform_files} DESTINATION $ENV{WMV_BASE_PATH}/bin/platforms)
+install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/platforms)
+install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/plugins/imageformats)

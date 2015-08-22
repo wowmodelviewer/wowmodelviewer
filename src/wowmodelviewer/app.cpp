@@ -20,6 +20,8 @@
 #include "util.h"
 #include "UserSkins.h"
 
+#include <QCoreApplication>
+
 /*	THIS IS OUR MAIN "START UP" FILE.
 	App.cpp creates our wxApp class object.
 	the wxApp initiates our program (takes over the role of main())
@@ -81,6 +83,8 @@ bool WowModelViewApp::OnInit()
   AttachConsole( GetCurrentProcessId() ) ;
   freopen( "CON", "w", stdout ) ;
 #endif
+
+  QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
 
 	frame = NULL;
 	wxSplashScreen* splash = NULL;

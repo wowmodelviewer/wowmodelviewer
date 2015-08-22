@@ -6,6 +6,7 @@
 #include "ximage.h"
 #include <QImage>
 #include <QImageWriter>
+#include <QImageReader>
 
 #include "Attachment.h"
 #include "globalvars.h"
@@ -1845,7 +1846,14 @@ void ModelCanvas::LoadBackground(wxString filename)
 	}
 	else
 	{
-		 QImage texture(filename.c_str());
+		 QImage texture;
+
+		 if(!texture.load(filename.c_str()))
+		 {
+		   LOG_ERROR << "Failed to load texture" << filename.c_str();
+		   LOG_INFO << "Supported formats:" << QImageReader::supportedImageFormats();
+		 }
+
 		 texture = texture.mirrored();
 		 texture = texture.convertToFormat(QImage::Format_RGBA8888);
 
