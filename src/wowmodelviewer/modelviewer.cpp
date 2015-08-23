@@ -2181,61 +2181,87 @@ void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 	uint32 sizex = 0;
 	uint32 sizey = 0;
 	
-	if (id == ID_CANVASS120) {
+	if (id == ID_CANVASS120)
+	{
 		sizex = 120;
 		sizey = 120;
-	} else if (id == ID_CANVASS512) {
+	}
+	else if (id == ID_CANVASS512)
+	{
 		sizex = 512;
 		sizey = 512;
-	} else if (id == ID_CANVASS1024) {
+	}
+	else if (id == ID_CANVASS1024)
+	{
 		sizex = 1024;
 		sizey = 1024;
-	} else if (id == ID_CANVASF480) {
+	}
+	else if (id == ID_CANVASF480)
+	{
 		sizex = 640;
 		sizey = 480;
-	} else if (id == ID_CANVASF600) {
+	}
+	else if (id == ID_CANVASF600)
+	{
 		sizex = 800;
 		sizey = 600;
-	} else if (id == ID_CANVASF768) {
+	}
+	else if (id == ID_CANVASF768)
+	{
 		sizex = 1024;
 		sizey = 768;
-	} else if (id == ID_CANVASF864) {
+	}
+	else if (id == ID_CANVASF864)
+	{
 		sizex = 1152;
 		sizey = 864;
-	} else if (id == ID_CANVASF1200) {
+	}
+	else if (id == ID_CANVASF1200)
+	{
 		sizex = 1600;
 		sizey = 1200;
-	} else if (id == ID_CANVASW480) {
+	}
+	else if (id == ID_CANVASW480)
+	{
 		sizex = 864;
 		sizey = 480;
-	} else if (id == ID_CANVASW720) {
+	}
+	else if (id == ID_CANVASW720)
+	{
 		sizex = 1280;
 		sizey = 720;
-	} else if (id == ID_CANVASW1080) {
+	}
+	else if (id == ID_CANVASW1080)
+	{
 		sizex = 1920;
 		sizey = 1080;
-	} else if (id == ID_CANVASM768) {
+	}
+	else if (id == ID_CANVASM768)
+	{
 		sizex = 1280;
 		sizey = 768;
-	} else if (id == ID_CANVASM1200) {
+	}
+	else if (id == ID_CANVASM1200)
+	{
 		sizex = 1900;
 		sizey = 1200;
 	}
 
-	if (sizex > 0 && sizey > 0) {
+	if (sizex > 0 && sizey > 0)
+	{
 		int curx=0, cury=0;
+		int winx=0, winy=0;
 		int difx=0, dify=0;
 
-		canvas->GetClientSize(&curx, &cury);
+		canvas->GetClientSize(&curx, &cury);  // canvas size
+		GetSize(&winx, &winy);                // window size
+
+		// calculate changes in canvas size:
 		difx = sizex - curx;
 		dify = sizey - cury;
-		// if the window is already large enough,  just shrink the canvas
-		//if (difx <= 0 && dify <= 0 && sizex < 800 && sizey < 600) {
-		//	canvas->SetClientSize(sizex, sizey);
-		//} else {
-			GetClientSize(&curx, &cury);
-			SetSize((curx + difx), (cury + dify));
-		//}
+
+		// set new window size based on these. Canvas will change accordingly:
+		SetSize((winx + difx), (winy + dify));
 	}
 }
 
