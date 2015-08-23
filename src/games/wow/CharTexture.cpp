@@ -95,7 +95,7 @@ void CharTexture::compose(TextureID texID)
 		name = QString("./ComposedTexture%1.png").arg(tmpidx++);
 		destImage.save(name);
 #endif
-
+		free(tempbuf);
 		texturemanager.del(temptex);
 	}
 #if DEBUG_TEXTURE > 0
