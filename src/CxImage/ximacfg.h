@@ -16,15 +16,15 @@
 #define CXIMAGE_SUPPORT_TRANSFORMATION 1
 /////////////////////////////////////////////////////////////////////////////
 // CxImage supported formats
-#define CXIMAGE_SUPPORT_BMP 1
+#define CXIMAGE_SUPPORT_BMP 0
 #define CXIMAGE_SUPPORT_GIF 1
-#define CXIMAGE_SUPPORT_JPG 1
+#define CXIMAGE_SUPPORT_JPG 0
 #define CXIMAGE_SUPPORT_PNG 0
-#define CXIMAGE_SUPPORT_ICO 1
+#define CXIMAGE_SUPPORT_ICO 0
 #define CXIMAGE_SUPPORT_TGA 1
-#define CXIMAGE_SUPPORT_PCX 1
-#define CXIMAGE_SUPPORT_WBMP 1
-#define CXIMAGE_SUPPORT_WMF 1
+#define CXIMAGE_SUPPORT_PCX 0
+#define CXIMAGE_SUPPORT_WBMP 0
+#define CXIMAGE_SUPPORT_WMF 0
 
 #if defined(_WINDOWS) && !defined(_MINGW)
 #define CXIMAGE_SUPPORT_TIF 0

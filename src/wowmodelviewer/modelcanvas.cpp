@@ -1889,7 +1889,6 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
 	if(temp.GetExt() == wxT("tga")) // QT does not support tga writing
 	{
-	  unsigned int format;
 	  CxImage newImage;
 	  newImage.AlphaCreate();  // Create the alpha layer
 	  newImage.IncreaseBpp(32);  // set image to 32bit
