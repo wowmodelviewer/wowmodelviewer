@@ -72,21 +72,6 @@ class ModelCanvas:
 	//DWORD pauseTime;
 	SceneState sceneState[4]; // 4 scene states for F1-F4
 
-	//void CreateTexture(wxString filename, GLuint texture);
-
-	
-	// Special Effects Stuff
-	// ----------------------------
-	/*
-	CShader perpixelShader;
-	CShader toonShader;
-	CShader blurShader;
-	CShader glowShader;
-	CShader deathShader;
-	CShader desaturateShader;
-	CShader multitexShader;
-	*/
-
 	GLuint fogTex;
 
 	bool fxBlur, fxGlow, fxFog;

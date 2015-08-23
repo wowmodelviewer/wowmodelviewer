@@ -2125,17 +2125,6 @@ void ModelViewer::OnLanguage(wxCommandEvent &event)
 
 void ModelViewer::OnAbout(wxCommandEvent &event)
 {
-/*
-text = new wxStaticText(this, wxID_ANY, wxT("Developers:		UfoZ, Darjk\n\n\
-Pioneers:		UfoZ,  Linghuye,  nSzAbolcs\n\n\
-Translators:	Culhag (French), Die_Backe (Deutsch)\n\n\
-Developed Using:\n\
-wxWidgets(2.6.3), wxAUI(0.9.2), OpenGL, zlib,\n\
-CxImage(5.99c), MPQLib, DDSLib, GLEW(1.3.3)\n\n\
-Build Info:\nVersion 0.5 compiled using Visual C++ 7.1 (2003) for\n\
-Windows 98\\ME\\2000\\XP on 17th December 2006\n\n\
-*/
-
 	wxAboutDialogInfo info;
 	info.SetName(GLOBALSETTINGS.appName());
 	wxString l_version = L"\n" + GLOBALSETTINGS.appVersion() + L" (" + GLOBALSETTINGS.buildName() + L")\n";

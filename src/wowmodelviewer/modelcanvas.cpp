@@ -633,171 +633,6 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 	}
 }
 
-/*
-inline void ModelCanvas::CreateTexture(wxString filename, GLuint texture)
-{
-	BYTE *buffer = NULL;
-	CxImage *image = NULL;
-
-	if (!wxFile::Exists(filename))
-		return;
-
-	bgImagePath = filename;
-
-	// Get the file extension and load the file
-	wxString tmp = filename.AfterLast(wxT('.')).Lower();
-
-	if (tmp == wxT("bmp"))
-		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_BMP);
-	else if (tmp == wxT("tga"))
-		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_TGA);
-	else if (tmp == wxT("jpg"))
-		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_JPG);
-	else if (tmp == wxT("png"))
-		image = new CxImage(filename.mb_str(), CXIMAGE_FORMAT_PNG);
-	else 
-		return;
-
-	if (image == NULL)
-		return;
-	
-
-	long size = image->GetWidth() * image->GetHeight() * 4;
-	image->Encode2RGBA(buffer, size);
-
-	//GLint format = GL_RGBA;
-	GLuint texFormat = 0;
-	//texFormat = GL_TEXTURE_RECTANGLE_ARB;
-	texFormat = GL_TEXTURE_2D;
-
-	// Setup the OpenGL Texture stuff
-	glGenTextures(1, &texture);
-	glBindTexture(texFormat, texture);
-	
-	// Build Mipmaps (builds different versions of the picture for distances - looks better)
-	//gluBuild2DMipmaps(GL_TEXTURE_2D, 3, pBitmap->sizeX, pBitmap->sizeY, GL_RGB, GL_UNSIGNED_BYTE, pBitmap->data);
-
-	// Lastly, we need to tell OpenGL the quality of our texture map.  GL_LINEAR_MIPMAP_LINEAR
-	// is the smoothest.  GL_LINEAR_MIPMAP_NEAREST is faster than GL_LINEAR_MIPMAP_LINEAR, 
-	// but looks blotchy and pixilated.  Good for slower computers though.  
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR_MIPMAP_NEAREST);
-	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-	glTexParameteri(texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);	// Linear Filtering
-	glTexParameteri(texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);	// Linear Filtering
-	
-	glTexImage2D(texFormat, 0, GL_RGBA8, image->GetWidth(), image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-	wxDELETE(image);
-	wxDELETE(buffer);
-}
-
-inline void ModelCanvas::GenerateShadowMap()
-{
-	/*
-	GLfloat lightToSceneDistance, nearPlane, fieldOfView;
-	GLfloat lightModelview[16], lightProjection[16];
-
-	// Save the depth precision for where it's useful
-	lightToSceneDistance = sqrt(LIGHT_POS[0] * LIGHT_POS[0] + 
-	LIGHT_POS[1] * LIGHT_POS[1] + 
-	LIGHT_POS[2] * LIGHT_POS[2]);
-	nearPlane = lightToSceneDistance - 150.0f;
-	if (nearPlane < 50.0f)
-	nearPlane = 50.0f;
-	// Keep the scene filling the depth texture
-	fieldOfView = 17000.0f / lightToSceneDistance;
-
-	glViewport(0, 0, 512, 512);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glFrustum(-12.0, 12.0, -20.0, 5.0, 13.0, 150.0);
-	glGetFloatv(GL_PROJECTION_MATRIX, lightProjection);
-	// Switch to light's point of view
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(LIGHT_POS[0], LIGHT_POS[1], LIGHT_POS[2], 
-	0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
-	glGetFloatv(GL_MODELVIEW_MATRIX, lightModelview);
-
-	// Clear the window with current clearing color
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	// All we care about here is resulting depth values
-	glShadeModel(GL_FLAT);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_COLOR_MATERIAL);
-	glDisable(GL_NORMALIZE);
-	glColorMask(0, 0, 0, 0);
-
-	// Overcome imprecision
-	glEnable(GL_POLYGON_OFFSET_FILL);
-
-	// Draw objects in the scene
-	RenderObjects(false);
-
-	// Copy depth values into depth texture
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 
-	0, 0, 512, 512, 0);
-
-	// Restore normal drawing state
-	glShadeModel(GL_SMOOTH);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_COLOR_MATERIAL);
-	glEnable(GL_NORMALIZE);
-	glColorMask(1, 1, 1, 1);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-
-	// Set up texture matrix for shadow map projection
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glTranslatef(0.5f, 0.5f, 0.5f);
-	glScalef(0.5f, 0.5f, 0.5f);
-	glMultMatrixf(lightProjection);
-	glMultMatrixf(lightModelview);
-	-------------------------------------------------------
-	*/
-	/*
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glViewport( 0, 0, 512, 512 );
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glFrustum(-0.25, 0.25, -0.5, 0.1, 0.3, 150.0);
-
-	// set up the camera to be at the light's position
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
-
-	gluLookAt(LIGHT_POS[0], LIGHT_POS[1], LIGHT_POS[2], 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-
-	// set up the texture matrix
-	GLfloat modelview[16], projection[16];
-	glGetFloatv(GL_PROJECTION_MATRIX, projection);
-	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
-	glMatrixMode(GL_TEXTURE);
-	glLoadIdentity();
-	glTranslatef(0.5f, 0.5f, 0.5f);
-	glScalef(0.5f, 0.5f, 0.5f);
-	glMultMatrixf(projection);
-	glMultMatrixf(modelview);
-	glMatrixMode(GL_MODELVIEW);
-
-	glDisable(GL_LIGHTING);
-	glEnable(GL_POLYGON_OFFSET_FILL);
-	RenderObjects(true);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, m_shadowMap);
-	glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, 0, 0, 512, 512, 0);
-	glActiveTexture(GL_TEXTURE0);
-
-	SetupProjection(m_windowWidth, m_windowHeight);
-	glClear( GL_DEPTH_BUFFER_BIT );
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-	glDisable(GL_POLYGON_OFFSET_FILL);
-}
-
-*/
 inline void ModelCanvas::RenderGrid() 
 {
 	int count = 0;
@@ -1809,9 +1644,6 @@ void ModelCanvas::ResetViewWMO(int id)
 
 void ModelCanvas::LoadBackground(wxString filename)
 {
-	BYTE *buffer = NULL;
-	CxImage *image = NULL;
-
 	if (!wxFile::Exists(filename))
 		return;
 
@@ -1821,7 +1653,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 	wxString tmp = filename.AfterLast(wxT('.'));
 	tmp.MakeLower();
 
-	//GLuint texFormat = GL_TEXTURE_RECTANGLE_ARB;
 	GLuint texFormat = GL_TEXTURE_2D;
 
 	if (tmp == wxT("avi"))
@@ -1867,9 +1698,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 		glTexImage2D(texFormat, 0, GL_RGBA, texture.width(), texture.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, texture.bits());
 		drawBackground = true;
 	}
-
-	wxDELETE(image);
-	wxDELETE(buffer);
 }
 
 void ModelCanvas::Zoom(float f, bool rel)
@@ -2059,19 +1887,14 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
 	LOG_INFO << "Saving screenshot in : " << fn.c_str();
 
-	if(temp.GetExt() == wxT("tga") || temp.GetExt() == wxT("jpg")) // tga or jpg format, use CxImage (QImage needs a plugin to handle jpg, which is hard to use as WMV is not (yet) a Qt app)
+	if(temp.GetExt() == wxT("tga")) // QT does not support tga writing
 	{
 	  unsigned int format;
-	  if (temp.GetExt() == wxT("tga"))
-	    format = CXIMAGE_FORMAT_TGA;
-	  else
-	    format = CXIMAGE_FORMAT_JPG;
-
 	  CxImage newImage;
 	  newImage.AlphaCreate();  // Create the alpha layer
 	  newImage.IncreaseBpp(32);  // set image to 32bit
 	  newImage.CreateFromArray(pixels, screenSize[2], screenSize[3], 32, (screenSize[2]*4), false);
-	  newImage.Save(fn.fn_str(), format);
+	  newImage.Save(fn.fn_str(), CXIMAGE_FORMAT_TGA);
 	  newImage.Destroy();
 	}
 	else // other formats, let Qt do the job
