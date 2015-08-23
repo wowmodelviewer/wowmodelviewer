@@ -14,6 +14,7 @@
 #include <map>
 
 #include <QFile>
+#include <QRegularExpression>
 
 #include "CASCFile.h"
 #include "logger/Logger.h"
@@ -135,36 +136,40 @@ bool CASCFolder::setLocale(std::string locale)
 
 void CASCFolder::initVersion()
 {
-  std::string buildinfofile = m_folder+"\\..\\.build.info";
-  LOG_INFO << "buildinfofile : " << buildinfofile.c_str();
-  std::ifstream buildinfo(buildinfofile.c_str());
+  QString buildinfofile = QString::fromStdString(m_folder)+"\\..\\.build.info";
+  LOG_INFO << "buildinfofile : " << buildinfofile;
 
-  if(!buildinfo.good())
+  QFile file(buildinfofile);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
     LOG_ERROR << "Fail to open .build.info to determine game version";
     return;
   }
 
-  std::string line;
+  QTextStream in(&file);
+  QString line;
+  while (!in.atEnd())
+    line = in.readLine();
 
-  while(!buildinfo.eof())
+  QStringList values = line.split('|');
+  QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
+  QRegularExpressionMatch result;
+  for(int i = 0; i < values.size() ; i++)
   {
-    buildinfo >> line;
+    result = re.match(values[i]);
+    if(result.hasMatch())
+    {
+      QString ver = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
+      m_version = ver.toStdString();
+      break;
+    }
   }
 
-  if(line.find_last_of("|") != std::string::npos)
-  {
-    m_version = line.substr (line.find_last_of("|")+1, line.length()-1);
-    size_t lastPointPos = m_version.find_last_of(".");
-    std::string version =  m_version.substr (0, lastPointPos);
-    std::string build = m_version.substr (lastPointPos +1, m_version.length()-1);
-    m_version = version + " (" + build + ")";
-    LOG_INFO << "Version successfully found :" << m_version.c_str();
-  }
-  else
-  {
+  if(m_version.empty())
     LOG_ERROR << "Fail to grab game version info in .build.info file";
-  }
+  else
+    LOG_INFO << "Version successfully found :" << m_version.c_str();
+
 }
 
 void CASCFolder::initFileList(std::set<FileTreeItem> &dest)
