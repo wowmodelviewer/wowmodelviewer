@@ -3,13 +3,13 @@
 #include "video.h"
 #undef _VIDEO_CPP_
 
-#include "ximage.h"
-
 #include "logger/Logger.h"
 
 #include "CASCFile.h"
 
 #include "globalvars.h" // g_selModel
+
+#include <QImage>
 
 // gl
 #include "OpenGLHeaders.h"
@@ -788,23 +788,23 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 		LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type="<< type;
 
 		BYTE *buffer = NULL;
-		CxImage *image = NULL;
 		unsigned char *buf = new unsigned char[sizes[0]];
 
 		f->seek(offsets[0]);
 		f->read(buf,sizes[0]);
-		image = new CxImage(buf, sizes[0], CXIMAGE_FORMAT_JPG);
 
-		if (image == NULL)
-			return;
+		QImage image;
 
-		long size = image->GetWidth() * image->GetHeight() * 4;
-		image->Encode2RGBA(buffer, size);
+		if(!image.loadFromData(buf, sizes[0],"jpg"))
+		{
+		  LOG_ERROR << __FUNCTION__ << __LINE__ << "Failed to load texture";
+		}
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image->GetWidth(), image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+		image = image.mirrored();
+		image = image.convertToFormat(QImage::Format_RGBA8888);
 
-		delete image;
-		image = 0;
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
 		delete buffer;
 		buffer = 0;
 		delete buf;

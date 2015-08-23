@@ -50,7 +50,6 @@ set(src animated.cpp
 use_core()
 use_glew()
 use_casclib()
-use_cximage()
 use_sqlite()
 
 
@@ -58,7 +57,7 @@ add_definitions(-DBUILDING_WOW_DLL)
 
 add_library(wow SHARED ${src})
 
-target_link_libraries(wow core cximage CascLib Qt5::Core Qt5::Xml Qt5::Gui)
+target_link_libraries(wow core CascLib Qt5::Core Qt5::Xml Qt5::Gui)
 
 if(WIN32)
   install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
