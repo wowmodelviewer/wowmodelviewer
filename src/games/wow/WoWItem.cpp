@@ -26,6 +26,9 @@
 #include "WoWItem.h"
 
 #include <QString>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
 
 #include "Attachment.h"
 #include "CASCFolder.h"
@@ -961,4 +964,91 @@ bool WoWItem::isCustomizableTabard()
   return (m_id == 5976  || // Guild Tabard
           m_id == 69209 || // Illustrious Guild Tabard
           m_id == 69210);  // Renowned Guild Tabard
+}
+
+void WoWItem::save(QXmlStreamWriter & stream)
+{
+  stream.writeStartElement("item");
+
+  stream.writeStartElement("slot");
+  stream.writeAttribute("value", QString::number(m_slot));
+  stream.writeEndElement();
+
+  stream.writeStartElement("id");
+  stream.writeAttribute("value", QString::number(m_id));
+  stream.writeEndElement();
+
+  stream.writeStartElement("displayId");
+  stream.writeAttribute("value", QString::number(m_displayId));
+  stream.writeEndElement();
+
+  stream.writeStartElement("level");
+  stream.writeAttribute("value", QString::number(m_level));
+  stream.writeEndElement();
+
+  if(isCustomizableTabard())
+    m_charModel->td.save(stream);
+
+  stream.writeEndElement(); // item
+}
+
+void WoWItem::load(QXmlStreamReader & reader)
+{
+  int nbValuesRead = 0;
+  while (!reader.atEnd() && nbValuesRead != 3)
+  {
+    if (reader.isStartElement())
+    {
+      if(reader.name() == "slot")
+      {
+        unsigned int slot = reader.attributes().value("value").toString().toUInt();
+        if(slot == m_slot)
+        {
+          while (!reader.atEnd() && nbValuesRead != 3)
+          {
+            if (reader.isStartElement())
+            {
+              if(reader.name() == "id")
+              {
+                int id = reader.attributes().value("value").toString().toInt();
+                nbValuesRead++;
+                if(id != -1)
+                  setId(id);
+              }
+
+              if(reader.name() == "displayId")
+              {
+                int id = reader.attributes().value("value").toString().toInt();
+                nbValuesRead++;
+                if(m_id == -1)
+                  setDisplayId(id);
+              }
+
+              if(reader.name() == "level")
+              {
+                int level = reader.attributes().value("value").toString().toInt();
+                nbValuesRead++;
+                setLevel(level);
+              }
+            }
+            reader.readNext();
+          }
+        }
+      }
+    }
+    reader.readNext();
+  }
+
+  if(isCustomizableTabard()) // look for extra tabard details
+  {
+    reader.readNext();
+    while(reader.isStartElement()==false)
+      reader.readNext();
+
+    if (reader.name() == "TabardDetails")
+    {
+      m_charModel->td.load(reader);
+      load(); // refresh tabard textures
+    }
+  }
 }

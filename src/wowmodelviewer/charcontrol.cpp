@@ -399,43 +399,6 @@ void CharControl::OnButton(wxCommandEvent &event)
 	//	dir.Append('\\');
 	switch(event.GetId())
 	{
-	case ID_SAVE_EQUIPMENT:
-	{
-	  wxFileDialog dialog(this, wxT("Save equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-	  if (dialog.ShowModal()==wxID_OK)
-	  {
-	    wxString s(dialog.GetPath());
-	    model->cd.save(s.c_str(), &model->td);
-
-	    // Save directory path
-	    dir = dialog.GetDirectory();
-	  }
-	  break;
-	}
-	case ID_LOAD_EQUIPMENT:
-	{
-/*
-	  wxFileDialog dialog(this, wxT("Load equipment"), dir, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN|wxFD_FILE_MUST_EXIST, wxDefaultPosition);
-	  if (dialog.ShowModal()==wxID_OK) {
-	    wxString s(dialog.GetPath());
-	    if (model->cd.load(s, &td)) {
-	      spins[SPIN_SKIN_COLOR]->SetValue((int)model->cd.skinColor);
-	      spins[SPIN_FACE_TYPE]->SetValue((int)model->cd.faceType);
-	      spins[SPIN_HAIR_COLOR]->SetValue((int)model->cd.hairColor);
-	      spins[SPIN_HAIR_STYLE]->SetValue((int)model->cd.hairStyle);
-	      spins[SPIN_FACIAL_HAIR]->SetValue((int)model->cd.facialHair);
-	      for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-	        spins[i]->Refresh(false);
-	    }
-	    RefreshEquipment();
-
-	    // Save directory path
-	    dir = dialog.GetDirectory();
-
-	  }
-	*/
-	  break;
-	}
 	case ID_CLEAR_EQUIPMENT:
 	{
 	  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)

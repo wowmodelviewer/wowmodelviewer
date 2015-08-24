@@ -10,6 +10,7 @@
 #include "CASCFolder.h"
 #include "wow_enums.h"
 
+#include <QXmlStreamWriter>
 
 
 QString TabardDetails::GetBackgroundTex(int slot)
@@ -76,3 +77,70 @@ int TabardDetails::GetMaxBorderColor(int border)
 	return i;
 }
 
+void TabardDetails::save(QXmlStreamWriter & stream)
+{
+  stream.writeStartElement("TabardDetails");
+
+  stream.writeStartElement("Icon");
+  stream.writeAttribute("value", QString::number(Icon));
+  stream.writeEndElement();
+
+  stream.writeStartElement("IconColor");
+  stream.writeAttribute("value", QString::number(IconColor));
+  stream.writeEndElement();
+
+  stream.writeStartElement("Border");
+  stream.writeAttribute("value", QString::number(Border));
+  stream.writeEndElement();
+
+  stream.writeStartElement("BorderColor");
+  stream.writeAttribute("value", QString::number(BorderColor));
+  stream.writeEndElement();
+
+  stream.writeStartElement("Background");
+  stream.writeAttribute("value", QString::number(Background));
+  stream.writeEndElement();
+
+  stream.writeEndElement(); // TabardDetails
+}
+
+void TabardDetails::load(QXmlStreamReader & reader)
+{
+  int nbValuesRead = 0;
+  while (!reader.atEnd() && nbValuesRead != 5)
+  {
+    if (reader.isStartElement())
+    {
+      if(reader.name() == "Icon")
+      {
+        Icon = reader.attributes().value("value").toString().toInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "IconColor")
+      {
+        IconColor = reader.attributes().value("value").toString().toInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "Border")
+      {
+        Border = reader.attributes().value("value").toString().toInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "BorderColor")
+      {
+        BorderColor = reader.attributes().value("value").toString().toInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "Background")
+      {
+        Background = reader.attributes().value("value").toString().toInt();
+        nbValuesRead++;
+      }
+    }
+    reader.readNext();
+  }
+}

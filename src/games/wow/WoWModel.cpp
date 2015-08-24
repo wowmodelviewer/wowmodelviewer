@@ -19,6 +19,10 @@
 #include "logger/Logger.h"
 #include "metaclasses/Iterator.h"
 
+#include <QFile>
+#include <QXmlStreamReader>
+#include <QXmlStreamWriter>
+
 enum TextureFlags {
 	TEXTURE_WRAPX=1,
 	TEXTURE_WRAPY
@@ -154,6 +158,7 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 	transparency = 0;
 	events = 0;
 	modelType = MT_NORMAL;
+	attachment = 0;
 
 	// --
 
@@ -256,14 +261,11 @@ WoWModel::~WoWModel()
 		// No matter what I try though I can't find the memory to unload.
 		if (header.nTextures)
 		{
-
 			// For character models, the texture isn't loaded into the texture manager, manually remove it
 			glDeleteTextures(1, &replaceTextures[1]);
 
 			delete [] textures; textures = 0;
-
 			delete [] globalSequences; globalSequences = 0;
-
 			delete [] bounds; bounds = 0;
 			delete [] boundTris; boundTris = 0;
 			delete [] showGeosets; showGeosets = 0;
@@ -1484,3 +1486,19 @@ std::map<int, std::string> WoWModel::getAnimsMap()
   }
   return result;
 }
+
+void WoWModel::save(QXmlStreamWriter &stream)
+{
+  stream.writeStartElement("model");
+  stream.writeStartElement("file");
+  stream.writeAttribute("name", QString::fromStdString(modelname));
+  stream.writeEndElement();
+  cd.save(stream);
+  stream.writeEndElement(); // model
+}
+
+void WoWModel::load(QXmlStreamReader &stream)
+{
+  cd.load(stream);
+}
+

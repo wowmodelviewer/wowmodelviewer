@@ -14,7 +14,9 @@
 #include "metaclasses/Observable.h"
 
 class WoWModel;
-struct TabardDetails;
+class QXmlStreamWriter;
+class QXmlStreamReader;
+
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -51,9 +53,9 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
     int geosets[NUM_GEOSETS];
 
-    // save + load equipment
-    void save(std::string fn, TabardDetails *td);
-    bool load(std::string fn, TabardDetails *td);
+    // save + load
+    void save(QXmlStreamWriter &);
+    void load(QXmlStreamReader &);
 
 
     void reset(WoWModel *);

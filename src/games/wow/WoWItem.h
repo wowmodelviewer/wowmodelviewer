@@ -37,6 +37,9 @@
 class Attachment;
 class WoWModel;
 
+class QXmlStreamWriter;
+class QXmlStreamReader;
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _WOWITEM_API_ __declspec(dllexport)
@@ -71,6 +74,9 @@ class _WOWITEM_API_ WoWItem : public Component
     unsigned int nbLevels() { return m_nbLevels; }
 
     std::map<POSITION_SLOTS, WoWModel *> itemModels;
+
+    void save(QXmlStreamWriter &);
+    void load(QXmlStreamReader &);
 
   private:
     void unload();

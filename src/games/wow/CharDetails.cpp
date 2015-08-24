@@ -14,6 +14,9 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
+#include <QXmlStreamWriter>
+#include <QXmlStreamReader>
+
 CharDetails::CharDetails() :
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), isNPC(true), m_model(0), race(0), gender(0),
@@ -23,72 +26,137 @@ m_hairColorMax(0), m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialH
 
 }
 
-void CharDetails::save(std::string fn, TabardDetails *td)
+void CharDetails::save(QXmlStreamWriter & stream)
 {
-	// TODO: save/load as xml?
-	// wx/xml/xml.h says the api will change, do not use etc etc.
-	std::ofstream f;
-	f.open(fn, std::ofstream::out | std::ofstream::app);
-	if(f.is_open())
-	{
-		f << (int)race << " " << (int)gender << endl;
-		f << (int)m_skinColor << " " << (int)m_faceType << " " << (int)m_hairColor << " " << (int)m_hairStyle << " " << (int)m_facialHair << endl;
-	// @TODO : to repair
-	/* for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-		f << equipment[i] << endl;
-	}
+  stream.writeStartElement("CharDetails");
 
-	// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-	if ((equipment[CS_TABARD] == 5976) || (equipment[CS_TABARD] == 69209) || (equipment[CS_TABARD] == 69210)) {
-		f << td->Background << wxT(" ") << td->Border << wxT(" ") << td->BorderColor << wxT(" ") << td->Icon << wxT(" ") << td->IconColor << endl;
-	}
-	*/
-	  f.close();
-	}
+  stream.writeStartElement("skinColor");
+  stream.writeAttribute("value", QString::number(m_skinColor));
+  stream.writeEndElement();
+
+  stream.writeStartElement("faceType");
+  stream.writeAttribute("value", QString::number(m_faceType));
+  stream.writeEndElement();
+
+  stream.writeStartElement("hairColor");
+  stream.writeAttribute("value", QString::number(m_hairColor));
+  stream.writeEndElement();
+
+  stream.writeStartElement("hairStyle");
+  stream.writeAttribute("value", QString::number(m_hairStyle));
+  stream.writeEndElement();
+
+  stream.writeStartElement("facialHair");
+  stream.writeAttribute("value", QString::number(m_facialHair));
+  stream.writeEndElement();
+
+  stream.writeStartElement("eyeGlowType");
+  stream.writeAttribute("value", QString::number((int)eyeGlowType));
+  stream.writeEndElement();
+
+  stream.writeStartElement("showUnderwear");
+  stream.writeAttribute("value", QString::number(showUnderwear));
+  stream.writeEndElement();
+
+  stream.writeStartElement("showEars");
+  stream.writeAttribute("value", QString::number(showEars));
+  stream.writeEndElement();
+
+  stream.writeStartElement("showHair");
+  stream.writeAttribute("value", QString::number(showHair));
+  stream.writeEndElement();
+
+  stream.writeStartElement("showFacialHair");
+  stream.writeAttribute("value", QString::number(showFacialHair));
+  stream.writeEndElement();
+
+  stream.writeStartElement("showFeet");
+  stream.writeAttribute("value", QString::number(showFeet));
+  stream.writeEndElement();
+
+  stream.writeEndElement(); // CharDetails
 }
 
-bool CharDetails::load(std::string fn, TabardDetails *td)
+void CharDetails::load(QXmlStreamReader & reader)
 {
-	unsigned int r, g;
-	bool same = false;
+  int nbValuesRead = 0;
+  while (!reader.atEnd() && nbValuesRead != 11)
+  {
+    if (reader.isStartElement())
+    {
+      if(reader.name() == "skinColor")
+      {
+        unsigned int skinColor = reader.attributes().value("value").toString().toUInt();
+        setSkinColor(skinColor);
+        nbValuesRead++;
+      }
 
-	// for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
-			// equipment[i] = 0;
+      if(reader.name() == "faceType")
+      {
+        unsigned int faceType = reader.attributes().value("value").toString().toUInt();
+        setFaceType(faceType);
+        nbValuesRead++;
+      }
 
-	std::ifstream f(fn.c_str());
+      if(reader.name() == "hairColor")
+      {
+        unsigned int hairColor = reader.attributes().value("value").toString().toUInt();
+        setHairColor(hairColor);
+        nbValuesRead++;
+      }
 
-	if(f.is_open())
-	{
-	  f >> r >> g;
+      if(reader.name() == "hairStyle")
+      {
+        unsigned int hairStyle = reader.attributes().value("value").toString().toUInt();
+        setHairStyle(hairStyle);
+        nbValuesRead++;
+      }
 
-	  if (r==race && g==gender) {
-#if defined _WINDOWS
-		f >> m_skinColor >> m_faceType >> m_hairColor >> m_hairStyle >> m_facialHair;
-#endif
-		same = true;
-	  } else {
-		int dummy;
-		for (size_t i=0; i<6; i++) f >> dummy;
-	  }
+      if(reader.name() == "facialHair")
+      {
+        unsigned int facialHair = reader.attributes().value("value").toString().toUInt();
+        setFacialHair(facialHair);
+        nbValuesRead++;
+      }
 
-	  // @TODO : to repair
-	  /*
-		for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
-		f >> tmp;
+      if(reader.name() == "eyeGlowType")
+      {
+        eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
 
-		if (tmp > 0)
-			equipment[i] = tmp;
-		}
+      if(reader.name() == "showUnderwear")
+      {
+        showUnderwear = reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
 
-		// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-		if (((equipment[CS_TABARD] == 5976) || (equipment[CS_TABARD] == 69209) || (equipment[CS_TABARD] == 69210)) && !input.Eof()) {
-		f >> td->Background >> td->Border >> td->BorderColor >> td->Icon >> td->IconColor;
-		td->showCustom = true;
-		}
-	   */
-	  f.close();
-	}
-	return same;
+      if(reader.name() == "showEars")
+      {
+        showEars = reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "showHair")
+      {
+        showHair = reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "showFacialHair")
+      {
+        showFacialHair = reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
+
+      if(reader.name() == "showFeet")
+      {
+        showFeet = reader.attributes().value("value").toString().toUInt();
+        nbValuesRead++;
+      }
+    }
+    reader.readNext();
+  }
 }
 
 void CharDetails::reset(WoWModel * model)

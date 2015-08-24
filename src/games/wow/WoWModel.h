@@ -40,6 +40,8 @@ struct ModelTransparency;
 class TextureAnim;
 class GameFile;
 class CASCFile;
+class QXmlStreamWriter;
+class QXmlStreamReader;
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -91,7 +93,6 @@ public:
 	ModelEvent		*events;
 	Vec3D *bounds;
 
-public:
 	// Raw Data
 	ModelVertex *origVertices;
 
@@ -102,7 +103,6 @@ public:
 	std::vector<std::string> TextureList;
 	// --
 
-public:
 	WoWModel(std::string name, bool forceAnim=false);
 	~WoWModel();
 
@@ -218,6 +218,9 @@ public:
   void displayHeader(ModelHeader & a_header);
 
   std::map<int, std::string> getAnimsMap();
+
+  void save(QXmlStreamWriter &);
+  void load(QXmlStreamReader &);
 
 };
 

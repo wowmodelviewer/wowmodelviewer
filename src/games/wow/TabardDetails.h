@@ -10,6 +10,9 @@
 
 #include <QString>
 
+class QXmlStreamReader;
+class QXmlStreamWriter;
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _TABARDDETAILS_API_ __declspec(dllexport)
@@ -45,6 +48,9 @@ struct _TABARDDETAILS_API_ TabardDetails
 	int GetMaxBorder();
 	int GetMaxBorderColor(int border);
 	int GetMaxBackground();
+
+	void save(QXmlStreamWriter &);
+	void load(QXmlStreamReader &);
 };
 
 
