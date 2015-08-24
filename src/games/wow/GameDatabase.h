@@ -62,6 +62,7 @@ class _GAMEDATABASE_API_ GameDatabase
     GameDatabase(GameDatabase &);
 
     static int treatQuery(void *NotUsed, int nbcols, char ** values , char ** cols);
+    static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
     bool createDatabaseFromXML(const QString & file);
     bool createTableFromXML(const QDomElement &);

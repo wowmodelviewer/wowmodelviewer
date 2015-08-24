@@ -52,6 +52,7 @@ bool GameDatabase::initFromXML(const QString & file)
      LOG_INFO << "Opened database successfully";
    }
 
+   sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
    return createDatabaseFromXML(file);
 }
 
@@ -191,6 +192,15 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
 
   sqlResult r = sqlQuery(create);
 
+  // add indexes to speed up item loading
+  if(curTable == "TextureFileData")
+  {
+    sqlQuery("CREATE INDEX index1 ON TextureFileData(TextureItemID)");
+    sqlQuery("CREATE INDEX index2 ON TextureFileData(TextureType)");
+    sqlQuery("CREATE INDEX index3 ON TextureFileData(FileDataID)");
+  }
+
+
   return r.valid;
 }
 
@@ -272,4 +282,15 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   query += ";";
   sqlResult r = sqlQuery(query);
   return r.valid;
+}
+
+void GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
+{
+  if(aTimeInNs/1000000 > 30)
+  {
+    LOG_ERROR << "LONG QUERY !";
+    LOG_ERROR << aQueryStr;
+    LOG_ERROR << "Query time (ms)" << aTimeInNs/1000000;
+  }
+
 }
