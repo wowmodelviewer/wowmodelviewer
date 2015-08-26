@@ -26,7 +26,10 @@ InstallDir $PROGRAMFILES32\WoWModelViewer
 !insertmacro MUI_PAGE_INSTFILES 
 
 !insertmacro MUI_LANGUAGE "English"
-# default section start
+
+############################
+# begin of install section #
+############################
 Section "Install"
  
 # define output path
@@ -70,10 +73,19 @@ WriteRegStr HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\la
 
 # define uninstaller name
 writeUninstaller $INSTDIR\uninstaller.exe
- 
-#-------
-# default section end
+
+# install vcredist package and launch if not found
+ReadRegDword $0 HKLM "SOFTWARE\Wow6432Node\Microsoft\DevDiv\vc\Servicing\12.0\RuntimeMinimum" "Install"
+${If} $0 == ""
+File "${wmvroot}\bin\vcredist_x86.exe"
+ExecWait '"$INSTDIR\vcredist_x86.exe" /install /quiet /norestart'
+Delete "$INSTDIR\vcredist_x86.exe"
+${EndIf}
+
 sectionEnd
+##########################
+# end of install section #
+##########################
  
 # create a section to define what the uninstaller does.
 # the section will always be named "Uninstall"
