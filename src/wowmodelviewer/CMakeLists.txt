@@ -57,7 +57,7 @@ use_casclib()
 
 set(RES_FILES "wmv.rc")
 
-add_definitions(-D_BETAVERSION) # comment if you are building a released version
+#add_definitions(-D_BETAVERSION) # comment if you are building a released version
 #add_definitions(-D_ALPHAVERSION) # comment if you are building a released version
 
 add_executable(wowmodelviewer WIN32 ${src} ${RES_FILES} )
