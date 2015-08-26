@@ -191,6 +191,8 @@ void ModelCanvas::OnSize(wxSizeEvent& event)
 
 	if (init) 
 		InitView();
+
+	g_modelViewer->UpdateCanvasStatus();
 }
 
 void ModelCanvas::InitView()

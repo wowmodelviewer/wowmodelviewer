@@ -112,7 +112,8 @@ public:
 	//void OnIdle();
 	void OnClose(wxCloseEvent &event);
 	void OnSize(wxSizeEvent &event);
-    void OnExit(wxCommandEvent &event);
+  void OnExit(wxCommandEvent &event);
+  void UpdateCanvasStatus();
 
 
     // menu commands

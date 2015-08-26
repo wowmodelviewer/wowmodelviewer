@@ -280,9 +280,9 @@ void ModelViewer::InitMenu()
 	LOG_INFO << "Initializing File Menu...";
 
 	if (GetStatusBar() == NULL){
-		CreateStatusBar(3);
-		int widths[] = {-1, 100, 50};
-		SetStatusWidths(3, widths);
+	  CreateStatusBar(4);
+	  int widths[] = {-1, 100, 50, 125};
+	  SetStatusWidths(4, widths);
 		SetStatusText(wxT("Initializing File Menu..."));
 	}
 
@@ -1281,7 +1281,7 @@ void ModelViewer::OnSize(wxSizeEvent &event)
 
 ModelViewer::~ModelViewer()
 {
-	LOG_INFO << "Shuting down the program...";
+	LOG_INFO << "Shutting down the program...";
 
 	video.render = false;
 
@@ -2367,13 +2367,21 @@ void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 	}
 }
 
+void ModelViewer::UpdateCanvasStatus()
+{
+  // called by ModelCanvas::OnSize() to display updated canvas dimensions on the status bar
+  int canvx = 0, canvy = 0;
+  canvas->GetClientSize(&canvx, &canvy);
+  SetStatusText(wxString::Format(wxT("Canvas: %i x %i"), canvx, canvy), 3);
+}
+
 void ModelViewer::ModelInfo()
 {
 	if (!canvas->model)
 		return;
 	WoWModel *m = canvas->model;
 	wxString fn = wxT("ModelInfo.xml");
-	// FIXME: ofstream is not compitable with multibyte path name
+	// FIXME: ofstream is not compatible with multibyte path name
 	ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
 
 	if (!xml.is_open()) {
