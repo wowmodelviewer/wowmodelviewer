@@ -46,6 +46,9 @@ File "${wmvroot}\bin_support\wow6.xml"
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins
 File "${wmvroot}\bin\plugins\*"
+SetOutPath $INSTDIR\plugins\imageformats
+File "${wmvroot}\bin\plugins\imageformats\*"
+
 
 CreateDirectory $INSTDIR\mo
 SetOutPath $INSTDIR\mo
