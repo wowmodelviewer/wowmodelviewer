@@ -54,7 +54,8 @@ void CASCFolder::initLocales()
   }
 
   std::string line, prevline;
-
+  // clean up any previously found locale
+  m_localesFound.clear();
   while(!buildinfo.eof())
   {
     buildinfo >> line;
