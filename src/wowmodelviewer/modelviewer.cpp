@@ -1190,13 +1190,12 @@ void ModelViewer::LoadItem(unsigned int id)
 	      " (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
 	  sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
+	  // LOG_INFO << query;
 
 	  if(itemInfos.valid && !itemInfos.empty())
 	  {
 	    QString model1 = itemInfos.values[0][0];
-	    //std::cout << "model1 = " << model1 << std::endl;
 	    std::string texture1 = itemInfos.values[0][1].toStdString();
-	    //std::cout << "texture1 = " << texture1 << std::endl;
 
 	    model1 = CASCFOLDER.getFullPathForFile(model1);
 	    if(model1 == "") // try with .m2 at the end
@@ -1208,8 +1207,6 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	    texture1 = itemInfos.values[0][1].toStdString() + itemInfos.values[0][2].toStdString();
 
-	    //std::cout << "FINAL - model1 = " << model1 << std::endl;
-	    //std::cout << "FINAL - texture1 = " << texture1 << std::endl;
 	    if(model1 != "" && texture1 != "")
 	    {
 	      LoadModel(model1.toStdString());

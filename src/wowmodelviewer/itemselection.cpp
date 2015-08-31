@@ -278,7 +278,7 @@ void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event){
 				}
 			}
 
-			g_modelViewer->LoadItem(rec.model);
+			g_modelViewer->LoadItem(rec.id);
 			g_modelViewer->UpdateControls();
 		}
 	}

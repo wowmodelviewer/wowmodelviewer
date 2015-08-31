@@ -817,7 +817,8 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 		{
 		  if (it->type == IT_SHOULDER || it->type == IT_SHIELD ||
 		      it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
-		      it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN)
+		      it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
+		      it->type == IT_DAGGER )
 		  {
 		    choices.Add(it->name.toStdString());
 		    numbers.push_back(it->id);
