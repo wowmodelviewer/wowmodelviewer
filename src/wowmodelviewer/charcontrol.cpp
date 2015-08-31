@@ -842,7 +842,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 	}
 
 	if (subclassesFound.size() > 1)
-		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality);
+		itemDialog = new CategoryChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, cats, catnames, &quality, false);
 	else
 	  itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices, &quality);
 
