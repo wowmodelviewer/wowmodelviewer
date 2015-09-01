@@ -474,7 +474,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	fn = fn.AfterLast(MPQ_SLASH);
 	
 	// query textures for model1
-	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\"").arg(fn.mb_str());
+	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
 	sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if(r.valid && !r.empty())
@@ -494,7 +494,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	}
 
 	// do the same for model2
-	query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model2 = \"%1\"").arg(fn.mb_str());
+	query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model2 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
 	r = GAMEDATABASE.sqlQuery(query);
 
 	if(r.valid && !r.empty())
