@@ -866,7 +866,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 	// Seems to only control the render order.  Which makes this function useless and not needed :(
 
 	// remove suffix .M2
-	QString tmpname = QString::fromStdString(modelname).replace(".m2","");
+	QString tmpname = QString::fromStdString(modelname).replace(".m2","", Qt::CaseInsensitive);
 	lodname = QString("%1%2.skin").arg(tmpname).arg(index,2,10,QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
 	GameFile * g = new CASCFile(lodname);
 
