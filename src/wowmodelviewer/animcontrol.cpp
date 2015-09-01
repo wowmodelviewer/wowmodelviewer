@@ -562,7 +562,6 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
 			wxString texname = it->tex[0];
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-			texname = g_selModel->itemName();
 			texname = texname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
 			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
 			g_selModel->TextureList.push_back(texname.c_str());

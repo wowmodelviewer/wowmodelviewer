@@ -1066,8 +1066,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    for(int i=0; i < 3; i++)
 	    {
 	      QString tex = r.values[0][i+2];
-	      tex = CASCFOLDER.getFullPathForFile(tex);
-
+	      tex = CASCFOLDER.getFullPathForFile(tex+".blp");
 	      grp.tex[i] = tex.toStdString();
 	      if(tex.length() > 0)
 	        count++;
