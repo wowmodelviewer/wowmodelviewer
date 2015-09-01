@@ -2062,124 +2062,123 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
     }
   }
 
-  QXmlStreamReader stream(&file);
-  if(stream.hasError())
+  QXmlStreamReader reader;
+  reader.setDevice(&file);
+  while (!reader.atEnd())
   {
-    // fall back to legacy reading
-    LOG_INFO << "Loading character from legacy file";
-
-    std::string modelname;
-    ifstream f(fn.fn_str());
-
-    f >> modelname; // model name
-    LOG_INFO << "modelname" << modelname.c_str();
-
-    // Load the model
-    LoadModel(wxString(modelname.c_str(), wxConvUTF8));
-    canvas->model->modelType = MT_CHAR;
-
-    f >> charControl->model->cd.race >> charControl->model->cd.gender; // race and gender
-    LOG_INFO << "race" << charControl->model->cd.race << "gender" << charControl->model->cd.gender;
-
-    size_t value;
-    f >> value;
-    LOG_INFO << value;
-    charControl->model->cd.setSkinColor(value);
-    f >> value;
-    LOG_INFO << value;
-    charControl->model->cd.setFaceType(value);
-    f >> value;
-    LOG_INFO << value;
-    charControl->model->cd.setHairColor(value);
-    f >> value;
-    LOG_INFO << value;
-    charControl->model->cd.setHairStyle(value);
-    f >> value;
-    LOG_INFO << value;
-    charControl->model->cd.setFacialHair(value);
-
-    if (f.peek() != wxT('\n')) // if facial color is present, just get rid of
-    {
-      LOG_INFO << "Reading extra useless facial color";
-      f >> value;
-      LOG_INFO << value;
-    }
-
-    // If Eyeglow is in char file...
-    if (f.peek() != wxT('\n'))
-    {
-      LOG_INFO << "Reading eyeglow";
-      f >> value;
-      LOG_INFO << value;
-      charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
-    }
-    else
-    {
-      // Otherwise, default to this value
-      charControl->model->cd.eyeGlowType = EGT_DEFAULT;
-    }
-
-    while (!f.eof())
-    {
-      for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
-      {
-        int itemId;
-        f >> itemId;
-        LOG_INFO << "item" << i << value;
-        WoWItem * item = charControl->model->getItem((CharSlots)i);
-        if(item)
-          item->setId(itemId);
-      }
-      break;
-    }
-
-    WoWItem * tabard = charControl->model->getItem(CS_TABARD);
-    // 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-    if(tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210) && !f.eof())
-    {
-      LOG_INFO << "read custom tabard values";
-      f >> charControl->model->td.Background >> charControl->model->td.Border >> charControl->model->td.BorderColor >> charControl->model->td.Icon >> charControl->model->td.IconColor;
-      charControl->model->td.showCustom = true;
-    }
-
-    f.close();
-  }
-  else
-  {
-    QXmlStreamReader reader;
-    reader.setDevice(&file);
     reader.readNext();
-    while (!reader.atEnd())
+    if(reader.hasError())
     {
-      if (reader.isStartElement())
+      // fall back to legacy reading
+      LOG_INFO << "Loading character from legacy file";
+
+      std::string modelname;
+      ifstream f(fn.fn_str());
+
+      f >> modelname; // model name
+      LOG_INFO << "modelname" << modelname.c_str();
+
+      // Load the model
+      LoadModel(wxString(modelname.c_str(), wxConvUTF8));
+      canvas->model->modelType = MT_CHAR;
+
+      f >> charControl->model->cd.race >> charControl->model->cd.gender; // race and gender
+      LOG_INFO << "race" << charControl->model->cd.race << "gender" << charControl->model->cd.gender;
+
+      size_t value;
+      f >> value;
+      LOG_INFO << "skin color" << value;
+      charControl->model->cd.setSkinColor(value);
+      f >> value;
+      LOG_INFO << "face type" << value;
+      charControl->model->cd.setFaceType(value);
+      f >> value;
+      LOG_INFO << "hair color" << value;
+      charControl->model->cd.setHairColor(value);
+      f >> value;
+      LOG_INFO << "hair style" << value;
+      charControl->model->cd.setHairStyle(value);
+      f >> value;
+      LOG_INFO << "facial hair" << value;
+      charControl->model->cd.setFacialHair(value);
+
+      if (f.peek() != wxT('\n')) // if facial color is present, just get rid of
       {
-        if (reader.name() == "model" && !equipmentOnly)
-        {
-          reader.readNext();
-          while(reader.isStartElement()==false)
-            reader.readNext();
+        LOG_INFO << "Reading extra useless facial color";
+        f >> value;
+        LOG_INFO << value;
+      }
 
-          if(reader.name() == "file")
-          {
-            QString modelname = reader.attributes().value("name").toString();
-            LoadModel(modelname.toStdString().c_str());
-            canvas->model->load(reader);
-          }
-          else
-          {
-            LOG_ERROR << "Failed to find character filename in file";
-            return;
-          }
+      // If Eyeglow is in char file...
+      if (f.peek() != wxT('\n'))
+      {
+        LOG_INFO << "Reading eyeglow";
+        f >> value;
+        LOG_INFO << value;
+        charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
+      }
+      else
+      {
+        // Otherwise, default to this value
+        charControl->model->cd.eyeGlowType = EGT_DEFAULT;
+      }
+
+      while (!f.eof())
+      {
+        CharSlots legacySlots[15] = {CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS, CS_GLOVES, CS_HAND_RIGHT,
+                                      CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS};
+
+        for (size_t i=0; i<15; i++)
+        {
+          int itemId;
+          f >> itemId;
+          LOG_INFO << "item" << i << itemId;
+          WoWItem * item = charControl->model->getItem(legacySlots[i]);
+          if(item)
+            item->setId(itemId);
         }
+        break;
+      }
 
-        if(reader.name() == "equipment")
+      WoWItem * tabard = charControl->model->getItem(CS_TABARD);
+      // 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
+      if(tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210) && !f.eof())
+      {
+        LOG_INFO << "read custom tabard values";
+        f >> charControl->model->td.Background >> charControl->model->td.Border >> charControl->model->td.BorderColor >> charControl->model->td.Icon >> charControl->model->td.IconColor;
+        charControl->model->td.showCustom = true;
+      }
+
+      f.close();
+    }
+
+    if (reader.isStartElement())
+    {
+      if (reader.name() == "model" && !equipmentOnly)
+      {
+        reader.readNext();
+        while(reader.isStartElement()==false)
+          reader.readNext();
+
+        if(reader.name() == "file")
         {
-          Iterator<WoWItem> itemsIt(canvas->model);
-          for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-            (*itemsIt)->load(reader);
+          QString modelname = reader.attributes().value("name").toString();
+          LoadModel(modelname.toStdString().c_str());
+          canvas->model->load(reader);
+        }
+        else
+        {
+          LOG_ERROR << "Failed to find character filename in file";
+          return;
         }
       }
-      reader.readNext();
+
+      if(reader.name() == "equipment")
+      {
+        Iterator<WoWItem> itemsIt(canvas->model);
+        for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
+          (*itemsIt)->load(reader);
+      }
     }
   }
 
