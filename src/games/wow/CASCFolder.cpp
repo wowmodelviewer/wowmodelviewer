@@ -149,21 +149,27 @@ void CASCFolder::initVersion()
 
   QTextStream in(&file);
   QString line;
-  while (!in.atEnd())
-    line = in.readLine();
 
+  // read first line and grab VERSION index
+  line = in.readLine();
+
+  QStringList headers = line.split('|');
+  int index = 0;
+  for( ; index < headers.size() ; index++)
+  {
+    if(headers[index].contains("VERSION", Qt::CaseInsensitive))
+      break;
+  }
+
+  // now that we have index, let's get actual values
+  line = in.readLine();
   QStringList values = line.split('|');
   QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
-  QRegularExpressionMatch result;
-  for(int i = 0; i < values.size() ; i++)
+  QRegularExpressionMatch result = re.match(values[index]);
+  if(result.hasMatch())
   {
-    result = re.match(values[i]);
-    if(result.hasMatch())
-    {
-      QString ver = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
-      m_version = ver.toStdString();
-      break;
-    }
+    QString ver = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
+    m_version = ver.toStdString();
   }
 
   if(m_version.empty())
