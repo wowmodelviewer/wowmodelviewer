@@ -1874,11 +1874,33 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
       RenderToBuffer();
 	}
 
-	// Make the BYTE array, factor of 3 because it's RBG.
-	BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
+	LOG_INFO << "Saving screenshot in : " << fn.c_str();
 
-	glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+	if(temp.GetExt() == wxT("tga")) // QT does not support tga writing
+	{
+	  // Make the BYTE array, factor of 3 because it's RBG.
+	  BYTE* pixels = new BYTE[ 4 * screenSize[2] * screenSize[3]];
 
+	  glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
+
+	  CxImage newImage;
+	  // deactivate alpha layr for now, need to rewrite RenderTexture class
+	  //newImage.AlphaCreate();  // Create the alpha layer
+	  newImage.IncreaseBpp(32);  // set image to 32bit
+	  newImage.CreateFromArray(pixels, screenSize[2], screenSize[3], 32, (screenSize[2]*4), false);
+	  newImage.Save(fn.fn_str(), CXIMAGE_FORMAT_TGA);
+	  newImage.Destroy();
+
+	  // free the memory
+	  wxDELETEA(pixels);
+	}
+	else // other formats, let Qt do the job
+	{
+	  QImage image(screenSize[2],  screenSize[3], QImage::Format_RGB32);
+	  glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, image.bits());
+	  image.mirrored().save(fn.c_str());
+	}
+	
 	if (rt)
 	{
 	  rt->ReleaseTexture();
@@ -1887,27 +1909,6 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	  delete rt;
 	  rt = 0;
 	}
-
-	LOG_INFO << "Saving screenshot in : " << fn.c_str();
-
-	if(temp.GetExt() == wxT("tga")) // QT does not support tga writing
-	{
-	  CxImage newImage;
-	  newImage.AlphaCreate();  // Create the alpha layer
-	  newImage.IncreaseBpp(32);  // set image to 32bit
-	  newImage.CreateFromArray(pixels, screenSize[2], screenSize[3], 32, (screenSize[2]*4), false);
-	  newImage.Save(fn.fn_str(), CXIMAGE_FORMAT_TGA);
-	  newImage.Destroy();
-	}
-	else // other formats, let Qt do the job
-	{
-	  QImage imageFile(pixels, screenSize[2],  screenSize[3], QImage::Format_ARGB32);
-	  imageFile = imageFile.mirrored();
-	  imageFile.save(fn.c_str());
-	}
-	
-	// free the memory
-	wxDELETEA(pixels);
 
 	// Set back to normal
 	glPixelStorei(GL_PACK_ALIGNMENT, 4);
