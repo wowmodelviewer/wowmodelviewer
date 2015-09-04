@@ -87,9 +87,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
 
     // Gather Race & Gender
     result->raceId = root[wxT("race")].AsInt();
-    result->genderId = root[wxT("gender")].AsInt();
-    result->race = wxT("Human");
-    result->gender = (result->genderId == 0) ? wxT("Male") : wxT("Female");
+    result->gender = (root[wxT("gender")].AsInt() == 0) ? wxT("Male") : wxT("Female");
 
     wxJSONValue app = root[wxT("appearance")];
     result->skinColor = app[wxT("skinColor")].AsInt();
@@ -237,16 +235,13 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
         result->tabardBorder = tabard[wxT("border")].AsInt();
       }
     }
-
-
     wxUninitialize();
   }
 
-  if(readStatus == 2) // malformed url, cacade to main app to display a pop up...
-  {
-    result = new CharInfos();
-    result->race = "malformed url";
-  }
+  result->valid = true;
+
+  if(readStatus == 2) // malformed url, cascade to main app to display a pop up...
+  	result->valid = false;
 
   return result;
 }

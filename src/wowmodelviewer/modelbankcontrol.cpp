@@ -90,11 +90,9 @@ void ModelBankControl::LoadModel()
 	if (cd.modelType==MT_CHAR && g_charControl) {
 		g_charControl->model->cd.setFaceType(cd.faceType);
 		g_charControl->model->cd.setFacialHair(cd.facialHair);
-		g_charControl->model->cd.gender = cd.gender;
 		g_charControl->model->cd.setHairColor(cd.hairColor);
 		g_charControl->model->cd.setHairStyle(cd.hairStyle);
 		g_charControl->model->cd.setSkinColor(cd.skinColor);
-		g_charControl->model->cd.race = cd.race;
 
 		g_charControl->model->cd.showEars = cd.showEars;
 		g_charControl->model->cd.showFacialHair = cd.showFacialHair;
@@ -156,10 +154,8 @@ void ModelBankControl::AddModel()
 
 		cd.faceType = g_charControl->model->cd.faceType();
 		cd.facialHair = g_charControl->model->cd.facialHair();
-		cd.gender = g_charControl->model->cd.gender;
 		cd.hairColor = g_charControl->model->cd.hairColor();
 		cd.hairStyle = g_charControl->model->cd.hairStyle();
-		cd.race = g_charControl->model->cd.race;
 		cd.skinColor = g_charControl->model->cd.skinColor();
 
 		cd.showEars = g_charControl->model->cd.showEars;

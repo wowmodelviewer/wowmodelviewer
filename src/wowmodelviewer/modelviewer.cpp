@@ -1097,8 +1097,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	    if(r.valid && !r.empty())
 	    {
-	      g_charControl->model->cd.race = r.values[0][1].toInt();
-	      g_charControl->model->cd.gender = r.values[0][2].toInt();
 	      g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
 	      g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
 	      g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
@@ -2071,10 +2069,9 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
     {
       // fall back to legacy reading
       LOG_INFO << "Loading character from legacy file";
-
-      std::string modelname;
       ifstream f(fn.fn_str());
 
+      std::string modelname;
       f >> modelname; // model name
       LOG_INFO << "modelname" << modelname.c_str();
 
@@ -2082,10 +2079,10 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
       LoadModel(wxString(modelname.c_str(), wxConvUTF8));
       canvas->model->modelType = MT_CHAR;
 
-      f >> charControl->model->cd.race >> charControl->model->cd.gender; // race and gender
-      LOG_INFO << "race" << charControl->model->cd.race << "gender" << charControl->model->cd.gender;
-
       size_t value;
+
+      f >> value >> value; // race and gender, we don't care
+
       f >> value;
       LOG_INFO << "skin color" << value;
       charControl->model->cd.setSkinColor(value);
@@ -2104,23 +2101,23 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
 
       if (f.peek() != wxT('\n')) // if facial color is present, just get rid of
       {
-        LOG_INFO << "Reading extra useless facial color";
-        f >> value;
-        LOG_INFO << value;
+      	LOG_INFO << "Reading extra useless facial color";
+      	f >> value;
+      	LOG_INFO << value;
       }
 
       // If Eyeglow is in char file...
       if (f.peek() != wxT('\n'))
       {
-        LOG_INFO << "Reading eyeglow";
-        f >> value;
-        LOG_INFO << value;
-        charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
+      	LOG_INFO << "Reading eyeglow";
+      	f >> value;
+      	LOG_INFO << value;
+      	charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
       }
       else
       {
-        // Otherwise, default to this value
-        charControl->model->cd.eyeGlowType = EGT_DEFAULT;
+      	// Otherwise, default to this value
+      	charControl->model->cd.eyeGlowType = EGT_DEFAULT;
       }
 
       while (!f.eof())
@@ -2831,7 +2828,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 	if(result)
 	{
-	  if(result->race == "malformed url")
+	  if(!result->valid)
 	  {
 	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
 	    return;
@@ -2840,11 +2837,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
 	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  result->race = r.values[0][0].toStdString().c_str();
+	  std::string race = r.values[0][0].toStdString();
 
 		// Load the model
-		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");
-		wxString strModelHD = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT("_hd.m2");
+		wxString strModel = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT(".m2");
+		wxString strModelHD = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT("_hd.m2");
 
 		// try with hd model first
 		if(CASCFOLDER.fileExists(std::string(strModelHD.mb_str())))
@@ -2862,8 +2859,6 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		}
 
 		// Update the model
-		g_charControl->model->cd.race = result->raceId;
-		g_charControl->model->cd.gender = result->genderId;
 		g_charControl->model->cd.setSkinColor(result->skinColor);
 		g_charControl->model->cd.setFaceType(result->faceType);
 		g_charControl->model->cd.setHairColor(result->hairColor);

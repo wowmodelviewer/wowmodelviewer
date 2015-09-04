@@ -63,7 +63,7 @@
 // Protected methods
 //--------------------------------------------------------------------
 CharInfos::CharInfos()
-: raceId(0), genderId(0), race(""), gender(""), hasTransmogGear(false), skinColor(0),
+: valid(false), raceId(0), gender(""), hasTransmogGear(false), skinColor(0),
   faceType(0), hairColor(0), hairStyle(0), facialHair(0), eyeGlowType(0),
   tabardIcon(-1), IconColor(-1), tabardBorder(-1), BorderColor(-1), Background(-1)
 {
