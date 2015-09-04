@@ -133,6 +133,15 @@ bool WowModelViewApp::OnInit()
 
 	setInterfaceLocale();
 
+	LOGGER.addChild(new WMVLog::LogOutputConsole());
+	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
+
+	// Just a little header to start off the log file.
+	LOG_INFO << "Starting:" << GLOBALSETTINGS.appName().c_str()
+			  		<< GLOBALSETTINGS.appVersion().c_str()
+						<< GLOBALSETTINGS.buildName().c_str();
+
+
 	// Now create our main frame.
     frame = new ModelViewer();
     
@@ -142,15 +151,6 @@ bool WowModelViewApp::OnInit()
 			splash->Show(false);
 		return false;
 	}
-
-	// be careful, must be done after ModelViewer constructor call
-	LOGGER.addChild(new WMVLog::LogOutputConsole());
-	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
-
-    // Just a little header to start off the log file.
-    LOG_INFO << "Starting:" << GLOBALSETTINGS.appName().c_str()
-		  << GLOBALSETTINGS.appVersion().c_str()
-		  << GLOBALSETTINGS.buildName().c_str();
 
 	SetTopWindow(frame);
 	/*
