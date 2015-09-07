@@ -153,6 +153,10 @@ bool VideoSettings::Init()
 #endif
 	supportFBO = glewIsSupported("GL_EXT_framebuffer_object") == GL_TRUE ? true : false;
 
+	// deactivate FBO for Intel cards, glReadPixels is known to be buggy for those cards...
+	if(strcmp(vendor, "Intel") == 0)
+		supportFBO = false;
+
 	supportTexRects = glewIsSupported("GL_ARB_texture_rectangle") == GL_TRUE ? true : false;
 
 	// Now output and log the info

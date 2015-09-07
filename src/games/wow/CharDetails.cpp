@@ -19,7 +19,7 @@
 
 CharDetails::CharDetails() :
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
-showFacialHair(true), showFeet(true), isNPC(true), m_model(0), race(0), gender(0),
+showFacialHair(true), showFeet(true), isNPC(true), m_model(0),
 m_skinColor(0), m_skinColorMax(0), m_faceType(0), m_faceTypeMax(0), m_hairColor(0),
 m_hairColorMax(0), m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialHairMax(0)
 {
@@ -182,7 +182,7 @@ void CharDetails::reset(WoWModel * model)
 
 void CharDetails::setSkinColor(size_t val)
 {
-  if(val != m_skinColor)
+  if(val != m_skinColor && val <= m_skinColorMax && val >= 0)
   {
     m_skinColor = val;
     updateMaxValues();
@@ -193,7 +193,7 @@ void CharDetails::setSkinColor(size_t val)
 
 void CharDetails::setFaceType(size_t val)
 {
-  if(val != m_faceType)
+  if(val != m_faceType && val <= m_faceTypeMax && val >= 0)
   {
     m_faceType = val;
     updateMaxValues();
@@ -204,7 +204,7 @@ void CharDetails::setFaceType(size_t val)
 
 void CharDetails::setHairColor(size_t val)
 {
-  if(val != m_hairColor)
+  if(val != m_hairColor && val <= m_hairColorMax && val >= 0)
   {
     m_hairColor = val;
     updateMaxValues();
@@ -215,7 +215,7 @@ void CharDetails::setHairColor(size_t val)
 
 void CharDetails::setHairStyle(size_t val)
 {
-  if(val != m_hairStyle)
+  if(val != m_hairStyle && val <= m_hairStyleMax && val >= 0)
   {
     m_hairStyle = val;
     updateMaxValues();
@@ -226,7 +226,7 @@ void CharDetails::setHairStyle(size_t val)
 
 void CharDetails::setFacialHair(size_t val)
 {
-  if(val != m_facialHair)
+  if(val != m_facialHair && val <= m_facialHairMax && val >= 0)
   {
     m_facialHair = val;
     updateMaxValues();
@@ -248,8 +248,8 @@ void CharDetails::updateMaxValues()
   RaceInfos::getCurrent(m_model->name().toStdString(), infos);
 
   QString query = QString("SELECT MAX(VariationIndex) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
-                        .arg(race)
-                        .arg(gender)
+                        .arg(infos.raceid)
+                        .arg(infos.sexid)
                         .arg(infos.isHD?8:3);
 
   sqlResult hairStyles = GAMEDATABASE.sqlQuery(query);
@@ -266,8 +266,8 @@ void CharDetails::updateMaxValues()
 
 
   query = QString("SELECT MAX(VariationID) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
-                            .arg(race)
-                            .arg(gender);
+                            .arg(infos.raceid)
+                            .arg(infos.sexid);
 
   sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query);
   if(facialHairStyles.valid && !facialHairStyles.values.empty())
@@ -296,16 +296,15 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
     return result;
 
 /*
-  std::cout << __FUNCTION__ << std::endl;
-  std::cout << "----------------------------------------------" << std::endl;
-  std::cout << "infos.raceid = " << infos.raceid << std::endl;
-  std::cout << "infos.sexid = " << infos.sexid << std::endl;
-  std::cout << "infos.textureLayoutID = " << infos.textureLayoutID << std::endl;
-  std::cout << "infos.isHD = " << infos.isHD << std::endl;
-  std::cout << "cd.skinColor() = " << skinColor() << std::endl;
-  std::cout << "section = " << section << std::endl;
-
-  std::cout << "----------------------------------------------" << std::endl;
+  LOG_INFO << __FUNCTION__;
+  LOG_INFO << "----------------------------------------------";
+  LOG_INFO << "infos.raceid = " << infos.raceid;
+  LOG_INFO << "infos.sexid = " << infos.sexid;
+  LOG_INFO << "infos.textureLayoutID = " << infos.textureLayoutID;
+  LOG_INFO << "infos.isHD = " << infos.isHD;
+  LOG_INFO << "cd.skinColor() = " << skinColor();
+  LOG_INFO << "section = " << section;
+  LOG_INFO << "----------------------------------------------";
 */
 
   size_t type = section;

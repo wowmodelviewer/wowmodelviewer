@@ -1097,8 +1097,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	    if(r.valid && !r.empty())
 	    {
-	      g_charControl->model->cd.race = r.values[0][1].toInt();
-	      g_charControl->model->cd.gender = r.values[0][2].toInt();
 	      g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
 	      g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
 	      g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
@@ -2069,87 +2067,101 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
     reader.readNext();
     if(reader.hasError())
     {
-      // fall back to legacy reading
+      file.close();
+      file.open(QIODevice::ReadOnly | QIODevice::Text);
       LOG_INFO << "Loading character from legacy file";
+      QTextStream in(&file);
 
-      std::string modelname;
-      ifstream f(fn.fn_str());
-
-      f >> modelname; // model name
-      LOG_INFO << "modelname" << modelname.c_str();
-
-      // Load the model
-      LoadModel(wxString(modelname.c_str(), wxConvUTF8));
-      canvas->model->modelType = MT_CHAR;
-
-      f >> charControl->model->cd.race >> charControl->model->cd.gender; // race and gender
-      LOG_INFO << "race" << charControl->model->cd.race << "gender" << charControl->model->cd.gender;
-
-      size_t value;
-      f >> value;
-      LOG_INFO << "skin color" << value;
-      charControl->model->cd.setSkinColor(value);
-      f >> value;
-      LOG_INFO << "face type" << value;
-      charControl->model->cd.setFaceType(value);
-      f >> value;
-      LOG_INFO << "hair color" << value;
-      charControl->model->cd.setHairColor(value);
-      f >> value;
-      LOG_INFO << "hair style" << value;
-      charControl->model->cd.setHairStyle(value);
-      f >> value;
-      LOG_INFO << "facial hair" << value;
-      charControl->model->cd.setFacialHair(value);
-
-      if (f.peek() != wxT('\n')) // if facial color is present, just get rid of
+      std::vector<QString> values;
+      while (!in.atEnd())
       {
-        LOG_INFO << "Reading extra useless facial color";
-        f >> value;
-        LOG_INFO << value;
+        QString line = in.readLine();
+        if(!line.isEmpty())
+          values.push_back(line);
       }
 
-      // If Eyeglow is in char file...
-      if (f.peek() != wxT('\n'))
+      unsigned int lineIndex = 0;
+
+      // modelname (if available)
+      if(values[lineIndex].contains("m2",Qt::CaseInsensitive))
       {
-        LOG_INFO << "Reading eyeglow";
-        f >> value;
-        LOG_INFO << value;
-        charControl->model->cd.eyeGlowType = (EyeGlowTypes)value;
+        LOG_INFO << "modelname" << values[lineIndex];
+
+        // Load the model
+        LoadModel(values[lineIndex].toStdString().c_str());
+        canvas->model->modelType = MT_CHAR;
+        lineIndex++;
+      }
+
+      // race and gender, we don't care
+      lineIndex++;
+
+      // character customization
+      QStringList multiVal = values[lineIndex].split(" ");
+      if(multiVal.size() >= 5)
+      {
+        LOG_INFO << "skin color" << multiVal[0];
+        charControl->model->cd.setSkinColor(multiVal[0].toInt());
+
+        LOG_INFO << "face type" << multiVal[0];
+        charControl->model->cd.setSkinColor(multiVal[1].toInt());
+
+        LOG_INFO << "hair color" << multiVal[0];
+        charControl->model->cd.setSkinColor(multiVal[2].toInt());
+
+        LOG_INFO << "hair style" << multiVal[0];
+        charControl->model->cd.setSkinColor(multiVal[3].toInt());
+
+        LOG_INFO << "facial hair" << multiVal[0];
+        charControl->model->cd.setSkinColor(multiVal[4].toInt());
+      }
+
+      // eye glow (if present)
+      if(multiVal.size() >= 7)
+      {
+        LOG_INFO << "reading eyeglow from file:" << multiVal[6].toInt();
+        charControl->model->cd.eyeGlowType = (EyeGlowTypes)multiVal[6].toInt();
       }
       else
       {
         // Otherwise, default to this value
+        LOG_INFO << "setting eye glow to default value";
         charControl->model->cd.eyeGlowType = EGT_DEFAULT;
       }
 
-      while (!f.eof())
-      {
-        CharSlots legacySlots[15] = {CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS, CS_GLOVES, CS_HAND_RIGHT,
-                                      CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS};
+      lineIndex++;
 
-        for (size_t i=0; i<15; i++)
+      CharSlots legacySlots[15] = {CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS, CS_GLOVES, CS_HAND_RIGHT,
+          CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS};
+
+      for (unsigned int i=0; i<15 && lineIndex < values.size(); i++, lineIndex++)
+      {
+        LOG_INFO << "item" << i << "=>" << values[lineIndex].toInt();
+        WoWItem * item = charControl->model->getItem(legacySlots[i]);
+        if(item)
+          item->setId(values[lineIndex].toInt());
+      }
+
+      // read tabard customization (if needed)
+      if(lineIndex < values.size())
+      {
+        WoWItem * tabard = charControl->model->getItem(CS_TABARD);
+        // 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
+        if(tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210))
         {
-          int itemId;
-          f >> itemId;
-          LOG_INFO << "item" << i << itemId;
-          WoWItem * item = charControl->model->getItem(legacySlots[i]);
-          if(item)
-            item->setId(itemId);
+          LOG_INFO << "read custom tabard values" << values[lineIndex];
+          multiVal = values[lineIndex].split(" ");
+          if(multiVal.size() >= 5)
+          {
+            charControl->model->td.Background = multiVal[0].toInt();
+            charControl->model->td.Border = multiVal[1].toInt();
+            charControl->model->td.BorderColor = multiVal[2].toInt();
+            charControl->model->td.Icon = multiVal[3].toInt();
+            charControl->model->td.IconColor = multiVal[4].toInt();
+            charControl->model->td.showCustom = true;
+          }
         }
-        break;
       }
-
-      WoWItem * tabard = charControl->model->getItem(CS_TABARD);
-      // 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
-      if(tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210) && !f.eof())
-      {
-        LOG_INFO << "read custom tabard values";
-        f >> charControl->model->td.Background >> charControl->model->td.Border >> charControl->model->td.BorderColor >> charControl->model->td.Icon >> charControl->model->td.IconColor;
-        charControl->model->td.showCustom = true;
-      }
-
-      f.close();
     }
 
     if (reader.isStartElement())
@@ -2831,7 +2843,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 	if(result)
 	{
-	  if(result->race == "malformed url")
+	  if(!result->valid)
 	  {
 	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
 	    return;
@@ -2840,11 +2852,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
 	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  result->race = r.values[0][0].toStdString().c_str();
+	  std::string race = r.values[0][0].toStdString();
 
 		// Load the model
-		wxString strModel = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT(".m2");
-		wxString strModelHD = wxT("Character\\") + result->race + MPQ_SLASH + result->gender + MPQ_SLASH + result->race + result->gender + wxT("_hd.m2");
+		wxString strModel = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT(".m2");
+		wxString strModelHD = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT("_hd.m2");
 
 		// try with hd model first
 		if(CASCFOLDER.fileExists(std::string(strModelHD.mb_str())))
@@ -2862,8 +2874,6 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		}
 
 		// Update the model
-		g_charControl->model->cd.race = result->raceId;
-		g_charControl->model->cd.gender = result->genderId;
 		g_charControl->model->cd.setSkinColor(result->skinColor);
 		g_charControl->model->cd.setFaceType(result->faceType);
 		g_charControl->model->cd.setHairColor(result->hairColor);

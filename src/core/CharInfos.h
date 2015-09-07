@@ -71,9 +71,9 @@ class _CHARINFOS_API_ CharInfos
     // Methods
 
     // Members
+    bool valid;
+
     size_t raceId;
-    size_t genderId;
-    std::string race;
     std::string gender;
     bool hasTransmogGear;
     size_t skinColor;

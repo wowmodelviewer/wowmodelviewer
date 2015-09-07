@@ -43,7 +43,6 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     };
 
     EyeGlowTypes eyeGlowType;
-    unsigned int race, gender;
 
     bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
 

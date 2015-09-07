@@ -254,8 +254,6 @@ void CharControl::UpdateModel(Attachment *a)
 	  for (size_t i=0; i<model->geosets.size(); i++) {
 	    model->showGeosets[i] = (model->geosets[i].id==0);
 	  }
-	  model->cd.race = infos.raceid;
-	  model->cd.gender = infos.sexid;
 
 	  g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
