@@ -476,10 +476,8 @@ void WoWModel::initCommon(GameFile * f)
 		origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
 
 		// Set the data for our vertices, normals from the model data
-		//if (!animGeometry || !supportVBO) {
-			vertices[i] = origVertices[i].pos;
-			normals[i] = origVertices[i].normal.normalize();
-		//}
+		vertices[i] = origVertices[i].pos;
+		normals[i] = origVertices[i].normal.normalize();
 
 		float len = origVertices[i].pos.lengthSquared();
 		if (len > rad){ 
@@ -1200,7 +1198,7 @@ void WoWModel::animate(ssize_t anim)
 		}
 
 		// clear bind
-        if (video.supportVBO) {
+		if (video.supportVBO) {
 			glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
 		}
 	}
@@ -1278,9 +1276,6 @@ inline void WoWModel::drawModel()
 				// I can't notice a difference but I guess it can't hurt
 				if (video.supportVBO && video.supportDrawRangeElements) {
 					glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-				
-				//} else if (!video.supportVBO) {
-				//	glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart); 
 				} else {
 					glBegin(GL_TRIANGLES);
 					for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++) {

@@ -16,7 +16,8 @@
 
 enum
 {
-  ID_DISPLAY_SETTINGS_APPLY
+  ID_DISPLAY_SETTINGS_APPLY,
+  ID_CHECK_ENVMAPPING
 };
 
 enum {
@@ -51,6 +52,7 @@ public:
 
   void Update();
   void OnButton(wxCommandEvent &event);
+  void OnCheck(wxCommandEvent &event);
 };
 
 
