@@ -817,6 +817,8 @@ void ModelViewer::SaveSession()
 	pConfig->Write(wxT("SampleBuffer"), video.curCap.sampleBuffer);
 	pConfig->Write(wxT("StencilBuffer"), video.curCap.stencil);
 	pConfig->Write(wxT("ZBuffer"), video.curCap.zBuffer);
+	pConfig->Write(wxT("UseEnvMapping"), video.useEnvMapping);
+	pConfig->Write(wxT("Fov"), (float)video.fov);
 
 	pConfig->SetPath(wxT("/Session"));
 	// Attempt at saving colour values as 3 byte hex - loss of accuracy from float
@@ -1374,24 +1376,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 	switch(id) {
 	case ID_FILE_RESETLAYOUT:
 		ResetLayout();
-		break;
-
-	/*
-	case ID_USE_ANTIALIAS:
-		useAntiAlias = event.IsChecked();
-		break;
-
-
-	case ID_USE_HWACC:
-		if (event.IsChecked() == true)
-			disableHWAcc = false;
-		else
-			disableHWAcc = true;
-		break;
-	*/
-
-	case ID_USE_ENVMAP:
-		video.useEnvMapping = event.IsChecked();
 		break;
 
 	case ID_SHOW_MASK:

@@ -15,6 +15,7 @@ IMPLEMENT_CLASS(DisplaySettings, wxWindow)
 
 BEGIN_EVENT_TABLE(DisplaySettings, wxWindow)
   EVT_BUTTON(ID_DISPLAY_SETTINGS_APPLY, DisplaySettings::OnButton)
+  EVT_CHECKBOX(CHECK_ENVMAPPING, DisplaySettings::OnCheck)
 END_EVENT_TABLE()
 
 DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
@@ -45,7 +46,7 @@ DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
   ADD_CONTROLS(CHECK_FBO, wxID_ANY, _("Frame Buffer"))
   ADD_CONTROLS(CHECK_PBO, wxID_ANY, _("Pixel Buffer"))
   ADD_CONTROLS(CHECK_DRAWRANGEELEMENTS, wxID_ANY, _("Draw Range Elements"))
-  ADD_CONTROLS(CHECK_ENVMAPPING, wxID_ANY, _("Environmental Mapping"))
+  ADD_CONTROLS(CHECK_ENVMAPPING, ID_CHECK_ENVMAPPING, _("Environmental Mapping"))
   ADD_CONTROLS(CHECK_NPOT, wxID_ANY, _("Non-Power of two"))
   ADD_CONTROLS(CHECK_PIXELSHADERS, wxID_ANY, _("Pixel Shaders"))
   ADD_CONTROLS(CHECK_VERTEXSHADERS, wxID_ANY, _("Vertex Shaders"))
@@ -94,60 +95,37 @@ void DisplaySettings::Update()
   txtFov->SetValue(wxString::Format(wxT("%f"), video.fov));
 
   // Toggle all the video options
-  if (video.supportCompression)
-    chkBox[CHECK_COMPRESSEDTEX]->SetValue(video.useCompression);
-  else
-    chkBox[CHECK_COMPRESSEDTEX]->Disable();
-
-  if (video.supportMultiTex) {
-    chkBox[CHECK_MULTITEX]->SetValue(true);
-    chkBox[CHECK_MULTITEX]->Disable();
-  } else
-    chkBox[CHECK_MULTITEX]->Disable();
-
-  if (video.supportVBO)
-    chkBox[CHECK_VBO]->SetValue(video.useVBO);
-  else
-    chkBox[CHECK_VBO]->Disable();
-
-  if (video.supportFBO)
-    chkBox[CHECK_FBO]->SetValue(video.useFBO);
-  else
-    chkBox[CHECK_FBO]->Disable();
-
-  if (video.supportPBO)
-    chkBox[CHECK_PBO]->SetValue(video.usePBO);
-  else
-    chkBox[CHECK_PBO]->Disable();
-
-  if (video.supportDrawRangeElements) {
-    chkBox[CHECK_DRAWRANGEELEMENTS]->SetValue(true);
-    chkBox[CHECK_DRAWRANGEELEMENTS]->Disable();
-  } else
-    chkBox[CHECK_DRAWRANGEELEMENTS]->Disable();
+  chkBox[CHECK_DRAWRANGEELEMENTS]->Disable();
+  chkBox[CHECK_DRAWRANGEELEMENTS]->SetValue(video.supportDrawRangeElements);
 
   chkBox[CHECK_ENVMAPPING]->SetValue(video.useEnvMapping);
 
-  if (video.supportNPOT) {
-    chkBox[CHECK_NPOT]->SetValue(true);
-    chkBox[CHECK_NPOT]->Disable();
-  } else
-    chkBox[CHECK_NPOT]->Disable();
+  chkBox[CHECK_COMPRESSEDTEX]->Disable();
+  chkBox[CHECK_COMPRESSEDTEX]->SetValue(video.supportCompression);
 
-  if (video.supportFragProg)
-    chkBox[CHECK_PIXELSHADERS]->SetValue(true);
-  else
-    chkBox[CHECK_PIXELSHADERS]->Disable();
+  chkBox[CHECK_MULTITEX]->Disable();
+  chkBox[CHECK_MULTITEX]->SetValue(video.supportMultiTex);
 
-  if (video.supportVertexProg)
-    chkBox[CHECK_VERTEXSHADERS]->SetValue(true);
-  else
-    chkBox[CHECK_VERTEXSHADERS]->Disable();
+  chkBox[CHECK_VBO]->Disable();
+  chkBox[CHECK_VBO]->SetValue(video.supportVBO);
 
-  if (video.supportGLSL)
-    chkBox[CHECK_GLSLSHADERS]->SetValue(true);
-  else
-    chkBox[CHECK_GLSLSHADERS]->Disable();
+  chkBox[CHECK_FBO]->Disable();
+  chkBox[CHECK_FBO]->SetValue(video.supportFBO);
+
+  chkBox[CHECK_PBO]->Disable();
+  chkBox[CHECK_PBO]->SetValue(video.supportPBO);
+
+  chkBox[CHECK_NPOT]->Disable();
+  chkBox[CHECK_NPOT]->SetValue(video.supportNPOT);
+
+  chkBox[CHECK_PIXELSHADERS]->Disable();
+  chkBox[CHECK_PIXELSHADERS]->SetValue(video.supportFragProg);
+
+  chkBox[CHECK_VERTEXSHADERS]->Disable();
+  chkBox[CHECK_VERTEXSHADERS]->SetValue(video.supportVertexProg);
+
+  chkBox[CHECK_GLSLSHADERS]->Disable();
+  chkBox[CHECK_GLSLSHADERS]->SetValue(video.supportGLSL);
 }
 
 void DisplaySettings::OnButton(wxCommandEvent &event)
@@ -169,4 +147,10 @@ void DisplaySettings::OnButton(wxCommandEvent &event)
     g_modelViewer->interfaceManager.GetPane(this->GetParent()).Show(false);
     g_modelViewer->interfaceManager.Update();
   }
+}
+
+void DisplaySettings::OnCheck(wxCommandEvent &event)
+{
+  if (event.GetId() == ID_CHECK_ENVMAPPING)
+    video.useEnvMapping = event.IsChecked();
 }

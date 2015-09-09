@@ -123,13 +123,6 @@ bool WowModelViewApp::OnInit()
 
 	// set the config file path.
 	cfgPath = userPath+SLASH+wxT("Config.ini");
-	
-	bool loadfail = LoadSettings();
-	if (loadfail == true) {
-		if (splash)
-			splash->Show(false);
-		return false;
-	}
 
 	setInterfaceLocale();
 
@@ -143,7 +136,7 @@ bool WowModelViewApp::OnInit()
 
 
 	// Now create our main frame.
-    frame = new ModelViewer();
+  frame = new ModelViewer();
     
 	if (!frame) {
 		//this->Close();
@@ -151,6 +144,8 @@ bool WowModelViewApp::OnInit()
 			splash->Show(false);
 		return false;
 	}
+
+	LoadSettings();
 
 	SetTopWindow(frame);
 	/*
@@ -316,7 +311,7 @@ void WowModelViewApp::OnUnhandledException()
 	wxLogFatalError(wxT("An unhandled exception error has occured."));
 }
 
-bool WowModelViewApp::LoadSettings()
+void WowModelViewApp::LoadSettings()
 {
 	wxString tmp;
 	// Application Config Settings
@@ -340,6 +335,10 @@ bool WowModelViewApp::LoadSettings()
 		pConfig->Read(wxT("SampleBuffer"), (bool*)&video.curCap.sampleBuffer, 0);	// False
 		pConfig->Read(wxT("StencilBuffer"), &video.curCap.stencil, 0);
 		pConfig->Read(wxT("ZBuffer"), &video.curCap.zBuffer, 16);
+		pConfig->Read(wxT("UseEnvMapping"), (bool*)&video.useEnvMapping, true);
+		double fov;
+		pConfig->Read(wxT("Fov"), &fov, 45);
+		video.fov = fov;
 
 		// Application locale info
 		pConfig->SetPath(wxT("/Locale"));
@@ -360,7 +359,6 @@ bool WowModelViewApp::LoadSettings()
 		// Clear our ini file config object
 		wxDELETE( pConfig );
 	}
-	return false;
 }
 
 void WowModelViewApp::SaveSettings()

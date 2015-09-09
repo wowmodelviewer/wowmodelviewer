@@ -215,16 +215,6 @@ void ModelCanvas::InitView()
 void ModelCanvas::InitShaders()
 {
 
-	if (video.supportFragProg) {
-		/*
-		// TODO: Rewrite these shaders from WoW into GLSL
-		deathShader.InitShaders("","shaders/FFXDeath.fp");
-		deathShader.Disable();
-		desaturateShader.InitShaders("","shaders/Desaturate.fp");
-		desaturateShader.Disable();
-		*/
-	}
-
 	fxBlur = false;
 	fxGlow = false;
 	fxFog = false;
@@ -277,13 +267,6 @@ void ModelCanvas::UninitShaders()
 	wxDELETE(desaturateShader);
 	wxDELETE(glowShader);
 	wxDELETE(boxShader);
-	*/
-	
-	/*
-	if (video.supportFragProg) {
-		blurShader.Disable();
-		blurShader.Release();
-	}
 	*/
 
 	/*
@@ -998,8 +981,6 @@ inline void ModelCanvas::RenderModel()
 
 	// render our main model
 	if (model) {
-		//if (video.supportFragProg)
-		//	deathShader.Enable();
 		if (video.supportGLSL) {
 			// Per pixel lighting, experimental
 			//perpixelShader.Enable();
@@ -1010,9 +991,6 @@ inline void ModelCanvas::RenderModel()
 		glEnable(GL_NORMALIZE);
 		RenderObjects();
 		glDisable(GL_NORMALIZE);
-
-		//if (video.supportFragProg)
-		//	deathShader.Disable();
 
 		// Blur/Glowing effects
 		if (video.supportGLSL) {

@@ -69,15 +69,6 @@ VideoSettings::VideoSettings()
 
 	//useAntiAlias = true;
 	useEnvMapping = true;
-	useShaders = true;
-	useCompression = false;
-	useVBO = false;
-	usePBO = false;
-#ifdef _WINDOWS
-	useFBO = true;
-#else
-	useFBO = false;
-#endif
 }
 
 VideoSettings::~VideoSettings()
@@ -140,9 +131,8 @@ bool VideoSettings::Init()
 	supportVertexProg = glewIsSupported("GL_ARB_vertex_program") == GL_TRUE ? true : false;
 	supportGLSL = glewIsSupported("GL_ARB_shading_language_100") == GL_TRUE ? true : false;
 	supportShaders = (supportFragProg && supportVertexProg);
-
-	supportDrawRangeElements = glewIsSupported("GL_EXT_draw_range_elements") == GL_TRUE ? true : false;
 	supportMultiTex = glewIsSupported("GL_ARB_multitexture") == GL_TRUE ? true : false;
+	supportDrawRangeElements = glewIsSupported("GL_EXT_draw_range_elements") == GL_TRUE ? true : false;
 	supportVBO = glewIsSupported("GL_ARB_vertex_buffer_object") == GL_TRUE ? true : false;
 	supportCompression = glewIsSupported("GL_ARB_texture_compression GL_ARB_texture_cube_map GL_EXT_texture_compression_s3tc") == GL_TRUE ? true : false;
 	supportPointSprites = glewIsSupported("GL_ARB_point_sprite GL_ARB_point_parameters") == GL_TRUE ? true : false;
@@ -178,7 +168,6 @@ bool VideoSettings::Init()
 
 	LOG_INFO << "Support wglPixelFormat:" << (supportWGLPixelFormat ? "true" : "false");
 	LOG_INFO << "Support Texture Compression:" << (supportCompression ? "true" : "false");
-	LOG_INFO << "Support Multi-Textures:" << (supportMultiTex ? "true" : "false");
 	LOG_INFO << "Support Draw Range Elements:" << (supportDrawRangeElements ? "true" : "false");
 	LOG_INFO << "Support Vertex Buffer Objects:" << (supportVBO ? "true" : "false");
 	LOG_INFO << "Support Point Sprites:" << (supportPointSprites ? "true" : "false");

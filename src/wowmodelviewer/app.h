@@ -66,7 +66,7 @@ public:
 	//virtual bool OnExceptionInMainLoop();
 	//virtual void HandleEvent(wxEvtHandler *handler, wxEventFunction func, wxEvent& event) const ; 
 
-	bool LoadSettings();
+	void LoadSettings();
 	void SaveSettings();
 
 	ModelViewer *frame;
