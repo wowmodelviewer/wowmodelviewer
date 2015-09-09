@@ -339,7 +339,6 @@ void WowModelViewApp::LoadSettings()
 		double fov;
 		pConfig->Read(wxT("Fov"), &fov, 45);
 		video.fov = fov;
-		LOG_INFO << "read fov" << video.fov;
 
 		// Application locale info
 		pConfig->SetPath(wxT("/Locale"));
