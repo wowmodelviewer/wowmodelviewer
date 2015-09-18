@@ -123,6 +123,7 @@ bool WowModelViewApp::OnInit()
 
 	// set the config file path.
 	cfgPath = userPath+SLASH+wxT("Config.ini");
+	LoadSettings();
 
 	setInterfaceLocale();
 
@@ -144,8 +145,6 @@ bool WowModelViewApp::OnInit()
 			splash->Show(false);
 		return false;
 	}
-
-	LoadSettings();
 
 	SetTopWindow(frame);
 	/*
