@@ -69,6 +69,7 @@
 void ExporterPlugin::exportGLTexture(GLuint id, std::string filename) const
 {
   LOG_INFO << "Exporting GL texture with id " << id << "in" << filename.c_str();
+  glEnable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, id);
   unsigned char *pixels = NULL;
 
@@ -92,7 +93,8 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::string filename) const
     QImage texture(pixels, width, height, QImage::Format_ARGB32);
     texture.save(filename.c_str());
   }
-
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
 }
 
 // Private methods
