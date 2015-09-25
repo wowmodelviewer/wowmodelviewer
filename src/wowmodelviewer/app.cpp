@@ -5,7 +5,6 @@
 #include <wx/mstream.h>
 #include <wx/stdpaths.h>
 #include <wx/app.h>
-//#include <wx/debugrpt.h>
 
 #include <windows.h>
 
@@ -341,23 +340,15 @@ void WowModelViewApp::LoadSettings()
 void WowModelViewApp::SaveSettings()
 {
 	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+
+	config.setValue("Locale/LanguageID", langID);
+	config.setValue("Locale/LanguageName", langName.c_str());
 	
-	pConfig->SetPath(wxT("/Locale"));
-	pConfig->Write(wxT("LanguageID"), langID);
-	pConfig->Write(wxT("LanguageName"), langName);
-	pConfig->Write(wxT("InterfaceID"), interfaceID);
-
-	pConfig->SetPath(wxT("/Settings"));
-	pConfig->Write(wxT("Path"), gamePath);
-	pConfig->Write(wxT("ArmoryPath"), armoryPath);
-	pConfig->Write(wxT("SSCounter"), ssCounter);
-	//pConfig->Write(wxT("AntiAlias"), useAntiAlias);
-	//pConfig->Write(wxT("DisableHWAcc"), disableHWAcc);
-	pConfig->Write(wxT("DefaultFormat"), imgFormat);
-
-	// Clear our ini file config object
-	wxDELETE( pConfig );
+	config.setValue("Settings/Path", gamePath.c_str());
+	config.setValue("Settings/ArmoryPath", armoryPath.c_str());
+	config.setValue("Settings/SSCounter", ssCounter);
+	config.setValue("Settings/DefaultFormat", imgFormat);
 }
 
 

@@ -34,6 +34,7 @@
 #include "UserSkins.h"
 
 #include <QFile>
+#include <QSettings>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
@@ -759,116 +760,88 @@ void ModelViewer::LoadSession()
 {
 	LOG_INFO << "Loading Session settings from:" << cfgPath.c_str();
 
-	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"),wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
-  pConfig->SetPath(wxT("/Session"));
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
-	pConfig->Read("RandomLooks", &useRandomLooks, true);
-	pConfig->Read("ShowParticle", &GLOBALSETTINGS.bShowParticle, true);
-	pConfig->Read("ZeroParticle", &GLOBALSETTINGS.bZeroParticle, true);
-	pConfig->Read("InitPoseOnlyExport", &GLOBALSETTINGS.bInitPoseOnlyExport , false);
+	// Application Config Settings
+	useRandomLooks = config.value("Session/RandomLooks", true).toBool();
+	GLOBALSETTINGS.bShowParticle = config.value("Session/ShowParticle", true).toBool();
+	GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
+	GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
 
 	// Other session settings
-	if (canvas) {
-
-		double c;
+	if (canvas)
+	{
 		// Background Colour
-		pConfig->Read(wxT("bgR"), &c, 71.0/255);
-		canvas->vecBGColor.x = c;
-		pConfig->Read(wxT("bgG"), &c, 95.0/255);
-		canvas->vecBGColor.y = c;
-		pConfig->Read(wxT("bgB"), &c, 121.0/255);
-		canvas->vecBGColor.z = c;
-		
+		canvas->vecBGColor.x = config.value("Session/bgR",  71.0/255).toFloat();
+		canvas->vecBGColor.y = config.value("Session/bgG",  95.0/255).toFloat();
+		canvas->vecBGColor.z = config.value("Session/bgB",  121.0/255).toFloat();
+
 		// boolean vars
-		pConfig->Read(wxT("DBackground"), &canvas->drawBackground, false);
-		pConfig->Read(wxT("BackgroundImage"), &bgImagePath, wxEmptyString);
-		if (!bgImagePath.IsEmpty()) {
+		canvas->drawBackground = config.value("Session/DBackground",  false).toBool();
+		bgImagePath = config.value("Session/BackgroundImage",  false).toString().toStdString();
+
+		if (!bgImagePath.IsEmpty())
 			canvas->LoadBackground(bgImagePath);
-			//viewMenu->Check(ID_BACKGROUND, canvas->drawBackground);
-		}
-		
-
-		// model file
-		/*wxString modelfn;
-		pConfig->Read(wxT("Model"), &modelfn);
-		if (modelfn) {
-			LoadModel(modelfn);
-		}*/
 	}
-
-	wxDELETE(pConfig);
 }
 
 void ModelViewer::SaveSession()
 {
-	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
+	config.setValue("Graphics/FSAA", video.curCap.aaSamples);
+	config.setValue("Graphics/AccumulationBuffer", video.curCap.accum);
+	config.setValue("Graphics/AlphaBits", video.curCap.alpha);
+	config.setValue("Graphics/ColourBits", video.curCap.colour);
+	config.setValue("Graphics/DoubleBuffer", video.curCap.doubleBuffer);
+	config.setValue("Graphics/HWAcceleration", video.curCap.hwAcc);
+	config.setValue("Graphics/SampleBuffer", video.curCap.sampleBuffer);
+	config.setValue("Graphics/StencilBuffer", video.curCap.stencil);
+	config.setValue("Graphics/ZBuffer", video.curCap.zBuffer);
+	config.setValue("Graphics/UseEnvMapping", video.useEnvMapping);
+	config.setValue("Graphics/Fov", (double)video.fov);
 
-	// Graphic / Video display settings
-	pConfig->SetPath(wxT("/Graphics"));
-	pConfig->Write(wxT("FSAA"), video.curCap.aaSamples);
-	pConfig->Write(wxT("AccumulationBuffer"), video.curCap.accum);
-	pConfig->Write(wxT("AlphaBits"), video.curCap.alpha);
-	pConfig->Write(wxT("ColourBits"), video.curCap.colour);
-	pConfig->Write(wxT("DoubleBuffer"), video.curCap.doubleBuffer);
-	pConfig->Write(wxT("HWAcceleration"), video.curCap.hwAcc);
-	pConfig->Write(wxT("SampleBuffer"), video.curCap.sampleBuffer);
-	pConfig->Write(wxT("StencilBuffer"), video.curCap.stencil);
-	pConfig->Write(wxT("ZBuffer"), video.curCap.zBuffer);
-	pConfig->Write(wxT("UseEnvMapping"), video.useEnvMapping);
-	pConfig->Write(wxT("Fov"), (float)video.fov);
+	config.setValue("Session/RandomLooks", useRandomLooks);
+	config.setValue("Session/ShowParticle", GLOBALSETTINGS.bShowParticle);
+	config.setValue("Session/ZeroParticle", GLOBALSETTINGS.bZeroParticle);
+	config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
 
-	pConfig->SetPath(wxT("/Session"));
-	// Attempt at saving colour values as 3 byte hex - loss of accuracy from float
-	//wxString temp(Vec3DToString(canvas->vecBGColor));
+	if (canvas)
+	{
+		config.setValue("Session/bgR", (double)canvas->vecBGColor.x);
+		config.setValue("Session/bgG", (double)canvas->vecBGColor.y);
+		config.setValue("Session/bgB", (double)canvas->vecBGColor.z);
 
-	// boolean vars
-	pConfig->Write(wxT("RandomLooks"), useRandomLooks);
-	pConfig->Write(wxT("ShowParticle"), GLOBALSETTINGS.bShowParticle);
-	pConfig->Write(wxT("ZeroParticle"), GLOBALSETTINGS.bZeroParticle);
-	pConfig->Write(wxT("InitPoseOnlyExport"), GLOBALSETTINGS.bInitPoseOnlyExport);
+		config.setValue("Session/DBackground", canvas->drawBackground);
 
-	if (canvas) {
-		pConfig->Write(wxT("bgR"), (double)canvas->vecBGColor.x);
-		pConfig->Write(wxT("bgG"), (double)canvas->vecBGColor.y);
-		pConfig->Write(wxT("bgB"), (double)canvas->vecBGColor.z);
-
-		pConfig->Write(wxT("DBackground"), canvas->drawBackground);
 		if (canvas->drawBackground)
-			pConfig->Write(wxT("BackgroundImage"), bgImagePath);
+			config.setValue("Session/BackgroundImage", bgImagePath.c_str());
 		else
-			pConfig->Write(wxT("BackgroundImage"), wxEmptyString);
+			config.setValue("Session/BackgroundImage", "");
 
 		// model file
 		if (canvas->model)
-			pConfig->Write(wxT("Model"), canvas->model->name().toStdString());
+			config.setValue("Session/Model", canvas->model->name());
 	}
-
-	// character details
-	// equipment
-
-	wxDELETE(pConfig);
 }
 
 void ModelViewer::LoadLayout()
 {
-	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
-	wxString layout;
-
-	// Get layout data
-	pConfig->SetPath(wxT("/Session"));
-	pConfig->Read(wxT("Layout"), &layout);
+	wxString layout = config.value("Session/Layout", "").toString().toStdString();
 
 	// if the layout data exists,  load it.
-	if (!layout.IsNull() && !layout.IsEmpty()) {
-		if (!interfaceManager.LoadPerspective(layout, false)){
+	if (!layout.IsNull() // something goes wrong
+			&& !layout.IsEmpty() // empty value
+			&& !layout.EndsWith("canvas")) // old saving badly read by Qt, ignore
+	{
+		if (!interfaceManager.LoadPerspective(layout, false))
+		{
 			LOG_ERROR << "Could not load the layout.";
 		}
-		else {
+		else
+		{
 			// No need to display these windows on startup
 			interfaceManager.GetPane(modelControl).Show(false);
 			interfaceManager.GetPane(settingsControl).Show(false);
@@ -881,24 +854,14 @@ void ModelViewer::LoadLayout()
 			LOG_INFO << "GUI Layout loaded from previous session.";
 		}
 	}
-
-	wxDELETE(pConfig);
 }
 
 void ModelViewer::SaveLayout()
 {
-	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
-	pConfig->SetPath(wxT("/Session"));
-	
-	// Save GUI layout data
-	wxString layout = interfaceManager.SavePerspective();
-	pConfig->Write(wxT("Layout"), layout);
-
+	config.setValue("Session/Layout", interfaceManager.SavePerspective().c_str());
 	LOG_INFO << "GUI Layout was saved.";
-
-	wxDELETE(pConfig);
 }
 
 
