@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include <wx/sizer.h>
+#include <wx/spinbutt.h>
 
 #include "logger/Logger.h"
 #include "globalvars.h"

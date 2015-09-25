@@ -1,10 +1,11 @@
 #include "app.h"
 
-#include <wx/image.h>
-#include <wx/splash.h>
-#include <wx/mstream.h>
-#include <wx/stdpaths.h>
 #include <wx/app.h>
+#include <wx/filename.h>
+#include <wx/image.h>
+#include <wx/mstream.h>
+#include <wx/splash.h>
+#include <wx/stdpaths.h>
 
 #include <windows.h>
 

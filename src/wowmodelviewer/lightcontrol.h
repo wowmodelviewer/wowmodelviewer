@@ -7,8 +7,6 @@
     #include <wx/wx.h>
 #endif
 
-#include <wx/colordlg.h>
-// --
 
 // OpenGL headers
 #include "OpenGLHeaders.h"

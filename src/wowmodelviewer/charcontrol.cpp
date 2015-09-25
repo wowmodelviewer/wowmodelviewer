@@ -1,7 +1,8 @@
 #include "charcontrol.h"
 
-#include <wx/txtstrm.h>
 #include <wx/combobox.h>
+#include <wx/spinbutt.h>
+#include <wx/txtstrm.h>
 
 #include "Attachment.h"
 #include "CASCFolder.h"

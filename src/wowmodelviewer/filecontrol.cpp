@@ -1,5 +1,6 @@
 #include "logger/Logger.h"
 
+#include <wx/filename.h>
 #include <wx/msgdlg.h>
 
 #include <QImage>

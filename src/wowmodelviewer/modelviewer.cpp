@@ -1,13 +1,12 @@
 #include "modelviewer.h"
 
 #include "AnimationExportChoiceDialog.h"
-#include <wx/app.h>
+
+#include <wx/aboutdlg.h>
 #include <wx/busyinfo.h>
+#include <wx/colordlg.h>
 #include <wx/filedlg.h>
-#include <wx/regex.h>
-#include <wx/tokenzr.h>
-#include <wx/txtstrm.h>
-#include <wx/utils.h>
+#include <wx/filename.h>
 
 #include "CharInfos.h"
 #include "ExporterPlugin.h"

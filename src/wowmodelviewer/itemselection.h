@@ -7,9 +7,9 @@
 #endif
 
 // wx
-#include <wx/regex.h>
 #include <wx/choicdlg.h>
-#include <wx/listctrl.h>
+class wxListEvent;
+class wxListView;
 
 // stl
 #include <map>
@@ -35,7 +35,7 @@ public:
 
 	virtual void OnClick(wxCommandEvent &event);
 	void OnSelect(wxListEvent &event);
-    virtual int GetSelection() const { return m_selection; }
+  virtual int GetSelection() const { return m_selection; }
 	void EndModal(int retCode) { SetReturnCode(retCode); Hide(); }
 };
 

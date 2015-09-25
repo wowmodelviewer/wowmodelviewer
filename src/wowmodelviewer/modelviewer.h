@@ -7,19 +7,11 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
-#include <wx/filename.h>
-#include <wx/fileconf.h>
-#include <wx/treectrl.h>
-#include <wx/colordlg.h>
-#include <wx/msgdlg.h>
-#include <wx/display.h>
-#include <wx/aboutdlg.h>
+
 #if defined(__WIN32__) && !defined(__WIN__)
 	#include <winsock.h>
 #endif
-#include <wx/url.h>
-#include <wx/xml/xml.h>
-#include <wx/wfstream.h>
+
 
 //wxAUI
 #include <wx/aui/aui.h>
