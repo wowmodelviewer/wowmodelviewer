@@ -195,6 +195,11 @@ void CASCFolder::initFileList(std::set<FileTreeItem> &dest)
 	while (!in.atEnd())
 	{
 		QString line = in.readLine();
+
+		QString fileName = line.section('\\',-1).toLower();
+		QString filePath = (line.section('\\', 0, -2).toLower()) + "\\";
+		folderFileList.push_back(std::make_pair(filePath, fileName));
+
 		FileTreeItem tmp;
 
 		line = line.toLower();
@@ -210,9 +215,8 @@ void CASCFolder::initFileList(std::set<FileTreeItem> &dest)
 		}
 
 		// fill global map for path search
-		QString fileName = line.section('\\',-1).toLower();
+		fileName = line.section('\\',-1).toLower();
 		globalNameMap[fileName] = line;
-
 
 		tmp.displayName = line;
 		tmp.color = 0;

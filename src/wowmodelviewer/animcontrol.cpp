@@ -23,6 +23,10 @@ BEGIN_EVENT_TABLE(AnimControl, wxWindow)
 	EVT_COMBOBOX(ID_SKIN, AnimControl::OnSkin)
 	EVT_COMBOBOX(ID_ITEMSET, AnimControl::OnItemSet)
 
+	EVT_COMBOBOX(ID_BLP_SKIN1, AnimControl::OnBLPSkin)
+	EVT_COMBOBOX(ID_BLP_SKIN2, AnimControl::OnBLPSkin)
+	EVT_COMBOBOX(ID_BLP_SKIN3, AnimControl::OnBLPSkin)
+
 	EVT_CHECKBOX(ID_OLDSTYLE, AnimControl::OnCheck)
 	EVT_CHECKBOX(ID_ANIM_LOCK, AnimControl::OnCheck)
 	EVT_CHECKBOX(ID_ANIM_NEXT, AnimControl::OnCheck)
@@ -83,7 +87,26 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
 
 	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170,10), wxSize(150,16), 0, NULL, wxCB_READONLY);
-	skinList->Show(FALSE);
+  skinList->Show(false);
+
+	BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600,5), wxSize(150,16));
+	BLPSkinsLabel->Show(false);
+
+	BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600,29), wxSize(30,16));
+	BLPSkinLabel1->Show(false);
+	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635,25), wxSize(150,16), 0, NULL, wxCB_READONLY);
+	BLPSkinList1->Show(false);
+
+	BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600,59), wxSize(30,16));
+	BLPSkinLabel2->Show(false);
+	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635,55), wxSize(150,16), 0, NULL, wxCB_READONLY);
+	BLPSkinList2->Show(false);
+
+	BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600,89), wxSize(30,16));
+	BLPSkinLabel3->Show(false);
+	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,16), 0, NULL, wxCB_READONLY);
+	BLPSkinList3->Show(false);
+
 	randomSkins = true;
 	defaultDoodads = true;
 
@@ -133,11 +156,21 @@ AnimControl::~AnimControl()
 	animCList2->Clear();
 	animCList3->Clear();
 	skinList->Clear();
+	BLPSkinList1->Clear();
+	BLPSkinList2->Clear();
+	BLPSkinList3->Clear();
 	
 	animCList->Destroy();
 	animCList2->Destroy();
 	animCList3->Destroy();
 	skinList->Destroy();
+	BLPSkinList1->Destroy();
+	BLPSkinList2->Destroy();
+	BLPSkinList3->Destroy();
+	BLPSkinsLabel->Destroy();
+	BLPSkinLabel1->Destroy();
+	BLPSkinLabel2->Destroy();
+	BLPSkinLabel3->Destroy();
 }
 
 void AnimControl::UpdateModel(WoWModel *m)
@@ -319,6 +352,14 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	
 	animCList->Show(false);
 	skinList->Show(false);
+	BLPSkinList1->Show(false);
+	BLPSkinList2->Show(false);
+	BLPSkinList3->Show(false);
+	BLPSkinsLabel->Show(false);
+	BLPSkinLabel1->Show(false);
+	BLPSkinLabel2->Show(false);
+	BLPSkinLabel3->Show(false);
+
 	loopList->Show(false);
 	btnAdd->Show(false);
 	
@@ -367,7 +408,7 @@ bool filterDir(QString fn)
 bool AnimControl::UpdateCreatureModel(WoWModel *m)
 {
   std::set<wxString> alreadyUsedTextures;
-  TextureSet skins;
+  TextureSet skins, BLPskins;
 
   // see if this model has skins
   LOG_INFO << "Searching skins for" << m->itemName().c_str();
@@ -432,7 +473,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // - We didn't find any texures in the database
   // - We found textures but the model only requires 1 texture
   // (Models will look bad in they require multiple textures but only one is set)
-  int numConfigSkins = m->CanSetTextureFromFile(1) + m->CanSetTextureFromFile(2) + m->CanSetTextureFromFile(3);
+  int numConfigSkins = m->canSetTextureFromFile(1) + m->canSetTextureFromFile(2) + m->canSetTextureFromFile(3);
   if (filelist.begin() != filelist.end())
   {
     TextureGroup grp;
@@ -476,19 +517,19 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // Creatures can have 1-3 textures that can be taken from game files.
   // But it varies from model to model which of the three textures can
   // be set this way.
-  if (m->CanSetTextureFromFile(1))
+  if (m->canSetTextureFromFile(1))
   {
     BLPSkinList1->Show(true);
     BLPSkinLabel1->Show(true);
     BLPSkinsLabel->Show(true);
   }
-  if (m->CanSetTextureFromFile(2))
+  if (m->canSetTextureFromFile(2))
   {
     BLPSkinList2->Show(true);
     BLPSkinLabel2->Show(true);
     BLPSkinsLabel->Show(true);
   }
-  if (m->CanSetTextureFromFile(3))
+  if (m->canSetTextureFromFile(3))
   {
     BLPSkinList3->Show(true);
     BLPSkinLabel3->Show(true);
@@ -608,7 +649,6 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
 			wxString texname = it->tex[0];
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-			texname = texname.BeforeLast(MPQ_SLASH) + MPQ_SLASH + texname + wxT(".blp");
 			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
 			g_selModel->TextureList.push_back(texname.c_str());
 			TextureGroup *grp = new TextureGroup(*it);
@@ -792,7 +832,37 @@ void AnimControl::OnSkin(wxCommandEvent &event)
 		int sel = event.GetSelection();
 		SetSkin(sel);
 	}
+
+	BLPSkinList1->SetSelection(wxNOT_FOUND);
+	BLPSkinList2->SetSelection(wxNOT_FOUND);
+	BLPSkinList3->SetSelection(wxNOT_FOUND);
 }
+
+void AnimControl::OnBLPSkin(wxCommandEvent &event)
+{
+  if (g_selModel)
+  {
+    int sel = event.GetSelection();
+    int texnum;
+    switch (event.GetId())
+    {
+    case ID_BLP_SKIN1:
+      texnum = 1;
+      break;
+    case ID_BLP_SKIN2:
+      texnum = 2;
+      break;
+    case ID_BLP_SKIN3:
+      texnum = 3;
+      break;
+    default:
+      return;
+    }
+    SetSingleSkin(sel, texnum);
+  }
+  skinList->SetSelection(wxNOT_FOUND);
+}
+
 
 void AnimControl::OnItemSet(wxCommandEvent &event)
 {
@@ -871,14 +941,19 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 
   switch (texnum)
   {
-    case 1 : grp = (TextureGroup*) BLPSkinList1->GetClientData(num);
-             break;
-    case 2 : grp = (TextureGroup*) BLPSkinList2->GetClientData(num);
-             break;
-    case 3 : grp = (TextureGroup*) BLPSkinList3->GetClientData(num);
-             break;
-    default: return;
+    case 1:
+      grp = (TextureGroup*) BLPSkinList1->GetClientData(num);
+      break;
+    case 2:
+      grp = (TextureGroup*) BLPSkinList2->GetClientData(num);
+      break;
+    case 3:
+      grp = (TextureGroup*) BLPSkinList3->GetClientData(num);
+      break;
+    default:
+      return;
   }
+
   int base = grp->base + texnum - 1;
   if (g_selModel->useReplaceTextures[base])
   {
