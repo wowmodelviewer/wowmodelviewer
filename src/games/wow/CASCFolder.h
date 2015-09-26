@@ -65,8 +65,10 @@ class _CASCFOLDER_API_ CASCFolder
     void initFileList(std::set<FileTreeItem> &dest);
 
     void filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString) = CASCFolder::defaultFilterFunc);
+    void getFilesForFolder(std::vector<QString> &fileNames, QString folderPath);
 
     bool setLocale(std::string);
+
 
   private:
     CASCFolder();

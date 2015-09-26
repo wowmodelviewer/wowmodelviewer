@@ -12,6 +12,7 @@
 #include <iostream>
 #include <locale>
 #include <map>
+#include <utility>
 
 #include <QFile>
 #include <QRegularExpression>
@@ -22,6 +23,7 @@
 CASCFolder * CASCFolder::m_instance = 0;
 
 std::map<QString,QString> globalNameMap;
+std::vector<std::pair<QString,QString>> folderFileList;
 
 CASCFolder::CASCFolder()
  : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
@@ -245,6 +247,19 @@ QString CASCFolder::getFullPathForFile(QString file)
   return "";
 }
 
+void CASCFolder::getFilesForFolder(std::vector<QString> &fileNames, QString folderPath)
+{
+  std::vector<std::pair<QString,QString>> matches;
+
+  // make a new vector array with only those pairs that match the supplied folder path:
+  std::copy_if(folderFileList.begin(), folderFileList.end(), back_inserter(matches),
+               [folderPath](std::pair<QString,QString>& p)
+                  { return (QString::compare(p.first, folderPath, Qt::CaseInsensitive) == 0); });
+
+  // Convert to a simpler vector array of full file names:
+  std::transform(matches.begin(), matches.end(), std::back_inserter(fileNames),
+                 [](std::pair<QString, QString>& p) { return p.first + p.second; });
+}
 
 bool CASCFolder::fileExists(std::string file)
 {

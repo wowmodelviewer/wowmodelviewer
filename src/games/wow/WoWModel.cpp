@@ -1497,3 +1497,25 @@ void WoWModel::load(QXmlStreamReader &stream)
   cd.load(stream);
 }
 
+bool WoWModel::CanSetTextureFromFile(int texnum)
+{
+  int textype;
+
+  switch (texnum)
+  {
+    case 1 : textype = TEXTURE_GAMEOBJECT1;
+             break;
+    case 2 : textype = TEXTURE_GAMEOBJECT2;
+             break;
+    case 3 : textype = TEXTURE_GAMEOBJECT3;
+             break;
+    default: return 0;
+  }
+
+  for (size_t i=0; i<TEXTURE_MAX; i++)
+  {
+    if (specialTextures[i] == textype)
+        return 1;
+  }
+  return 0;
+}
