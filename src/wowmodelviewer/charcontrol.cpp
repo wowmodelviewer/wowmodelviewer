@@ -507,6 +507,22 @@ void CharControl::RefreshModel()
 
 	  if(textures.size() > 1)
 	    model->tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
+
+	  // pandaren female => need to display tabard2 geosets (need to find something better...)
+	  for (size_t i=0; i<model->geosets.size(); i++)
+	  {
+	    if(model->geosets[i].id == 1401)
+	      model->showGeosets[i] = true;
+	  }
+	}
+	else
+	{
+	  // de activate pandaren female tabard2 when no underwear
+	  for (size_t i=0; i<model->geosets.size(); i++)
+	  {
+	    if(model->geosets[i].id == 1401)
+	      model->showGeosets[i] = false;
+	  }
 	}
 
 	// face
@@ -625,14 +641,14 @@ void CharControl::RefreshModel()
 	         << "Tabard" << model->getItem(CS_TABARD)->id();
 
 	// reset geosets
-	for (size_t j=0; j<model->geosets.size(); j++) {
+	for (size_t j=0; j<model->geosets.size(); j++)
+	{
 		int id = model->geosets[j].id;
-
-		for (size_t i=1; i<NUM_GEOSETS; i++) {
+		for (size_t i=1; i<NUM_GEOSETS; i++)
+		{
 			int a = (int)i*100, b = ((int)i+1) * 100;
-			if (id>a && id<b) 
+			if (a != 1400 && id>a && id<b) // skip tabard2 group (1400) -> buggy pandaren female tabard
 				model->showGeosets[j] = (id == (a + model->cd.geosets[i]));
-
 		}
 	}
 
