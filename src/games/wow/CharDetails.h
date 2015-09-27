@@ -44,7 +44,7 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
     EyeGlowTypes eyeGlowType;
 
-    bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
+    bool showUnderwear, showEars, showHair, showFacialHair, showFeet, autoHideGeosetsForHeadItems;
 
     bool isNPC;
 

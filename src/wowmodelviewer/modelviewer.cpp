@@ -148,6 +148,7 @@ BEGIN_EVENT_TABLE(ModelViewer, wxFrame)
 	EVT_MENU(ID_SHOW_HAIR, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_SHOW_FACIALHAIR, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_SHOW_FEET, ModelViewer::OnCharToggle)
+	EVT_MENU(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_SHEATHE, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_CHAREYEGLOW_NONE, ModelViewer::OnCharToggle)
 	EVT_MENU(ID_CHAREYEGLOW_DEFAULT, ModelViewer::OnCharToggle)
@@ -440,6 +441,8 @@ void ModelViewer::InitMenu()
 		charMenu->Check(ID_SHOW_FACIALHAIR, true);
 		charMenu->AppendCheckItem(ID_SHOW_FEET, _("Show Feet"));
 		charMenu->Check(ID_SHOW_FEET, false);
+		charMenu->AppendCheckItem(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, _("Auto Hide Geosets for head items"));
+		charMenu->Check(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 		charMenu->AppendCheckItem(ID_SHEATHE, _("Sheathe Weapons\tCTRL+Z"));
 		charMenu->Check(ID_SHEATHE, false);
 

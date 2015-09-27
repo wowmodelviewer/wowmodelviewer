@@ -347,6 +347,8 @@ void CharControl::OnCheck(wxCommandEvent &event)
 		model->cd.eyeGlowType = EGT_DEFAULT;
 	else if (ID==ID_CHAREYEGLOW_DEATHKNIGHT)
 		model->cd.eyeGlowType = EGT_DEATHKNIGHT;
+	else if(ID==ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS)
+	  model->cd.autoHideGeosetsForHeadItems = event.IsChecked();
 
 	//  Update controls associated
 	RefreshEquipment();
@@ -640,7 +642,7 @@ void CharControl::RefreshModel()
 
 	WoWItem * headItem = model->getItem(CS_HEAD);
 
-	if( headItem != 0 && headItem->id() != 0)
+	if( headItem != 0 && headItem->id() != 0 && model->cd.autoHideGeosetsForHeadItems)
 	{
 	  QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
 	      "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
