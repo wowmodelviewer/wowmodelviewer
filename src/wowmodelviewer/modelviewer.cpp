@@ -5,6 +5,7 @@
 #include <wx/aboutdlg.h>
 #include <wx/busyinfo.h>
 #include <wx/colordlg.h>
+#include <wx/colour.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 
@@ -256,7 +257,7 @@ ModelViewer::ModelViewer()
 		// Set our display mode	
 		//if (video.GetCompatibleWinMode(video.curCap)) {
 			video.SetMode();
-			if (!video.render) // Something bad must of happened - find a new working display mode
+			if (!video.render) // Something bad must have happened - find a new working display mode
 				video.GetAvailableMode();
 		} else {
 			LOG_ERROR << "Failed to find a compatible graphics mode.  Finding first available display mode...";
@@ -372,19 +373,19 @@ void ModelViewer::InitMenu()
 		viewMenu->AppendSeparator();
 
 		wxMenu *setSize = new wxMenu;
-		setSize->AppendRadioItem(ID_CANVASS120, wxT("(1:1) 120 x 120"),_("Square (1:1)"));
-		setSize->AppendRadioItem(ID_CANVASS512, wxT("(1:1) 512 x 512"),_("Square (1:1)"));
-		setSize->AppendRadioItem(ID_CANVASS1024, wxT("(1:1) 1024 x 1024"),_("Square (1:1)"));
-		setSize->AppendRadioItem(ID_CANVASF480, wxT("(4:3) 640 x 480"),_("Fullscreen (4:3)"));
-		setSize->AppendRadioItem(ID_CANVASF600, wxT("(4:3) 800 x 600"),_("Fullscreen (4:3)"));
-		setSize->AppendRadioItem(ID_CANVASF768, wxT("(4:3) 1024 x 768"),_("Fullscreen (4:3)"));
-		setSize->AppendRadioItem(ID_CANVASF864, wxT("(4:3) 1152 x 864"),_("Fullscreen (4:3)"));
-		setSize->AppendRadioItem(ID_CANVASF1200, wxT("(4:3) 1600 x 1200"),_("Fullscreen (4:3)"));
-		setSize->AppendRadioItem(ID_CANVASW480, wxT("(16:9) 864 x 480"),_("Widescreen (16:9)"));
-		setSize->AppendRadioItem(ID_CANVASW720, wxT("(16:9) 1280 x 720"),_("Widescreen (16:9)"));
-		setSize->AppendRadioItem(ID_CANVASW1080, wxT("(16:9) 1920 x 1080"),_("Widescreen (16:9)"));
-		setSize->AppendRadioItem(ID_CANVASM768, wxT("(5:3) 1280 x 768"),_("Misc (5:3)"));
-		setSize->AppendRadioItem(ID_CANVASM1200, wxT("(8:5) 1920 x 1200"),_("Misc (8:5)"));
+		setSize->Append(ID_CANVASS120, wxT("(1:1) 120 x 120"),_("Square (1:1)"));
+		setSize->Append(ID_CANVASS512, wxT("(1:1) 512 x 512"),_("Square (1:1)"));
+		setSize->Append(ID_CANVASS1024, wxT("(1:1) 1024 x 1024"),_("Square (1:1)"));
+		setSize->Append(ID_CANVASF480, wxT("(4:3) 640 x 480"),_("Fullscreen (4:3)"));
+		setSize->Append(ID_CANVASF600, wxT("(4:3) 800 x 600"),_("Fullscreen (4:3)"));
+		setSize->Append(ID_CANVASF768, wxT("(4:3) 1024 x 768"),_("Fullscreen (4:3)"));
+		setSize->Append(ID_CANVASF864, wxT("(4:3) 1152 x 864"),_("Fullscreen (4:3)"));
+		setSize->Append(ID_CANVASF1200, wxT("(4:3) 1600 x 1200"),_("Fullscreen (4:3)"));
+		setSize->Append(ID_CANVASW480, wxT("(16:9) 864 x 480"),_("Widescreen (16:9)"));
+		setSize->Append(ID_CANVASW720, wxT("(16:9) 1280 x 720"),_("Widescreen (16:9)"));
+		setSize->Append(ID_CANVASW1080, wxT("(16:9) 1920 x 1080"),_("Widescreen (16:9)"));
+		setSize->Append(ID_CANVASM768, wxT("(5:3) 1280 x 768"),_("Misc (5:3)"));
+		setSize->Append(ID_CANVASM1200, wxT("(8:5) 1920 x 1200"),_("Misc (8:5)"));
 
 		viewMenu->Append(ID_CANVASSIZE, wxT("Set Canvas Size"), setSize);
 		
@@ -591,7 +592,7 @@ void ModelViewer::InitDatabase()
   }
   else
   {
-    LOG_INFO << "Initializing succeed.";
+    LOG_INFO << "Initializing succeeded.";
   }
 
 	LOG_INFO << "Initializing Databases...";
@@ -767,13 +768,27 @@ void ModelViewer::LoadSession()
 	GLOBALSETTINGS.bZeroParticle = config.value("Session/ZeroParticle", true).toBool();
 	GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
 
+	// Background and Custom Colours
+	wxString colStr;
+	wxColour bgCol;
+	colStr = config.value("Session/bgCol",  "#475F79").toString().toStdString(); // #475F79 = (71, 95, 121)
+	if (!bgCol.Set(colStr))
+ 		bgCol = wxColour(71, 95, 121);
+	bgDialogData.SetColour(bgCol);
+	for (int i = 0; i < 16; i++)
+	{
+		wxColour custCol;
+		colStr = config.value(QString("Session/bgCustCol%1").arg(i), wxEmptyString).toString().toStdString();
+		if ((colStr != wxEmptyString) && custCol.Set(colStr))
+			bgDialogData.SetCustomColour(i, custCol);
+	}
 	// Other session settings
 	if (canvas)
 	{
-		// Background Colour
-		canvas->vecBGColor.x = config.value("Session/bgR",  71.0/255).toFloat();
-		canvas->vecBGColor.y = config.value("Session/bgG",  95.0/255).toFloat();
-		canvas->vecBGColor.z = config.value("Session/bgB",  121.0/255).toFloat();
+		// Set canvas background Colour
+		canvas->vecBGColor.x = bgCol.Red()/255.0f;
+		canvas->vecBGColor.y = bgCol.Green()/255.0f;
+		canvas->vecBGColor.z = bgCol.Blue()/255.0f;
 
 		// boolean vars
 		canvas->drawBackground = config.value("Session/DBackground",  false).toBool();
@@ -805,11 +820,25 @@ void ModelViewer::SaveSession()
 	config.setValue("Session/ZeroParticle", GLOBALSETTINGS.bZeroParticle);
 	config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
 
+	// Background and Custom Colours
+	wxColour bgCol;
+	bgCol = bgDialogData.GetColour();
+	config.setValue("Session/bgCol", bgCol.GetAsString(wxC2S_HTML_SYNTAX).mb_str());
+	for (int i = 0; i < 16; i++)
+	{
+		bgCol = bgDialogData.GetCustomColour(i);
+		if (!bgCol.IsOk())  // skip undefined custom colours
+			continue;
+		config.setValue(QString("Session/bgCustCol%1").arg(i), bgCol.GetAsString(wxC2S_HTML_SYNTAX).mb_str());
+	}
+
+
 	if (canvas)
 	{
-		config.setValue("Session/bgR", (double)canvas->vecBGColor.x);
-		config.setValue("Session/bgG", (double)canvas->vecBGColor.y);
-		config.setValue("Session/bgB", (double)canvas->vecBGColor.z);
+		int canvx = 0, canvy = 0;
+		canvas->GetClientSize(&canvx, &canvy);
+		config.setValue("Session/CanvasWidth", canvx);
+		config.setValue("Session/CanvasHeight", canvy);
 
 		config.setValue("Session/DBackground", canvas->drawBackground);
 
@@ -852,6 +881,14 @@ void ModelViewer::LoadLayout()
 #endif
 			LOG_INFO << "GUI Layout loaded from previous session.";
 		}
+	}
+
+	// Restore saved canvas size:
+	if (canvas)
+	{
+		int canvx = config.value("Session/CanvasWidth", 800).toInt();
+		int canvy = config.value("Session/CanvasHeight", 600).toInt();
+		SetCanvasSize(canvx, canvy);
 	}
 }
 
@@ -1644,15 +1681,16 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
 
 Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
 {
-	wxColourData data;
-	wxColour dcol((unsigned char)(defColor.x*255.0f), (unsigned char)(defColor.y*255.0f), (unsigned char)(defColor.z*255.0f));
-	data.SetChooseFull(true);
-	data.SetColour(dcol);
-	   
-	wxColourDialog dialog(this, &data);
+	wxColour dcol(roundf(defColor.x*255.0f), roundf(defColor.y*255.0f), roundf(defColor.z*255.0f));
+	bgDialogData.SetChooseFull(true);
+	bgDialogData.SetColour(dcol);
+ 	   
+	wxColourDialog dialog(this, &bgDialogData);
 
-	if (dialog.ShowModal() == wxID_OK) {
-		wxColour col = dialog.GetColourData().GetColour();
+	if (dialog.ShowModal() == wxID_OK)
+	{
+		bgDialogData = dialog.GetColourData();
+		wxColour col = bgDialogData.GetColour();
 		return Vec3D(col.Red()/255.0f, col.Green()/255.0f, col.Blue()/255.0f);
 	}
 	return defColor;
@@ -1748,7 +1786,7 @@ void ModelViewer::LoadWoW()
   else
   {
     isWoWLoaded = true;
-    SetStatusText(wxT("Initial WoW Done."));
+    SetStatusText(wxT("Initializing WoW Done."));
     fileMenu->Enable(ID_LOAD_WOW, false);
   }
 
@@ -2232,91 +2270,47 @@ void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 
 void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 {
-	int id = event.GetId();
-	uint32 sizex = 0;
-	uint32 sizey = 0;
-	
-	if (id == ID_CANVASS120)
+	switch (event.GetId())
 	{
-		sizex = 120;
-		sizey = 120;
+		case ID_CANVASS120  :	SetCanvasSize(120, 120);
+					break;
+		case ID_CANVASS512  :	SetCanvasSize(512, 512);
+					break;
+		case ID_CANVASS1024 :	SetCanvasSize(1024, 1024); 
+					break; 
+		case ID_CANVASF480  :	SetCanvasSize(640, 480);
+					break;
+		case ID_CANVASF600  :	SetCanvasSize(800, 600);
+					break;
+		case ID_CANVASF768  :	SetCanvasSize(1024, 768);
+					break;
+		case ID_CANVASF864  :	SetCanvasSize(1152, 864);
+					break;
+		case ID_CANVASF1200 :	SetCanvasSize(1600, 1200); 
+					break;
+		case ID_CANVASW480  :	SetCanvasSize(864, 480);
+					break;
+		case ID_CANVASW720  :	SetCanvasSize(1280, 720);
+					break;
+		case ID_CANVASW1080 :	SetCanvasSize(1920, 1080);
+					break;
+		case ID_CANVASM768  :	SetCanvasSize(1280, 768);
+					break;
+		case ID_CANVASM1200 :	SetCanvasSize(1900, 1200);
+					break;
 	}
-	else if (id == ID_CANVASS512)
-	{
-		sizex = 512;
-		sizey = 512;
-	}
-	else if (id == ID_CANVASS1024)
-	{
-		sizex = 1024;
-		sizey = 1024;
-	}
-	else if (id == ID_CANVASF480)
-	{
-		sizex = 640;
-		sizey = 480;
-	}
-	else if (id == ID_CANVASF600)
-	{
-		sizex = 800;
-		sizey = 600;
-	}
-	else if (id == ID_CANVASF768)
-	{
-		sizex = 1024;
-		sizey = 768;
-	}
-	else if (id == ID_CANVASF864)
-	{
-		sizex = 1152;
-		sizey = 864;
-	}
-	else if (id == ID_CANVASF1200)
-	{
-		sizex = 1600;
-		sizey = 1200;
-	}
-	else if (id == ID_CANVASW480)
-	{
-		sizex = 864;
-		sizey = 480;
-	}
-	else if (id == ID_CANVASW720)
-	{
-		sizex = 1280;
-		sizey = 720;
-	}
-	else if (id == ID_CANVASW1080)
-	{
-		sizex = 1920;
-		sizey = 1080;
-	}
-	else if (id == ID_CANVASM768)
-	{
-		sizex = 1280;
-		sizey = 768;
-	}
-	else if (id == ID_CANVASM1200)
-	{
-		sizex = 1900;
-		sizey = 1200;
-	}
+}
 
-	if (sizex > 0 && sizey > 0)
+void ModelViewer::SetCanvasSize(uint32 sizex, uint32 sizey)
+{
+	if (canvas && sizex && sizey)
 	{
-		int curx=0, cury=0;
-		int winx=0, winy=0;
-		int difx=0, dify=0;
-
-		canvas->GetClientSize(&curx, &cury);  // canvas size
-		GetSize(&winx, &winy);                // window size
-
-		// calculate changes in canvas size:
-		difx = sizex - curx;
-		dify = sizey - cury;
-
-		// set new window size based on these. Canvas will change accordingly:
-		SetSize((winx + difx), (winy + dify));
+		canvas->SetMinSize(wxSize(sizex, sizey));
+		// Fit() needs to be called twice to ensure it resizes properly for small sizes.
+		// (At 120x120 the menu will wrap and impinge on the canvas, so need to call Fit() again!)
+		// It's clunky, but it's the only way I can think of to do it - Wain
+		Fit();
+		Fit();
 	}
 }
 

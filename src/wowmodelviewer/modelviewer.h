@@ -67,7 +67,8 @@ public:
 	//wxWidget objects
 	wxMenuBar *menuBar;
 	wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
-	
+	wxColourData bgDialogData;
+
 	// wxAUI - new docking lib (now part of wxWidgets 2.8.0)
 	wxAuiManager interfaceManager;
 
@@ -104,11 +105,11 @@ public:
 	//void OnIdle();
 	void OnClose(wxCloseEvent &event);
 	void OnSize(wxSizeEvent &event);
-  void OnExit(wxCommandEvent &event);
-  void UpdateCanvasStatus();
+	void OnExit(wxCommandEvent &event);
+	void UpdateCanvasStatus();
+	void SetCanvasSize(uint32 sizex, uint32 sizey);
 
-
-    // menu commands
+	// menu commands
 	void OnToggleDock(wxCommandEvent &event);
 	void OnToggleCommand(wxCommandEvent &event);
 	void OnSetColor(wxCommandEvent &event);
