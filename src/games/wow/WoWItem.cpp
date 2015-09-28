@@ -387,6 +387,7 @@ void WoWItem::load()
   	GLuint tex;
 
   	QString model = iteminfos.values[0][0];
+
   	if(!model.isEmpty())
   	{
   		model.replace(".mdx", ".m2", Qt::CaseInsensitive);
@@ -409,11 +410,7 @@ void WoWItem::load()
   			}
   			m->replaceTextures[TEXTURE_CAPE] = tex;
   		}
-  		else
-  			itemModels[ATT_BELT_BUCKLE] = 0;
   	}
-  	else
-  		itemModels[ATT_BELT_BUCKLE] = 0;
 
   	std::string texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
   	if(!texture.empty())
