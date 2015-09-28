@@ -85,6 +85,7 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     unsigned int facialHair() { return m_facialHair; }
     unsigned int facialHairMax() { return m_facialHairMax; }
     void setFacialHair(unsigned int);
+    std::vector<int>validHairColors() { return m_validHairColors; }
 
   private:
     unsigned int m_skinColor, m_skinColorMax;
@@ -92,11 +93,12 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     unsigned int m_hairColor, m_hairColorMax;
     unsigned int m_hairStyle, m_hairStyleMax;
     unsigned int m_facialHair, m_facialHairMax;
+    std::vector<int> m_validHairColors;
 
     WoWModel * m_model;
 
     void updateMaxValues();
-
+    void updateValidValues();
 
 
 };

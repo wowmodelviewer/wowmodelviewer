@@ -178,6 +178,7 @@ void CharDetails::reset(WoWModel * model)
   isNPC = false;
 
   updateMaxValues();
+  updateValidValues();
 }
 
 void CharDetails::setSkinColor(size_t val)
@@ -204,7 +205,7 @@ void CharDetails::setFaceType(size_t val)
 
 void CharDetails::setHairColor(size_t val)
 {
-  if(val != m_hairColor && val <= m_hairColorMax && val >= 0)
+  if(val != m_hairColor && (find(m_validHairColors.begin(), m_validHairColors.end(), val) != m_validHairColors.end()) )
   {
     m_hairColor = val;
     updateMaxValues();
@@ -242,7 +243,6 @@ void CharDetails::updateMaxValues()
 
   m_faceTypeMax = getNbValuesForSection(FaceType);
   m_skinColorMax = getNbValuesForSection(SkinType);
-  m_hairColorMax = getNbValuesForSection(HairType);
 
   RaceInfos infos;
   RaceInfos::getCurrent(m_model->name().toStdString(), infos);
@@ -279,6 +279,9 @@ void CharDetails::updateMaxValues()
     LOG_ERROR << "Unable to collect number of facial hair styles for model" << m_model->name();
     m_facialHairMax = 0;
   }
+
+
+  m_hairColorMax = m_validHairColors.size() - 1;
 
   if (m_faceTypeMax == 0) m_faceTypeMax = 1;
   if (m_skinColorMax == 0) m_skinColorMax = 1;
@@ -427,4 +430,34 @@ int CharDetails::getNbValuesForSection(SectionType section)
   }
 
   return result;
+}
+
+void CharDetails::updateValidValues()
+{
+  if(!m_model)
+    return;
+
+  RaceInfos infos;
+  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
+
+  // valid hair colours:
+  m_validHairColors.clear();
+  QString query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
+                           .arg(infos.raceid)
+                           .arg(infos.sexid)
+                           .arg(hairStyle())
+                           .arg(infos.isHD?8:3);
+
+  sqlResult hairCols = GAMEDATABASE.sqlQuery(query);
+
+  if(hairCols.valid && !hairCols.values.empty())
+  {
+    for (int i = 0, j = hairCols.values.size(); i < j; i++)
+      m_validHairColors.push_back(hairCols.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect hair colours for model" << m_model->name();
+  }
+
 }

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * CharDetailsFrame.cpp
  *
  *  Created on: 21 déc. 2014
@@ -80,7 +80,11 @@ void CharDetailsFrame::refresh()
 
   spins[SPIN_SKIN_COLOR]->SetValue((int)m_details->skinColor());
   spins[SPIN_FACE_TYPE]->SetValue((int)m_details->faceType());
-  spins[SPIN_HAIR_COLOR]->SetValue((int)m_details->hairColor());
+
+  std::vector<int> haircols = m_details->validHairColors();
+  spins[SPIN_HAIR_COLOR]->SetValue(find(haircols.begin(), haircols.end(),
+                                        (int)m_details->hairColor()) - haircols.begin());
+
   spins[SPIN_HAIR_STYLE]->SetValue((int)m_details->hairStyle());
   spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details->facialHair());
 
@@ -105,7 +109,7 @@ void CharDetailsFrame::onSpin(wxSpinEvent &event)
     m_details->setFaceType(event.GetPosition());
     break;
   case ID_HAIR_COLOR:
-    m_details->setHairColor(event.GetPosition());
+    m_details->setHairColor(m_details->validHairColors()[event.GetPosition()]);
     break;
   case ID_HAIR_STYLE:
     m_details->setHairStyle(event.GetPosition());
@@ -138,7 +142,7 @@ void CharDetailsFrame::randomiseChar()
   // Choose random values for the looks! ^_^
   m_details->setSkinColor(randint(0, (int)m_details->skinColorMax()));
   m_details->setFaceType(randint(0, (int)m_details->faceTypeMax()));
-  m_details->setHairColor(randint(0, (int)m_details->hairColorMax()));
+  m_details->setHairColor(m_details->validHairColors()[randint(0, m_details->validHairColors().size())]);
   m_details->setHairStyle(randint(0, (int)m_details->hairStyleMax()));
   m_details->setFacialHair(randint(0, (int)m_details->facialHairMax()));
 }
