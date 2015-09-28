@@ -7,19 +7,11 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
-#include <wx/filename.h>
-#include <wx/fileconf.h>
-#include <wx/treectrl.h>
-#include <wx/colordlg.h>
-#include <wx/msgdlg.h>
-#include <wx/display.h>
-#include <wx/aboutdlg.h>
+
 #if defined(__WIN32__) && !defined(__WIN__)
 	#include <winsock.h>
 #endif
-#include <wx/url.h>
-#include <wx/xml/xml.h>
-#include <wx/wfstream.h>
+
 
 //wxAUI
 #include <wx/aui/aui.h>
@@ -75,7 +67,8 @@ public:
 	//wxWidget objects
 	wxMenuBar *menuBar;
 	wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
-	
+	wxColourData bgDialogData;
+
 	// wxAUI - new docking lib (now part of wxWidgets 2.8.0)
 	wxAuiManager interfaceManager;
 
@@ -112,11 +105,11 @@ public:
 	//void OnIdle();
 	void OnClose(wxCloseEvent &event);
 	void OnSize(wxSizeEvent &event);
-  void OnExit(wxCommandEvent &event);
-  void UpdateCanvasStatus();
+	void OnExit(wxCommandEvent &event);
+	void UpdateCanvasStatus();
+	void SetCanvasSize(uint32 sizex, uint32 sizey);
 
-
-    // menu commands
+	// menu commands
 	void OnToggleDock(wxCommandEvent &event);
 	void OnToggleCommand(wxCommandEvent &event);
 	void OnSetColor(wxCommandEvent &event);

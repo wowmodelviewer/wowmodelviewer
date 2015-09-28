@@ -8,10 +8,12 @@
 #ifndef _ITEMIMPORTERDIALOG_H_
 #define _ITEMIMPORTERDIALOG_H_
 
-#include <wx/button.h>
 #include <wx/dialog.h>
-#include <wx/textctrl.h>
-#include <wx/stattext.h>
+
+class wxButton;
+class wxStaticText;
+class wxTextCtrl;
+
 #include "database.h"
 
 

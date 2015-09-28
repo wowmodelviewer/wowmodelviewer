@@ -12,12 +12,6 @@
 #endif
 
 // headers
-#include <wx/app.h>
-//#include <wx/debugrpt.h>
-#include <wx/tokenzr.h>
-#include <wx/dir.h>
-#include <wx/aui/aui.h>
-
 #include "util.h"
 #include "globalvars.h"
 #include "modelviewer.h"

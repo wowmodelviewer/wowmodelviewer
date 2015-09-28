@@ -7,9 +7,11 @@
     #include <wx/wx.h>
 #endif
 
+#include <wx/aui/aui.h>
+
 #include "video.h"
 #include "modelcanvas.h"
-#include <wx/aui/aui.h>
+
 
 class ImageControl: public wxWindow
 {

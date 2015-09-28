@@ -2,6 +2,8 @@
 
 #include <QString>
 
+#include <wx/listctrl.h>
+
 #include "globalvars.h"
 #include "GameDatabase.h"
 #include "charcontrol.h"

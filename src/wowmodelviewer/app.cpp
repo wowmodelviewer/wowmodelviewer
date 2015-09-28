@@ -1,10 +1,11 @@
 #include "app.h"
 
-#include <wx/image.h>
-#include <wx/splash.h>
-#include <wx/mstream.h>
-#include <wx/stdpaths.h>
 #include <wx/app.h>
+#include <wx/filename.h>
+#include <wx/image.h>
+#include <wx/mstream.h>
+#include <wx/splash.h>
+#include <wx/stdpaths.h>
 
 #include <windows.h>
 
@@ -21,6 +22,7 @@
 #include "UserSkins.h"
 
 #include <QCoreApplication>
+#include <QSettings>
 
 /*	THIS IS OUR MAIN "START UP" FILE.
 	App.cpp creates our wxApp class object.
@@ -137,8 +139,8 @@ bool WowModelViewApp::OnInit()
 
 
 	// Now create our main frame.
-  frame = new ModelViewer();
-    
+	frame = new ModelViewer();
+
 	if (!frame) {
 		//this->Close();
 		if (splash)
@@ -258,8 +260,7 @@ bool WowModelViewApp::OnInit()
 void WowModelViewApp::OnFatalException()
 {
 	//wxApp::SetExitOnFrameDelete(false);
-
-	/*
+/*
 	wxDebugReport report;
     wxDebugReportPreviewStd preview;
 
@@ -267,8 +268,7 @@ void WowModelViewApp::OnFatalException()
 
     if (preview.Show(report))
         report.Process();
-	*/
-
+*/
 	if (frame != NULL) {
 		frame->Destroy();
 		frame = NULL;
@@ -306,80 +306,50 @@ void WowModelViewApp::HandleEvent(wxEvtHandler *handler, wxEventFunction func, w
 
 void WowModelViewApp::OnUnhandledException() 
 { 
-    //wxMessageBox(wxT("An unhandled exception was caught, the program will now terminate."), wxT("Unhandled Exception"), wxOK | wxICON_ERROR); 
-	wxLogFatalError(wxT("An unhandled exception error has occured."));
+  wxMessageBox(wxT("An unhandled exception was caught, the program will now terminate."), wxT("Unhandled Exception"), wxOK | wxICON_ERROR);
+//	wxLogFatalError(wxT("An unhandled exception error has occured."));
 }
 
 void WowModelViewApp::LoadSettings()
 {
-	wxString tmp;
-	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(GetAppName(), wxEmptyString,
-                             cfgPath,
-                             wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
-	
-	
-	if(pConfig)
-	{
-		// Graphic / Video display settings
-		pConfig->SetPath(wxT("/Graphics"));
-		pConfig->Read(wxT("FSAA"), &video.curCap.aaSamples, 0);
-		pConfig->Read(wxT("AccumulationBuffer"), &video.curCap.accum, 0);
-		pConfig->Read(wxT("AlphaBits"), &video.curCap.alpha, 0);
-		pConfig->Read(wxT("ColourBits"), &video.curCap.colour, 24);
-		pConfig->Read(wxT("DoubleBuffer"), (bool*)&video.curCap.doubleBuffer, 1);	// True
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+
+	// graphic settings
+	video.curCap.aaSamples = config.value("Graphics/FSAA", 0).toInt();
+	video.curCap.accum = config.value("Graphics/AccumulationBuffer", 0).toInt();
+	video.curCap.alpha = config.value("Graphics/AlphaBits", 0).toInt();
+	video.curCap.colour = config.value("Graphics/ColourBits", 24).toInt();
+	video.curCap.doubleBuffer = config.value("Graphics/DoubleBuffer", 1).toInt();
 #ifdef _WINDOWS
-		pConfig->Read(wxT("HWAcceleration"), &video.curCap.hwAcc, WGL_FULL_ACCELERATION_ARB);
+	video.curCap.hwAcc = config.value("Graphics/HWAcceleration", WGL_FULL_ACCELERATION_ARB).toInt();
 #endif
-		pConfig->Read(wxT("SampleBuffer"), (bool*)&video.curCap.sampleBuffer, 0);	// False
-		pConfig->Read(wxT("StencilBuffer"), &video.curCap.stencil, 0);
-		pConfig->Read(wxT("ZBuffer"), &video.curCap.zBuffer, 16);
-		pConfig->Read(wxT("UseEnvMapping"), (bool*)&video.useEnvMapping, true);
-		double fov;
-		pConfig->Read(wxT("Fov"), &fov, 45);
-		video.fov = fov;
+	video.curCap.sampleBuffer = config.value("Graphics/SampleBuffer", 0).toInt();
+	video.curCap.stencil = config.value("Graphics/StencilBuffer", 0).toInt();
+	video.curCap.zBuffer = config.value("Graphics/ZBuffer", 16).toInt();
 
-		// Application locale info
-		pConfig->SetPath(wxT("/Locale"));
-		pConfig->Read(wxT("LanguageID"), &langID, -1);
-		pConfig->Read(wxT("LanguageName"), &langName, wxEmptyString);
-		//pConfig->Read(wxT("InterfaceID"), &interfaceID, 0);
-		
-		// Application settings
-		pConfig->SetPath(wxT("/Settings"));
-		pConfig->Read(wxT("Path"), &gamePath, wxEmptyString);
-		pConfig->Read(wxT("ArmoryPath"), &armoryPath, wxEmptyString);
+	// Application locale info
+	langID = config.value("Locale/LanguageID", 1).toInt();
+	langName = config.value("Locale/LanguageName", "").toString().toStdString().c_str();
 
-		pConfig->Read(wxT("SSCounter"), &ssCounter, 100);
-		//pConfig->Read(wxT("AntiAlias"), &useAntiAlias, true);
-		//pConfig->Read(wxT("DisableHWAcc"), &disableHWAcc, false);
-		pConfig->Read(wxT("DefaultFormat"), &imgFormat, 0);
-
-		// Clear our ini file config object
-		wxDELETE( pConfig );
-	}
+	// Application settings
+	gamePath = config.value("Settings/Path", "").toString().toStdString().c_str();
+	armoryPath = config.value("Settings/ArmoryPath", "").toString().toStdString().c_str();
+	ssCounter = config.value("Settings/SSCounter", 100).toInt();
+	imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 }
 
 void WowModelViewApp::SaveSettings()
 {
 	// Application Config Settings
-	wxFileConfig *pConfig = new wxFileConfig(wxT("Global"), wxEmptyString, cfgPath, wxEmptyString, wxCONFIG_USE_LOCAL_FILE);
+	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+
+	config.setValue("Locale/LanguageID", langID);
+	config.setValue("Locale/LanguageName", langName.c_str());
 	
-	pConfig->SetPath(wxT("/Locale"));
-	pConfig->Write(wxT("LanguageID"), langID);
-	pConfig->Write(wxT("LanguageName"), langName);
-	pConfig->Write(wxT("InterfaceID"), interfaceID);
-
-	pConfig->SetPath(wxT("/Settings"));
-	pConfig->Write(wxT("Path"), gamePath);
-	pConfig->Write(wxT("ArmoryPath"), armoryPath);
-	pConfig->Write(wxT("SSCounter"), ssCounter);
-	//pConfig->Write(wxT("AntiAlias"), useAntiAlias);
-	//pConfig->Write(wxT("DisableHWAcc"), disableHWAcc);
-	pConfig->Write(wxT("DefaultFormat"), imgFormat);
-
-	// Clear our ini file config object
-	wxDELETE( pConfig );
+	config.setValue("Settings/Path", gamePath.c_str());
+	config.setValue("Settings/ArmoryPath", armoryPath.c_str());
+	config.setValue("Settings/SSCounter", ssCounter);
+	config.setValue("Settings/DefaultFormat", imgFormat);
 }
 
 
