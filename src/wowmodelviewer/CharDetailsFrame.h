@@ -1,4 +1,4 @@
-/*
+﻿/*
  * CharDetailsFrame.h
  *
  *  Created on: 21 déc. 2014
@@ -55,6 +55,7 @@ class CharDetailsFrame : public wxWindow, public Observer
 
     wxSpinButton *spins[NUM_SPIN_BTNS];
     wxStaticText *spinLabels[NUM_SPIN_BTNS];
+    wxStaticText *spinValues[NUM_SPIN_BTNS];
 
     void onSpin(wxSpinEvent &event);
     void onRandomise(wxCommandEvent &event);

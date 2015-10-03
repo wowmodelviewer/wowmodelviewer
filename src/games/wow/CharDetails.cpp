@@ -20,8 +20,8 @@
 CharDetails::CharDetails() :
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), isNPC(true), m_model(0),
-m_skinColor(0), m_skinColorMax(0), m_faceType(0), m_faceTypeMax(0), m_hairColor(0),
-m_hairColorMax(0), m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialHairMax(0)
+m_skinColor(0), m_skinColorMax(0), m_faceType(0), m_hairColor(0),
+m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialHairMax(0)
 {
 
 }
@@ -187,6 +187,7 @@ void CharDetails::setSkinColor(size_t val)
   {
     m_skinColor = val;
     updateMaxValues();
+    updateValidValues();
     CharDetailsEvent event(this, CharDetailsEvent::SKINCOLOR_CHANGED);
     notify(event);
   }
@@ -194,10 +195,9 @@ void CharDetails::setSkinColor(size_t val)
 
 void CharDetails::setFaceType(size_t val)
 {
-  if(val != m_faceType && val <= m_faceTypeMax && val >= 0)
+  if(val != m_faceType && (find(m_validFaceTypes.begin(), m_validFaceTypes.end(), val) != m_validFaceTypes.end()) )
   {
     m_faceType = val;
-    updateMaxValues();
     CharDetailsEvent event(this, CharDetailsEvent::FACETYPE_CHANGED);
     notify(event);
   }
@@ -208,7 +208,6 @@ void CharDetails::setHairColor(size_t val)
   if(val != m_hairColor && (find(m_validHairColors.begin(), m_validHairColors.end(), val) != m_validHairColors.end()) )
   {
     m_hairColor = val;
-    updateMaxValues();
     CharDetailsEvent event(this, CharDetailsEvent::HAIRCOLOR_CHANGED);
     notify(event);
   }
@@ -241,16 +240,14 @@ void CharDetails::updateMaxValues()
   if(!m_model)
     return;
 
-  m_faceTypeMax = getNbValuesForSection(FaceType);
   m_skinColorMax = getNbValuesForSection(SkinType);
 
   RaceInfos infos;
   RaceInfos::getCurrent(m_model->name().toStdString(), infos);
 
-  QString query = QString("SELECT MAX(VariationIndex) FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+  QString query = QString("SELECT MAX(VariationID) FROM CharHairGeosets WHERE RaceID=%1 AND SexID=%2")
                         .arg(infos.raceid)
-                        .arg(infos.sexid)
-                        .arg(infos.isHD?8:3);
+                        .arg(infos.sexid);
 
   sqlResult hairStyles = GAMEDATABASE.sqlQuery(query);
 
@@ -280,12 +277,7 @@ void CharDetails::updateMaxValues()
     m_facialHairMax = 0;
   }
 
-
-  m_hairColorMax = m_validHairColors.size() - 1;
-
-  if (m_faceTypeMax == 0) m_faceTypeMax = 1;
   if (m_skinColorMax == 0) m_skinColorMax = 1;
-  if (m_hairColorMax == 0) m_hairColorMax = 1;
   if (m_hairStyleMax == 0) m_hairStyleMax = 1;
   if (m_facialHairMax == 0) m_facialHairMax = 1;
 }
@@ -442,11 +434,12 @@ void CharDetails::updateValidValues()
 
   // valid hair colours:
   m_validHairColors.clear();
-  QString query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
+  QString query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID=%1 "
+                          "AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
                            .arg(infos.raceid)
                            .arg(infos.sexid)
                            .arg(hairStyle())
-                           .arg(infos.isHD?8:3);
+                           .arg(infos.isHD? HairTypeHD : HairType);
 
   sqlResult hairCols = GAMEDATABASE.sqlQuery(query);
 
@@ -457,7 +450,29 @@ void CharDetails::updateValidValues()
   }
   else
   {
-    LOG_ERROR << "Unable to collect hair colours for model" << m_model->name();
+    LOG_ERROR << "Unable to collect hair colours for model " << m_model->name();
+  }
+
+
+  // valid face types:
+  m_validFaceTypes.clear();
+  query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
+                  "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
+                           .arg(infos.raceid)
+                           .arg(infos.sexid)
+                           .arg(skinColor())
+                           .arg(infos.isHD? FaceTypeHD : FaceType);
+
+  sqlResult faces = GAMEDATABASE.sqlQuery(query);
+
+  if(faces.valid && !faces.values.empty())
+  {
+    for (int i = 0, j = faces.values.size(); i < j; i++)
+      m_validFaceTypes.push_back(faces.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect face types for model " << m_model->name();
   }
 
 }

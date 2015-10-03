@@ -39,7 +39,12 @@ class _CHARDETAILS_API_ CharDetails : public Observable
       FaceType = 1,
       FacialHairType = 2,
       HairType = 3,
-      UnderwearType = 4
+      UnderwearType = 4,
+      SkinTypeHD = 5,
+      FaceTypeHD = 6,
+      FacialHairTypeHD = 7,
+      HairTypeHD = 8,
+      UnderwearTypeHD = 9
     };
 
     EyeGlowTypes eyeGlowType;
@@ -71,11 +76,9 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     void setSkinColor(unsigned int);
 
     unsigned int faceType() { return m_faceType; }
-    unsigned int faceTypeMax() { return m_faceTypeMax; }
     void setFaceType(unsigned int);
 
     unsigned int hairColor() { return m_hairColor; }
-    unsigned int hairColorMax() { return m_hairColorMax; }
     void setHairColor(unsigned int);
 
     unsigned int hairStyle() { return m_hairStyle; }
@@ -86,14 +89,16 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     unsigned int facialHairMax() { return m_facialHairMax; }
     void setFacialHair(unsigned int);
     std::vector<int>validHairColors() { return m_validHairColors; }
+    std::vector<int>validFaceTypes() { return m_validFaceTypes; }
 
   private:
     unsigned int m_skinColor, m_skinColorMax;
-    unsigned int m_faceType, m_faceTypeMax;
-    unsigned int m_hairColor, m_hairColorMax;
+    unsigned int m_faceType;
+    unsigned int m_hairColor;
     unsigned int m_hairStyle, m_hairStyleMax;
     unsigned int m_facialHair, m_facialHairMax;
     std::vector<int> m_validHairColors;
+    std::vector<int> m_validFaceTypes;
 
     WoWModel * m_model;
 

@@ -38,18 +38,26 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);
 
-  wxGridSizer *gs = new wxGridSizer(3);
-  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(200,20), wxALIGN_CENTER), wxSizerFlags().Border(wxBOTTOM, 5));
+  wxFlexGridSizer *gs = new wxFlexGridSizer(4, 0, 5);
+  gs->AddGrowableCol(3);
+  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1,20), wxALIGN_CENTER),
+                            wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
   #define ADD_CONTROLS(type, id, caption) \
-		gs->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
-		gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
-		gs->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
+		gs->Add(new wxStaticText(this, wxID_ANY, caption), \
+                        wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL). \
+                        Border(wxLEFT, 5)); \
+		gs->Add(spinValues[type] = new wxStaticText(this, wxID_ANY, " 0"), \
+                        wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
+		gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), \
+                        wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags().Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
+		gs->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("00 / 00")), \
+                        wxSizerFlags().Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
 
-  ADD_CONTROLS(SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color"))
-  ADD_CONTROLS(SPIN_FACE_TYPE, ID_FACE_TYPE, _("Face type"))
-  ADD_CONTROLS(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color"))
-  ADD_CONTROLS(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style"))
-  ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature"))
+  ADD_CONTROLS(SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color:"))
+  ADD_CONTROLS(SPIN_FACE_TYPE, ID_FACE_TYPE, _("Face type:"))
+  ADD_CONTROLS(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color:"))
+  ADD_CONTROLS(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style:"))
+  ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature:"))
   #undef ADD_CONTROLS
 
   top->Add(gs,wxEXPAND);
@@ -71,28 +79,42 @@ void CharDetailsFrame::refresh()
 {
   if(!m_details)
     return;
-
-  spins[SPIN_SKIN_COLOR]->SetRange(0, (int)m_details->skinColorMax());
-  spins[SPIN_FACE_TYPE]->SetRange(0, (int)m_details->faceTypeMax());
-  spins[SPIN_HAIR_COLOR]->SetRange(0, (int)m_details->hairColorMax());
-  spins[SPIN_HAIR_STYLE]->SetRange(0, (int)m_details->hairStyleMax());
-  spins[SPIN_FACIAL_HAIR]->SetRange(0, (int)m_details->facialHairMax());
-
-  spins[SPIN_SKIN_COLOR]->SetValue((int)m_details->skinColor());
-  spins[SPIN_FACE_TYPE]->SetValue((int)m_details->faceType());
-
-  std::vector<int> haircols = m_details->validHairColors();
-  spins[SPIN_HAIR_COLOR]->SetValue(find(haircols.begin(), haircols.end(),
-                                        (int)m_details->hairColor()) - haircols.begin());
-
-  spins[SPIN_HAIR_STYLE]->SetValue((int)m_details->hairStyle());
-  spins[SPIN_FACIAL_HAIR]->SetValue((int)m_details->facialHair());
+  int val, max, index;
+  std::vector<int> validVals;
 
   for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-    spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
-
-  for (size_t i=0; i<NUM_SPIN_BTNS; i++)
+  {
+    switch (i)
+    {
+      case SPIN_FACE_TYPE   : validVals = m_details->validFaceTypes();
+                              val = (int)m_details->faceType();
+                              index = find(validVals.begin(), validVals.end(), val) - validVals.begin();
+                              max = validVals.size() - 1;
+                              break;
+      case SPIN_HAIR_COLOR  : validVals = m_details->validHairColors();
+                              val = (int)m_details->hairColor();
+                              index = find(validVals.begin(), validVals.end(), val) - validVals.begin();
+                              max = validVals.size() - 1;
+                              break;
+      case SPIN_SKIN_COLOR  : val = (int)m_details->skinColor();
+                              index = val;
+                              max = (int)m_details->skinColorMax();
+                              break;
+      case SPIN_HAIR_STYLE  : val = (int)m_details->hairStyle();
+                              index = val;
+                              max = (int)m_details->hairStyleMax();
+                              break;
+      case SPIN_FACIAL_HAIR : val = (int)m_details->facialHair();
+                              index = val;
+                              max = (int)m_details->facialHairMax();
+                              break;
+    }
+    spins[i]->SetRange(0, max);
+    spins[i]->SetValue(index);
+    spinValues[i]->SetLabel(wxString::Format(wxT("%2i"), val));
+    spinLabels[i]->SetLabel(wxString::Format(wxT("%2i / %i"), index + 1, max + 1));
     spins[i]->Refresh(false);
+  }
 }
 
 void CharDetailsFrame::onSpin(wxSpinEvent &event)
@@ -106,7 +128,7 @@ void CharDetailsFrame::onSpin(wxSpinEvent &event)
     m_details->setSkinColor(event.GetPosition());
     break;
   case ID_FACE_TYPE:
-    m_details->setFaceType(event.GetPosition());
+    m_details->setFaceType(m_details->validFaceTypes()[event.GetPosition()]);
     break;
   case ID_HAIR_COLOR:
     m_details->setHairColor(m_details->validHairColors()[event.GetPosition()]);
@@ -141,8 +163,10 @@ void CharDetailsFrame::randomiseChar()
 
   // Choose random values for the looks! ^_^
   m_details->setSkinColor(randint(0, (int)m_details->skinColorMax()));
-  m_details->setFaceType(randint(0, (int)m_details->faceTypeMax()));
-  m_details->setHairColor(m_details->validHairColors()[randint(0, m_details->validHairColors().size())]);
+  if (m_details->validFaceTypes().size())
+    m_details->setFaceType(m_details->validFaceTypes()[randint(0, m_details->validFaceTypes().size() - 1)]);
+  if (m_details->validHairColors().size())
+    m_details->setHairColor(m_details->validHairColors()[randint(0, m_details->validHairColors().size() - 1)]);
   m_details->setHairStyle(randint(0, (int)m_details->hairStyleMax()));
   m_details->setFacialHair(randint(0, (int)m_details->facialHairMax()));
 }
