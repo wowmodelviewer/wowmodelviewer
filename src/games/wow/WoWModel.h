@@ -216,6 +216,7 @@ public:
   WoWItem * getItem(CharSlots slot);
   void UpdateTextureList(std::string texName, int special);
   void displayHeader(ModelHeader & a_header);
+  bool WoWModel::canSetTextureFromFile(int texnum);
 
   std::map<int, std::string> getAnimsMap();
 

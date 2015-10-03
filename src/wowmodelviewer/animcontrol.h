@@ -78,6 +78,7 @@ class AnimControl: public wxWindow
 
 	wxComboBox *animCList, *animCList2, *animCList3, *wmoList, *loopList;
 	wxStaticText *wmoLabel,*speedLabel, *speedMouthLabel, *frameLabel;
+	wxStaticText *BLPSkinsLabel, *BLPSkinLabel1, *BLPSkinLabel2, *BLPSkinLabel3;
 	wxSlider *speedSlider, *speedMouthSlider, *frameSlider;
 	wxButton *btnAdd;
 	wxCheckBox *lockAnims, *nextAnims;
@@ -89,12 +90,13 @@ class AnimControl: public wxWindow
 	bool UpdateCreatureModel(WoWModel *m);
 	bool UpdateItemModel(WoWModel *m);
 	bool FillSkinSelector(TextureSet &skins);
+	bool FillBLPSkinSelector(TextureSet &skins);
 
 public:
 	AnimControl(wxWindow* parent, wxWindowID id);
 	~AnimControl();
 
-	wxComboBox *skinList;
+	wxComboBox *skinList, *BLPSkinList1, *BLPSkinList2, *BLPSkinList3;
 
 	void UpdateModel(WoWModel *m);
 	void UpdateWMO(WMO *w, int group);
@@ -103,12 +105,14 @@ public:
 	void OnCheck(wxCommandEvent &event);
 	void OnAnim(wxCommandEvent &event);
 	void OnSkin(wxCommandEvent &event);
+	void OnBLPSkin(wxCommandEvent &event);
 	void OnItemSet(wxCommandEvent &event);
 	void OnSliderUpdate(wxCommandEvent &event);
 	void OnLoop(wxCommandEvent &event); 
 
 	int AddSkin(TextureGroup grp);
 	void SetSkin(int num);
+	void SetSingleSkin(int num, int texnum);
 	void SetAnimSpeed(float speed);
 	void SetAnimFrame(size_t frame);
 

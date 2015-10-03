@@ -3,6 +3,8 @@
 
 #include "logger/Logger.h"
 
+#include <wx/colordlg.h>
+
 extern const size_t MAX_LIGHTS;
 
 // default colour values

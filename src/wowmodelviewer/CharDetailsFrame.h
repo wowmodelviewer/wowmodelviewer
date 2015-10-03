@@ -12,8 +12,10 @@
   #include <wx/wx.h>
 #endif
 #include <wx/window.h>
-#include <wx/spinbutt.h>
-#include <wx/stattext.h>
+class wxSpinButton;
+class wxSpinEvent;
+class wxStaticText;
+
 
 #include "CharDetails.h"
 

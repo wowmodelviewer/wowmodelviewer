@@ -6,9 +6,6 @@
     #include <wx/wx.h>
 #endif
 
-// wx
-#include <wx/spinbutt.h>
-
 // stl
 #include <string>
 #include <vector>

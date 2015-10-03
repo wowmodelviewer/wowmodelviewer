@@ -19,22 +19,16 @@
 // Standard C++ headers
 #include <stdio.h>
 
-// wx
-#include <wx/bitmap.h>
-#include <wx/filename.h>
-#include <wx/fileconf.h>
-#include <wx/string.h>
-
 // Our other utility headers
 #include "vec3d.h"
 #include "quaternion.h"
 
 #include <QString>
 
+#include <wx/bitmap.h>
+#include <wx/string.h>
 
 using namespace std;
-
-
 
 extern wxString gamePath;
 extern wxString cfgPath;

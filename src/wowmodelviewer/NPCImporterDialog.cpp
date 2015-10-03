@@ -7,9 +7,13 @@
 
 #include "NPCImporterDialog.h"
 
+#include <wx/button.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
+#include <wx/stattext.h>
+#include <wx/textctrl.h>
+
 #include "ImporterPlugin.h"
 #include "NPCInfos.h"
 #include "PluginManager.h"
