@@ -55,7 +55,6 @@ class CharDetailsFrame : public wxWindow, public Observer
 
     wxSpinButton *spins[NUM_SPIN_BTNS];
     wxStaticText *spinLabels[NUM_SPIN_BTNS];
-    wxStaticText *spinValues[NUM_SPIN_BTNS];
 
     void onSpin(wxSpinEvent &event);
     void onRandomise(wxCommandEvent &event);

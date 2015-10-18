@@ -1,7 +1,7 @@
-﻿/*
+/*
  * CharDetailsFrame.cpp
  *
- *  Created on: 21 déc. 2014
+ *  Created on: 21 d�c. 2014
  *      Author: Jerome
  */
 
@@ -38,16 +38,14 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);
 
-  wxFlexGridSizer *gs = new wxFlexGridSizer(4, 0, 5);
-  gs->AddGrowableCol(3);
+  wxFlexGridSizer *gs = new wxFlexGridSizer(3, 0, 5);
+  gs->AddGrowableCol(2);
   top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1,20), wxALIGN_CENTER),
                             wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
   #define ADD_CONTROLS(type, id, caption) \
 		gs->Add(new wxStaticText(this, wxID_ANY, caption), \
                         wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL). \
                         Border(wxLEFT, 5)); \
-		gs->Add(spinValues[type] = new wxStaticText(this, wxID_ANY, " 0"), \
-                        wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
 		gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), \
                         wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags().Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
 		gs->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("00 / 00")), \
@@ -60,7 +58,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   ADD_CONTROLS(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature:"))
   #undef ADD_CONTROLS
 
-  top->Add(gs,wxEXPAND);
+  top->Add(gs,wxSizerFlags().Border(wxBOTTOM, 5).Expand());
   top->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
   SetAutoLayout(true);
   top->SetSizeHints(this);
@@ -111,7 +109,6 @@ void CharDetailsFrame::refresh()
     }
     spins[i]->SetRange(0, max);
     spins[i]->SetValue(index);
-    spinValues[i]->SetLabel(wxString::Format(wxT("%2i"), val));
     spinLabels[i]->SetLabel(wxString::Format(wxT("%2i / %i"), index + 1, max + 1));
     spins[i]->Refresh(false);
   }
