@@ -444,4 +444,17 @@
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="name" />
   </LightSkybox>
+  <Mount>
+    <gamefile name="DBFilesClient\Mount" />
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="SpellID" />
+    <field type="uint" name="MountCapability" />
+    <field type="uint" name="DisplayID" />
+    <field type="uint" name="Flags" />
+    <field type="text" name="Name" />
+    <field type="text" name="Description" />
+    <field type="text" name="Info" />
+    <field type="uint" name="SourceType" /> 
+    <field type="uint" name="PlayerCondition" />
+  </Mount>
 </database>

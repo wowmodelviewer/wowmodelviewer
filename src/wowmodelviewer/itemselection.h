@@ -35,8 +35,11 @@ public:
 
 	virtual void OnClick(wxCommandEvent &event);
 	void OnSelect(wxListEvent &event);
-    virtual int GetSelection() const { return m_selection; }
+  virtual int GetSelection() const { return m_selection; }
 	void EndModal(int retCode) { SetReturnCode(retCode); Hide(); }
+	virtual void DoFilter() { };
+	virtual void Check(int index, bool state) { };
+
 };
 
 
@@ -68,13 +71,12 @@ public:
 	    const std::vector<int> *quality,
 	    bool keepfirst = true);
 
-	virtual void OnFilter(wxCommandEvent& event);
-	virtual void OnImportNPC(wxCommandEvent& event);
-	virtual void OnImportItem(wxCommandEvent& event);
-	virtual int GetSelection() const { return m_indices[m_selection]; }
-
-	virtual void DoFilter();
-	virtual	bool FilterFunc(int index);
+  virtual void OnFilter(wxCommandEvent& event);
+  virtual void OnImportNPC(wxCommandEvent& event);
+  virtual void OnImportItem(wxCommandEvent& event);
+  virtual int GetSelection() const { return m_indices[m_selection]; }
+  virtual bool FilterFunc(int index);
+  virtual void DoFilter();
 };
 
 
@@ -103,10 +105,10 @@ public:
 						   bool keepfirst = true,
 						   bool helpmsg = true);
 
-	void Check(int index, bool state = true);
-	void OnCheck(wxCommandEvent &e);
-	void OnCheckDoubleClick(wxCommandEvent &e);
-	bool FilterFunc(int index);
+	virtual void Check(int index, bool state = true);
+	virtual void OnCheck(wxCommandEvent &e);
+	virtual void OnCheckDoubleClick(wxCommandEvent &e);
+	virtual bool FilterFunc(int index);
 };
 
 #endif

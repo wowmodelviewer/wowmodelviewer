@@ -454,7 +454,7 @@ void ModelViewer::InitMenu()
 		charMenu->Append(ID_LOAD_SET, _("Load Item Set"));
 		charMenu->Append(ID_LOAD_START, _("Load Start Outfit"));
 		charMenu->AppendSeparator();
-		charMenu->Append(ID_MOUNT_CHARACTER, _("Mount a character..."));
+		charMenu->Append(ID_MOUNT_CHARACTER, _("Mount / Dismount"));
 		charMenu->Append(ID_CHAR_RANDOMISE, _("Randomise Character\tF10"));
 
 		// Start out Disabled.
@@ -1070,8 +1070,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    int count = 0;
 	    for(int i=0; i < 3; i++)
 	    {
-	      QString tex = r.values[0][i+2];
-	      tex = CASCFOLDER.getFullPathForFile(tex+".blp");
+	      QString tex = r.values[0][0] + r.values[0][i+2] + ".blp";
 	      grp.tex[i] = tex.toStdString();
 	      if(tex.length() > 0)
 	        count++;

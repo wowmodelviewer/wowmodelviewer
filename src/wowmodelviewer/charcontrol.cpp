@@ -51,8 +51,6 @@ CharSlots slotOrderWithRobe[] = {
 };
 
 static wxArrayString creaturemodels;
-static std::vector<bool> ridablelist;
-
 IMPLEMENT_CLASS(CharControl, wxWindow)
 
 BEGIN_EVENT_TABLE(CharControl, wxWindow)
@@ -168,7 +166,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
 	top->Add(new wxStaticText(this, -1, _("Tabard details")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxALL, 1));
 	top->Add(gs3, wxEXPAND);
-	top->Add(new wxButton(this, ID_MOUNT, _("Choose mount")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxTOP, 5));
+	top->Add(new wxButton(this, ID_MOUNT, _("Mount / dismount")), wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxTOP, 10));
 
 	//p->SetSizer(top);
 	
@@ -928,70 +926,79 @@ bool filterCreatures(wxString fn)
 	return (tmp.StartsWith(wxT("crea")) && tmp.EndsWith(wxT("m2")));
 }
 
-// TODO: Add an equivilant working version of this function for Linux / Mac OS X
 void CharControl::selectMount()
 {
-  /*
-	ClearItemDialog();
+  ClearItemDialog();
+  numbers.clear();
+  choices.Clear();
+  cats.clear();
+  catnames.Clear();
+  catnames.Add(wxT("Player mounts"));
+  catnames.Add(wxT("All Creature/* models"));
+  std::vector<NumStringPair> mounts;
 
-	numbers.clear();
-	choices.Clear();
-	cats.clear();
-	catnames.Clear();
-	catnames.Add(wxT("Known ridable models"));
-	catnames.Add(wxT("Other models"));
+  // the "always show first" flag to CategoryChoiceDialog will ensure this is always shown, regardless of category:
+  choices.Add(_("---- None ----"));
+  cats.push_back(0);
+  numbers.push_back(-1);
 
-	static bool filelistInitialized = false;
+  // Proper player mounts:
+  sqlResult mountQuery = GAMEDATABASE.sqlQuery(
+                         "SELECT Mount.DisplayID, Mount.Name FROM Mount");
+  if(mountQuery.valid && !mountQuery.empty())
+  {
+    for(int i = 0, imax = mountQuery.values.size(); i < imax; i++)
+    {
+      NumStringPair p;
+      p.id = mountQuery.values[i][0].toInt();
+      p.name = mountQuery.values[i][1].toStdString();
+      mounts.push_back(p);
+    }
+  }
+  std::sort(mounts.begin(), mounts.end());
+  for (std::vector<NumStringPair>::iterator it = mounts.begin(); it != mounts.end(); it++)
+  {
+    choices.Add(it->name);
+    numbers.push_back(it->id);
+    cats.push_back(0);
+  }
 
-	if (!filelistInitialized) {
-		std::set<FileTreeItem> filelist;
+  // All models from Creature/
+  if (creaturemodels.empty())
+  {
+    sqlResult creatureQuery = GAMEDATABASE.sqlQuery(
+                              "SELECT name, path FROM FileData "
+                              "WHERE path LIKE 'creature%' "
+                              "AND name LIKE '%.m2' COLLATE NOCASE "
+                              "ORDER BY LOWER(path), LOWER(name)");
+    if(creatureQuery.valid && !creatureQuery.empty())
+    {
+      for(int i = 0, imax = creatureQuery.values.size(); i < imax; i++)
+      {
+        std::string path, name;
+        name = creatureQuery.values[i][0].toLower().toStdString();
+        path = creatureQuery.values[i][1].toLower().toStdString() + name;
+        creaturemodels.push_back(wxString(path));
+      }
+    }
+  }
+  for (size_t i = 0; i < creaturemodels.size(); i++) 
+  {
+    choices.Add(creaturemodels[i].substr(9,string::npos));  // remove "creature/" bit for readability
+    numbers.push_back(i);
+    cats.push_back(1);
+  }
 
-		wxArrayString knownRidable;
-
-		getFileLists(filelist, filterCreatures);
-
-		wxTextFile file;
-		file.Open(wxT("ridable.csv"));
-		if (file.IsOpened()) {
-			wxString tmp;
-			for ( tmp = file.GetFirstLine(); !file.Eof(); tmp = file.GetNextLine() ) {
-				tmp.MakeLower();
-				if (knownRidable.Index(tmp, false)==wxNOT_FOUND)
-					knownRidable.Add(tmp);
-			}
-		} else {
-			LOG_ERROR << "Can't Initiate ridable.csv ...";
-		}
-		
-		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-			wxString str((*it).displayName.toLower().toStdString());
-			creaturemodels.push_back(str);
-			ridablelist.push_back(knownRidable.Index(str, false)!=wxNOT_FOUND);
-		}
-		filelistInitialized = true;
-	}
-
-	choices.Add(_("---- None ----"));
-	cats.push_back(0);
-	
-	for (size_t i=0; i<creaturemodels.size(); i++) {
-		choices.Add(creaturemodels[i].Mid(9));
-		cats.push_back(ridablelist[i]?0:1);
-	}
-
-	// TODO: obtain a list of "known ridable" models, and filter the list into two categories
-	itemDialog = new FilteredChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"), wxT("Creatures"), choices, 0);
-	CategoryChoiceDialog *itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"), wxT("Creatures"), choices, cats, catnames, 0);
-	itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4,64));
-	itemDialog->Check(1, false);
-	itemDialog->DoFilter();
-	itemDialog->Show();
-
-	const int w = 250;
-	itemDialog->SetSizeHints(w,-1,-1,-1,-1,-1);
-	itemDialog->SetSize(w, -1); 
-	this->itemDialog = itemDialog;
-	*/
+  itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
+                                        wxT("Mounts"), choices, cats, catnames, 0, true);
+  itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4,64));
+  itemDialog->Check(1, false);
+  itemDialog->DoFilter();
+  itemDialog->Show();
+  const int w = 250;
+  itemDialog->SetSizeHints(w,-1,-1,-1,-1,-1);
+  itemDialog->SetSize(w, -1); 
+  this->itemDialog = itemDialog;
 }
 
 void CharControl::selectNPC(ssize_t type)
@@ -1064,7 +1071,8 @@ void CharControl::selectNPC(ssize_t type)
 
 void CharControl::OnUpdateItem(int type, int id)
 {
-	switch (type) {
+  switch (type)
+  {
 	case UPDATE_ITEM:
 	{
 	  WoWItem * item = model->getItem((CharSlots)choosingSlot);
@@ -1147,95 +1155,119 @@ void CharControl::OnUpdateItem(int type, int id)
 			}
 		}
 		break;
-	case UPDATE_MOUNT:
-		if (model == 0)
-			return;
 
-		//canvas->timer.Stop();
-		if (g_canvas->root->model()) {
-			delete g_canvas->root->model();
-			g_canvas->root->setModel(0);
-			g_canvas->model = 0;
-		}
+    case UPDATE_MOUNT:
+    {
+      TextureGroup grp;
+      std::string modelName;
+      WoWModel *m;
 
-		if (id == 0) {
-			// clearing the mount
-			model->charModelDetails.isMounted = false;
-			g_canvas->model = model;
-			g_canvas->ResetView();
-			if (charAtt) {
-				charAtt->scale = g_canvas->root->scale;
-				charAtt->id = 0;
-			}
-			g_animControl->UpdateModel(model);
-		} else {
-			WoWModel *m = new WoWModel(creaturemodels[id-1].c_str(), false);
-			m->isMount = true;
+      if (!model)
+        return;
+      if (g_canvas->root->model())
+      {
+        delete g_canvas->root->model();
+        g_canvas->root->setModel(0);
+        g_canvas->model = 0;
+      }
+      if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
+      {
+        // clearing the mount
+        model->charModelDetails.isMounted = false;
+        g_canvas->model = model;
+        g_canvas->ResetView();
+        if (charAtt)
+        {
+          charAtt->scale = g_canvas->root->scale;
+          charAtt->id = 0;
+        }
+        g_animControl->UpdateModel(model);
+        break;
+      }
 
-			// TODO: check if model is ridable
-			g_canvas->root->setModel(m);
-			g_canvas->model = m;
-			g_animControl->UpdateModel(m);
-			
-			// find the "mount" animation
-			/*
-			for (size_t i=0; i<model->header.nAnimations; i++) {
-				if (model->anims[i].animID == ANIMATION_MOUNT) {
-					model->animManager->Stop();
-					model->currentAnim = (int)i;
-					model->animManager->Set(0,(short)i,0);
-					break;
-				}
-			}
-			*/
-			// Alfred 2009.7.23 use animLookups to speednup
-			if (model->header.nAnimationLookup >= ANIMATION_MOUNT && model->animLookups[ANIMATION_MOUNT] >= 0) {
-					model->animManager->Stop();
-					model->currentAnim = model->animLookups[ANIMATION_MOUNT];
-					model->animManager->SetAnim(0,(short)model->currentAnim,0);
-			}
-			
-			g_canvas->curAtt = g_canvas->root;
-			model->charModelDetails.isMounted = true;
+      // Sheathe weapons:
+      model->bSheathe = true;
+      RefreshEquipment();
+      RefreshModel();
+      g_modelViewer->charMenu->Check(ID_SHEATHE, 1);
 
-			if (charAtt) {
-				charAtt->parent = g_canvas->root;
-				//charAtt->id = 42;
+      if (cats[id] == 0) // create proper mount from model ID
+      {
+        int morphID = numbers[id];
+        // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
+        QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+	    "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
+	    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+	    "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
 
-				// Need to set this - but from what
-				// Model data doesn't contain sizes for different race/gender
-				// Character data doesn't contain sizes for different mounts
-				// possibly some formula that from both models that needs to be calculated.
-				// For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
-				// I really have no idea!  
-				if(creaturemodels[id-1].Mid(9,9).IsSameAs(wxT("Kodobeast"), false))
-					charAtt->scale = 2.25f;
-				else
-					charAtt->scale = 1.0f;
-				
-				//Model *mChar = static_cast<Model*>(charAtt->model);
-				//charAtt->scale = m->rad / mChar->rad;
+        sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
+        if (!mountQuery.valid || mountQuery.empty())
+          break;
+        std::string path = mountQuery.values[0][0].toStdString();
+        modelName = path + mountQuery.values[0][1].toStdString();
+        int count = 0;
+        for(int i = 0; i < 3; i++)
+        {
+          std::string tex = "";
+          std::string fname = mountQuery.values[0][i+2].toStdString();
+          if (!fname.empty())
+          {
+            tex = path + fname + ".blp";
+            count++;
+          }
+          grp.tex[i] = tex;
+        }
+        grp.base = TEXTURE_GAMEOBJECT1;
+        grp.count = count;
+      }
+      else if (cats[id] == 1) // create mount from any old creature model file name
+      {
+        modelName = creaturemodels[numbers[id]].c_str();
+        // that's it. No special textures or anything.
+      }
+      else
+        break; // shouldn't happen
+      m = new WoWModel(modelName, false);
+      m->isMount = true;
+      g_canvas->root->setModel(m);
+      g_canvas->model = m;
+      g_animControl->UpdateModel(m);
+      // add specific textures for proper mounts. Must do this after model is updated.
+      if (!cats[id] && !grp.tex[0].empty())
+        g_animControl->AddSkin(grp);
 
-				// Human Male = 2.0346599
-				// NE Male = 2.5721216
-				// NE Female = 2.2764397
+      model->bSheathe = true;
+      RefreshEquipment();
 
-				// RidingFrostSaber = 2.4360743
-				// 1.00000
-
-				//canvas->root->scale = 0.5f;
-				//Attachment *att = charAtt->addChild("World\\ArtTest\\Boxtest\\xyz.m2", 24, -1);
-				//m-> = att->scale;
-				//delete att;
-			}
-
-			g_canvas->ResetView();
-			model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
-			g_canvas->model->rot.x = 0.0f; // mounted characters look better from the side
-		}
-		//canvas->timer.Start();
-		break;
-
+      // Alfred 2009.7.23 use animLookups to speed up
+      if (model->header.nAnimationLookup >= ANIMATION_MOUNT &&
+          model->animLookups[ANIMATION_MOUNT] >= 0)
+      {
+        model->animManager->Stop();
+        model->currentAnim = model->animLookups[ANIMATION_MOUNT];
+        model->animManager->SetAnim(0,(short)model->currentAnim,0);
+      }		
+      g_canvas->curAtt = g_canvas->root;
+      model->charModelDetails.isMounted = true;
+      if (charAtt)
+      { 
+        charAtt->parent = g_canvas->root;
+          // Need to set this - but from what
+          // Model data doesn't contain sizes for different race/gender
+          // Character data doesn't contain sizes for different mounts
+          // possibly some formula that from both models that needs to be calculated.
+          // For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
+          // I really have no idea!  
+        if (creaturemodels[id-1].Mid(9,9).IsSameAs(wxT("Kodobeast"), false))
+          charAtt->scale = 2.25f;
+        else
+          charAtt->scale = 1.0f;
+      }
+      g_canvas->ResetView();
+      model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
+      g_canvas->model->rot.x = 0.0f; // mounted characters look better from the side
+      break;
+     }
 	case UPDATE_CREATURE_ITEM:
 		//model->cd.equipment[choosingSlot] = numbers[id];
 		//RefreshCreatureItem(choosingSlot);
