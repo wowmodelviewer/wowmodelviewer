@@ -333,7 +333,7 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
               WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
               .arg(infos.raceid)
               .arg(infos.sexid)
-              .arg(hairStyle()?hairStyle():1)
+              .arg(hairStyle())
               .arg(hairColor())
               .arg(type);
       break;
