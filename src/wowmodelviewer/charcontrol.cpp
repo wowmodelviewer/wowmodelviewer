@@ -737,48 +737,22 @@ void CharControl::RefreshModel()
 	model->replaceTextures[TEXTURE_FUR] = model->furTex;
 	model->replaceTextures[TEXTURE_GAMEOBJECT1] = model->gobTex;
 
-	size_t egt = model->cd.eyeGlowType;
-
-	// Eye Glows
-	for(size_t i=0; i<model->passes.size(); i++)
-	{
-		ModelRenderPass &p = model->passes[i];
-		QStringList texsplit = QString::fromStdString(model->TextureList[p.tex]).split('\\');
-		wxString texName = texsplit[texsplit.size()-1].toLower().toStdString();
-
-		if (texName.Find(wxT("eyeglow")) == wxNOT_FOUND)
-			continue;
-
-		// Regular Eye Glow
-		if ((texName.Find(wxT("eyeglow")) != wxNOT_FOUND)&&(texName.Find(wxT("deathknight")) == wxNOT_FOUND))
-		{
-			if (egt == EGT_NONE)				// If No EyeGlow
-				model->showGeosets[p.geoset] = false;
-			else if (egt == EGT_DEATHKNIGHT)		// If DK EyeGlow
-				model->showGeosets[p.geoset] = false;
-			else										// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
-				model->showGeosets[p.geoset] = true;
-		}
-
-		// DeathKnight Eye Glow
-		if (texName.Find(wxT("deathknight")) != wxNOT_FOUND)
-		{
-			if (egt == EGT_NONE)				// If No EyeGlow
-				model->showGeosets[p.geoset] = false;
-			else if (egt == EGT_DEATHKNIGHT)		// If DK EyeGlow
-				model->showGeosets[p.geoset] = true;
-			else											// Default EyeGlow, AKA model->cd.eyeGlowType == EGT_DEFAULT
-				model->showGeosets[p.geoset] = false;
-		}
-	}
-
-	// Update Eye Glow Menu
-	if (egt == EGT_NONE)
-		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
-	else if (egt == EGT_DEATHKNIGHT)
-		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
-	else
-		g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  size_t egt = model->cd.eyeGlowType;
+  int egtId = CG_EYEGLOW*100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i=0; i<model->geosets.size(); i++)
+  {
+    int id = model->geosets[i].id;
+    if ((int)(id/100) == CG_EYEGLOW)  // geosets 1700..1799
+      model->showGeosets[i] = (id == egtId);
+  }
+  // Update Eye Glow Menu
+  if (egt == EGT_NONE)
+    g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
+  else if (egt == EGT_DEATHKNIGHT)
+    g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
+  else
+    g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
 }
 
 void CharControl::ClearItemDialog()
