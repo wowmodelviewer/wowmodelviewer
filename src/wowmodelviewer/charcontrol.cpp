@@ -211,6 +211,9 @@ bool CharControl::Init()
 	model->td.maxIcon = model->td.GetMaxIcon();
 	model->td.maxIconColor = model->td.GetMaxIconColor(0);
 
+	// Set default eyeglow
+	model->cd.eyeGlowType = EGT_DEFAULT;
+
 	return true;
 }
 

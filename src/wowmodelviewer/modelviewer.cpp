@@ -2866,6 +2866,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		g_charControl->model->cd.setHairColor(result->hairColor);
 		g_charControl->model->cd.setHairStyle(result->hairStyle);
 		g_charControl->model->cd.setFacialHair(result->facialHair);
+		g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
 
 		g_charControl->model->td.Icon = result->tabardIcon;
 		g_charControl->model->td.Border = result->tabardBorder;
