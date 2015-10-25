@@ -1,6 +1,8 @@
 
 #include "SettingsControl.h"
 
+#include <wx/notebook.h>
+
 #include "logger/Logger.h"
 #include "DisplaySettings.h"
 #include "ExportSettings.h"

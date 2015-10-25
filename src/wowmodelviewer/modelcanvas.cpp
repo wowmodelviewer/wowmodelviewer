@@ -8,6 +8,10 @@
 #include <QImageWriter>
 #include <QImageReader>
 
+#include <wx/display.h>
+#include <wx/file.h>
+#include <wx/filename.h>
+
 #include "Attachment.h"
 #include "globalvars.h"
 #include "video.h"

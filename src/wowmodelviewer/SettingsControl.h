@@ -8,7 +8,7 @@
     #include <wx/wx.h>
 #endif
 
-#include <wx/notebook.h>
+class wxNotebook;
 
 // Custom headers
 #include "util.h"

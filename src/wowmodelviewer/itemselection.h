@@ -7,9 +7,9 @@
 #endif
 
 // wx
-#include <wx/regex.h>
 #include <wx/choicdlg.h>
-#include <wx/listctrl.h>
+class wxListEvent;
+class wxListView;
 
 // stl
 #include <map>

@@ -8,10 +8,10 @@
 
 // gl
 #include "OpenGLHeaders.h"
+
 // wx
 #include <wx/glcanvas.h>
 #include <wx/window.h>
-#include <wx/treectrl.h>
 
 // stl
 #include <string>

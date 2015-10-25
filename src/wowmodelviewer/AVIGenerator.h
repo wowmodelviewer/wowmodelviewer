@@ -16,24 +16,13 @@
 #ifndef AVIGENERATOR_H
 #define AVIGENERATOR_H
 
-#if _MSC_VER > 1000
-#pragma once
-#endif // _MSC_VER > 1000
-
-#include <wx/wxprec.h>
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
 // needed headers
 #include <comdef.h>
 #include <memory.h>
 #include <tchar.h>
 #include <string.h>
 
-#pragma warning(disable : 4311)
 #include <vfw.h>
-#pragma warning(default : 4311)
 
 #include <assert.h>
 

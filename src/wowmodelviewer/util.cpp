@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <wx/msw/winundef.h>
 #endif
+#include <wx/bitmap.h>
 #include <wx/choicdlg.h>
 #include <wx/dir.h>
 #include <wx/dirdlg.h>
