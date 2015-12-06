@@ -111,7 +111,7 @@ GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".rc5";
+  m_versionSpecialExtend = "";
 
   bShowParticle = false;
   bZeroParticle = false;
