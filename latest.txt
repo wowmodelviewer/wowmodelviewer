@@ -1,2 +1,2 @@
 v0.8.0
-https://wowmodelviewer.atlassian.net/wiki/display/WMV/Download+WoW+Model+Viewer
+http://download.wowmodelviewer.net
