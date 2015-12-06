@@ -30,6 +30,7 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <sstream>
 
 // Qt
 
@@ -334,12 +335,18 @@ void FBXExporter::createSkeleton()
   std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
   for (unsigned int i=0; i<m_p_model->header.nAnimations; i++)
   {
-    std::string anim_name = animsMap[m_p_model->anims[i].animID];
     if(std::find(m_animsToExport.begin(), m_animsToExport.end(), m_p_model->anims[i].animID) == m_animsToExport.end())
-         continue;
+      continue;
+
+    std::stringstream ss;
+    ss << animsMap[m_p_model->anims[i].animID];
+    ss << " [";
+    ss << i;
+    ss << "]";
+
+    std::string anim_name =  ss.str();
 
     // Animation stack and layer.
-
     FbxAnimStack* anim_stack = FbxAnimStack::Create(m_p_scene, anim_name.c_str());
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
     anim_stack->AddMember(anim_layer);

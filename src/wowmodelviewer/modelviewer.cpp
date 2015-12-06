@@ -2883,12 +2883,14 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         std::vector<int> ids;
         ids.resize(animsMap.size());
         unsigned int i = 0;
-        for(std::map<int, std::string>::iterator it = animsMap.begin();
-           it != animsMap.end();
-           ++it, i++)
+
+        for (size_t i=0; i<canvas->model->header.nAnimations; i++)
         {
-          values.Add(it->second.c_str());
-          ids[i] = it->first;
+          wxString animName = animsMap[canvas->model->anims[i].animID];
+          animName << " [";
+          animName << i;
+          animName << "]";
+          values.Add(animName);
           selection.Add(i);
         }
 
@@ -2901,7 +2903,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for(unsigned int i = 0 ; i < selection.GetCount() ; i++)
-          animsToExport.push_back(ids[selection[i]]);
+          animsToExport.push_back(canvas->model->anims[selection[i]].animID);
 
         plugin->setAnimationsToExport(animsToExport);
 
