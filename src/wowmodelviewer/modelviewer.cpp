@@ -2823,8 +2823,15 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		g_charControl->model->cd.setFacialHair(result->facialHair);
 		g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
 
-		g_charControl->model->td.Icon = result->tabardIcon;
-		g_charControl->model->td.Border = result->tabardBorder;
+		if(result->customTabard)
+		{
+		  g_charControl->model->td.showCustom = true;
+		  g_charControl->model->td.Icon = result->tabardIcon;
+		  g_charControl->model->td.IconColor = result->IconColor;
+		  g_charControl->model->td.Border = result->tabardBorder;
+		  g_charControl->model->td.BorderColor = result->BorderColor;
+		  g_charControl->model->td.Background = result->Background;
+		}
 
 		for(unsigned int i=0 ; i < NUM_CHAR_SLOTS ; i++)
 		{

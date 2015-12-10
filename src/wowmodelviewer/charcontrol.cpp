@@ -388,6 +388,20 @@ void CharControl::RefreshEquipment()
 	        levelboxes[i]->Enable(false);
 	      }
 	    }
+
+	    if(item && (i == CS_TABARD) && (model->td.showCustom == true))
+	    {
+	      tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.Icon);
+	      tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.IconColor);
+	      tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.Border);
+	      tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
+	      tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.Background);
+
+	      for (size_t i=0; i<NUM_TABARD_BTNS; i++) {
+	        tabardSpins[i]->Refresh(false);
+	        spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
+	      }
+	    }
 	  }
 	}
 }

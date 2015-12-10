@@ -12,6 +12,64 @@
 
 #include <QXmlStreamWriter>
 
+const std::vector<QString> TabardDetails::ICON_COLOR_VECTOR =
+      {"ff092a5d", "ffffffff", "ff004867", "ff516700", "ff5d094f", "ff54370a", "ff00671f", "ff808080",
+       "ff006757", "ff636700",  "ff672300", "ff670021", "ff101517", "ffdfa55a", "ffb1b8b1", "ff376700"};
+
+
+const std::vector<QString> TabardDetails::BORDER_COLOR_VECTOR =
+      {"ff670021", "ff006793", "ffffffff", "ff675600", "fff9cc30", "ff54370a", "ff674500", "ff0f1415",
+       "ff63a300", "ff00317c", "ff00671f", "ff639400", "ff7b0067", "ff6d0077", "ff008e90", "ff672300"};
+
+const std::vector<QString> TabardDetails::BACKGROUND_COLOR_VECTOR =
+      {"ffd7ddcb", "ffff891b", "ff009061", "ffd34ac8", "ffae4b00", "ff21dcff", "ffbcf61b", "ff88ba03",
+       "ff1ef7c1", "ff860f9a", "ff2c6aae", "ffff2088", "ff808080", "ff00820f", "ff9b00a6", "ffff1fbf",
+       "ffe14500", "ffad29ac", "ffc49b00", "ff588000", "ff8e9700", "ff1eff68", "ffc900c3", "ff009dc5",
+       "fffffc14", "ff4d8eda", "fff68700", "ffe3f618", "ffb7c003", "ffffff14", "ffbd005b", "ff04c347",
+       "ffc58132", "ffd30087", "ff04b78f", "ffd8dd00", "fff3ca00", "ffb1002e", "ff9e0036", "ff006391",
+       "ff232323", "ffffffff", "ff003582", "ffff38fa", "ff4f2300", "ff646464", "ffa30068", "ffffb317",
+       "fffc6891", "ffb4bba8", "ff875513"};
+
+
+unsigned int TabardDetails::iconColorToIndex(QString & color)
+{
+  unsigned int result = 0;
+
+  for(;result < ICON_COLOR_VECTOR.size() ; result++)
+  {
+    if(color == ICON_COLOR_VECTOR[result])
+      break;
+  }
+
+  return result;
+}
+
+unsigned int TabardDetails::borderColorToIndex(QString & color)
+{
+  unsigned int result = 0;
+
+  for(;result < BORDER_COLOR_VECTOR.size() ; result++)
+  {
+    if(color == BORDER_COLOR_VECTOR[result])
+      break;
+  }
+
+  return result;
+}
+
+unsigned int TabardDetails::backgroundColorToIndex(QString & color)
+{
+  unsigned int result = 0;
+
+  for(;result < BACKGROUND_COLOR_VECTOR.size() ; result++)
+  {
+    if(color == BACKGROUND_COLOR_VECTOR[result])
+      break;
+  }
+
+  return result;
+}
+
 
 QString TabardDetails::GetBackgroundTex(int slot)
 {

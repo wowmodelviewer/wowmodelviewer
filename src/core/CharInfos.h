@@ -72,6 +72,7 @@ class _CHARINFOS_API_ CharInfos
 
     // Members
     bool valid;
+    bool customTabard;
 
     size_t raceId;
     std::string gender;
