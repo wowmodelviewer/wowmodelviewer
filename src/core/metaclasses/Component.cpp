@@ -66,7 +66,7 @@ Component::~Component()
 
 // Public methods
 //--------------------------------------------------------------------
-bool Component::addChild(Component *, Component * /* previous = 0*/, bool /* afterComponent = false*/)
+bool Component::addChild(Component *)
 {
 	return false;
 }

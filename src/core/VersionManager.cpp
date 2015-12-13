@@ -41,7 +41,6 @@
 // Externals
 
 // Other libraries
-#include "metaclasses/Iterator.h"
 
 // Current library
 #include "FileDownloader.h"
@@ -82,11 +81,12 @@ void VersionManager::updateCurrentVersionInfo()
   m_currentVersionsMap.insert(std::make_pair(appName,appVersion));
 
   // init plugins infos
-  Iterator<Plugin> pluginIt(PLUGINMANAGER);
-  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+  for(PluginManager::iterator it = PLUGINMANAGER.begin();
+      it != PLUGINMANAGER.end() ;
+      ++it)
   {
-    QString pluginName((*pluginIt)->name().c_str());
-    QString pluginVersion((*pluginIt)->version().c_str());
+    QString pluginName((*it)->name());
+    QString pluginVersion((*it)->version().c_str());
     m_currentVersionsMap.insert(std::make_pair(pluginName,pluginVersion));
   }
 }

@@ -51,8 +51,6 @@
 #include "GlobalSettings.h"
 #include "logger/Logger.h"
 
-#include "metaclasses/Iterator.h"
-
 // Current library
 
 
@@ -164,14 +162,16 @@ bool OBJExporter::exportModel(WoWModel * model, std::string target)
   // export equipped items
   if(!GLOBALSETTINGS.bInitPoseOnlyExport)
   {
-    Iterator<WoWItem> itemIt(model);
-    for(itemIt.begin(); !itemIt.ended(); itemIt++)
+
+    for(WoWModel::iterator it = model->begin();
+        it != model->end();
+        ++it)
     {
-      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*itemIt)->itemModels;
+      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->itemModels;
       if(!itemModels.empty())
       {
         obj << "# " << "\n";
-        obj << "# " << (*itemIt)->name() << "\n";
+        obj << "# " << (*it)->name() << "\n";
         obj << "# " << "\n";
         for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
             it != itemModels.end();

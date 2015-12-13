@@ -7,7 +7,6 @@
 #include <wx/textctrl.h>
 
 #include "logger/Logger.h"
-#include "metaclasses/Iterator.h"
 #include "Attachment.h"
 #include "WoWItem.h"
 

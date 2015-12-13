@@ -3,7 +3,6 @@
 #include "CASCFile.h"
 #include <sstream>
 #include "CASCFile.h"
-#include "CASCFolder.h"
 #include "logger/Logger.h"
 
 DBCFile::DBCFile(const std::string &filename) : filename(filename)

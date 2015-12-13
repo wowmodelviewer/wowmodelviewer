@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <string>
 
+#include "metaclasses/Component.h"
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _GAMEFILE_API_ __declspec(dllexport)
@@ -21,7 +23,7 @@
 #    define _GAMEFILE_API_
 #endif
 
-class _GAMEFILE_API_ GameFile
+class _GAMEFILE_API_ GameFile : public Component
 {
   public:
     GameFile():eof(true),buffer(0),pointer(0),size(0) {}

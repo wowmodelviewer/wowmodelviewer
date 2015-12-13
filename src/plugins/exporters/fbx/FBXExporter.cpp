@@ -43,8 +43,6 @@
 
 #include "util.h" // SLASH
 
-#include "metaclasses/Iterator.h"
-
 #include <wx/wxprec.h>
 
 #ifndef WX_PRECOMP

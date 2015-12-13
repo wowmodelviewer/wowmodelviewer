@@ -4,6 +4,7 @@
 #include <wx/notebook.h>
 
 #include "logger/Logger.h"
+#include "CustomDirectorySettings.h"
 #include "DisplaySettings.h"
 #include "ExportSettings.h"
 #include "GeneralSettings.h"
@@ -29,10 +30,12 @@ SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
 	page1 = new GeneralSettings(notebook, ID_GENERAL_SETTINGS);
 	page2 = new DisplaySettings(notebook, ID_DISPLAY_SETTINGS);
 	page3 = new ExportSettings(notebook, ID_EXPORT_SETTINGS);
+	page4 = new CustomDirectorySettings(notebook, ID_CUSTOM_DIRECTORY_SETTINGS);
 
 	notebook->AddPage(page1, _("General"), false, -1);
 	notebook->AddPage(page2, _("Display"), false);
 	notebook->AddPage(page3, _("Export"), false);
+	notebook->AddPage(page4, _("Custom data"), false);
 }
 
 
@@ -50,6 +53,7 @@ void SettingsControl::Open()
 	page1->Update();
 	page2->Update();
 	page3->Update();
+	page4->Update();
 }
 
 void SettingsControl::Close()

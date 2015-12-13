@@ -31,7 +31,7 @@
 //--------------------------------------------------------------------
 // STL
 #include <iostream>
-#include <list>
+#include <unordered_set>
 
 // Qt 
 
@@ -52,7 +52,8 @@ template <class DataType>
 class Container : public Component
 {
 	public :
-		// Constants / Enums
+
+    typedef typename std::unordered_set<DataType *>::iterator iterator;
 
 		// Constructors 
 		Container();
@@ -61,7 +62,7 @@ class Container : public Component
 		virtual ~Container();
 
 		// Methods
-		bool addChild(DataType * child, DataType * previous = 0, bool afterComponent = false);
+		bool addChild(DataType * child);
 		bool removeChild(DataType * child);
 		void removeAllChildren();
 
@@ -70,10 +71,20 @@ class Container : public Component
 
 		unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
 
-		int findChild(DataType * child, bool recursive = false) const;
+		Component * findChild(Component * child, bool recursive = false);
 		DataType * getChild(unsigned int index);
 		const DataType * getChild(unsigned int index) const;
 		
+		iterator begin()
+		{
+		  return m_children.begin();
+		}
+
+		iterator end()
+		{
+		  return m_children.end();
+		}
+
 	protected :
 		// Constants / Enums
 	
@@ -95,7 +106,7 @@ class Container : public Component
 		// Methods
 		
 		// Members
-		std::list<DataType *> m_children;
+		std::unordered_set<DataType *> m_children;
 
 		// friend class declarations
 };
@@ -110,7 +121,7 @@ Container<DataType>::Container()
 template<class DataType>
 Container<DataType>::~Container()
 {
-	typename std::list<DataType *>::iterator l_it;
+	typename std::unordered_set<DataType *>::iterator l_it;
 	for(l_it = m_children.begin() ; l_it != m_children.end() ; l_it++)
 	{
 		(*l_it)->unref();
@@ -118,48 +129,14 @@ Container<DataType>::~Container()
 }
 
 template<class DataType>
-bool Container<DataType>::addChild(DataType * child, DataType * previous /* = 0 */, bool afterComponent /* = false */)
+bool Container<DataType>::addChild(DataType * child)
 {
-	// is this child already in list ?
-	if(findChild(child) != -1)
-	{
-		return false;
-	}
+	m_children.insert(child);
 
-	// if a component to insert after was given, we search for it before inserting
-	typename std::list<DataType *>::iterator l_it = m_children.end();
-
-	if(previous != 0)
-	{
-		for(l_it = m_children.begin() ; l_it != m_children.end() ; l_it++)
-		{
-			if((*l_it) == previous)
-			{
-				if(afterComponent)
-				{
-					l_it++;
-				}
-				break;
-			}
-		}
-	}
-
-	// ok, we add it in list
-	if(l_it != m_children.end())
-	{
-		m_children.insert(l_it,child);
-	}
-	else
-	{
-		m_children.push_back(child);
-	}
 	child->setParent(this);
 
 	// for hierarchy notification
 	onChildAdded(child);
-
-	// for external observers notification
-	child->setParent(this);
 
 	return true;
 }
@@ -168,15 +145,11 @@ template<class DataType>
 bool Container<DataType>::removeChild(DataType * child)
 {
 	// ok, we remove this child from the list
-	child->ref();
-	m_children.remove(child);
+	m_children.erase(child);
 	child->setParent(0);
 
 	// for hierarchy notification
 	onChildRemoved(child);
-
-	// for external observers notification
-	child->setParent(this);
 
 	child->unref();
 	return true;
@@ -217,26 +190,26 @@ int Container<DataType>::removeAllChildrenOfType()
 
 
 template<class DataType>
-int Container<DataType>::findChild(DataType * child, bool recursive /* = false */) const
+Component * Container<DataType>::findChild(Component * child, bool recursive /* = false */)
 {
-	typename std::list<DataType *>::const_iterator l_it = m_children.begin();
-	int l_result = -1;
-	for( int l_index = 0 ; l_it != m_children.end() ; l_it++, l_index++)
+	std::unordered_set<DataType *>::const_iterator l_it = m_children.find(dynamic_cast<DataType *>(child));
+
+	if(l_it != m_children.end())
+	  return *l_it;
+
+	// resursive part
+	if(recursive)
 	{
-		if(*l_it == child)
-		{
-			l_result = l_index;
-		}
-		if(recursive)
-		{
-			l_result = (*l_it)->findChild(child,recursive);
-			if(l_result != -1)
-			{
-				break;
-			}
-		}
+	  std::unordered_set<DataType *>::const_iterator l_itEnd = m_children.end();
+	  for(l_it = m_children.begin() ; l_it != l_itEnd ; ++l_it)
+	  {
+	    Component * result = (*l_it)->findChild(child,recursive);
+	    if(result)
+	      return result;
+	  }
 	}
-	return l_result;
+
+	return 0;
 }
 
 template<class DataType>
@@ -246,7 +219,7 @@ DataType * Container<DataType>::getChild(unsigned int index)
 	if(index < m_children.size())
 	{
 	  unsigned int l_index = 0;
-		typename std::list<DataType *>::iterator l_it;
+		typename std::unordered_set<DataType *>::iterator l_it;
     for(l_it = m_children.begin() ; l_index < index ;  l_index++)
 		{
     	l_it++;
@@ -263,7 +236,7 @@ const DataType * Container<DataType>::getChild(unsigned int index) const
 	if(index < m_children.size())
 	{
 	  unsigned int l_index = 0;
-		typename std::list<DataType *>::const_iterator l_it;
+		typename std::unordered_set<DataType *>::const_iterator l_it;
         for(l_it = m_children.begin() ; l_index < index ; l_index++)
 		{
              l_it++;

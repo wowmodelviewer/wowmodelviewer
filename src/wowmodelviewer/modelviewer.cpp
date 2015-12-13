@@ -20,13 +20,13 @@
 #include "CASCFolder.h"
 #include "globalvars.h"
 #include "GameDatabase.h"
+#include "GameDirectory.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelTransparency.h"
 #include "RaceInfos.h"
 #include "TextureAnim.h"
 #include "logger/Logger.h"
-#include "metaclasses/Iterator.h"
 #include "app.h"
 #include "AnimationExportChoiceDialog.h"
 #include "SettingsControl.h"
@@ -311,15 +311,19 @@ void ModelViewer::InitMenu()
 	wxMenu *exportMenu = new wxMenu;
 	exportMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
 
-	Iterator<ExporterPlugin> pluginIt(PLUGINMANAGER);
+	PluginManager::iterator it = PLUGINMANAGER.begin();
 	int subMenuId = 10000;
-	for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++, subMenuId++)
+	for(; it != PLUGINMANAGER.end() ; ++it, subMenuId++)
 	{
-	  ExporterPlugin * plugin = *pluginIt;
-	  exportMenu->Append(subMenuId,plugin->menuLabel());
-	  Connect( subMenuId,
-	        wxEVT_COMMAND_MENU_SELECTED,
-	        wxCommandEventHandler(ModelViewer::OnExport) );
+	  ExporterPlugin * plugin = dynamic_cast<ExporterPlugin *>(*it);
+
+	  if(plugin)
+	  {
+	    exportMenu->Append(subMenuId,plugin->menuLabel());
+	    Connect( subMenuId,
+	      wxEVT_COMMAND_MENU_SELECTED,
+	      wxCommandEventHandler(ModelViewer::OnExport) );
+	  }
 	}
 	fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), exportMenu);
 
@@ -1087,7 +1091,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    {
 	      // try hd model if it exists
 	      std::string modelnamehd = modelname.substr(0,pos) + "_hd.m2";
-	      if(CASCFOLDER.fileExists(modelnamehd))
+	      if(GAMEDIRECTORY.fileExists(modelnamehd))
 	        modelname= modelnamehd;
 	    }
 
@@ -1197,12 +1201,12 @@ void ModelViewer::LoadItem(unsigned int id)
 	    QString model1 = itemInfos.values[0][0];
 	    std::string texture1 = itemInfos.values[0][1].toStdString();
 
-	    model1 = CASCFOLDER.getFullPathForFile(model1);
+	    model1 = GAMEDIRECTORY.getFullPathForFile(model1);
 	    if(model1 == "") // try with .m2 at the end
 	    {
 	      model1 = itemInfos.values[0][0];
 	      model1.replace(".mdx", ".m2", Qt::CaseInsensitive);
-	      model1 = CASCFOLDER.getFullPathForFile(model1);
+	      model1 = GAMEDIRECTORY.getFullPathForFile(model1);
 	    }
 
 	    texture1 = itemInfos.values[0][1].toStdString() + itemInfos.values[0][2].toStdString();
@@ -1732,13 +1736,13 @@ void ModelViewer::LoadWoW()
     getGamePath();
   }
 
-  CASCFOLDER.init(gamePath.c_str());
+  GAMEDIRECTORY.init(QString(gamePath.c_str()));
 
   // init game version
-  SetStatusText(wxString(CASCFOLDER.version()), 1);
+  SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
 
   // init game locale
-  std::vector<std::string> localesFound = CASCFOLDER.localesFound();
+  std::vector<std::string> localesFound = GAMEDIRECTORY.localesFound();
 
   if(localesFound.empty())
   {
@@ -1763,18 +1767,18 @@ void ModelViewer::LoadWoW()
       locale = localesFound[id];
   }
 
-  if(!CASCFOLDER.setLocale(locale))
+  if(!GAMEDIRECTORY.setLocale(locale))
   {
-    wxString message =  wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), CASCFOLDER.lastError());
+    wxString message =  wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), GAMEDIRECTORY.lastError());
     wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
     dial->ShowModal();
     return;
   }
 
 
-  langName = CASCFOLDER.locale();
+  langName = GAMEDIRECTORY.locale();
 
-  SetStatusText(wxString(CASCFOLDER.locale()), 2);
+  SetStatusText(wxString(GAMEDIRECTORY.locale()), 2);
 
   InitDatabase();
 
@@ -2009,9 +2013,12 @@ void ModelViewer::SaveChar(wxString fn, bool equipmentOnly /*= false*/)
 
   // then save equipment
   stream.writeStartElement("equipment");
-  Iterator<WoWItem> itemsIt(canvas->model);
-  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-    (*itemsIt)->save(stream);
+
+  for(WoWModel::iterator it = canvas->model->begin();
+      it != canvas->model->end();
+      ++it)
+    (*it)->save(stream);
+
   stream.writeEndElement(); // equipment
 
   stream.writeEndElement(); // SavedCharacter
@@ -2173,9 +2180,10 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
 
       if(reader.name() == "equipment")
       {
-        Iterator<WoWItem> itemsIt(canvas->model);
-        for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-          (*itemsIt)->load(reader);
+        for(WoWModel::iterator it = canvas->model->begin();
+            it != canvas->model->end();
+            ++it)
+          (*it)->load(reader);
       }
     }
   }
@@ -2761,9 +2769,10 @@ void ModelViewer::UpdateControls()
 	else
 	{
 	  //refresh equipment
-	  Iterator<WoWItem> itemsIt(canvas->model);
-	  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-	    (*itemsIt)->refresh();
+	  for(WoWModel::iterator it = canvas->model->begin();
+	      it != canvas->model->end();
+	      ++it)
+	    (*it)->refresh();
 	}
 	modelControl->RefreshModel(canvas->root);
 }
@@ -2773,11 +2782,13 @@ void ModelViewer::ImportArmoury(wxString strURL)
   CharInfos * result = NULL;
 
   std::string url = strURL.ToAscii();
-  Iterator<ImporterPlugin> pluginIt(PLUGINMANAGER);
-  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+
+  for(PluginManager::iterator it = PLUGINMANAGER.begin();
+      it != PLUGINMANAGER.end();
+      ++it)
   {
-    ImporterPlugin * plugin = *pluginIt;
-    if(plugin->acceptURL(url))
+    ImporterPlugin * plugin = dynamic_cast<ImporterPlugin *>(*it);
+    if(plugin && plugin->acceptURL(url))
     {
       result = plugin->importChar(url);
     }
@@ -2801,7 +2812,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		wxString strModelHD = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT("_hd.m2");
 
 		// try with hd model first
-		if(CASCFOLDER.fileExists(std::string(strModelHD.mb_str())))
+		if(GAMEDIRECTORY.fileExists(std::string(strModelHD.mb_str())))
 		  LoadModel(strModelHD);
 		else
 		  LoadModel(strModel);
@@ -2863,12 +2874,12 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
   std::string exporterLabel = fileMenu->GetLabel(event.GetId()).mb_str();
 
-  Iterator<ExporterPlugin> pluginIt(PLUGINMANAGER);
-  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+  PluginManager::iterator it = PLUGINMANAGER.begin();
+  for(; it != PLUGINMANAGER.end() ; ++it)
   {
-    ExporterPlugin * plugin = *pluginIt;
+    ExporterPlugin * plugin = dynamic_cast<ExporterPlugin *>(*it);
 
-    if(plugin->menuLabel() == exporterLabel)
+    if(plugin && plugin->menuLabel() == exporterLabel)
     {
       wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), "", "",
           plugin->fileSaveFilter(), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);

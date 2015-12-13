@@ -73,7 +73,6 @@ class _PLUGIN_API_ Plugin : public Component
     // these fields are filled within json plugin informations and set by PluginManager
     // at load time
     std::string coreVersionNeeded() const { return m_coreVersionNeeded;}
-    std::string name() const  { return m_name; }
     std::string version() const { return m_version; }
     std::string id() const { return (m_category + "_" + m_internalName); }
 

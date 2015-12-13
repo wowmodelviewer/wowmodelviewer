@@ -12,8 +12,8 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
-#include "CASCFolder.h"
 #include "dbcfile.h"
+#include "GameDirectory.h"
 #include "logger/Logger.h"
 
 GameDatabase * GameDatabase::m_instance = 0;
@@ -211,7 +211,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
     QString filename = gamefile+POSSIBLE_DB_EXT[i];
-    if(CASCFOLDER.fileExists(filename.toStdString()))
+    if(GAMEDIRECTORY.fileExists(filename.toStdString()))
     {
       fileToOpen = filename;
       break;

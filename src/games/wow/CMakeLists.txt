@@ -27,7 +27,9 @@ set(src animated.cpp
         dbcfile.cpp
         ddslib.cpp
         GameDatabase.cpp
+        GameDirectory.cpp
         GameFile.cpp
+        GameFolder.cpp
         globalvars.cpp
         ModelAttachment.cpp
         ModelCamera.cpp

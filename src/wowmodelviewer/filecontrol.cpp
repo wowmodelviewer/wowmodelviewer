@@ -3,10 +3,11 @@
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
 
+#include <QDirIterator>
 #include <QImage>
 
 #include "CASCFile.h"
-#include "CASCFolder.h"
+#include "GameDirectory.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 #include "modelviewer.h"
@@ -75,7 +76,8 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		choFilter->SetSelection(filterMode);
 	} catch(...) {};
 
-	CASCFOLDER.initFileList(filelist);
+	GAMEDIRECTORY.initFileList(filelist);
+
 	filelist.clear();
 }
 
@@ -118,7 +120,7 @@ void FileControl::Init(ModelViewer* mv)
 
 	filterString = filterStrings[filterMode];
 
-	CASCFOLDER.filterFileList(filelist, filterSearch);
+	GAMEDIRECTORY.filterFileList(filelist, filterSearch);
 
 	// Put all the viewable files into our File Tree.
 	TreeStack stack;
@@ -673,5 +675,6 @@ void FileControl::OnButton(wxCommandEvent &event)
 		Init();
 	}
 }
+
 
 

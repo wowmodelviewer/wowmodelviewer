@@ -17,7 +17,6 @@
 #include "ImporterPlugin.h"
 #include "NPCInfos.h"
 #include "PluginManager.h"
-#include "metaclasses/Iterator.h"
 
 const int NPCimporterDialog::ID_BTN_IMPORT = wxNewId();
 
@@ -107,12 +106,14 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	else
 	{
 	  std::string url = m_URLname->GetValue().ToAscii();
-	  Iterator<ImporterPlugin> pluginIt(PLUGINMANAGER);
+
 	  NPCInfos * result = NULL;
-	  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+	  for(PluginManager::iterator it = PLUGINMANAGER.begin();
+	      it != PLUGINMANAGER.end() ;
+	      ++it)
 	  {
-	    ImporterPlugin * plugin = *pluginIt;
-	    if(plugin->acceptURL(url))
+	    ImporterPlugin * plugin = dynamic_cast<ImporterPlugin *>(*it);
+	    if(plugin && plugin->acceptURL(url))
 	    {
 	      result = plugin->importNPC(url);
 	    }

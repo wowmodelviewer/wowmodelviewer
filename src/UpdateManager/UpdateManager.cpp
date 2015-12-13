@@ -50,9 +50,6 @@
 #include "logger/Logger.h"
 #include "logger/LogOutputFile.h"
 
-#include "metaclasses/Iterator.h"
-
-
 // Current library
 
 

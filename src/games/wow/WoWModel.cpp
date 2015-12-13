@@ -8,16 +8,15 @@
 #include "GlobalSettings.h"
 #include "Bone.h"
 #include "CASCFile.h"
-#include "CASCFolder.h"
-#include "globalvars.h"
 #include "GameDatabase.h"
+#include "GameDirectory.h"
+#include "globalvars.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
 #include "logger/Logger.h"
-#include "metaclasses/Iterator.h"
 
 #include <QFile>
 #include <QXmlStreamReader>
@@ -697,7 +696,7 @@ void WoWModel::initAnimated(GameFile * f)
 		  tempname = QString::fromStdString(modelname).replace(".m2","");
 		  tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID,4,10,QChar('0')).arg(animsWotLK.subAnimID,2,10,QChar('0'));
 
-		  if(CASCFOLDER.fileExists(tempname.toStdString()))
+		  if(GAMEDIRECTORY.fileExists(tempname.toStdString()))
 		    animfiles.push_back(new CASCFile(tempname.toStdString()));
 		  else
 		    animfiles.push_back(NULL);
@@ -1428,11 +1427,13 @@ void WoWModel::drawParticles()
 
 WoWItem * WoWModel::getItem(CharSlots slot)
 {
-  Iterator<WoWItem> itemIt(this);
-  for(itemIt.begin(); !itemIt.ended() ; itemIt++)
+
+  for(WoWModel::iterator it = this->begin();
+      it != this->end() ;
+      ++it)
     {
-     if((*itemIt)->slot() == slot)
-       return *itemIt;
+     if((*it)->slot() == slot)
+       return *it;
     }
 
   return 0;

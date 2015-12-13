@@ -34,6 +34,7 @@ extern wxString gamePath;
 extern wxString cfgPath;
 extern wxString bgImagePath;
 extern wxString armoryPath;
+extern wxString customDirectoryPath;
 
 extern bool useRandomLooks;
 

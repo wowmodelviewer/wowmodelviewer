@@ -5,12 +5,10 @@
 #include <wx/txtstrm.h>
 
 #include "Attachment.h"
-#include "CASCFolder.h"
 #include "globalvars.h"
 #include "GameDatabase.h"
 #include "RaceInfos.h"
 #include "logger/Logger.h"
-#include "metaclasses/Iterator.h"
 #include "itemselection.h"
 #include "modelviewer.h"
 #include "util.h"
@@ -636,9 +634,11 @@ void CharControl::RefreshModel()
   }
 
 	//refresh equipment
-  Iterator<WoWItem> itemsIt(model);
-  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-    (*itemsIt)->refresh();
+
+  for(WoWModel::iterator it = model->begin();
+      it != model->end();
+      ++it)
+    (*it)->refresh();
 
 	LOG_INFO << "Current Equipment :"
 	         << "Head" << model->getItem(CS_HEAD)->id()
@@ -1127,9 +1127,11 @@ void CharControl::OnUpdateItem(int type, int id)
 			if(itemSet.valid && !itemSet.empty())
 			{
 				// reset previously equipped items
-				Iterator<WoWItem> itemsIt(model);
-				  for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-				    (*itemsIt)->setId(0);
+
+			  for(WoWModel::iterator it = model->begin();
+			      it != model->end();
+			      ++it)
+			    (*it)->setId(0);
 
 				for(unsigned i = 0 ; i < 8; i++)
 					tryToEquipItem(itemSet.values[0][i].toInt());
@@ -1156,9 +1158,10 @@ void CharControl::OnUpdateItem(int type, int id)
 			if(startOutfit.valid && !startOutfit.empty())
 			{
 				// reset previously equipped items
-				Iterator<WoWItem> itemsIt(model);
-				for(itemsIt.begin(); !itemsIt.ended(); itemsIt++)
-					(*itemsIt)->setId(0);
+			  for(WoWModel::iterator it = model->begin();
+			      it != model->end();
+			      ++it)
+			    (*it)->setId(0);
 
 				for(unsigned i = 0 ; i < 24; i++)
 				{

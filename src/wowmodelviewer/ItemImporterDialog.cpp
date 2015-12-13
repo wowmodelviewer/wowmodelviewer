@@ -17,7 +17,6 @@
 #include "ImporterPlugin.h"
 #include "PluginManager.h"
 #include "util.h"
-#include "metaclasses/Iterator.h"
 
 const int ItemImporterDialog::ID_BTN_IMPORT = wxNewId();
 
@@ -111,11 +110,13 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	else
 	{
 	  std::string url = m_URLname->GetValue().ToAscii();
-	  Iterator<ImporterPlugin> pluginIt(PLUGINMANAGER);
-	  for(pluginIt.begin(); !pluginIt.ended() ; pluginIt++)
+
+	  for(PluginManager::iterator it = PLUGINMANAGER.begin();
+	      it != PLUGINMANAGER.end() ;
+	      ++it)
 	  {
-	    ImporterPlugin * plugin = *pluginIt;
-	    if(plugin->acceptURL(url))
+	    ImporterPlugin * plugin = dynamic_cast<ImporterPlugin *>(*it);
+	    if(plugin && plugin->acceptURL(url))
 	    {
 	      m_importedItem = plugin->importItem(url);
 	    }

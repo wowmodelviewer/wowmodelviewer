@@ -24,9 +24,7 @@ set(src CharInfos.cpp
         PluginManager.cpp
         VersionManager.cpp
         metaclasses/Component.cpp
-        metaclasses/ConstIterator.cpp
         metaclasses/Event.cpp
-        metaclasses/Iterator.cpp
         metaclasses/Observable.cpp
         metaclasses/Observer.cpp
         logger/Logger.cpp

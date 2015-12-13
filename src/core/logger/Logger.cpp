@@ -42,7 +42,6 @@
 // Externals
 
 // Other libraries
-#include "../metaclasses/Iterator.h"
 
 // Current library
 
@@ -77,9 +76,10 @@ void Logger::init()
 void Logger::writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
   QString message = Logger::formatLog(type, context, msg);
-  Iterator<LogOutput> outputIt(LOGGER);
-  for(outputIt.begin(); !outputIt.ended(); outputIt++)
-    (*outputIt)->write(message);
+  for(Logger::iterator it = LOGGER.begin();
+      it != LOGGER.end();
+      ++it)
+    (*it)->write(message);
 }
 
 

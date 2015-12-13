@@ -15,6 +15,7 @@ class wxNotebook;
 #include "video.h"
 #include "modelcanvas.h"
 
+class CustomDirectorySettings;
 class DisplaySettings;
 class ExportSettings;
 class GeneralSettings;
@@ -26,6 +27,7 @@ enum
   ID_GENERAL_SETTINGS,
   ID_DISPLAY_SETTINGS,
   ID_EXPORT_SETTINGS,
+  ID_CUSTOM_DIRECTORY_SETTINGS,
   ID_SETTINGS_TABS
 };
 
@@ -39,6 +41,7 @@ class SettingsControl: public wxWindow
 	GeneralSettings *page1;
 	DisplaySettings *page2;
 	ExportSettings *page3;
+	CustomDirectorySettings * page4;
 public:
 
 	SettingsControl(wxWindow* parent, wxWindowID id);

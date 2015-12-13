@@ -4,12 +4,13 @@
 #include <algorithm>
 
 #include "logger/Logger.h"
-#include "CASCFolder.h"
 #include "FileTreeItem.h"
-#include "globalvars.h"
+#include "GameDirectory.h"
 #include "GameDatabase.h"
-#include "util.h"
+#include "globalvars.h"
 #include "UserSkins.h"
+#include "util.h"
+
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 
@@ -461,9 +462,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   modelpath = modelpath.BeforeLast(MPQ_SLASH) + MPQ_SLASH;
   modelpath = modelpath.Lower();
   sFilterDir = QString::fromStdString(modelpath.mb_str());
-  CASCFOLDER.filterFileList(filelist, filterDir);
+  GAMEDIRECTORY.filterFileList(filelist, filterDir);
   // get all files in the model's folder:
-  CASCFOLDER.getFilesForFolder(folderFiles, sFilterDir);
+  GAMEDIRECTORY.getFilesForFolder(folderFiles, sFilterDir);
   // remove all files that aren't BLPs:
   auto newend = std::remove_if(folderFiles.begin(), folderFiles.end(),
                                [](QString& ff) { return ! ff.endsWith(".blp", Qt::CaseInsensitive); });
@@ -606,7 +607,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	std::set<FileTreeItem> filelist;
 	sFilterDir = QString::fromStdString(m->itemName());
 	sFilterDir.toLower();
-	CASCFOLDER.filterFileList(filelist,filterDir);
+	GAMEDIRECTORY.filterFileList(filelist,filterDir);
 	if (filelist.begin() != filelist.end())
 	{
 		TextureGroup grp;

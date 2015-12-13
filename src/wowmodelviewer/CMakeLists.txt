@@ -26,6 +26,7 @@ set(src  AnimationExportChoiceDialog.cpp
          camera.cpp
          charcontrol.cpp
          CharDetailsFrame.cpp
+         CustomDirectorySettings.cpp
          DisplaySettings.cpp
          effects.cpp
          ExportSettings.cpp

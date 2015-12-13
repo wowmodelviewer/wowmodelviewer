@@ -31,10 +31,10 @@
 
 
 #include "Attachment.h"
-#include "CASCFolder.h"
 #include "database.h" // items
-#include "globalvars.h"
 #include "GameDatabase.h"
+#include "GameDirectory.h"
+#include "globalvars.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
 #include "WoWModel.h"
@@ -288,7 +288,7 @@ void WoWItem::load()
     model += ((infos.sexid == 0)?"M":"F");
     // add .m2
     model += ".m2";
-    model = CASCFOLDER.getFullPathForFile(model);
+    model = GAMEDIRECTORY.getFullPathForFile(model);
 
     m = new WoWModel(model.toStdString(), true);
 
@@ -318,7 +318,7 @@ void WoWItem::load()
     // left shoulder
     QString model = iteminfos.values[0][0];
     model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    model = CASCFOLDER.getFullPathForFile(model);
+    model = GAMEDIRECTORY.getFullPathForFile(model);
 
     m = new WoWModel(model.toStdString(), true);
 
@@ -341,7 +341,7 @@ void WoWItem::load()
     // right shoulder
     model = iteminfos.values[0][1];
     model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    model = CASCFOLDER.getFullPathForFile(model);
+    model = GAMEDIRECTORY.getFullPathForFile(model);
 
     m = new WoWModel(model.toStdString(), true);
 
@@ -391,7 +391,7 @@ void WoWItem::load()
   	if(!model.isEmpty())
   	{
   		model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-  		model = CASCFOLDER.getFullPathForFile(model);
+  		model = GAMEDIRECTORY.getFullPathForFile(model);
 
   		m = new WoWModel(model.toStdString(), true);
 
@@ -541,7 +541,7 @@ void WoWItem::load()
 
     QString itemModel = iteminfos.values[0][0];
     itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    itemModel = CASCFOLDER.getFullPathForFile(itemModel);
+    itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
 
     m = new WoWModel(itemModel.toStdString(), true);
 
@@ -570,7 +570,7 @@ void WoWItem::load()
 
     QString itemModel = iteminfos.values[0][0];
     itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    itemModel = CASCFOLDER.getFullPathForFile(itemModel);
+    itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
 
     m = new WoWModel(itemModel.toStdString(), true);
 

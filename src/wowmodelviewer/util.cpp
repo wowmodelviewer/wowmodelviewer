@@ -15,6 +15,7 @@ wxString gamePath;
 wxString cfgPath;
 wxString bgImagePath;
 wxString armoryPath;
+wxString customDirectoryPath;
 
 UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;

@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-#include "CASCFolder.h"
+#include "GameDirectory.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 // #define DEBUG_READ
@@ -34,22 +34,12 @@ CASCFile::CASCFile(const std::string & path)
 
 bool CASCFile::open()
 {
-  bool result = false;
-  if(CASCFOLDER.hStorage)
-  {
-#ifdef DEBUG_READ
-    std::cout << "locale used : " <<  CASCFOLDER.CASCLocale() << std::endl;
-#endif
-    result = CascOpenFile(CASCFOLDER.hStorage, m_filePath.c_str(), CASCFOLDER.CASCLocale(), 0, &m_handle);
-    if(!result)
-      LOG_ERROR << "Opening" << m_filePath.c_str() << "failed." << "Error" << GetLastError();
-  }
-  else
-    m_handle = NULL;
-#ifdef DEBUG_READ
-  std::cout << __FUNCTION__ << " result => " << std::boolalpha << result << std::endl;
-#endif
-  return result;
+  m_handle = GAMEDIRECTORY.openFile(m_filePath);
+
+  if(!m_handle)
+    LOG_ERROR << "Opening" << m_filePath.c_str() << "failed." << "Error" << GetLastError();
+
+  return m_handle;
 }
 
 bool CASCFile::close()

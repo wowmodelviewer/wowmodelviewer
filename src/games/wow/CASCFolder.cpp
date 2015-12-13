@@ -20,23 +20,18 @@
 #include "CASCFile.h"
 #include "logger/Logger.h"
 
-CASCFolder * CASCFolder::m_instance = 0;
-
-std::map<QString,QString> globalNameMap;
-std::vector<std::pair<QString,QString>> folderFileList;
-
 CASCFolder::CASCFolder()
  : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
 {
 
 }
 
-void CASCFolder::init(const std::string &folder)
+void CASCFolder::init(const QString &folder)
 {
   m_folder = folder;
 
-  if(m_folder.find_last_of("\\") == m_folder.length()-1)
-    m_folder = m_folder.substr (0,m_folder.length()-1);
+  if(m_folder.endsWith("\\"))
+    m_folder.remove(m_folder.size()-1,1);
 
   initLocales();
   initVersion();
@@ -44,9 +39,9 @@ void CASCFolder::init(const std::string &folder)
 
 void CASCFolder::initLocales()
 {
-  LOG_INFO << "Determining Locale for:" << m_folder.c_str();
+  LOG_INFO << "Determining Locale for:" << m_folder;
 
-  std::string buildinfofile = m_folder+"\\..\\.build.info";
+  std::string buildinfofile = m_folder.toStdString()+"\\..\\.build.info";
   std::ifstream buildinfo(buildinfofile.c_str());
 
   if(!buildinfo.good())
@@ -110,12 +105,12 @@ bool CASCFolder::setLocale(std::string locale)
     if(it != locales.end())
     {
       HANDLE dummy;
-      LOG_INFO << "Loading Game Folder:" << m_folder.c_str();
+      LOG_INFO << "Loading Game Folder:" << m_folder;
       // locale found => try to open it
-      if(!CascOpenStorage(m_folder.c_str(), it->second, &hStorage))
+      if(!CascOpenStorage(m_folder.toStdString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
-        LOG_ERROR << "Opening" << m_folder.c_str() << "failed." << "Error" << m_openError;
+        LOG_ERROR << "Opening" << m_folder << "failed." << "Error" << m_openError;
         return false;
       }
 
@@ -128,7 +123,7 @@ bool CASCFolder::setLocale(std::string locale)
       }
       else
       {
-        LOG_ERROR << "Setting Locale" << locale.c_str() << "for folder" << m_folder.c_str() << "failed";
+        LOG_ERROR << "Setting Locale" << locale.c_str() << "for folder" << m_folder << "failed";
         return false;
       }
     }
@@ -139,7 +134,7 @@ bool CASCFolder::setLocale(std::string locale)
 
 void CASCFolder::initVersion()
 {
-  QString buildinfofile = QString::fromStdString(m_folder)+"\\..\\.build.info";
+  QString buildinfofile = m_folder+"\\..\\.build.info";
   LOG_INFO << "buildinfofile : " << buildinfofile;
 
   QFile file(buildinfofile);
@@ -169,100 +164,13 @@ void CASCFolder::initVersion()
   QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
   QRegularExpressionMatch result = re.match(values[index]);
   if(result.hasMatch())
-  {
-    QString ver = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
-    m_version = ver.toStdString();
-  }
+    m_version = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
 
-  if(m_version.empty())
+  if(m_version.isEmpty())
     LOG_ERROR << "Fail to grab game version info in .build.info file";
   else
-    LOG_INFO << "Version successfully found :" << m_version.c_str();
+    LOG_INFO << "Version successfully found :" << m_version;
 
-}
-
-void CASCFolder::initFileList(std::set<FileTreeItem> &dest)
-{
-	QFile file("listfile.txt");
-	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-	{
-		LOG_ERROR << "Fail to open listfile.txt.";
-		return;
-	}
-
-	QTextStream in(&file);
-
-	while (!in.atEnd())
-	{
-		QString line = in.readLine();
-
-		QString fileName = line.section('\\',-1).toLower();
-		QString filePath = (line.section('\\', 0, -2).toLower()) + "\\";
-		folderFileList.push_back(std::make_pair(filePath, fileName));
-
-		FileTreeItem tmp;
-
-		line = line.toLower();
-		QString firstLetter = line[0];
-		firstLetter = firstLetter.toUpper();
-		line[0] = firstLetter[0];
-		int ret = line.indexOf('\\');
-		if (ret>-1)
-		{
-			firstLetter = line[ret+1];
-			firstLetter = firstLetter.toUpper();
-			line[ret+1] = firstLetter[0];
-		}
-
-		// fill global map for path search
-		fileName = line.section('\\',-1).toLower();
-		globalNameMap[fileName] = line;
-
-		tmp.displayName = line;
-		tmp.color = 0;
-		dest.insert(tmp);
-  }
-}
-
-void CASCFolder::filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString)/* = CASCFolder::defaultFilterFunc*/)
-{
-	std::map<QString,QString>::iterator itEnd = globalNameMap.end();
-	for(std::map<QString,QString>::iterator it = globalNameMap.begin();
-			it != itEnd;
-			++it)
-	{
-		if(filterfunc(it->second))
-		{
-			FileTreeItem tmp;
-			tmp.displayName = it->second;
-			tmp.color = 0;
-			dest.insert(tmp);
-		}
-	}
-}
-
-QString CASCFolder::getFullPathForFile(QString file)
-{
-  std::map<QString,QString>::iterator it = globalNameMap.find(file.toLower());
-
-  if(it != globalNameMap.end())
-  	return it->second;
-
-  return "";
-}
-
-void CASCFolder::getFilesForFolder(std::vector<QString> &fileNames, QString folderPath)
-{
-  std::vector<std::pair<QString,QString>> matches;
-
-  // make a new vector array with only those pairs that match the supplied folder path:
-  std::copy_if(folderFileList.begin(), folderFileList.end(), back_inserter(matches),
-               [folderPath](std::pair<QString,QString>& p)
-                  { return (QString::compare(p.first, folderPath, Qt::CaseInsensitive) == 0); });
-
-  // Convert to a simpler vector array of full file names:
-  std::transform(matches.begin(), matches.end(), std::back_inserter(fileNames),
-                 [](std::pair<QString, QString>& p) { return p.first + p.second; });
 }
 
 bool CASCFolder::fileExists(std::string file)
@@ -283,3 +191,11 @@ bool CASCFolder::fileExists(std::string file)
  // LOG_ERROR << "Opening" << file.c_str() << "failed." << "Error" << GetLastError();
   return false;
 }
+
+HANDLE CASCFolder::openFile(std::string file)
+{
+  HANDLE result;
+  CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, &result);
+  return result;
+}
+

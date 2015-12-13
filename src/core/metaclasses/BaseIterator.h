@@ -60,7 +60,7 @@ class BaseIterator
     // Methods
     void begin();
 
-    bool ended();
+    bool end();
 
     void operator++(int);
 
@@ -78,7 +78,7 @@ class BaseIterator
 
     // Members
     std::vector<ItemType * > m_items;
-    unsigned int m_index;
+    typename std::vector<ItemType * >::iterator m_internalIt;
 
   private :
     // Constants / Enums
@@ -104,7 +104,7 @@ class BaseIterator
 template<class ItemType>
 BaseIterator<ItemType>::BaseIterator()
 {
-  m_index = 0;
+  m_internalIt = m_items.begin();
 }
 
 // Destructor
@@ -119,19 +119,19 @@ BaseIterator<ItemType>::~BaseIterator()
 template<class ItemType>
 void BaseIterator<ItemType>::begin()
 {
-  m_index = 0;
+  m_internalIt = m_items.begin();
 }
 
 template<class ItemType>
-bool BaseIterator<ItemType>::ended()
+bool BaseIterator<ItemType>::end()
 {
-  return (m_index >= m_items.size());
+  return m_items.end();
 }
 
 template<class ItemType>
 void BaseIterator<ItemType>::operator++(int)
 {
-  m_index++;
+  ++m_internalIt;
 }
 
 #endif /* _BASEITERATOR_H_ */
