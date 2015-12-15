@@ -8,6 +8,8 @@
 
 #include "GameFile.h"
 
+#include "GameFolder.h"
+
 #include <cstring> // memcpy
 
 size_t GameFile::read(void* dest, size_t bytes)

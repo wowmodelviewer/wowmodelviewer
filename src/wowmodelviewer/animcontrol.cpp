@@ -5,7 +5,7 @@
 
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "GameDatabase.h"
 #include "globalvars.h"
 #include "UserSkins.h"

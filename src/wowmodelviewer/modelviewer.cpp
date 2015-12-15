@@ -20,7 +20,7 @@
 #include "CASCFolder.h"
 #include "globalvars.h"
 #include "GameDatabase.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelTransparency.h"
@@ -1736,7 +1736,7 @@ void ModelViewer::LoadWoW()
     getGamePath();
   }
 
-  GAMEDIRECTORY.init(QString(gamePath.c_str()));
+  Game::instance().init(QString(gamePath.c_str()));
 
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);

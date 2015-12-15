@@ -8,11 +8,15 @@
 #ifndef _GAMEFOLDER_H_
 #define _GAMEFOLDER_H_
 
-#include <stdio.h>
 #include <map>
+#include <stdio.h>
 
 #include <QString>
 #include <QStringList>
+
+#include "CASCFolder.h"
+#include "FileTreeItem.h"
+#include "GameFile.h"
 
 #include "metaclasses/Container.h"
 
@@ -26,20 +30,36 @@
 #    define _GAMEFOLDER_API_
 #endif
 
-class _GAMEFOLDER_API_ GameFolder : public Container<Component>
+class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
 {
   public:
-    GameFolder(QString & path);
+    GameFolder();
     virtual ~GameFolder() {}
 
-    void createChildren(QStringList &);
+    void init(const QString & path, const QString & file);
 
-    void onChildAdded(Component *);
+    // return full path for a given file ie :
+    // HumanMale.m2 => Character\Human\male\humanmale.m2
+    QString getFullPathForFile(QString file);
 
-    GameFolder * getFolder(QString &name);
+    bool fileExists(std::string file);
+
+    void getFilesForFolder(std::vector<QString> &fileNames, QString folderPath);
+    void filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString) = GameFolder::defaultFilterFunc);
+
+    HANDLE openFile(std::string file);
+
+    QString version();
+
+    std::string locale();
+    bool setLocale(std::string);
+    std::vector<std::string> localesFound();
+
+    int lastError();
 
   private:
-    std::map<QString, GameFolder *> m_subFolderMap;
+    CASCFolder m_CASCFolder;
+    static bool defaultFilterFunc(QString) { return true; }
 };
 
 

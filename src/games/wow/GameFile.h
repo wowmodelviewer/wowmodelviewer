@@ -40,6 +40,9 @@ class _GAMEFILE_API_ GameFile : public Component
     void close();
     virtual void openFile(std::string filename) = 0;
 
+    void setFullName(QString & name) { m_fullName = name; }
+    QString fullname() { return m_fullName; }
+
   protected:
     bool eof;
     unsigned char *buffer;
@@ -49,6 +52,8 @@ class _GAMEFILE_API_ GameFile : public Component
     // disable copying
     GameFile(const GameFile &);
     void operator=(const GameFile &);
+
+    QString m_fullName;
 };
 
 

@@ -33,7 +33,7 @@
 #include "Attachment.h"
 #include "database.h" // items
 #include "GameDatabase.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "globalvars.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"

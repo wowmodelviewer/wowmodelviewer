@@ -5,56 +5,125 @@
  *      Author: Jeromnimo
  */
 
-
 #include "GameFolder.h"
 
+#include <QFile>
+
 #include "CASCFile.h"
+#include "Game.h"
 
-GameFolder::GameFolder(QString & path)
+#include "logger/Logger.h"
+
+GameFolder::GameFolder()
 {
-  setName(path);
 }
 
-void GameFolder::createChildren(QStringList & items)
+void GameFolder::init(const QString & path, const QString & filename)
 {
-  if(items.size() == 0)
-    return;
+  m_CASCFolder.init(path);
 
-  QString item = items[0];
-
-  if(item.contains("."))
+  QFile file(filename);
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
-    GameFile * file = new CASCFile();
-    file->setName(item);
+    LOG_ERROR << "Fail to open" << filename;
+    return;
+  }
+
+  QTextStream in(&file);
+
+  LOG_INFO << __FUNCTION__ << "Start to build object hierarchy";
+  while (!in.atEnd())
+  {
+    QString line = in.readLine();
+    line = line.toLower();
+
+    QStringList items = line.split("\\");
+
+    CASCFile * file = new CASCFile();
+    file->setName(items[items.size()-1]);
+    file->setFullName(line);
     addChild(file);
-    return;
   }
+  LOG_INFO << __FUNCTION__ << "Hierarchy creation done";
+}
 
-  items.removeFirst();
-
-  GameFolder * folder = getFolder(item);
-  if(!folder)
+QString GameFolder::getFullPathForFile(QString file)
+{
+  LOG_INFO << __FUNCTION__ << file;
+  file = file.toLower();
+  for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
-    folder = new GameFolder(item);
-    addChild(folder);
+    if((*it)->name() == file)
+    {
+      LOG_INFO << (*it)->fullname();
+      return (*it)->fullname();
+    }
   }
 
-  folder->createChildren(items);
+  return "";
 }
 
-void GameFolder::onChildAdded(Component * child)
+void GameFolder::getFilesForFolder(std::vector<QString> &fileNames, QString folderPath)
 {
-  GameFolder * folder = dynamic_cast<GameFolder *>(child);
-  if(folder)
-    m_subFolderMap[folder->name()] = folder;
+  LOG_INFO << __FUNCTION__ << folderPath;
+  folderPath = folderPath.toLower();
+  for(GameFolder::iterator it = begin() ; it != end() ; ++it)
+  {
+    GameFile * file = *it;
+    if(file->fullname().startsWith(folderPath))
+    {
+      fileNames.push_back(file->name());
+    }
+  }
 }
 
-GameFolder * GameFolder::getFolder(QString &name)
+void GameFolder::filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString)/* = GameFolder::defaultFilterFunc*/)
 {
-  std::map<QString, GameFolder *>::iterator result = m_subFolderMap.find(name);
+  for(GameFolder::iterator it = begin() ; it != end() ; ++it)
+  {
 
-  if(result != m_subFolderMap.end())
-    return result->second;
+    if(filterfunc((*it)->name()))
+    {
+      FileTreeItem tmp;
+      tmp.displayName = (*it)->fullname();
+      tmp.color = 0;
+      dest.insert(tmp);
+    }
+  }
+}
 
-  return 0;
+HANDLE GameFolder::openFile(std::string file)
+{
+  return m_CASCFolder.openFile(file);
+}
+
+QString GameFolder::version()
+{
+  return m_CASCFolder.version();
+}
+
+bool GameFolder::fileExists(std::string file)
+{
+   return m_CASCFolder.fileExists(file);
+}
+
+std::string GameFolder::locale()
+{
+   return m_CASCFolder.locale();
+}
+
+
+bool GameFolder::setLocale(std::string val)
+{
+  return m_CASCFolder.setLocale(val);
+}
+
+std::vector<std::string> GameFolder::localesFound()
+{
+  return m_CASCFolder.localesFound();
+}
+
+int GameFolder::lastError()
+{
+  return m_CASCFolder.lastError();
 }

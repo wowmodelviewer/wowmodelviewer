@@ -7,7 +7,7 @@
 #include <QImage>
 
 #include "CASCFile.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 #include "modelviewer.h"
@@ -58,6 +58,21 @@ static QString filterStrings[] = {"m2", "wmo", "adt", "wav", "ogg", "mp3",
 static wxString chos[] = {wxT("Models (*.m2)"), wxT("WMOs (*.wmo)"), wxT("ADTs (*.adt)"), wxT("WAVs (*.wav)"), wxT("OGGs (*.ogg)"), wxT("MP3s (*.mp3)"), 
 	wxT("Images (*.blp)"), wxT("Shaders (*.bls)"), wxT("DBCs (*.dbc)"), wxT("DB2s (*.db2)"), wxT("LUAs (*.lua)"), wxT("XMLs (*.xml)"), wxT("SKINs (*.skin)")};
 
+void beautifyFileName(QString & file)
+{
+  file = file.toLower();
+  QString firstLetter = file[0];
+  firstLetter = firstLetter.toUpper();
+  file[0] = firstLetter[0];
+  int ret = file.indexOf('\\');
+  if (ret>-1)
+  {
+    firstLetter = file[ret+1];
+    firstLetter = firstLetter.toUpper();
+    file[ret+1] = firstLetter[0];
+  }
+}
+
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
 {
 	modelviewer = NULL;
@@ -75,8 +90,6 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
 		choFilter->SetSelection(filterMode);
 	} catch(...) {};
-
-	GAMEDIRECTORY.initFileList(filelist);
 
 	filelist.clear();
 }
@@ -135,7 +148,9 @@ void FileControl::Init(ModelViewer* mv)
 	size_t index=0;
 
 	for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-		const wxString &str = (*it).displayName.toStdString();
+	  QString name = (*it).displayName;
+	  beautifyFileName(name);
+		const wxString &str = name.toStdString();
 		size_t p = 0;
 		size_t i;
 

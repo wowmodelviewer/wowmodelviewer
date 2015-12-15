@@ -13,7 +13,7 @@
 #include <QFile>
 
 #include "dbcfile.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "logger/Logger.h"
 
 GameDatabase * GameDatabase::m_instance = 0;

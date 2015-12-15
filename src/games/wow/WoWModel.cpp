@@ -9,7 +9,7 @@
 #include "Bone.h"
 #include "CASCFile.h"
 #include "GameDatabase.h"
-#include "GameDirectory.h"
+#include "Game.h"
 #include "globalvars.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"

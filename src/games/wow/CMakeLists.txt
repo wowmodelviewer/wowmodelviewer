@@ -26,8 +26,8 @@ set(src animated.cpp
         database.cpp
         dbcfile.cpp
         ddslib.cpp
+        Game.cpp
         GameDatabase.cpp
-        GameDirectory.cpp
         GameFile.cpp
         GameFolder.cpp
         globalvars.cpp

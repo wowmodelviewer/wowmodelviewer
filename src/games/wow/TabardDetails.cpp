@@ -7,7 +7,7 @@
 
 #include "TabardDetails.h"
 
-#include "GameDirectory.h"
+#include "Game.h"
 #include "wow_enums.h"
 
 #include <QXmlStreamWriter>
