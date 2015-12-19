@@ -81,7 +81,7 @@ class _COMPONENT_API_ Component
 
 		virtual unsigned int nbChildren() const {return 0; }
 
-		virtual Component * findChild(Component * /* component */,bool /* recursive */ ) { return 0; }
+		virtual bool findChild(Component * /* component */, bool /* recursive */ ) { return false; }
 		virtual Component * getChild(unsigned int /* index */) { return 0; }
 		virtual const Component * getChild(unsigned int /* index */) const { return 0; }
 

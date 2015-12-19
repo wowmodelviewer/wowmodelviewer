@@ -397,14 +397,6 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	wmoLabel->Show(TRUE);
 }
 
-QString sFilterDir;
-bool filterDir(QString fn)
-{
-	QString tmp = fn;
-	tmp = tmp.toLower();
-	return (tmp.startsWith(sFilterDir) && tmp.endsWith("blp"));
-}
-
 
 bool AnimControl::UpdateCreatureModel(WoWModel *m)
 {
@@ -456,15 +448,14 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
   // Search the model's directory for all BLPs:
-  std::set<FileTreeItem> filelist;
+  std::set<GameFile *> files;
   std::vector<QString> folderFiles;
   wxString modelpath = wxString(m->itemName());
   modelpath = modelpath.BeforeLast(MPQ_SLASH) + MPQ_SLASH;
   modelpath = modelpath.Lower();
-  sFilterDir = QString::fromStdString(modelpath.mb_str());
-  GAMEDIRECTORY.filterFileList(filelist, filterDir);
+
   // get all files in the model's folder:
-  GAMEDIRECTORY.getFilesForFolder(folderFiles, sFilterDir);
+  GAMEDIRECTORY.getFilesForFolder(folderFiles, QString::fromStdString(modelpath.mb_str()));
   // remove all files that aren't BLPs:
   auto newend = std::remove_if(folderFiles.begin(), folderFiles.end(),
                                [](QString& ff) { return ! ff.endsWith(".blp", Qt::CaseInsensitive); });
@@ -475,19 +466,19 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // - We found textures but the model only requires 1 texture
   // (Models will look bad in they require multiple textures but only one is set)
   int numConfigSkins = m->canSetTextureFromFile(1) + m->canSetTextureFromFile(2) + m->canSetTextureFromFile(3);
-  if (filelist.begin() != filelist.end())
+  if (folderFiles.begin() != folderFiles.end())
   {
     TextureGroup grp;
     grp.base = TEXTURE_GAMEOBJECT1;
     grp.count = 1;
     for (std::vector<QString>::iterator it = folderFiles.begin(); it != folderFiles.end(); ++it)
     {
-      wxString texname = (*it).toStdString();
+      wxString texname = (*it).toLower().toStdString();
       grp.tex[0] =  texname;
       BLPskins.insert(grp);
       // append to main list only if not already included as part of database-defined textures:
       if ((numConfigSkins == 1) &&
-          (std::find(alreadyUsedTextures.begin(), alreadyUsedTextures.end(), texname.Lower()) ==
+          (std::find(alreadyUsedTextures.begin(), alreadyUsedTextures.end(), texname) ==
            alreadyUsedTextures.end()))
       {
           skins.insert(grp);
@@ -604,20 +595,25 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 	LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
 	// Search the same directory for BLPs
-	std::set<FileTreeItem> filelist;
-	sFilterDir = QString::fromStdString(m->itemName());
-	sFilterDir.toLower();
-	GAMEDIRECTORY.filterFileList(filelist,filterDir);
-	if (filelist.begin() != filelist.end())
+	std::vector<QString> files;
+
+	wxString modelpath = wxString(m->itemName());
+	modelpath = modelpath.BeforeLast(MPQ_SLASH) + MPQ_SLASH;
+	modelpath = modelpath.Lower();
+
+	// get all files in the model's folder:
+	GAMEDIRECTORY.getFilesForFolder(files, QString::fromStdString(modelpath.mb_str()));
+
+	if (files.begin() != files.end())
 	{
 		TextureGroup grp;
 		grp.base = TEXTURE_ITEM;
 		grp.count = 1;
-		for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it)
+		for (std::vector<QString>::iterator it = files.begin(); it != files.end(); ++it)
 		{
-		  wxString texname = (*it).displayName.toStdString();
+		  wxString texname = it->toLower().toStdString();
 		  // use this alone texture only if not already used from database infos
-		  if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname.Lower()) == alreadyUsedTextures.end())
+		  if(grp.tex[0].length() > 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(),texname) == alreadyUsedTextures.end())
 		  {
 		    grp.tex[0] = texname;
 		    skins.insert(grp);

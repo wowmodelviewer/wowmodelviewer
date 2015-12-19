@@ -8,6 +8,7 @@
 #include "GameFolder.h"
 
 #include <QFile>
+#include <QRegularExpression>
 
 #include "CASCFile.h"
 #include "Game.h"
@@ -65,29 +66,24 @@ QString GameFolder::getFullPathForFile(QString file)
 
 void GameFolder::getFilesForFolder(std::vector<QString> &fileNames, QString folderPath)
 {
-  LOG_INFO << __FUNCTION__ << folderPath;
   folderPath = folderPath.toLower();
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
     GameFile * file = *it;
     if(file->fullname().startsWith(folderPath))
     {
-      fileNames.push_back(file->name());
+      fileNames.push_back(file->fullname());
     }
   }
 }
 
-void GameFolder::filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString)/* = GameFolder::defaultFilterFunc*/)
+void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
 {
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
-
-    if(filterfunc((*it)->name()))
+    if((*it)->name().contains(QRegularExpression(filter)))
     {
-      FileTreeItem tmp;
-      tmp.displayName = (*it)->fullname();
-      tmp.color = 0;
-      dest.insert(tmp);
+      dest.insert(*it);
     }
   }
 }

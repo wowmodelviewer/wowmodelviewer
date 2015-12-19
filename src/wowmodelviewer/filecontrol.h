@@ -8,12 +8,18 @@ class ModelViewer;
 #include <wx/string.h>
 #include <wx/treectrl.h> // wxTreeItemId
 
+class FileTreeData:public wxTreeItemData
+{
+public:
+  GameFile * file;
+  FileTreeData(GameFile * f): file(f) {}
+};
+
 class FileControl: public wxWindow
 {
 	DECLARE_CLASS(FileControl)
 	DECLARE_EVENT_TABLE()
 
-	std::set<FileTreeItem> filelist;
 public:
 	// Constructor + Deconstructor
 	FileControl(wxWindow* parent, wxWindowID id);
@@ -41,13 +47,45 @@ public:
 
 private:
 	void ClearCanvas();
-};
 
-class FileTreeData:public wxTreeItemData
-{
-public:
-	wxString fn;
-	FileTreeData(wxString fn):fn(fn) {}
+	class TreeStackItem : public Container<TreeStackItem>
+	{
+	  public:
+	    wxTreeItemId id;
+	    GameFile * file;
+
+	    TreeStackItem * getChildByName(QString name)
+	    {
+	      std::map<QString, TreeStackItem *>::iterator it = m_childrenMap.find(name);
+
+	      if(it != m_childrenMap.end())
+	        return it->second;
+
+	      return 0;
+	    }
+
+	    void onChildAdded(Component * child)
+	    {
+	      TreeStackItem * item = dynamic_cast<TreeStackItem *>(child);
+	      m_childrenMap[item->name()] = item;
+	    }
+
+	    void createTreeItems(wxTreeCtrl * tree)
+	    {
+	      for(std::map<QString, TreeStackItem *>::iterator it = m_childrenMap.begin();
+	          it != m_childrenMap.end() ;
+	          ++it)
+	      {
+	        TreeStackItem * child = it->second;
+	        child->id = tree->AppendItem(id, it->second->name().toStdString(), -1, -1, ((it->second->file)?new FileTreeData(it->second->file):0));
+	        child->createTreeItems(tree);
+
+	      }
+	    }
+
+	  private:
+	    std::map<QString, TreeStackItem *> m_childrenMap;
+	};
 };
 
 #endif

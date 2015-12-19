@@ -12,9 +12,6 @@
 #include "logger/Logger.h"
 #include "modelviewer.h"
 
-typedef std::pair<wxTreeItemId, wxString> TreeStackItem;
-typedef std::vector<TreeStackItem> TreeStack;
-
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
 BEGIN_EVENT_TABLE(FileControl, wxWindow)
@@ -90,8 +87,6 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
 		choFilter->SetSelection(filterMode);
 	} catch(...) {};
-
-	filelist.clear();
 }
 
 FileControl::~FileControl()
@@ -126,141 +121,50 @@ void FileControl::Init(ModelViewer* mv)
 	if (modelviewer == NULL)
 		modelviewer = mv;
 
-	LOG_INFO << "Initializing File Controls...";
+	LOG_INFO << "Initializing File Controls - Start";
+
 	// Gets the list of files that meet the filter criteria
 	// and puts them into an array to be processed into our file tree
 	content = QString(txtContent->GetValue().c_str()).toLower().trimmed();
 
-	filterString = filterStrings[filterMode];
+	filterString = "^.*"+ content +".*\\." + filterStrings[filterMode];
 
-	GAMEDIRECTORY.filterFileList(filelist, filterSearch);
+	std::set<GameFile *> files;
 
-	// Put all the viewable files into our File Tree.
-	TreeStack stack;
+	GAMEDIRECTORY.getFilteredFiles(files, filterString);
+	LOG_INFO << "Initializing File Controls - Filtering done";
 	TreeStackItem root;
-	wxTreeItemId item;
-	fileTree->DeleteAllItems();
-	fileTree->AddRoot(wxT("Root"));
-	root.first = fileTree->GetRootItem();
-	root.second = wxT("");
-	stack.push_back(root);
-
-	size_t index=0;
-
-	for (std::set<FileTreeItem>::iterator it = filelist.begin(); it != filelist.end(); ++it) {
-	  QString name = (*it).displayName;
+	LOG_INFO << "Initializing File Controls - Files to treat" << files.size();
+	for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it) {
+	  QString name = (*it)->fullname();
 	  beautifyFileName(name);
-		const wxString &str = name.toStdString();
-		size_t p = 0;
-		size_t i;
 
-		// find the matching place in the stack
-		for (i=1; i<stack.size(); i++) {
-			wxString &comp = stack[i].second;
-			bool match = true;
-			for (size_t j=0; j<comp.length(); j++) {
-				if (comp[j] != str[p+j]) {
-					match = false;
-					break;
-				}
-			}
-			if (match) 
-				match &= str[p+comp.length()] == '\\';
-
-			if (!match)
-				break;
-            p += comp.length() + 1;
-		}
-		// i-1 is the index of the last matching piece in the stack
-
-		// delete the extra parts off the end of the stack
-		size_t numtopop = stack.size()-i;
-		for (size_t k=0; k<numtopop; k++) {
-			stack.pop_back();
-		}
-		
-		// starting at p, append extra folders
-		size_t start = p;
-		for (; p<str.length(); p++) {
-			if (str[p]=='\\') {
-				// we've hit a folder, push it onto the stack
-				TreeStackItem newItem;
-				newItem.second = str.substr(start, p-start);
-				start = p+1;
-				newItem.first = fileTree->AppendItem(stack[stack.size()-1].first, newItem.second);
-				
-				//if (colour == true) {
-                switch(it->color){
-                    case 0:
-                        fileTree->SetItemTextColour(newItem.first, *wxBLACK);				// Base Color
-                        break;
-                    case 1:
-                        fileTree->SetItemTextColour(newItem.first, *wxBLUE);				// patch.mpq & wow-update files
-                        break;
-                    case 2:
-                        fileTree->SetItemTextColour(newItem.first, *wxRED);					// patch-2.mpq & Cache patch files
-                        break;
-					case 3:
-                        fileTree->SetItemTextColour(newItem.first, wxColour(160,0,160));	// Outland Purple (First Expansion)
-                        break;
-                    case 4:
-                        fileTree->SetItemTextColour(newItem.first, wxColour(35,130,179));	// Frozen Blue (Second Expansion)
-                        break;
-                    case 5:
-                        fileTree->SetItemTextColour(newItem.first, wxColour(233,109,17));	// Destruction Orange (Third Expansion)
-                        break;
-                    case 6:
-                        fileTree->SetItemTextColour(newItem.first, wxColour(0,207,107));	// Bamboo Green (Fourth Expansion)
-                        break;
-                    case 7:
-                        fileTree->SetItemTextColour(newItem.first, *wxCYAN);				// Reserved
-                        break;
-                    default:
-                        fileTree->SetItemTextColour(newItem.first, *wxLIGHT_GREY);
-                }
-				//} else {
-				//	colour = true;
-				//}
-				//fileTree->SetItemBackgroundColour(newItem.first, wxColour(237,243,254));
-
-				stack.push_back(newItem);
-			}
-		}
-		// now start was at the character after the last \\, so we append a filename
-		wxString fileName = str.substr(start);
-
-		item = fileTree->AppendItem(stack[stack.size()-1].first, fileName, -1, -1, new FileTreeData(str));
-        switch(it->color){
-            case 0:
-                fileTree->SetItemTextColour(item, *wxBLACK);				// Base Color
-                break;
-            case 1:
-                fileTree->SetItemTextColour(item, *wxBLUE);					// patch.mpq & wow-update files
-                break;
-            case 2:
-                fileTree->SetItemTextColour(item, *wxRED);					// patch-2.mpq & Cache patch files
-                break;
-            case 3:
-                fileTree->SetItemTextColour(item, wxColour(160,0,160));		// Outland Purple (First Expansion)
-                break;
-            case 4:
-                fileTree->SetItemTextColour(item, wxColour(35,130,179));	// Frozen Blue (Second Expansion)
-                break;
-            case 5:
-                fileTree->SetItemTextColour(item, wxColour(233,109,17));	// Destruction Orange (Third Expansion)
-                break;
-            case 6:
-                fileTree->SetItemTextColour(item, wxColour(0,207,107));		// Bamboo Green (Fourth Expansion)
-                break;
-            case 7:
-                fileTree->SetItemTextColour(item, *wxCYAN);					// Reserved
-                break;
-            default:
-                fileTree->SetItemTextColour(item, *wxLIGHT_GREY);
-        }
-		index++;
-
+	  QStringList items = name.split("\\");
+	  TreeStackItem * curparent = &root;
+	  for(int i=0; i < items.size() -1; i++)
+	  {
+	    TreeStackItem * child = curparent->getChildByName(items[i]);
+	    if(!child)
+	    {
+	      child = new TreeStackItem();
+	      child->setName(items[i]);
+	      curparent->addChild(child);
+	    }
+	    curparent = child;
+	  }
+	  TreeStackItem * child = new TreeStackItem();
+	  child->file = *it;
+	  child->setName(items[items.size()-1]);
+	  curparent->addChild(child);
 	}
+	LOG_INFO << "Initializing File Controls - File Hierachy created";
+
+	fileTree->DeleteAllItems();
+	root.id = fileTree->AddRoot(wxT("Root"));
+
+	LOG_INFO << "Initializing File Controls - nb children level 1" << root.nbChildren();
+	root.createTreeItems(fileTree);
+	LOG_INFO << "Initializing File Controls - END";
 
 	if (content != wxEmptyString)
 		fileTree->ExpandAll();
@@ -274,8 +178,6 @@ void FileControl::Init(ModelViewer* mv)
 		else
 			fileTree->SetItemBackgroundColour(h, *wxWHITE);
 	}
-
-	filelist.clear();
 }
 
 void FileControl::OnChoice(wxCommandEvent &event)
@@ -373,7 +275,7 @@ wxString FileControl::ExportPNG(wxString val)
 void FileControl::OnPopupClick(wxCommandEvent &evt)
 {
 	FileTreeData *data = (FileTreeData*)(static_cast<wxMenu *>(evt.GetEventObject())->GetClientData());
-	wxString val(data->fn);
+	wxString val(data->file->fullname().toStdString());
 
 	int id = evt.GetId();
 	if (id == ID_FILELIST_SAVE) { 
@@ -413,7 +315,7 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	infoMenu.SetClientData( data );
 	infoMenu.Append(ID_FILELIST_SAVE, wxT("&Save..."), wxT("Save this object"));
 	// TODO: if is music, a Play option
-	wxString temp(tdata->fn);
+	wxString temp(tdata->file->fullname().toStdString());
 	temp.MakeLower();
 
 	// if is graphic, a View option
@@ -584,13 +486,12 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 	CurrentItem = item;
 
 	if (filterMode == FILE_FILTER_MODEL) {
+	  wxString rootfn(data->file->fullname().toStdString());
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model && !modelviewer->canvas->model->name().isEmpty() && modelviewer->canvas->model->name().toStdString() == std::string(data->fn.c_str()))
+		if (modelviewer->canvas->model && !modelviewer->canvas->model->name().isEmpty() && modelviewer->canvas->model->name().toStdString() == std::string(rootfn.c_str()))
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();
-
-		wxString rootfn(data->fn);
 		LOG_INFO << "Selecting model in tree selector:" << rootfn.c_str();
 
 		// Check to make sure the selected item is a model (an *.m2 file).
@@ -607,13 +508,13 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		modelviewer->isWMO = true;
-		wxString rootfn(data->fn);
+		wxString rootfn(data->file->fullname().toStdString());
 
 		//canvas->model->modelType = MT_WMO;
 
 		// if we have selected a non-root wmo, find the root filename
-		char dash = rootfn[data->fn.length() - 8];
-		char num = rootfn[data->fn.length() - 7];
+		char dash = rootfn[rootfn.length() - 8];
+		char num = rootfn[rootfn.length() - 7];
 		bool isroot = !((dash=='_') && (num>='0') && (num<='9'));
 		if (!isroot) {
 			rootfn.erase(rootfn.length()-8);
@@ -625,7 +526,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		int id = -1;
 		if (!isroot) {
 			char idnum[4];
-			strncpy(idnum, (char *)data->fn.c_str() + strlen((char *)data->fn.c_str())-7,3);
+			strncpy(idnum, (char *)rootfn.c_str() + strlen((char *)rootfn.c_str())-7,3);
 			//wxString(data->fn.Substr((data->fn.Length() - 7), 3)).ToLong(&id);
 			idnum[3]=0;
 			sscanf(idnum,"%d",&id);
@@ -642,7 +543,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		// For Graphics
-		wxString val(data->fn);
+		wxString val(data->file->fullname().toStdString());
 		ExportPNG(val);
 		wxFileName fn(val);
 		wxString temp(wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png"));
@@ -654,7 +555,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		modelviewer->isADT = true;
-		wxString rootfn(data->fn);
+		wxString rootfn(data->file->fullname().toStdString());
 		modelviewer->canvas->LoadADT(rootfn);
 
 		UpdateInterface();

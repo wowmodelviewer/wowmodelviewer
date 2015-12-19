@@ -15,7 +15,6 @@
 #include <QStringList>
 
 #include "CASCFolder.h"
-#include "FileTreeItem.h"
 #include "GameFile.h"
 
 #include "metaclasses/Container.h"
@@ -45,7 +44,7 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     bool fileExists(std::string file);
 
     void getFilesForFolder(std::vector<QString> &fileNames, QString folderPath);
-    void filterFileList(std::set<FileTreeItem> &dest, bool filterfunc(QString) = GameFolder::defaultFilterFunc);
+    void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
 
     HANDLE openFile(std::string file);
 
@@ -59,7 +58,6 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
 
   private:
     CASCFolder m_CASCFolder;
-    static bool defaultFilterFunc(QString) { return true; }
 };
 
 

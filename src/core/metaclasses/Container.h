@@ -71,9 +71,9 @@ class Container : public Component
 
 		unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
 
-		Component * findChild(Component * child, bool recursive = false);
-		DataType * getChild(unsigned int index);
-		const DataType * getChild(unsigned int index) const;
+		bool findChild(Component * child, bool recursive = false);
+		Component * getChild(unsigned int index);
+		const Component * getChild(unsigned int index) const;
 		
 		iterator begin()
 		{
@@ -190,12 +190,12 @@ int Container<DataType>::removeAllChildrenOfType()
 
 
 template<class DataType>
-Component * Container<DataType>::findChild(Component * child, bool recursive /* = false */)
+bool Container<DataType>::findChild(Component * child, bool recursive /* = false */)
 {
 	std::unordered_set<DataType *>::const_iterator l_it = m_children.find(dynamic_cast<DataType *>(child));
 
 	if(l_it != m_children.end())
-	  return *l_it;
+	  return true;
 
 	// resursive part
 	if(recursive)
@@ -203,9 +203,8 @@ Component * Container<DataType>::findChild(Component * child, bool recursive /* 
 	  std::unordered_set<DataType *>::const_iterator l_itEnd = m_children.end();
 	  for(l_it = m_children.begin() ; l_it != l_itEnd ; ++l_it)
 	  {
-	    Component * result = (*l_it)->findChild(child,recursive);
-	    if(result)
-	      return result;
+	    if((*l_it)->findChild(child,recursive))
+	      return true;
 	  }
 	}
 
@@ -213,7 +212,7 @@ Component * Container<DataType>::findChild(Component * child, bool recursive /* 
 }
 
 template<class DataType>
-DataType * Container<DataType>::getChild(unsigned int index)
+Component * Container<DataType>::getChild(unsigned int index)
 {
 	DataType * l_p_result = 0;
 	if(index < m_children.size())
@@ -230,7 +229,7 @@ DataType * Container<DataType>::getChild(unsigned int index)
 }
 
 template<class DataType>
-const DataType * Container<DataType>::getChild(unsigned int index) const
+const Component * Container<DataType>::getChild(unsigned int index) const
 {
 	const DataType * l_p_result = 0;
 	if(index < m_children.size())
