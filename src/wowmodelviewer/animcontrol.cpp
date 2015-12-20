@@ -437,7 +437,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.count = count;
 
-      if(grp.tex[0] != 0 > 0 && std::find(skins.begin(),skins.end(),grp) == skins.end())
+      if(grp.tex[0] != 0 && std::find(skins.begin(),skins.end(),grp) == skins.end())
         skins.insert(grp);
     }
   }
