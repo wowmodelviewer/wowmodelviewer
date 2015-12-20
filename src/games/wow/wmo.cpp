@@ -5,7 +5,7 @@
 
 using namespace std;
 
-WMO::WMO(std::string name): ManagedItem(name)
+WMO::WMO(QString name): ManagedItem(name)
 {
   /*
 	GameFile f(name);
@@ -266,7 +266,7 @@ WMO::~WMO()
 		delete[] groups;
 
 		for (size_t i=0; i<textures.size(); i++) {
-            texturemanager.delbyname(textures[i]);
+		  texturemanager.delbyname(textures[i]);
 		}
 
 		/*

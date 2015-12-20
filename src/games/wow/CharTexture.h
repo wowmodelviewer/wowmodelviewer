@@ -11,6 +11,8 @@
 #include <map>
 #include "video.h" // TextureID
 
+class GameFile;
+
 struct CharRegionCoords {
 	int xpos, ypos, width, height;
 };
@@ -21,7 +23,7 @@ struct LayoutSize {
 
 struct CharTextureComponent
 {
-  std::string name;
+  GameFile * file;
   int region;
   int layer;
 
@@ -45,10 +47,10 @@ class _CHARTEXTURE_API_ CharTexture
 {
   public:
     CharTexture(unsigned int _layoutSizeId = 0)
-        : layoutSizeId(_layoutSizeId)
-      {}
+  : layoutSizeId(_layoutSizeId)
+  {}
 
-    void addLayer(std::string fn, int region, int layer);
+    void addLayer(QString fn, int region, int layer);
 
     void compose(TextureID texID);
 
@@ -58,9 +60,8 @@ class _CHARTEXTURE_API_ CharTexture
 
   private:
     unsigned int layoutSizeId;
-	std::vector<CharTextureComponent> m_components;
-	static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
-
+    std::vector<CharTextureComponent> m_components;
+    static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
 };
 
 

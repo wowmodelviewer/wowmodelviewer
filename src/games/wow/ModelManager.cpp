@@ -10,7 +10,7 @@
 #include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's
-int ModelManager::add(std::string)
+int ModelManager::add(GameFile *)
 {
   return 1;
   //@TODO : to repair, used by WMO only

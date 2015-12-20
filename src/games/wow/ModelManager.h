@@ -12,7 +12,7 @@
 
 class ModelManager: public SimpleManager {
 public:
-	int add(std::string name);
+	int add(GameFile *);
 
 	ModelManager() : v(0) {}
 

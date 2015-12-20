@@ -22,12 +22,12 @@ class TextureGroup
     static const size_t num = 3;
     size_t count;
     int base;
-    wxString tex[num];
-    TextureGroup() : base(0)
+    GameFile * tex[num];
+    TextureGroup() : base(0), count(0)
     {
       for (size_t i=0; i<num; i++)
       {
-        tex[i] = wxT("");
+        tex[i] = 0;
       }
     }
 

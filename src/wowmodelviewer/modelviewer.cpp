@@ -1073,14 +1073,13 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	    int count = 0;
 	    for(int i=0; i < 3; i++)
 	    {
-	      QString tex = r.values[0][0] + r.values[0][i+2] + ".blp";
-	      grp.tex[i] = tex.toStdString();
-	      if(tex.length() > 0)
+	      grp.tex[i] = GAMEDIRECTORY.getFile(r.values[0][0] + r.values[0][i+2] + ".blp");
+	      if(grp.tex[0])
 	        count++;
 	    }
 	    grp.base = TEXTURE_GAMEOBJECT1;
 	    grp.count = count;
-	    if (grp.tex[0].length() > 0)
+	    if (grp.tex[0])
 	      animControl->AddSkin(grp);
 	  }
 	  else
@@ -1216,8 +1215,8 @@ void ModelViewer::LoadItem(unsigned int id)
 	      grp.base = TEXTURE_ITEM;
 	      grp.count = 1;
 
-	      grp.tex[0] = texture1.c_str();
-	      if (grp.tex[0].length() > 0)
+	      grp.tex[0] = GAMEDIRECTORY.getFile(texture1.c_str());
+	      if (grp.tex[0])
 	        animControl->AddSkin(grp);
 	    }
 	  }
@@ -2541,7 +2540,7 @@ void ModelViewer::ModelInfo()
 		xml << "      <vertexEnd>" << p.vertexEnd << "</vertexEnd>" << endl;
 		xml << "      <tex>" << p.tex << "</tex>" << endl;
 		if (p.tex >= 0)
-			xml << "      <texName>" << m->TextureList[p.tex] << "</texName>" << endl;
+			xml << "      <texName>" << m->TextureList[p.tex].toStdString() << "</texName>" << endl;
 		xml << "      <useTex2>" << p.useTex2 << "</useTex2>" << endl;
 		xml << "      <useEnvMap>" << p.useEnvMap << "</useEnvMap>" << endl;
 		xml << "      <cull>" << p.cull << "</cull>" << endl;
@@ -2736,7 +2735,7 @@ void ModelViewer::ModelInfo()
 //	xml << "    <>" << m->header. << "</>" << endl;
 	xml << "  <TextureLists>" << endl;
 	for(size_t i=0; i<m->TextureList.size(); i++) {
-		xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i] << "</TextureList>" << endl;
+		xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i].toStdString() << "</TextureList>" << endl;
 	}
 	xml << "  </TextureLists>" << endl;
 

@@ -8,8 +8,9 @@
 
 #include <wx/arrstr.h>
 
-#include "vec3d.h"
 #include "enums.h"
+#include "GameFile.h"
+#include "vec3d.h"
 #include "wow_enums.h"
 
 #include <vector>
@@ -22,7 +23,7 @@ struct ModelBank
 	ModelType modelType;
 
 	// Non-Char info
-	wxArrayString textures;
+	std::vector<GameFile *> textures;
 
 	Vec3D pos;
 	Vec3D rot;

@@ -375,9 +375,9 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
     if (p.init(model))
     {
-      std::string tex = model->TextureList[p.tex].c_str();
-      QString texfile = QFileInfo(tex.c_str()).completeBaseName();
-      tex = QFileInfo(mtlFile).completeBaseName().toStdString() + "_" + texfile.toStdString() + ".png";
+      QString tex = model->TextureList[p.tex];
+      QString texfile = QFileInfo(tex).completeBaseName();
+      tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
       float amb = 0.25f;
       Vec4D diff = p.ocol;
@@ -406,9 +406,9 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       file << "Ke 0.000000 0.000000 0.000000" << "\n";
       file << QString(wxString::Format(wxT("Ns %0.6f"), 0.0f)) << "\n";
 
-      file << "map_Kd " << QString::fromStdString(tex) << "\n";
-      tex = QFileInfo(mtlFile).absolutePath().toStdString() + "\\" + tex;
-      texToExport[tex] = model->TextureList[p.tex].c_str();
+      file << "map_Kd " << tex << "\n";
+      tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
+      texToExport[tex.toStdString()] = model->TextureList[p.tex].toStdString();
     }
   }
 
@@ -424,7 +424,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
     }
     else
     {
-      GLuint texID = texturemanager.add(it->second);
+      GLuint texID = texturemanager.get(it->second.c_str());
       exportGLTexture(texID, it->first);
     }
   }

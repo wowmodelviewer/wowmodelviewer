@@ -4,11 +4,13 @@
 #include <algorithm>
 
 #include "logger/Logger.h"
-#include "globalvars.h"
+
+#include "Game.h"
 #include "GameFile.h"
-#include "vec3d.h"
+#include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
+#include "vec3d.h"
 
 using namespace std;
 
@@ -771,7 +773,7 @@ MapTile::~MapTile()
 	}
 
 	for (size_t j=0; j<textures.size(); j++) {
-		texturemanager.delbyname(textures[j]);
+		texturemanager.delbyname(textures[j].c_str());
 	}
 
 	/*
@@ -978,7 +980,7 @@ void MapChunk::initTextures(wxString basename, int first, int last)
 	wxString buf;
 	for (ssize_t i=first; i<=last; i++) {
 		buf = wxString::Format(wxT("%s.%d.blp"), (char *)basename.c_str(), i);
-		wTextures.push_back(texturemanager.add(buf.c_str()));
+		wTextures.push_back(texturemanager.add(GAMEDIRECTORY.getFile(buf.c_str())));
 	}
 }
 
@@ -1253,7 +1255,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 					animated[i] = 0;
 				}
 
-				textures[i] = texturemanager.get(mt->textures[mcly[i].textureId]);
+				textures[i] = texturemanager.get(mt->textures[mcly[i].textureId].c_str());
 			}
 		}
 		else if (strncmp(fcc, "MCRF", 4) == 0) {

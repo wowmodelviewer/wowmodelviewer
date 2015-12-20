@@ -89,7 +89,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	if (!file)
 		return;
 
-	setItemName(file->fullname().toStdString());
+	setItemName(file->fullname());
 
 	// replace .MDX with .M2
 	QString tempname = file->fullname();
@@ -539,10 +539,10 @@ void WoWModel::initCommon(GameFile * f)
 			*/
 
 			if (texdef[i].type == TEXTURE_FILENAME) {
-				std::string texname((char*)(f->getBuffer()+texdef[i].nameOfs));
-				textures[i] = texturemanager.add(texname);
+				QString texname((char*)(f->getBuffer()+texdef[i].nameOfs));
+				textures[i] = texturemanager.add(GAMEDIRECTORY.getFile(texname));
 				TextureList.push_back(texname);
-				LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << TextureList.size() << "]";
+				LOG_INFO << "Added" << texname << "to the TextureList[" << TextureList.size() << "]";
 			} else {
 				// special texture - only on characters and such...
 				textures[i] = 0;
@@ -562,14 +562,14 @@ void WoWModel::initCommon(GameFile * f)
 				}
 
 				LOG_INFO << "Added" << tex << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
-				TextureList.push_back(tex.toStdString());
+				TextureList.push_back(tex);
 
 				if (texdef[i].type < TEXTURE_MAX)
 					useReplaceTextures[texdef[i].type] = true;
 
 				if (texdef[i].type == TEXTURE_ARMORREFLECT) {
 					// a fix for weapons with type-3 textures.
-					replaceTextures[texdef[i].type] = texturemanager.add("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP");
+					replaceTextures[texdef[i].type] = texturemanager.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
 				}
 			}
 		}
@@ -1443,13 +1443,13 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   return 0;
 }
 
-void WoWModel::UpdateTextureList(std::string texName, int special)
+void WoWModel::UpdateTextureList(QString texName, int special)
 {
   for (size_t i=0; i< header.nTextures; i++)
   {
     if (specialTextures[i] == special)
     {
-      LOG_INFO << "Updating" << TextureList[i].c_str() << "to" << texName.c_str();
+      LOG_INFO << "Updating" << TextureList[i] << "to" << texName;
       TextureList[i] = texName;
       break;
     }

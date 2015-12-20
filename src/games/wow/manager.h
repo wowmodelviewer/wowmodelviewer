@@ -2,10 +2,12 @@
 #define MANAGER_H
 
 // STL
-#include <string>
+#include <iostream>
 #include <map>
 
-#include <iostream>
+#include <QString>
+
+#include "GameFile.h"
 #include "OpenGLHeaders.h"
 
 // base class for manager objects
@@ -17,14 +19,15 @@
 #        define _MANAGEDITEM_API_ __declspec(dllimport)
 #    endif
 #else
-#    define _DISPLAYABLE_API_
+#    define _MANAGEDITEM_API_
 #endif
 
-class _MANAGEDITEM_API_ ManagedItem {
+class _MANAGEDITEM_API_ ManagedItem
+{
 	int refcount;
-	std::string m_itemName;
+	QString m_itemName;
 public:
-	ManagedItem(std::string n): refcount(0), m_itemName(n) { }
+	ManagedItem(QString n): refcount(0), m_itemName(n) { }
 	virtual ~ManagedItem() {}
 
 	void addref()
@@ -37,8 +40,8 @@ public:
 		return --refcount==0;
 	}
 	
-	void setItemName(std::string name) { m_itemName = name; }
-	std::string itemName() { return m_itemName; }
+	void setItemName(QString name) { m_itemName = name; }
+	QString itemName() { return m_itemName; }
 };
 
 
@@ -46,14 +49,20 @@ public:
 template <class IDTYPE>
 class Manager {
 public:
-	std::map<std::string, IDTYPE> names;
+	std::map<QString, IDTYPE> names;
 	std::map<IDTYPE, ManagedItem*> items;
 
 	Manager()
 	{
 	}
 
-	virtual IDTYPE add(std::string name) = 0;
+	~Manager()
+	{
+	  names.clear();
+	  items.clear();
+	}
+
+	virtual IDTYPE add(GameFile *) = 0;
 
 	virtual void del(IDTYPE id)
 	{
@@ -76,7 +85,7 @@ public:
 		}
 	}
 
-	void delbyname(std::string name)
+	void delbyname(QString name)
 	{
 		if (has(name)) 
 			del(get(name));
@@ -84,17 +93,21 @@ public:
 
 	virtual void doDelete(IDTYPE) {}
 
-	bool has(std::string name)
+	bool has(QString name)
 	{
 		return (names.find(name) != names.end());
 	}
 
-	IDTYPE get(std::string name)
+	IDTYPE get(QString name)
 	{
-		return names[name];
+	  std::map<QString, IDTYPE>::iterator it = names.find(name);
+	  if(it != names.end())
+	    return it->second;
+
+		return 0;
 	}
 
-	std::string get(IDTYPE id)
+	QString get(IDTYPE id)
 	{
 	  return "";
 		//return names[id];
@@ -113,7 +126,7 @@ public:
 	}
 
 protected:
-	void do_add(std::string name, IDTYPE id, ManagedItem* item)
+	void do_add(QString name, IDTYPE id, ManagedItem* item)
 	{
 		names[name] = id;
 		item->addref();

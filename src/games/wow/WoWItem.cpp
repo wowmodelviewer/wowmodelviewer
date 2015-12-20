@@ -207,7 +207,7 @@ void WoWItem::unload()
   itemModels.clear();
 
   // release textures and clear map
-  for(std::map<CharRegions, std::string>::iterator it = m_itemTextures.begin(),
+  for(std::map<CharRegions, QString>::iterator it = m_itemTextures.begin(),
       itEnd = m_itemTextures.end();
       it != itEnd ;
       ++it)
@@ -295,14 +295,14 @@ void WoWItem::load()
     if (m->ok)
     {
       itemModels[ATT_HELMET] = m;
-      std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x] == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+          m->TextureList[x] = texture->fullname();
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -325,14 +325,14 @@ void WoWItem::load()
     if (m->ok)
     {
       itemModels[ATT_LEFT_SHOULDER] = m;
-      std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x] == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+          m->TextureList[x] = texture->fullname();
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -348,14 +348,14 @@ void WoWItem::load()
     if (m->ok)
     {
       itemModels[ATT_RIGHT_SHOULDER] = m;
-      std::string texture = iteminfos.values[0][4].toStdString() + iteminfos.values[0][5].toStdString();
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][4] + iteminfos.values[0][5]);
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x] == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+          m->TextureList[x] = texture->fullname();
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -366,18 +366,18 @@ void WoWItem::load()
   {
     m_itemGeosets[CG_BOOTS] = 1 + iteminfos.values[0][6].toInt();
 
-    std::string texture = iteminfos.values[0][23].toStdString() + iteminfos.values[0][24].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][23] + iteminfos.values[0][24]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_LEG_LOWER] = texture;
+      m_itemTextures[CR_LEG_LOWER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][25].toStdString() + iteminfos.values[0][26].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][25] + iteminfos.values[0][26]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_FOOT] = texture;
+      m_itemTextures[CR_FOOT] = texture->fullname();
     }
   }
   break;
@@ -398,32 +398,32 @@ void WoWItem::load()
   		if (m->ok)
   		{
   			itemModels[ATT_BELT_BUCKLE] = m;
-  			std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+  			GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
   			tex = texturemanager.add(texture);
   			for (size_t x=0;x<m->TextureList.size();x++)
   			{
   				if (m->TextureList[x] == "Special_2")
   				{
-  					LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-  					m->TextureList[x] = texture;
+  					LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+  					m->TextureList[x] = texture->fullname();
   				}
   			}
   			m->replaceTextures[TEXTURE_CAPE] = tex;
   		}
   	}
 
-  	std::string texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
-  	if(!texture.empty())
+  	GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][19] + iteminfos.values[0][20]);
+  	if(texture)
   	{
   		texturemanager.add(texture);
-  		m_itemTextures[CR_TORSO_LOWER] = texture;
+  		m_itemTextures[CR_TORSO_LOWER] = texture->fullname();
   	}
 
-  	texture = iteminfos.values[0][21].toStdString() + iteminfos.values[0][22].toStdString();
-  	if(!texture.empty())
+  	texture = GAMEDIRECTORY.getFile(iteminfos.values[0][21] + iteminfos.values[0][22]);
+  	if(texture)
   	{
   		texturemanager.add(texture);
-  		m_itemTextures[CR_LEG_UPPER] = texture;
+  		m_itemTextures[CR_LEG_UPPER] = texture->fullname();
   	}
   }
   break;
@@ -431,18 +431,18 @@ void WoWItem::load()
   {
     m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][7].toInt();
 
-    std::string texture = iteminfos.values[0][21].toStdString() + iteminfos.values[0][22].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][21] + iteminfos.values[0][22]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_LEG_UPPER] = texture;
+      m_itemTextures[CR_LEG_UPPER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][23].toStdString() + iteminfos.values[0][24].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][23] + iteminfos.values[0][24]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_LEG_LOWER] = texture;
+      m_itemTextures[CR_LEG_LOWER] = texture->fullname();
     }
 
     if (iteminfos.values[0][8].toInt()==1)
@@ -455,32 +455,32 @@ void WoWItem::load()
   {
     m_itemGeosets[CG_WRISTBANDS] = 1 + iteminfos.values[0][6].toInt();
 
-    std::string texture = iteminfos.values[0][11].toStdString() + iteminfos.values[0][12].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][11] + iteminfos.values[0][12]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_ARM_UPPER] = texture;
+      m_itemTextures[CR_ARM_UPPER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][13].toStdString() + iteminfos.values[0][14].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][13] + iteminfos.values[0][14]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_ARM_LOWER] = texture;
+      m_itemTextures[CR_ARM_LOWER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][17].toStdString() + iteminfos.values[0][18].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][17] + iteminfos.values[0][18]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_TORSO_UPPER] = texture;
+      m_itemTextures[CR_TORSO_UPPER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][19] + iteminfos.values[0][20]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_TORSO_LOWER] = texture;
+      m_itemTextures[CR_TORSO_LOWER] = texture->fullname();
     }
 
     const ItemRecord &item = items.getById(m_id);
@@ -489,29 +489,29 @@ void WoWItem::load()
     {
       m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][8].toInt();
 
-      texture = iteminfos.values[0][21].toStdString() + iteminfos.values[0][22].toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(iteminfos.values[0][21] + iteminfos.values[0][22]);
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_LEG_UPPER] = texture;
+        m_itemTextures[CR_LEG_UPPER] = texture->fullname();
       }
 
-      texture = iteminfos.values[0][23].toStdString() + iteminfos.values[0][24].toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(iteminfos.values[0][23] + iteminfos.values[0][24]);
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_LEG_LOWER] = texture;
+        m_itemTextures[CR_LEG_LOWER] = texture->fullname();
       }
     }
   }
   break;
   case CS_BRACERS:
   {
-    std::string texture = iteminfos.values[0][13].toStdString() + iteminfos.values[0][14].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][13] + iteminfos.values[0][14]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_ARM_LOWER] = texture;
+      m_itemTextures[CR_ARM_LOWER] = texture->fullname();
     }
   }
   break;
@@ -519,18 +519,18 @@ void WoWItem::load()
   {
     m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][6].toInt();
 
-    std::string texture = iteminfos.values[0][13].toStdString() + iteminfos.values[0][14].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][13] + iteminfos.values[0][14]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_ARM_LOWER] = texture;
+      m_itemTextures[CR_ARM_LOWER] = texture->fullname();
     }
 
-    texture = iteminfos.values[0][15].toStdString() + iteminfos.values[0][16].toStdString();
-    if(!texture.empty())
+    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][15] + iteminfos.values[0][16]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_HAND] = texture;
+      m_itemTextures[CR_HAND] = texture->fullname();
     }
   }
   break;
@@ -549,14 +549,14 @@ void WoWItem::load()
     {
       itemModels[ATT_RIGHT_PALM] = m;
 
-      std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x] == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+          m->TextureList[x] = texture->fullname();
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -578,14 +578,14 @@ void WoWItem::load()
     {
       itemModels[ATT_LEFT_PALM] = m;
 
-      std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x] == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x].c_str() << "with" << texture.c_str();
-          m->TextureList[x] = texture;
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
+          m->TextureList[x] = texture->fullname();
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -596,11 +596,11 @@ void WoWItem::load()
   {
     m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][6].toInt();
 
-    std::string texture = iteminfos.values[0][2].toStdString() + iteminfos.values[0][3].toStdString();
-    if(!texture.empty())
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
+    if(texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_CAPE] = texture;
+      m_itemTextures[CR_CAPE] = texture->fullname();
     }
   }
   break;
@@ -610,63 +610,63 @@ void WoWItem::load()
     if(isCustomizableTabard())
     {
     	m_charModel->td.showCustom = true;
-      std::string texture = m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER).toStdString();
-      if(!texture.empty())
+    	GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_1] = texture;
+        m_itemTextures[CR_TABARD_1] = texture->fullname();
       }
 
-      texture = m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER).toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_2] = texture;
+        m_itemTextures[CR_TABARD_2] = texture->fullname();
       }
 
-      texture = m_charModel->td.GetIconTex(CR_TORSO_UPPER).toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_UPPER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_3] = texture;
+        m_itemTextures[CR_TABARD_3] = texture->fullname();
       }
 
-      texture = m_charModel->td.GetIconTex(CR_TORSO_LOWER).toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_LOWER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_4] = texture;
+        m_itemTextures[CR_TABARD_4] = texture->fullname();
       }
 
-      texture = m_charModel->td.GetBorderTex(CR_TORSO_UPPER).toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_UPPER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_5] = texture;
+        m_itemTextures[CR_TABARD_5] = texture->fullname();
       }
 
-      texture = m_charModel->td.GetBorderTex(CR_TORSO_LOWER).toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_LOWER));
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TABARD_6] = texture;
+        m_itemTextures[CR_TABARD_6] = texture->fullname();
       }
     }
     else
     {
     	m_charModel->td.showCustom = false;
-      std::string texture = iteminfos.values[0][17].toStdString() + iteminfos.values[0][18].toStdString();
-      if(!texture.empty())
+    	GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][17] + iteminfos.values[0][18]);
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TORSO_UPPER] = texture;
+        m_itemTextures[CR_TORSO_UPPER] = texture->fullname();
       }
 
-      texture = iteminfos.values[0][19].toStdString() + iteminfos.values[0][20].toStdString();
-      if(!texture.empty())
+      texture = GAMEDIRECTORY.getFile(iteminfos.values[0][19] + iteminfos.values[0][20]);
+      if(texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_TORSO_LOWER] = texture;
+        m_itemTextures[CR_TORSO_LOWER] = texture->fullname();
       }
     }
   }
@@ -784,7 +784,7 @@ void WoWItem::refresh()
       if(it != itemModels.end())
       	 m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
 
-      std::map<CharRegions, std::string>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
+      std::map<CharRegions, QString>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
       if(it2 != m_itemTextures.end())
       	m_charModel->tex.addLayer(it2->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -800,7 +800,7 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_LOWER);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_LEG_LOWER);
     if(it != m_itemTextures.end())
       m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
@@ -823,7 +823,7 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
     if(it != m_itemTextures.end())
       m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -840,7 +840,7 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_WRISTBANDS] = geoIt->second;
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
     if(it != m_itemTextures.end())
       m_charModel->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -874,7 +874,7 @@ void WoWItem::refresh()
   }
   case CS_BRACERS:
   {
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
     if(it != m_itemTextures.end())
       m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
     break;
@@ -885,7 +885,7 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
     if(it != m_itemTextures.end())
       m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
 
@@ -900,10 +900,10 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_CAPE] = geoIt->second;
 
-    std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_CAPE);
+    std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_CAPE);
     if(it != m_itemTextures.end())
     {
-    	m_charModel->capeTex = texturemanager.add(it->second);
+    	m_charModel->capeTex = texturemanager.add(GAMEDIRECTORY.getFile(it->second));
       m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
     }
     break;
@@ -914,7 +914,7 @@ void WoWItem::refresh()
 
     if(isCustomizableTabard())
     {
-      std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TABARD_1);
+      std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_TABARD_1);
       if(it != m_itemTextures.end())
         m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -941,7 +941,7 @@ void WoWItem::refresh()
     }
     else
     {
-      std::map<CharRegions, std::string>::iterator it = m_itemTextures.find(CR_TORSO_UPPER);
+      std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_TORSO_UPPER);
       if(it != m_itemTextures.end())
         m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 

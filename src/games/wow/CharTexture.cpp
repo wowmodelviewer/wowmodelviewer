@@ -13,21 +13,25 @@
 
 #include <QImage>
 #include <QPainter>
+
+#include "Game.h"
 #include "GameDatabase.h"
+#include "GameFile.h"
 #include "types.h"
 #include "wow_enums.h" // NUM_REGIONS
+
 #include "logger/Logger.h"
 
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 
-void CharTexture::addLayer(std::string fn, int region, int layer)
+void CharTexture::addLayer(QString fn, int region, int layer)
 {
   //std::cout << __FUNCTION__ << " " << fn.mb_str() << " " << region << " " << layer << std::endl;
   if (fn.length()==0)
     return;
 
   CharTextureComponent ct;
-  ct.name = fn;
+  ct.file = GAMEDIRECTORY.getFile(fn);
   ct.region = region;
   ct.layer = layer;
   m_components.push_back(ct);
@@ -48,7 +52,7 @@ void CharTexture::compose(TextureID texID)
 	// if we only have one texture then don't bother with compositing
 	if (m_components.size()==1)
 	{
-		Texture temp(m_components[0].name);
+		Texture temp(m_components[0].file);
 		texturemanager.LoadBLP(texID, &temp);
 		return;
 	}
@@ -64,7 +68,7 @@ void CharTexture::compose(TextureID texID)
 		CharTextureComponent &comp = *it;
 		const CharRegionCoords &coords = layoutInfos.second[comp.region];
 
-		TextureID temptex = texturemanager.add(comp.name);
+		TextureID temptex = texturemanager.add(comp.file);
 		Texture * tex = dynamic_cast<Texture*>(texturemanager.items[temptex]);
 
 		// Alfred 2009.07.03, tex width or height can't be zero

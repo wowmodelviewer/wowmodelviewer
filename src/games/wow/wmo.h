@@ -174,7 +174,7 @@ public:
 	unsigned int d1;
 	
 	WoWModel *model;
-	std::string filename;
+	QString filename;
 	int id;
 	unsigned int scale;
 	int light;
@@ -235,7 +235,7 @@ public:
 	WMOMaterial *mat;
 	bool ok;
 	char *groupnames;
-	std::vector<std::string> textures;
+	std::vector<QString> textures;
 	std::vector<std::string> models;
 	std::vector<WMOModelInstance> modelis;
 	ModelManager loadedModels;
@@ -254,7 +254,7 @@ public:
 	WoWModel *skybox;
 	int sbid;
 
-	WMO(std::string name);
+	WMO(QString name);
 	~WMO();
 	
 	int doodadset;

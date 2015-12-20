@@ -244,7 +244,7 @@ wxString FileControl::ExportPNG(wxString val)
 	if (fn.GetExt().Lower() != wxT("blp"))
 		return "";
 
-	TextureID temptex = texturemanager.add(val.c_str());
+	TextureID temptex = texturemanager.add(GAMEDIRECTORY.getFile(val.c_str()));
 	Texture &tex = *((Texture*)texturemanager.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return "";

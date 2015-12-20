@@ -461,19 +461,6 @@ void FBXExporter::createSkeleton()
   }
 }
 
-// Get Proper Texture Names for an M2 File
-wxString GetM2TextureName(WoWModel *m, ModelRenderPass p, size_t PassNumber)
-{
-  wxString texName;
-  if ((int)m->TextureList.size() > p.tex)
-    texName = wxString(m->TextureList[p.tex]).BeforeLast(wxT('.')).AfterLast(SLASH);
-
-  if (texName.Len() == 0)
-    texName = wxString(m->modelname).BeforeLast(wxT('.')).AfterLast(SLASH) + wxString::Format(wxT("_Image_%03i"),PassNumber);
-
-  return texName;
-}
-
 // Create materials.
 void FBXExporter::createMaterials()
 {
@@ -494,7 +481,7 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      wxString tex = m_p_model->TextureList[pass.tex];
+      wxString tex = m_p_model->TextureList[pass.tex].toStdString().c_str();
       std::string tex_name = tex.AfterLast(SLASH).BeforeLast('.').c_str();
       tex_name += ".png";
       wxString tex_fullpath_filename = wxString(m_filename.c_str()).BeforeLast(SLASH) + wxT(SLASH) + tex_name.c_str();
@@ -502,7 +489,7 @@ void FBXExporter::createMaterials()
       if(tex_name.find("Body") != std::string::npos)
         m_texturesToExport[tex_fullpath_filename.c_str()] = m_p_model->replaceTextures[TEXTURE_BODY];
       else
-        m_texturesToExport[tex_fullpath_filename.c_str()] = texturemanager.add(tex.c_str());
+        m_texturesToExport[tex_fullpath_filename.c_str()] = texturemanager.get(tex.c_str());
 
       FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.c_str());
       texture->SetFileName(tex_fullpath_filename.c_str());

@@ -700,9 +700,14 @@ void VideoSettings::SetCurrent()
 #endif
 }
 
-GLuint TextureManager::add(std::string name)
+GLuint TextureManager::add(GameFile * file)
 {
 	GLuint id = 0;
+
+	if(!file)
+	  return 0;
+
+	QString name = file->fullname();
 
 	// if the item already exists, return the existing ID
 	if (names.find(name) != names.end()) {
@@ -713,7 +718,7 @@ GLuint TextureManager::add(std::string name)
 
 	// Else, create the texture
 
-	Texture *tex = new Texture(name);
+	Texture *tex = new Texture(file);
 	if (tex) {
 		// clear old texture memory from vid card
 		glDeleteTextures(1, &id);
@@ -742,7 +747,7 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	
-	GameFile * f = GAMEDIRECTORY.getFile(tex->itemName().c_str());
+	GameFile * f = tex->file;
 
 	if (!f || !f->open() || f->isEof()) {
 		tex->id = 0;
@@ -977,6 +982,10 @@ void TextureManager::doDelete(GLuint id)
 	}
 }
 
+Texture::Texture(GameFile * f)
+: ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f)
+{
+}
 
 void Texture::getPixels(unsigned char* buf, unsigned int format)
 {

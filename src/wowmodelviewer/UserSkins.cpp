@@ -2,6 +2,7 @@
 
 #include <fstream>
 
+#include "Game.h"
 #include "logger/Logger.h"
 
 #define SET_WARN_COUNT 10
@@ -69,8 +70,8 @@ void UserSkins::LoadFile(const wxString &filename)
 					LOG_ERROR << "UserSkins: unexpected EOF at line" << lineNr;
 					return;
 				}
-				grp.tex[i] = wxString(line.c_str(), wxConvUTF8);
-				if (grp.tex[i] != wxEmptyString)
+				grp.tex[i] = GAMEDIRECTORY.getFile(line.c_str());
+				if (grp.tex[i])
 					count++;
 			}
 			grp.base = TEXTURE_GAMEOBJECT1;

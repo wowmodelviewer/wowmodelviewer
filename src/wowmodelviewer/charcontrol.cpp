@@ -509,8 +509,8 @@ void CharControl::RefreshModel()
 
 	if(textures.size() > 1)
 	{
-		model->furTex = texturemanager.add(textures[1]);
-	  model->UpdateTextureList(textures[1], TEXTURE_FUR);
+		model->furTex = texturemanager.add(GAMEDIRECTORY.getFile(textures[1].c_str()));
+	  model->UpdateTextureList(textures[1].c_str(), TEXTURE_FUR);
 	}
 
 	// Display underwear on the model?
@@ -584,7 +584,7 @@ void CharControl::RefreshModel()
 	textures = model->cd.getTextureNameForSection(CharDetails::HairType);
   if(textures.size() > 0)
   {
-  	model->hairTex = texturemanager.add(textures[0].c_str());
+  	model->hairTex = texturemanager.add(GAMEDIRECTORY.getFile(textures[0].c_str()));
     model->UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
 
     if(infos.isHD)
@@ -1178,7 +1178,7 @@ void CharControl::OnUpdateItem(int type, int id)
     case UPDATE_MOUNT:
     {
       TextureGroup grp;
-      std::string modelName;
+      QString modelName;
       WoWModel *m;
 
       if (!model)
@@ -1222,19 +1222,19 @@ void CharControl::OnUpdateItem(int type, int id)
         sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
         if (!mountQuery.valid || mountQuery.empty())
           break;
-        std::string path = mountQuery.values[0][0].toStdString();
-        modelName = path + mountQuery.values[0][1].toStdString();
+        QString path = mountQuery.values[0][0];
+        modelName = path + mountQuery.values[0][1];
         int count = 0;
         for(int i = 0; i < 3; i++)
         {
-          std::string tex = "";
-          std::string fname = mountQuery.values[0][i+2].toStdString();
-          if (!fname.empty())
+          QString tex = "";
+          QString fname = mountQuery.values[0][i+2];
+          if (!fname.isEmpty())
           {
             tex = path + fname + ".blp";
             count++;
           }
-          grp.tex[i] = tex;
+          grp.tex[i] = GAMEDIRECTORY.getFile(tex);
         }
         grp.base = TEXTURE_GAMEOBJECT1;
         grp.count = count;
@@ -1246,13 +1246,13 @@ void CharControl::OnUpdateItem(int type, int id)
       }
       else
         break; // shouldn't happen
-      m = new WoWModel(GAMEDIRECTORY.getFile(modelName.c_str()), false);
+      m = new WoWModel(GAMEDIRECTORY.getFile(modelName), false);
       m->isMount = true;
       g_canvas->root->setModel(m);
       g_canvas->model = m;
       g_animControl->UpdateModel(m);
       // add specific textures for proper mounts. Must do this after model is updated.
-      if (!cats[id] && !grp.tex[0].empty())
+      if (!cats[id] && (grp.tex[0] != 0))
         g_animControl->AddSkin(grp);
 
       model->bSheathe = true;

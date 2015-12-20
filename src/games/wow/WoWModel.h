@@ -100,7 +100,7 @@ public:
 	Vec2D *texCoords;
 	uint16 *indices;
 	uint32 nIndices;
-	std::vector<std::string> TextureList;
+	std::vector<QString> TextureList;
 	// --
 
 	WoWModel(GameFile * file, bool forceAnim=false);
@@ -214,7 +214,7 @@ public:
 	friend struct ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
-  void UpdateTextureList(std::string texName, int special);
+  void UpdateTextureList(QString texName, int special);
   void displayHeader(ModelHeader & a_header);
   bool WoWModel::canSetTextureFromFile(int texnum);
 
