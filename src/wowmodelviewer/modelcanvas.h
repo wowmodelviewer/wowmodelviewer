@@ -141,8 +141,8 @@ public:
 	void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
 	void CheckMovement();	// move the character
 	
-	Attachment* LoadModel(wxString fn);
-	Attachment* LoadCharModel(wxString fn);
+	Attachment* LoadModel(GameFile *);
+	Attachment* LoadCharModel(GameFile *);
 #if 0
 	Attachment* AddModel(const char *fn);
 #endif

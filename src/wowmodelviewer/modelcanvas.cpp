@@ -317,16 +317,17 @@ Attachment* ModelCanvas::AddModel(const char *fn)
 }
 #endif
 
-Attachment* ModelCanvas::LoadModel(wxString fn)
+Attachment* ModelCanvas::LoadModel(GameFile * file)
 {
 	clearAttachments();
 	root->setModel(0);
-	wxDELETE(wmo);
-	model = new WoWModel(fn.c_str(), true);
+	delete wmo;
+	wmo = NULL;
+	model = new WoWModel(file, true);
 
 	if (!model->ok)
 	{
-		wxDELETE(model);
+		delete model;
 		model = NULL;
 		return NULL;
 	}
@@ -339,17 +340,19 @@ Attachment* ModelCanvas::LoadModel(wxString fn)
 	return root;
 }
 
-Attachment* ModelCanvas::LoadCharModel(wxString fn)
+Attachment* ModelCanvas::LoadCharModel(GameFile * file)
 {
 	clearAttachments();
 	root->setModel(0);
-	wxDELETE(wmo);
+	delete wmo;
+	wmo = NULL;
 
 	// Create new one
-	model = new WoWModel(fn.c_str(), true);
+	model = new WoWModel(file, true);
 	if (!model->ok)
 	{
-		wxDELETE(model);
+	  LOG_INFO << "Model is not OK !";
+		delete model;
 		model = NULL;
 		return NULL;
 	}

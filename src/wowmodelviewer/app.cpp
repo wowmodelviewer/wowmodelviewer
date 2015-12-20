@@ -15,7 +15,7 @@
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
-#include "UserSkins.h"
+#include "Game.h"
 #include "GameDatabase.h"
 #include "resource1.h"
 #include "util.h"
@@ -209,7 +209,7 @@ bool WowModelViewApp::OnInit()
 					break;
 
 				// Load the model
-				frame->LoadModel(fn);
+				frame->LoadModel(GAMEDIRECTORY.getFile(fn.c_str()));
 			}
 		} else if (cmd == wxT("-mo")) {
 			if (i+1 < argc) {
@@ -221,7 +221,7 @@ bool WowModelViewApp::OnInit()
 
 				// If its a character model, give it some skin.
 				// Load the model
-				frame->LoadModel(fn);
+				frame->LoadModel(GAMEDIRECTORY.getFile(fn.c_str()));
 
 				// Output the screenshot
 				fn = wxT("ss_")+fn.AfterLast('\\').BeforeLast('.')+wxT(".png");

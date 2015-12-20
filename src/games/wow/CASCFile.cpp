@@ -7,61 +7,54 @@
 
 #include "CASCFile.h"
 
-#include <iostream>
-
 #include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 // #define DEBUG_READ
 
-CASCFile::CASCFile()
-: GameFile(), m_handle(NULL),  m_filePath("")
+
+CASCFile::CASCFile(QString path)
+ : GameFile(path), m_handle(0)
 {
-#ifdef DEBUG_READ
-  std::cout << __FUNCTION__ << " 2" << std::endl;
-#endif
 }
 
-CASCFile::CASCFile(const std::string & path)
- : GameFile(), m_filePath(path)
+CASCFile::~CASCFile()
 {
-#ifdef DEBUG_READ
-  std::cout << __FUNCTION__ << " 1" << std::endl;
-#endif
-  openFile(path);
+  LOG_INFO << __FUNCTION__ << this;
+  close();
 }
 
 
 bool CASCFile::open()
 {
-  m_handle = GAMEDIRECTORY.openFile(m_filePath);
+#ifdef DEBUG_READ
+  LOG_INFO << __FUNCTION__ << "Opening" << filepath;
+#endif
+
+  if(m_handle) // already opened
+  {
+#ifdef DEBUG_READ
+  LOG_INFO << filepath << "is already opened";
+#endif
+    return true;
+  }
+
+  eof = true;
+  m_handle = GAMEDIRECTORY.openFile(filepath.toStdString());
 
   if(!m_handle)
-    LOG_ERROR << "Opening" << m_filePath.c_str() << "failed." << "Error" << GetLastError();
+    LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
 
-  return m_handle;
-}
-
-bool CASCFile::close()
-{
   if(m_handle)
-    return CascCloseFile(m_handle);
-  else
-    return true;
-}
-
-void CASCFile::openFile(std::string filename)
-{
-#ifdef DEBUG_READ
-  std::cout << __FUNCTION__ << " opening => " << filename << std::endl;
-#endif
-  m_filePath = filename;
-  if(open())
   {
     DWORD nbBytesRead = 0;
     size = CascGetFileSize(m_handle,0);
+    if(size == CASC_INVALID_SIZE)
+      LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
+
     if(buffer)
       delete [] buffer;
+
     buffer = new unsigned char[size];
     CascReadFile(m_handle, buffer, size, &nbBytesRead);
     if(nbBytesRead != 0)
@@ -69,11 +62,32 @@ void CASCFile::openFile(std::string filename)
     else
       eof = true;
 #ifdef DEBUG_READ
-    std::cout << __FUNCTION__ <<  " | " << m_filePath << " nb bytes read => " << nbBytesRead << " / " << size << std::endl;
+    LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;
 #endif
   }
-  else
+
+  return m_handle;
+}
+
+bool CASCFile::close()
+{
+#ifdef DEBUG_READ
+  LOG_INFO << __FUNCTION__ << "Closing" << filepath << m_handle;
+#endif
+  if(m_handle)
   {
-    eof = true;
+    GameFile::close();
+    HANDLE savedHandle = m_handle;
+    m_handle = 0;
+
+#ifdef DEBUG_READ
+    bool result = CascCloseFile(savedHandle);
+    LOG_INFO << __FUNCTION__ << result;
+    return result;
+#else
+    return CascCloseFile(savedHandle);
+#endif
   }
+
+  return true;
 }

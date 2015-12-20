@@ -290,7 +290,7 @@ void WoWItem::load()
     model += ".m2";
     model = GAMEDIRECTORY.getFullPathForFile(model);
 
-    m = new WoWModel(model.toStdString(), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
 
     if (m->ok)
     {
@@ -320,7 +320,7 @@ void WoWItem::load()
     model.replace(".mdx", ".m2", Qt::CaseInsensitive);
     model = GAMEDIRECTORY.getFullPathForFile(model);
 
-    m = new WoWModel(model.toStdString(), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
 
     if (m->ok)
     {
@@ -343,7 +343,7 @@ void WoWItem::load()
     model.replace(".mdx", ".m2", Qt::CaseInsensitive);
     model = GAMEDIRECTORY.getFullPathForFile(model);
 
-    m = new WoWModel(model.toStdString(), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
 
     if (m->ok)
     {
@@ -393,7 +393,7 @@ void WoWItem::load()
   		model.replace(".mdx", ".m2", Qt::CaseInsensitive);
   		model = GAMEDIRECTORY.getFullPathForFile(model);
 
-  		m = new WoWModel(model.toStdString(), true);
+  		m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
 
   		if (m->ok)
   		{
@@ -543,7 +543,7 @@ void WoWItem::load()
     itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
     itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
 
-    m = new WoWModel(itemModel.toStdString(), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(itemModel), true);
 
     if (m->ok)
     {
@@ -572,7 +572,7 @@ void WoWItem::load()
     itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
     itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
 
-    m = new WoWModel(itemModel.toStdString(), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(itemModel), true);
 
     if (m->ok)
     {

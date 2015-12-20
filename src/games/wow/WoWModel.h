@@ -103,7 +103,7 @@ public:
 	std::vector<std::string> TextureList;
 	// --
 
-	WoWModel(std::string name, bool forceAnim=false);
+	WoWModel(GameFile * file, bool forceAnim=false);
 	~WoWModel();
 
 	std::vector<ModelCamera> cam;

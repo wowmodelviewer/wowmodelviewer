@@ -92,16 +92,6 @@ void Component::unref()
 	}
 }
 
-void Component::onChildAdded(Component *)
-{
-
-}
-
-void Component::onChildRemoved(Component *)
-{
-
-}
-
 void Component::onParentSet(Component *)
 {
 
@@ -159,7 +149,6 @@ void Component::print(int a_depth /*= 0*/)
 	{
 		getChild(i)->print(a_depth);
 	}
-
 }
 
 void Component::copy(const Component & component, bool /* recursive*/)

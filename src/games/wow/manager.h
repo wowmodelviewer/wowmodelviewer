@@ -37,6 +37,7 @@ public:
 		return --refcount==0;
 	}
 	
+	void setItemName(std::string name) { m_itemName = name; }
 	std::string itemName() { return m_itemName; }
 };
 

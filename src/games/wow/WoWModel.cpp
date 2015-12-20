@@ -81,15 +81,18 @@ void glInitAll()
 	glDepthFunc(GL_NEVER);
 }
 
-WoWModel::WoWModel(std::string name, bool forceAnim) :
-    ManagedItem(name),
+WoWModel::WoWModel(GameFile * file, bool forceAnim) :
+    ManagedItem(""),
     forceAnim(forceAnim)
 {
-	if (name == "")
+  ok = false;
+	if (!file)
 		return;
 
+	setItemName(file->fullname().toStdString());
+
 	// replace .MDX with .M2
-	QString tempname = QString::fromStdString(name);
+	QString tempname = file->fullname();
 	tempname.replace(".mdx",".m2");
 
 	// Initiate our model variables.
@@ -160,36 +163,32 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 	attachment = 0;
 
 	// --
-
-	GameFile * f = new CASCFile(tempname.toStdString());
-
 	ok = false;
-	if (f->isEof() || (f->getSize() < sizeof(ModelHeader)))
+
+
+	if (!file->open() || file->isEof() || (file->getSize() < sizeof(ModelHeader)))
 	{
 		LOG_ERROR << "Unable to load model:" << tempname;
-		// delete this; //?
-		f->close();
-		delete f;
+		file->close();
 		return;
 	}
 
 	ok = true;
 	
-	memcpy(&header, f->getBuffer(), sizeof(ModelHeader));
+	memcpy(&header, file->getBuffer(), sizeof(ModelHeader));
 
-	LOG_INFO << "Loading model:" << tempname << "size:" << f->getSize();
+	LOG_INFO << "Loading model:" << tempname << "size:" << file->getSize();
 
 	//displayHeader(header);
 
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0') {
 		LOG_ERROR << "Invalid model!  May be corrupted.";
 		ok = false;
-		f->close();
-		delete f;
+		file->close();
 		return;
 	}
 
-	animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
+	animated = isAnimated(file) || forceAnim;  // isAnimated will set animGeometry and animTextures
 
 	modelname = tempname.toStdString();
 	QStringList list = tempname.split("\\");
@@ -197,9 +196,8 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 	if (header.nameOfs != 304 && header.nameOfs != 320)
 	{
 	  LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
-	  //ok = false;
-	  //f.close();
-	  //return;
+	  file->close();
+	  return;
 	}
 
 	// Error check
@@ -212,7 +210,7 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 	if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
 		LOG_ERROR << "Model version is incorrect! Make sure you are loading models from World of Warcraft 2.0.1 or newer client.";
 		ok = false;
-		f->close();
+		file->close();
 
 		/*
 		 @TODO : replace with exceptions
@@ -222,30 +220,33 @@ WoWModel::WoWModel(std::string name, bool forceAnim) :
 		return;
 	}
 
-	if (f->getSize() < header.ofsParticleEmitters) {
+	if (file->getSize() < header.ofsParticleEmitters) {
 		LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
+		file->close();
+		return;
 	}
 	
 	if (header.nGlobalSequences) {
 		globalSequences = new uint32[header.nGlobalSequences];
-		memcpy(globalSequences, (f->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
+		memcpy(globalSequences, (file->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
 	}
 
 	if (forceAnim)
 		animBones = true;
 
 	if (animated)
-		initAnimated(f);
+		initAnimated(file);
 	else
-		initStatic(f);
+		initStatic(file);
 
-	f->close();
+	file->close();
 	
 	// Ready to render.
 	showModel = true;
 	if (hasParticles)
 		showParticles = true;
 	alpha = 1.0f;
+
 }
 
 WoWModel::~WoWModel()
@@ -696,8 +697,9 @@ void WoWModel::initAnimated(GameFile * f)
 		  tempname = QString::fromStdString(modelname).replace(".m2","");
 		  tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID,4,10,QChar('0')).arg(animsWotLK.subAnimID,2,10,QChar('0'));
 
-		  if(GAMEDIRECTORY.fileExists(tempname.toStdString()))
-		    animfiles.push_back(new CASCFile(tempname.toStdString()));
+		  GameFile * anim = GAMEDIRECTORY.getFile(tempname);
+		  if(anim)
+		    animfiles.push_back(new CASCFile(anim->fullname()));
 		  else
 		    animfiles.push_back(NULL);
 		}
@@ -729,7 +731,6 @@ void WoWModel::initAnimated(GameFile * f)
 	  for(size_t i=0; i<header.nAnimations; i++) {
 	    if(animfiles[i] && (animfiles[i]->getSize() > 0))
 	      animfiles[i]->close();
-	    delete animfiles[i];
 	  }
 	}
 
@@ -865,22 +866,26 @@ void WoWModel::setLOD(GameFile * f, int index)
 	// remove suffix .M2
 	QString tmpname = QString::fromStdString(modelname).replace(".m2","", Qt::CaseInsensitive);
 	lodname = QString("%1%2.skin").arg(tmpname).arg(index,2,10,QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
-	GameFile * g = new CASCFile(lodname);
+
+	GameFile * g = GAMEDIRECTORY.getFile(lodname.c_str());
+
+	if(!g || !g->open())
+	{
+	  LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
+	  return;
+	}
 
 	if (g->isEof()) {
 		LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
 		g->close();
-		delete g;
 		return;
 	}
 
 	ModelView *view = (ModelView*)(g->getBuffer());
 
-
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N') {
 		LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
 		g->close();
-		delete g;
 		return;
 	}
 
@@ -985,7 +990,6 @@ void WoWModel::setLOD(GameFile * f, int index)
 	}
 
 	g->close();
-	delete g;
 	// transparent parts come later
 	std::sort(passes.begin(), passes.end());
 }

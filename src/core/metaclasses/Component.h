@@ -76,9 +76,6 @@ class _COMPONENT_API_ Component
 		virtual bool removeChild(Component *);
 		virtual void removeAllChildren() { }
 
-		virtual void onChildAdded(Component *);
-		virtual void onChildRemoved(Component *);
-
 		virtual unsigned int nbChildren() const {return 0; }
 
 		virtual bool findChild(Component * /* component */, bool /* recursive */ ) { return false; }

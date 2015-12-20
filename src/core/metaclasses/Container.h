@@ -66,6 +66,9 @@ class Container : public Component
 		bool removeChild(DataType * child);
 		void removeAllChildren();
 
+	  virtual void onChildAdded(DataType *) {};
+	  virtual void onChildRemoved(DataType *) {};
+
 		template <class ChildType>
 			int removeAllChildrenOfType();
 

@@ -98,7 +98,7 @@ QString TabardDetails::GetIconTex(int slot)
 int TabardDetails::GetMaxBackground()
 {
 	int i = 0;
-	while(GAMEDIRECTORY.fileExists(QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(i,2,10,QChar('0')).toStdString()))
+	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(i,2,10,QChar('0'))))
 		i++;
 	return i;
 }
@@ -106,7 +106,7 @@ int TabardDetails::GetMaxBackground()
 int TabardDetails::GetMaxIcon()
 {
 	int i = 0;
-	while(GAMEDIRECTORY.fileExists(QString("Textures\\GuildEmblems\\Emblem_%1_00_TU_U.blp").arg(i,2,10,QChar('0')).toStdString()))
+	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_00_TU_U.blp").arg(i,2,10,QChar('0'))))
 		i++;
 	return i;
 }
@@ -114,7 +114,7 @@ int TabardDetails::GetMaxIcon()
 int TabardDetails::GetMaxIconColor(int icon)
 {
 	int i = 0;
-	while(GAMEDIRECTORY.fileExists(QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(icon,2,10,QChar('0')).arg(i,2,10,QChar('0')).toStdString()))
+	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(icon,2,10,QChar('0')).arg(i,2,10,QChar('0'))))
 		i++;
 	return i;
 }
@@ -122,7 +122,7 @@ int TabardDetails::GetMaxIconColor(int icon)
 int TabardDetails::GetMaxBorder()
 {
 	int i = 0;
-	while(GAMEDIRECTORY.fileExists(QString("Textures\\GuildEmblems\\Border_%1_00_TU_U.blp").arg(i,2,10,QChar('0')).toStdString()))
+	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_00_TU_U.blp").arg(i,2,10,QChar('0'))))
 		i++;
 	return i;
 }
@@ -130,7 +130,7 @@ int TabardDetails::GetMaxBorder()
 int TabardDetails::GetMaxBorderColor(int border)
 {
 	int i = 0;
-	while(GAMEDIRECTORY.fileExists(QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(border,2,10,QChar('0')).arg(i,2,10,QChar('0')).toStdString()))
+	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(border,2,10,QChar('0')).arg(i,2,10,QChar('0'))))
 		i++;
 	return i;
 }

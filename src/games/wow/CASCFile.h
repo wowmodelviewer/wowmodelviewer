@@ -28,16 +28,13 @@ class CASCFolder;
 class _CASCFILE_API_ CASCFile : public GameFile
 {
   public:
-    CASCFile();
-    CASCFile(const std::string & path);
-    ~CASCFile() { close(); }
+    CASCFile(QString path);
+    ~CASCFile();
     bool open();
     bool close();
-    void openFile(std::string filename);
 
   private:
     HANDLE m_handle;
-    std::string m_filePath;
 };
 
 

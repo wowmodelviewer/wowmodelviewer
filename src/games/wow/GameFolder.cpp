@@ -35,14 +35,10 @@ void GameFolder::init(const QString & path, const QString & filename)
   LOG_INFO << __FUNCTION__ << "Start to build object hierarchy";
   while (!in.atEnd())
   {
-    QString line = in.readLine();
-    line = line.toLower();
+    QString line = in.readLine().toLower();
 
-    QStringList items = line.split("\\");
-
-    CASCFile * file = new CASCFile();
-    file->setName(items[items.size()-1]);
-    file->setFullName(line);
+    CASCFile * file = new CASCFile(line);
+    file->setName(line.mid(line.lastIndexOf("\\")+1));
     addChild(file);
   }
   LOG_INFO << __FUNCTION__ << "Hierarchy creation done";
@@ -50,15 +46,11 @@ void GameFolder::init(const QString & path, const QString & filename)
 
 QString GameFolder::getFullPathForFile(QString file)
 {
-  LOG_INFO << __FUNCTION__ << file;
   file = file.toLower();
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
     if((*it)->name() == file)
-    {
-      LOG_INFO << (*it)->fullname();
       return (*it)->fullname();
-    }
   }
 
   return "";
@@ -77,15 +69,42 @@ void GameFolder::getFilesForFolder(std::vector<QString> &fileNames, QString fold
   }
 }
 
-void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
+void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath)
 {
+  folderPath = folderPath.toLower();
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
-    if((*it)->name().contains(QRegularExpression(filter)))
+    GameFile * file = *it;
+    if(file->fullname().startsWith(folderPath))
+    {
+      fileNames.push_back(file);
+    }
+  }
+}
+
+void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
+{
+  QRegularExpression regex(filter);
+  for(GameFolder::iterator it = begin() ; it != end() ; ++it)
+  {
+    if((*it)->name().contains(regex))
     {
       dest.insert(*it);
     }
   }
+}
+
+GameFile * GameFolder::getFile(QString filename)
+{
+  filename = filename.toLower();
+
+  GameFile * result = 0;
+
+  std::map<QString, GameFile *>::iterator it = m_childrenMap.find(filename);
+  if(it != m_childrenMap.end())
+    result = it->second;
+
+  return result;
 }
 
 HANDLE GameFolder::openFile(std::string file)
@@ -98,16 +117,10 @@ QString GameFolder::version()
   return m_CASCFolder.version();
 }
 
-bool GameFolder::fileExists(std::string file)
-{
-   return m_CASCFolder.fileExists(file);
-}
-
 std::string GameFolder::locale()
 {
    return m_CASCFolder.locale();
 }
-
 
 bool GameFolder::setLocale(std::string val)
 {
@@ -122,4 +135,9 @@ std::vector<std::string> GameFolder::localesFound()
 int GameFolder::lastError()
 {
   return m_CASCFolder.lastError();
+}
+
+void GameFolder::onChildAdded(GameFile * child)
+{
+  m_childrenMap[child->fullname()] = child;
 }

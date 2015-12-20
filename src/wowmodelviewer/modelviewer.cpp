@@ -908,24 +908,24 @@ void ModelViewer::SaveLayout()
 }
 
 
-void ModelViewer::LoadModel(const wxString fn)
+void ModelViewer::LoadModel(GameFile * file)
 {
-	if (!canvas || fn.IsEmpty())
+	if (!canvas || !file)
 		return;
 
 	isModel = true;
 
 	// check if this is a character model
-	isChar = (fn.Lower().StartsWith(wxT("char")) || fn.Lower().StartsWith(wxT("alternate\\char")));
+	isChar = (file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith("alternate\\char", Qt::CaseInsensitive));
 	Attachment *modelAtt = NULL;
 
 	if (isChar)
 	{
-		modelAtt = canvas->LoadCharModel(fn);
+		modelAtt = canvas->LoadCharModel(file);
 		// error check
 		if (!modelAtt)
 		{
-			LOG_ERROR << "Failed to load the model" << fn.c_str();
+			LOG_ERROR << "Failed to load the model" << file->fullname();
 			return;
 		}
 
@@ -949,12 +949,12 @@ void ModelViewer::LoadModel(const wxString fn)
 	}
 	else
 	{
-		modelAtt = canvas->LoadCharModel(fn); //  change it from LoadModel, don't sure it's right or not.
+		modelAtt = canvas->LoadCharModel(file); //  change it from LoadModel, don't sure it's right or not.
 
 		// error check
 		if (!modelAtt)
 		{
-			LOG_ERROR << "Failed to load the model" << fn.c_str();
+			LOG_ERROR << "Failed to load the model" << file->fullname();
 			return;
 		}
 		// creature model, keep left/right hand only as equipment
@@ -1066,7 +1066,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  {
 	    std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
 	    wxString name(modelname.c_str());
-	    LoadModel(name);
+	    LoadModel(GAMEDIRECTORY.getFile(name.c_str()));
 	    canvas->model->modelType = MT_NORMAL;
 
 	    TextureGroup grp;
@@ -1085,18 +1085,15 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 	  }
 	  else
 	  {
-	    std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
-	    std::size_t pos = modelname.find(".m2");
-	    if(pos != std::string::npos) // normally always true
-	    {
-	      // try hd model if it exists
-	      std::string modelnamehd = modelname.substr(0,pos) + "_hd.m2";
-	      if(GAMEDIRECTORY.fileExists(modelnamehd))
-	        modelname= modelnamehd;
-	    }
+	    QString modelname = r.values[0][0] + r.values[0][1];
+	    QString modelnamehd = modelname;
+	    modelnamehd.replace(".m2","_hd.m2");
 
+	    GameFile * model = GAMEDIRECTORY.getFile(modelnamehd);
+	    if(!model)
+	      model = GAMEDIRECTORY.getFile(modelname);
 
-	    LoadModel(modelname);
+	    LoadModel(model);
 
 	    query = QString("SELECT * FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(r.values[0][5]);
 
@@ -1213,7 +1210,7 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	    if(model1 != "" && texture1 != "")
 	    {
-	      LoadModel(model1.toStdString());
+	      LoadModel(GAMEDIRECTORY.getFile(model1));
 	      canvas->model->TextureList.push_back(texture1.c_str());
 	      TextureGroup grp;
 	      grp.base = TEXTURE_ITEM;
@@ -1984,7 +1981,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
 			wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
 			if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString) {
-				canvas->skyModel = new WoWModel(skyDialog.GetStringSelection().c_str(), false);
+				canvas->skyModel = new WoWModel(GAMEDIRECTORY.getFile(skyDialog.GetStringSelection().c_str()), false);
 				canvas->sky->setModel(canvas->skyModel);
 			}
 		}
@@ -2081,7 +2078,7 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
         LOG_INFO << "modelname" << values[lineIndex];
 
         // Load the model
-        LoadModel(values[lineIndex].toStdString().c_str());
+        LoadModel(GAMEDIRECTORY.getFile(values[lineIndex]));
         canvas->model->modelType = MT_CHAR;
         lineIndex++;
       }
@@ -2168,7 +2165,7 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
         if(reader.name() == "file")
         {
           QString modelname = reader.attributes().value("name").toString();
-          LoadModel(modelname.toStdString().c_str());
+          LoadModel(GAMEDIRECTORY.getFile(modelname));
           canvas->model->load(reader);
         }
         else
@@ -2805,17 +2802,18 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
 	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  std::string race = r.values[0][0].toStdString();
+	  QString race = r.values[0][0];
 
 		// Load the model
-		wxString strModel = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT(".m2");
-		wxString strModelHD = wxT("Character\\") + race + MPQ_SLASH + result->gender + MPQ_SLASH + race + result->gender + wxT("_hd.m2");
+		QString strModel = "Character\\" + race + MPQ_SLASH + result->gender.c_str() + MPQ_SLASH + race + result->gender.c_str() + ".m2";
+		QString strModelHD = "Character\\" + race + MPQ_SLASH + result->gender.c_str() + MPQ_SLASH + race + result->gender.c_str() + "_hd.m2";
 
 		// try with hd model first
-		if(GAMEDIRECTORY.fileExists(std::string(strModelHD.mb_str())))
-		  LoadModel(strModelHD);
-		else
-		  LoadModel(strModel);
+		GameFile * file = GAMEDIRECTORY.getFile(strModelHD);
+		if(!file)
+		  file = GAMEDIRECTORY.getFile(strModel);
+
+		LoadModel(file);
 
 		if (!g_canvas->model)
 			return;

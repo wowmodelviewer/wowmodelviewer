@@ -11,7 +11,9 @@
 
 #include "BaseCanvas.h"
 #include "displayable.h"
+#include "Game.h"
 #include "WoWModel.h"
+
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
@@ -205,9 +207,9 @@ Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float sc
 	if (modelfn.length() == 0 || id<0)
 		return 0;
 
-	WoWModel *m = new WoWModel(modelfn, true);
+	WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelfn.c_str()), true);
 
-	if (m && m->ok)
+	if (m->ok)
 	{
 		return addChild(m, id, slot, scale, rot, pos);
 	}

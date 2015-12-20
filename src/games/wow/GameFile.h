@@ -26,7 +26,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile():eof(true),buffer(0),pointer(0),size(0) {}
+    GameFile(QString path):eof(true),buffer(0),pointer(0),size(0), filepath(path) {}
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -37,23 +37,22 @@ class _GAMEFILE_API_ GameFile : public Component
     bool isEof();
     void seek(size_t offset);
     void seekRelative(size_t offset);
-    void close();
-    virtual void openFile(std::string filename) = 0;
+    virtual bool open() = 0;
+    virtual bool close();
 
-    void setFullName(QString & name) { m_fullName = name; }
-    QString fullname() { return m_fullName; }
+    void setFullName(QString & name) { filepath = name; }
+    QString fullname() { return filepath; }
 
   protected:
     bool eof;
     unsigned char *buffer;
     size_t pointer, size;
+    QString filepath;
 
   private:
     // disable copying
     GameFile(const GameFile &);
     void operator=(const GameFile &);
-
-    QString m_fullName;
 };
 
 

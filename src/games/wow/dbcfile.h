@@ -8,6 +8,8 @@
 
 #include <QString>
 
+class GameFile;
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _DBCFILE_API_ __declspec(dllexport)
@@ -22,7 +24,7 @@
 class _DBCFILE_API_ DBCFile
 {
 public:
-	DBCFile(const std::string &filename);
+	DBCFile(GameFile *);
 	~DBCFile();
 
 	// Open database. It must be openened before it can be used.
@@ -148,7 +150,7 @@ public:
 	size_t size() const { return recordCount; }
 
 private:
-	std::string filename;
+	GameFile * file;
 	size_t recordSize;
 	size_t recordCount;
 	size_t fieldCount;

@@ -10,8 +10,11 @@
 #include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's
-int ModelManager::add(std::string name)
+int ModelManager::add(std::string)
 {
+  return 1;
+  //@TODO : to repair, used by WMO only
+  /*
 	int id;
 	if (names.find(name) != names.end()) {
 		id = names[name];
@@ -23,6 +26,7 @@ int ModelManager::add(std::string name)
 	id = nextID();
     do_add(name, id, model);
     return id;
+    */
 }
 
 // Resets the animation back to default.

@@ -5,8 +5,9 @@
 #include <wx/txtstrm.h>
 
 #include "Attachment.h"
-#include "globalvars.h"
+#include "Game.h"
 #include "GameDatabase.h"
+#include "globalvars.h"
 #include "RaceInfos.h"
 #include "logger/Logger.h"
 #include "itemselection.h"
@@ -1245,7 +1246,7 @@ void CharControl::OnUpdateItem(int type, int id)
       }
       else
         break; // shouldn't happen
-      m = new WoWModel(modelName, false);
+      m = new WoWModel(GAMEDIRECTORY.getFile(modelName.c_str()), false);
       m->isMount = true;
       g_canvas->root->setModel(m);
       g_canvas->model = m;

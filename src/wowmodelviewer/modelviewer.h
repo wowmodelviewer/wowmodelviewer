@@ -97,7 +97,7 @@ public:
 	void LoadChar(wxString fn, bool equipmentOnly = false);
 	void SaveChar(wxString fn, bool equipmentOnly = false);
 
-	void LoadModel(const wxString fn);
+	void LoadModel(GameFile * f);
 	void LoadItem(unsigned int displayID);
 	void LoadNPC(unsigned int modelid);
 

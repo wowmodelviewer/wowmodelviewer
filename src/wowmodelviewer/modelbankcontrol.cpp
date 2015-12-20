@@ -3,6 +3,7 @@
 #include <wx/arrstr.h>
 #include <wx/wfstream.h>
 
+#include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
 #include "modelviewer.h"
@@ -79,7 +80,7 @@ void ModelBankControl::LoadModel()
 
 	ModelBank cd = bankList[val];
 
-	g_modelViewer->LoadModel(cd.fileName.c_str());
+	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(cd.fileName.c_str()));
 
 	if (g_canvas->model) {
 		g_canvas->model->pos = cd.pos;

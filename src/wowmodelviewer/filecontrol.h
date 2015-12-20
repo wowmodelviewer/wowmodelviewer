@@ -64,10 +64,9 @@ private:
 	      return 0;
 	    }
 
-	    void onChildAdded(Component * child)
+	    void onChildAdded(TreeStackItem * child)
 	    {
-	      TreeStackItem * item = dynamic_cast<TreeStackItem *>(child);
-	      m_childrenMap[item->name()] = item;
+	      m_childrenMap[child->name()] = child;
 	    }
 
 	    void createTreeItems(wxTreeCtrl * tree)

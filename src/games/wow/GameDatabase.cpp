@@ -206,22 +206,19 @@ bool GameDatabase::createTableFromXML(const QDomElement & elem)
 
 bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & gamefile)
 {
+  GameFile * fileToOpen = 0;
   // loop over possible extension to check if file exists
-  QString fileToOpen = "";
   for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
-    QString filename = gamefile+POSSIBLE_DB_EXT[i];
-    if(GAMEDIRECTORY.fileExists(filename.toStdString()))
-    {
-      fileToOpen = filename;
+    fileToOpen = GAMEDIRECTORY.getFile(gamefile+POSSIBLE_DB_EXT[i]);
+    if(fileToOpen)
       break;
-    }
   }
 
-  if(fileToOpen.isEmpty())
+  if(!fileToOpen)
     return false;
 
-  DBCFile dbc(fileToOpen.toStdString().c_str());
+  DBCFile dbc(fileToOpen);
   if(!dbc.open())
     return false;
 

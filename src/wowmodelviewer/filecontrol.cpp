@@ -126,15 +126,12 @@ void FileControl::Init(ModelViewer* mv)
 	// Gets the list of files that meet the filter criteria
 	// and puts them into an array to be processed into our file tree
 	content = QString(txtContent->GetValue().c_str()).toLower().trimmed();
-
 	filterString = "^.*"+ content +".*\\." + filterStrings[filterMode];
-
 	std::set<GameFile *> files;
-
 	GAMEDIRECTORY.getFilteredFiles(files, filterString);
-	LOG_INFO << "Initializing File Controls - Filtering done";
+
+	LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
 	TreeStackItem root;
-	LOG_INFO << "Initializing File Controls - Files to treat" << files.size();
 	for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it) {
 	  QString name = (*it)->fullname();
 	  beautifyFileName(name);
@@ -157,27 +154,16 @@ void FileControl::Init(ModelViewer* mv)
 	  child->setName(items[items.size()-1]);
 	  curparent->addChild(child);
 	}
-	LOG_INFO << "Initializing File Controls - File Hierachy created";
 
+	LOG_INFO << "Initializing File Controls - File Hierarchy created";
 	fileTree->DeleteAllItems();
 	root.id = fileTree->AddRoot(wxT("Root"));
-
-	LOG_INFO << "Initializing File Controls - nb children level 1" << root.nbChildren();
 	root.createTreeItems(fileTree);
+
 	LOG_INFO << "Initializing File Controls - END";
 
 	if (content != wxEmptyString)
 		fileTree->ExpandAll();
-
-	// bg recolor
-	wxTreeItemId h;
-	size_t i = 0;
-	for(h=fileTree->GetFirstVisibleItem();h.IsOk();h=fileTree->GetNextVisible(h)) {
-		if (i++%2==1)
-			fileTree->SetItemBackgroundColour(h, wxColour(237,243,254));
-		else
-			fileTree->SetItemBackgroundColour(h, *wxWHITE);
-	}
 }
 
 void FileControl::OnChoice(wxCommandEvent &event)
@@ -198,11 +184,19 @@ void FileControl::Export(wxString val, int select)
 	if (val.IsEmpty())
 		return;
 
-	CASCFile f(val.c_str());
-	if (f.isEof())
+	GameFile * f = GAMEDIRECTORY.getFile(val.c_str());
+	if(!f)
+	{
+	  LOG_ERROR << "Could not extract" << val.c_str();
+	  return;
+	}
+
+	f->open();
+
+	if (f->isEof())
 	{
 		LOG_ERROR << "Could not extract" << val.c_str();
-		f.close();
+		f->close();
 		return;
 	}
 
@@ -230,7 +224,7 @@ void FileControl::Export(wxString val, int select)
 
 	if (hFile)
 	{
-		fwrite(f.getBuffer(), 1, f.getSize(), hFile);
+		fwrite(f->getBuffer(), 1, f->getSize(), hFile);
 		fclose(hFile);
 	}
 	else
@@ -238,7 +232,7 @@ void FileControl::Export(wxString val, int select)
 	  LOG_ERROR << "Saving to" << filename.c_str() << "failed";
 	}
 
-	f.close();
+	f->close();
 }
 
 wxString FileControl::ExportPNG(wxString val)
@@ -501,7 +495,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		//if (wxGetKeyState(WXK_SHIFT)) 
 		//	canvas->AddModel(rootfn);
 		//else
-			modelviewer->LoadModel(rootfn);	// Load the model.
+			modelviewer->LoadModel(GAMEDIRECTORY.getFile(rootfn.c_str()));	// Load the model.
 
 		UpdateInterface();
 	} else if (filterMode == FILE_FILTER_WMO) {

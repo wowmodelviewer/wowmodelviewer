@@ -5,8 +5,8 @@
 
 #include "logger/Logger.h"
 
-#include "CASCFile.h"
-
+#include "Game.h"
+#include "GameFile.h"
 #include "globalvars.h" // g_selModel
 
 #include <QImage>
@@ -742,10 +742,9 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	// bind the texture
 	glBindTexture(GL_TEXTURE_2D, id);
 	
+	GameFile * f = GAMEDIRECTORY.getFile(tex->itemName().c_str());
 
-	CASCFile * f = new CASCFile(tex->itemName());
-
-	if (f->isEof()) {
+	if (!f || !f->open() || f->isEof()) {
 		tex->id = 0;
 		return;
 	} else {
@@ -959,7 +958,6 @@ void TextureManager::LoadBLP(GLuint id, Texture *tex)
 	}
 
 	f->close();
-	delete f;
 	/*
 	// TODO: Add proper support for mipmaps
 	if (hasmipmaps) {

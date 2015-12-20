@@ -2,8 +2,8 @@
 
 #include "Attachment.h"
 #include "database.h"
-#include "GameDatabase.h"
 #include "enums.h"
+#include "GameDatabase.h"
 #include "itemselection.h"
 
 // Enchants Dialog

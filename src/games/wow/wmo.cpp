@@ -1389,8 +1389,11 @@ void WMOModelInstance::draw()
 
 void WMOModelInstance::loadModel(ModelManager &mm)
 {
+  //@TODO to repair for WMO support
+  /*
     model = (WoWModel*)mm.items[mm.add(filename)];
 	model->isWMO = true;
+	*/
 }
 
 void WMOModelInstance::unloadModel(ModelManager &mm)
