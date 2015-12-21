@@ -30,6 +30,7 @@ set(src animated.cpp
         GameDatabase.cpp
         GameFile.cpp
         GameFolder.cpp
+        HardDriveFile.cpp
         globalvars.cpp
         ModelAttachment.cpp
         ModelCamera.cpp

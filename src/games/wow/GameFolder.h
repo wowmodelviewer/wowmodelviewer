@@ -36,6 +36,7 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     virtual ~GameFolder() {}
 
     void init(const QString & path, const QString & file);
+    void addCustomFiles(const QString & path);
 
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2

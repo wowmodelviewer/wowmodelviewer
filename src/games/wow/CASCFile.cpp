@@ -43,14 +43,20 @@ bool CASCFile::open()
   m_handle = GAMEDIRECTORY.openFile(filepath.toStdString());
 
   if(!m_handle)
+  {
     LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
+    return false;
+  }
 
   if(m_handle)
   {
     DWORD nbBytesRead = 0;
     size = CascGetFileSize(m_handle,0);
     if(size == CASC_INVALID_SIZE)
+    {
       LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
+      return false;
+    }
 
     if(buffer)
       delete [] buffer;
@@ -66,7 +72,7 @@ bool CASCFile::open()
 #endif
   }
 
-  return m_handle;
+  return true;
 }
 
 bool CASCFile::close()

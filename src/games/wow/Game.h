@@ -35,6 +35,7 @@ class _GAME_API_ Game
     }
 
     void init(const QString & path);
+    void addCustomFiles(const QString &path);
 
 
     GameFolder & gameFolder() { return m_gameFolder; }

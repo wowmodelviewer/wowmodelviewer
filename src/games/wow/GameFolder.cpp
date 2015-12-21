@@ -7,11 +7,13 @@
 
 #include "GameFolder.h"
 
+#include <QDirIterator>
 #include <QFile>
 #include <QRegularExpression>
 
 #include "CASCFile.h"
 #include "Game.h"
+#include "HardDriveFile.h"
 
 #include "logger/Logger.h"
 
@@ -43,6 +45,30 @@ void GameFolder::init(const QString & path, const QString & filename)
   }
   LOG_INFO << __FUNCTION__ << "Hierarchy creation done";
 }
+
+void GameFolder::addCustomFiles(const QString & path)
+{
+  QDirIterator dirIt(path, QDirIterator::Subdirectories);
+
+  while(dirIt.hasNext())
+  {
+    dirIt.next();
+    QString filePath = dirIt.filePath().toLower();
+
+    if(QFileInfo(filePath).isFile())
+    {
+      QString toRemove = path;
+      toRemove += "\\";
+      filePath.replace(0, toRemove.size(), "");
+      filePath.replace("/","\\");
+
+      HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath());
+      file->setName(filePath.mid(filePath.lastIndexOf("\\")+1));
+      addChild(file);
+    }
+  }
+}
+
 
 QString GameFolder::getFullPathForFile(QString file)
 {

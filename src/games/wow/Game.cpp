@@ -17,3 +17,9 @@ void Game::init(const QString & path)
 {
   m_gameFolder.init(path, "listfile.txt");
 }
+
+void Game::addCustomFiles(const QString & path)
+{
+  m_gameFolder.addCustomFiles(path);
+}
+
