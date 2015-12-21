@@ -1209,13 +1209,14 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	    if(model1 != "" && texture1 != "")
 	    {
+
 	      LoadModel(GAMEDIRECTORY.getFile(model1));
-	      canvas->model->TextureList.push_back(texture1.c_str());
 	      TextureGroup grp;
 	      grp.base = TEXTURE_ITEM;
 	      grp.count = 1;
 
 	      grp.tex[0] = GAMEDIRECTORY.getFile(texture1.c_str());
+	      canvas->model->TextureList.push_back(grp.tex[0]);
 	      if (grp.tex[0])
 	        animControl->AddSkin(grp);
 	    }
@@ -2540,7 +2541,7 @@ void ModelViewer::ModelInfo()
 		xml << "      <vertexEnd>" << p.vertexEnd << "</vertexEnd>" << endl;
 		xml << "      <tex>" << p.tex << "</tex>" << endl;
 		if (p.tex >= 0)
-			xml << "      <texName>" << m->TextureList[p.tex].toStdString() << "</texName>" << endl;
+			xml << "      <texName>" << m->TextureList[p.tex]->fullname().toStdString() << "</texName>" << endl;
 		xml << "      <useTex2>" << p.useTex2 << "</useTex2>" << endl;
 		xml << "      <useEnvMap>" << p.useEnvMap << "</useEnvMap>" << endl;
 		xml << "      <cull>" << p.cull << "</cull>" << endl;
@@ -2735,7 +2736,7 @@ void ModelViewer::ModelInfo()
 //	xml << "    <>" << m->header. << "</>" << endl;
 	xml << "  <TextureLists>" << endl;
 	for(size_t i=0; i<m->TextureList.size(); i++) {
-		xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i].toStdString() << "</TextureList>" << endl;
+		xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i]->fullname().toStdString() << "</TextureList>" << endl;
 	}
 	xml << "  </TextureLists>" << endl;
 

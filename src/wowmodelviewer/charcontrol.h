@@ -81,8 +81,6 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
-
-	void UpdateTextureList(wxString texName, int special);
 };
 
 

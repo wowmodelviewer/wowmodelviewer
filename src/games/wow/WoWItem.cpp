@@ -299,10 +299,10 @@ void WoWItem::load()
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
-        if (m->TextureList[x] == "Special_2")
+        if (m->TextureList[x]->fullname() == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-          m->TextureList[x] = texture->fullname();
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -329,10 +329,10 @@ void WoWItem::load()
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
-        if (m->TextureList[x] == "Special_2")
+        if (m->TextureList[x]->fullname() == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-          m->TextureList[x] = texture->fullname();
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -352,10 +352,10 @@ void WoWItem::load()
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
-        if (m->TextureList[x] == "Special_2")
+        if (m->TextureList[x]->fullname() == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-          m->TextureList[x] = texture->fullname();
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -402,10 +402,10 @@ void WoWItem::load()
   			tex = texturemanager.add(texture);
   			for (size_t x=0;x<m->TextureList.size();x++)
   			{
-  				if (m->TextureList[x] == "Special_2")
+  				if (m->TextureList[x]->fullname() == "Special_2")
   				{
-  					LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-  					m->TextureList[x] = texture->fullname();
+  					LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+  					m->TextureList[x] = texture;
   				}
   			}
   			m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -553,10 +553,10 @@ void WoWItem::load()
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
-        if (m->TextureList[x] == "Special_2")
+        if (m->TextureList[x]->fullname() == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-          m->TextureList[x] = texture->fullname();
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -582,10 +582,10 @@ void WoWItem::load()
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
-        if (m->TextureList[x] == "Special_2")
+        if (m->TextureList[x]->fullname() == "Special_2")
         {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x] << "with" << texture->fullname();
-          m->TextureList[x] = texture->fullname();
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
         }
       }
       m->replaceTextures[TEXTURE_CAPE] = tex;
@@ -903,8 +903,9 @@ void WoWItem::refresh()
     std::map<CharRegions, QString>::iterator it = m_itemTextures.find(CR_CAPE);
     if(it != m_itemTextures.end())
     {
-    	m_charModel->capeTex = texturemanager.add(GAMEDIRECTORY.getFile(it->second));
-      m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
+      GameFile * tex = GAMEDIRECTORY.getFile(it->second);
+    	m_charModel->capeTex = texturemanager.add(tex);
+      m_charModel->UpdateTextureList(tex, TEXTURE_CAPE);
     }
     break;
   }

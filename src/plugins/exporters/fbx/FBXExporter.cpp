@@ -481,7 +481,7 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      wxString tex = m_p_model->TextureList[pass.tex].toStdString().c_str();
+      wxString tex = m_p_model->TextureList[pass.tex]->fullname().toStdString().c_str();
       std::string tex_name = tex.AfterLast(SLASH).BeforeLast('.').c_str();
       tex_name += ".png";
       wxString tex_fullpath_filename = wxString(m_filename.c_str()).BeforeLast(SLASH) + wxT(SLASH) + tex_name.c_str();

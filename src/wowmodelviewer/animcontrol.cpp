@@ -645,7 +645,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 			wxString texname = tex->fullname().toStdString().c_str();
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
 			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
-			g_selModel->TextureList.push_back(texname.c_str());
+			g_selModel->TextureList.push_back(tex);
 			TextureGroup *grp = new TextureGroup(*it);
 			skinList->SetClientData(num++, grp);
 		}
@@ -671,7 +671,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins)
       BLPSkinList2->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
       BLPSkinList3->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
       LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillBLPSkinSelector.";
-      g_selModel->TextureList.push_back(texname.c_str());
+      g_selModel->TextureList.push_back(tex);
       TextureGroup *grp = new TextureGroup(*it);
       BLPSkinList1->SetClientData(num, grp);
       BLPSkinList2->SetClientData(num, grp);
@@ -920,7 +920,7 @@ void AnimControl::SetSkin(int num)
 			{
 				if (base == g_selModel->specialTextures[j])
 				{
-					g_selModel->TextureList[j] = tex->fullname();
+					g_selModel->TextureList[j] = tex;
 					break;
 				}
 			}
@@ -960,7 +960,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
     {
       if (base == g_selModel->specialTextures[j])
       {
-        g_selModel->TextureList[j] = tex->fullname();
+        g_selModel->TextureList[j] = tex;
         break;
       }
     }

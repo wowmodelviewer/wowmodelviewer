@@ -375,7 +375,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
     if (p.init(model))
     {
-      QString tex = model->TextureList[p.tex];
+      QString tex = model->TextureList[p.tex]->fullname();
       QString texfile = QFileInfo(tex).completeBaseName();
       tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
@@ -408,7 +408,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-      texToExport[tex.toStdString()] = model->TextureList[p.tex].toStdString();
+      texToExport[tex.toStdString()] = model->TextureList[p.tex]->fullname().toStdString();
     }
   }
 

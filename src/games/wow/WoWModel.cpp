@@ -540,8 +540,9 @@ void WoWModel::initCommon(GameFile * f)
 
 			if (texdef[i].type == TEXTURE_FILENAME) {
 				QString texname((char*)(f->getBuffer()+texdef[i].nameOfs));
-				textures[i] = texturemanager.add(GAMEDIRECTORY.getFile(texname));
-				TextureList.push_back(texname);
+				GameFile * tex = GAMEDIRECTORY.getFile(texname);
+				textures[i] = texturemanager.add(tex);
+				TextureList.push_back(tex);
 				LOG_INFO << "Added" << texname << "to the TextureList[" << TextureList.size() << "]";
 			} else {
 				// special texture - only on characters and such...
@@ -550,8 +551,8 @@ void WoWModel::initCommon(GameFile * f)
 				//if (texdef[i].type < TEXTURE_MAX)specialTextures[texdef[i].type] = (int)i;
 				specialTextures[i] = texdef[i].type;
 
-				QString tex = QString("Special_%1").arg(texdef[i].type);
-
+				GameFile * tex = new CASCFile(QString("Special_%1").arg(texdef[i].type));
+				/*
 				if (modelType == MT_NORMAL){
 					if (texdef[i].type == TEXTURE_HAIR)
 						tex = "Hair.blp";
@@ -560,8 +561,9 @@ void WoWModel::initCommon(GameFile * f)
 					else if(texdef[i].type == TEXTURE_FUR)
 						tex = "Fur.blp";
 				}
+*/
 
-				LOG_INFO << "Added" << tex << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
+				LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
 				TextureList.push_back(tex);
 
 				if (texdef[i].type < TEXTURE_MAX)
@@ -1443,14 +1445,14 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   return 0;
 }
 
-void WoWModel::UpdateTextureList(QString texName, int special)
+void WoWModel::UpdateTextureList(GameFile * tex, int special)
 {
   for (size_t i=0; i< header.nTextures; i++)
   {
     if (specialTextures[i] == special)
     {
-      LOG_INFO << "Updating" << TextureList[i] << "to" << texName;
-      TextureList[i] = texName;
+      LOG_INFO << "Updating" << TextureList[i] << "to" << tex->fullname();
+      TextureList[i] = tex;
       break;
     }
   }

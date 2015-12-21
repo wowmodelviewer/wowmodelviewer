@@ -509,8 +509,9 @@ void CharControl::RefreshModel()
 
 	if(textures.size() > 1)
 	{
-		model->furTex = texturemanager.add(GAMEDIRECTORY.getFile(textures[1].c_str()));
-	  model->UpdateTextureList(textures[1].c_str(), TEXTURE_FUR);
+	  GameFile * tex = GAMEDIRECTORY.getFile(textures[1].c_str());
+		model->furTex = texturemanager.add(tex);
+	  model->UpdateTextureList(tex, TEXTURE_FUR);
 	}
 
 	// Display underwear on the model?
@@ -584,8 +585,9 @@ void CharControl::RefreshModel()
 	textures = model->cd.getTextureNameForSection(CharDetails::HairType);
   if(textures.size() > 0)
   {
-  	model->hairTex = texturemanager.add(GAMEDIRECTORY.getFile(textures[0].c_str()));
-    model->UpdateTextureList(textures[0].c_str(), TEXTURE_HAIR);
+    GameFile * tex = GAMEDIRECTORY.getFile(textures[0].c_str());
+  	model->hairTex = texturemanager.add(tex);
+    model->UpdateTextureList(tex, TEXTURE_HAIR);
 
     if(infos.isHD)
     {
