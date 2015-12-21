@@ -50,7 +50,7 @@ class _CHARTEXTURE_API_ CharTexture
   : layoutSizeId(_layoutSizeId)
   {}
 
-    void addLayer(QString fn, int region, int layer);
+    void addLayer(GameFile *, int region, int layer);
 
     void compose(TextureID texID);
 

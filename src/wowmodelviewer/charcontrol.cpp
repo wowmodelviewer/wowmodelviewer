@@ -505,7 +505,7 @@ void CharControl::RefreshModel()
 	std::vector<std::string> textures = model->cd.getTextureNameForSection(CharDetails::SkinType);
 
 	if(textures.size() > 0)
-	  model->tex.addLayer(textures[0].c_str(), CR_BASE, 0);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_BASE, 0);
 
 	if(textures.size() > 1)
 	{
@@ -519,10 +519,10 @@ void CharControl::RefreshModel()
 	{
 	  textures = model->cd.getTextureNameForSection(CharDetails::UnderwearType);
 	  if(textures.size() > 0)
-	    model->tex.addLayer(textures[0].c_str(), CR_PELVIS_UPPER, 1); // pants
+	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_PELVIS_UPPER, 1); // pants
 
 	  if(textures.size() > 1)
-	    model->tex.addLayer(textures[1].c_str(), CR_TORSO_UPPER, 1); // top
+	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_TORSO_UPPER, 1); // top
 
 	  // pandaren female => need to display tabard2 geosets (need to find something better...)
 	  for (size_t i=0; i<model->geosets.size(); i++)
@@ -544,18 +544,18 @@ void CharControl::RefreshModel()
 	// face
 	textures = model->cd.getTextureNameForSection(CharDetails::FaceType);
 	if(textures.size() > 0)
-	  model->tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 1);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_FACE_LOWER, 1);
 
 	if(textures.size() > 1)
-	  model->tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 1);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 1);
 
 	// facial hair
 	textures = model->cd.getTextureNameForSection(CharDetails::FacialHairType);
 	if(textures.size() > 0)
-	  model->tex.addLayer(textures[0].c_str(), CR_FACE_LOWER, 2);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_FACE_LOWER, 2);
 
 	if(textures.size() > 1)
-	  model->tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 2);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 2);
 
   // select hairstyle geoset(s)
 	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
@@ -592,17 +592,17 @@ void CharControl::RefreshModel()
     if(infos.isHD)
     {
       if(!showScalp && textures.size() > 1)
-        model->tex.addLayer(textures[1].c_str(), CR_FACE_UPPER, 3);
+        model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 3);
     }
     else
     {
       if(!showScalp)
       {
         if(textures.size() > 1)
-          model->tex.addLayer(textures[1].c_str(), CR_FACE_LOWER, 3);
+          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_LOWER, 3);
 
         if(textures.size() > 2)
-          model->tex.addLayer(textures[2].c_str(), CR_FACE_UPPER, 3);
+          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[2].c_str()), CR_FACE_UPPER, 3);
       }
     }
   }

@@ -24,14 +24,14 @@
 
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 
-void CharTexture::addLayer(QString fn, int region, int layer)
+void CharTexture::addLayer(GameFile * file, int region, int layer)
 {
   //std::cout << __FUNCTION__ << " " << fn.mb_str() << " " << region << " " << layer << std::endl;
-  if (fn.length()==0)
+  if (!file)
     return;
 
   CharTextureComponent ct;
-  ct.file = GAMEDIRECTORY.getFile(fn);
+  ct.file = file;
   ct.region = region;
   ct.layer = layer;
   m_components.push_back(ct);

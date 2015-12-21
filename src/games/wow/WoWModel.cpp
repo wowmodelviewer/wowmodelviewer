@@ -551,17 +551,19 @@ void WoWModel::initCommon(GameFile * f)
 				//if (texdef[i].type < TEXTURE_MAX)specialTextures[texdef[i].type] = (int)i;
 				specialTextures[i] = texdef[i].type;
 
-				GameFile * tex = new CASCFile(QString("Special_%1").arg(texdef[i].type));
-				/*
+				GameFile * tex = 0;
+
 				if (modelType == MT_NORMAL){
 					if (texdef[i].type == TEXTURE_HAIR)
-						tex = "Hair.blp";
+					  tex = new CASCFile("Hair.blp");
 					else if(texdef[i].type == TEXTURE_BODY)
-						tex = "Body.blp";
+					  tex = new CASCFile("Body.blp");
 					else if(texdef[i].type == TEXTURE_FUR)
-						tex = "Fur.blp";
+					  tex = new CASCFile("Fur.blp");
 				}
-*/
+
+				if(!tex)
+				  tex = new CASCFile(QString("Special_%1").arg(texdef[i].type));
 
 				LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
 				TextureList.push_back(tex);

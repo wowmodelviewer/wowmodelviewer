@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include "GameFile.h"
 #include "wow_enums.h"
 #include "metaclasses/Component.h"
 
@@ -96,7 +97,7 @@ class _WOWITEM_API_ WoWItem : public Component
     static std::map<CharSlots,int> SLOT_LAYERS;
     static std::map<CharSlots,int> initSlotLayers();
 
-    std::map<CharRegions, QString> m_itemTextures;
+    std::map<CharRegions, GameFile *> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
 
