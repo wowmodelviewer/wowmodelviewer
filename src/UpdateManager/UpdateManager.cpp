@@ -217,5 +217,5 @@ void UpdateManager::resizeTable()
 void UpdateManager::cellClicked(int row, int col)
 {
   if(m_table->item(row,col) && m_table->item(row,col)->text() == "Update Needed")
-    QDesktopServices::openUrl(QUrl("https://wowmodelviewer.atlassian.net/wiki/display/WMV/Download+WoW+Model+Viewer"));
+    QDesktopServices::openUrl(QUrl("http://download.wowmodelviewer.net"));
 }
