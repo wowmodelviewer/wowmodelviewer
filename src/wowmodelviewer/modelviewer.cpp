@@ -478,6 +478,8 @@ void ModelViewer::InitMenu()
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
+		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
+
 
 		wxMenu *effectsMenu = new wxMenu;
 		effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
@@ -1006,6 +1008,7 @@ void ModelViewer::LoadModel(GameFile * file)
 		charMenu->Enable(ID_LOAD_START, true);
 		charMenu->Enable(ID_MOUNT_CHARACTER, true);
 		charMenu->Enable(ID_CHAR_RANDOMISE, true);
+		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 
 		charControl->UpdateModel(modelAtt);
 	}
@@ -1028,6 +1031,7 @@ void ModelViewer::LoadModel(GameFile * file)
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
+		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}
 
 	// Update the model control
@@ -1238,6 +1242,7 @@ void ModelViewer::LoadItem(unsigned int id)
 		charMenu->Enable(ID_LOAD_START, false);
 		charMenu->Enable(ID_MOUNT_CHARACTER, false);
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
+		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 
 	} catch (...) {}
 
@@ -2206,6 +2211,7 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
 	charMenu->Enable(ID_LOAD_START, true);
 	charMenu->Enable(ID_MOUNT_CHARACTER, true);
 	charMenu->Enable(ID_CHAR_RANDOMISE, true);
+	charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 
 	// Update interface docking components
 	interfaceManager.Update();
