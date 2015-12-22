@@ -1734,7 +1734,9 @@ void ModelViewer::LoadWoW()
   }
 
   Game::instance().init(QString(gamePath.c_str()));
-  Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()));
+
+  if(!customDirectoryPath.IsEmpty())
+    Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()));
 
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);

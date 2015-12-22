@@ -37,6 +37,7 @@ class GeneralSettings: public wxWindow
 
   wxCheckBox *chkbox[NUM_SETTINGS1_CHECK];
   wxTextCtrl *gamePathCtrl;
+  wxTextCtrl *customDirectoryPathCtrl;
 
 public:
 
