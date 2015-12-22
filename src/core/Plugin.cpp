@@ -53,7 +53,7 @@ GlobalSettings * Plugin::globalSettings = 0;
 // Constructors 
 //--------------------------------------------------------------------
 Plugin::Plugin()
- : Component(), m_name(""), m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
+ : Component(), m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
 {
 
 }
@@ -75,7 +75,7 @@ Plugin * Plugin::load(std::string path, GlobalSettings & settings)
   {
     newPlugin = dynamic_cast<Plugin *>(plugin);
     QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
-    newPlugin->m_name = metaInfos.value("name").toString().toStdString();
+    newPlugin->setName(metaInfos.value("name").toString());
     newPlugin->m_version = metaInfos.value("version").toString().toStdString();
     newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
     newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
@@ -94,7 +94,7 @@ Plugin * Plugin::load(std::string path, GlobalSettings & settings)
 
 void Plugin::doPrint()
 {
-  std::cout << id() << ": " << m_name << " (version: " << m_version << " - core needed: " << m_coreVersionNeeded << ")" << std::endl;
+  std::cout << id() << ": " << name().toStdString() << " (version: " << m_version << " - core needed: " << m_coreVersionNeeded << ")" << std::endl;
 }
 
 // Protected methods

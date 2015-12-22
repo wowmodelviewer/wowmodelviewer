@@ -106,7 +106,6 @@ class _PLUGIN_API_ Plugin : public Component
     void transmitGlobalsFromCore(GlobalSettings &);
 
 		// Members
-    std::string m_name;
     std::string m_internalName;
     std::string m_category;
     std::string m_version;
