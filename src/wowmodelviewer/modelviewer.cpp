@@ -866,6 +866,11 @@ void ModelViewer::LoadLayout()
 {
 	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
+	int posx = config.value("Session/PositionX", "").toInt();
+	int posy = config.value("Session/PositionY", "").toInt();
+
+	SetPosition(wxPoint(posx,posy));
+
 	wxString layout = config.value("Session/Layout", "").toString().toStdString();
 
 	// if the layout data exists,  load it.
@@ -906,6 +911,11 @@ void ModelViewer::SaveLayout()
 	QSettings config(cfgPath.c_str(), QSettings::IniFormat);
 
 	config.setValue("Session/Layout", interfaceManager.SavePerspective().c_str());
+
+	wxPoint pos = GetPosition();
+	config.setValue("Session/PositionX", pos.x);
+	config.setValue("Session/PositionY", pos.y);
+
 	LOG_INFO << "GUI Layout was saved.";
 }
 
