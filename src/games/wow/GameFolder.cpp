@@ -34,7 +34,7 @@ void GameFolder::init(const QString & path, const QString & filename)
 
   QTextStream in(&file);
 
-  LOG_INFO << __FUNCTION__ << "Start to build object hierarchy";
+  LOG_INFO << "GameFolder - Start to build object hierarchy";
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
@@ -43,11 +43,12 @@ void GameFolder::init(const QString & path, const QString & filename)
     file->setName(line.mid(line.lastIndexOf("\\")+1));
     addChild(file);
   }
-  LOG_INFO << __FUNCTION__ << "Hierarchy creation done";
+  LOG_INFO << "GameFolder - Hierarchy creation done";
 }
 
-void GameFolder::addCustomFiles(const QString & path)
+void GameFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
 {
+  LOG_INFO << "Add customFiles from folder" << path;
   QDirIterator dirIt(path, QDirIterator::Subdirectories);
 
   while(dirIt.hasNext())
@@ -62,9 +63,29 @@ void GameFolder::addCustomFiles(const QString & path)
       filePath.replace(0, toRemove.size(), "");
       filePath.replace("/","\\");
 
-      HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath());
-      file->setName(filePath.mid(filePath.lastIndexOf("\\")+1));
-      addChild(file);
+      GameFile * originalFile = getFile(filePath);
+      bool addnewfile = true;
+      if(originalFile)
+      {
+        if(bypassOriginalFiles)
+        {
+          removeChild(originalFile);
+          delete originalFile;
+          addnewfile = true;
+        }
+        else
+        {
+          addnewfile = false;
+        }
+      }
+
+      if(addnewfile)
+      {
+        LOG_INFO << "Add custom file" << filePath << "from hard drive location" << dirIt.filePath();
+        HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath());
+        file->setName(filePath.mid(filePath.lastIndexOf("\\")+1));
+        addChild(file);
+      }
     }
   }
 }
@@ -167,3 +188,9 @@ void GameFolder::onChildAdded(GameFile * child)
 {
   m_childrenMap[child->fullname()] = child;
 }
+
+void GameFolder::onChildRemoved(GameFile * child)
+{
+  m_childrenMap.erase(child->fullname());
+}
+

@@ -20,7 +20,6 @@ CASCFile::CASCFile(QString path)
 
 CASCFile::~CASCFile()
 {
-  LOG_INFO << __FUNCTION__ << this;
   close();
 }
 

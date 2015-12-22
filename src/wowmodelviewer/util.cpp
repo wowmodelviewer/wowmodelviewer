@@ -16,6 +16,7 @@ wxString cfgPath;
 wxString bgImagePath;
 wxString armoryPath;
 wxString customDirectoryPath;
+int customFilesConflictPolicy = 0;
 
 UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;

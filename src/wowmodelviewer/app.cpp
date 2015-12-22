@@ -335,6 +335,7 @@ void WowModelViewApp::LoadSettings()
 	gamePath = config.value("Settings/Path", "").toString().toStdString().c_str();
 	armoryPath = config.value("Settings/ArmoryPath", "").toString().toStdString().c_str();
 	customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdString().c_str();
+	customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
 	ssCounter = config.value("Settings/SSCounter", 100).toInt();
 	imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 }
@@ -350,6 +351,7 @@ void WowModelViewApp::SaveSettings()
 	config.setValue("Settings/Path", gamePath.c_str());
 	config.setValue("Settings/ArmoryPath", armoryPath.c_str());
 	config.setValue("Settings/CustomDirPath", customDirectoryPath.c_str());
+	config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
 	config.setValue("Settings/SSCounter", ssCounter);
 	config.setValue("Settings/DefaultFormat", imgFormat);
 }

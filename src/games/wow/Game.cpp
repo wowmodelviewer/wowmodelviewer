@@ -18,8 +18,8 @@ void Game::init(const QString & path)
   m_gameFolder.init(path, "listfile.txt");
 }
 
-void Game::addCustomFiles(const QString & path)
+void Game::addCustomFiles(const QString & path, bool bypassOriginalFiles)
 {
-  m_gameFolder.addCustomFiles(path);
+  m_gameFolder.addCustomFiles(path, bypassOriginalFiles);
 }
 

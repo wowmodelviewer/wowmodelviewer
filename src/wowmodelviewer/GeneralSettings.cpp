@@ -38,15 +38,18 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   sizer->Add(chkbox[CHECK_ZEROPARTICLE], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(chkbox[CHECK_RANDOMSKIN], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
+  wxString policies[2] = {_("Keep game files"), _("Keep custom files")};
 
+  keepPolicyRadioBox = new wxRadioBox(this, -1, _("Conflict policy"), wxDefaultPosition, wxDefaultSize, 2, policies, 2);
   gamePathCtrl =  new wxTextCtrl(this, wxID_ANY, gamePath, wxDefaultPosition, wxSize(300,-1), 0);
   customDirectoryPathCtrl =  new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(300,-1), 0);
 
   top->Add(sizer, 0, wxEXPAND | wxALL, 10);
   top->Add(new wxStaticText(this, wxID_ANY, _("Game path (including final \\Data statement - ie C:\\Games\\WoW\\Data)"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->Add(gamePathCtrl, 0, wxALL, 5);
-  top->Add(new wxStaticText(this, wxID_ANY, _("Folder to explore to add additional files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
+  top->Add(new wxStaticText(this, wxID_ANY, _("Folder to explore for additional files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->Add(customDirectoryPathCtrl, 0, wxALL, 5);
+  top->Add(keepPolicyRadioBox, 0, wxALL, 5);
   top->Add(new wxButton(this, ID_GENERAL_SETTINGS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->SetMinSize(350, 350);
   SetSizer(top);
@@ -75,6 +78,7 @@ void GeneralSettings::Update()
   chkbox[CHECK_ZEROPARTICLE]->SetValue(GLOBALSETTINGS.bZeroParticle);
   gamePathCtrl->SetValue(gamePath);
   customDirectoryPathCtrl->SetValue(customDirectoryPath);
+  keepPolicyRadioBox->SetSelection(customFilesConflictPolicy);
 }
 
 void GeneralSettings::OnButton(wxCommandEvent &event)
@@ -92,6 +96,12 @@ void GeneralSettings::OnButton(wxCommandEvent &event)
     if(customDirectoryPath !=  customDirectoryPathCtrl->GetValue())
     {
       customDirectoryPath = customDirectoryPathCtrl->GetValue();
+      settingsChanged = true;
+    }
+
+    if(customFilesConflictPolicy != keepPolicyRadioBox->GetSelection())
+    {
+      customFilesConflictPolicy = keepPolicyRadioBox->GetSelection();
       settingsChanged = true;
     }
 

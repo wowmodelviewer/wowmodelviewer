@@ -36,7 +36,7 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     virtual ~GameFolder() {}
 
     void init(const QString & path, const QString & file);
-    void addCustomFiles(const QString & path);
+    void addCustomFiles(const QString & path, bool bypassOriginalFiles);
 
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2
@@ -58,6 +58,7 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     int lastError();
 
     void onChildAdded(GameFile *);
+    void onChildRemoved(GameFile *);
 
   private:
     CASCFolder m_CASCFolder;
