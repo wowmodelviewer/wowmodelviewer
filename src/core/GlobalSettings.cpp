@@ -56,7 +56,7 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 8;
-  m_versionRevNumber = 0;
+  m_versionRevNumber = 1;
 
   m_appName = "WoW Model Viewer";
   m_buildName = "Trip in Draenor";
