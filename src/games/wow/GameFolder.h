@@ -42,7 +42,6 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     // HumanMale.m2 => Character\Human\male\humanmale.m2
     QString getFullPathForFile(QString file);
 
-    void getFilesForFolder(std::vector<QString> &fileNames, QString folderPath);
     void getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath);
     void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
     GameFile * getFile(QString filename);

@@ -103,19 +103,6 @@ QString GameFolder::getFullPathForFile(QString file)
   return "";
 }
 
-void GameFolder::getFilesForFolder(std::vector<QString> &fileNames, QString folderPath)
-{
-  folderPath = folderPath.toLower();
-  for(GameFolder::iterator it = begin() ; it != end() ; ++it)
-  {
-    GameFile * file = *it;
-    if(file->fullname().startsWith(folderPath))
-    {
-      fileNames.push_back(file->fullname());
-    }
-  }
-}
-
 void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath)
 {
   folderPath = folderPath.toLower();
