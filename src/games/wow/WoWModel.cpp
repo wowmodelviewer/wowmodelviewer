@@ -172,7 +172,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	tempname.replace(".mdx",".m2");
 
 	ok = true;
-	
+
 	memcpy(&header, file->getBuffer(), sizeof(ModelHeader));
 
 	LOG_INFO << "Loading model:" << tempname << "size:" << file->getSize();
@@ -194,6 +194,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	if (header.nameOfs != 304 && header.nameOfs != 320)
 	{
 	  LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
+	  ok = false;
 	  file->close();
 	  return;
 	}
