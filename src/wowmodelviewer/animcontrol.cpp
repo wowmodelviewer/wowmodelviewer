@@ -591,26 +591,24 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
 	LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
-	// Search the same directory for BLPs
-	std::vector<GameFile *> files;
+	// get all blp files that corresponds to the model
+	std::set<GameFile *> files;
 
-	wxString modelpath = wxString(m->itemName().toStdString().c_str());
-	modelpath = modelpath.BeforeLast(MPQ_SLASH) + MPQ_SLASH;
-	modelpath = modelpath.Lower();
+	QString filterString = m->itemName().mid(m->itemName().lastIndexOf("\\")+1);
+	filterString = "^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
+	GAMEDIRECTORY.getFilteredFiles(files, filterString);
 
-	// get all files in the model's folder:
-	GAMEDIRECTORY.getFilesForFolder(files, QString::fromStdString(modelpath.mb_str()));
-
-	if (files.begin() != files.end())
+	if (files.size() != 0)
 	{
 		TextureGroup grp;
 		grp.base = TEXTURE_ITEM;
 		grp.count = 1;
-		for (std::vector<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
+		for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
 		{
 		  GameFile * tex = *it;
+
 		  // use this alone texture only if not already used from database infos
-		  if(grp.tex[0] != 0 && std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(), tex) == alreadyUsedTextures.end())
+		  if(std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(), tex) == alreadyUsedTextures.end())
 		  {
 		    grp.tex[0] = tex;
 		    skins.insert(grp);

@@ -119,6 +119,12 @@ void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString f
 void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
 {
   QRegularExpression regex(filter);
+
+  if(!regex.isValid())
+  {
+    LOG_ERROR << regex.errorString();
+    return;
+  }
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
     if((*it)->name().contains(regex))
