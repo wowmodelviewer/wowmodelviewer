@@ -1744,6 +1744,7 @@ void ModelViewer::OnGameToggle(wxCommandEvent &event)
 
 void ModelViewer::LoadWoW()
 {
+  fileControl->Disable();
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();
   }
@@ -1818,6 +1819,7 @@ void ModelViewer::LoadWoW()
   {
     SetStatusText(wxT("Error Initializing the Character Controls."));
   };
+  fileControl->Enable();
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
