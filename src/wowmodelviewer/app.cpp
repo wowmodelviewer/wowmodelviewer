@@ -233,7 +233,7 @@ bool WowModelViewApp::OnInit()
 		else {
 			wxString tmp = cmd.AfterLast('.');
 			if (!tmp.IsNull() && !tmp.IsEmpty() && tmp.IsSameAs(wxT("chr"), false))
-				frame->LoadChar(cmd);
+				frame->LoadChar(cmd.c_str());
 		}
 	}
 	// -------

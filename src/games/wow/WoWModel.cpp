@@ -85,16 +85,6 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
     ManagedItem(""),
     forceAnim(forceAnim)
 {
-  ok = false;
-	if (!file)
-		return;
-
-	setItemName(file->fullname());
-
-	// replace .MDX with .M2
-	QString tempname = file->fullname();
-	tempname.replace(".mdx",".m2");
-
 	// Initiate our model variables.
 	trans = 1.0f;
 	rad = 1.0f;
@@ -165,13 +155,21 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	// --
 	ok = false;
 
+	if (!file)
+	  return;
 
 	if (!file->open() || file->isEof() || (file->getSize() < sizeof(ModelHeader)))
 	{
-		LOG_ERROR << "Unable to load model:" << tempname;
+		LOG_ERROR << "Unable to load model:" << file->fullname();
 		file->close();
 		return;
 	}
+
+	setItemName(file->fullname());
+
+	// replace .MDX with .M2
+	QString tempname = file->fullname();
+	tempname.replace(".mdx",".m2");
 
 	ok = true;
 	
@@ -1501,9 +1499,9 @@ void WoWModel::save(QXmlStreamWriter &stream)
   stream.writeEndElement(); // model
 }
 
-void WoWModel::load(QXmlStreamReader &stream)
+void WoWModel::load(QString &file)
 {
-  cd.load(stream);
+  cd.load(file);
 }
 
 bool WoWModel::canSetTextureFromFile(int texnum)

@@ -94,8 +94,8 @@ public:
 	void SaveLayout();
 	void ResetLayout();
 	// save + load character *.CHR files
-	void LoadChar(wxString fn, bool equipmentOnly = false);
-	void SaveChar(wxString fn, bool equipmentOnly = false);
+	void LoadChar(QString fn, bool equipmentOnly = false);
+	void SaveChar(QString fn, bool equipmentOnly = false);
 
 	void LoadModel(GameFile * f);
 	void LoadItem(unsigned int displayID);

@@ -25,6 +25,7 @@
 
 #include "WoWItem.h"
 
+#include <QFile>
 #include <QString>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -989,8 +990,18 @@ void WoWItem::save(QXmlStreamWriter & stream)
   stream.writeEndElement(); // item
 }
 
-void WoWItem::load(QXmlStreamReader & reader)
+void WoWItem::load(QString & f)
 {
+  QFile file(f);
+  if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    LOG_ERROR << "Fail to open" << f;
+    return;
+  }
+
+  QXmlStreamReader reader;
+  reader.setDevice(&file);
+
   int nbValuesRead = 0;
   while (!reader.atEnd() && nbValuesRead != 3)
   {
@@ -999,6 +1010,7 @@ void WoWItem::load(QXmlStreamReader & reader)
       if(reader.name() == "slot")
       {
         unsigned int slot = reader.attributes().value("value").toString().toUInt();
+
         if(slot == m_slot)
         {
           while (!reader.atEnd() && nbValuesRead != 3)

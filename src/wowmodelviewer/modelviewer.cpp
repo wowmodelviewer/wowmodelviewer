@@ -1425,7 +1425,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 		{
 			wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_SAVE|wxFD_OVERWRITE_PROMPT);
 			if (saveDialog.ShowModal()==wxID_OK)
-				SaveChar(saveDialog.GetPath());
+				SaveChar(saveDialog.GetPath().c_str());
 		}
 		break;
 	case ID_LOAD_CHAR:
@@ -1443,7 +1443,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 				      item->setId(0);
 				  }
 				}
-				LoadChar(loadDialog.GetPath());
+				LoadChar(loadDialog.GetPath().c_str());
 			}
 		}
 		fileControl->UpdateInterface();
@@ -1472,7 +1472,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 	            item->setId(0);
 	        }
 	      }
-	      LoadChar(loadDialog.GetPath(), true);
+	      LoadChar(loadDialog.GetPath().c_str(), true);
 	    }
 	    break;
 	  }
@@ -2008,12 +2008,12 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 	}
 }
 
-void ModelViewer::SaveChar(wxString fn, bool equipmentOnly /*= false*/)
+void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 {
-  QFile file(fn.c_str());
+  QFile file(fn);
   if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
   {
-    LOG_ERROR << "Fail to open" << fn.c_str();
+    LOG_ERROR << "Fail to open" << fn;
     return;
   }
 
@@ -2042,12 +2042,12 @@ void ModelViewer::SaveChar(wxString fn, bool equipmentOnly /*= false*/)
   file.close();
 }
 
-void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
+void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 {
-  QFile file(fn.c_str());
+  QFile file(fn);
   if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
-    LOG_ERROR << "Fail to open" << fn.c_str();
+    LOG_ERROR << "Fail to open" << fn;
     return;
   }
 
@@ -2184,7 +2184,7 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
         {
           QString modelname = reader.attributes().value("name").toString();
           LoadModel(GAMEDIRECTORY.getFile(modelname));
-          canvas->model->load(reader);
+          canvas->model->load(fn);
         }
         else
         {
@@ -2198,7 +2198,7 @@ void ModelViewer::LoadChar(wxString fn, bool equipmentOnly /* = false */)
         for(WoWModel::iterator it = canvas->model->begin();
             it != canvas->model->end();
             ++it)
-          (*it)->load(reader);
+          (*it)->load(fn);
       }
     }
   }

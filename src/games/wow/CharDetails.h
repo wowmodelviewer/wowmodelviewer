@@ -59,7 +59,7 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
     // save + load
     void save(QXmlStreamWriter &);
-    void load(QXmlStreamReader &);
+    void load(QString &);
 
 
     void reset(WoWModel *);

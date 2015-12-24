@@ -14,6 +14,7 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
+#include <QFile>
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
@@ -77,8 +78,18 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeEndElement(); // CharDetails
 }
 
-void CharDetails::load(QXmlStreamReader & reader)
+void CharDetails::load(QString & f)
 {
+  QFile file(f);
+  if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    LOG_ERROR << "Fail to open" << f;
+    return;
+  }
+
+  QXmlStreamReader reader;
+  reader.setDevice(&file);
+
   int nbValuesRead = 0;
   while (!reader.atEnd() && nbValuesRead != 11)
   {

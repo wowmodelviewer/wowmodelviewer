@@ -221,7 +221,7 @@ public:
   std::map<int, std::string> getAnimsMap();
 
   void save(QXmlStreamWriter &);
-  void load(QXmlStreamReader &);
+  void load(QString &);
 
 };
 

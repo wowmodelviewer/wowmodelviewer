@@ -77,7 +77,7 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<POSITION_SLOTS, WoWModel *> itemModels;
 
     void save(QXmlStreamWriter &);
-    void load(QXmlStreamReader &);
+    void load(QString &);
 
   private:
     void unload();
