@@ -56,10 +56,10 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 8;
-  m_versionRevNumber = 1;
+  m_versionRevNumber = 2;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Trip in Draenor";
+  m_buildName = "Christmas Edition ;)";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
