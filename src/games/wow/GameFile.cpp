@@ -50,6 +50,7 @@ bool GameFile::close()
 {
   if(size)
   {
+    buffer -= md21offset;
     delete [] buffer;
     buffer = 0;
   }
