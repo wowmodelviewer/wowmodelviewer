@@ -477,7 +477,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 	FileTreeData *data = (FileTreeData*)fileTree->GetItemData(item);
 
 	// make sure the data (file name) is valid
-	if (!data){
+	if (!data || !data->file){
 		return; // isn't valid, exit.
 	}
 

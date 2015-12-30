@@ -54,6 +54,8 @@ private:
 	    wxTreeItemId id;
 	    GameFile * file;
 
+	    TreeStackItem() : file(0) {}
+
 	    TreeStackItem * getChildByName(QString name)
 	    {
 	      std::map<QString, TreeStackItem *>::iterator it = m_childrenMap.find(name);
