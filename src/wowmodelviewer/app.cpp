@@ -9,17 +9,18 @@
 
 #include <windows.h>
 
-#include "GlobalSettings.h"
-#include "PluginManager.h"
+#include "Game.h"
 #include "GameDatabase.h"
+#include "GlobalSettings.h"
+#include "LogStackWalker.h"
+#include "PluginManager.h"
+#include "resource1.h"
+#include "UserSkins.h"
+#include "util.h"
+
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"
 #include "logger/LogOutputFile.h"
-#include "Game.h"
-#include "GameDatabase.h"
-#include "resource1.h"
-#include "util.h"
-#include "UserSkins.h"
 
 #include <QCoreApplication>
 #include <QSettings>
@@ -46,7 +47,14 @@
 // tell wxwidgets which class is our app
 IMPLEMENT_APP(WowModelViewApp)
 
-//#include "globalvars.h"
+void dumpStackInLogs()
+{
+  LOG_ERROR << "---- WALK FROM EXCEPTION -----";
+  LogStackWalker sw;
+  sw.WalkFromException();
+  LOG_ERROR << "---- WALK FROM CURRENT CONTEXT -----";
+  sw.Walk();
+}
 
 void WowModelViewApp::setInterfaceLocale()
 {
@@ -107,11 +115,8 @@ bool WowModelViewApp::OnInit()
 	
 	
 	// Error & Logging settings
-#ifndef _DEBUG
-	#if wxUSE_ON_FATAL_EXCEPTION
-		wxHandleFatalExceptions(true);
-	#endif
-#endif
+	wxHandleFatalExceptions(true);
+
 
 	wxStandardPaths sp;
 	wxString execPath = sp.GetExecutablePath();
@@ -259,28 +264,18 @@ bool WowModelViewApp::OnInit()
 
 void WowModelViewApp::OnFatalException()
 {
-	//wxApp::SetExitOnFrameDelete(false);
-/*
-	wxDebugReport report;
-    wxDebugReportPreviewStd preview;
+  LOG_ERROR << __FUNCTION__;
+  dumpStackInLogs();
 
-	report.AddAll(wxDebugReport::Context_Exception);
-
-    if (preview.Show(report))
-        report.Process();
-*/
-	if (frame != NULL) {
-		frame->Destroy();
-		frame = NULL;
-	}
+  if (frame != NULL) {
+    frame->Destroy();
+    frame = NULL;
+  }
 }
 
 int WowModelViewApp::OnExit()
 {
 	SaveSettings();
-	
-	//if (frame != NULL)
-	//	frame->Destroy();
 
 	CleanUp();
 
@@ -306,8 +301,9 @@ void WowModelViewApp::HandleEvent(wxEvtHandler *handler, wxEventFunction func, w
 
 void WowModelViewApp::OnUnhandledException() 
 { 
+  LOG_ERROR << __FUNCTION__;
+  dumpStackInLogs();
   wxMessageBox(wxT("An unhandled exception was caught, the program will now terminate."), wxT("Unhandled Exception"), wxOK | wxICON_ERROR);
-//	wxLogFatalError(wxT("An unhandled exception error has occured."));
 }
 
 void WowModelViewApp::LoadSettings()

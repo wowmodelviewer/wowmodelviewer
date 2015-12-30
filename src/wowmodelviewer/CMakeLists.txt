@@ -36,6 +36,7 @@ set(src  AnimationExportChoiceDialog.cpp
          itemselection.cpp
          lightcontrol.cpp
          liquid.cpp
+         LogStackWalker.cpp
          maptile.cpp
          modelbankcontrol.cpp
          modelcanvas.cpp

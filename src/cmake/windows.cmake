@@ -16,6 +16,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4251")
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES MinSizeRel)
-  add_definitions(-DKEEP_CONSOLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /INCREMENTAL:NO")
 endif()
