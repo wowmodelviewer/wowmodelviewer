@@ -702,9 +702,14 @@ void WoWModel::initAnimated(GameFile * f)
 
 		  GameFile * anim = GAMEDIRECTORY.getFile(tempname);
 		  if(anim)
-		    animfiles.push_back(new CASCFile(anim->fullname()));
+		  {
+		    anim->open();
+		    animfiles.push_back(anim);
+		  }
 		  else
+		  {
 		    animfiles.push_back(NULL);
+		  }
 		}
 
 		animManager = new AnimManager(anims);
