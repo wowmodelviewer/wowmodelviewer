@@ -56,10 +56,10 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 8;
-  m_versionRevNumber = 2;
+  m_versionRevNumber = 3;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Christmas Edition ;)";
+  m_buildName = "Archimonde will survive";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -90,6 +90,8 @@ GlobalSettings::GlobalSettings()
 		Lost Lich King
     Skeer the Bloodseeker
     Thrall's revenge
+    Trip in Draenor
+    Christmas Edition ;)
 
 
    */
