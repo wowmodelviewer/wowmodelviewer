@@ -36,6 +36,7 @@ extern wxString bgImagePath;
 extern wxString armoryPath;
 extern wxString customDirectoryPath;
 extern int customFilesConflictPolicy;
+extern int displayItemAndNPCId;
 
 extern bool useRandomLooks;
 

@@ -17,6 +17,7 @@ wxString bgImagePath;
 wxString armoryPath;
 wxString customDirectoryPath;
 int customFilesConflictPolicy = 0;
+int displayItemAndNPCId = 0;
 
 UserSkins userSkins;
 UserSkins& gUserSkins = userSkins;

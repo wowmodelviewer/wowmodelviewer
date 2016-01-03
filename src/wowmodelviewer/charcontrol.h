@@ -81,6 +81,7 @@ public:
 	void selectNPC(ssize_t type);
 
 	const wxString selectCharModel();
+	static QString getItemName(ItemRecord &);
 };
 
 

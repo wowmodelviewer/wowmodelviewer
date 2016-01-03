@@ -783,6 +783,8 @@ void CharControl::ClearItemDialog()
 	}
 }
 
+
+
 void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 {
   //std::cout << __FUNCTION__ << " type = " << type << " / slot = " << slot << " / current = " << current << std::endl;
@@ -829,7 +831,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 		      it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
 		      it->type == IT_DAGGER )
 		  {
-		    choices.Add(it->name.toStdString());
+		    choices.Add(getItemName(*it).toStdString());
 		    numbers.push_back(it->id);
 		    quality.push_back(it->quality);
 
@@ -839,7 +841,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 		}
 		else if (correctType((ssize_t)it->type, slot))
 		{
-			choices.Add(it->name.toStdString());
+			choices.Add(getItemName(*it).toStdString());
 			numbers.push_back(it->id);
 			quality.push_back(it->quality);
 
@@ -1052,7 +1054,13 @@ void CharControl::selectNPC(ssize_t type)
 	{
 		if (it->model > 0)
 		{
-			choices.Add(it->name.toStdString());
+
+		  QString NPCName = it->name;
+
+		  if(displayItemAndNPCId != 0)
+		    NPCName += QString(" [%1]").arg(it->id);
+
+			choices.Add(NPCName.toStdString());
 			numbers.push_back(it->id);
 			quality.push_back(0);
 			
@@ -1452,4 +1460,16 @@ void CharControl::tryToEquipItem(int id)
 	{
 		LOG_ERROR << "Cannot retrieve item from database (id" << id << ")";
 	}
+}
+
+QString CharControl::getItemName(ItemRecord & item)
+{
+  QString result = item.name;
+
+  if(displayItemAndNPCId != 0)
+  {
+    result += QString(" [%1]").arg(item.id);
+  }
+
+  return result;
 }

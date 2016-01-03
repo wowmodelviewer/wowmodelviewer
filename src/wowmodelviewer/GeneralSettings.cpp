@@ -17,6 +17,7 @@ BEGIN_EVENT_TABLE(GeneralSettings, wxWindow)
   EVT_CHECKBOX(ID_SETTINGS_RANDOMSKIN, GeneralSettings::OnCheck)
   EVT_CHECKBOX(ID_SETTINGS_SHOWPARTICLE, GeneralSettings::OnCheck)
   EVT_CHECKBOX(ID_SETTINGS_ZEROPARTICLE, GeneralSettings::OnCheck)
+  EVT_CHECKBOX(ID_SETTINGS_DISPLAYIDINLIST, GeneralSettings::OnCheck)
   EVT_BUTTON(ID_GENERAL_SETTINGS_APPLY, GeneralSettings::OnButton)
 END_EVENT_TABLE()
 
@@ -28,15 +29,17 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   }
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
 
-  wxBoxSizer *sizer = new wxBoxSizer( wxHORIZONTAL );
+  wxGridSizer *sizer = new wxGridSizer(2, 2, 5, 5);
 
   chkbox[CHECK_SHOWPARTICLE] = new wxCheckBox(this, ID_SETTINGS_SHOWPARTICLE, _("Show Particle"), wxDefaultPosition, wxDefaultSize, 0);
   chkbox[CHECK_ZEROPARTICLE] = new wxCheckBox(this, ID_SETTINGS_ZEROPARTICLE, _("Zero Particle"), wxDefaultPosition, wxDefaultSize, 0);
   chkbox[CHECK_RANDOMSKIN] = new wxCheckBox(this, ID_SETTINGS_RANDOMSKIN, _("Random Skins"), wxDefaultPosition, wxDefaultSize, 0);
+  chkbox[CHECK_DISPLAYIDINLIST] = new wxCheckBox(this, ID_SETTINGS_DISPLAYIDINLIST, _("Display Items & NPCs' IDs in lists"), wxDefaultPosition, wxDefaultSize, 0);
 
   sizer->Add(chkbox[CHECK_SHOWPARTICLE], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(chkbox[CHECK_ZEROPARTICLE], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(chkbox[CHECK_RANDOMSKIN], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
+  sizer->Add(chkbox[CHECK_DISPLAYIDINLIST], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
   wxString policies[2] = {_("Keep game files"), _("Keep custom files")};
 
@@ -62,12 +65,14 @@ void GeneralSettings::OnCheck(wxCommandEvent &event)
 {
   int id = event.GetId();
 
-  if (id==ID_SETTINGS_RANDOMSKIN) {
+  if (id == ID_SETTINGS_RANDOMSKIN) {
     useRandomLooks = event.IsChecked();
-  } else if (id==ID_SETTINGS_SHOWPARTICLE) {
+  } else if (id == ID_SETTINGS_SHOWPARTICLE) {
     GLOBALSETTINGS.bShowParticle = event.IsChecked();
-  } else if (id==ID_SETTINGS_ZEROPARTICLE) {
+  } else if (id == ID_SETTINGS_ZEROPARTICLE) {
     GLOBALSETTINGS.bZeroParticle = event.IsChecked();
+  } else if (id == ID_SETTINGS_DISPLAYIDINLIST) {
+    displayItemAndNPCId = event.IsChecked();
   }
 }
 
@@ -76,6 +81,7 @@ void GeneralSettings::Update()
   chkbox[CHECK_RANDOMSKIN]->SetValue(useRandomLooks);
   chkbox[CHECK_SHOWPARTICLE]->SetValue(GLOBALSETTINGS.bShowParticle);
   chkbox[CHECK_ZEROPARTICLE]->SetValue(GLOBALSETTINGS.bZeroParticle);
+  chkbox[CHECK_DISPLAYIDINLIST]->SetValue(displayItemAndNPCId);
   gamePathCtrl->SetValue(gamePath);
   customDirectoryPathCtrl->SetValue(customDirectoryPath);
   keepPolicyRadioBox->SetSelection(customFilesConflictPolicy);
