@@ -2,7 +2,7 @@
 
 #include "GameDatabase.h"
 #include <algorithm> // std::stransform
-#include "GameDatabase.h"
+#include "Game.h"
 #include "logger/Logger.h"
 
 std::map< std::string, RaceInfos> RaceInfos::RACES;

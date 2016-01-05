@@ -15,8 +15,6 @@
 class QDomElement;
 #include <QString>
 
-#define GAMEDATABASE GameDatabase::instance()
-
 class sqlResult
 {
   public:
@@ -41,13 +39,8 @@ class sqlResult
 class _GAMEDATABASE_API_ GameDatabase
 {
   public:
-    static GameDatabase & instance()
-    {
-      if(GameDatabase::m_instance == 0)
-        GameDatabase::m_instance = new GameDatabase();
-
-      return *m_instance;
-    }
+    GameDatabase();
+    GameDatabase(GameDatabase &);
 
     bool initFromXML(const QString & file);
 
@@ -58,9 +51,6 @@ class _GAMEDATABASE_API_ GameDatabase
     ~GameDatabase();
 
   private:
-    GameDatabase();
-    GameDatabase(GameDatabase &);
-
     static int treatQuery(void *NotUsed, int nbcols, char ** values , char ** cols);
     static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
@@ -74,9 +64,6 @@ class _GAMEDATABASE_API_ GameDatabase
     std::map<QString, std::map<int, std::pair<QString, QString> > >  m_dbStruct;
 
     bool m_fastMode;
-
-    static GameDatabase * m_instance;
-
 };
 
 

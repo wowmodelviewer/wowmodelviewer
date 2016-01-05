@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include "CharDetailsEvent.h"
-#include "GameDatabase.h"
+#include "Game.h"
 #include "TabardDetails.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"

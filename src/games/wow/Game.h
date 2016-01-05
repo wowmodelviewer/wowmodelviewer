@@ -10,9 +10,12 @@
 
 #include <QString>
 
+#include "GameDatabase.h"
 #include "GameFolder.h"
 
+
 #define GAMEDIRECTORY Game::instance().gameFolder()
+#define GAMEDATABASE Game::instance().gameDatabase()
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -39,6 +42,7 @@ class _GAME_API_ Game
 
 
     GameFolder & gameFolder() { return m_gameFolder; }
+    GameDatabase & gameDatabase() { return m_gameDatabase;}
 
   private:
     // disable explicit construct and destruct
@@ -48,6 +52,7 @@ class _GAME_API_ Game
     void operator=(const Game &);
 
     GameFolder m_gameFolder;
+    GameDatabase m_gameDatabase;
 
     static Game * m_instance;
 };

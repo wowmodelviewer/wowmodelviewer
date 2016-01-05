@@ -188,6 +188,7 @@ bool ModelRenderPass::init(WoWModel *m)
 
 	// TODO: Add proper support for multi-texturing.
 
+	LOG_INFO << __FUNCTION__ << blendmode;
 	// ALPHA BLENDING
 	// blend mode
 	switch (blendmode) {
@@ -265,9 +266,12 @@ bool ModelRenderPass::init(WoWModel *m)
 		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE2_ALPHA,GL_CONSTANT);
 		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_ALPHA,GL_REPLACE);
 		*/
-
+	case 7:
+	  glEnable(GL_BLEND);
+	  glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		break;
 	default:
+
 		LOG_ERROR << "Unknown blendmode:" << blendmode;
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
@@ -308,6 +312,7 @@ bool ModelRenderPass::init(WoWModel *m)
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();
 
+		LOG_INFO << __FUNCTION__ << texanim;
 		m->texAnims[texanim].setup(texanim);
 	}
 

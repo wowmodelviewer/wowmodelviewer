@@ -16,8 +16,6 @@
 #include "Game.h"
 #include "logger/Logger.h"
 
-GameDatabase * GameDatabase::m_instance = 0;
-
 const std::vector<QString> POSSIBLE_DB_EXT = {".dbc", ".db2"};
 
 GameDatabase::~GameDatabase()

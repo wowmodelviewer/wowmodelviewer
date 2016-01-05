@@ -5,7 +5,7 @@
 #include <wx/listctrl.h>
 
 #include "globalvars.h"
-#include "GameDatabase.h"
+#include "Game.h"
 #include "charcontrol.h"
 #include "ItemImporterDialog.h"
 #include "modelviewer.h"
