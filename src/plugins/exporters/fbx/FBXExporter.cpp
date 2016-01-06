@@ -517,12 +517,13 @@ void FBXExporter::createMaterials()
 }
 
 
-bool FBXExporter::exportModel(WoWModel * model, std::string target)
+bool FBXExporter::exportModel(Model * model, std::string target)
 {
-  if(!model)
-    return false;
+  m_p_model = dynamic_cast<WoWModel *>(model);
 
-  m_p_model = model;
+  if(!m_p_model)
+      return false;
+
   m_filename = target;
 
   m_p_manager = FbxManager::Create();

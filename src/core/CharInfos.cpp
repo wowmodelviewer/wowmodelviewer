@@ -67,8 +67,6 @@ CharInfos::CharInfos()
   faceType(0), hairColor(0), hairStyle(0), facialHair(0), eyeGlowType(0),
   tabardIcon(-1), IconColor(-1), tabardBorder(-1), BorderColor(-1), Background(-1)
 {
-  for(unsigned int i=0; i < NUM_CHAR_SLOTS ; i++)
-    equipment[i] = 0;
 }
 
 // Private methods

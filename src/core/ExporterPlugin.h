@@ -38,11 +38,10 @@
 // Externals
 #include "GL/glew.h"
 
-class WoWModel;
-
 // Other libraries
 
 // Current library
+class Model;
 #include "Plugin.h"
 
 // Namespaces used
@@ -76,7 +75,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     virtual std::string fileSaveTitle() const = 0;
     virtual std::string fileSaveFilter() const = 0;
 
-    virtual bool exportModel(WoWModel *, std::string file) = 0;
+    virtual bool exportModel(Model *, std::string file) = 0;
 
     bool canExportAnimation() const { return m_canExportAnimation; }
 

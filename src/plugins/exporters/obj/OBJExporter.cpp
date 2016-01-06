@@ -99,8 +99,10 @@ std::string OBJExporter::fileSaveFilter() const
 }
 
 
-bool OBJExporter::exportModel(WoWModel * model, std::string target)
+bool OBJExporter::exportModel(Model * m, std::string target)
 {
+  WoWModel * model = dynamic_cast<WoWModel *>(m);
+
   if(!model)
     return false;
 

@@ -35,6 +35,7 @@
 #include <QtPlugin>
 
 // Externals
+class WoWModel;
 
 // Other libraries
 #include "matrix.h"
@@ -73,7 +74,7 @@ class OBJExporter : public QObject, public ExporterPlugin
    std::string fileSaveTitle() const;
    std::string fileSaveFilter() const;
 
-   bool exportModel(WoWModel *, std::string file);
+   bool exportModel(Model *, std::string file);
 
     // Members
 

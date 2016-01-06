@@ -30,6 +30,7 @@
 //--------------------------------------------------------------------
 // STL
 #include <string>
+#include <vector>
 
 // Qt
 
@@ -38,8 +39,6 @@
 // Other libraries
 
 // Current library
-// @ TODO : avoid this core depends on wow game library
-#include "../games/wow/wow_enums.h"
 
 
 // Namespaces used
@@ -91,7 +90,7 @@ class _CHARINFOS_API_ CharInfos
     int BorderColor;
     int Background;
 
-    int equipment[NUM_CHAR_SLOTS];
+    std::vector<int> equipment;
 
   protected :
     // Constants / Enums

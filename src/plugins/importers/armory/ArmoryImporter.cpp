@@ -85,6 +85,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
   {
     // No Gathering Errors Detected.
     result = new CharInfos();
+    result->equipment.resize(NUM_CHAR_SLOTS);
 
     // Gather Race & Gender
     result->raceId = root[wxT("race")].AsInt();
