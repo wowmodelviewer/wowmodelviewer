@@ -756,6 +756,17 @@ void CharControl::RefreshModel()
 	model->replaceTextures[TEXTURE_FUR] = model->furTex;
 	model->replaceTextures[TEXTURE_GAMEOBJECT1] = model->gobTex;
 
+	// If model is one of these races, show the feet (don't wear boots)
+	if (infos.raceid == RACE_TAUREN ||
+	    infos.raceid == RACE_TROLL ||
+	    infos.raceid == RACE_DRAENEI ||
+	    infos.raceid == RACE_NAGA ||
+	    infos.raceid == RACE_BROKEN ||
+	    infos.raceid == RACE_WORGEN)
+	{
+	  model->cd.showFeet = true;
+	}
+
   // Eye Glow Geosets are ID 1701, 1702, etc.
   size_t egt = model->cd.eyeGlowType;
   int egtId = CG_EYEGLOW*100 + egt + 1;   // CG_EYEGLOW = 17
