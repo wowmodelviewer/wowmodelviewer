@@ -102,7 +102,7 @@ struct ModelHeader {
 	uint32 ofsAttachments; // Attachments are for weapons etc.
 	uint32 nAttachLookup; // P, Miscellaneous
 	uint32 ofsAttachLookup; // Of course with a lookup.
-	uint32 nEvents; // 
+	uint32 nEvents; //
 	uint32 ofsEvents; // Used for playing sounds when dying and a lot else.
 	uint32 nLights; // R
 	uint32 ofsLights; // Lights are mainly used in loginscreens but in wands and some doodads too.
@@ -114,6 +114,8 @@ struct ModelHeader {
 	uint32 ofsRibbonEmitters; // Things swirling around. See the CoT-entrance for light-trails.
 	uint32 nParticleEmitters; // V, Effects
 	uint32 ofsParticleEmitters; // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
+	uint32 nUnknown; // Apparently added in models with the 8-flag only. If that flag is not set, this field does not exist!
+	uint32 ofsUnknown; // An array of shorts, related to renderflags.
 };
 
 #define	ANIMATION_HANDSCLOSED	15
@@ -240,7 +242,7 @@ struct ModelGeoset {
 	uint16 nSkinnedBones;	// number of bone indices, Number of elements in the bone lookup table.
 	uint16 StartBones;		// ? always 1 to 4, Starting index in the bone lookup table.
 	uint16 rootBone;		// root bone?
-	uint16 nBones;		// 
+	uint16 nBones;		//
 	Vec3D BoundingBox[2];
 	float radius;
 };
@@ -274,21 +276,22 @@ class ModelGeosetHD {
 
 #define	TEXTUREUNIT_STATIC	16
 /// Lod part, A texture unit (sub of material)
-struct ModelTexUnit{
-	// probably the texture units
-	// size always >=number of materials it seems
-	uint16 flags;		// Usually 16 for static textures, and 0 for animated textures.
-	uint16 shading;		// If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
-	uint16 op;			// Material this texture is part of (index into mat)
-	uint16 op2;			// Always same as above?
-	int16 colorIndex;	// A Color out of the Colors-Block or -1 if none.
-	uint16 flagsIndex;	// RenderFlags (index into render flags, TexFlags)
-	uint16 texunit;		// Index into the texture unit lookup table.
-	uint16 mode;		// See below.
-	uint16 textureid;	// Index into Texture lookup table
-	uint16 texunit2;	// copy of texture unit value?
-	uint16 transid;		// Index into transparency lookup table.
-	uint16 texanimid;	// Index into uvanimation lookup table. 
+struct ModelTexUnit
+{
+  // probably the texture units size always >=number of materials it seems
+  uint16 flags;      // Usually 16 for static textures, and 0 for animated textures.
+  uint16 shading;    // If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
+  uint16 op;         // Material this texture is part of (index into mat)
+  uint16 op2;        // Usually same as above. Not sure what it's for
+  int16 colorIndex;  // A Color out of the Colors-Block or -1 if none.
+  uint16 flagsIndex; // RenderFlags (index into render flags, TexFlags)
+  uint16 texunit;    // Index into the texture unit lookup table.
+  uint16 op_count;   // Used for shaders (below), but also the number of textures to load,
+                     // starting at the texture lookup in the next field.
+  uint16 textureid;  // Index into Texture lookup table
+  uint16 texunit2;   // copy of texture unit value?
+  uint16 transid;    // Index into transparency lookup table.
+  uint16 texanimid;  // Index into uvanimation lookup table.
 };
 /*
 Shader thingey
@@ -407,7 +410,7 @@ struct ModelParticleParams {
 	FakeAnimationBlock opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
 	FakeAnimationBlock sizes; 		// (Vec2D)	It carries two floats per key. (x and y scale)
 	int32 d[2];
-	FakeAnimationBlock Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity) 
+	FakeAnimationBlock Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
 	FakeAnimationBlock unk2; 		// (UInt16)
 	float unk[3];
 	Vec3D scales;
@@ -423,87 +426,74 @@ struct ModelParticleParams {
 	int32 ofsUnknownReferenc;
 };
 
-#define	MODELPARTICLE_FLAGS_DONOTTRAIL		0x10
-#define	MODELPARTICLE_FLAGS_DONOTBILLBOARD	0x1000
-#define	MODELPARTICLE_EMITTER_PLANE			1
-#define	MODELPARTICLE_EMITTER_SPHERE		2
-#define	MODELPARTICLE_EMITTER_SPLINE		3
-struct ModelParticleEmitterDef {
-    int32 id;
-	int32 flags; // MODELPARTICLE_FLAGS_*
-	Vec3D pos; // The position. Relative to the following bone.
-	int16 bone; // The bone its attached to.
-	int16 texture; // And the texture that is used.
-	int32 nModelFileName;
-	int32 ofsModelFileName;
-	int32 nParticleFileName;
-	int32 ofsParticleFileName; // TODO
-	int8 blend;
-	int8 EmitterType; // EmitterType	 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
-	int16 ParticleColor; // This one is used so you can assign a color to specific particles. They loop over all 
-						 // particles and compare +0x2A to 11, 12 and 13. If that matches, the colors from the dbc get applied.
-	int8 ParticleType; // 0 "normal" particle, 
-					   // 1 large quad from the particle's origin to its position (used in Moonwell water effects)
-					   // 2 seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
-	int8 HeaderTail; // 0 - Head, 1 - Tail, 2 - Both
-	int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
-	int16 cols; // How many different frames are on that texture? People should learn what rows and cols are.
-	int16 rows; // (2, 2) means slice texture to 2*2 pieces
-	AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
-	AnimationBlock SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
-	AnimationBlock VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
-	AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
-	AnimationBlock Gravity; // (Float) Fall down, apple!
-	AnimationBlock Lifespan; // (Float) Everyone has to die.
-	int32 unknown;
-	AnimationBlock EmissionRate; // (Float) Stread your particles, emitter.
-	int32 unknown2;
-	AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
-	AnimationBlock EmissionAreaWidth; // (Float) 
-	AnimationBlock Gravity2; // (Float) A second gravity? Its strong.
-	ModelParticleParams p;
-	AnimationBlock en; // (UInt16)
-};
+// Most of these model particle flags are currently ignored by WMV:
+#define MODELPARTICLE_FLAGS_WORLDSPACE     0x8        // Particles travel "up" in world space, rather than model
+#define MODELPARTICLE_FLAGS_DONOTTRAIL     0x10       // Do not trail 
+#define MODELPARTICLE_FLAGS_MODELSPACE     0x80       // Particles in model space
+#define MODELPARTICLE_FLAGS_PINNED         0x400      // Pinned Particles, their quad enlarges from their creation
+                                                      // position to where they expand
+#define MODELPARTICLE_FLAGS_DONOTBILLBOARD 0x1000     // Wiki says: XYQuad Particles. They align to XY axis
+                                                      // facing Z axis direction
+#define MODELPARTICLE_FLAGS_RANDOMTEXTURE  0x10000    // Choose Random Texture
+#define MODELPARTICLE_FLAGS_OUTWARD        0x20000    // "Outward" particles, most emitters have this and
+                                                      // their particles move away from the origin, when they
+                                                      // don't the particles start at origin+(speed*life) and
+                                                      // move towards the origin
+#define MODELPARTICLE_FLAGS_RANDOMSTART    0x200000   // Random Flip Book Start
+#define MODELPARTICLE_FLAGS_BONEGENERATOR  0x1000000  // Bone generator = bone, not joint
+#define MODELPARTICLE_FLAGS_DONOTTHROTTLE  0x4000000  // Do not throttle emission rate based on distance
+#define MODELPARTICLE_FLAGS_MULTITEXTURE   0x10000000 // Particle uses multi-texturing. This affects emitter values
+#define MODELPARTICLE_EMITTER_PLANE  1
+#define MODELPARTICLE_EMITTER_SPHERE 2
+#define MODELPARTICLE_EMITTER_SPLINE 3
 
-struct ModelParticleEmitterDefV10 {
-    int32 id;
-	int32 flags;
-	Vec3D pos; // The position. Relative to the following bone.
-	int16 bone; // The bone its attached to.
-	int16 texture; // And the texture that is used.
-	int32 nModelFileName;
-	int32 ofsModelFileName;
-	int32 nParticleFileName;
-	int32 ofsParticleFileName; // TODO
-	int8 blend;
-	int8 EmitterType; // EmitterType	 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
-	int16 ParticleColor; // This one is used so you can assign a color to specific particles. They loop over all 
-						 // particles and compare +0x2A to 11, 12 and 13. If that matches, the colors from the dbc get applied.
-	int8 ParticleType; // 0 "normal" particle, 
-					   // 1 large quad from the particle's origin to its position (used in Moonwell water effects)
-					   // 2 seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
-	int8 HeaderTail; // 0 - Head, 1 - Tail, 2 - Both
-	int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
-	int16 cols; // How many different frames are on that texture? People should learn what rows and cols are.
-	int16 rows; // (2, 2) means slice texture to 2*2 pieces
-	AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
-	AnimationBlock SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
-	AnimationBlock VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
-	AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
-	AnimationBlock Gravity; // (Float) Fall down, apple!
-	AnimationBlock Lifespan; // (Float) Everyone has to die.
-	int32 unknown;
-	AnimationBlock EmissionRate; // (Float) Stread your particles, emitter.
-	int32 unknown2;
-	AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
-	AnimationBlock EmissionAreaWidth; // (Float) 
-	AnimationBlock Gravity2; // (Float) A second gravity? Its strong.
-	ModelParticleParams p;
-	AnimationBlock en; // (UInt16), seems unused in cataclysm
-	int32 unknown3; // 12319, cataclysm
-	int32 unknown4; // 12319, cataclysm
-	int32 unknown5; // 12319, cataclysm
-	int32 unknown6; // 12319, cataclysm
+template<typename Base, size_t integer_bits, size_t decimal_bits> struct fixed_point
+{
+  Base decimal : decimal_bits;
+  Base integer : integer_bits;
+  Base sign : 1;
+  float to_float() const { return (sign ? -1.0f : 1.0f) * (integer + decimal / float (1 << decimal_bits)); }
+};
+using fp_6_9 = fixed_point<uint16, 6, 9>;
+using fp_2_5 = fixed_point<uint8, 2, 5>;
+struct vector_2fp_6_9 { fp_6_9 x; fp_6_9 y; };
+
+struct M2ParticleDef
+{
+  int32 id;  // so far it's always -1
+  int32 flags; // MODELPARTICLE_FLAGS_*
+  Vec3D pos; // The position. Relative to the following bone.
+  int16 bone; // The bone it's attached to.
+  int16 texture; // And the texture that is used. In multitextured particles this is actually composed of
+                  // three 5-bit texture ints, plus 1 bit left over.
+  int32 nModelFileName;
+  int32 ofsModelFileName;
+  int32 nParticleFileName;
+  int32 ofsParticleFileName; // TODO
+  uint8 blend;
+  uint8 EmitterType;    // EmitterType 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
+  uint16 ParticleColor; // If used then it's usually 11, 12 or 13. This one is used so you can assign a color to specific particles. They loop over all
+                        // particles and compare +0x2A to 11, 12 and 13. If that matches, the colors from the dbc get applied.
+  fp_2_5 multiTextureParamX[2]; // used for multitextured particles, but not sure how, yet
+  int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
+  uint16 rows; // How many different frames are on that texture? People should learn what rows and cols are.
+  uint16 cols; // (2, 2) means slice texture to 2*2 pieces
+  AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
+  AnimationBlock SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
+  AnimationBlock VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
+  AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
+  AnimationBlock Gravity; // (Float)
+  AnimationBlock Lifespan; // (Float)
+  int32 unknown;
+  AnimationBlock EmissionRate; // (Float) Spread your particles, emitter.
+  int32 unknown2;
+  AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
+  AnimationBlock EmissionAreaWidth; // (Float)
+  AnimationBlock Gravity2; // (Float) second gravity?
+  ModelParticleParams p;
+  AnimationBlock EnabledIn; // (UInt16)
+  vector_2fp_6_9 multiTextureParam0[2];
+  vector_2fp_6_9 multiTextureParam1[2];
 };
 
 struct ModelRibbonEmitterDef {

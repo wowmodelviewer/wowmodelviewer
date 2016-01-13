@@ -97,10 +97,10 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 		useReplaceTextures[i] = false;
 	}
 
-	for (size_t i=0; i<ATT_MAX; i++) 
+	for (size_t i=0; i<ATT_MAX; i++)
 		attLookup[i] = -1;
 
-	for (size_t i=0; i<BONE_MAX; i++) 
+	for (size_t i=0; i<BONE_MAX; i++)
 		keyBoneLookup[i] = -1;
 
 
@@ -122,15 +122,15 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	showTexture = true;
 
 	charModelDetails.Reset();
-	
+
 	vbuf = nbuf = tbuf = 0;
-	
+
 	origVertices = 0;
 	vertices = 0;
 	normals = 0;
 	texCoords = 0;
 	indices = 0;
-	
+
 	animtime = 0;
 	anim = 0;
 	anims = 0;
@@ -224,7 +224,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 		file->close();
 		return;
 	}
-	
+
 	if (header.nGlobalSequences) {
 		globalSequences = new uint32[header.nGlobalSequences];
 		memcpy(globalSequences, (file->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
@@ -239,7 +239,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 		initStatic(file);
 
 	file->close();
-	
+
 	// Ready to render.
 	showModel = true;
 	if (hasParticles)
@@ -412,7 +412,7 @@ bool WoWModel::isAnimated(GameFile * f)
 		}
 	}
 
-	if (animGeometry) 
+	if (animGeometry)
 		animBones = true;
 	else {
 		for (size_t i=0; i<header.nBones; i++) {
@@ -432,7 +432,7 @@ bool WoWModel::isAnimated(GameFile * f)
 					header.nParticleEmitters>0 ||
 					header.nRibbonEmitters>0;
 
-	if (animMisc) 
+	if (animMisc)
 		animBones = true;
 
 	// animated colors
@@ -479,7 +479,7 @@ void WoWModel::initCommon(GameFile * f)
 		normals[i] = origVertices[i].normal.normalize();
 
 		float len = origVertices[i].pos.lengthSquared();
-		if (len > rad){ 
+		if (len > rad){
 			rad = len;
 		}
 	}
@@ -521,7 +521,7 @@ void WoWModel::initCommon(GameFile * f)
 			DBFilesClient\CreatureDisplayInfo.dbc
 			DBFilesClient\ItemDisplayInfo.dbc
 			(possibly more)
-				
+
 			0	 Texture given in filename
 			1	 Body + clothes
 			2	Cape
@@ -614,7 +614,7 @@ void WoWModel::initCommon(GameFile * f)
 	if (header.nColors) {
 		colors = new ModelColor[header.nColors];
 		ModelColorDef *colorDefs = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
-		for (size_t i=0; i<header.nColors; i++) 
+		for (size_t i=0; i<header.nColors; i++)
 			colors[i].init(f, colorDefs[i], globalSequences);
 	}
 
@@ -622,7 +622,7 @@ void WoWModel::initCommon(GameFile * f)
 	if (header.nTransparency) {
 		transparency = new ModelTransparency[header.nTransparency];
 		ModelTransDef *trDefs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
-		for (size_t i=0; i<header.nTransparency; i++) 
+		for (size_t i=0; i<header.nTransparency; i++)
 			transparency[i].init(f, trDefs[i], globalSequences);
 	}
 
@@ -714,7 +714,7 @@ void WoWModel::initAnimated(GameFile * f)
 
 		animManager = new AnimManager(anims);
 	}
-	
+
 	if (animBones) {
 		// init bones...
 		bones = new Bone[header.nBones];
@@ -747,12 +747,12 @@ void WoWModel::initAnimated(GameFile * f)
 		animLookups = new int16[header.nAnimationLookup];
 		memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
 	}
-	
+
 	const size_t size = (header.nVertices * sizeof(float));
 	vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
 	texCoords = new Vec2D[header.nVertices];
-	for (size_t i=0; i<header.nVertices; i++) 
+	for (size_t i=0; i<header.nVertices; i++)
 		texCoords[i] = origVertices[i].texcoords;
 
 	if (video.supportVBO) {
@@ -761,19 +761,19 @@ void WoWModel::initAnimated(GameFile * f)
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
 		delete [] vertices; vertices = 0;
-		
+
 		// Texture buffer
 		glGenBuffersARB(1,&tbuf);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2*size, texCoords, GL_STATIC_DRAW_ARB);
 		delete [] texCoords; texCoords = 0;
-		
+
 		// normals buffer
 		glGenBuffersARB(1,&nbuf);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
 		delete [] normals; normals = 0;
-		
+
 		// clean bind
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 	}
@@ -793,28 +793,20 @@ void WoWModel::initAnimated(GameFile * f)
 		}
 	}
 
-	// particle systems
-	if (header.nParticleEmitters) {
-		if (header.version[0] >= 0x10) {
-			ModelParticleEmitterDefV10 *pdefsV10 = (ModelParticleEmitterDefV10 *)(f->getBuffer() + header.ofsParticleEmitters);
-			ModelParticleEmitterDef *pdefs;
-			particleSystems = new ParticleSystem[header.nParticleEmitters];
-			hasParticles = true;
-			for (size_t i=0; i<header.nParticleEmitters; i++) {
-				pdefs = (ModelParticleEmitterDef *) &pdefsV10[i];
-				particleSystems[i].model = this;
-				particleSystems[i].init(f, *pdefs, globalSequences);
-			}
-		} else {
-			ModelParticleEmitterDef *pdefs = (ModelParticleEmitterDef *)(f->getBuffer() + header.ofsParticleEmitters);
-			particleSystems = new ParticleSystem[header.nParticleEmitters];
-			hasParticles = true;
-			for (size_t i=0; i<header.nParticleEmitters; i++) {
-				particleSystems[i].model = this;
-				particleSystems[i].init(f, pdefs[i], globalSequences);
-			}
-		}
-	}
+  // particle systems
+  if (header.nParticleEmitters)
+  {
+    M2ParticleDef *pdefs = (M2ParticleDef *)(f->getBuffer() + header.ofsParticleEmitters);
+    M2ParticleDef *pdef;
+    particleSystems = new ParticleSystem[header.nParticleEmitters];
+    hasParticles = true;
+    for (size_t i=0; i<header.nParticleEmitters; i++)
+    {
+      pdef = (M2ParticleDef *) &pdefs[i];
+      particleSystems[i].model = this;
+      particleSystems[i].init(f, *pdef, globalSequences);
+    }
+  }
 
 	// ribbons
 	if (header.nRibbonEmitters) {
@@ -943,7 +935,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
 		//pass.texture2 = 0;
 		size_t geoset = tex[j].op;
-		
+
 		pass.geoset = (int)geoset;
 
 		pass.indexStart = geosets[geoset].istart;
@@ -957,7 +949,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
 		// TODO: figure out these flags properly -_-
 		ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
-		
+
 		pass.blendmode = rf.blend;
 		//if (rf.blend == 0) // Test to disable/hide different blend types
 		//	continue;
@@ -988,8 +980,8 @@ void WoWModel::setLOD(GameFile * f, int index)
 		// Texture flags
 		pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
 		pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
-		
-		// tex[j].flags: Usually 16 for static textures, and 0 for animated textures.	
+
+		// tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
 		if (animTextures && (tex[j].flags & TEXTUREUNIT_STATIC) == 0) {
 			pass.texanim = texanimlookup[tex[j].texanimid];
 		}
@@ -1010,7 +1002,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
 	}
 
 	// Character specific bone animation calculations.
-	if (charModelDetails.isChar) {	
+	if (charModelDetails.isChar) {
 
 		// Animate the "core" rotations and transformations for the rest of the model to adopt into their transformations
 		if (keyBoneLookup[BONE_ROOT] > -1)	{
@@ -1081,7 +1073,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
 		}
 
 		for (size_t i=0; i<5; i++) {
-			if (keyBoneLookup[BONE_RFINGER1 + i] > -1) 
+			if (keyBoneLookup[BONE_RFINGER1 + i] > -1)
 				bones[keyBoneLookup[BONE_RFINGER1 + i]].calcMatrix(bones, a, t);
 		}
 
@@ -1153,10 +1145,10 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
 void WoWModel::animate(ssize_t anim)
 {
 	size_t t=0;
-	
+
 	ModelAnimation &a = anims[anim];
 	int tmax = (a.timeEnd-a.timeStart);
-	if (tmax==0) 
+	if (tmax==0)
 		tmax = 1;
 
 	if (isWMO == true) {
@@ -1165,7 +1157,7 @@ void WoWModel::animate(ssize_t anim)
 		t += a.timeStart;
 	} else
 		t = animManager->GetFrame();
-	
+
 	this->animtime = t;
 	this->anim = anim;
 
@@ -1262,17 +1254,17 @@ inline void WoWModel::drawModel()
 		// Bind the texture coordinates buffer
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
 		glTexCoordPointer(2, GL_FLOAT, 0, 0);
-		
+
 	} else if (animated) {
 		glVertexPointer(3, GL_FLOAT, 0, vertices);
 		glNormalPointer(GL_FLOAT, 0, normals);
 		glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
 	}
-	
+
 	// Display in wireframe mode?
 	if (showWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	
+
 	// Render the various parts of the model.
 	for (size_t i=0; i<passes.size(); i++) {
 		ModelRenderPass &p = passes[i];
@@ -1311,7 +1303,7 @@ inline void WoWModel::drawModel()
 			p.deinit();
 		}
 	}
-	
+
 	if (showWireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -1350,14 +1342,14 @@ inline void WoWModel::draw()
 void WoWModel::lightsOn(GLuint lbase)
 {
 	// setup lights
-	for (size_t i=0, l=lbase; i<header.nLights; i++) 
+	for (size_t i=0, l=lbase; i<header.nLights; i++)
 		lights[i].setup(animtime, (GLuint)l++);
 }
 
 // These aren't really needed in the model viewer.. only wowmapviewer
 void WoWModel::lightsOff(GLuint lbase)
 {
-	for (size_t i=0, l=lbase; i<header.nLights; i++) 
+	for (size_t i=0, l=lbase; i<header.nLights; i++)
 		glDisable((GLenum)l++);
 }
 
@@ -1414,7 +1406,7 @@ void WoWModel::drawBoundingVolume()
 		size_t v = boundTris[i];
 		if (v < header.nBoundingVertices)
 			glVertex3fv(bounds[v]);
-		else 
+		else
 			glVertex3f(0,0,0);
 	}
 	glEnd();

@@ -24,34 +24,43 @@ class WoWModel;
 #endif
 
 
-struct _MODELRENDERPASS_API_ ModelRenderPass {
-	uint32 indexStart, indexCount, vertexStart, vertexEnd;
-	//TextureID texture, texture2;
-	int tex;
-	bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
-	float p;
+struct _MODELRENDERPASS_API_ ModelRenderPass
+{
+  uint32 indexStart, indexCount, vertexStart, vertexEnd;
+  //TextureID texture, texture2;
+  bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
+  float p;
 
-	int16 texanim, color, opacity, blendmode;
+  int16 texanim, color, opacity, blendmode;
+  uint16 tex;
 
-	// Geoset ID
-	int geoset;
+  // Geoset ID
+  int geoset;
 
-	// texture wrapping
-	bool swrap, twrap;
+  // texture wrapping
+  bool swrap, twrap;
 
-	// colours
-	Vec4D ocol, ecol;
+  // colours
+  Vec4D ocol, ecol;
 
-	bool init(WoWModel *m);
-	void deinit();
+  bool init(WoWModel *m);
+  int BlendValueForMode(int mode);
 
-	bool operator< (const ModelRenderPass &m) const
-	{
-		// This is the old sort order method which I'm pretty sure is wrong - need to try something else.
-		// Althogh transparent part should be displayed later, but don't know how to sort it
-		// And it will sort by geoset id now.
-		return geoset < m.geoset;
-	}
+  void deinit();
+
+
+  bool operator< (const ModelRenderPass &m) const
+  {
+    // Probably not 100% right, but seems to work better than just geoset sorting.
+    // Blend mode mostly takes into account transparency and material - Wain
+    if (trans == m.trans)
+    {
+      if (blendmode == m.blendmode)
+        return (geoset < m.geoset);
+      return blendmode < m.blendmode;
+    }
+    return (trans < m.trans);
+  }
 };
 
 
