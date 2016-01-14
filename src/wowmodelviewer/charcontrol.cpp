@@ -558,28 +558,32 @@ void CharControl::RefreshModel()
 	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 2);
 
   // select hairstyle geoset(s)
-	QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
-	                  .arg(infos.raceid)
-	                  .arg(infos.sexid)
-	                  .arg(model->cd.hairStyle());
+  QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+                          .arg(infos.raceid)
+                          .arg(infos.sexid)
+                          .arg(model->cd.hairStyle());
+  sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
-	sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
+  if (hairStyle.valid && !hairStyle.values.empty())
+  {
+    showScalp = (bool)hairStyle.values[0][1].toInt();
+    unsigned int geosetId = hairStyle.values[0][0].toInt();
+    if (!geosetId)  // adds missing scalp if no other hair geoset used. Seems to work that way, anyway...
+      geosetId = 1;
+    for (size_t j=0; j<model->geosets.size(); j++)
+    {
+      int id = model->geosets[j].id;
+      if (!id) // 0 is for skin, not hairstyle
+        continue;
+      if (id == geosetId)
+        model->showGeosets[j] = model->cd.showHair;
+      else if (id < 100)
+        model->showGeosets[j] = false;
+    }
+  }
+  else
+    LOG_ERROR << "Unable to collect hair style " << model->cd.hairStyle() << " for model " << model->name();
 
-	if(hairStyle.valid && !hairStyle.values.empty())
-	{
-	  showScalp = (bool)hairStyle.values[0][1].toInt();
-	  unsigned int geosetId = hairStyle.values[0][0].toInt();
-	  for (size_t j=0; j<model->geosets.size(); j++) {
-	    if (model->geosets[j].id == geosetId)
-	      model->showGeosets[j] = model->cd.showHair;
-	    else if (model->geosets[j].id >= 1 && model->geosets[j].id < 100)
-	      model->showGeosets[j] = false;
-	  }
-	}
-	else
-	{
-	  LOG_ERROR << "Unable to collect hair style" << model->cd.hairStyle() << "for model" << model->name();
-	}
 
   // Hair texture
 	textures = model->cd.getTextureNameForSection(CharDetails::HairType);
