@@ -1375,6 +1375,7 @@ void ModelViewer::OnToggleDock(wxCommandEvent &event)
 		interfaceManager.GetPane(lightControl).Show(true);
 	} else if (id==ID_SHOW_MODEL) {
 		interfaceManager.GetPane(modelControl).Show(true);
+		modelControl->Update();
 	} else if (id==ID_SHOW_SETTINGS) {
 		interfaceManager.GetPane(settingsControl).Show(true);
 		settingsControl->Open();
