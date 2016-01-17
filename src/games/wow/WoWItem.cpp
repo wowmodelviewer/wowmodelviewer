@@ -59,7 +59,7 @@ map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
 WoWItem::WoWItem(CharSlots slot)
 : m_charModel(0), m_id(-1), m_quality(0),
   m_slot(slot), m_displayId(-1), m_level(0),
-  m_nbLevels(0)
+  m_nbLevels(0), m_type(0)
 {
   setName("---- None ----");
 }
@@ -76,6 +76,7 @@ void WoWItem::setId(int id)
       // reset name and quality
       setName("---- None ----");
       m_quality = 0;
+      m_type = 0;
 
       if(m_slot == CS_HAND_RIGHT)
         m_charModel->charModelDetails.closeRHand = false;
@@ -132,6 +133,7 @@ void WoWItem::setId(int id)
     ItemRecord itemRcd = items.getById(id);
     setName(itemRcd.name);
     m_quality = itemRcd.quality;
+    m_type = itemRcd.type;
     load();
   }
 }
@@ -164,6 +166,7 @@ void WoWItem::setLevel(unsigned int level)
     ItemRecord itemRcd = items.getById(m_id);
     setName(itemRcd.name);
     m_quality = itemRcd.quality;
+    m_type = itemRcd.type;
     load();
   }
 }
@@ -798,8 +801,26 @@ void WoWItem::refresh()
   case CS_BOOTS:
   {
     std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_BOOTS);
+
     if(geoIt != m_itemGeosets.end())
-      m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+    {
+      // don't render boots behind robe
+      {
+        WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+
+        if(chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
+          m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+      }
+
+      // handle 2000* group for hd models
+      {
+        RaceInfos infos;
+        if(RaceInfos::getCurrent(m_charModel->name().toStdString(), infos) && infos.isHD)
+        {
+          m_charModel->cd.geosets[CG_HDFEET] = 2;
+        }
+      }
+    }
 
     std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_LEG_LOWER);
     if(it != m_itemTextures.end())

@@ -90,6 +90,7 @@ class _WOWITEM_API_ WoWItem : public Component
     int m_displayId;
     int m_quality;
     int m_level;
+    int m_type;
     unsigned int m_nbLevels;
 
     CharSlots m_slot;
