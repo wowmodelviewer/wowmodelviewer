@@ -908,12 +908,20 @@ void WoWItem::refresh()
       m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
 
     std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
+
+    int layer = SLOT_LAYERS[m_slot];
+
+    // if we are wearing a robe, render gloves first in texture compositing
+    WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+    if(chestItem->m_type == IT_ROBE)
+    	layer = SLOT_LAYERS[CS_CHEST]-1;
+
     if(it != m_itemTextures.end())
-      m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, layer);
 
     it = m_itemTextures.find(CR_HAND);
     if(it != m_itemTextures.end())
-      m_charModel->tex.addLayer(it->second, CR_HAND, SLOT_LAYERS[m_slot]);
+      m_charModel->tex.addLayer(it->second, CR_HAND, layer);
     break;
   }
   case CS_CAPE:

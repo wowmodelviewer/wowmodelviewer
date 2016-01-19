@@ -16,40 +16,6 @@
 #include "WoWModel.h"
 #include "wow_enums.h"
 
-CharSlots slotOrder[] = {
-	CS_SHIRT,
-	CS_HEAD,
-	CS_SHOULDER,
-	CS_PANTS,
-	CS_BOOTS,
-	CS_CHEST,
-	CS_TABARD,
-	CS_BELT,
-	CS_BRACERS,
-	CS_GLOVES,
-	CS_HAND_RIGHT,
-	CS_HAND_LEFT,
-	CS_CAPE,
-	CS_QUIVER
-};
-
-CharSlots slotOrderWithRobe[] = {
-	CS_SHIRT,
-	CS_HEAD,
-	CS_SHOULDER,
-	CS_BOOTS,
-	CS_PANTS,
-	CS_BRACERS,
-	CS_CHEST,
-	CS_GLOVES,
-	CS_TABARD,
-	CS_BELT,
-	CS_HAND_RIGHT,
-	CS_HAND_LEFT,
-	CS_CAPE,
-	CS_QUIVER
-};
-
 static wxArrayString creaturemodels;
 IMPLEMENT_CLASS(CharControl, wxWindow)
 
