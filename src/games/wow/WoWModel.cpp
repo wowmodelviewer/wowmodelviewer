@@ -111,6 +111,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 
 	hasCamera = false;
 	hasParticles = false;
+  	replaceParticleColors = false;
 	isWMO = false;
 	isMount = false;
 
@@ -1356,12 +1357,15 @@ void WoWModel::lightsOff(GLuint lbase)
 // Updates our particles within models.
 void WoWModel::updateEmitters(float dt)
 {
-	if (!ok || !showParticles || !GLOBALSETTINGS.bShowParticle)
-		return;
+  if (!ok || !showParticles || !GLOBALSETTINGS.bShowParticle)
+    return;
 
-	for (size_t i=0; i<header.nParticleEmitters; i++) {
-		particleSystems[i].update(dt);
-	}
+  for (size_t i=0; i<header.nParticleEmitters; i++)
+  {
+    particleSystems[i].update(dt);
+    particleSystems[i].replaceParticleColors = replaceParticleColors;
+    particleSystems[i].particleColorReplacements = particleColorReplacements;
+  }
 }
 
 

@@ -147,38 +147,41 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 
 AnimControl::~AnimControl()
 {
-	// Free the memory the was allocated (fixed: memory leak)
-	for (size_t i=0; i<skinList->GetCount(); i++) {
-		TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
-		wxDELETE(grp);
-	}
+  // Free the memory that was allocated (fixed: memory leak)
+  for (size_t i=0; i<skinList->GetCount(); i++)
+  {
+    TextureGroup *grp = (TextureGroup *)skinList->GetClientData((unsigned int)i);
+    wxDELETE(grp);
+  }
 
-	animCList->Clear();
-	animCList2->Clear();
-	animCList3->Clear();
-	skinList->Clear();
-	BLPSkinList1->Clear();
-	BLPSkinList2->Clear();
-	BLPSkinList3->Clear();
-	
-	animCList->Destroy();
-	animCList2->Destroy();
-	animCList3->Destroy();
-	skinList->Destroy();
-	BLPSkinList1->Destroy();
-	BLPSkinList2->Destroy();
-	BLPSkinList3->Destroy();
-	BLPSkinsLabel->Destroy();
-	BLPSkinLabel1->Destroy();
-	BLPSkinLabel2->Destroy();
-	BLPSkinLabel3->Destroy();
+  animCList->Clear();
+  animCList2->Clear();
+  animCList3->Clear();
+  skinList->Clear();
+  BLPSkinList1->Clear();
+  BLPSkinList2->Clear();
+  BLPSkinList3->Clear();
+
+  animCList->Destroy();
+  animCList2->Destroy();
+  animCList3->Destroy();
+  skinList->Destroy();
+  BLPSkinList1->Destroy();
+  BLPSkinList2->Destroy();
+  BLPSkinList3->Destroy();
+  BLPSkinsLabel->Destroy();
+  BLPSkinLabel1->Destroy();
+  BLPSkinLabel2->Destroy();
+  BLPSkinLabel3->Destroy();
+  PCRList = std::vector<particleColorReplacements>();
 }
 
 void AnimControl::UpdateModel(WoWModel *m)
 {
   if (!m)
     return;
-
+  PCRList.clear();
+  CDIToTexGp.clear();
   // Clear skin/texture data from previous model - if there is any.
   if (g_selModel)
   {
@@ -350,7 +353,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 
 	frameSlider->SetRange(0, 10);
 	frameSlider->SetTickFreq(2, 1);
-	
+	PCRList.clear();
 	animCList->Show(false);
 	skinList->Show(false);
 	BLPSkinList1->Show(false);
@@ -397,9 +400,46 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	wmoLabel->Show(TRUE);
 }
 
+void AnimControl::SetSkinByDisplayID(int cdi)
+{
+  if (!cdi)
+    return;
+
+  if (CDIToTexGp.find(cdi) == CDIToTexGp.end())
+  {
+    LOG_INFO << "AnimControl::SetSkinByDisplayID : DisplayInfo ID (" << cdi << ") not associated with this model";
+    return;
+  }
+
+  TextureGroup gp = CDIToTexGp[cdi];
+  // Find position of texture group in menu and set the model to this appearance:
+  int count = skinList->GetCount();
+  for (int i = 0; i < count; i++)
+  {
+    // note that these aren't the same group, just equivalent:
+    if (gp == *(static_cast<TextureGroup *> (skinList->GetClientData(i))))
+    {
+      SetSkin(i);
+      return;
+    }
+  }
+LOG_INFO << "No matching texture group found for cdi " << cdi;
+}
+
+Vec4D AnimControl::fromARGB(int color)
+{
+  const float alpha = ((color & 0xFF000000) >> 24) / 255.0f;
+  const float red = ((color & 0x00FF0000) >> 16) / 255.0f;
+  const float green = ((color & 0x0000FF00) >>  8) / 255.0f;
+  const float blue = ((color & 0x000000FF)      ) / 255.0f;
+  return Vec4D(red, green, blue, alpha);
+// Note: the above alpha is probably irrelevant. It doesn't seem to be included. We always set the particle to its default one
+}
 
 bool AnimControl::UpdateCreatureModel(WoWModel *m)
 {
+  int numPCRs = 0;
+
   std::set<GameFile *> alreadyUsedTextures;
   TextureSet skins, BLPskins;
 
@@ -411,19 +451,22 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // remove extension
   fn = fn.BeforeLast(wxT('.'));
 
-  QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path FROM CreatureDisplayInfo \
-		                   LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID \
-		                   LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE FileData.name LIKE \"%1\"").arg( wxString(m->itemName().toStdString().c_str()).AfterLast(SLASH).c_str());
+  QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path, ParticleColorID, "
+                          "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                          "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID "
+                          "WHERE FileData.name LIKE \"%1\"")
+                          .arg( wxString(m->itemName().toStdString().c_str()).AfterLast(SLASH).c_str());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
-
+  PCRList.clear();
   if(r.valid && !r.values.empty())
   {
     for(size_t i = 0 ; i < r.values.size() ; i++)
     {
       TextureGroup grp;
       int count = 0;
-      for (size_t skin=0; skin<TextureGroup::num; skin++)
+      for (size_t skin = 0; skin < TextureGroup::num; skin++)
       {
         if(!r.values[i][skin].isEmpty())
         {
@@ -433,12 +476,35 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
           count++;
         }
       }
-
+      int cdi = r.values[i][5].toInt();
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.count = count;
+      int pci = r.values[i][4].toInt(); // particleColorIndex, for replacing particle color
+      if (pci)
+      {
+        grp.particleColInd = pci;
+        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
+	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+	      "WHERE ID = %1;").arg(pci);
+        sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+        if(pcir.valid && !pcir.empty())
+        {
+          std::vector<Vec4D> cols;
+          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          {
+            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+          }
+          PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
+          grp.PCRIndex = numPCRs;
+          numPCRs++;
+        }
+      }
+      else
+          grp.PCRIndex = -1;
 
-      if(grp.tex[0] != 0 && std::find(skins.begin(),skins.end(),grp) == skins.end())
+      if(grp.tex[0] != 0 && std::find(skins.begin(), skins.end(), grp) == skins.end())
         skins.insert(grp);
+      CDIToTexGp[cdi] = grp;
     }
   }
 
@@ -480,7 +546,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
           (std::find(alreadyUsedTextures.begin(), alreadyUsedTextures.end(), tex) ==
            alreadyUsedTextures.end()))
       {
-          skins.insert(grp);
+        skins.insert(grp);
       }
     }
   }
@@ -492,7 +558,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
     LOG_INFO << "Found" << skins.size() << "skins (total)";
     ret = FillSkinSelector(skins);
 
-    if (count == 0) // No entries on .dbc and skins.txt
+    if (!count) // No entries on .dbc and skins.txt
       count = (int)skins.size();
 
     if (ret)
@@ -532,104 +598,162 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
 bool AnimControl::UpdateItemModel(WoWModel *m)
 {
+  int numPCRs = 0;
+
   std::set<GameFile *> alreadyUsedTextures;
   TextureSet skins;
 
   LOG_INFO << "Searching skins for" << m->itemName();
 
-	wxString fn = m->itemName().toStdString().c_str();
+  wxString fn = m->itemName().toStdString().c_str();
 
-	// change M2 to mdx
-	fn = fn.BeforeLast(wxT('.')) + wxT(".mdx");
+  // change M2 to mdx
+  fn = fn.BeforeLast(wxT('.')) + wxT(".mdx");
 
-	// Check to see if its a helmet model, if so cut off the race
-	// and gender specific part of the filename off
-	if (fn.Find(wxT("\\head\\")) > wxNOT_FOUND || fn.Find(wxT("\\Head\\")) > wxNOT_FOUND) {
-		fn = fn.BeforeLast('_') + wxT(".mdx");
-	}
+  // Check to see if it's a helmet model, if so cut the race-
+  // and gender-specific part of the filename off
+  if (fn.Find(wxT("\\head\\")) > wxNOT_FOUND || fn.Find(wxT("\\Head\\")) > wxNOT_FOUND)
+    fn = fn.BeforeLast('_') + wxT(".mdx");
 
-	// just get the file name, exclude the path.
-	fn = fn.AfterLast(MPQ_SLASH);
+  // just get the file name, exclude the path.
+  fn = fn.AfterLast(MPQ_SLASH);
 	
-	// query textures for model1
-	QString query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model1 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+  // query textures for model1
+  QString query= QString("SELECT DISTINCT path, name, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+                         "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID "
+                         "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id "
+                         "WHERE Model1 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	if(r.valid && !r.empty())
-	{
-	  for(size_t i = 0 ; i < r.values.size() ; i++)
-	  {
-	    TextureGroup grp;
-	    grp.base = TEXTURE_ITEM;
-	    grp.count = 1;
-	    GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
-	    alreadyUsedTextures.insert(tex);
-	    grp.tex[0] = tex;
-	    if (grp.tex[0] != 0)
-	      skins.insert(grp);
-	  }
-	}
+  if(r.valid && !r.empty())
+  {
+    for(size_t i = 0 ; i < r.values.size() ; i++)
+    {
+      TextureGroup grp;
+      grp.base = TEXTURE_ITEM;
+      grp.count = 1;
+      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
+      alreadyUsedTextures.insert(tex);
+      grp.tex[0] = tex;
+      int cdi = r.values[i][3].toInt();
+      int pci = r.values[i][2].toInt(); // particleColorIndex, for replacing particle color
+      if (pci)
+      {
+        grp.particleColInd = pci;
+        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
+	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+	      "WHERE ID = %1;").arg(pci);
+        sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+        if(pcir.valid && !pcir.empty())
+        {
+          std::vector<Vec4D> cols;
+          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          {
+            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+          }
+          PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
+          grp.PCRIndex = numPCRs;
+          numPCRs++;
+        }
+      }
+      else
+          grp.PCRIndex = -1;
 
-	// do the same for model2
-	query= QString("SELECT DISTINCT path,name FROM ItemDisplayInfo  LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id WHERE Model2 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
-	r = GAMEDATABASE.sqlQuery(query);
+      if (grp.tex[0] != 0)
+        skins.insert(grp);
+      CDIToTexGp[cdi] = grp;
+    }
+  }
 
-	if(r.valid && !r.empty())
-	{
-	  for(size_t i = 0 ; i < r.values.size() ; i++)
-	  {
-	    TextureGroup grp;
-	    grp.base = TEXTURE_ITEM;
-	    grp.count = 1;
-	    GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
-	    alreadyUsedTextures.insert(tex);
-	    grp.tex[0] = tex;
-	    if (grp.tex[0] != 0)
-	      skins.insert(grp);
-	  }
-	}
+  // do the same for model2
+  query= QString("SELECT DISTINCT path, name, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo  "
+                 "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID "
+                 "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id "
+                 "WHERE Model2 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
+  r = GAMEDATABASE.sqlQuery(query);
 
-	LOG_INFO << "Found" << skins.size() << "skins (Database)";
+  if(r.valid && !r.empty())
+  {
+    for(size_t i = 0 ; i < r.values.size() ; i++)
+    {
+      TextureGroup grp;
+      grp.base = TEXTURE_ITEM;
+      grp.count = 1;
+      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
+      alreadyUsedTextures.insert(tex);
+      grp.tex[0] = tex;
+      int cdi = r.values[i][3].toInt();
+      int pci = r.values[i][2].toInt(); // particleColorIndex, for replacing particle color
+      if (pci)
+      {
+        grp.particleColInd = pci;
+        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
+	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+	      "WHERE ID = %1;").arg(pci);
+        sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+        if(pcir.valid && !pcir.empty())
+        {
+          std::vector<Vec4D> cols;
+          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          {
+            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+          }
+          PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
+          grp.PCRIndex = numPCRs;
+          numPCRs++;
+        }
+      }
+      else
+          grp.PCRIndex = -1;
 
-	// get all blp files that corresponds to the model
-	std::set<GameFile *> files;
+      if (grp.tex[0] != 0)
+        skins.insert(grp);
+      CDIToTexGp[cdi] = grp;
+    }
+  }
 
-	QString filterString = m->itemName().mid(m->itemName().lastIndexOf("\\")+1);
-	filterString = "^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
-	GAMEDIRECTORY.getFilteredFiles(files, filterString);
+  LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
-	if (files.size() != 0)
-	{
-		TextureGroup grp;
-		grp.base = TEXTURE_ITEM;
-		grp.count = 1;
-		for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
-		{
-		  GameFile * tex = *it;
+  // get all blp files that corresponds to the model
+  std::set<GameFile *> files;
 
-		  // use this alone texture only if not already used from database infos
-		  if(std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(), tex) == alreadyUsedTextures.end())
-		  {
-		    grp.tex[0] = tex;
-		    skins.insert(grp);
-		  }
-		}
-	}
-	bool ret = false;
+  QString filterString = m->itemName().mid(m->itemName().lastIndexOf("\\")+1);
+  filterString = "^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
+  GAMEDIRECTORY.getFilteredFiles(files, filterString);
 
-	if (!skins.empty())
-	{
-	  LOG_INFO << "Found" << skins.size() << "skins (Total)";
-		ret = FillSkinSelector(skins);
+  if (files.size() != 0)
+  {
+    TextureGroup grp;
+    grp.base = TEXTURE_ITEM;
+    grp.count = 1;
+    for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
+    {
+      GameFile * tex = *it;
 
-		if (ret)
-		{ // Don't call SetSkin without a skin
-			int mySkin = randomSkins ? randint(0, (int)skins.size()-1) : 0;
-			SetSkin(mySkin);
-		}
-	}
+      // use this alone texture only if not already used from database infos
+      if(std::find(alreadyUsedTextures.begin(),alreadyUsedTextures.end(), tex) == alreadyUsedTextures.end())
+      {
+        grp.tex[0] = tex;
+        skins.insert(grp);
+      }
+    }
+  }
+  bool ret = false;
 
-	return ret;
+  if (!skins.empty())
+  {
+    LOG_INFO << "Found" << skins.size() << "skins (Total)";
+    ret = FillSkinSelector(skins);
+
+    if (ret)
+    {
+      // Don't call SetSkin without a skin
+      int mySkin = randomSkins ? randint(0, (int)skins.size()-1) : 0;
+      SetSkin(mySkin);
+    }
+  }
+
+  return ret;
 }
 
 
@@ -638,7 +762,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
 	if (skins.size() > 0) {
 		int num = 0;
 		// fill our skin selector
-		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it) {
+		for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it) {
 			GameFile * tex = it->tex[0];
 			wxString texname = tex->fullname().toStdString().c_str();
 			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
@@ -822,14 +946,15 @@ void AnimControl::OnAnim(wxCommandEvent &event)
 
 void AnimControl::OnSkin(wxCommandEvent &event)
 {
-	if (g_selModel) {
-		int sel = event.GetSelection();
-		SetSkin(sel);
-	}
+  if (g_selModel)
+  {
+    int sel = event.GetSelection();
+    SetSkin(sel);
+  }
 
-	BLPSkinList1->SetSelection(wxNOT_FOUND);
-	BLPSkinList2->SetSelection(wxNOT_FOUND);
-	BLPSkinList3->SetSelection(wxNOT_FOUND);
+  BLPSkinList1->SetSelection(wxNOT_FOUND);
+  BLPSkinList2->SetSelection(wxNOT_FOUND);
+  BLPSkinList3->SetSelection(wxNOT_FOUND);
 }
 
 void AnimControl::OnBLPSkin(wxCommandEvent &event)
@@ -906,27 +1031,38 @@ void AnimControl::OnLoop(wxCommandEvent &)
 
 void AnimControl::SetSkin(int num)
 {
-	TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
-	for (size_t i=0; i<grp->count; i++)
-	{
-		int base = grp->base + i;
-		if (g_selModel->useReplaceTextures[base])
-		{
-		  GameFile * tex = grp->tex[i];
-			// refresh TextureList for further use
-			for (ssize_t j=0; j<TEXTURE_MAX; j++)
-			{
-				if (base == g_selModel->specialTextures[j])
-				{
-					g_selModel->TextureList[j] = tex;
-					break;
-				}
-			}
-			g_selModel->replaceTextures[grp->base+i] = texturemanager.add(tex);
-		}
-	}
+  TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
+  for (size_t i=0; i<grp->count; i++)
+  {
+    int base = grp->base + i;
+    if (g_selModel->useReplaceTextures[base])
+    {
+      GameFile * tex = grp->tex[i];
+      // refresh TextureList for further use
+      for (ssize_t j=0; j<TEXTURE_MAX; j++)
+      {
+        if (base == g_selModel->specialTextures[j])
+        {
+            g_selModel->TextureList[j] = tex;
+            break;
+        }
+      }
+      g_selModel->replaceTextures[grp->base+i] = texturemanager.add(tex);
+    }
+  }
 
-	skinList->Select(num);
+  if (grp->particleColInd && grp->PCRIndex > -1)
+  {
+    int ind = grp->PCRIndex;
+    g_selModel->replaceParticleColors = true;
+    g_selModel->particleColorReplacements = PCRList[ind];
+  }
+  else
+  {
+    g_selModel->replaceParticleColors = false;
+  }
+
+  skinList->Select(num);
 }
 
 void AnimControl::SetSingleSkin(int num, int texnum)
@@ -968,12 +1104,12 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 
 int AnimControl::AddSkin(TextureGroup grp)
 {
-	skinList->Append(wxT("Custom"));
-	int count = skinList->GetCount() - 1;
-	TextureGroup *group = new TextureGroup(grp);
-	skinList->SetClientData(count, group);
-	SetSkin(count);
-	return count;
+  skinList->Append(wxT("Custom"));
+  int count = skinList->GetCount() - 1;
+  TextureGroup *group = new TextureGroup(grp);
+  skinList->SetClientData(count, group);
+  SetSkin(count);
+  return count;
 }
 
 void AnimControl::SetAnimSpeed(float speed)

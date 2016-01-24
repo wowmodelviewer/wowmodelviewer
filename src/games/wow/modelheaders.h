@@ -472,7 +472,7 @@ struct M2ParticleDef
   int32 ofsParticleFileName; // TODO
   uint8 blend;
   uint8 EmitterType;    // EmitterType 1 - Plane (rectangle), 2 - Sphere, 3 - Spline? (can't be bothered to find one)
-  uint16 ParticleColor; // If used then it's usually 11, 12 or 13. This one is used so you can assign a color to specific particles. They loop over all
+  uint16 ParticleColorIndex; // If used then it's usually 11, 12 or 13. This one is used so you can assign a color to specific particles. They loop over all
                         // particles and compare +0x2A to 11, 12 and 13. If that matches, the colors from the dbc get applied.
   fp_2_5 multiTextureParamX[2]; // used for multitextured particles, but not sure how, yet
   int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)

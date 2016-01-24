@@ -8,15 +8,6 @@
 #define MAX_PARTICLES 10000
 
 
-Vec4D fromARGB(uint32 color)
-{
-  const float a = ((color & 0xFF000000) >> 24) / 255.0f;
-  const float r = ((color & 0x00FF0000) >> 16) / 255.0f;
-  const float g = ((color & 0x0000FF00) >>  8) / 255.0f;
-  const float b = ((color & 0x000000FF)      ) / 255.0f;
-  return Vec4D(r,g,b,a);
-}
-
 template<class T>
 T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 {
@@ -41,7 +32,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   areaw.init (mta.EmissionAreaWidth, f, globals);
   deacceleration.init (mta.Gravity2, f, globals);
   enabled.init (mta.EnabledIn, f, globals);
-
+  particleColID = mta.ParticleColorIndex;
 
   Vec3D colors2[3];
   memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
@@ -194,7 +185,25 @@ void ParticleSystem::update(float dt)
   }
 
   float mspeed = 1.0f;
+  Vec4D colVals[3];
 
+  if (replaceParticleColors && particleColID >= 11 && particleColID <= 13)
+  {
+    int id = particleColID - 11;
+    colVals[0] = particleColorReplacements[id][0];
+    colVals[1] = particleColorReplacements[id][1];
+    colVals[2] = particleColorReplacements[id][2];
+    // need to add the particle alphas:
+    colVals[0][3] = colors[0][3];
+    colVals[1][3] = colors[1][3];
+    colVals[2][3] = colors[2][3];
+  }
+  else
+  {
+    colVals[0] = colors[0];
+    colVals[1] = colors[1];
+    colVals[2] = colors[2];
+  }
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); ) {
     Particle &p = *it;
     p.speed += p.down * grav * dt - p.dir * deaccel * dt;
@@ -208,7 +217,7 @@ void ParticleSystem::update(float dt)
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
     p.size = lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
-    p.color = lifeRamp<Vec4D>(rlife, mid, colors[0], colors[1], colors[2]);
+    p.color = lifeRamp<Vec4D>(rlife, mid, colVals[0], colVals[1], colVals[2]);
 
     // kill off old particles
     if (rlife >= 1.0f)

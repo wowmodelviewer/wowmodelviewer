@@ -1056,209 +1056,191 @@ void ModelViewer::LoadModel(GameFile * file)
 // Load an NPC model
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
-	canvas->clearAttachments();
-	//if (!isChar) // may memory leak
-	//	wxDELETE(canvas->model);
-	canvas->model = NULL;
+  canvas->clearAttachments();
+  //if (!isChar) // may memory leak
+  //	wxDELETE(canvas->model);
+  canvas->model = NULL;
 	
-	isModel = true;
-	isChar = false;
-	isWMO = false;
+  isModel = true;
+  isChar = false;
+  isWMO = false;
 
-	QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
-	    "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, CreatureDisplayInfo.ExtendedDisplayInfoID FROM Creature "
-	    "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
-	    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-	    "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = %1;").arg(modelid);
+  QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
+                          "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ParticleColorID , "
+                          "CreatureDisplayInfo.ID FROM Creature "
+                          "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
+                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+                          "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = %1;").arg(modelid);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	if(r.valid && !r.empty())
-	{
-	  // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
-	  if(r.values[0][5].toInt() == 0)
-	  {
-	    std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
-	    wxString name(modelname.c_str());
-	    LoadModel(GAMEDIRECTORY.getFile(name.c_str()));
-	    canvas->model->modelType = MT_NORMAL;
+  if(r.valid && !r.empty())
+  {
+    // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
+    if(r.values[0][5].toInt() == 0)
+    {
+      std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
+      wxString name(modelname.c_str());
+      LoadModel(GAMEDIRECTORY.getFile(name.c_str()));
+      canvas->model->modelType = MT_NORMAL;
+      animControl->SetSkinByDisplayID(r.values[0][7].toInt());
+    }
+    else
+    {
+      QString modelname = r.values[0][0] + r.values[0][1];
+      QString modelnamehd = modelname;
+      modelnamehd.replace(".m2","_hd.m2");
 
-	    TextureGroup grp;
-	    int count = 0;
-	    for(int i=0; i < 3; i++)
-	    {
-	      grp.tex[i] = GAMEDIRECTORY.getFile(r.values[0][0] + r.values[0][i+2] + ".blp");
-	      if(grp.tex[0])
-	        count++;
-	    }
-	    grp.base = TEXTURE_GAMEOBJECT1;
-	    grp.count = count;
-	    if (grp.tex[0])
-	      animControl->AddSkin(grp);
-	  }
-	  else
-	  {
-	    QString modelname = r.values[0][0] + r.values[0][1];
-	    QString modelnamehd = modelname;
-	    modelnamehd.replace(".m2","_hd.m2");
+      GameFile * model = GAMEDIRECTORY.getFile(modelnamehd);
+      if (!model)
+        model = GAMEDIRECTORY.getFile(modelname);
 
-	    GameFile * model = GAMEDIRECTORY.getFile(modelnamehd);
-	    if(!model)
-	      model = GAMEDIRECTORY.getFile(modelname);
+      LoadModel(model);
 
-	    LoadModel(model);
+      query = QString("SELECT * FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(r.values[0][5]);
 
-	    query = QString("SELECT * FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(r.values[0][5]);
+      r = GAMEDATABASE.sqlQuery(query);
 
-	    r = GAMEDATABASE.sqlQuery(query);
+      if(r.valid && !r.empty())
+      {
+        g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
+        g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
+        g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
+        g_charControl->model->cd.setHairStyle(r.values[0][5].toInt());
+        g_charControl->model->cd.setFacialHair(r.values[0][7].toInt());
 
-	    if(r.valid && !r.empty())
-	    {
-	      g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
-	      g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
-	      g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
-	      g_charControl->model->cd.setHairStyle(r.values[0][5].toInt());
-	      g_charControl->model->cd.setFacialHair(r.values[0][7].toInt());
+        WoWItem * item = g_charControl->model->getItem(CS_HEAD);
+        if (item)
+          item->setDisplayId(r.values[0][8].toInt());
 
-	      WoWItem * item = g_charControl->model->getItem(CS_HEAD);
-	      if(item)
-	        item->setDisplayId(r.values[0][8].toInt());
+        item = g_charControl->model->getItem(CS_SHOULDER);
+        if (item)
+          item->setDisplayId(r.values[0][9].toInt());
 
-	      item = g_charControl->model->getItem(CS_SHOULDER);
-	      if(item)
-	        item->setDisplayId(r.values[0][9].toInt());
+        item = g_charControl->model->getItem(CS_SHIRT);
+        if (item)
+          item->setDisplayId(r.values[0][10].toInt());
 
-	      item = g_charControl->model->getItem(CS_SHIRT);
-	      if(item)
-	        item->setDisplayId(r.values[0][10].toInt());
+        item = g_charControl->model->getItem(CS_CHEST);
+        if (item)
+          item->setDisplayId(r.values[0][11].toInt());
 
-	      item = g_charControl->model->getItem(CS_CHEST);
-	      if(item)
-	        item->setDisplayId(r.values[0][11].toInt());
+        item = g_charControl->model->getItem(CS_BELT);
+        if (item)
+          item->setDisplayId(r.values[0][12].toInt());
 
-	      item = g_charControl->model->getItem(CS_BELT);
-	      if(item)
-	        item->setDisplayId(r.values[0][12].toInt());
+        item = g_charControl->model->getItem(CS_PANTS);
+        if (item)
+          item->setDisplayId(r.values[0][13].toInt());
 
-	      item = g_charControl->model->getItem(CS_PANTS);
-	      if(item)
-	        item->setDisplayId(r.values[0][13].toInt());
+        item = g_charControl->model->getItem(CS_BOOTS);
+        if (item)
+          item->setDisplayId(r.values[0][14].toInt());
 
-	      item = g_charControl->model->getItem(CS_BOOTS);
-	      if(item)
-	        item->setDisplayId(r.values[0][14].toInt());
+        item = g_charControl->model->getItem(CS_BRACERS);
+        if (item)
+          item->setDisplayId(r.values[0][15].toInt());
 
-	      item = g_charControl->model->getItem(CS_BRACERS);
-	      if(item)
-	        item->setDisplayId(r.values[0][15].toInt());
+        item = g_charControl->model->getItem(CS_GLOVES);
+        if (item)
+          item->setDisplayId(r.values[0][16].toInt());
 
-	      item = g_charControl->model->getItem(CS_GLOVES);
-	      if(item)
-	        item->setDisplayId(r.values[0][16].toInt());
+        item = g_charControl->model->getItem(CS_TABARD);
+        if (item)
+          item->setDisplayId(r.values[0][17].toInt());
 
-	      item = g_charControl->model->getItem(CS_TABARD);
-	      if(item)
-	        item->setDisplayId(r.values[0][17].toInt());
+        item = g_charControl->model->getItem(CS_CAPE);
+        if (item)
+          item->setDisplayId(r.values[0][18].toInt());
 
-	      item = g_charControl->model->getItem(CS_CAPE);
-	      if(item)
-	        item->setDisplayId(r.values[0][18].toInt());
+        g_charControl->model->cd.isNPC = true;
+        g_charControl->RefreshModel();
+        g_charControl->RefreshEquipment();
+      }
 
+    }
+  }
 
+  fileControl->UpdateInterface();
 
-	      g_charControl->model->cd.isNPC = true;
+  // wxAUI
+  // hide charControl if current model is not a Character one.
+  if(!g_charControl->model->charModelDetails.isChar)
+    interfaceManager.GetPane(charControl).Show(false);
 
-	      g_charControl->RefreshModel();
-	      g_charControl->RefreshEquipment();
-	    }
-
-	  }
-	}
-
-	fileControl->UpdateInterface();
-
-	// wxAUI
-	// hide charControl if current model is not a Character one.
-	if(!g_charControl->model->charModelDetails.isChar)
-	  interfaceManager.GetPane(charControl).Show(false);
-
-	interfaceManager.Update();
+  interfaceManager.Update();
 }
 
 void ModelViewer::LoadItem(unsigned int id)
 {
-	canvas->clearAttachments();
-	//if (!isChar) // may memory leak
-	//	wxDELETE(canvas->model);
-	canvas->model = NULL;
+  canvas->clearAttachments();
+  //if (!isChar) // may memory leak
+  //	wxDELETE(canvas->model);
+  canvas->model = NULL;
 	
-	isModel = true;
-	isChar = false;
-	isWMO = false;
+  isModel = true;
+  isChar = false;
+  isWMO = false;
 
-	try {
-	  QString query = QString("SELECT Model1, Path, Name FROM ItemDisplayInfo"
-	      " LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID"
-	      " LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID"
-	      " WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID ="
-	      " (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
+  try
+  {
+    QString query = QString("SELECT Model1, Path, Name, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+	                       "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID "
+	                       "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID "
+	                       "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
+	                       "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
-	  sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
-	  // LOG_INFO << query;
+    sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
+    // LOG_INFO << query;
 
-	  if(itemInfos.valid && !itemInfos.empty())
-	  {
-	    QString model1 = itemInfos.values[0][0];
-	    std::string texture1 = itemInfos.values[0][1].toStdString();
+    if(itemInfos.valid && !itemInfos.empty())
+    {
+      QString model1 = itemInfos.values[0][0];
+      std::string path = itemInfos.values[0][1].toStdString();
 
-	    model1 = GAMEDIRECTORY.getFullPathForFile(model1);
-	    if(model1 == "") // try with .m2 at the end
-	    {
-	      model1 = itemInfos.values[0][0];
-	      model1.replace(".mdx", ".m2", Qt::CaseInsensitive);
-	      model1 = GAMEDIRECTORY.getFullPathForFile(model1);
-	    }
+      if (model1 != "")
+      {
+        model1.replace(".mdx", ".m2", Qt::CaseInsensitive);
+        model1 = QString::fromStdString(path) + model1;
+      }
+      std::string texture1 = path + itemInfos.values[0][2].toStdString();
 
-	    texture1 = itemInfos.values[0][1].toStdString() + itemInfos.values[0][2].toStdString();
+      if(model1 != "" && texture1 != "")
+      {
+        LoadModel(GAMEDIRECTORY.getFile(model1));
+        TextureGroup grp;
+        grp.base = TEXTURE_ITEM;
+        grp.count = 1;
+        grp.tex[0] = GAMEDIRECTORY.getFile(texture1.c_str());
+        canvas->model->TextureList.push_back(grp.tex[0]);
+        if (grp.tex[0])
+          animControl->SetSkinByDisplayID(itemInfos.values[0][3].toInt());
+      }
+    }
 
-	    if(model1 != "" && texture1 != "")
-	    {
+    charMenu->Enable(ID_SAVE_CHAR, false);
+    charMenu->Enable(ID_SHOW_UNDERWEAR, false);
+    charMenu->Enable(ID_SHOW_EARS, false);
+    charMenu->Enable(ID_SHOW_HAIR, false);
+    charMenu->Enable(ID_SHOW_FACIALHAIR, false);
+    charMenu->Enable(ID_SHOW_FEET, false);
+    charMenu->Enable(ID_SHEATHE, false);
+    charMenu->Enable(ID_CHAREYEGLOW, false);
+    charMenu->Enable(ID_SAVE_EQUIPMENT, false);
+    charMenu->Enable(ID_LOAD_EQUIPMENT, false);
+    charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
+    charMenu->Enable(ID_LOAD_SET, false);
+    charMenu->Enable(ID_LOAD_START, false);
+    charMenu->Enable(ID_MOUNT_CHARACTER, false);
+    charMenu->Enable(ID_CHAR_RANDOMISE, false);
+    charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
+  }
+  catch (...) {}
 
-	      LoadModel(GAMEDIRECTORY.getFile(model1));
-	      TextureGroup grp;
-	      grp.base = TEXTURE_ITEM;
-	      grp.count = 1;
-
-	      grp.tex[0] = GAMEDIRECTORY.getFile(texture1.c_str());
-	      canvas->model->TextureList.push_back(grp.tex[0]);
-	      if (grp.tex[0])
-	        animControl->AddSkin(grp);
-	    }
-	  }
-
-
-		charMenu->Enable(ID_SAVE_CHAR, false);
-		charMenu->Enable(ID_SHOW_UNDERWEAR, false);
-		charMenu->Enable(ID_SHOW_EARS, false);
-		charMenu->Enable(ID_SHOW_HAIR, false);
-		charMenu->Enable(ID_SHOW_FACIALHAIR, false);
-		charMenu->Enable(ID_SHOW_FEET, false);
-		charMenu->Enable(ID_SHEATHE, false);
-		charMenu->Enable(ID_CHAREYEGLOW, false);
-		charMenu->Enable(ID_SAVE_EQUIPMENT, false);
-		charMenu->Enable(ID_LOAD_EQUIPMENT, false);
-		charMenu->Enable(ID_CLEAR_EQUIPMENT, false);
-		charMenu->Enable(ID_LOAD_SET, false);
-		charMenu->Enable(ID_LOAD_START, false);
-		charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		charMenu->Enable(ID_CHAR_RANDOMISE, false);
-		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
-
-	} catch (...) {}
-
-	// wxAUI
-	interfaceManager.GetPane(charControl).Show(isChar);
-	interfaceManager.Update();
+  // wxAUI
+  interfaceManager.GetPane(charControl).Show(isChar);
+  interfaceManager.Update();
 }
 
 // This is called when the user goes to File->Exit

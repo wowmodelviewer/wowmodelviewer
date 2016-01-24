@@ -82,10 +82,19 @@ class ParticleSystem
     Vec4D colors[3];
     float sizes[3];
     bool multitexture;
+    int particleColID;
+    bool replaceParticleColors;
+    // Start, Mid and End colours, for cases where the model's particle colours are overridden by values from ParticleColor.dbc,
+    // indexed from CreatureDisplayInfo:
+    typedef std::vector<Vec4D> particleColorSet;
+    // The particle will get its replacement colour set from 0, 1 or 2, depending on whether its ParticleColorIndex is set to 11, 12 or 13:
+    std::vector<particleColorSet> particleColorReplacements;
 
     ParticleSystem(): mid(0), emitter(0), rem(0)
     {
       multitexture = 0;
+      particleColID = 0;
+      replaceParticleColors = false;
       blend = 0;
       order = 0;
       ParticleType = 0;
