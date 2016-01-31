@@ -418,12 +418,6 @@ void FBXExporter::createAnimations()
 
             Quaternion q = bone.rot.getValue(anim, t);
 
-            if (bone.parent >= 0)
-            {
-              Bone& parent_bone = m_p_model->bones[bone.parent];
-              q *= parent_bone.rot.getValue(anim, t);
-            }
-
            // LOG_INFO << "B q =" << q.w << q.x << q.y << q.z;
             //q = m.GetQuaternion();
             //LOG_INFO << "A q =" << q.w << q.x << q.y << q.z;
