@@ -41,20 +41,7 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
-map<int,int> create_map()
-{
-  map<int,int> m;
-  m[1] = 2;
-  m[3] = 4;
-  m[5] = 6;
-  return m;
-}
-
 map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
-
-
-
-
 
 WoWItem::WoWItem(CharSlots slot)
 : m_charModel(0), m_id(-1), m_quality(0),

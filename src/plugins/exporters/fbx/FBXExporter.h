@@ -103,6 +103,7 @@ class FBXExporter : public QObject, public ExporterPlugin
     void createMaterials();
     void createMesh();
     void createSkeleton();
+    void createAnimations();
     void reset();
 
 
@@ -113,6 +114,7 @@ class FBXExporter : public QObject, public ExporterPlugin
     FbxNode    * m_p_meshNode;
 
     std::string m_filename;
+    std::vector<FbxNode*> m_boneNodes;
 
     std::map<std::string, GLuint> m_texturesToExport;
 

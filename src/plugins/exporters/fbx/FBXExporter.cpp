@@ -213,6 +213,8 @@ static const int KEY_SCALE    = 4;
 void updateTimeline(Timeline &timeline, vector<TimeT> &times, int keyMask)
 {
   size_t numTimes = times.size();
+  LOG_INFO << __FUNCTION__ << keyMask << numTimes;
+
   for (size_t n = 0; n < numTimes; n++)
   {
     TimeT time = times[n];
@@ -238,7 +240,7 @@ void FBXExporter::createSkeleton()
   FbxAMatrix matrix;
 
   FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
-  std::vector<FbxNode*> bone_nodes;
+
   std::vector<FbxCluster*> bone_clusters;
   std::vector<FbxSkeleton::EType> bone_types;
   size_t num_of_bones = m_p_model->header.nBones;
@@ -275,7 +277,7 @@ void FBXExporter::createSkeleton()
     bone_name += static_cast<int>(i);
 
     FbxNode* skeleton_node = FbxNode::Create(m_p_scene, bone_name);
-    bone_nodes.push_back(skeleton_node);
+    m_boneNodes.push_back(skeleton_node);
     skeleton_node->LclTranslation.Set(FbxVector4(trans.x * SCALE_FACTOR, trans.y * SCALE_FACTOR, trans.z * SCALE_FACTOR));
 
     FbxSkeleton* skeleton_attribute = FbxSkeleton::Create(m_p_scene, bone_name);
@@ -290,13 +292,13 @@ void FBXExporter::createSkeleton()
     {
       skeleton_attribute->SetSkeletonType(FbxSkeleton::eLimb);
       skeleton_attribute->LimbLength.Set(100.0 * SCALE_FACTOR * (sqrtf(trans.x * trans.x + trans.y * trans.y + trans.z * trans.z)));
-      bone_nodes[pid]->AddChild(skeleton_node);
+      m_boneNodes[pid]->AddChild(skeleton_node);
     }
     else
     {
       skeleton_attribute->SetSkeletonType(FbxSkeleton::eLimbNode);
       skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
-      bone_nodes[pid]->AddChild(skeleton_node);
+      m_boneNodes[pid]->AddChild(skeleton_node);
     }
 
     skeleton_node->SetNodeAttribute(skeleton_attribute);
@@ -326,20 +328,26 @@ void FBXExporter::createSkeleton()
   }
 
   skin->SetGeometry(m_p_meshNode->GetMesh());
-  LOG_INFO << "Skeleton successfully created";
+}
 
-
+void FBXExporter::createAnimations()
+{
+  if(m_boneNodes.empty())
+  {
+    LOG_INFO << "No bone in skeleton, son no animation will be exported";
+    return;
+  }
 
   std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
-  for (unsigned int i=0; i<m_p_model->header.nAnimations; i++)
+  for (unsigned int anim=0; anim<m_p_model->header.nAnimations; anim++)
   {
-    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), m_p_model->anims[i].animID) == m_animsToExport.end())
+    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), m_p_model->anims[anim].animID) == m_animsToExport.end())
       continue;
 
     std::stringstream ss;
-    ss << animsMap[m_p_model->anims[i].animID];
+    ss << animsMap[m_p_model->anims[anim].animID];
     ss << " [";
-    ss << i;
+    ss << anim;
     ss << "]";
 
     std::string anim_name =  ss.str();
@@ -349,41 +357,41 @@ void FBXExporter::createSkeleton()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
     anim_stack->AddMember(anim_layer);
 
-    for (unsigned int b = 0; b < num_of_bones; b++)
+    for (unsigned int b = 0; b < m_p_model->header.nBones; b++)
     {
       Bone& bone = m_p_model->bones[b];
-      if (uses_anim(bone, i))
+
+      FbxAnimCurve* t_curve_x = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+      FbxAnimCurve* t_curve_y = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+      FbxAnimCurve* t_curve_z = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+      FbxAnimCurve* r_curve_x = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+      FbxAnimCurve* r_curve_y = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+      FbxAnimCurve* r_curve_z = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+      FbxAnimCurve* s_curve_x = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+      FbxAnimCurve* s_curve_y = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+      FbxAnimCurve* s_curve_z = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+
+      uint32 timeInc = (m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/60;
+      float frameRate = 60.f / (float)(m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/1000.f;
+
+      FbxTime::SetGlobalTimeMode(FbxTime::eCustom, frameRate);
+
+      for(uint32 t = m_p_model->anims[anim].timeStart ; t < m_p_model->anims[anim].timeEnd ; t += timeInc)
       {
-        Timeline timeline;
-        updateTimeline(timeline, bone.rot.times[i], KEY_ROTATE);
-        updateTimeline(timeline, bone.scale.times[i], KEY_SCALE);
-        size_t ntrans = 0;
-        size_t nrot = 0;
-        size_t nscale = 0;
-
-        FbxAnimCurve* t_curve_x = bone_nodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* t_curve_y = bone_nodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* t_curve_z = bone_nodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-        FbxAnimCurve* r_curve_x = bone_nodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* r_curve_y = bone_nodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* r_curve_z = bone_nodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-        FbxAnimCurve* s_curve_x = bone_nodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-        FbxAnimCurve* s_curve_y = bone_nodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-        FbxAnimCurve* s_curve_z = bone_nodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
         FbxTime time;
-        for (Timeline::iterator it = timeline.begin(); it != timeline.end(); it++)
+        time.SetSecondDouble((float)t / 1000.0);
+
+        if(bone.rot.uses(anim) || bone.scale.uses(anim) || bone.trans.uses(anim))
         {
-          time.SetSecondDouble(static_cast<double>(it->first) / 1000.0);
-          if ((it->second & KEY_TRANSLATE) && (ntrans < bone.trans.data[i].size()))
+          if (bone.trans.uses(anim))
           {
-            Vec3D v = bone.trans.getValue(i, it->first);
+            Vec3D v = bone.trans.getValue(anim,t);
+
             if (bone.parent >= 0)
             {
               Bone& parent_bone = m_p_model->bones[bone.parent];
               v += (bone.pivot - parent_bone.pivot);
             }
-            ntrans++;
 
             t_curve_x->KeyModifyBegin();
             int key_index = t_curve_x->KeyAdd(time);
@@ -403,11 +411,23 @@ void FBXExporter::createSkeleton()
             t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
             t_curve_z->KeyModifyEnd();
           }
-          if (it->second & KEY_ROTATE)
+
+          if (bone.rot.uses(anim))
           {
             float x, y, z;
 
-            Quaternion q = bone.rot.getValue(i, it->first);
+            Quaternion q = bone.rot.getValue(anim, t);
+
+            if (bone.parent >= 0)
+            {
+              Bone& parent_bone = m_p_model->bones[bone.parent];
+              q *= parent_bone.rot.getValue(anim, t);
+            }
+
+           // LOG_INFO << "B q =" << q.w << q.x << q.y << q.z;
+            //q = m.GetQuaternion();
+            //LOG_INFO << "A q =" << q.w << q.x << q.y << q.z;
+
             FbxQuaternion quat(q.x, q.y, q.z, q.w);
             FbxVector4 angle = quat.DecomposeSphericalXYZ();
 
@@ -433,9 +453,10 @@ void FBXExporter::createSkeleton()
             r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
             r_curve_z->KeyModifyEnd();
           }
-          if (it->second & KEY_SCALE)
+
+          if (bone.scale.uses(anim))
           {
-            Vec3D& v = bone.scale.getValue(i, it->first);
+            Vec3D v = bone.scale.getValue(anim, t);
 
             s_curve_x->KeyModifyBegin();
             int key_index = s_curve_x->KeyAdd(time);
@@ -571,6 +592,8 @@ bool FBXExporter::exportModel(Model * model, std::string target)
     LOG_INFO << "Materials successfully created";
     createSkeleton();
     LOG_INFO << "Skeleton successfully created";
+    createAnimations();
+    LOG_INFO << "Animations successfully created";
   }
   catch(const std::exception& ex)
   {
