@@ -255,7 +255,6 @@ void ParticleSystem::draw()
     blend = 0;
   else if (blend > 7)
     blend = 2;
-
   switch (blend)
   {
   case BM_OPAQUE:	         // 0

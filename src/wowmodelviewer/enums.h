@@ -208,6 +208,16 @@ enum ObjectID {
 	ID_MODEL_ROT_Y,
 	ID_MODEL_ROT_Z,
 	ID_MODEL_SIZE,
+	ID_MODEL_PC_REPLACE, // use replacement colours for particles, where applicable
+	ID_MODEL_PC_START_11, // For replacable particle colours, start, mid and end, IDs 11, 12 and 13
+	ID_MODEL_PC_MID_11,
+	ID_MODEL_PC_END_11,
+	ID_MODEL_PC_START_12,
+	ID_MODEL_PC_MID_12,
+	ID_MODEL_PC_END_12,
+	ID_MODEL_PC_START_13,
+	ID_MODEL_PC_MID_13,
+	ID_MODEL_PC_END_13,
 
 	// ----------------------------------------
 	// Model Bank Control Frame

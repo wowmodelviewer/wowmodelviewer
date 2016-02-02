@@ -112,6 +112,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	hasCamera = false;
 	hasParticles = false;
   	replaceParticleColors = false;
+  	replacableParticleColorIDs.clear();
 	isWMO = false;
 	isMount = false;
 
@@ -269,7 +270,6 @@ WoWModel::~WoWModel()
 			delete [] bounds; bounds = 0;
 			delete [] boundTris; boundTris = 0;
 			delete [] showGeosets; showGeosets = 0;
-
 			delete animManager; animManager = 0;
 
 			if (animated)
@@ -806,6 +806,10 @@ void WoWModel::initAnimated(GameFile * f)
       pdef = (M2ParticleDef *) &pdefs[i];
       particleSystems[i].model = this;
       particleSystems[i].init(f, *pdef, globalSequences);
+      int pci = particleSystems[i].particleColID;
+      if (pci && (std::find(replacableParticleColorIDs.begin(),
+          replacableParticleColorIDs.end(), pci) == replacableParticleColorIDs.end()))
+        replacableParticleColorIDs.push_back(pci);
     }
   }
 

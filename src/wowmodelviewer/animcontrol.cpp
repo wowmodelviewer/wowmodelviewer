@@ -8,6 +8,7 @@
 #include "Game.h"
 #include "GameDatabase.h"
 #include "globalvars.h"
+#include "modelviewer.h"
 #include "UserSkins.h"
 #include "util.h"
 
@@ -1031,7 +1032,20 @@ void AnimControl::OnLoop(wxCommandEvent &)
 
 void AnimControl::SetSkin(int num)
 {
+  if (num == -1)
+    num = skinList->GetSelection();  // if we pass -1 to the func, we're redrawing the current skin
+  if (num < 0) // model not currently using a proper texture set, possibly custom
+  {
+    g_selModel->replaceParticleColors = false;
+    return;
+  }
   TextureGroup *grp = (TextureGroup*) skinList->GetClientData(num);
+
+  if (!grp) // invalid texture group
+  {
+    g_selModel->replaceParticleColors = false;
+    return;
+  }
   for (size_t i=0; i<grp->count; i++)
   {
     int base = grp->base + i;
@@ -1043,24 +1057,21 @@ void AnimControl::SetSkin(int num)
       {
         if (base == g_selModel->specialTextures[j])
         {
-            g_selModel->TextureList[j] = tex;
-            break;
+          g_selModel->TextureList[j] = tex;
+          break;
         }
       }
       g_selModel->replaceTextures[grp->base+i] = texturemanager.add(tex);
     }
   }
 
-  if (grp->particleColInd && grp->PCRIndex > -1)
+  if (grp->particleColInd && grp->PCRIndex > -1 && !g_modelViewer->modelControl->IsReplacingParticleColors())
   {
-    int ind = grp->PCRIndex;
     g_selModel->replaceParticleColors = true;
-    g_selModel->particleColorReplacements = PCRList[ind];
+    g_selModel->particleColorReplacements = PCRList[grp->PCRIndex];
   }
   else
-  {
     g_selModel->replaceParticleColors = false;
-  }
 
   skinList->Select(num);
 }

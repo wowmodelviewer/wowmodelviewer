@@ -93,11 +93,15 @@ public:
 	ModelEvent		*events;
 	Vec3D *bounds;
 
+	std::vector<uint> replacableParticleColorIDs;
 	bool replaceParticleColors;
-	// Start, Mid and End colours, for cases where the model's particle colours are overridden by values from ParticleColor.dbc,
-	// indexed from CreatureDisplayInfo:
+
+	// Start, Mid and End colours, for cases where the model's particle colours are
+	// overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
 	typedef std::vector<Vec4D> particleColorSet;
-	// The particle will get its replacement colour set from 0, 1 or 2, depending on whether its ParticleColorIndex is set to 11, 12 or 13:
+
+	// The particle will get its replacement colour set from 0, 1 or 2,
+	// depending on whether its ParticleColorIndex is set to 11, 12 or 13:
 	std::vector<particleColorSet> particleColorReplacements;
 	// Raw Data
 	ModelVertex *origVertices;

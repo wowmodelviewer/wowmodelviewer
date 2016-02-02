@@ -696,7 +696,7 @@ void ModelViewer::InitDocking()
 	// model control
 	interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
 		Name(wxT("Models")).Caption(wxT("Models")).
-		FloatingSize(wxSize(160,460)).Float().Show(false).
+		FloatingSize(wxSize(160,460)).TopDockable(false).BottomDockable(false).Float().Show(false).
 		DestroyOnClose(false));
 
 	// model bank control

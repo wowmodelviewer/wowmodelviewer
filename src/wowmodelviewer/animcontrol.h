@@ -82,6 +82,11 @@ class TextureGroup
 };
 
 typedef std::set<TextureGroup> TextureSet;
+typedef std::vector<Vec4D> particleColorSet; // Holds 3 particle colours: Start, Mid and End (of particle life), for cases where 
+                                             // particle colours are overridden by values from ParticleColor.dbc,
+typedef std::vector<particleColorSet> particleColorReplacements; // Holds 3 colour sets. The particle will get its replacement
+                                                                 // colour set from 0, 1 or 2, depending on whether its
+                                                                 // ParticleColorIndex is set to 11, 12 or 13
 
 class AnimControl: public wxWindow
 {
@@ -133,11 +138,6 @@ public:
   bool defaultDoodads; 
   std::string oldname;
   std::map<int, TextureGroup> CDIToTexGp;
-  typedef std::vector<Vec4D> particleColorSet; // Holds 3 particle colours: Start, Mid and End (of particle life), for cases where 
-                                               // particle colours are overridden by values from ParticleColor.dbc,
-  typedef std::vector<particleColorSet> particleColorReplacements; // Holds 3 colour sets. The particle will get its replacement
-                                                                   // colour set from 0, 1 or 2, depending on whether its
-                                                                   // ParticleColorIndex is set to 11, 12 or 13
   std::vector<particleColorReplacements> PCRList; 
   int selectedAnim;
   int selectedAnim2;
