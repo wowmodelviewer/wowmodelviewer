@@ -68,7 +68,6 @@ FBXExporter::FBXExporter():
  m_p_manager(0), m_p_scene(0), m_p_model(0), m_p_meshNode(0)
 {
   m_canExportAnimation = true;
-  reset();
 }
 
 // Destructor
@@ -187,45 +186,6 @@ void FBXExporter::createMesh()
   m_p_meshNode->SetShadingMode(FbxNode::eTextureShading);
 }
 
-
-bool uses_anim(Bone &b, size_t anim_index)
-{
-  return (b.trans.uses(anim_index) || b.rot.uses(anim_index) || b.scale.uses(anim_index));
-}
-
-bool has_anim(WoWModel* m, size_t anim_index)
-{
-  for (size_t n = 0; n < m->header.nBones; n++)
-  {
-    Bone& b = m->bones[n];
-    if (uses_anim(b, anim_index))
-      return true;
-  }
-  return false;
-}
-typedef size_t      TimeT;
-typedef map<TimeT, int> Timeline;
-
-static const int KEY_TRANSLATE  = 1;
-static const int KEY_ROTATE   = 2;
-static const int KEY_SCALE    = 4;
-
-void updateTimeline(Timeline &timeline, vector<TimeT> &times, int keyMask)
-{
-  size_t numTimes = times.size();
-  LOG_INFO << __FUNCTION__ << keyMask << numTimes;
-
-  for (size_t n = 0; n < numTimes; n++)
-  {
-    TimeT time = times[n];
-    Timeline::iterator it = timeline.find(time);
-    if (it != timeline.end())
-      it->second |= keyMask;
-    else
-      timeline[time] = keyMask;
-  }
-}
-
 void FBXExporter::createSkeleton()
 {
   // Get the scene��s root node.
@@ -246,20 +206,31 @@ void FBXExporter::createSkeleton()
   size_t num_of_bones = m_p_model->header.nBones;
 
   // Set bone type.
+  std::vector<bool> has_children;
+  has_children.resize(num_of_bones);
   for (size_t i = 0; i < num_of_bones; ++i)
   {
     Bone bone = m_p_model->bones[i];
+    if(bone.parent != -1)
+      has_children[bone.parent] = true;
+  }
+
+  bone_types.resize(num_of_bones);
+  for (size_t i = 0; i < num_of_bones; ++i)
+  {
+    Bone bone = m_p_model->bones[i];
+
     if (bone.parent == -1)
     {
-      bone_types.push_back(FbxSkeleton::eRoot);
+      bone_types[i] = FbxSkeleton::eRoot;
+    }
+    else if(has_children[i])
+    {
+      bone_types[i] = FbxSkeleton::eLimb;
     }
     else
     {
-      if (bone_types[bone.parent] != FbxSkeleton::eRoot)
-      {
-        bone_types[bone.parent] = FbxSkeleton::eLimb;
-      }
-      bone_types.push_back(FbxSkeleton::eLimbNode);
+      bone_types[i] = FbxSkeleton::eLimbNode;
     }
   }
 
@@ -268,6 +239,7 @@ void FBXExporter::createSkeleton()
   {
     Bone &bone = m_p_model->bones[i];
     Vec3D trans = bone.pivot;
+
     int pid = bone.parent;
     if (pid > -1)
       trans -= m_p_model->bones[pid].pivot;
@@ -281,22 +253,20 @@ void FBXExporter::createSkeleton()
     skeleton_node->LclTranslation.Set(FbxVector4(trans.x * SCALE_FACTOR, trans.y * SCALE_FACTOR, trans.z * SCALE_FACTOR));
 
     FbxSkeleton* skeleton_attribute = FbxSkeleton::Create(m_p_scene, bone_name);
+    skeleton_attribute->SetSkeletonType(bone_types[i]);
 
     if (bone_types[i] == FbxSkeleton::eRoot)
     {
-      skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
       skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
       bone_group_node->AddChild(skeleton_node);
     }
     else if (bone_types[i] == FbxSkeleton::eLimb)
     {
-      skeleton_attribute->SetSkeletonType(FbxSkeleton::eLimb);
       skeleton_attribute->LimbLength.Set(100.0 * SCALE_FACTOR * (sqrtf(trans.x * trans.x + trans.y * trans.y + trans.z * trans.z)));
       m_boneNodes[pid]->AddChild(skeleton_node);
     }
     else
     {
-      skeleton_attribute->SetSkeletonType(FbxSkeleton::eLimbNode);
       skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
       m_boneNodes[pid]->AddChild(skeleton_node);
     }
@@ -334,7 +304,7 @@ void FBXExporter::createAnimations()
 {
   if(m_boneNodes.empty())
   {
-    LOG_INFO << "No bone in skeleton, son no animation will be exported";
+    LOG_INFO << "No bone in skeleton, so no animation will be exported";
     return;
   }
 
@@ -357,119 +327,119 @@ void FBXExporter::createAnimations()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
     anim_stack->AddMember(anim_layer);
 
-    for (unsigned int b = 0; b < m_p_model->header.nBones; b++)
+    uint32 timeInc = (m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/60;
+
+    FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
+
+    for(uint32 t = m_p_model->anims[anim].timeStart ; t < m_p_model->anims[anim].timeEnd ; t += timeInc)
     {
-      Bone& bone = m_p_model->bones[b];
+      FbxTime time;
+      time.SetSecondDouble((float)t / 1000.0);
 
-      FbxAnimCurve* t_curve_x = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* t_curve_y = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* t_curve_z = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      FbxAnimCurve* r_curve_x = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* r_curve_y = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* r_curve_z = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      FbxAnimCurve* s_curve_x = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* s_curve_y = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* s_curve_z = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-      uint32 timeInc = (m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/60;
-      float frameRate = 60.f / (float)(m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/1000.f;
-
-      FbxTime::SetGlobalTimeMode(FbxTime::eCustom, frameRate);
-
-      for(uint32 t = m_p_model->anims[anim].timeStart ; t < m_p_model->anims[anim].timeEnd ; t += timeInc)
+      for (unsigned int b = 0; b < m_p_model->header.nBones; b++)
       {
-        FbxTime time;
-        time.SetSecondDouble((float)t / 1000.0);
+        Bone& bone = m_p_model->bones[b];
 
-        if(bone.rot.uses(anim) || bone.scale.uses(anim) || bone.trans.uses(anim))
+        bool rot = bone.rot.uses(anim);
+        bool scale = bone.scale.uses(anim);
+        bool trans = bone.trans.uses(anim);
+
+        if(!rot && !scale && !trans) // bone is not animated, skip it
+          continue;
+
+        FbxAnimCurve* t_curve_x = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+        FbxAnimCurve* t_curve_y = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+        FbxAnimCurve* t_curve_z = m_boneNodes[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+        FbxAnimCurve* r_curve_x = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+        FbxAnimCurve* r_curve_y = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+        FbxAnimCurve* r_curve_z = m_boneNodes[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+        FbxAnimCurve* s_curve_x = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
+        FbxAnimCurve* s_curve_y = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
+        FbxAnimCurve* s_curve_z = m_boneNodes[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
+
+        if (trans)
         {
-          if (bone.trans.uses(anim))
+          Vec3D v = bone.trans.getValue(anim,t);
+
+          if (bone.parent != -1)
           {
-            Vec3D v = bone.trans.getValue(anim,t);
-
-            if (bone.parent >= 0)
-            {
-              Bone& parent_bone = m_p_model->bones[bone.parent];
-              v += (bone.pivot - parent_bone.pivot);
-            }
-
-            t_curve_x->KeyModifyBegin();
-            int key_index = t_curve_x->KeyAdd(time);
-            t_curve_x->KeySetValue(key_index, v.x * SCALE_FACTOR);
-            t_curve_x->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            t_curve_x->KeyModifyEnd();
-
-            t_curve_y->KeyModifyBegin();
-            key_index = t_curve_y->KeyAdd(time);
-            t_curve_y->KeySetValue(key_index, v.y * SCALE_FACTOR);
-            t_curve_y->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            t_curve_y->KeyModifyEnd();
-
-            t_curve_z->KeyModifyBegin();
-            key_index = t_curve_z->KeyAdd(time);
-            t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
-            t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            t_curve_z->KeyModifyEnd();
+            Bone& parent_bone = m_p_model->bones[bone.parent];
+            v += (bone.pivot - parent_bone.pivot);
           }
 
-          if (bone.rot.uses(anim))
-          {
-            float x, y, z;
+          t_curve_x->KeyModifyBegin();
+          int key_index = t_curve_x->KeyAdd(time);
+          t_curve_x->KeySetValue(key_index, v.x * SCALE_FACTOR);
+          t_curve_x->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          t_curve_x->KeyModifyEnd();
 
-            Quaternion q = bone.rot.getValue(anim, t);
+          t_curve_y->KeyModifyBegin();
+          key_index = t_curve_y->KeyAdd(time);
+          t_curve_y->KeySetValue(key_index, v.y * SCALE_FACTOR);
+          t_curve_y->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          t_curve_y->KeyModifyEnd();
 
-           // LOG_INFO << "B q =" << q.w << q.x << q.y << q.z;
-            //q = m.GetQuaternion();
-            //LOG_INFO << "A q =" << q.w << q.x << q.y << q.z;
+          t_curve_z->KeyModifyBegin();
+          key_index = t_curve_z->KeyAdd(time);
+          t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
+          t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          t_curve_z->KeyModifyEnd();
+        }
 
-            FbxQuaternion quat(q.x, q.y, q.z, q.w);
-            FbxVector4 angle = quat.DecomposeSphericalXYZ();
+        if (rot)
+        {
+          float x, y, z;
 
-            x = angle[0];
-            y = angle[1];
-            z = angle[2];
+          Quaternion q = bone.rot.getValue(anim, t);
+          Quaternion tq;
+          tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
 
-            r_curve_x->KeyModifyBegin();
-            int key_index = r_curve_x->KeyAdd(time);
-            r_curve_x->KeySetValue(key_index,-x);
-            r_curve_x->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            r_curve_x->KeyModifyEnd();
+          Vec3D rot = tq.toEulerXYZ();
 
-            r_curve_y->KeyModifyBegin();
-            key_index = r_curve_y->KeyAdd(time);
-            r_curve_y->KeySetValue(key_index,-y);
-            r_curve_y->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            r_curve_y->KeyModifyEnd();
+          x = rot.x * -(180.0f / PI);
+          y = rot.y * -(180.0f / PI);
+          z = rot.z * -(180.0f / PI);
 
-            r_curve_z->KeyModifyBegin();
-            key_index = r_curve_z->KeyAdd(time);
-            r_curve_z->KeySetValue(key_index,-z);
-            r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            r_curve_z->KeyModifyEnd();
-          }
+          r_curve_x->KeyModifyBegin();
+          int key_index = r_curve_x->KeyAdd(time);
+          r_curve_x->KeySetValue(key_index,x);
+          r_curve_x->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          r_curve_x->KeyModifyEnd();
 
-          if (bone.scale.uses(anim))
-          {
-            Vec3D v = bone.scale.getValue(anim, t);
+          r_curve_y->KeyModifyBegin();
+          key_index = r_curve_y->KeyAdd(time);
+          r_curve_y->KeySetValue(key_index,y);
+          r_curve_y->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          r_curve_y->KeyModifyEnd();
 
-            s_curve_x->KeyModifyBegin();
-            int key_index = s_curve_x->KeyAdd(time);
-            s_curve_x->KeySetValue(key_index, v.x);
-            s_curve_x->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            s_curve_x->KeyModifyEnd();
+          r_curve_z->KeyModifyBegin();
+          key_index = r_curve_z->KeyAdd(time);
+          r_curve_z->KeySetValue(key_index,z);
+          r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          r_curve_z->KeyModifyEnd();
+        }
 
-            s_curve_y->KeyModifyBegin();
-            key_index = s_curve_y->KeyAdd(time);
-            s_curve_y->KeySetValue(key_index, v.y);
-            s_curve_y->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            s_curve_y->KeyModifyEnd();
+        if (scale)
+        {
+          Vec3D v = bone.scale.getValue(anim, t);
 
-            s_curve_z->KeyModifyBegin();
-            key_index = s_curve_z->KeyAdd(time);
-            s_curve_z->KeySetValue(key_index, v.z);
-            s_curve_z->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-            s_curve_z->KeyModifyEnd();
-          }
+          s_curve_x->KeyModifyBegin();
+          int key_index = s_curve_x->KeyAdd(time);
+          s_curve_x->KeySetValue(key_index, v.x);
+          s_curve_x->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          s_curve_x->KeyModifyEnd();
+
+          s_curve_y->KeyModifyBegin();
+          key_index = s_curve_y->KeyAdd(time);
+          s_curve_y->KeySetValue(key_index, v.y);
+          s_curve_y->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          s_curve_y->KeyModifyEnd();
+
+          s_curve_z->KeyModifyBegin();
+          key_index = s_curve_z->KeyAdd(time);
+          s_curve_z->KeySetValue(key_index, v.z);
+          s_curve_z->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+          s_curve_z->KeyModifyEnd();
         }
       }
     }
@@ -534,6 +504,8 @@ void FBXExporter::createMaterials()
 
 bool FBXExporter::exportModel(Model * model, std::string target)
 {
+  reset();
+
   m_p_model = dynamic_cast<WoWModel *>(model);
 
   if(!m_p_model)
@@ -576,6 +548,10 @@ bool FBXExporter::exportModel(Model * model, std::string target)
     return false;
   }
   LOG_INFO << "FBX SDK scene successfully created";
+
+  //UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded)
+  FbxAxisSystem openglSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd , FbxAxisSystem::eRightHanded);
+  openglSystem.ConvertScene(m_p_scene);
 
   // export main model mesh
   try
@@ -637,15 +613,17 @@ void FBXExporter::reset()
 {
   if(m_p_manager)
     m_p_manager->Destroy();
+
   m_p_manager = 0;
 
-  if(m_p_scene)
-    m_p_scene->Destroy();
+  // scene is destroyed by manager's destroy call
   m_p_scene = 0;
 
   m_p_model = 0;
   m_p_meshNode = 0;
 
   m_filename = "";
+
+  m_boneNodes.clear();
   m_texturesToExport.clear();
 }

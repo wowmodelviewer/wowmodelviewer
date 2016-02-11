@@ -246,6 +246,15 @@ public:
 		return q;
 	}
 
+	Vec3D GetTranslation() {
+	  return Vec3D(m[0][3], m[1][3], m[2][3]);
+	}
+
+	Vec3D GetScale() {
+	  return Vec3D(m[0][0], m[1][1], m[2][2]);
+	}
+
+
 	float determinant() const
 	{
 		#define SUB(a,b) (m[2][a]*m[3][b] - m[3][a]*m[2][b])

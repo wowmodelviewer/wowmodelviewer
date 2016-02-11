@@ -9,6 +9,8 @@
 
 #include "GL/glew.h"
 
+#include "logger/logger.h"
+
 void Bone::calcMatrix(Bone *allbones, ssize_t anim, size_t time, bool rotate)
 {
 	if (calc)
@@ -81,7 +83,6 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<Gam
 	parent = b.parent;
 	pivot = fixCoordSystem(b.pivot);
 	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
-	//billboard = false;
 
 	boneDef = b;
 

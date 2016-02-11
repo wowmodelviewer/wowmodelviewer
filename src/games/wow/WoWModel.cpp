@@ -179,7 +179,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 
 	LOG_INFO << "Loading model:" << tempname << "size:" << file->getSize();
 
-	displayHeader(header);
+	//displayHeader(header);
 
 	if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0') {
 		LOG_ERROR << "Invalid model!  May be corrupted.";
