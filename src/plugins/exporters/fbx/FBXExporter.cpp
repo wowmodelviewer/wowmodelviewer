@@ -540,6 +540,8 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   }
   LOG_INFO << "FBX SDK exporter successfully created";
 
+  // make file compatible with older fbx versions
+  exporter->SetFileExportVersion(FBX_2014_00_COMPATIBLE);
 
   m_p_scene = FbxScene::Create(m_p_manager, "My Scene");
   if(!m_p_scene)
@@ -550,8 +552,8 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   LOG_INFO << "FBX SDK scene successfully created";
 
   //UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded)
-  FbxAxisSystem openglSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd , FbxAxisSystem::eRightHanded);
-  openglSystem.ConvertScene(m_p_scene);
+  //FbxAxisSystem openglSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd , FbxAxisSystem::eRightHanded);
+  //openglSystem.ConvertScene(m_p_scene);
 
   // export main model mesh
   try
