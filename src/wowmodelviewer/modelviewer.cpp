@@ -2799,7 +2799,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	{
 	  if(!result->valid)
 	  {
-	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
+	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends with /simple or /advanced and does not contains any special character."),wxT("Bad Armory Link"));
 	    return;
 	  }
 	  // retrieve race name from DB

@@ -76,7 +76,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
 {
   wxInitialize();
 
-  CharInfos * result = NULL;
+  CharInfos * result = new CharInfos();
   wxJSONValue root;
 
   int readStatus = readJSONValues(CHARACTER,url,root);
@@ -84,7 +84,6 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
   if (readStatus == 0 && root.Size() != 0)
   {
     // No Gathering Errors Detected.
-    result = new CharInfos();
     result->equipment.resize(NUM_CHAR_SLOTS);
 
     // Gather Race & Gender
@@ -242,12 +241,8 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
       }
     }
     wxUninitialize();
+    result->valid = true;
   }
-
-  result->valid = true;
-
-  if(readStatus == 2) // malformed url, cascade to main app to display a pop up...
-  	result->valid = false;
 
   return result;
 }
