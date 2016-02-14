@@ -234,9 +234,28 @@ void FBXExporter::createSkeleton()
     }
   }
 
+  // filter out bones without any vertex attached
+  size_t num_of_vertices = m_p_model->header.nVertices;
+  std::vector<bool> has_vertex;
+  has_vertex.resize(num_of_bones);
+
+  for (size_t i = 0; i < num_of_vertices; i++)
+  {
+    ModelVertex& vertex = m_p_model->origVertices[i];
+    for (size_t j = 0; j < 4; j++)
+    {
+      if ((vertex.bones[j] == 0) && (vertex.weights[j] == 0))
+        continue;
+      has_vertex[vertex.bones[j]] = true;
+    }
+  }
+
   // Create bone.
   for (size_t i = 0; i < num_of_bones; ++i)
   {
+    if(!has_vertex[i] && !has_children[i])
+      continue;
+
     Bone &bone = m_p_model->bones[i];
     Vec3D trans = bone.pivot;
 
@@ -249,7 +268,7 @@ void FBXExporter::createSkeleton()
     bone_name += static_cast<int>(i);
 
     FbxNode* skeleton_node = FbxNode::Create(m_p_scene, bone_name);
-    m_boneNodes.push_back(skeleton_node);
+    m_boneNodes[i] = skeleton_node;
     skeleton_node->LclTranslation.Set(FbxVector4(trans.x * SCALE_FACTOR, trans.y * SCALE_FACTOR, trans.z * SCALE_FACTOR));
 
     FbxSkeleton* skeleton_attribute = FbxSkeleton::Create(m_p_scene, bone_name);
@@ -282,10 +301,10 @@ void FBXExporter::createSkeleton()
     cluster->SetTransformMatrix(matrix);
     matrix = skeleton_node->EvaluateGlobalTransform();
     cluster->SetTransformLinkMatrix(matrix);
-    skin->AddCluster(bone_clusters[i]);
+    skin->AddCluster(cluster);
   }
 
-  size_t num_of_vertices = m_p_model->header.nVertices;
+  num_of_vertices = m_p_model->header.nVertices;
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex& vertex = m_p_model->origVertices[i];
@@ -311,13 +330,14 @@ void FBXExporter::createAnimations()
   std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
   for (unsigned int anim=0; anim<m_p_model->header.nAnimations; anim++)
   {
-    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), m_p_model->anims[anim].animID) == m_animsToExport.end())
+    ModelAnimation cur_anim = m_p_model->anims[anim];
+    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.animID) == m_animsToExport.end())
       continue;
 
     std::stringstream ss;
-    ss << animsMap[m_p_model->anims[anim].animID];
+    ss << animsMap[cur_anim.animID];
     ss << " [";
-    ss << anim;
+    ss << cur_anim.Index;
     ss << "]";
 
     std::string anim_name =  ss.str();
@@ -327,22 +347,26 @@ void FBXExporter::createAnimations()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
     anim_stack->AddMember(anim_layer);
 
-    uint32 timeInc = (m_p_model->anims[anim].timeEnd - m_p_model->anims[anim].timeStart)/60;
+    uint32 timeInc = (cur_anim.timeEnd - cur_anim.timeStart)/60;
 
     FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
 
-    for(uint32 t = m_p_model->anims[anim].timeStart ; t < m_p_model->anims[anim].timeEnd ; t += timeInc)
+    for(uint32 t = cur_anim.timeStart ; t < cur_anim.timeEnd ; t += timeInc)
     {
       FbxTime time;
       time.SetSecondDouble((float)t / 1000.0);
 
-      for (unsigned int b = 0; b < m_p_model->header.nBones; b++)
+      for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
+          it != m_boneNodes.end();
+          ++it)
+
       {
+        int b = it->first;
         Bone& bone = m_p_model->bones[b];
 
-        bool rot = bone.rot.uses(anim);
-        bool scale = bone.scale.uses(anim);
-        bool trans = bone.trans.uses(anim);
+        bool rot = bone.rot.uses(cur_anim.Index);
+        bool scale = bone.scale.uses(cur_anim.Index);
+        bool trans = bone.trans.uses(cur_anim.Index);
 
         if(!rot && !scale && !trans) // bone is not animated, skip it
           continue;
@@ -359,7 +383,7 @@ void FBXExporter::createAnimations()
 
         if (trans)
         {
-          Vec3D v = bone.trans.getValue(anim,t);
+          Vec3D v = bone.trans.getValue(cur_anim.Index,t);
 
           if (bone.parent != -1)
           {
@@ -390,7 +414,7 @@ void FBXExporter::createAnimations()
         {
           float x, y, z;
 
-          Quaternion q = bone.rot.getValue(anim, t);
+          Quaternion q = bone.rot.getValue(cur_anim.Index, t);
           Quaternion tq;
           tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
 
@@ -421,7 +445,7 @@ void FBXExporter::createAnimations()
 
         if (scale)
         {
-          Vec3D v = bone.scale.getValue(anim, t);
+          Vec3D v = bone.scale.getValue(cur_anim.Index, t);
 
           s_curve_x->KeyModifyBegin();
           int key_index = s_curve_x->KeyAdd(time);
@@ -550,6 +574,14 @@ bool FBXExporter::exportModel(Model * model, std::string target)
     return false;
   }
   LOG_INFO << "FBX SDK scene successfully created";
+
+  // add some info to exported scene
+  FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager,"SceneInfo");
+  sceneInfo->mTitle = m_p_model->name().toStdString().c_str();
+  sceneInfo->mAuthor = GLOBALSETTINGS.appName().c_str();
+  sceneInfo->mRevision = GLOBALSETTINGS.appVersion().c_str();
+  m_p_scene->SetSceneInfo(sceneInfo);
+
 
   //UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded)
   //FbxAxisSystem openglSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd , FbxAxisSystem::eRightHanded);
