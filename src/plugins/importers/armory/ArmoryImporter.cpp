@@ -363,15 +363,17 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       wxString strDomain = strURL.Mid(7).BeforeFirst('/');
       wxString strPage = strURL.Mid(7).Mid(strDomain.Len());
 
+      wxString Region = strDomain.BeforeFirst('.');
+
       wxString strp = strPage.BeforeLast('/');	// No simple/advanced
       wxString CharName = strp.AfterLast('/');
       strp = strp.BeforeLast('/');				// Update strp
       wxString Realm = strp.AfterLast('/');
 
-      LOG_INFO << "Loading Battle.Net Armory. Site: " << strDomain.c_str() << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
+      LOG_INFO << "Loading Battle.Net Armory. Region: " << Region << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
 
-      apiPage = wxT("http://") + strDomain;
-      apiPage << wxT("/api/wow/character/") << Realm << wxT('/') << CharName << wxT("?fields=appearance,items,guild");
+      apiPage = wxT("http://wowmodelviewer.net/armory.php?region=");
+      apiPage << Region << "&realm=" << Realm << "&char=" << CharName;
       break;
     }
     case ITEM:
