@@ -95,13 +95,8 @@ std::string FBXExporter::fileSaveFilter() const
 // Create mesh.
 void FBXExporter::createMesh()
 {
-  // Get the scene��s root node.
-  FbxNode* root_node = m_p_scene->GetRootNode();
   // Create a node for the mesh.
   m_p_meshNode = FbxNode::Create(m_p_manager, m_p_model->name().toStdString().c_str());
-
-  // Set the node as a child of the scene��s root node.
-  root_node->AddChild(m_p_meshNode);
 
   // Create mesh.
   size_t num_of_vertices = m_p_model->header.nVertices;
@@ -188,20 +183,12 @@ void FBXExporter::createMesh()
 
 void FBXExporter::createSkeleton()
 {
-  // Get the scene��s root node.
-  FbxNode* root_node = m_p_scene->GetRootNode();
-
-  FbxNode* bone_group_node = FbxNode::Create(m_p_scene, m_p_model->name().toStdString().c_str());
+  m_p_skeletonNode = FbxNode::Create(m_p_scene, m_p_model->name().toStdString().c_str());
   FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(m_p_scene, "");
   bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
   bone_group_skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
-  bone_group_node->SetNodeAttribute(bone_group_skeleton_attribute);
-  root_node->AddChild(bone_group_node);
-  FbxAMatrix matrix;
+  m_p_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
 
-  FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
-
-  std::vector<FbxCluster*> bone_clusters;
   std::vector<FbxSkeleton::EType> bone_types;
   size_t num_of_bones = m_p_model->header.nBones;
 
@@ -277,7 +264,7 @@ void FBXExporter::createSkeleton()
     if (bone_types[i] == FbxSkeleton::eRoot)
     {
       skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
-      bone_group_node->AddChild(skeleton_node);
+      m_p_skeletonNode->AddChild(skeleton_node);
     }
     else if (bone_types[i] == FbxSkeleton::eLimb)
     {
@@ -291,20 +278,45 @@ void FBXExporter::createSkeleton()
     }
 
     skeleton_node->SetNodeAttribute(skeleton_attribute);
+  }
+}
 
+void FBXExporter::linkMeshAndSkeleton()
+{
+  std::vector<FbxCluster*> bone_clusters;
+
+  // create clusters
+  for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
+            it != m_boneNodes.end();
+            ++it)
+  {
     FbxCluster* cluster = FbxCluster::Create(m_p_scene, "");
     bone_clusters.push_back(cluster);
-    cluster->SetLink(skeleton_node);
+    cluster->SetLink(it->second);
     cluster->SetLinkMode(FbxCluster::eTotalOne);
-
-    matrix = m_p_meshNode->EvaluateGlobalTransform();
-    cluster->SetTransformMatrix(matrix);
-    matrix = skeleton_node->EvaluateGlobalTransform();
-    cluster->SetTransformLinkMatrix(matrix);
-    skin->AddCluster(cluster);
   }
 
-  num_of_vertices = m_p_model->header.nVertices;
+  // set initial matrices
+  FbxAMatrix matrix = m_p_meshNode->EvaluateGlobalTransform();
+  for(std::vector<FbxCluster*>::iterator it = bone_clusters.begin() ;
+              it != bone_clusters.end();
+              ++it)
+  {
+    (*it)->SetTransformMatrix(matrix);
+  }
+
+  // set link matrices
+  std::vector<FbxCluster*>::iterator clusterIt = bone_clusters.begin();
+  for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
+              it != m_boneNodes.end();
+              ++it, ++clusterIt)
+  {
+    matrix = it->second->EvaluateGlobalTransform();
+    (*clusterIt)->SetTransformLinkMatrix(matrix);
+  }
+
+  // define control points
+  size_t num_of_vertices = m_p_model->header.nVertices;
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex& vertex = m_p_model->origVertices[i];
@@ -316,7 +328,18 @@ void FBXExporter::createSkeleton()
     }
   }
 
-  skin->SetGeometry(m_p_meshNode->GetMesh());
+  // add cluster to skin
+  FbxGeometry* lPatchAttribute = (FbxGeometry*) m_p_meshNode->GetNodeAttribute();
+  FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
+
+  for(std::vector<FbxCluster*>::iterator it = bone_clusters.begin() ;
+      it != bone_clusters.end();
+      ++it)
+  {
+    skin->AddCluster(*it);
+  }
+
+  lPatchAttribute->AddDeformer(skin);
 }
 
 void FBXExporter::createAnimations()
@@ -583,21 +606,30 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   m_p_scene->SetSceneInfo(sceneInfo);
 
 
-  //UpVector = +Y, FrontVector = +Z, CoordSystem = +X (RightHanded)
-  //FbxAxisSystem openglSystem(FbxAxisSystem::eYAxis, FbxAxisSystem::eParityOdd , FbxAxisSystem::eRightHanded);
-  //openglSystem.ConvertScene(m_p_scene);
-
   // export main model mesh
+  // follow FBX SDK example (ExportScene01) for organization
   try
   {
     createMesh();
     LOG_INFO << "Mesh successfully created";
+
     createMaterials();
     LOG_INFO << "Materials successfully created";
+
     createSkeleton();
     LOG_INFO << "Skeleton successfully created";
+
+    // add all those things to the scene
+    FbxNode* root_node = m_p_scene->GetRootNode();
+    root_node->AddChild(m_p_meshNode);
+    root_node->AddChild(m_p_skeletonNode);
+
+    linkMeshAndSkeleton();
+
     createAnimations();
     LOG_INFO << "Animations successfully created";
+
+
   }
   catch(const std::exception& ex)
   {
@@ -655,6 +687,7 @@ void FBXExporter::reset()
 
   m_p_model = 0;
   m_p_meshNode = 0;
+  m_p_skeletonNode = 0;
 
   m_filename = "";
 

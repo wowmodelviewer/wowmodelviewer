@@ -104,6 +104,7 @@ class FBXExporter : public QObject, public ExporterPlugin
     void createMesh();
     void createSkeleton();
     void createAnimations();
+    void linkMeshAndSkeleton();
     void reset();
 
 
@@ -112,6 +113,7 @@ class FBXExporter : public QObject, public ExporterPlugin
     FbxScene   * m_p_scene;
     WoWModel   * m_p_model;
     FbxNode    * m_p_meshNode;
+    FbxNode    * m_p_skeletonNode;
 
     std::string m_filename;
     std::map<int,FbxNode*> m_boneNodes;
