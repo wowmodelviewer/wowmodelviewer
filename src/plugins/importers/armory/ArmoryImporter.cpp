@@ -387,13 +387,12 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       // for the sake of simplicity, only handle english name for now
 
       wxString strURL(url);
-      wxString strDomain = strURL.Mid(7).BeforeFirst('/');
       wxString itemNumber = strURL.Mid(7).AfterLast('/');
 
-      LOG_INFO << "Loading Battle.Net Armory. Site: " << strDomain.c_str() << ", Item: " << itemNumber.c_str();
+      LOG_INFO << "Loading Battle.Net Armory. Item: " << itemNumber.c_str();
 
-      apiPage = wxT("http://") + strDomain;
-      apiPage << wxT("/api/wow/item/") << itemNumber;
+      apiPage = wxT("http://wowmodelviewer.net/armory.php?item=");
+      apiPage << itemNumber;
 
       break;
     }
