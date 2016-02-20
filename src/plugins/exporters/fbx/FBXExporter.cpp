@@ -480,7 +480,8 @@ void FBXExporter::createAnimations()
   for (unsigned int anim=0; anim<m_p_model->header.nAnimations; anim++)
   {
     ModelAnimation cur_anim = m_p_model->anims[anim];
-    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.animID) == m_animsToExport.end())
+
+    if(std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.Index) == m_animsToExport.end())
       continue;
 
     std::stringstream ss;
@@ -711,4 +712,5 @@ void FBXExporter::reset()
 
   m_boneNodes.clear();
   m_texturesToExport.clear();
+  m_boneClusters.clear();
 }

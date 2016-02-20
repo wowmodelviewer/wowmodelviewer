@@ -2924,7 +2924,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for(unsigned int i = 0 ; i < selection.GetCount() ; i++)
-          animsToExport.push_back(canvas->model->anims[selection[i]].animID);
+          animsToExport.push_back(canvas->model->anims[selection[i]].Index);
 
         plugin->setAnimationsToExport(animsToExport);
 
