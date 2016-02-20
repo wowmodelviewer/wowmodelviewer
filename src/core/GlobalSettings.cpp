@@ -56,10 +56,10 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 8;
-  m_versionRevNumber = 3;
+  m_versionRevNumber = 4;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Archimonde will survive";
+  m_buildName = "Wain's edition";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -92,6 +92,7 @@ GlobalSettings::GlobalSettings()
     Thrall's revenge
     Trip in Draenor
     Christmas Edition ;)
+    Archimonde will survive
 
 
    */
