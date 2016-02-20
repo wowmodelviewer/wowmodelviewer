@@ -2244,6 +2244,7 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
 	info.AddDeveloper(wxT("Kjasi (A.K.A. Sephiroth3D)"));
 	info.AddDeveloper(wxT("Tob.Franke"));
 	info.AddDeveloper(wxT("Jeromnimo"));
+	info.AddDeveloper(wxT("Wain"));
 	info.AddTranslator(wxT("MadSquirrel (French)"));
 	info.AddTranslator(wxT("Tigurius (Deutsch)"));
 	info.AddTranslator(wxT("Kurax (Chinese)"));
