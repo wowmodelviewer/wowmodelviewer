@@ -51,13 +51,13 @@ void CASCFolder::initLocales()
   }
 
   std::string line, prevline;
+  std::string buildKey = "";
   std::map<std::string, std::string> buildKeys;
   // clean up any previously found locale
   m_localesFound.clear();
   while(!buildinfo.eof())
   {
     buildinfo >> line;
-    std::string buildKey = "";
 
     // find the build key for this locale
     if (!prevline.empty() && prevline.find("|0|") == std::string::npos &&
