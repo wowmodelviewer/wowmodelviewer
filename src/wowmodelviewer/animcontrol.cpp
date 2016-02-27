@@ -2,7 +2,7 @@
 
 #include <wx/wx.h>
 #include <algorithm>
-
+#include <wx/combobox.h>
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
 #include "Game.h"
@@ -16,134 +16,146 @@
 IMPLEMENT_CLASS(AnimControl, wxWindow)
 
 BEGIN_EVENT_TABLE(AnimControl, wxWindow)
-	EVT_COMBOBOX(ID_ANIM, AnimControl::OnAnim)
-	EVT_COMBOBOX(ID_ANIM_SECONDARY, AnimControl::OnAnim)
-	EVT_TEXT_ENTER(ID_ANIM_SECONDARY_TEXT, AnimControl::OnButton)
-	EVT_COMBOBOX(ID_ANIM_MOUTH, AnimControl::OnAnim)
+  EVT_COMBOBOX(ID_ANIM, AnimControl::OnAnim)
+  EVT_COMBOBOX(ID_ANIM_SECONDARY, AnimControl::OnAnim)
+  EVT_TEXT_ENTER(ID_ANIM_SECONDARY_TEXT, AnimControl::OnButton)
+  EVT_COMBOBOX(ID_ANIM_MOUTH, AnimControl::OnAnim)
 
-	EVT_COMBOBOX(ID_LOOPS, AnimControl::OnLoop)
-	EVT_COMBOBOX(ID_SKIN, AnimControl::OnSkin)
-	EVT_COMBOBOX(ID_ITEMSET, AnimControl::OnItemSet)
+  EVT_COMBOBOX(ID_LOOPS, AnimControl::OnLoop)
+  EVT_COMBOBOX(ID_SKIN, AnimControl::OnSkin)
+  EVT_COMBOBOX(ID_ITEMSET, AnimControl::OnItemSet)
 
-	EVT_COMBOBOX(ID_BLP_SKIN1, AnimControl::OnBLPSkin)
-	EVT_COMBOBOX(ID_BLP_SKIN2, AnimControl::OnBLPSkin)
-	EVT_COMBOBOX(ID_BLP_SKIN3, AnimControl::OnBLPSkin)
+  EVT_COMBOBOX(ID_BLP_SKIN1, AnimControl::OnBLPSkin)
+  EVT_COMBOBOX(ID_BLP_SKIN2, AnimControl::OnBLPSkin)
+  EVT_COMBOBOX(ID_BLP_SKIN3, AnimControl::OnBLPSkin)
 
-	EVT_CHECKBOX(ID_OLDSTYLE, AnimControl::OnCheck)
-	EVT_CHECKBOX(ID_ANIM_LOCK, AnimControl::OnCheck)
-	EVT_CHECKBOX(ID_ANIM_NEXT, AnimControl::OnCheck)
+  EVT_CHECKBOX(ID_OLDSTYLE, AnimControl::OnCheck)
+  EVT_CHECKBOX(ID_ANIM_LOCK, AnimControl::OnCheck)
+  EVT_CHECKBOX(ID_ANIM_NEXT, AnimControl::OnCheck)
 
-	EVT_BUTTON(ID_PLAY, AnimControl::OnButton)
-	EVT_BUTTON(ID_PAUSE, AnimControl::OnButton)
-	EVT_BUTTON(ID_STOP, AnimControl::OnButton)
-	EVT_BUTTON(ID_ADDANIM, AnimControl::OnButton)
-	EVT_BUTTON(ID_CLEARANIM, AnimControl::OnButton)
-	EVT_BUTTON(ID_PREVANIM, AnimControl::OnButton)
-	EVT_BUTTON(ID_NEXTANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_SHOW_BLP_SKINLIST, AnimControl::OnButton)
+  EVT_BUTTON(ID_PLAY, AnimControl::OnButton)
+  EVT_BUTTON(ID_PAUSE, AnimControl::OnButton)
+  EVT_BUTTON(ID_STOP, AnimControl::OnButton)
+  EVT_BUTTON(ID_ADDANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_CLEARANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_PREVANIM, AnimControl::OnButton)
+  EVT_BUTTON(ID_NEXTANIM, AnimControl::OnButton)
 
-	EVT_SLIDER(ID_SPEED, AnimControl::OnSliderUpdate)
-	EVT_SLIDER(ID_SPEED_MOUTH, AnimControl::OnSliderUpdate)
-	EVT_SLIDER(ID_FRAME, AnimControl::OnSliderUpdate)
+  EVT_SLIDER(ID_SPEED, AnimControl::OnSliderUpdate)
+  EVT_SLIDER(ID_SPEED_MOUTH, AnimControl::OnSliderUpdate)
+  EVT_SLIDER(ID_FRAME, AnimControl::OnSliderUpdate)
 END_EVENT_TABLE()
 
 AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 {
-	LOG_INFO << "Creating Anim Control...";
+  LOG_INFO << "Creating Anim Control...";
 
-	if(Create(parent, id, wxDefaultPosition, wxSize(700,120), 0, wxT("AnimControlFrame")) == false) {
-		wxMessageBox(wxT("Failed to create a window for our AnimControl!"), wxT("Error"));
-		LOG_ERROR << "Failed to create a window for our AnimControl!";
-		return;
-	}
+  if(Create(parent, id, wxDefaultPosition, wxSize(700,120), 0, wxT("AnimControlFrame")) == false)
+  {
+    wxMessageBox(wxT("Failed to create a window for our AnimControl!"), wxT("Error"));
+    LOG_ERROR << "Failed to create a window for our AnimControl!";
+    return;
+  }
 
-	const wxString strLoops[10] = {wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"), wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
+  const wxString strLoops[10] = { wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"),
+                                  wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
 	
-	animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,16), 0, NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation")); //|wxCB_SORT); //wxPoint(66,10)
-	animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,16), 0, NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary")); //|wxCB_SORT); //wxPoint(66,10)
-	animCList2->Enable(false);
-	animCList2->Show(false);
+  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,16), 0,
+                             NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation"));
+  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,16), 0,
+                             NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
+  animCList2->Enable(false);
+  animCList2->Show(false);
 
-	lockText = new wxTextCtrl(this, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxPoint(300, 64), wxSize(20, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
-	lockText->SetValue(wxString::Format(wxT("%d"), UPPER_BODY_BONES));
-	lockText->Enable(false);
-	lockText->Show(false);
+  lockText = new wxTextCtrl(this, ID_ANIM_SECONDARY_TEXT, wxEmptyString, wxPoint(300, 64),
+                            wxSize(20, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
+  lockText->SetValue(wxString::Format(wxT("%d"), UPPER_BODY_BONES));
+  lockText->Enable(false);
+  lockText->Show(false);
 
-	// Our hidden head/mouth related controls
-	animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170,95), wxSize(150,16), 0, NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary")); //|wxCB_SORT); //wxPoint(66,10)
-	animCList3->Enable(false);
-	animCList3->Show(false);
+  // Our hidden head/mouth related controls
+  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170,95), wxSize(150,16), 0,
+                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
+  animCList3->Enable(false);
+  animCList3->Show(false);
 
-	//btnPauseMouth = new wxButton(this, ID_PAUSE_MOUTH, wxT("Pause"), wxPoint(160,100), wxSize(45,20));
-	//btnPauseMouth->Show(false);
+  //btnPauseMouth = new wxButton(this, ID_PAUSE_MOUTH, wxT("Pause"), wxPoint(160,100), wxSize(45,20));
+  //btnPauseMouth->Show(false);
 
-	speedMouthLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(340,95), wxDefaultSize);
-	speedMouthLabel->Show(false);
+  speedMouthLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(340,95), wxDefaultSize);
+  speedMouthLabel->Show(false);
 
-	speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
-	speedMouthSlider->SetTickFreq(10, 1);
-	speedMouthSlider->Show(false);
+  speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
+  speedMouthSlider->SetTickFreq(10, 1);
+  speedMouthSlider->Show(false);
 
-	// ---
+  // ---
 
-	loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40,16), 10, strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops")); //|wxCB_SORT); //wxPoint(66,10)
-	btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
+  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40,16), 10,
+                            strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
+  btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
 
-	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170,10), wxSize(150,16), 0, NULL, wxCB_READONLY);
+  skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170,10), wxSize(150,16), 0, NULL, wxCB_READONLY);
   skinList->Show(false);
 
-	BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600,5), wxSize(150,16));
-	BLPSkinsLabel->Show(false);
+  BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600,5), wxSize(150,16));
+  BLPSkinsLabel->Show(false);
 
-	BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600,29), wxSize(30,16));
-	BLPSkinLabel1->Show(false);
-	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635,25), wxSize(150,16), 0, NULL, wxCB_READONLY);
-	BLPSkinList1->Show(false);
+  showBLPList = new wxButton(this, ID_SHOW_BLP_SKINLIST, _("Show skin list (LONG!)"), wxPoint(635,25), wxSize(150,22));
+  showBLPList->Show(false);
 
-	BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600,59), wxSize(30,16));
-	BLPSkinLabel2->Show(false);
-	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635,55), wxSize(150,16), 0, NULL, wxCB_READONLY);
-	BLPSkinList2->Show(false);
+  BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600,29), wxSize(30,16));
+  BLPSkinLabel1->Show(false);
+  BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635,25), wxSize(150,16), 0, NULL, wxCB_READONLY);
+  BLPSkinList1->Show(false);
 
-	BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600,89), wxSize(30,16));
-	BLPSkinLabel3->Show(false);
-	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,16), 0, NULL, wxCB_READONLY);
-	BLPSkinList3->Show(false);
+  BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600,59), wxSize(30,16));
+  BLPSkinLabel2->Show(false);
+  BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635,55), wxSize(150,16), 0, NULL, wxCB_READONLY);
+  BLPSkinList2->Show(false);
 
-	randomSkins = true;
-	defaultDoodads = true;
+  BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600,89), wxSize(30,16));
+  BLPSkinLabel3->Show(false);
+  BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,16), 0, NULL, wxCB_READONLY);
+  BLPSkinList3->Show(false);
 
-	wmoList = new wxComboBox(this, ID_ITEMSET, _("Item set"), wxPoint(220,10), wxSize(128,16), 0, NULL, wxCB_READONLY);
-	wmoList->Show(FALSE);
-	wmoLabel = new wxStaticText(this, -1, wxEmptyString, wxPoint(10,15), wxSize(192,16));
-	wmoLabel->Show(FALSE);
+  randomSkins = true;
+  defaultDoodads = true;
+  modelFolderChanged = true;
+  BLPListFilled = false;
 
-	speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
-	speedSlider->SetTickFreq(10, 1);
-	speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
+  wmoList = new wxComboBox(this, ID_ITEMSET, _("Item set"), wxPoint(220,10), wxSize(128,16), 0, NULL, wxCB_READONLY);
+  wmoList->Show(FALSE);
+  wmoLabel = new wxStaticText(this, -1, wxEmptyString, wxPoint(10,15), wxSize(192,16));
+  wmoLabel->Show(FALSE);
 
-	frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
-	frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
-	frameSlider->SetTickFreq(2, 1);
+  speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
+  speedSlider->SetTickFreq(10, 1);
+  speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
 
-	btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
-	btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
-	btnStop = new wxButton(this, ID_STOP, _("Stop"), wxPoint(115,40), wxSize(45,20));
+  frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
+  frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
+  frameSlider->SetTickFreq(2, 1);
+
+  btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
+  btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
+  btnStop = new wxButton(this, ID_STOP, _("Stop"), wxPoint(115,40), wxSize(45,20));
 	
-	btnClear = new wxButton(this, ID_CLEARANIM, _("Clear"), wxPoint(10,64), wxSize(45,20));
-	btnPrev = new wxButton(this, ID_PREVANIM, wxT("<<"), wxPoint(62,64), wxSize(45,20));
-	btnNext = new wxButton(this, ID_NEXTANIM, wxT(">>"), wxPoint(115,64), wxSize(45,20));
+  btnClear = new wxButton(this, ID_CLEARANIM, _("Clear"), wxPoint(10,64), wxSize(45,20));
+  btnPrev = new wxButton(this, ID_PREVANIM, wxT("<<"), wxPoint(62,64), wxSize(45,20));
+  btnNext = new wxButton(this, ID_NEXTANIM, wxT(">>"), wxPoint(115,64), wxSize(45,20));
 	
-	lockAnims = new wxCheckBox(this, ID_ANIM_LOCK, _("Lock Animations"), wxPoint(170,64), wxDefaultSize, 0);
-	bLockAnims = true;
-	lockAnims->SetValue(bLockAnims);
+  lockAnims = new wxCheckBox(this, ID_ANIM_LOCK, _("Lock Animations"), wxPoint(170,64), wxDefaultSize, 0);
+  bLockAnims = true;
+  lockAnims->SetValue(bLockAnims);
 
-	oldStyle = new wxCheckBox(this, ID_OLDSTYLE, _("Auto Animate"), wxPoint(170,40), wxDefaultSize, 0);
-	bOldStyle = true;
-	oldStyle->SetValue(bOldStyle);
-	nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(430,10), wxDefaultSize, 0);
-	bNextAnims = false;
-	nextAnims->SetValue(bNextAnims);
-
+  oldStyle = new wxCheckBox(this, ID_OLDSTYLE, _("Auto Animate"), wxPoint(170,40), wxDefaultSize, 0);
+  bOldStyle = true;
+  oldStyle->SetValue(bOldStyle);
+  nextAnims = new wxCheckBox(this, ID_ANIM_NEXT, _("Next Animations"), wxPoint(430,10), wxDefaultSize, 0);
+  bNextAnims = false;
+  nextAnims->SetValue(bNextAnims);
 }
 
 AnimControl::~AnimControl()
@@ -207,9 +219,27 @@ void AnimControl::UpdateModel(WoWModel *m)
   animCList3->Clear();
 
   skinList->Clear();
-  BLPSkinList1->Clear();
-  BLPSkinList2->Clear();
-  BLPSkinList3->Clear();
+
+  QString modelpath = GetModelFolder(m);
+  if (modelFolder != modelpath)  // new model is in different folder to old
+  {
+    modelFolderChanged = true;
+    BLPListFilled = false;
+    modelFolder = modelpath;
+    BLPskins.clear();
+    BLPSkinList1->Clear();
+    BLPSkinList2->Clear();
+    BLPSkinList3->Clear();
+  }
+  else
+  {
+    modelFolderChanged = false;
+    BLPSkinList1->SetSelection(wxNOT_FOUND);
+    BLPSkinList2->SetSelection(wxNOT_FOUND);
+    BLPSkinList3->SetSelection(wxNOT_FOUND);
+  }
+
+  showBLPList->Show(false);
   BLPSkinList1->Show(false);
   BLPSkinList2->Show(false);
   BLPSkinList3->Show(false);
@@ -357,6 +387,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	PCRList.clear();
 	animCList->Show(false);
 	skinList->Show(false);
+	showBLPList->Show(false);
 	BLPSkinList1->Show(false);
 	BLPSkinList2->Show(false);
 	BLPSkinList3->Show(false);
@@ -424,7 +455,12 @@ void AnimControl::SetSkinByDisplayID(int cdi)
       return;
     }
   }
-LOG_INFO << "No matching texture group found for cdi " << cdi;
+  LOG_ERROR << "No matching texture group found for cdi " << cdi;
+}
+
+QString AnimControl::GetModelFolder(WoWModel *m)
+{
+  return QString(m->itemName().toStdString().c_str()).section(MPQ_SLASH, 0, -2) + MPQ_SLASH;
 }
 
 Vec4D AnimControl::fromARGB(int color)
@@ -442,12 +478,15 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   int numPCRs = 0;
 
   std::set<GameFile *> alreadyUsedTextures;
-  TextureSet skins, BLPskins;
+  TextureSet skins;
 
   // see if this model has skins
   LOG_INFO << "Searching skins for" << m->itemName();
 
   wxString fn = m->itemName().toStdString().c_str();
+  fn.MakeLower();
+
+  wxString modelname = fn.AfterLast(SLASH);
 
   // remove extension
   fn = fn.BeforeLast(wxT('.'));
@@ -456,8 +495,8 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                           "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
                           "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                           "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID "
-                          "WHERE FileData.name LIKE \"%1\"")
-                          .arg( wxString(m->itemName().toStdString().c_str()).AfterLast(SLASH).c_str());
+                          "WHERE FileData.name = \"%1\" COLLATE NOCASE")
+                          .arg( modelname.c_str());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   PCRList.clear();
@@ -479,6 +518,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       }
       int cdi = r.values[i][5].toInt();
       grp.base = TEXTURE_GAMEOBJECT1;
+      grp.definedTexture = true;
       grp.count = count;
       int pci = r.values[i][4].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
@@ -514,42 +554,61 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
   // Search the model's directory for all BLPs:
-  std::set<GameFile *> files;
   std::vector<GameFile *> folderFiles;
-  wxString modelpath = wxString(m->itemName().toStdString().c_str());
-  modelpath = modelpath.BeforeLast(MPQ_SLASH) + MPQ_SLASH;
-  modelpath = modelpath.Lower();
 
   // get all files in the model's folder:
-  GAMEDIRECTORY.getFilesForFolder(folderFiles, QString::fromStdString(modelpath.mb_str()));
-  // remove all files that aren't BLPs:
-  auto newend = std::remove_if(folderFiles.begin(), folderFiles.end(),
-                               [](GameFile * ff) { return ! ff->fullname().endsWith(".blp", Qt::CaseInsensitive); });
-  folderFiles.erase(newend, folderFiles.end());
-
+  GAMEDIRECTORY.getFilesForFolder(folderFiles, modelFolder, ".blp");
   // Add folder textures to main skin list only if :
-  // - We didn't find any texures in the database
-  // - We found textures but the model only requires 1 texture
-  // (Models will look bad in they require multiple textures but only one is set)
-  int numConfigSkins = m->canSetTextureFromFile(1) + m->canSetTextureFromFile(2) + m->canSetTextureFromFile(3);
+  // - We didn't find any texures in the displayInfo database
+  // - Or we found textures but the model only requires 1 texture at a time
+  // (Models will look bad if they require multiple textures but only one is set)
+  int numConfigSkins = m->canSetTextureFromFile(TEXTURE_GAMEOBJECT1) +
+                       m->canSetTextureFromFile(TEXTURE_GAMEOBJECT2) +
+                       m->canSetTextureFromFile(TEXTURE_GAMEOBJECT3);
   if (folderFiles.begin() != folderFiles.end())
   {
-    TextureGroup grp;
-    grp.base = TEXTURE_GAMEOBJECT1;
-    grp.count = 1;
     for (std::vector<GameFile *>::iterator it = folderFiles.begin(); it != folderFiles.end(); ++it)
     {
+      TextureGroup grp;
+      grp.base = TEXTURE_GAMEOBJECT1;
+      grp.count = 1;
       GameFile * tex = *it;
       grp.tex[0] =  tex;
-      BLPskins.insert(grp);
+      grp.definedTexture = false;
+      if (modelFolderChanged)
+        BLPskins.insert(grp);
       // append to main list only if not already included as part of database-defined textures:
       if ((numConfigSkins == 1) &&
           (std::find(alreadyUsedTextures.begin(), alreadyUsedTextures.end(), tex) ==
-           alreadyUsedTextures.end()))
-      {
+           alreadyUsedTextures.end()) &&
+          (std::find(skins.begin(), skins.end(), grp) == skins.end()))
         skins.insert(grp);
-      }
     }
+  }
+
+  if ((!BLPListFilled || modelFolderChanged) && !BLPskins.empty())
+    FillBLPSkinSelector(BLPskins);
+
+  // Creatures can have 1-3 textures that can be taken from game files.
+  // But it varies from model to model which of the three textures can
+  // be set this way.
+  if (m->canSetTextureFromFile(TEXTURE_GAMEOBJECT1))
+  {
+    BLPSkinList1->Show(true);
+    BLPSkinLabel1->Show(true);
+    BLPSkinsLabel->Show(true);
+  }
+  if (m->canSetTextureFromFile(TEXTURE_GAMEOBJECT2))
+  {
+    BLPSkinList2->Show(true);
+    BLPSkinLabel2->Show(true);
+    BLPSkinsLabel->Show(true);
+  }
+  if (m->canSetTextureFromFile(TEXTURE_GAMEOBJECT3))
+  {
+    BLPSkinList3->Show(true);
+    BLPSkinLabel3->Show(true);
+    BLPSkinsLabel->Show(true);
   }
 
   bool ret = false;
@@ -567,31 +626,6 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       int mySkin = randomSkins ? randint(0, (int)count-1) : 0;
       SetSkin(mySkin);
     }
-  }
-
-  if (!BLPskins.empty())
-    FillBLPSkinSelector(BLPskins);
-
-  // Creatures can have 1-3 textures that can be taken from game files.
-  // But it varies from model to model which of the three textures can
-  // be set this way.
-  if (m->canSetTextureFromFile(1))
-  {
-    BLPSkinList1->Show(true);
-    BLPSkinLabel1->Show(true);
-    BLPSkinsLabel->Show(true);
-  }
-  if (m->canSetTextureFromFile(2))
-  {
-    BLPSkinList2->Show(true);
-    BLPSkinLabel2->Show(true);
-    BLPSkinsLabel->Show(true);
-  }
-  if (m->canSetTextureFromFile(3))
-  {
-    BLPSkinList3->Show(true);
-    BLPSkinLabel3->Show(true);
-    BLPSkinsLabel->Show(true);
   }
 
   return ret;
@@ -618,7 +652,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   // just get the file name, exclude the path.
   fn = fn.AfterLast(MPQ_SLASH);
-	
+
   // query textures for model1
   QString query= QString("SELECT DISTINCT path, name, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                          "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID "
@@ -632,6 +666,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     {
       TextureGroup grp;
       grp.base = TEXTURE_ITEM;
+      grp.definedTexture = true;
       grp.count = 1;
       GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
       alreadyUsedTextures.insert(tex);
@@ -679,6 +714,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     {
       TextureGroup grp;
       grp.base = TEXTURE_ITEM;
+      grp.definedTexture = true;
       grp.count = 1;
       GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
       alreadyUsedTextures.insert(tex);
@@ -715,17 +751,18 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
-  // get all blp files that corresponds to the model
+  // get all blp files that correspond to the model
   std::set<GameFile *> files;
 
   QString filterString = m->itemName().mid(m->itemName().lastIndexOf("\\")+1);
-  filterString = "^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
+  filterString = "(?i)^.*" + filterString.left(filterString.lastIndexOf(".")) + ".*\\.blp";
   GAMEDIRECTORY.getFilteredFiles(files, filterString);
 
   if (files.size() != 0)
   {
     TextureGroup grp;
     grp.base = TEXTURE_ITEM;
+    grp.definedTexture = false;
     grp.count = 1;
     for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
     {
@@ -739,6 +776,52 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       }
     }
   }
+
+  // Search the model's directory for all BLPs to add to secondary "BLPskins" selector:
+  std::vector<GameFile *> folderFiles;
+
+  // get all files in the model's folder:
+  GAMEDIRECTORY.getFilesForFolder(folderFiles, modelFolder, ".blp");
+
+  if (folderFiles.begin() != folderFiles.end())
+  {
+    for (std::vector<GameFile *>::iterator it = folderFiles.begin(); it != folderFiles.end(); ++it)
+    {
+      TextureGroup grp;
+      grp.base = TEXTURE_ITEM;
+      grp.count = 1;
+      GameFile * tex = *it;
+      grp.tex[0] =  tex;
+      grp.definedTexture = false;
+      if (modelFolderChanged)
+        BLPskins.insert(grp);
+    }
+  }
+
+  // Creatures can have 1-3 textures that can be taken from game files.
+  // But it varies from model to model which of the three textures can
+  // be set this way.
+  if (m->canSetTextureFromFile(TEXTURE_ITEM))
+  {
+    // if there's loads of skins in the folder then filling the selector becomes slow and
+    // costly, so instead show a button to give users the option of filling the selector:
+    if (modelFolderChanged && BLPskins.size() > 50)
+    {
+      BLPSkinsLabel->Show(true);
+      BLPSkinLabel1->Show(true);
+      showBLPList->Show(true);
+    }
+    else if (!BLPskins.empty())
+    {
+      BLPSkinsLabel->Show(true);
+      if (modelFolderChanged || !BLPListFilled)
+        FillBLPSkinSelector(BLPskins, true);
+      BLPSkinList1->Show(true);
+      BLPSkinLabel1->Show(true);
+      BLPSkinsLabel->Show(true);
+    }
+  }
+
   bool ret = false;
 
   if (!skins.empty())
@@ -757,50 +840,129 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   return ret;
 }
 
+void AnimControl::ActivateBLPSkinList()
+{
+  if (!BLPskins.empty())
+  {
+    showBLPList->Show(false);
+    FillBLPSkinSelector(BLPskins, true);
+    BLPSkinList1->Show(true);
+    SyncBLPSkinList();
+  }
+}
+
+void AnimControl::SyncBLPSkinList()
+{
+  BLPSkinList1->SetSelection(wxNOT_FOUND);
+  BLPSkinList2->SetSelection(wxNOT_FOUND);
+  BLPSkinList3->SetSelection(wxNOT_FOUND);
+
+  // Configure BLPSkinLists (single skin selectors) to show same skins as the main texture selector, if possible
+  std::vector<wxString> currTextures(3);
+
+  int sel = skinList->GetSelection();
+  if (sel < 0) // model not currently using a proper texture set, possibly custom
+    return;
+  TextureGroup *grp = (TextureGroup*) skinList->GetClientData(sel);
+
+
+  for (size_t i = 0; i < 3; i++)
+  {
+    wxString texname;
+    GameFile * tex = grp->tex[i];
+    if (tex)
+    {
+      texname = tex->fullname().toStdString().c_str();
+      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+    }
+    currTextures[i] = texname;
+  }
+
+  // Set BLPSkinLists (single skin selector menus) to the same textures, if possible:
+  if (BLPListFilled && BLPskins.size() > 0)
+  {
+    int num = 0;
+    // fill our skin selector
+    for (TextureSet::iterator it = BLPskins.begin(); it != BLPskins.end(); ++it)
+    {
+      GameFile * tex = it->tex[0];
+      wxString texname = tex->fullname().toStdString().c_str();
+      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      if (texname == currTextures[0])
+        BLPSkinList1->SetSelection(num);
+      if (texname == currTextures[1])
+        BLPSkinList2->SetSelection(num);
+      if (texname == currTextures[2])
+        BLPSkinList3->SetSelection(num);
+      num++;
+    }
+  }
+}
 
 bool AnimControl::FillSkinSelector(TextureSet &skins)
 {
-	if (skins.size() > 0) {
-		int num = 0;
-		// fill our skin selector
-		for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it) {
-			GameFile * tex = it->tex[0];
-			wxString texname = tex->fullname().toStdString().c_str();
-			skinList->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-			LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillSkinSelector.";
-			g_selModel->TextureList.push_back(tex);
-			TextureGroup *grp = new TextureGroup(*it);
-			skinList->SetClientData(num++, grp);
-		}
+  if (skins.size() < 1)
+    return false;
 
-		bool ret = (skins.size() > 0);
-		//skins.clear();
-		return ret;
-	} else 
-		return false;
+  int num = 0;
+  // fill our skin selector
+  for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it)
+  {
+    GameFile * tex = it->tex[0];
+    wxString texname = tex->fullname().toStdString().c_str();
+    wxString selectorName = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+    if (it->definedTexture)
+      selectorName.MakeUpper();
+    skinList->Append(selectorName);
+    LOG_INFO << "TextureList[" << g_selModel->TextureList.size() << "] : added " 
+             << texname.c_str() << " via FillSkinSelector";
+    g_selModel->TextureList.push_back(tex);
+    TextureGroup *grp = new TextureGroup(*it);
+    skinList->SetClientData(num++, grp);
+  }
+
+  bool ret = (skins.size() > 0);
+  //skins.clear();
+  return ret;
 }
 
-bool AnimControl::FillBLPSkinSelector(TextureSet &skins)
+bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
 {
+  BLPListFilled = true;
+
   if (skins.size() > 0)
   {
+    BLPSkinList1->Freeze();
+    BLPSkinList2->Freeze();
+    BLPSkinList3->Freeze();
     int num = 0;
     // fill our skin selector
     for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it)
     {
       GameFile * tex = it->tex[0];
       wxString texname = tex->fullname().toStdString().c_str();
-      BLPSkinList1->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-      BLPSkinList2->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-      BLPSkinList3->Append(texname.AfterLast(MPQ_SLASH).BeforeLast('.'));
-      LOG_INFO << "Added" << texname.c_str() << "to the TextureList[" << g_selModel->TextureList.size() << "] via FillBLPSkinSelector.";
+      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      if (!item)
+        LOG_INFO << "TextureList[" << g_selModel->TextureList.size() << "] : added "
+                 << texname.c_str() << " via FillBLPSkinSelector";
       g_selModel->TextureList.push_back(tex);
       TextureGroup *grp = new TextureGroup(*it);
+
+      BLPSkinList1->Append(texname);
       BLPSkinList1->SetClientData(num, grp);
-      BLPSkinList2->SetClientData(num, grp);
-      BLPSkinList3->SetClientData(num, grp);
+
+      if (!item)
+      {
+        BLPSkinList2->Append(texname);
+        BLPSkinList3->Append(texname);
+        BLPSkinList2->SetClientData(num, grp);
+        BLPSkinList3->SetClientData(num, grp);
+      }
       num++;
     }
+    BLPSkinList1->Thaw();
+    BLPSkinList2->Thaw();
+    BLPSkinList3->Thaw();
 
     bool ret = (skins.size() > 0);
     //skins.clear();
@@ -812,36 +974,49 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins)
 
 void AnimControl::OnButton(wxCommandEvent &event)
 {
-	if (!g_selModel)
-		return;
+  if (!g_selModel)
+    return;
 
-	int id = event.GetId();
-
-	if (id == ID_PLAY) {
-		g_selModel->currentAnim = g_selModel->animManager->GetAnim();
-		g_selModel->animManager->Play();
-	} else if (id == ID_PAUSE) {
-		g_selModel->animManager->Pause();
-	} else if (id == ID_STOP) {
-		g_selModel->animManager->Stop();
-	} else if (id == ID_CLEARANIM) {
-		g_selModel->animManager->Clear();
-	} else if (id == ID_ADDANIM) {
-		g_selModel->animManager->AddAnim(selectedAnim, loopList->GetSelection());
-	} else if (id == ID_PREVANIM) {
-		g_selModel->animManager->PrevFrame();
-		SetAnimFrame(g_selModel->animManager->GetFrame());
-	} else if (id == ID_NEXTANIM) {
-		g_selModel->animManager->NextFrame();
-		SetAnimFrame(g_selModel->animManager->GetFrame());
-	} else if (id == ID_ANIM_SECONDARY_TEXT) {
-		int count = wxAtoi(lockText->GetValue());
-		if (count < 0)
-			count = UPPER_BODY_BONES;
-		if (count > BONE_MAX)
-			count = BONE_MAX;
-		g_selModel->animManager->SetSecondaryCount(count);
-	}
+  switch (event.GetId())
+  {
+    case ID_PLAY :
+        g_selModel->currentAnim = g_selModel->animManager->GetAnim();
+        g_selModel->animManager->Play();
+        break;
+    case ID_PAUSE :
+        g_selModel->animManager->Pause();
+        break;
+    case ID_STOP :
+        g_selModel->animManager->Stop();
+        break;
+    case ID_CLEARANIM :
+        g_selModel->animManager->Clear();
+        break;
+    case ID_ADDANIM :
+        g_selModel->animManager->AddAnim(selectedAnim, loopList->GetSelection());
+        break;
+    case ID_PREVANIM :
+        g_selModel->animManager->PrevFrame();
+        SetAnimFrame(g_selModel->animManager->GetFrame());
+        break;
+    case ID_NEXTANIM :
+        g_selModel->animManager->NextFrame();
+        SetAnimFrame(g_selModel->animManager->GetFrame());
+        break;
+    case ID_ANIM_SECONDARY_TEXT :
+        {
+          int count = wxAtoi(lockText->GetValue());
+          if (count < 0)
+            count = UPPER_BODY_BONES;
+          if (count > BONE_MAX)
+            count = BONE_MAX;
+          g_selModel->animManager->SetSecondaryCount(count);
+        }
+        break;
+    case ID_SHOW_BLP_SKINLIST:
+        ActivateBLPSkinList();
+        break;
+  }
 }
 
 void AnimControl::OnCheck(wxCommandEvent &event)
@@ -952,10 +1127,6 @@ void AnimControl::OnSkin(wxCommandEvent &event)
     int sel = event.GetSelection();
     SetSkin(sel);
   }
-
-  BLPSkinList1->SetSelection(wxNOT_FOUND);
-  BLPSkinList2->SetSelection(wxNOT_FOUND);
-  BLPSkinList3->SetSelection(wxNOT_FOUND);
 }
 
 void AnimControl::OnBLPSkin(wxCommandEvent &event)
@@ -966,17 +1137,17 @@ void AnimControl::OnBLPSkin(wxCommandEvent &event)
     int texnum;
     switch (event.GetId())
     {
-    case ID_BLP_SKIN1:
-      texnum = 1;
-      break;
-    case ID_BLP_SKIN2:
-      texnum = 2;
-      break;
-    case ID_BLP_SKIN3:
-      texnum = 3;
-      break;
-    default:
-      return;
+      case ID_BLP_SKIN1:
+        texnum = 1;
+        break;
+      case ID_BLP_SKIN2:
+        texnum = 2;
+        break;
+      case ID_BLP_SKIN3:
+        texnum = 3;
+        break;
+      default:
+        return;
     }
     SetSingleSkin(sel, texnum);
   }
@@ -1032,6 +1203,8 @@ void AnimControl::OnLoop(wxCommandEvent &)
 
 void AnimControl::SetSkin(int num)
 {
+  std::vector<wxString> currTextures(3);
+
   if (num == -1)
     num = skinList->GetSelection();  // if we pass -1 to the func, we're redrawing the current skin
   if (num < 0) // model not currently using a proper texture set, possibly custom
@@ -1048,10 +1221,18 @@ void AnimControl::SetSkin(int num)
   }
   for (size_t i=0; i<grp->count; i++)
   {
+    wxString texname;
+    GameFile * tex = grp->tex[i];
+    if (tex)
+    {
+      texname = tex->fullname().toStdString().c_str();
+      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+    }
+    currTextures[i] = texname;
+
     int base = grp->base + i;
     if (g_selModel->useReplaceTextures[base])
     {
-      GameFile * tex = grp->tex[i];
       // refresh TextureList for further use
       for (ssize_t j=0; j<TEXTURE_MAX; j++)
       {
@@ -1074,6 +1255,8 @@ void AnimControl::SetSkin(int num)
     g_selModel->replaceParticleColors = false;
 
   skinList->Select(num);
+
+  SyncBLPSkinList();
 }
 
 void AnimControl::SetSingleSkin(int num, int texnum)

@@ -85,16 +85,16 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   emitter = 0;
   switch (EmitterType)
   {
-  case MODELPARTICLE_EMITTER_PLANE:
-    emitter = new PlaneParticleEmitter(this);
-    break;
-  case MODELPARTICLE_EMITTER_SPHERE:
-    emitter = new SphereParticleEmitter(this);
-    break;
-  case MODELPARTICLE_EMITTER_SPLINE: // Spline?
-  default:
-    LOG_ERROR << "Unknown Emitter:" << EmitterType;
-    break;
+    case MODELPARTICLE_EMITTER_PLANE:
+            emitter = new PlaneParticleEmitter(this);
+            break;
+    case MODELPARTICLE_EMITTER_SPHERE:
+            emitter = new SphereParticleEmitter(this);
+            break;
+    case MODELPARTICLE_EMITTER_SPLINE: // Spline?
+    default:
+            LOG_ERROR << "Unknown Emitter:" << EmitterType;
+            break;
   }
 
   tofs = frand();
@@ -257,73 +257,91 @@ void ParticleSystem::draw()
     blend = 2;
   switch (blend)
   {
-  case BM_OPAQUE:	         // 0
-    glDisable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    break;
-  case BM_TRANSPARENT:      // 1
-    glDisable(GL_BLEND);
-    glEnable(GL_ALPHA_TEST);
-    glBlendFunc(GL_ONE, GL_ZERO);
-    break;
-  case BM_ALPHA_BLEND:      // 2
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    break;
-  case BM_ADDITIVE:         // 3
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_COLOR, GL_ONE);
-    break;
-  case BM_ADDITIVE_ALPHA:   // 4
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    break;
-  case BM_MODULATE:	         // 5
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_DST_COLOR, GL_ZERO);
-    break;
-  case BM_MODULATEX2:	    // 6
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-    break;
-  case BM_7:	               // 7, new in WoD
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    break;
-  default:
-    LOG_ERROR << "Unknown blendmode:" << blend;
-    glEnable(GL_BLEND);
-    glDisable(GL_ALPHA_TEST);
-    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    case BM_OPAQUE:	         // 0
+      glDisable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      break;
+    case BM_TRANSPARENT:      // 1
+      glDisable(GL_BLEND);
+      glEnable(GL_ALPHA_TEST);
+      glBlendFunc(GL_ONE, GL_ZERO);
+      break;
+    case BM_ALPHA_BLEND:      // 2
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      break;
+    case BM_ADDITIVE:         // 3
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_SRC_COLOR, GL_ONE);
+      break;
+    case BM_ADDITIVE_ALPHA:   // 4
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+      break;
+    case BM_MODULATE:	         // 5
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_DST_COLOR, GL_ZERO);
+      break;
+    case BM_MODULATEX2:	    // 6
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+      break;
+    case BM_7:	               // 7, new in WoD
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      break;
+    default:
+      LOG_ERROR << "Unknown blendmode:" << blend;
+      glEnable(GL_BLEND);
+      glDisable(GL_ALPHA_TEST);
+      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
   }
 
-  glActiveTextureARB(GL_TEXTURE0_ARB);
-  glEnable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-  if (texture2)
+  if (!multitexture)
   {
-    glActiveTextureARB(GL_TEXTURE1_ARB);
+    glActiveTextureARB(GL_TEXTURE0_ARB);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
   }
-  if (texture3)
+  else
   {
-    glActiveTextureARB(GL_TEXTURE2_ARB);
+    glActiveTextureARB(GL_TEXTURE0_ARB);
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture3);
-    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+    glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
+    glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 4.0);
+    glTexEnvf(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 4.0);
+    if (texture2)
+    {
+      glActiveTextureARB(GL_TEXTURE1_ARB);
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, texture2);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
+      glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+    if (texture3)
+    {
+      glActiveTextureARB(GL_TEXTURE2_ARB);
+      glEnable(GL_TEXTURE_2D);
+      glBindTexture(GL_TEXTURE_2D, texture3);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_MODULATE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
+      glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
   }
-  glActiveTextureARB(GL_TEXTURE0_ARB);
-
   Vec3D vRight(1,0,0);
   Vec3D vUp(0,1,0);
 
@@ -420,6 +438,8 @@ void ParticleSystem::draw()
   glEnd();
 
   glActiveTextureARB(GL_TEXTURE0_ARB);
+  glTexEnvf(GL_TEXTURE_ENV, GL_RGB_SCALE, 1.0);
+  glTexEnvf(GL_TEXTURE_ENV, GL_ALPHA_SCALE, 1.0);
   glDisable(GL_TEXTURE_2D);
   if (texture2)
   {

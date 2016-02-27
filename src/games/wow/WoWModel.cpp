@@ -1512,26 +1512,9 @@ void WoWModel::load(QString &file)
 
 bool WoWModel::canSetTextureFromFile(int texnum)
 {
-  int textype;
-
-  switch (texnum)
-  {
-    case 1:
-      textype = TEXTURE_GAMEOBJECT1;
-      break;
-    case 2:
-      textype = TEXTURE_GAMEOBJECT2;
-      break;
-    case 3:
-      textype = TEXTURE_GAMEOBJECT3;
-      break;
-    default:
-      return false;
-  }
-
   for (size_t i=0; i<TEXTURE_MAX; i++)
   {
-    if (specialTextures[i] == textype)
+    if (specialTextures[i] == texnum)
       return 1;
   }
   return 0;

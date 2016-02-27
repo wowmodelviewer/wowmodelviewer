@@ -23,6 +23,8 @@ class TextureGroup
     size_t count;
     int base;
     GameFile * tex[num];
+    // tex gp is derived from CreatureDisplayInfo, not just a random skin in the folder:
+    bool definedTexture;
     // For particle colour replacements:
     int particleColInd; // ID for ParticleColor.dbc
     int PCRIndex;  // index into PCRList - list of particle color replacement values
@@ -35,6 +37,7 @@ class TextureGroup
       }
       particleColInd = 0;
       PCRIndex = -1;
+      definedTexture = false;
     }
 
     // default copy constr
@@ -48,10 +51,15 @@ class TextureGroup
       count = grp.count;
       particleColInd = grp.particleColInd;
       PCRIndex = grp.PCRIndex;
+      definedTexture = grp.definedTexture;
     }
 
     bool operator<(const TextureGroup &grp) const
     {
+      if (!definedTexture && grp.definedTexture)
+        return false;
+      if (definedTexture && !grp.definedTexture)
+        return true;
       for (size_t i=0; i<num; i++)
       {
         if (tex[i]<grp.tex[i]) return true;
@@ -94,6 +102,7 @@ class AnimControl: public wxWindow
   DECLARE_EVENT_TABLE()
 
   wxComboBox *animCList, *animCList2, *animCList3, *wmoList, *loopList;
+  wxButton *showBLPList;
   wxStaticText *wmoLabel,*speedLabel, *speedMouthLabel, *frameLabel;
   wxStaticText *BLPSkinsLabel, *BLPSkinLabel1, *BLPSkinLabel2, *BLPSkinLabel3;
   wxSlider *speedSlider, *speedMouthSlider, *frameSlider;
@@ -107,7 +116,7 @@ class AnimControl: public wxWindow
   bool UpdateCreatureModel(WoWModel *m);
   bool UpdateItemModel(WoWModel *m);
   bool FillSkinSelector(TextureSet &skins);
-  bool FillBLPSkinSelector(TextureSet &skins);
+  bool FillBLPSkinSelector(TextureSet &skins, bool item = false);
 
 public:
   AnimControl(wxWindow* parent, wxWindowID id);
@@ -130,13 +139,18 @@ public:
   void SetSkinByDisplayID(int cdi);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);
+  void ActivateBLPSkinList();
+  void SyncBLPSkinList();
   void SetSingleSkin(int num, int texnum);
   void SetAnimSpeed(float speed);
   void SetAnimFrame(size_t frame);
+  QString GetModelFolder(WoWModel *m);
 
   bool randomSkins;
   bool defaultDoodads; 
   std::string oldname;
+  QString modelFolder;
+  bool modelFolderChanged, BLPListFilled;
   std::map<int, TextureGroup> CDIToTexGp;
   std::vector<particleColorReplacements> PCRList; 
   int selectedAnim;
@@ -145,6 +159,7 @@ public:
   bool bOldStyle;
   bool bLockAnims;
   bool bNextAnims;
+  TextureSet BLPskins;
 };
 
 #endif

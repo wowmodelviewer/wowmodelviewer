@@ -103,13 +103,13 @@ QString GameFolder::getFullPathForFile(QString file)
   return "";
 }
 
-void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath)
+void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension)
 {
-  folderPath = folderPath.toLower();
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
     GameFile * file = *it;
-    if(file->fullname().startsWith(folderPath))
+    if(file->fullname().startsWith(folderPath, Qt::CaseInsensitive) &&
+       (!extension.size() || file->fullname().endsWith(extension, Qt::CaseInsensitive)))
     {
       fileNames.push_back(file);
     }
