@@ -70,10 +70,6 @@ target_link_libraries(wowmodelviewer
   CascLib
 )
 
-add_custom_target(release nmake install
-                  COMMAND $ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "$ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi")             
-
-
 install(TARGETS wowmodelviewer 
         RUNTIME DESTINATION $ENV{WMV_BASE_PATH}/bin)
   
