@@ -63,7 +63,7 @@ VersionManager::VersionManager(QObject * parent)
   connect(m_fileDownloader, SIGNAL(downloadFinished(QString &)),
       this, SLOT(fileDownloaded(QString &)));
 
-  m_fileDownloader->get(QUrl("http://update.wowmodelviewer.net/latest.json"));
+  m_fileDownloader->get(QUrl("https://wowmodelviewer.net/update/latest.json"));
   updateCurrentVersionInfo();
 }
 
