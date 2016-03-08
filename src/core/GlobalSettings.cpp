@@ -56,10 +56,10 @@ GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 8;
-  m_versionRevNumber = 4;
+  m_versionRevNumber = 5;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Wain's edition";
+  m_buildName = "Bilgewhizzle";
 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
@@ -93,7 +93,7 @@ GlobalSettings::GlobalSettings()
     Trip in Draenor
     Christmas Edition ;)
     Archimonde will survive
-
+    Wain's edition
 
    */
 
