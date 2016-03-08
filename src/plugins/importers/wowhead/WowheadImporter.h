@@ -31,7 +31,6 @@
 // STL
 
 // Qt
-#include <QObject>
 #include <QtPlugin>
 
 // Externals
@@ -49,7 +48,7 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class WowheadImporter : public QObject, public ImporterPlugin
+class WowheadImporter : public ImporterPlugin
 {
     Q_INTERFACES(ImporterPlugin)
     Q_OBJECT

@@ -97,7 +97,7 @@ void Component::onParentSet(Component *)
 
 }
 
-void Component::setParent(Component * a_p_parent)
+void Component::setParentComponent(Component * a_p_parent)
 {
 	m_p_parent = a_p_parent;
 	onParentSet(m_p_parent);

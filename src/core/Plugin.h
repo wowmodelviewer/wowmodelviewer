@@ -32,6 +32,8 @@
 #include <string>
 
 // Qt
+class QCoreApplication;
+class QThread;
 
 // Externals
 class ModelViewer;
@@ -58,8 +60,9 @@ class ModelViewer;
 #    define _PLUGIN_API_
 #endif
 
-class _PLUGIN_API_ Plugin : public Component
+class _PLUGIN_API_ Plugin : public QObject, public Component
 {
+    Q_OBJECT
 	public :
 		// Constants / Enums
 		
@@ -112,9 +115,14 @@ class _PLUGIN_API_ Plugin : public Component
     std::string m_coreVersionNeeded;
 		
     static GlobalSettings * globalSettings;
+    static QCoreApplication * app;
+    static QThread * thread;
 
 		// friend class declarations
     friend class GlobalSettings;
+
+  private slots:
+    void onExec();
 };
 
 // static members definition

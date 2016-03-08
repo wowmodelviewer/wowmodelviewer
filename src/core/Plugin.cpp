@@ -33,7 +33,9 @@
 // STL
 
 // Qt 
+#include <QCoreApplication>
 #include <QPluginLoader>
+#include <QThread>
 
 // Externals
 
@@ -49,6 +51,9 @@
 // Beginning of implementation
 //====================================================================
 GlobalSettings * Plugin::globalSettings = 0;
+QCoreApplication * Plugin::app = NULL;
+QThread * Plugin::thread = NULL;
+
 
 // Constructors 
 //--------------------------------------------------------------------
@@ -64,6 +69,7 @@ Plugin::Plugin()
 
 // Public methods
 //--------------------------------------------------------------------
+// Private Qt application
 Plugin * Plugin::load(std::string path, GlobalSettings & settings)
 {
   QString pluginToLoad = QString::fromStdString(path);
@@ -82,6 +88,13 @@ Plugin * Plugin::load(std::string path, GlobalSettings & settings)
     newPlugin->m_category = metaInfos.value("category").toString().toStdString();
 
     newPlugin->transmitGlobalsFromCore(settings);
+
+    // waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
+    // thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
+    // starts the app)
+    Plugin::thread = new QThread();
+    connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
+    Plugin::thread->start();
 
     return newPlugin;
   }
@@ -106,4 +119,17 @@ void Plugin::doPrint()
 void Plugin::transmitGlobalsFromCore(GlobalSettings & settings)
 {
   Plugin::globalSettings = &settings;
+}
+
+void Plugin::onExec()
+{
+  if (QCoreApplication::instance() == NULL)
+  {
+    int argc = 1;
+    char * argv[] = {"plugin.app", NULL};
+    Plugin::app = new QCoreApplication(argc,argv);
+    Plugin::app->exec();
+    if (Plugin::app)
+      delete Plugin::app;
+  }
 }

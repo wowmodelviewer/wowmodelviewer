@@ -74,7 +74,7 @@ class Container : public Component
 
 		unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
 
-		bool findChild(Component * child, bool recursive = false);
+		bool findChildComponent(Component * child, bool recursive = false);
 		Component * getChild(unsigned int index);
 		const Component * getChild(unsigned int index) const;
 		
@@ -136,7 +136,7 @@ bool Container<DataType>::addChild(DataType * child)
 {
 	m_children.insert(child);
 
-	child->setParent(this);
+	child->setParentComponent(this);
 
 	// for hierarchy notification
 	onChildAdded(child);
@@ -149,7 +149,7 @@ bool Container<DataType>::removeChild(DataType * child)
 {
 	// ok, we remove this child from the list
 	m_children.erase(child);
-	child->setParent(0);
+	child->setParentComponent(0);
 
 	// for hierarchy notification
 	onChildRemoved(child);
@@ -193,7 +193,7 @@ int Container<DataType>::removeAllChildrenOfType()
 
 
 template<class DataType>
-bool Container<DataType>::findChild(Component * child, bool recursive /* = false */)
+bool Container<DataType>::findChildComponent(Component * child, bool recursive /* = false */)
 {
 	std::unordered_set<DataType *>::const_iterator l_it = m_children.find(dynamic_cast<DataType *>(child));
 
@@ -206,7 +206,7 @@ bool Container<DataType>::findChild(Component * child, bool recursive /* = false
 	  std::unordered_set<DataType *>::const_iterator l_itEnd = m_children.end();
 	  for(l_it = m_children.begin() ; l_it != l_itEnd ; ++l_it)
 	  {
-	    if((*l_it)->findChild(child,recursive))
+	    if((*l_it)->findChildComponent(child,recursive))
 	      return true;
 	  }
 	}

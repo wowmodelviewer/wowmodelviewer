@@ -78,12 +78,12 @@ class _COMPONENT_API_ Component
 
 		virtual unsigned int nbChildren() const {return 0; }
 
-		virtual bool findChild(Component * /* component */, bool /* recursive */ ) { return false; }
+		virtual bool findChildComponent(Component * /* component */, bool /* recursive */ ) { return false; }
 		virtual Component * getChild(unsigned int /* index */) { return 0; }
 		virtual const Component * getChild(unsigned int /* index */) const { return 0; }
 
 		// parent management
-		void setParent(Component *);
+		void setParentComponent(Component *);
 		virtual void onParentSet(Component *);
 		const Component * parent() const { return m_p_parent; }
 		Component * parent() { return m_p_parent; }

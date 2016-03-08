@@ -31,7 +31,6 @@
 // STL
 
 // Qt
-#include <QObject>
 #include <QtPlugin>
 
 // Externals
@@ -53,7 +52,7 @@ class WoWModel;
 
 // Class Declaration
 //--------------------------------------------------------------------
-class OBJExporter : public QObject, public ExporterPlugin
+class OBJExporter : public ExporterPlugin
 {
     Q_INTERFACES(ExporterPlugin)
     Q_OBJECT

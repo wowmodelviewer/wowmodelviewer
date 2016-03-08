@@ -32,6 +32,10 @@
 // STL
 
 // Qt
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 // Irrlicht
 
@@ -372,7 +376,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 
       LOG_INFO << "Loading Battle.Net Armory. Region: " << Region << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
 
-      apiPage = wxT("http://wowmodelviewer.net/armory.php?region=");
+      apiPage = wxT("https://wowmodelviewer.net/armory.php?region=");
       apiPage << Region << "&realm=" << Realm << "&char=" << CharName;
       break;
     }
@@ -391,7 +395,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 
       LOG_INFO << "Loading Battle.Net Armory. Item: " << itemNumber.c_str();
 
-      apiPage = wxT("http://wowmodelviewer.net/armory.php?item=");
+      apiPage = wxT("https://wowmodelviewer.net/armory.php?item=");
       apiPage << itemNumber;
 
       break;
@@ -400,14 +404,19 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 
   LOG_INFO << "Final API Page: " << apiPage.c_str();
 
+  QNetworkAccessManager networkManager;
+  QUrl apiUrl(apiPage.c_str());
+  QNetworkRequest request(apiUrl);
+  request.setRawHeader("User-Agent", "WoWModelViewer");
+  QNetworkReply *reply = networkManager.get(request);
+
+  QEventLoop loop;
+  connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+  connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
+  loop.exec();
+
+  QByteArray bts = reply->readAll();
+
   wxJSONReader reader;
-
-  //Read the Armory API Page & get the error numbers
-  wxURL apiPageURL(apiPage);
-  wxInputStream *doc = apiPageURL.GetInputStream();
-
-  if(!doc)
-    return -1;
-
-  return reader.Parse(*doc,&result);
+  return reader.Parse(bts.data(),&result);
 }

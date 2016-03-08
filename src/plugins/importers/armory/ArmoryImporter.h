@@ -31,7 +31,6 @@
 // STL
 
 // Qt
-#include <QObject>
 #include <QtPlugin>
 
 // Externals
@@ -40,6 +39,7 @@
 #define _IMPORTERPLUGIN_CPP_ // to define interface
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
+
 
 // Current library
 #include "wx/jsonreader.h"
@@ -50,7 +50,7 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class ArmoryImporter : public QObject, public ImporterPlugin
+class ArmoryImporter : public ImporterPlugin
 {
     Q_INTERFACES(ImporterPlugin)
     Q_OBJECT

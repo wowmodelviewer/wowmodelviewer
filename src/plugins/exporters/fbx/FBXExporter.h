@@ -33,7 +33,6 @@
 #include <string>
 
 // Qt
-#include <QObject>
 #include <QtPlugin>
 
 // Externals
@@ -56,7 +55,7 @@ class WoWModel;
 
 // Class Declaration
 //--------------------------------------------------------------------
-class FBXExporter : public QObject, public ExporterPlugin
+class FBXExporter : public ExporterPlugin
 {
     Q_INTERFACES(ExporterPlugin)
     Q_OBJECT
