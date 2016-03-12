@@ -10,6 +10,9 @@
 #include "logger/Logger.h"
 #include "globalvars.h"
 #include "modelviewer.h"
+#include "util.h"
+#include <wx/stattext.h>
+#include <wx/statline.h>
 
 IMPLEMENT_CLASS(GeneralSettings, wxWindow)
 
@@ -19,11 +22,15 @@ BEGIN_EVENT_TABLE(GeneralSettings, wxWindow)
   EVT_CHECKBOX(ID_SETTINGS_ZEROPARTICLE, GeneralSettings::OnCheck)
   EVT_CHECKBOX(ID_SETTINGS_DISPLAYIDINLIST, GeneralSettings::OnCheck)
   EVT_BUTTON(ID_GENERAL_SETTINGS_APPLY, GeneralSettings::OnButton)
+  EVT_BUTTON(ID_FIND_GAME_FOLDER, GeneralSettings::OnButton)
+  EVT_BUTTON(ID_FIND_CUSTOM_FOLDER, GeneralSettings::OnButton)
+  EVT_BUTTON(ID_ERASE_CUSTOM_FOLDER, GeneralSettings::OnButton)
 END_EVENT_TABLE()
 
 GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 {
-  if (Create(parent, id, wxPoint(0,0), wxSize(400,400), 0, wxT("GeneralSettings")) == false) {
+  if (Create(parent, id, wxPoint(0,0), wxSize(400,550), 0, wxT("GeneralSettings")) == false)
+  {
     LOG_ERROR << "GeneralSettings";
     return;
   }
@@ -41,20 +48,44 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   sizer->Add(chkbox[CHECK_RANDOMSKIN], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(chkbox[CHECK_DISPLAYIDINLIST], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
-  wxString policies[2] = {_("Keep game files"), _("Keep custom files")};
+  wxString policies[2] = {_("Use game files"), _("Use custom files")};
 
   keepPolicyRadioBox = new wxRadioBox(this, -1, _("Conflict policy"), wxDefaultPosition, wxDefaultSize, 2, policies, 2);
-  gamePathCtrl =  new wxTextCtrl(this, wxID_ANY, gamePath, wxDefaultPosition, wxSize(300,-1), 0);
-  customDirectoryPathCtrl =  new wxTextCtrl(this, wxID_ANY, "", wxDefaultPosition, wxSize(300,-1), 0);
+  gamePathDisplay =  new wxTextCtrl(this, wxID_ANY, gamePath, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
+  wxString customMsg = customDirectoryPath;
+  if (customMsg.IsEmpty())
+    customMsg = wxString("Select a folder...");
+  customDirectoryPathDisplay =  new wxTextCtrl(this, wxID_ANY, customMsg, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
+  top->AddSpacer(5);
+  top->Add(new wxStaticText(this, wxID_ANY, _("Game Folder"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
+  top->Add(gamePathDisplay, 0, wxALL, 5);
+  top->Add(new wxButton(this, ID_FIND_GAME_FOLDER, _("Change Game Folder"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
+  top->AddSpacer(10);
+  top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
+  top->AddSpacer(10);
+  top->Add(new wxStaticText(this, wxID_ANY, _("Custom / Imported Files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
+  top->Add(customDirectoryPathDisplay, 0, wxALL, 5);
+  wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
+  gbox->Add(new wxButton(this, ID_FIND_CUSTOM_FOLDER, _("Select Custom Folder"), wxDefaultPosition, wxDefaultSize, 0));
+  gbox->Add(new wxButton(this, ID_ERASE_CUSTOM_FOLDER, _("No Custom Folder"), wxDefaultPosition, wxDefaultSize, 0));
+  top->Add(gbox, 0, wxALL, 5);
+  wxStaticText *customFileMsg = new wxStaticText(this, wxID_ANY,
+                                                 _("Custom files should be placed in a folder hierarchy that mirrors "
+                                                   "the game database\ne.g. <Custom Folder>/Creature/Dragon/Dragon.m2"),
+                                                 wxDefaultPosition, wxDefaultSize, 0);
+  customFileMsg->Wrap(300);
 
-  top->Add(sizer, 0, wxEXPAND | wxALL, 10);
-  top->Add(new wxStaticText(this, wxID_ANY, _("Game path (including final \\Data statement - ie C:\\Games\\WoW\\Data)"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->Add(gamePathCtrl, 0, wxALL, 5);
-  top->Add(new wxStaticText(this, wxID_ANY, _("Folder to explore for additional files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->Add(customDirectoryPathCtrl, 0, wxALL, 5);
+  top->Add(customFileMsg, 0, wxALL, 5);
+  top->AddSpacer(5);
   top->Add(keepPolicyRadioBox, 0, wxALL, 5);
+  top->AddSpacer(10);
+  top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
+  top->AddSpacer(10);
+  top->Add(new wxStaticText(this, wxID_ANY, _("Other"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
+  top->Add(sizer, 0, wxEXPAND | wxALL, 10);
+  top->AddSpacer(20);
   top->Add(new wxButton(this, ID_GENERAL_SETTINGS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->SetMinSize(350, 350);
+  top->SetMinSize(350, 550);
   SetSizer(top);
   SetAutoLayout(true);
   Layout();
@@ -82,29 +113,39 @@ void GeneralSettings::Update()
   chkbox[CHECK_SHOWPARTICLE]->SetValue(GLOBALSETTINGS.bShowParticle);
   chkbox[CHECK_ZEROPARTICLE]->SetValue(GLOBALSETTINGS.bZeroParticle);
   chkbox[CHECK_DISPLAYIDINLIST]->SetValue(displayItemAndNPCId);
-  gamePathCtrl->SetValue(gamePath);
-  customDirectoryPathCtrl->SetValue(customDirectoryPath);
+  gamePathDisplay->SetValue(gamePath);
+  if (customDirectoryPath.IsEmpty())
+    customDirectoryPathDisplay->SetValue("Select a folder...");
+  else
+    customDirectoryPathDisplay->SetValue(customDirectoryPath);
   keepPolicyRadioBox->SetSelection(customFilesConflictPolicy);
+  newGamePath = wxEmptyString;
+  newCustomFolder = wxEmptyString;
 }
 
 void GeneralSettings::OnButton(wxCommandEvent &event)
 {
-  if ( event.GetId() == ID_GENERAL_SETTINGS_APPLY)
+  int id = event.GetId();
+
+  if ( id == ID_GENERAL_SETTINGS_APPLY)
   {
     bool settingsChanged = false;
-
-    if(gamePath != gamePathCtrl->GetValue())
+    if(!newGamePath.IsEmpty() && gamePath !=  newGamePath)
     {
-      gamePath = gamePathCtrl->GetValue();
+      gamePath = newGamePath;
       settingsChanged = true;
     }
-
-    if(customDirectoryPath !=  customDirectoryPathCtrl->GetValue())
+    if (newCustomFolder == wxString("ERASE"))
     {
-      customDirectoryPath = customDirectoryPathCtrl->GetValue();
+      if (customDirectoryPath != wxEmptyString)
+        settingsChanged = true;
+      customDirectoryPath = wxEmptyString;
+    }
+    else if(!newCustomFolder.IsEmpty() && customDirectoryPath !=  newCustomFolder)
+    {
+      customDirectoryPath = newCustomFolder;
       settingsChanged = true;
     }
-
     if(customFilesConflictPolicy != keepPolicyRadioBox->GetSelection())
     {
       customFilesConflictPolicy = keepPolicyRadioBox->GetSelection();
@@ -113,9 +154,38 @@ void GeneralSettings::OnButton(wxCommandEvent &event)
 
     if(settingsChanged)
     {
-      wxMessageBox(wxT("Settings changed.\nYou need to restart WoW Model Viewer to take them into account"), wxT("Settings Changed"), wxICON_INFORMATION);
+      wxMessageBox(wxT("Settings changed.\nYou need to restart WoW Model Viewer to take them into account"),
+                   wxT("Settings Changed"), wxICON_INFORMATION);
       g_modelViewer->SaveSession();
+      settingsChanged = false;
     }
   }
+
+  else if (id == ID_FIND_GAME_FOLDER)
+  {
+    wxString newPath = getGamePath(true);
+    if (newPath.IsEmpty()) // user probably hit cancel
+      return;
+    gamePathDisplay->SetValue(newPath);
+    newGamePath = newPath;
+  }
+
+  else if (id == ID_FIND_CUSTOM_FOLDER)
+  {
+    wxDirDialog *customDirPicker = new wxDirDialog(this, _("Select the folder containing your custom files."), 
+                                                   customDirectoryPath, 0);
+    int i = customDirPicker->ShowModal();
+    if (i != wxID_OK)
+      return;
+    newCustomFolder = customDirPicker->GetPath();
+    customDirectoryPathDisplay->SetValue(newCustomFolder);
+  }
+
+  else if (id == ID_ERASE_CUSTOM_FOLDER)
+  {
+    newCustomFolder = wxString("ERASE");
+    customDirectoryPathDisplay->SetValue(wxString("Select a folder.."));
+  }
 }
+
 

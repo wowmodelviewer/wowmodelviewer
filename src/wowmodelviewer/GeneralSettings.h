@@ -10,6 +10,7 @@
 
 // WX Headers
 #include <wx/wxprec.h>
+#include <wx/filepicker.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
 #endif
@@ -20,7 +21,10 @@ enum
   ID_SETTINGS_SHOWPARTICLE,
   ID_SETTINGS_ZEROPARTICLE,
   ID_SETTINGS_DISPLAYIDINLIST,
-  ID_GENERAL_SETTINGS_APPLY
+  ID_GENERAL_SETTINGS_APPLY,
+  ID_FIND_GAME_FOLDER,
+  ID_FIND_CUSTOM_FOLDER,
+  ID_ERASE_CUSTOM_FOLDER,
 };
 
 enum {
@@ -38,12 +42,11 @@ class GeneralSettings: public wxWindow
     DECLARE_EVENT_TABLE()
 
   wxCheckBox *chkbox[NUM_SETTINGS1_CHECK];
-  wxTextCtrl *gamePathCtrl;
-  wxTextCtrl *customDirectoryPathCtrl;
+  wxTextCtrl *gamePathDisplay;
+  wxTextCtrl *customDirectoryPathDisplay;
   wxRadioBox *keepPolicyRadioBox;
-
+  wxString newGamePath, newCustomFolder;
 public:
-
   GeneralSettings(wxWindow* parent, wxWindowID id);
   ~GeneralSettings(){};
 

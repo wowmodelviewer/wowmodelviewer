@@ -708,7 +708,7 @@ void ModelViewer::InitDocking()
 	// settings frame
 	interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
 		Name(wxT("Settings")).Caption(wxT("Settings")).
-		FloatingSize(wxSize(400,440)).Float().TopDockable(false).LeftDockable(false).
+		FloatingSize(wxSize(400,550)).Float().TopDockable(false).LeftDockable(false).
 		RightDockable(false).BottomDockable(false).Fixed().Show(false));
 
     // tell the manager to "commit" all the changes just made
@@ -752,12 +752,13 @@ void ModelViewer::ResetLayout()
 
 	interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
 		Name(wxT("Models")).Caption(wxT("Models")).
-		FloatingSize(wxSize(160,460)).Float().Show(false).
+		FloatingSize(wxSize(160,460)).Float().TopDockable(false).LeftDockable(false).
+		RightDockable(false).TopDockable(false).BottomDockable(false).Show(false).
 		DestroyOnClose(false));
 
 	interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
 		Name(wxT("Settings")).Caption(wxT("Settings")).
-		FloatingSize(wxSize(400,440)).Float().TopDockable(false).LeftDockable(false).
+		FloatingSize(wxSize(400,550)).Float().TopDockable(false).LeftDockable(false).
 		RightDockable(false).BottomDockable(false).Show(false));
 
     // tell the manager to "commit" all the changes just made

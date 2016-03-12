@@ -122,77 +122,88 @@ void MakeDirs(wxString PathBase, wxString ExtPaths){
 	}
 }
 
-void getGamePath()
+wxString getGamePath(bool noSet)
 {
 #ifdef _WINDOWS
-	HKEY key;
-	unsigned long t, s;
-	long l;
-	unsigned char path[1024];
-	memset(path, 0, sizeof(path));
+  HKEY key;
+  unsigned long t, s;
+  long l;
+  unsigned char path[1024];
+  memset(path, 0, sizeof(path));
 
-	wxArrayString sNames;
-	gamePath = wxEmptyString;
+  wxArrayString sNames;
+  wxString folder, newPath;
 
-	// if it failed, look for World of Warcraft install
-	const wxString regpaths[] = {
-		// _WIN64
-		wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft"),
-		wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft\\PTR"),
-		wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft\\Beta"),
-		//_WIN32, but for compatible
-		wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft"),
-		wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR"),
-		wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta"),
-	};
+  // if it failed, look for World of Warcraft install
+  const wxString regpaths[] =
+  {
+    // _WIN64
+    wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft"),
+    wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft\\PTR"),
+    wxT("SOFTWARE\\Wow6432Node\\Blizzard Entertainment\\World of Warcraft\\Beta"),
+    //_WIN32, but for compatible
+    wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft"),
+    wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\PTR"),
+    wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta"),
+  };
 
-	for (size_t i=0; i<WXSIZEOF(regpaths); i++) {
-		l = RegOpenKeyEx((HKEY)HKEY_LOCAL_MACHINE, regpaths[i], 0, KEY_QUERY_VALUE, &key);
+  for (size_t i=0; i<WXSIZEOF(regpaths); i++)
+  {
+    l = RegOpenKeyEx((HKEY)HKEY_LOCAL_MACHINE, regpaths[i], 0, KEY_QUERY_VALUE, &key);
 
-		if (l == ERROR_SUCCESS) {
-			s = sizeof(path);
-			l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t,(LPBYTE)path, &s);
-			wxString spath(path);
-			if (l == ERROR_SUCCESS && wxDir::Exists(path) && sNames.Index(spath) == wxNOT_FOUND) {
-				sNames.Add(spath);
-			}
-			RegCloseKey(key);
-		}
-	}
-
-	if (sNames.size() == 1)
-		gamePath = sNames[0];
-	else if (sNames.size() > 1)
-		gamePath = wxGetSingleChoice(wxT("Please select a Path:"), wxT("Path"), sNames);
-
-	// If we found an install then set the game path, otherwise just set to C:\ for now
-	if (gamePath == wxEmptyString) {
-		gamePath = wxT("C:\\Program Files\\World of Warcraft\\");
-		if (!wxFileExists(gamePath+wxT("Wow.exe"))){
-			gamePath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), gamePath);
-		}
-	}
-	if (!gamePath.IsEmpty() && gamePath.Last() != SLASH)
-		gamePath.Append(SLASH);
-	gamePath.Append(wxT("Data\\"));
-#elif _MAC // Mac OS X
-    gamePath = wxT("/Applications/World of Warcraft/");
-	if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) ){
-        gamePath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), gamePath);
+    if (l == ERROR_SUCCESS)
+    {
+      s = sizeof(path);
+      l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t,(LPBYTE)path, &s);
+      wxString spath(path);
+      if (l == ERROR_SUCCESS && wxDir::Exists(path) && sNames.Index(spath) == wxNOT_FOUND)
+        sNames.Add(spath);
+      RegCloseKey(key);
     }
-	if (!gamePath.IsEmpty() && gamePath.Last() != SLASH)
-		gamePath.Append(SLASH);
-	gamePath.Append(wxT("Data/"));
+  }
+
+  if (sNames.size())
+  {
+    sNames.Add("Other");
+    folder = wxGetSingleChoice(wxT("Please select a Path:"), wxT("Path"), sNames);
+  }
+  // If we found an install then set the game path, otherwise just set to C:\ for now
+  
+  if (folder == wxEmptyString || folder == wxString("Other"))
+  {
+    folder = gamePath;
+    if (folder == wxEmptyString)
+      folder = wxT("C:\\Program Files\\World of Warcraft\\");
+    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), folder);
+    if (newPath.IsEmpty())  // user probably hit cancel
+      return newPath;
+  }
+  else
+    newPath = folder;
+  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
+    newPath.Append(SLASH);
+  if(!newPath.EndsWith(wxString("Data\\")))
+    newPath.Append(wxString("Data\\"));
+#elif _MAC // Mac OS X
+  newPath = wxT("/Applications/World of Warcraft/");
+  if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) )
+    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
+  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
+    newPath.Append(SLASH);
+  newPath.Append(wxT("Data/"));
 #else // Linux
-	gamePath = wxT(".")+SLASH;
-	if (!wxFileExists(gamePath+wxT("Wow.exe"))){
-		gamePath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), gamePath);
-	}
-	if (!gamePath.IsEmpty() && gamePath.Last() != SLASH)
-		gamePath.Append(SLASH);
-	gamePath.Append(wxT("Data/"));
+  newPath = wxT(".")+SLASH;
+  if (!wxFileExists(newPath+wxT("Wow.exe")))
+    newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
+  if (!newPath.IsEmpty() && newPath.Last() != SLASH)
+    newPath.Append(SLASH);
+  newPath.Append(wxT("Data/"));
 #endif
+  if (!noSet)
+    gamePath = newPath;
+  return newPath;
 }
+
 
 #ifdef _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
