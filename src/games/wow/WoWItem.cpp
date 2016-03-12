@@ -899,8 +899,9 @@ void WoWItem::refresh()
     int layer = SLOT_LAYERS[m_slot];
 
     // if we are wearing a robe, render gloves first in texture compositing
+    // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
     WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-    if(chestItem->m_type == IT_ROBE)
+    if(chestItem->m_type == IT_ROBE && geoIt->second == 1)
     	layer = SLOT_LAYERS[CS_CHEST]-1;
 
     if(it != m_itemTextures.end())
