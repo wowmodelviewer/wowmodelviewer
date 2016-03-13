@@ -41,7 +41,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   chkbox[CHECK_SHOWPARTICLE] = new wxCheckBox(this, ID_SETTINGS_SHOWPARTICLE, _("Show Particle"), wxDefaultPosition, wxDefaultSize, 0);
   chkbox[CHECK_ZEROPARTICLE] = new wxCheckBox(this, ID_SETTINGS_ZEROPARTICLE, _("Zero Particle"), wxDefaultPosition, wxDefaultSize, 0);
   chkbox[CHECK_RANDOMSKIN] = new wxCheckBox(this, ID_SETTINGS_RANDOMSKIN, _("Random Skins"), wxDefaultPosition, wxDefaultSize, 0);
-  chkbox[CHECK_DISPLAYIDINLIST] = new wxCheckBox(this, ID_SETTINGS_DISPLAYIDINLIST, _("Display Items & NPCs' IDs in lists"), wxDefaultPosition, wxDefaultSize, 0);
+  chkbox[CHECK_DISPLAYIDINLIST] = new wxCheckBox(this, ID_SETTINGS_DISPLAYIDINLIST, _("Display Items/NPCs' IDs in lists"), wxDefaultPosition, wxDefaultSize, 0);
 
   sizer->Add(chkbox[CHECK_SHOWPARTICLE], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
   sizer->Add(chkbox[CHECK_ZEROPARTICLE], 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
@@ -56,13 +56,13 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   if (customMsg.IsEmpty())
     customMsg = wxString("Select a folder...");
   customDirectoryPathDisplay =  new wxTextCtrl(this, wxID_ANY, customMsg, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
-  top->AddSpacer(5);
+  top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Game Folder"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->Add(gamePathDisplay, 0, wxALL, 5);
   top->Add(new wxButton(this, ID_FIND_GAME_FOLDER, _("Change Game Folder"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->AddSpacer(10);
+  top->AddSpacer(2);
   top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
-  top->AddSpacer(10);
+  top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Custom / Imported Files"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->Add(customDirectoryPathDisplay, 0, wxALL, 5);
   wxFlexGridSizer * gbox = new wxFlexGridSizer(2, 5, 5);
@@ -71,19 +71,19 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   top->Add(gbox, 0, wxALL, 5);
   wxStaticText *customFileMsg = new wxStaticText(this, wxID_ANY,
                                                  _("Custom files should be placed in a folder hierarchy that mirrors "
-                                                   "the game database\ne.g. <Custom Folder>/Creature/Dragon/Dragon.m2"),
+                                                   "the game database (ie <Custom Folder>/Creature/Dragon/Dragon.m2)"),
                                                  wxDefaultPosition, wxDefaultSize, 0);
-  customFileMsg->Wrap(300);
+  customFileMsg->Wrap(350);
 
   top->Add(customFileMsg, 0, wxALL, 5);
-  top->AddSpacer(5);
+  top->AddSpacer(2);
   top->Add(keepPolicyRadioBox, 0, wxALL, 5);
-  top->AddSpacer(10);
+  top->AddSpacer(2);
   top->Add(new wxStaticLine(this, wxID_ANY), 1, wxEXPAND);
-  top->AddSpacer(10);
+  top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Other"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
-  top->Add(sizer, 0, wxEXPAND | wxALL, 10);
-  top->AddSpacer(20);
+  top->Add(sizer, 0, wxEXPAND | wxALL, 5);
+  top->AddSpacer(2);
   top->Add(new wxButton(this, ID_GENERAL_SETTINGS_APPLY, _("Apply"), wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
   top->SetMinSize(350, 550);
   SetSizer(top);
