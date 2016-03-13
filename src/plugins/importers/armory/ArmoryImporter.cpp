@@ -417,6 +417,8 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 
   QByteArray bts = reply->readAll();
 
+  LOG_INFO << __FUNCTION__ << bts;
+
   wxJSONReader reader;
   return reader.Parse(bts.data(),&result);
 }
