@@ -21,9 +21,9 @@ add_definitions(-DQT_PLUGIN)
 
 set(src OBJExporter.cpp)
 
+use_glew()
 use_core()
 use_wow()
-use_glew()
 
 add_library(objexporter SHARED ${src})
 

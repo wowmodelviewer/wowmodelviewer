@@ -38,13 +38,6 @@
 // Externals
 
 // Other libraries
-#include <wx/wxprec.h>
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-#include <wx/string.h>
-
 #include "Bone.h"
 #include "WoWModel.h"
 
@@ -261,7 +254,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
         }
         MakeModelFaceForwards(vert);
         vert *= 1.0;
-        file << QString(wxString::Format(wxT("v %.06f %.06f %.06f"), vert.x, vert.y, vert.z).mb_str()) << "\n";
+        QString val;
+        val.sprintf("v %.06f %.06f %.06f",vert.x, vert.y, vert.z);
+        file << val << "\n";
 
         vertics ++;
       }
@@ -282,7 +277,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       {
         uint16 a = model->indices[b];
         Vec2D tc =  model->origVertices[a].texcoords;
-        file << QString(wxString::Format(wxT("vt %.06f %.06f"), tc.x, 1-tc.y)) << "\n";
+        QString val;
+        val.sprintf("vt %.06f %.06f", tc.x, 1-tc.y);
+        file << val << "\n";
         textures ++;
       }
     }
@@ -299,7 +296,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       {
         uint16 a = model->indices[b];
         Vec3D n = model->origVertices[a].normal;
-        file << QString(wxString::Format(wxT("vn %.06f %.06f %.06f"), n.x, n.y, n.z)) << "\n";
+        QString val;
+        val.sprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
+        file << val << "\n";
         normals ++;
       }
     }
@@ -322,7 +321,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
       int g = p.geoset;
 
-      QString matName = QString(model->modelname.c_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), g));
+      QString val;
+      val.sprintf("Geoset_%03i",g);
+      QString matName = QString(model->modelname.c_str()) + "_" + val;
       matName.replace("\\","_");
       QString partName = matName;
 
@@ -384,7 +385,9 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       float amb = 0.25f;
       Vec4D diff = p.ocol;
 
-      QString material = QString(model->modelname.c_str()) + "_" + QString(wxString::Format(wxT("Geoset_%03i"), p.geoset));
+      QString val;
+      val.sprintf("Geoset_%03i",p.geoset);
+      QString material = QString(model->modelname.c_str()) + "_" + val;
       material.replace("\\","_");
       if (p.unlit == true)
       {
@@ -402,11 +405,15 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "newmtl " << material << "\n";
       file << "illum 2" << "\n";
-      file << QString(wxString::Format(wxT("Kd %.06f %.06f %.06f"), diff.x, diff.y, diff.z)) << "\n";
-      file << QString(wxString::Format(wxT("Ka %.06f %.06f %.06f"), amb, amb, amb)) << "\n";
-      file << QString(wxString::Format(wxT("Ks %.06f %.06f %.06f"), p.ecol.x, p.ecol.y, p.ecol.z)) << "\n";
+      val.sprintf("Kd %.06f %.06f %.06f", diff.x, diff.y, diff.z);
+      file << val << "\n";
+      val.sprintf("Ka %.06f %.06f %.06f", amb, amb, amb);
+      file << val << "\n";
+      val.sprintf("Ks %.06f %.06f %.06f", p.ecol.x, p.ecol.y, p.ecol.z);
+      file << val << "\n";
       file << "Ke 0.000000 0.000000 0.000000" << "\n";
-      file << QString(wxString::Format(wxT("Ns %0.6f"), 0.0f)) << "\n";
+      val.sprintf("Ns %0.6f", 0.0f);
+      file << val << "\n";
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;

@@ -51,10 +51,13 @@ set(src  AnimationExportChoiceDialog.cpp
 
 # add external code usage
 use_glew()
+# reset extralibs to clean up wxwidgets (use_glew actually links with wx gl lib)
+set(extralibs "")
 use_core()
 use_wow()
 use_cximage()
 use_casclib()
+use_wxwidgets()
 
 set(RES_FILES "wmv.rc")
 

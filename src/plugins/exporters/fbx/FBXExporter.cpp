@@ -43,15 +43,6 @@
 
 #include "util.h" // SLASH
 
-#include <wx/wxprec.h>
-
-#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif
-
-#include <wx/arrstr.h>
-#include <wx/choicdlg.h>
-
 
 // Current library
 
@@ -640,18 +631,20 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      wxString tex = m_p_model->TextureList[pass.tex]->fullname().toStdString().c_str();
-      std::string tex_name = tex.AfterLast(SLASH).BeforeLast('.').c_str();
+      QString tex = m_p_model->TextureList[pass.tex]->fullname();
+      QString tex_name = tex.right(tex.lastIndexOf('/')+1);
+      tex_name = tex.left(tex.lastIndexOf('.'));
       tex_name += ".png";
-      wxString tex_fullpath_filename = wxString(m_filename.c_str()).BeforeLast(SLASH) + wxT(SLASH) + tex_name.c_str();
+      QString tex_fullpath_filename = QString(m_filename.c_str()).right(tex.lastIndexOf('/')+1) + '/' + tex_name;
+      //wxString tex_fullpath_filename = wxString(m_filename.c_str()).BeforeLast(SLASH) + wxT(SLASH) + tex_name.c_str();
 
-      if(tex_name.find("Body") != std::string::npos)
-        m_texturesToExport[tex_fullpath_filename.c_str()] = m_p_model->replaceTextures[TEXTURE_BODY];
+      if(tex_name.contains("Body", Qt::CaseInsensitive))
+        m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = m_p_model->replaceTextures[TEXTURE_BODY];
       else
-        m_texturesToExport[tex_fullpath_filename.c_str()] = texturemanager.get(tex.c_str());
+        m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = texturemanager.get(tex);
 
-      FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.c_str());
-      texture->SetFileName(tex_fullpath_filename.c_str());
+      FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+      texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
       texture->SetTextureUse(FbxTexture::eStandard);
       texture->SetMappingType(FbxTexture::eUV);
       texture->SetMaterialUse(FbxFileTexture::eModelMaterial);

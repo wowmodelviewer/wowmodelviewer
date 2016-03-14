@@ -47,10 +47,16 @@ macro(use_glew)
   add_definitions(-DGLEW_STATIC)
   
   # temporary solution, glew needs opengl lib, and right now, wx one is used...
-  # as wxwidget congig is global across cmake files, need to find all packages here :(
   set(wxWidgets_CONFIGURATION msw)
-  find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+  find_package(wxWidgets REQUIRED gl)
+  
   list(APPEND extralibs ${wxWidgets_LIBRARIES})
+endmacro()
+
+macro(use_wxwidgets)
+	set(wxWidgets_CONFIGURATION msw)
+	find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+	list(APPEND extralibs ${wxWidgets_LIBRARIES})
 endmacro()
 
 macro(use_cximage)

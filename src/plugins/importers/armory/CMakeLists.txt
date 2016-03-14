@@ -24,6 +24,7 @@ set(src ArmoryImporter.cpp
 
 use_core()
 use_wow()
+use_wxwidgets()
 
 add_library(armory SHARED ${src})
 
