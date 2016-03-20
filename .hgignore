@@ -7,3 +7,4 @@ syntax: glob
 .cproject
 .settings/*
 ./Installers/Windows/NSIS/*.exe
+./VisualStudio2013/*
