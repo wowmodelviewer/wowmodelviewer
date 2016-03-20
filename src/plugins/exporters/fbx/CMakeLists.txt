@@ -30,6 +30,7 @@ use_core()
 use_wow()
 
 add_library(fbxexporter SHARED ${src})
+set_property(TARGET fbxexporter PROPERTY FOLDER "plugins")
 
 target_link_libraries(fbxexporter Qt5::Core core wow $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
 

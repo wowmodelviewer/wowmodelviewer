@@ -66,6 +66,8 @@ set(RES_FILES "wmv.rc")
 
 add_executable(wowmodelviewer WIN32 ${src} ${RES_FILES} )
 
+set_property(TARGET wowmodelviewer PROPERTY FOLDER "executables")
+
 target_link_libraries(wowmodelviewer
   ${wxWidgets_LIBRARIES}
   wow

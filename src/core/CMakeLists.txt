@@ -37,6 +37,7 @@ use_cximage()
 add_definitions(-DBUILDING_CORE_DLL)
 
 add_library(core SHARED ${src})
+set_property(TARGET core PROPERTY FOLDER "libraries")
 
 target_link_libraries(core Qt5::Core Qt5::Network Qt5::Gui ${extralibs})
 

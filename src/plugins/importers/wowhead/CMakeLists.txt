@@ -25,6 +25,7 @@ use_core()
 use_wow()
 
 add_library(wowhead SHARED ${src})
+set_property(TARGET wowhead PROPERTY FOLDER "plugins")
 
 target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core wow)
 

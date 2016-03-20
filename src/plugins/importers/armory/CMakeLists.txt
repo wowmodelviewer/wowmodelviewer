@@ -27,6 +27,7 @@ use_wow()
 use_wxwidgets()
 
 add_library(armory SHARED ${src})
+set_property(TARGET armory PROPERTY FOLDER "plugins")
 
 target_link_libraries(armory ${wxWidgets_LIBRARIES} core wow Qt5::Core)
 

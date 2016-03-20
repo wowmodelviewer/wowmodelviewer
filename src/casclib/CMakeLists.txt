@@ -91,6 +91,7 @@ endif()
 
 message(STATUS "Building Shared CascLib")
 add_library(CascLib ${SRC_FILES} ${SRC_ADDITIONAL_FILES})
+set_property(TARGET CascLib PROPERTY FOLDER "external libraries")
 target_link_libraries(CascLib ${LINK_LIBS})
 
 #if(WIN32)

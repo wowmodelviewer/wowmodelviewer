@@ -26,8 +26,7 @@ use_core()
 use_wow()
 
 add_library(objexporter SHARED ${src})
-
-add_dependencies(objexporter core)
+set_property(TARGET objexporter PROPERTY FOLDER "plugins")
 
 target_link_libraries(objexporter Qt5::Core core wow)
 

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 include(cmake/common.cmake)
 
+# group cmake auto targets  in a dedicated folder for Visual Studio
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # add external libraries compilation
 add_subdirectory(CxImage)
 add_subdirectory(casclib)
