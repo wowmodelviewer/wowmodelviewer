@@ -21,11 +21,14 @@ add_definitions(-DQT_PLUGIN)
 
 set(src OBJExporter.cpp)
 
+set(useful_files objexporter.json)
+set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+
 use_glew()
 use_core()
 use_wow()
 
-add_library(objexporter SHARED ${src})
+add_library(objexporter SHARED ${src} ${useful_files})
 set_property(TARGET objexporter PROPERTY FOLDER "plugins")
 
 target_link_libraries(objexporter Qt5::Core core wow)

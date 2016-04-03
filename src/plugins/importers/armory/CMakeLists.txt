@@ -22,11 +22,14 @@ set(src ArmoryImporter.cpp
         jsonval.cpp
         jsonwriter.cpp)
 
+set(useful_files armoryimporter.json)
+set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+
 use_core()
 use_wow()
 use_wxwidgets()
 
-add_library(armory SHARED ${src})
+add_library(armory SHARED ${src} ${useful_files})
 set_property(TARGET armory PROPERTY FOLDER "plugins")
 
 target_link_libraries(armory ${wxWidgets_LIBRARIES} core wow Qt5::Core)

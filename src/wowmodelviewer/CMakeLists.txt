@@ -64,7 +64,16 @@ set(RES_FILES "wmv.rc")
 #add_definitions(-D_BETAVERSION) # comment if you are building a released version
 #add_definitions(-D_ALPHAVERSION) # comment if you are building a released version
 
-add_executable(wowmodelviewer WIN32 ${src} ${RES_FILES} )
+# extra useful files for visual studio project
+set(useful_files $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
+				 wmv.rc
+				 wowmodelviewer.json
+				 )
+
+set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+
+add_executable(wowmodelviewer WIN32 ${src} ${RES_FILES} ${useful_files})
 
 set_property(TARGET wowmodelviewer PROPERTY FOLDER "executables")
 

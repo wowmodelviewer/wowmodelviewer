@@ -25,11 +25,14 @@ include_directories($ENV{WMV_BASE_PATH}/src/wowmodelviewer) # needed for util.h 
 
 set(src FBXExporter.cpp)
 
+set(useful_files fbxexporter.json)
+set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+
 use_glew()
 use_core()
 use_wow()
 
-add_library(fbxexporter SHARED ${src})
+add_library(fbxexporter SHARED ${src} ${useful_files})
 set_property(TARGET fbxexporter PROPERTY FOLDER "plugins")
 
 target_link_libraries(fbxexporter Qt5::Core core wow $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
