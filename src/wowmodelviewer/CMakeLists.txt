@@ -67,7 +67,6 @@ set(RES_FILES "wmv.rc")
 # extra useful files for visual studio project
 set(useful_files $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
-				 wmv.rc
 				 wowmodelviewer.json
 				 )
 
