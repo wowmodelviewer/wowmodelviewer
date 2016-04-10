@@ -10,23 +10,19 @@
 #include "WoWModel.h"
 
 // Adds models to the model manager, used by WMO's
-int ModelManager::add(GameFile *)
+int ModelManager::add(GameFile * file)
 {
-  return 1;
-  //@TODO : to repair, used by WMO only
-  /*
 	int id;
-	if (names.find(name) != names.end()) {
-		id = names[name];
+	if (names.find(file->name()) != names.end()) {
+    id = names[file->name()];
 		items[id]->addref();
 		return id;
 	}
 	// load new
-	WoWModel *model = new WoWModel(name);
+	WoWModel *model = new WoWModel(file);
 	id = nextID();
-    do_add(name, id, model);
+  do_add(file->name(), id, model);
     return id;
-    */
 }
 
 // Resets the animation back to default.

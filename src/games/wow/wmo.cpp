@@ -1,24 +1,34 @@
 #include "wmo.h"
 
-#include "GameFile.h"
+#include "CASCFile.h"
+#include "Game.h"
+
 #include "logger/Logger.h"
+
+#include <algorithm>
+
 
 using namespace std;
 
+void flipcc(QString & cc)
+{
+  QByteArray ba = cc.toLatin1();
+  char *d = ba.data();
+  std::reverse(d, d + cc.length());
+  cc = QString(d);
+}
+
 WMO::WMO(QString name): ManagedItem(name)
 {
-  /*
-	GameFile f(name);
+  CASCFile f(name);
+  f.open();
 	ok = !f.isEof();
 	if (!ok) {
-		LOG_ERROR << "Couldn't load WMO" << name.c_str();
+		LOG_ERROR << "Couldn't load WMO" << name;
 		f.close();
 		return;
 	}
 
-	LOG_INFO << "Loading WMO" << name.c_str();
-
-	char fourcc[5];
 	uint32 size;
 	float ff[3];
 
@@ -33,15 +43,18 @@ WMO::WMO(QString name): ManagedItem(name)
 	char *texbuf=0;
 
 	while (!f.isEof()) {
-		f.read(fourcc,4);
-		f.read(&size, 4);
+    char buf[5];
+    f.read(buf, 4);
+    buf[4] = 0;
 
-//		flipcc(fourcc); // in former mpq.h
-		fourcc[4] = 0;
+    QString fourcc = QString::fromLatin1(buf);
+    flipcc(fourcc);
+
+		f.read(&size, 4);
 
 		size_t nextpos = f.getPos() + size;
 
-		if (!strcmp(fourcc,"MOHD")) {
+		if (fourcc == "MOHD") {
 			// Header for the map object. 64 bytes.
 			f.read(&nTextures, 4); // number of materials
 			f.read(&nGroups, 4); // number of WMO groups
@@ -60,14 +73,14 @@ WMO::WMO(QString name): ManagedItem(name)
 
 			groups = new WMOGroup[nGroups];
 			mat = new WMOMaterial[nTextures];
-		} else if (!strcmp(fourcc,"MOTX")) {
+		} else if (fourcc == "MOTX") {
 			// textures
 			// The beginning of a string is always aligned to a 4Byte Adress. (0, 4, 8, C). 
 			// The end of the string is Zero terminated and filled with zeros until the next aligment. 
 			// Sometimes there also empty aligtments for no (it seems like no) real reason.
 			texbuf = new char[size];
 			f.read(texbuf, size);
-		} else if (!strcmp(fourcc,"MOMT")) {
+		} else if (fourcc == "MOMT") {
 			// materials
 			// Materials used in this map object, 64 bytes per texture (BLP file), nMaterials entries.
 
@@ -75,10 +88,9 @@ WMO::WMO(QString name): ManagedItem(name)
 				WMOMaterial *m = &mat[i];
 				f.read(m, 0x40);
 
-				wxString texpath(texbuf+m->nameStart, wxConvUTF8);
-				fixname(texpath);
+				QString texpath = QString::fromLatin1(texbuf+m->nameStart);
 
-				m->tex = texturemanager.add(texpath);
+        m->tex = texturemanager.add(GAMEDIRECTORY.getFile(texpath));
 				textures.push_back(texpath);
 				
 				// need repeat turned on
@@ -93,31 +105,29 @@ WMO::WMO(QString name): ManagedItem(name)
 //				gLog("\t - %s\n", texpath.c_str());
 
 			}
-		} else if (!strcmp(fourcc,"MOGN")) {
+		} else if (fourcc == "MOGN") {
 			// List of group names for the groups in this map object. There are nGroups entries in this chunk.
 			// A contiguous block of zero-terminated strings. The names are purely informational, 
 			// they aren't used elsewhere (to my knowledge)
 			// i think that his realy is zero terminated and just a name list .. but so far im not sure 
 			// _what_ else it could be - tharo
-			groupnames = new char[size];
-			memcpy(groupnames,f.getPointer(),size);
-			
-			//groupnames = (char*)f.getPointer();
-		} else if (!strcmp(fourcc,"MOGI")) {
+      groupnames = new char[size];
+      f.read(groupnames, size);
+		} else if (fourcc == "MOGI") {
 			// group info - important information! ^_^
 			// Group information for WMO groups, 32 bytes per group, nGroups entries.
 			for (size_t i=0; i<nGroups; i++) {
 				groups[i].init(this, f, (int)i, groupnames);
 
 			}
-		} else if (!strcmp(fourcc,"MOLT")) {
+		} else if (fourcc == "MOLT") {
 			// Lighting information. 48 bytes per light, nLights entries
 			for (size_t i=0; i<nLights; i++) {
 				WMOLight l;
 				l.init(f);
 				lights.push_back(l);
 			}
-		} else if (!strcmp(fourcc,"MODN")) {
+		} else if (fourcc == "MODN") {
 			// models ...
 			// MMID would be relative offsets for MMDX filenames
 			// List of filenames for M2 (mdx) models that appear in this WMO.
@@ -125,21 +135,19 @@ WMO::WMO(QString name): ManagedItem(name)
 			if (size) {
 
 				ddnames = (char*)f.getPointer();
-				fixnamen(ddnames, size);
+				//fixnamen(ddnames, size);
 
 				char *p=ddnames,*end=p+size;
 				
 				while (p<end) {
-					wxString path(p, wxConvUTF8);
+					QString path = QString::fromLatin1(p);
 					p+=strlen(p)+1;
 					while ((p<end) && (*p==0)) p++;
-
-					//gWorld->modelmanager.add(path);
-					models.push_back(path);
+					models.push_back(path.toStdString());
 				}
 				f.seekRelative((int)size);
 			}
-		} else if (!strcmp(fourcc,"MODS")) {
+		} else if (fourcc == "MODS") {
 			// This chunk defines doodad sets.
 			// Doodads in WoW are M2 model files. There are 32 bytes per doodad set, and nSets 
 			// entries. Doodad sets specify several versions of "interior decoration" for a WMO. Like, 
@@ -152,7 +160,7 @@ WMO::WMO(QString name): ManagedItem(name)
 				f.read(&dds, 32);
 				doodadsets.push_back(dds);
 			}
-		} else if (!strcmp(fourcc,"MODD")) {
+		} else if (fourcc == "MODD") {
 			// Information for doodad instances. 40 bytes per doodad instance, nDoodads entries.
 			// While WMOs and models (M2s) in a map tile are rotated along the axes, doodads within 
 			// a WMO are oriented using quaternions! Hooray for consistency!
@@ -173,12 +181,12 @@ WMO::WMO(QString name): ManagedItem(name)
 			}
 
 		}
-		else if (!strcmp(fourcc,"MOSB")) {
+		else if (fourcc == "MOSB") {
 			// Skybox. Always 00 00 00 00. Skyboxes are now defined in DBCs (Light.dbc etc.). 
 			// Contained a M2 filename that was used as skybox.
 			if (size>4) {
-				wxString path = wxString((char*)f.getPointer(), wxConvUTF8);
-				fixname(path);
+				QString path = QString::fromLatin1((char*)f.getPointer());
+				//fixname(path);
 				if (path.length()) {
 					//gLog("SKYBOX:\n");
 
@@ -191,9 +199,8 @@ WMO::WMO(QString name): ManagedItem(name)
 					}
 
 				}
-			}
 		}
-		else if (!strcmp(fourcc,"MOPV")) {
+		else if (fourcc == "MOPV") {
 			// Portal vertices, 4 * 3 * float per portal, nPortals entries.
 			// Portals are (always?) rectangles that specify where doors or entrances are in a WMO. 
 			// They could be used for visibility, but I currently have no idea what relations they have 
@@ -219,7 +226,7 @@ WMO::WMO(QString name): ManagedItem(name)
 				pvs.push_back(p);
 			}
 		}
-		else if (!strcmp(fourcc,"MOPR")) {
+		else if (fourcc == "MOPR") {
 			// Portal <> group relationship? 2*nPortals entries of 8 bytes.
 			// I think this might specify the two WMO groups that a portal connects.
 			size_t nn = size / 8;
@@ -228,15 +235,15 @@ WMO::WMO(QString name): ManagedItem(name)
 				prs.push_back(*pr++);
 			}
 		}
-		else if (!strcmp(fourcc,"MOVV")) {
+		else if (fourcc == "MOVV") {
 			// Visible block vertices
 			// Just a list of vertices that corresponds to the visible block list.
 		}
-		else if (!strcmp(fourcc,"MOVB")) {
+		else if (fourcc == "MOVB") {
 			// Visible block list
  			// WMOVB p;
 		}
-		else if (!strcmp(fourcc,"MFOG")) {
+		else if (fourcc == "MFOG") {
 			// Fog information. Made up of blocks of 48 bytes.
 			size_t nfogs = size / 0x30;
 			for (size_t i=0; i<nfogs; i++) {
@@ -245,7 +252,7 @@ WMO::WMO(QString name): ManagedItem(name)
 				fogs.push_back(fog);
 			}
 		}
-		else if (!strcmp(fourcc,"MFOG")) {
+		else if (fourcc == "MFOG") {
 			// optional, Convex Volume Planes. Contains blocks of floating-point numbers.
 		}
 
@@ -253,17 +260,16 @@ WMO::WMO(QString name): ManagedItem(name)
 	}
 
 	f.close();
-	delete[] texbuf;
+  delete[] texbuf;
 
-	//for (size_t i=0; i<nGroups; i++) groups[i].initDisplayList();
-*/
+	for (size_t i=0; i<nGroups; i++) groups[i].initDisplayList();
 }
 
 WMO::~WMO()
 {
 	if (ok) {
 		//gLog("Unloading WMO %s\n", name.c_str());
-		delete[] groups;
+	  delete[] groups;
 
 		for (size_t i=0; i<textures.size(); i++) {
 		  texturemanager.delbyname(textures[i]);
@@ -277,12 +283,11 @@ WMO::~WMO()
 
 		delete[] mat;
 
-		/*
+		
 		if (skybox) {
 			delete skybox;
 			//gWorld->modelmanager.del(sbid);
 		}
-		*/
 
 		loadedModels.clear();
 		delete groupnames;
@@ -292,10 +297,10 @@ WMO::~WMO()
 void WMO::loadGroup(int id)
 {
 	if (id==-1) {
-		for (size_t i=0; i<nGroups; i++) {
-			groups[i].initDisplayList();
-			groups[i].visible = true;
-		}
+    for (size_t i = 0; i < nGroups; i++) {
+      groups[i].initDisplayList();
+      groups[i].visible = true;
+    }
 	}
 	else if (id>=0 && (unsigned int)id<nGroups) {
 		groups[id].initDisplayList();
@@ -670,7 +675,6 @@ struct WMOGroupHeader {
 
 void WMOGroup::initDisplayList()
 {
-  /*
 	vertices = NULL;
 	normals = NULL;
 	texcoords = NULL;
@@ -685,48 +689,50 @@ void WMOGroup::initDisplayList()
 	int nLR = 0;
 
 	// open group file
-	wxString temp(wmo->name.c_str(), wxConvUTF8);
-	temp = temp.BeforeLast(wxT('.'));
+  QString temp(wmo->itemName());
+	temp = temp.left(temp.lastIndexOf('.'));
 	
-	wxString fname;
-	fname.Printf(wxT("%s_%03d.wmo"), temp.c_str(), num);
-
-	GameFile gf(fname);
-    gf.seek(0x14);
+  QString fname = QString("%1_%2.wmo").arg(temp).arg(num, 3, 10, QChar('0'));
+  CASCFile gf(fname);
+  gf.open();
+  gf.seek(0x14);
 
 	// read header
-	gf.read(&gh, sizeof(WMOGroupHeader));
+  gf.read(&gh, sizeof(WMOGroupHeader));
 	WMOFog &wf = wmo->fogs[gh.fogs[0]];
 	if (wf.r2 <= 0)
 		fog = -1; // default outdoor fog..?
 	else 
 		fog = gh.fogs[0];
 
-	name = wxString(wmo->groupnames + gh.nameStart, wxConvUTF8);
-	desc = wxString(wmo->groupnames + gh.nameStart2, wxConvUTF8);
+  name = QString::fromLatin1(wmo->groupnames + gh.nameStart).toStdString();
+  desc = QString::fromLatin1(wmo->groupnames + gh.nameStart2).toStdString();
 
 	b1 = Vec3D(gh.box1[0], gh.box1[2], -gh.box1[1]);
 	b2 = Vec3D(gh.box2[0], gh.box2[2], -gh.box2[1]);
 
-	gf.seek(0x58); // first chunk
-	char fourcc[5];
+  gf.seek(0x58); // first chunk
+  
 	uint32 size;
 
 	cv = 0;
 	hascv = false;
 
 	while (!gf.isEof()) {
-		gf.read(fourcc,4);
-		gf.read(&size, 4);
+    char buf[5];
+    gf.read(buf, 4);
+    buf[4] = 0;
 
-//		flipcc(fourcc); // in former mpq.h
-		fourcc[4] = 0;
+    QString fourcc = QString::fromLatin1(buf);
+    flipcc(fourcc);
+
+		gf.read(&size, 4);
 
 		size_t nextpos = gf.getPos() + size;
 
 		// why copy stuff when I can just map it from memory ^_^
 
-		if (!strcmp(fourcc,"MOPY")) {
+		if (fourcc == "MOPY") {
 			
 //			Material info for triangles, two bytes per triangle. So size of this chunk in bytes is twice the number of triangles in the WMO group.
 //			Offset	Type	Description
@@ -761,76 +767,67 @@ void WMOGroup::initDisplayList()
 //			0xFF representing -1 is used for collision-only triangles. They aren't rendered but have collision. Problem with it: WoW seems to cast and reflect light on them. Its a bug in the engine. --schlumpf_ 20:40, 7 June 2009 (CEST)
 //			Triangles stored here are more-or-less pre-sorted by texture, so it's ok to draw them sequentially.
 
-
 			// materials per triangle
 			nTriangles = (uint32)(size / 2);
 			materials = new uint16[nTriangles];
-			gf.read(materials, size);
-			//memcpy(materials, gf.getPointer(), size);
+      gf.read(materials, size);
 		}
-		else if (!strcmp(fourcc,"MOVI")) {
-
+		else if (fourcc == "MOVI") {
 //			Vertex indices for triangles. Three 16-bit integers per triangle, that are indices into the vertex list. The numbers specify the 3 vertices for each triangle, their order makes it possible to do backface culling.
-
 			nIndices = (size / 2);
 			indices = new uint16[nIndices];
-			gf.read(indices, size);
+      gf.read(indices, nIndices*2);
 		}
-		else if (!strcmp(fourcc,"MOVT")) {
-
-//			Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
-
-			nVertices = (size / 12);
-			// let's hope it's padded to 12 bytes, not 16...
-			vertices = new Vec3D[nVertices];
-			gf.read(vertices, size);
-			vmin = Vec3D( 9999999.0f, 9999999.0f, 9999999.0f);
-			vmax = Vec3D(-9999999.0f,-9999999.0f,-9999999.0f);
-			rad = 0;
-			for (size_t i=0; i<nVertices; i++) {
-				Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
-				if (v.x < vmin.x) vmin.x = v.x;
-				if (v.y < vmin.y) vmin.y = v.y;
-				if (v.z < vmin.z) vmin.z = v.z;
-				if (v.x > vmax.x) vmax.x = v.x;
-				if (v.y > vmax.y) vmax.y = v.y;
-				if (v.z > vmax.z) vmax.z = v.z;
-			}
-			center = (vmax + vmin) * 0.5f;
-			rad = (vmax-center).length();
+		else if (fourcc == "MOVT") {
+        //			Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
+        nVertices = (size / 12);
+        // let's hope it's padded to 12 bytes, not 16...
+        vertices = new Vec3D[nVertices];
+        gf.read(vertices, size);
+        vmin = Vec3D(9999999.0f, 9999999.0f, 9999999.0f);
+        vmax = Vec3D(-9999999.0f, -9999999.0f, -9999999.0f);
+        rad = 0;
+        for (size_t i = 0; i < nVertices; i++) {
+          Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
+          if (v.x < vmin.x) vmin.x = v.x;
+          if (v.y < vmin.y) vmin.y = v.y;
+          if (v.z < vmin.z) vmin.z = v.z;
+          if (v.x > vmax.x) vmax.x = v.x;
+          if (v.y > vmax.y) vmax.y = v.y;
+          if (v.z > vmax.z) vmax.z = v.z;     
+        }
+        center = (vmax + vmin) * 0.5f;
+        rad = (vmax - center).length();      
 		}
-		else if (!strcmp(fourcc,"MONR")) {
+		else if (fourcc == "MONR") {
 			// Normals. 3 floats per vertex normal, in (X,Z,-Y) order.
 			uint32 tSize = (uint32)(size/12);
 			normals = new Vec3D[tSize];
 			gf.read(normals, size);
 		}
-		else if (!strcmp(fourcc,"MOTV")) {
+		else if (fourcc == "MOTV") {
 			// Texture coordinates, 2 floats per vertex in (X,Y) order. The values range from 0.0 to 1.0. Vertices, normals and texture coordinates are in corresponding order, of course.
 			uint32 tSize = (uint32)(size/8);
 			texcoords = new Vec2D[tSize];
 			gf.read(texcoords, size);
 		}
-		else if (!strcmp(fourcc,"MOLR")) {
-
+		else if (fourcc == "MOLR") {
 //			Light references, one 16-bit integer per light reference.
 //			This is basically a list of lights used in this WMO group, the numbers are indices into the WMO root file's MOLT table.
 //			For some WMO groups there is a large number of lights specified here, more than what a typical video card will handle at once. I wonder how they do lighting properly. Currently, I just turn on the first GL_MAX_LIGHTS and hope for the best. :(
-
 			nLR = (int)size / 2;
 			useLights =  (short*)gf.getPointer();
 		}
-		else if (strcmp(fourcc,"MODR")==0) {
-
+		else if (fourcc == "MODR") {  
 //			Doodad references, one 16-bit integer per doodad.
 //			The numbers are indices into the doodad instance table (MODD chunk) of the WMO root file. These have to be filtered to the doodad set being used in any given WMO instance.
-
+      /*
 			nDoodads = (int)(size/2);
 			ddr = new short[nDoodads];
 			gf.read(ddr,size);
+        */
 		}
-		else if (strcmp(fourcc,"MOBN")==0) {
-
+		else if (fourcc == "MOBN") {
 //			Array of t_BSP_NODE.
 //			struct t_BSP_NODE
 //			{
@@ -844,22 +841,11 @@ void WMOGroup::initDisplayList()
 //			// The numfaces and firstface define a polygon plane.
 //													2005-4-4 by linghuye
 //			This+BoundingBox(in wmo_root.MOGI) is used for Collision --Tigurius
-
 		}
-		else if (strcmp(fourcc,"MOBR")==0) {
+		else if (fourcc == "MOBR") {
 			// Triangle indices (in MOVI which define triangles) to describe polygon planes defined by MOBN BSP nodes.
 		}
-		else if (!strcmp(fourcc,"MODR")) {
-
-//			Doodad references, one 16-bit integer per doodad.
-//			The numbers are indices into the doodad instance table (MODD chunk) of the WMO root file. These have to be filtered to the doodad set being used in any given WMO instance.
-
-			if (ddr) delete ddr;
-			nDoodads = (int)(size / 2);
-			ddr = new short[nDoodads];
-			gf.read(ddr,size);
-		}
-		else if (!strcmp(fourcc,"MOBA")) {
+    else if (fourcc == "MOBA") {
 //			Render batches. Records of 24 bytes.
 //			struct SMOBatch // 03-29-2005 By ObscuR
 //			{
@@ -896,11 +882,10 @@ void WMOGroup::initDisplayList()
 //			Flags
 //			0x1		Unknown
 //			0x4		Unknown
-
-			nBatches = (uint32)(size/24);
+      
+      nBatches = (uint32)(size / 24);
 			batches = new WMOBatch[nBatches];
-			memcpy(batches, gf.getPointer(), size);
-
+      gf.read(batches, size);    
 
 //			// batch logging
 //			gLog("\nWMO group #%d - %s\nVertices: %d\nTriangles: %d\nIndices: %d\nBatches: %d\n",
@@ -921,7 +906,7 @@ void WMOGroup::initDisplayList()
 //			int l = nBatches-1;
 //			gLog("Max index: %d\n", ba[l].indexStart + ba[l].indexCount);
 		}
-		else if (!strcmp(fourcc,"MOCV")) {
+		else if (fourcc == "MOCV") {
 			size_t spos = gf.getPos();
 //			Vertex colors, 4 bytes per vertex (BGRA), for WMO groups using indoor lighting.
 //			I don't know if this is supposed to work together with, or replace, the lights referenced in MOLR. But it sure is the only way for the ground around the goblin smelting pot to turn red in the Deadmines. (but some corridors are, in turn, too dark - how the hell does lighting work anyway, are there lightmaps hidden somewhere?)
@@ -929,31 +914,23 @@ void WMOGroup::initDisplayList()
 //			After further inspection, this is it, actual pre-lit vertex colors for WMOs - vertex lighting is turned off. This is used if flag 0x2000 in the MOGI chunk is on for this group. This pretty much fixes indoor lighting in Ironforge and Undercity. The "light" lights are used only for M2 models (doodads and characters). (The "too dark" corridors seemed like that because I was looking at it in a window - in full screen it looks pretty much the same as in the game) Now THAT's progress!!!
 
 			//gLog("CV: %d\n", size);
-			hascv = true;
+			//hascv = true;
 			cv = (unsigned int*)gf.getPointer();
-			LOG_INFO << "Original Vertex Colors Gathered.";
 
-			// Temp, until we get this fully working.
+      // Temp, until we get this fully working.
 			gf.seek(spos);
-			LOG_INFO << "Gathering New Vertex Colors...";
 			VertexColors = new WMOVertColor[nVertices];
-			memcpy(VertexColors, gf.getPointer(), size);
+      gf.read(VertexColors, size);
 //			for (size_t x=0;x<nVertices;x++){
 //				WMOVertColor vc;
 //				gf.read(&vc,4);
 //				VertexColors.push_back(vc);
 //			}
-
 		}
-		else if (!strcmp(fourcc,"MLIQ")) {
+		else if (fourcc == "MLIQ") {
 			// liquids
 			WMOLiquidHeader hlq;
-			gf.read(&hlq, 0x1E);
-
-			//gLog("WMO Liquid: %dx%d, %dx%d, (%f,%f,%f) %d\n", hlq.X, hlq.Y, hlq.A, hlq.B, hlq.pos.x, hlq.pos.y, hlq.pos.z, hlq.type);
-
-			//lq = new Liquid(hlq.A, hlq.B, Vec3D(hlq.pos.x, hlq.pos.z, -hlq.pos.y));
-			//lq->initFromWMO(gf, wmo->mat[hlq.type], (flags&0x2000)!=0);
+      gf.read(&hlq, sizeof(WMOLiquidHeader));
 		}
 
 		// TODO: figure out/use MFOG ?
@@ -982,26 +959,24 @@ void WMOGroup::initDisplayList()
 
 	// assume that texturing is on, for unit 1
 
-	IndiceToVerts = new uint32[nIndices]+2;
+	IndiceToVerts = new uint32[nIndices];
 
 	for (size_t b=0; b<nBatches; b++) {
 		WMOBatch *batch = &batches[b];
 		WMOMaterial *mat = &wmo->mat[batch->texture];
 
 		// build indice to vert array.
-		LOG_INFO << "Indice to Vert Conversion Array for Batch" << b;
 		for (size_t i=0;i<=batch->indexCount;i++){
 			size_t a = indices[batch->indexStart + i];
 			for (size_t j=batch->vertexStart;j<=batch->vertexEnd;j++){
 				if (vertices[a] == vertices[j]){
 					IndiceToVerts[batch->indexStart + i] = j;
-					LOG_INFO << "Indice" << batch->indexStart + i << "=" << j;
 					break;
 				}
 			}
 		}
 
-        // setup texture
+    // setup texture
 		glBindTexture(GL_TEXTURE_2D, mat->tex);
 
 		bool atest = (mat->transparent) != 0;
@@ -1066,7 +1041,6 @@ void WMOGroup::initDisplayList()
 	indoor = false;
 
 	ok = true;
-	*/
 }
 
 
@@ -1226,7 +1200,7 @@ nIndices(0), nBatches(0)
 WMOGroup::~WMOGroup()
 {
 	cleanup();
-	if (ddr) delete ddr;
+	delete ddr;
 }
 
 void WMOGroup::cleanup()
@@ -1235,15 +1209,20 @@ void WMOGroup::cleanup()
 	dl = 0;
 	if (dl_light) glDeleteLists(dl_light, 1);
 	dl_light = 0;
-	//if (lq) delete lq; lq = 0;
 	ok = false;
 
 	delete vertices;
+  vertices = 0;
 	delete normals;
+  normals = 0;
 	delete texcoords;
+  texcoords = 0;
 	delete indices;
+  indices = 0;
 	delete materials;
+  materials = 0;
 	delete batches;
+  batches = 0;
 }
 
 void WMOFog::init(GameFile &f)
@@ -1347,7 +1326,11 @@ std::set<int> WMOInstance::ids;
 
 void WMOModelInstance::init(char *fname, GameFile &f)
 {
-	filename = fname;
+	filename = QString::fromLatin1(fname);
+  filename = filename.toLower();
+  filename.replace(".mdx", ".m2");
+  filename.replace(".mdl", ".m2");
+
 	model = 0;
 
 	float ff[3],temp;
@@ -1389,11 +1372,8 @@ void WMOModelInstance::draw()
 
 void WMOModelInstance::loadModel(ModelManager &mm)
 {
-  //@TODO to repair for WMO support
-  /*
-    model = (WoWModel*)mm.items[mm.add(filename)];
+  model = (WoWModel*)mm.items[mm.add(GAMEDIRECTORY.getFile(filename))];
 	model->isWMO = true;
-	*/
 }
 
 void WMOModelInstance::unloadModel(ModelManager &mm)

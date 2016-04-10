@@ -508,7 +508,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		modelviewer->isWMO = true;
 		wxString rootfn(data->file->fullname().toStdString());
 
-		//canvas->model->modelType = MT_WMO;
+    //modelviewer->canvas->model->modelType = MT_WMO;
 
 		// if we have selected a non-root wmo, find the root filename
 		char dash = rootfn[rootfn.length() - 8];
@@ -529,6 +529,9 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 			idnum[3]=0;
 			sscanf(idnum,"%d",&id);
 		}
+
+    LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo;
+
 		modelviewer->canvas->wmo->loadGroup(id);
 		modelviewer->canvas->ResetViewWMO(id);
 		modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
