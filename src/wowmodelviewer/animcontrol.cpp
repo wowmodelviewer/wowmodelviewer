@@ -11,6 +11,7 @@
 #include "modelviewer.h"
 #include "UserSkins.h"
 #include "util.h"
+#include "WMOGroup.h"
 
 
 IMPLEMENT_CLASS(AnimControl, wxWindow)

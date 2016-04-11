@@ -48,6 +48,10 @@ set(src animated.cpp
         TextureAnim.cpp
         video.cpp
         wmo.cpp
+		WMOFog.cpp
+		WMOGroup.cpp
+		WMOLight.cpp
+		WMOModelInstance.cpp
         WoWItem.cpp
         WoWModel.cpp)
 

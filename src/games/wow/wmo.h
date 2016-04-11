@@ -12,70 +12,15 @@
 #include "ModelManager.h"
 #include "vec3d.h"
 #include "video.h"
+#include "WMOFog.h"
+#include "WMOLight.h"
+#include "WMOModelInstance.h"
 #include "WoWModel.h"
 
 class WMO;
 class WMOGroup;
-class WMOInstance;
-class WMOManager;
 
 class GameFile;
-//class Liquid;
-
-struct WMOBatch {
-  unsigned short  a[2 * 3];        // indices? a box? (-2,-2,-1,2,2,3 in cameron)
-	unsigned int indexStart;
-	unsigned short indexCount, vertexStart, vertexEnd;
-	unsigned char flags, texture;
-};
-
-struct WMOVertColor{
-	uint8 b, g, r, a;
-};
-
-class WMOGroup {
-	WMO *wmo;
-	int flags;
-	GLuint dl,dl_light;
-	Vec3D center;
-	float rad;
-	int num;
-	int fog;
-	size_t nDoodads;
-	short *ddr;
-	//Liquid *lq;
-public:
-	Vec3D *vertices, *normals;
-	Vec2D *texcoords;
-	uint16 *indices;
-	uint16 *materials;
-	uint32 nTriangles, nVertices,  nIndices, nBatches;
-	unsigned int *cv;
-	WMOBatch *batches;
-	WMOVertColor *VertexColors;
-	uint32 *IndiceToVerts;
-
-	Vec3D v1,v2;
-	Vec3D b1,b2;
-	Vec3D vmin, vmax;
-	bool indoor, hascv, visible, ok;
-
-	bool outdoorLights;
-	std::string name, desc;
-
-	WMOGroup();
-	~WMOGroup();
-	void init(WMO *wmo, GameFile &f, int num, char *names);
-	void initDisplayList();
-	void initLighting(int nLR, short *useLights);
-	void draw();
-	void drawLiquid();
-	void drawDoodads(int doodadset);
-	void setupFog();
-	void cleanup();
-
-	void updateModels(bool load);
-};
 
 #define	WMO_MATERIAL_CULL	0x04	// Remove the back-facing polygons
 #define WMO_MATERIAL_LUM	0x10	// Bright at Night
@@ -93,29 +38,6 @@ struct WMOMaterial {
 	int dx[5];
 	// read up to here -_-
 	TextureID tex;
-};
-
-enum LightType 
-{
-	OMNI_LGT,
-	SPOT_LGT,
-	DIRECT_LGT,
-	AMBIENT_LGT
-};
-struct WMOLight {
-	unsigned int lighttype, type, useatten, color;
-	Vec3D pos;
-	float intensity;
-	float attenStart, attenEnd;
-	float unk[3];
-	float r;
-
-	Vec4D fcolor;
-
-	void init(GameFile &f);
-	void setup(GLint light);
-
-	static void setupOnce(GLint light, Vec3D dir, Vec3D lcol);
 };
 
 struct WMOPV {
@@ -145,48 +67,6 @@ struct WMOLiquidHeader {
 	int X, Y, A, B;
 	Vec3D pos;
 	short type;
-};
-
-struct WMOFog {
-	unsigned int flags;
-	Vec3D pos;
-	float r1; // Smaller radius
-	float r2; // Larger radius
-	float fogend; // This is the distance at which all visibility ceases, and you see no objects or terrain except for the fog color.
-	float fogstart; // This is where the fog starts. Obtained by multiplying the fog end value by the fog start multiplier. multiplier (0..1)
-	unsigned int color1; // The back buffer is also cleared to this colour 
-	float f2; // Unknown (almost always 222.222)
-	float f3; // Unknown (-1 or -0.5)
-	unsigned int color2;
-	// read to here (0x30 bytes)
-	Vec4D color;
-	void init(GameFile &f);
-	void setup();
-};
-
-class WMOModelInstance {
-public:
-	// header
-	Vec3D pos;		// Position
-	float w;		// W for Quat Rotation
-	Vec3D dir;		// Direction for Quat Rotation
-	float sc;		// Scale Factor
-	unsigned int d1;
-	
-	WoWModel *model;
-	QString filename;
-	int id;
-	unsigned int scale;
-	int light;
-	Vec3D ldir;
-	Vec3D lcol;
-
-	WMOModelInstance() {}
-    void init(char *fname, GameFile &f);
-	void draw();
-
-	void loadModel(ModelManager &mm);
-	void unloadModel(ModelManager &mm);
 };
 
 struct WMOHeader {
@@ -269,31 +149,9 @@ public:
 	void loadGroup(int id);
 	void showDoodadSet(int id);
 	void updateModels();
+
+  static void flipcc(QString &);
+
 };
-
-/*
-class WMOManager: public SimpleManager {
-public:
-	int add(wxString name);
-};
-
-
-class WMOInstance {
-	static std::set<int> ids;
-public:
-	WMO *wmo;
-	Vec3D pos;
-	Vec3D pos2, pos3, dir;
-	int id, d2, d3;
-	int doodadset;
-
-	WMOInstance(WMO *wmo, GameFile &f);
-	void draw();
-	//void drawPortals();
-
-	static void reset();
-};
-*/
-
 
 #endif

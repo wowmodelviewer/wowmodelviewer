@@ -19,6 +19,7 @@
 #include "animcontrol.h"
 #include "modelviewer.h"
 #include "shaders.h"
+#include "WMOGroup.h"
 
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
 
