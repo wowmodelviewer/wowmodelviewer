@@ -119,7 +119,6 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	drawAVIBackground = false;
 	drawSky = false;
 	drawGrid = false;
-	bMouseLight = false;
 	useCamera = false;
 	
 	
@@ -443,8 +442,8 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 			if (event.LeftIsDown() && event.RightIsDown()) {
 				wmo->viewpos.y -= dy*mul;
 			} else if (event.LeftIsDown()) {
-				wmo->viewrot.x -= dx*mul/5;
-				wmo->viewrot.y -= dy*mul/5;
+        wmo->viewrot.x -= dx*mul / 5;
+        wmo->viewrot.y -= dy*mul / 5;
 			} else if (event.RightIsDown()) {
 				wmo->viewrot.x -= dx*mul/5;
 				float f = cos(wmo->viewrot.y * piover180);
@@ -469,10 +468,7 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 			mx = px;
 			my = py;
 
-			if (bMouseLight) // going to use vRot to hold our temp light position (technically, our g_modelViewer->lightControl->lights rotation).
-				vRot0 = Vec3D(g_modelViewer->lightControl->GetCurrentPos().x,g_modelViewer->lightControl->GetCurrentPos().y,g_modelViewer->lightControl->GetCurrentPos().z);
-			else
-				vRot0 = model->rot;
+      vRot0 = model->rot;
 
 			vPos0 = model->pos;
 
@@ -480,45 +476,19 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 			int dx = mx - px;
 			int dy = my - py;
 
-			if (event.LeftIsDown()) {
-				if (bMouseLight)
-					return;
-
+			if (event.LeftIsDown()) {        
 				model->rot.x = vRot0.x - (dy / 2.0f); // * mul);
 				model->rot.y = vRot0.y - (dx / 2.0f); // * mul);
-
-				//viewControl->Refresh();
-
 			} else if (event.RightIsDown()) {
-				mul /= 100.0f;
+        mul /= 100.0f;
 
-				if (bMouseLight) {
-					Vec4D temp = g_modelViewer->lightControl->GetCurrentPos();
-					temp.y = vRot0.y + dy*mul;
-					temp.x = vRot0.x - dx*mul;
-					g_modelViewer->lightControl->SetPos(temp);
-					g_modelViewer->lightControl->Update();
-				} else {
-					model->pos.x = vPos0.x - dx*mul;
-					model->pos.y = vPos0.y + dy*mul;
-
-					//viewControl->Refresh();
-				}
-
+        model->pos.x = vPos0.x - dx*mul;
+        model->pos.y = vPos0.y + dy*mul;
 			} else if (event.MiddleIsDown()) {
 				if (!event.m_altDown) {
 					mul = (mul / 20.0f) * dy;
-
-					if (bMouseLight) {
-						Vec4D temp = g_modelViewer->lightControl->GetCurrentPos();
-						temp.z = vRot0.z - mul;
-						g_modelViewer->lightControl->SetPos(temp); 
-						g_modelViewer->lightControl->Update();
-					} else {
-						Zoom(mul, false);
-						my = py;
-					}
-
+				  Zoom(mul, false);
+				  my = py;
 				} else {
 					mul = (mul / 1200.0f) * dy;
 					Zoom(mul, true);
@@ -530,14 +500,7 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 			if (pz != 0) {
 				mul = (mul / 120.0f) * pz;
 				if (!wxGetKeyState(WXK_ALT)) {
-					if (bMouseLight) {
-						Vec4D temp = g_modelViewer->lightControl->GetCurrentPos();
-						temp.z -= mul / 10.0f;
-						g_modelViewer->lightControl->SetPos(temp); 
-						g_modelViewer->lightControl->Update();
-					} else {
-						Zoom(mul, false);
-					}
+          Zoom(mul, false);
 				} else {
 					mul /= 50.0f;
 					Zoom(mul, true);

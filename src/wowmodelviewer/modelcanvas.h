@@ -156,9 +156,6 @@ public:
 	bool drawLightDir, drawBackground, drawSky, drawGrid, drawAVIBackground;
 	bool useCamera; //, useLights;
 
-	// These are now handled by each individual model.
-	bool bMouseLight; // true if the mouse is set to control the light pos, instead of model
-
 	int lightType;	// MODEL / AMBIENCE / DYNAMIC
 	int ignoreMouse;
 
