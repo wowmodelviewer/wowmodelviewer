@@ -967,25 +967,22 @@ void CharControl::selectMount()
   // All models from Creature/
   if (creaturemodels.empty())
   {
-    sqlResult creatureQuery = GAMEDATABASE.sqlQuery(
-                              "SELECT name, path FROM FileData "
-                              "WHERE path LIKE 'creature%' "
-                              "AND name LIKE '%.m2' COLLATE NOCASE "
-                              "ORDER BY LOWER(path), LOWER(name)");
-    if(creatureQuery.valid && !creatureQuery.empty())
+    std::vector<GameFile *> files;
+    GAMEDIRECTORY.getFilesForFolder(files, QString("creature\\"), QString("m2"));
+    if(files.size())
     {
-      for(int i = 0, imax = creatureQuery.values.size(); i < imax; i++)
+      std::vector<GameFile *>::iterator it;
+      for(it = files.begin(); it != files.end(); ++it)
       {
-        std::string path, name;
-        name = creatureQuery.values[i][0].toLower().toStdString();
-        path = creatureQuery.values[i][1].toLower().toStdString() + name;
-        creaturemodels.push_back(wxString(path));
+        QString fn = (*it)->fullname();
+        creaturemodels.push_back(wxString(fn.toUtf8().constData()));
       }
+      creaturemodels.Sort();
     }
   }
   for (size_t i = 0; i < creaturemodels.size(); i++) 
   {
-    choices.Add(creaturemodels[i].substr(9,string::npos));  // remove "creature/" bit for readability
+    choices.Add(creaturemodels[i].substr(9, string::npos)); // remove "creature/" bit for readability
     numbers.push_back(i);
     cats.push_back(1);
   }
