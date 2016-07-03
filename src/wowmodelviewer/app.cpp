@@ -252,6 +252,11 @@ bool WowModelViewApp::OnInit()
       SetConsoleTitle("WoWModelViewer Debug Console");
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
 
+      HWND console = GetConsoleWindow();
+      RECT r;
+      GetWindowRect(console, &r);
+      MoveWindow(console, r.left, r.top, 800, 600, TRUE);
+
       std::wcout.clear();
       std::cout.clear();
       std::wcerr.clear();
