@@ -25,12 +25,8 @@
 
   // In MSVC 8.0, there are some functions declared as deprecated.
   #if _MSC_VER >= 1400
-    #ifndef  _CRT_SECURE_NO_DEPRECATE
-      #define _CRT_SECURE_NO_DEPRECATE
-    #endif
-    #ifndef _CRT_NON_CONFORMING_SWPRINTFS
-  	  #define _CRT_NON_CONFORMING_SWPRINTFS
-    #endif
+  #define _CRT_SECURE_NO_DEPRECATE
+  #define _CRT_NON_CONFORMING_SWPRINTFS
   #endif
 
   #include <tchar.h>
@@ -76,7 +72,7 @@
   #if (__ppc__ == 1) || (__POWERPC__ == 1) || (_ARCH_PPC == 1)
     #include <stdint.h>
     #include <CoreFoundation/CFByteOrder.h>
-  #endif 
+  #endif
 
   #define    PKEXPORT
   #define    __SYS_ZLIB
@@ -164,7 +160,7 @@
     #define MAX_PATH 1024
   #endif
 
-  #define WINAPI 
+  #define WINAPI
 
   #define FILE_BEGIN    SEEK_SET
   #define FILE_CURRENT  SEEK_CUR
@@ -180,6 +176,7 @@
   #define _tcsrchr  strrchr
   #define _tcsstr   strstr
   #define _tcsspn   strspn
+  #define _tcsncmp  strncmp
   #define _tprintf  printf
   #define _stprintf sprintf
   #define _tremove  remove
@@ -201,7 +198,7 @@
   #define off64_t off_t
   #define O_LARGEFILE 0
 #endif
-                                                
+
 // Platform-specific error codes for UNIX-based platforms
 #if defined(PLATFORM_MAC) || defined(PLATFORM_LINUX)
   #define ERROR_SUCCESS                  0
@@ -219,6 +216,11 @@
   #define ERROR_HANDLE_EOF               1002        // No such error code under Linux
   #define ERROR_CAN_NOT_COMPLETE         1003        // No such error code under Linux
   #define ERROR_FILE_CORRUPT             1004        // No such error code under Linux
+  #define ERROR_FILE_ENCRYPTED           1005        // Returned by encrypted stream when can't find file key
+#endif
+
+#ifndef ERROR_FILE_INCOMPLETE
+#define ERROR_FILE_INCOMPLETE            1006        // The required file part is missing
 #endif
 
 //-----------------------------------------------------------------------------
