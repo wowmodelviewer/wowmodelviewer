@@ -37,6 +37,7 @@ extern "C" {
 //  Z - S for static-linked CRT library, D for multithreaded DLL CRT library
 //
 
+/*
 #if defined(_MSC_VER) && !defined(__CASCLIB_SELF__)
 
   #ifdef _DEBUG                                 // DEBUG VERSIONS
@@ -70,7 +71,7 @@ extern "C" {
   #endif
 
 #endif
-
+  */
 //-----------------------------------------------------------------------------
 // Defines
 

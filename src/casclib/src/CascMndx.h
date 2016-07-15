@@ -13,6 +13,9 @@
 
 class TFileNameDatabase;
 
+#define CASC_MAX_MAR_FILES           3          // Maximum of 3 MAR files are supported
+#define CASC_MNDX_SIGNATURE 0x58444E4D          // 'MNDX'
+
 #define CASC_MAX_ENTRIES(type) (0xFFFFFFFF / sizeof(type))
 
 #define CASC_SEARCH_INITIALIZING    0
@@ -56,8 +59,8 @@ typedef union _ARRAY_POINTER
 } ARRAY_POINTER, *PARRAY_POINTER;
 
 // Simple access to various tables within TGenericArray
-#define ByteArray     ArrayPointer.Bytes  
-#define CharArray     ArrayPointer.Chars  
+#define ByteArray     ArrayPointer.Bytes
+#define CharArray     ArrayPointer.Chars
 #define Uint32Array   ArrayPointer.Uint32s
 #define TripletArray  ArrayPointer.Triplets
 #define NameFragArray ArrayPointer.NameFrags
@@ -87,7 +90,7 @@ class TByteStream
     HANDLE hMap;
 };
 
-class TGenericArray 
+class TGenericArray
 {
     public:
 
@@ -128,7 +131,7 @@ class TGenericArray
     bool  bIsValidArray;
 };
 
-class TBitEntryArray : public TGenericArray 
+class TBitEntryArray : public TGenericArray
 {
     public:
 
@@ -244,16 +247,16 @@ class TNameIndexStruct
     int LoadFromStream(TByteStream & InStream);
     int LoadFromStream_Exchange(TByteStream & InStream);
 
-    TGenericArray NameFragments;  
-    TSparseArray Struct68;  
+    TGenericArray NameFragments;
+    TSparseArray Struct68;
 };
 
 class TStruct10
 {
     public:
-    
+
     TStruct10();
-    
+
     void CopyFrom(TStruct10 & Target);
     int sub_1956FD0(DWORD dwBitMask);
     int sub_1957050(DWORD dwBitMask);
@@ -286,7 +289,7 @@ class TFileNameDatabasePtr
 class TFileNameDatabase
 {
     public:
-    
+
     TFileNameDatabase();
 
     void ExchangeWith(TFileNameDatabase & Target);
@@ -352,14 +355,5 @@ inline bool IS_SINGLE_CHAR_MATCH(TGenericArray & Table, DWORD ItemIndex)
 {
     return ((Table.NameFragArray[ItemIndex].FragOffs & 0xFFFFFF00) == 0xFFFFFF00);
 }
-
-//-----------------------------------------------------------------------------
-// CASC functions related to MNDX
-
-int  LoadMndxRootFile(TCascStorage * hs, LPBYTE pbRootFile, DWORD cbRootFile);
-PCASC_PACKAGE FindMndxPackage(TCascStorage * hs, const char * szFileName);
-int  SearchMndxInfo(PCASC_MNDX_INFO pMndxInfo, const char * szFileName, DWORD dwPackage, PCASC_ROOT_ENTRY_MNDX * ppFoundInfo);
-bool DoStorageSearch_MNDX(TCascSearch * pSearch, PCASC_FIND_DATA pFindData);
-void FreeMndxInfo(PCASC_MNDX_INFO pMndxInfo);
 
 #endif  // __CASC_MNDX_ROOT__
