@@ -17,23 +17,23 @@
 #include <string>
 
 // our headers
-#include "WoWModel.h"
-#include "wmo.h"
-#include "BaseCanvas.h"
-#include "util.h"
-#include "maptile.h"
-#include "lightcontrol.h"
-#include "RenderTexture.h"
-#include "camera.h"
 #include "AnimExporter.h"
+#include "ArcBallCamera.h"
 #if defined (_WINDOWS)
 #include "AVIGenerator.h"
 #endif
-
+#include "BaseCanvas.h"
 #include "enums.h"
-
+#include "lightcontrol.h"
+#include "maptile.h"
+#include "RenderTexture.h"
+#include "util.h"
+#include "wmo.h"
+#include "WoWModel.h"
 
 // custom objects
+class ArcBallCameraControl;
+
 class Attachment;
 
 class AnimControl;
@@ -66,16 +66,6 @@ class ModelCanvas:
 {
 	DECLARE_CLASS(ModelCanvas)
     DECLARE_EVENT_TABLE()
-	
-	float time, modelsize;
-	DWORD lastTime;
-	//DWORD pauseTime;
-	SceneState sceneState[4]; // 4 scene states for F1-F4
-
-	GLuint fogTex;
-
-	bool fxBlur, fxGlow, fxFog;
-	// ----------------------------
 
 public:
 	ModelCanvas(wxWindow *parent, VideoCaps *cap = NULL);
@@ -84,8 +74,6 @@ public:
 	// GUI Control Panels
 	AnimControl *animControl;
 	GifExporter *gifExporter;
-
-	CCamera camera;
 
 	RenderTexture *rt;
 
@@ -133,12 +121,6 @@ public:
 	void SetCurrent();
 	void SwapBuffers();
 
-	// view:
-	Vec3D vRot0;
-	Vec3D vPos0;
-	wxCoord mx, my;
-
-	void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
 	void CheckMovement();	// move the character
 	
 	Attachment* LoadModel(GameFile *);
@@ -182,6 +164,19 @@ public:
 #if defined(_WINDOWS)
 	CAVIGenerator cAvi;
 #endif
+
+private:
+  float time, modelsize;
+  DWORD lastTime;
+  //DWORD pauseTime;
+  SceneState sceneState[4]; // 4 scene states for F1-F4
+
+  GLuint fogTex;
+
+  bool fxBlur, fxGlow, fxFog;
+
+  ArcBallCameraControl * m_p_cameraCtrl;
+  ArcBallCamera arcCamera;
 };
 
 

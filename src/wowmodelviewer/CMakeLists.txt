@@ -18,12 +18,13 @@ find_package(Qt5Gui)
 find_package(Qt5Network)
 
 # add wmv source files compilation
-set(src  AnimationExportChoiceDialog.cpp
+set(src  ArcBallCamera.cpp
+		 ArcBallCameraControl.cpp
+         AnimationExportChoiceDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
          app.cpp
          AVIGenerator.cpp
-         camera.cpp
          charcontrol.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp

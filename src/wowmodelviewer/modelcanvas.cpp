@@ -1,8 +1,5 @@
 #include "modelcanvas.h"
 
-#include "animcontrol.h"
-#include "logger/Logger.h"
-
 #include "ximage.h"
 #include <QImage>
 #include <QImageWriter>
@@ -12,14 +9,16 @@
 #include <wx/file.h>
 #include <wx/filename.h>
 
+#include "ArcBallCameraControl.h"
+#include "animcontrol.h"
 #include "Attachment.h"
 #include "globalvars.h"
-#include "video.h"
-#include "logger/Logger.h"
-#include "animcontrol.h"
 #include "modelviewer.h"
 #include "shaders.h"
+#include "video.h"
 #include "WMOGroup.h"
+
+#include "logger/Logger.h"
 
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
 
@@ -153,6 +152,8 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	
 	root = new Attachment(NULL, NULL, -1, -1);
 	sky = new Attachment(NULL, NULL, -1, -1);
+
+  m_p_cameraCtrl = new ArcBallCameraControl(arcCamera);
 }
 
 ModelCanvas::~ModelCanvas()
@@ -182,6 +183,7 @@ ModelCanvas::~ModelCanvas()
 		wxDELETE(rt);
 	}
 #endif
+  delete m_p_cameraCtrl;
 }
 
 void ModelCanvas::OnEraseBackground(wxEraseEvent& event)
@@ -411,140 +413,8 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 	if (event.Button(wxMOUSE_BTN_ANY) == true)
 		SetFocus();
 
-	int px = event.GetX();
-	int py = event.GetY();
-	int pz = event.GetWheelRotation();
-
-	// mul = multiplier in which to multiply everything to achieve a sense of control over the amount to move stuff by
-	float mul = 1.0f;
-	if (event.m_shiftDown)
-		mul /= 10;
-	if (event.m_controlDown)
-		mul *= 10;
-	if (event.m_altDown)
-		mul *= 50;
-
-	if (wmo) {
-
-		//if (model->animManager)
-		//	mul *= model->animManager->GetSpeed(); //animSpeed;
-
-		if (event.ButtonDown()) {
-			mx = px;
-			my = py;
-
-		} else if (event.Dragging()) {
-			int dx = mx - px;
-			int dy = my - py;
-			mx = px;
-			my = py;
-
-			if (event.LeftIsDown() && event.RightIsDown()) {
-				wmo->viewpos.y -= dy*mul;
-			} else if (event.LeftIsDown()) {
-        wmo->viewrot.x -= dx*mul / 5;
-        wmo->viewrot.y -= dy*mul / 5;
-			} else if (event.RightIsDown()) {
-				wmo->viewrot.x -= dx*mul/5;
-				float f = cos(wmo->viewrot.y * piover180);
-				float sf = sin(wmo->viewrot.x * piover180);
-				float cf = cos(wmo->viewrot.x * piover180);
-				wmo->viewpos.x -= sf * mul * dy * f;
-				wmo->viewpos.z += cf * mul * dy * f;
-				wmo->viewpos.y += sin(wmo->viewrot.y * piover180) * mul * dy;
-			} else if (event.MiddleIsDown()) {
-				//?
-			}
-
-		} else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-			//?
-		}
-
-	} else if (model) {
-		if (model->animManager)
-			mul *= model->animManager->GetSpeed(); //animSpeed;
-
-		if (event.ButtonDown()) {
-			mx = px;
-			my = py;
-
-      vRot0 = model->rot;
-
-			vPos0 = model->pos;
-
-		} else if (event.Dragging()) {
-			int dx = mx - px;
-			int dy = my - py;
-
-			if (event.LeftIsDown()) {        
-				model->rot.x = vRot0.x - (dy / 2.0f); // * mul);
-				model->rot.y = vRot0.y - (dx / 2.0f); // * mul);
-			} else if (event.RightIsDown()) {
-        mul /= 100.0f;
-
-        model->pos.x = vPos0.x - dx*mul;
-        model->pos.y = vPos0.y + dy*mul;
-			} else if (event.MiddleIsDown()) {
-				if (!event.m_altDown) {
-					mul = (mul / 20.0f) * dy;
-				  Zoom(mul, false);
-				  my = py;
-				} else {
-					mul = (mul / 1200.0f) * dy;
-					Zoom(mul, true);
-					my = py;
-				}
-			}
-
-		} else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-			if (pz != 0) {
-				mul = (mul / 120.0f) * pz;
-				if (!wxGetKeyState(WXK_ALT)) {
-          Zoom(mul, false);
-				} else {
-					mul /= 50.0f;
-					Zoom(mul, true);
-				}
-			}
-		}
-	} else if (adt) {
-		// Copied from WMO controls.
-
-		if (event.ButtonDown()) {
-			mx = px;
-			my = py;
-
-		} else if (event.Dragging()) {
-			int dx = mx - px;
-			int dy = my - py;
-			mx = px;
-			my = py;
-
-			if (event.LeftIsDown() && event.RightIsDown()) {
-				adt->viewpos.y -= dy*mul;
-			} else if (event.LeftIsDown()) {
-				adt->viewrot.x -= dx*mul/5;
-				adt->viewrot.y -= dy*mul/5;
-			} else if (event.RightIsDown()) {
-				adt->viewrot.x -= dx*mul/5;
-				float f = cos(adt->viewrot.y * piover180);
-				float sf = sin(adt->viewrot.x * piover180);
-				float cf = cos(adt->viewrot.x * piover180);
-				adt->viewpos.x -= sf * mul * dy * f;
-				adt->viewpos.z += cf * mul * dy * f;
-				adt->viewpos.y += sin(adt->viewrot.y * piover180) * mul * dy;
-			} else if (event.MiddleIsDown()) {
-				//?
-			}
-
-		} else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-			//?
-		}
-	}
-
-
-	//if (event.GetEventType() == wxEVT_ENTER_WINDOW)
-	//	SetFocus();
+  if (m_p_cameraCtrl)
+    m_p_cameraCtrl->onMouse(event);
 }
 
 void ModelCanvas::InitGL()
@@ -873,7 +743,7 @@ inline void ModelCanvas::RenderModel()
 			RenderSkybox();
 	}
 
-	camera.Setup();
+  arcCamera.setup();
 
 	// This is redundant and no longer needed.
 	// all lighting stuff needs to be reorganised
@@ -909,24 +779,6 @@ inline void ModelCanvas::RenderModel()
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, g_modelViewer->lightControl->lights[0].diffuse);	// use diffuse, as thats our main 'colour setter'
 	}
 	// ==============================================
-
-	// This is also redundant
-	// The camera class should be taking over this crap
-	// *************************
-	// setup the view/projection
-	if (model) {
-		if (useCamera && model->hasCamera) {
-			model->cam[0].setup();
-		} else {
-			// TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-			glTranslatef(model->pos.x, model->pos.y, -model->pos.z);
-			glRotatef(model->rot.x, 1.0f, 0.0f, 0.0f);
-			glRotatef(model->rot.y, 0.0f, 1.0f, 0.0f);
-			glRotatef(model->rot.z, 0.0f, 0.0f, 1.0f);
-			// --==--
-		}
-	}
-	// ==========================
 			
 	// As above for lighting
 	// ************* Relative Lighting *******************
@@ -1182,20 +1034,8 @@ inline void ModelCanvas::RenderWMO()
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 	glColor3f(1.0f, 1.0f, 1.0f);
-	// --==--
-
-	/*
-	// TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-	// View
-	if (model) {
-		glTranslatef(model->pos.x, model->pos.y, -model->pos.z);
-		glRotatef(model->rot.x, 1.0f, 0.0f, 0.0f);
-		glRotatef(model->rot.y, 0.0f, 1.0f, 0.0f);
-		glRotatef(model->rot.z, 0.0f, 0.0f, 1.0f);
-		// --==--
-	}
-	*/
-	camera.Setup();
+	
+  arcCamera.setup();
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -1247,7 +1087,8 @@ inline void ModelCanvas::RenderADT()
 		// --==--
 	}
 	*/
-	camera.Setup();
+
+  arcCamera.setup();
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -1393,7 +1234,7 @@ void ModelCanvas::RenderToBuffer()
 			RenderSkybox();
 	}
 
-	camera.Setup();
+  arcCamera.setup();
 		
 	// Render the grid if wanted and masking isn't enabled
 	if (drawGrid && !video.useMasking)
@@ -1652,22 +1493,6 @@ void ModelCanvas::LoadBackground(wxString filename)
 	}
 }
 
-void ModelCanvas::Zoom(float f, bool rel)
-{
-	if (!model)
-		return;
-	if (rel) {
-		float cosx = cos(model->rot.x * piover180);
-		model->pos.x += cos(model->rot.y * piover180) * cosx * f;
-		model->pos.y += sin(model->rot.x * piover180) * sin(model->rot.y * piover180) * f;
-		model->pos.z += sin(model->rot.y * piover180) * cosx * f;
-	} else {
-		model->pos.z -= f;
-	}
-
-	//viewControl->Refresh();
-}
-
 // Check for keyboard input
 void ModelCanvas::OnKey(wxKeyEvent &event)
 {
@@ -1720,7 +1545,7 @@ void ModelCanvas::CheckMovement()
 	if(!wintest)
 		return;
 
-	
+  /*
 	if (wxGetKeyState(WXK_NUMPAD8))	// Move forward
 		camera.MoveForward(-0.1f);
 	if (wxGetKeyState(WXK_NUMPAD2))	// Move Backwards
@@ -1735,6 +1560,7 @@ void ModelCanvas::CheckMovement()
 		camera.Strafe(-0.05f);
 	if (wxGetKeyState(WXK_NUMPAD6))	// Straff Right
 		camera.Strafe(0.05f);
+  */
 
 	// M2 Model only stuff below here
 	if (!model || !model->animManager)
@@ -1772,10 +1598,12 @@ void ModelCanvas::CheckMovement()
 	//else
 	//	speed *= 0.05f;
 
+  /*
 	if (wxGetKeyState(WXK_UP))
 		Zoom(speed, true);
 	else if (wxGetKeyState(WXK_DOWN))
 		Zoom(-speed, true);
+    */
 	// --
 }
 

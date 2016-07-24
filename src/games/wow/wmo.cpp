@@ -67,9 +67,9 @@ WMO::WMO(QString name): ManagedItem(name)
 			f.read(&col, 4); // ambient color? RGB
 			f.read(&nX, 4); // WMO ID (column 2 in WMOAreaTable.dbc)
 			f.read(ff,12); // Bounding box corner 1
-			v1 = Vec3D(ff[0],ff[1],ff[2]);
+      v1 = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 			f.read(ff,12); // Bounding box corner 2
-			v2 = Vec3D(ff[0],ff[1],ff[2]);
+      v2 = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 			f.read(&LiquidType, 4);
 
 			groups = new WMOGroup[nGroups];
@@ -217,13 +217,13 @@ WMO::WMO(QString name): ManagedItem(name)
 			WMOPV p;
 			for (size_t i=0; i<nP; i++) {
 				f.read(ff,12);
-				p.a = Vec3D(ff[0],ff[2],-ff[1]);
+        p.a = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-				p.b = Vec3D(ff[0],ff[2],-ff[1]);
+        p.b = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-				p.c = Vec3D(ff[0],ff[2],-ff[1]);
+        p.c = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-				p.d = Vec3D(ff[0],ff[2],-ff[1]);
+        p.d = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
 				pvs.push_back(p);
 			}
 		}
@@ -336,7 +336,7 @@ void WMO::update(int dt)
 void WMO::draw()
 {
 	if (!ok) return;
-
+  
 	glRotatef(viewrot.y, 1, 0, 0);
 	glRotatef(viewrot.x, 0, 1, 0);
 	glRotatef(viewrot.z, 0, 0, 1);

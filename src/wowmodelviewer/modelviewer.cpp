@@ -1472,6 +1472,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 		}
 		break;
 
+    /*
 	case ID_ZOOM_IN:
 		canvas->Zoom(0.5f, false);
 		break;
@@ -1479,6 +1480,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 	case ID_ZOOM_OUT:
 		canvas->Zoom(-0.5f, false);
 		break;
+    */
 
 	case ID_SAVE_TEMP1:
 		canvas->SaveSceneState(1);
