@@ -26,8 +26,9 @@ void ArcBallCamera::reset()
   m_up.y = 1.;
   m_distance = 5.;
   m_lookAt.reset();
-  m_azimuth = 0.;
+  m_azimuth = 90.;
   m_inclination = 90.;
+  updatePosition();
 }
 
 void ArcBallCamera::zoomOut()
@@ -52,31 +53,26 @@ void ArcBallCamera::pan(float a_xVal, float a_yVal)
 {
   m_lookAt.x += a_xVal;
   m_lookAt.y -= a_yVal;
-
 }
 
 
 void ArcBallCamera::updatePosition()
 {
-  //LOG_INFO << "m_inclination = " << m_inclination << " / m_azimuth = " << m_azimuth;
-  //LOG_INFO << "BEFORE - m_position = " << m_position.x << " " << m_position.y << " " << m_position.z;
-
   Vec3D viewDir = m_position - m_lookAt;
 
   viewDir.x = sinf(m_inclination * PI / 180.) * sinf(m_azimuth * PI / 180.);
   viewDir.y = cosf(m_inclination * PI / 180.);
   viewDir.z = sinf(m_inclination * PI / 180.) * cosf(m_azimuth * PI / 180.);
-
   viewDir.normalize();
-  m_position = viewDir * m_distance + m_lookAt;
 
-  //LOG_INFO << "AFTER - m_position = " << m_position.x << " " << m_position.y << " " << m_position.z;
+  m_position = viewDir * m_distance + m_lookAt;
 }
 
 void ArcBallCamera::updateAzimuth(float a_val)
 {
-  m_azimuth -= a_val;
-  m_azimuth = (int)m_azimuth % 360;
+  m_azimuth += (-a_val); // invert sign => when moving right, azimuth decrease
+
+  m_azimuth = (int)m_azimuth % 360;   // lock angle between 0 and 2 PI
   updatePosition();
 }
 
@@ -86,9 +82,15 @@ void ArcBallCamera::updateInclination(float a_val)
 
   // lock movement between -179 and +179 degrees
   if (m_inclination < -179)
-    m_inclination = -179;
-  if (m_inclination > 179)
-    m_inclination = 179;
+    m_inclination = 180;
+  else if (m_inclination > 179)
+    m_inclination = -180;
+
+  // update up camera vector depending on azimuth value
+  if (m_inclination < 1 || m_inclination > 179)
+    m_up.y = -1;
+  else
+    m_up.y = 1;
  
   updatePosition();
 }
@@ -104,16 +106,18 @@ void ArcBallCamera::setup()
 {
   glLoadIdentity();
 
-  //LOG_INFO << "m_position = " << m_position.x << " " << m_position.y << " " << m_position.z;
-  //LOG_INFO << "m_lookAt = " << m_lookAt.x << " " << m_lookAt.y << " " << m_lookAt.z;
-  //LOG_INFO << "m_up = " << m_up.x << " " << m_up.y << " " << m_up.z;
+  /*LOG_INFO << __FUNCTION__;
+  LOG_INFO << "m_position = " << m_position.x << " " << m_position.y << " " << m_position.z;
+  LOG_INFO << "m_lookAt = " << m_lookAt.x << " " << m_lookAt.y << " " << m_lookAt.z;
+  LOG_INFO << "m_up = " << m_up.x << " " << m_up.y << " " << m_up.z;*/
 
   gluLookAt(m_position.x, m_position.y, m_position.z,
             m_lookAt.x, m_lookAt.y, m_lookAt.z,
             m_up.x, m_up.y, m_up.z);
 
-  /*
+  
   //Usefull for debug : display a big coord system at camera look at position
+  /*
   glPushMatrix();
   glTranslatef(m_lookAt.x,m_lookAt.y,m_lookAt.z);
   glBegin(GL_LINES);
@@ -132,6 +136,6 @@ void ArcBallCamera::setup()
   glEnd();
 
   glPopMatrix();
-    */
+  */
 }
 
