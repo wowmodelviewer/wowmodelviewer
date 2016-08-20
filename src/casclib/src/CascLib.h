@@ -36,7 +36,6 @@ extern "C" {
 //  Y - A for ANSI version, U for Unicode version
 //  Z - S for static-linked CRT library, D for multithreaded DLL CRT library
 //
-
 /*
 #if defined(_MSC_VER) && !defined(__CASCLIB_SELF__)
 
@@ -71,7 +70,7 @@ extern "C" {
   #endif
 
 #endif
-  */
+*/
 //-----------------------------------------------------------------------------
 // Defines
 
@@ -106,7 +105,7 @@ extern "C" {
 
 #define CASC_LOCALE_BIT_ENUS        0x01
 #define CASC_LOCALE_BIT_KOKR        0x02
-#define CASC_LOCALE_DUAL_LANG       0x03
+#define CASC_LOCALE_BIT_RESERVED    0x03
 #define CASC_LOCALE_BIT_FRFR        0x04
 #define CASC_LOCALE_BIT_DEDE        0x05
 #define CASC_LOCALE_BIT_ZHCN        0x06
