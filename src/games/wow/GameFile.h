@@ -32,7 +32,7 @@ class _GAMEFILE_API_ GameFile : public Component
     size_t read(void* dest, size_t bytes);
     size_t getSize();
     size_t getPos();
-    unsigned char* getBuffer();
+    virtual unsigned char* getBuffer();
     unsigned char* getPointer();
     bool isEof();
     void seek(size_t offset);

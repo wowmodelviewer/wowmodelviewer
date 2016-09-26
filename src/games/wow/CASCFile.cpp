@@ -14,7 +14,7 @@
 
 
 CASCFile::CASCFile(QString path)
- : GameFile(path), m_handle(0)
+  : GameFile(path), m_handle(0), m_isMD21(false)
 {
 }
 
@@ -69,7 +69,15 @@ bool CASCFile::open()
 #ifdef DEBUG_READ
     LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;
 #endif
+
+    if ((nbBytesRead >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
+    {
+      LOG_INFO << __FUNCTION__ << __FILE__ << __LINE__ << "MD21 file detected";
+      m_isMD21 = true;
+    }
   }
+
+ 
 
   return true;
 }
@@ -95,4 +103,13 @@ bool CASCFile::close()
   }
 
   return true;
+}
+
+
+unsigned char* CASCFile::getBuffer()
+{
+  if (m_isMD21)
+    return buffer + 8;
+  else
+    return buffer;
 }
