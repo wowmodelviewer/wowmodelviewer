@@ -32,7 +32,6 @@ class _CASCFILE_API_ CASCFile : public GameFile
     ~CASCFile();
     bool open();
     bool close();
-    unsigned char* getBuffer();
 
   private:
     HANDLE m_handle;

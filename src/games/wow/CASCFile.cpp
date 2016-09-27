@@ -70,14 +70,27 @@ bool CASCFile::open()
     LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;
 #endif
 
+    // if MD21 file, deal with chunks
     if ((nbBytesRead >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
     {
-      LOG_INFO << __FUNCTION__ << __FILE__ << __LINE__ << "MD21 file detected";
-      m_isMD21 = true;
+      // read size of first chunk in the file
+      unsigned __int32 chunkSize;
+      memcpy(&chunkSize, buffer + 4, 4);
+
+      // check if there is only one chunk in the file (if chunk size is at least 98% of the file)
+      if ((float)chunkSize / (float)size >= 0.98)
+      {
+        LOG_INFO << __FUNCTION__ << __FILE__ << __LINE__ << "MD21 file detected";
+        // relocate buffer on chunk's data
+        unsigned char *newBuffer = new unsigned char[chunkSize];
+        std::copy(buffer + 8, buffer + 8 + chunkSize, newBuffer);
+        delete[] buffer;
+        buffer = newBuffer;
+        size = chunkSize; // real size is only chunk' size
+      }
+      // @todo else -> multiple chunks in the file, to be implemented when needed
     }
   }
-
- 
 
   return true;
 }
@@ -103,13 +116,4 @@ bool CASCFile::close()
   }
 
   return true;
-}
-
-
-unsigned char* CASCFile::getBuffer()
-{
-  if (m_isMD21)
-    return buffer + 8;
-  else
-    return buffer;
 }
