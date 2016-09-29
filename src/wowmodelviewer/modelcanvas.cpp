@@ -216,6 +216,7 @@ void ModelCanvas::InitView()
 	video.ResizeGLScene(w, h);
 	video.xRes = w;
 	video.yRes = h;
+  arcCamera.refreshSceneSize(w, h);
 }
 
 void ModelCanvas::InitShaders()
@@ -362,6 +363,8 @@ Attachment* ModelCanvas::LoadCharModel(GameFile * file)
 	ResetView();
 	Attachment *att = root->addChild(model, 0, -1);
 	curAtt = att;
+
+  arcCamera.autofit(model->minCoord, model->maxCoord);
 
 	return att;
 }

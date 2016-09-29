@@ -9,12 +9,14 @@
 
 #include "ArcBallCamera.h"
 
+#include "quaternion.h"
+
 #include <wx/event.h>
 
 #include "logger/Logger.h"
 
 ArcBallCameraControl::ArcBallCameraControl(ArcBallCamera & cam) :
-m_camera(cam), m_xStart(0), m_yStart(0)
+m_camera(cam)
 {
 
 }
@@ -30,32 +32,13 @@ void ArcBallCameraControl::onMouse(wxMouseEvent &event)
   int py = event.GetY();
   int pz = event.GetWheelRotation();
 
-  if (event.ButtonDown())
+  if (event.LeftDown())
   {
-    m_xStart = px;
-    m_yStart = py;
+    m_camera.setStartPos(px, py);
   }
-  else if (event.Dragging())
+  else if (event.Dragging() && event.LeftIsDown())
   {
-    // compute movement
-    int l_xCurrent = px;
-    int l_yCurrent = py;
-
-    int l_xDiff = l_xCurrent - m_xStart;
-    int l_yDiff = l_yCurrent - m_yStart;
-
-    m_xStart = l_xCurrent;
-    m_yStart = l_yCurrent;
-
-    if (event.LeftIsDown()) // camera rotation
-    {
-      m_camera.updateAzimuth(l_xDiff);
-      m_camera.updateInclination(l_yDiff);
-    }
-    else if (event.RightIsDown()) // pan
-    {
-      m_camera.pan(-l_xDiff / 50.0, -l_yDiff / 50.0);
-    }
+    m_camera.updatePos(px, py);
   }
   else if (event.GetEventType() == wxEVT_MOUSEWHEEL)
   {

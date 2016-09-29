@@ -92,6 +92,8 @@ public:
 	RibbonEmitter	*ribbons;
 	ModelEvent		*events;
 	Vec3D *bounds;
+  Vec3D minCoord;
+  Vec3D maxCoord;
 
 	std::vector<uint> replacableParticleColorIDs;
 	bool replaceParticleColors;

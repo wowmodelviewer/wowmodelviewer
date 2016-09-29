@@ -23,10 +23,6 @@ class ArcBallCameraControl
 
   private:
     ArcBallCamera & m_camera;
-
-    int m_xStart;
-    int m_yStart;
-
 };
 
 #endif

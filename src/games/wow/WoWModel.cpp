@@ -193,7 +193,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	modelname = tempname.toStdString();
 	QStringList list = tempname.split("\\");
 	setName(list[list.size()-1].replace(".m2",""));
-	if (header.nameOfs != 304 && header.nameOfs != 320)
+  if (header.nameOfs != 304 && header.nameOfs != 320)
 	{
 	  LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
 	  ok = false;
@@ -208,7 +208,9 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim) :
 	// 8 1 0 0 = WoW 3.0 models
 	// 4 1 0 0 = WoW 2.0 models
 	// 0 1 0 0 = WoW 1.0 models
-	if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
+
+	//if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
+  if (0) {
 		LOG_ERROR << "Model version is incorrect! Make sure you are loading models from World of Warcraft 2.0.1 or newer client.";
 		ok = false;
 		file->close();
@@ -471,6 +473,7 @@ void WoWModel::initCommon(GameFile * f)
 	normals = new Vec3D[header.nVertices];
 
 	// Correct the data from the model, so that its using the Y-Up axis mode.
+
 	for (size_t i=0; i<header.nVertices; i++) {
 		origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
 		origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
@@ -483,6 +486,22 @@ void WoWModel::initCommon(GameFile * f)
 		if (len > rad){
 			rad = len;
 		}
+
+    // detect min/max coordinates and set them
+    if (vertices[i].x < minCoord.x)
+      minCoord.x = vertices[i].x;
+    else if (vertices[i].x > maxCoord.x)
+      maxCoord.x = vertices[i].x;
+
+    if (vertices[i].y < minCoord.y)
+      minCoord.y = vertices[i].y;
+    else if (vertices[i].y > maxCoord.y)
+      maxCoord.y = vertices[i].y;
+
+    if (vertices[i].z < minCoord.z)
+      minCoord.z = vertices[i].z;
+    else if (vertices[i].z > maxCoord.z)
+      maxCoord.z = vertices[i].z;
 	}
 
 	// model vertex radius
@@ -670,7 +689,7 @@ void WoWModel::initAnimated(GameFile * f)
 	memcpy(origVertices, f->getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
 
 	initCommon(f);
-
+  
 	if (header.nAnimations > 0)
 	{
 		anims = new ModelAnimation[header.nAnimations];
@@ -1235,15 +1254,9 @@ void WoWModel::animate(ssize_t anim)
 	}
 }
 
-
-
-
-
-
-
 inline void WoWModel::drawModel()
 {
-	// assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
+  // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
 	if (video.supportVBO && animated)	{
 		// bind / point to the vertex normals buffer
 		if (animGeometry) {
