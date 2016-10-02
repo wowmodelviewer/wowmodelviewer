@@ -17,6 +17,8 @@
 #define DISPLAY_ORIGIN 0
 #define DISPLAY_LOOKAT 0
 
+Vec3D pan;
+
 ArcBallCamera::ArcBallCamera()
 {
   reset();
@@ -35,8 +37,10 @@ void ArcBallCamera::reset()
   m_transform.m[0][2] = -1;
   m_transform.m[2][0] = 1;
   m_transform.m[2][2] = 0;
-
+ 
   m_lastRot = Matrix::identity();
+
+  m_startVec.reset();
 }
 
 void ArcBallCamera::refreshSceneSize(int width, int height)
@@ -64,26 +68,29 @@ void ArcBallCamera::zoomIn()
 void ArcBallCamera::pan(float a_xVal, float a_yVal)
 {
   m_lookAt.x += a_xVal;
-  m_lookAt.y -= a_yVal;
+  m_lookAt.y += -a_yVal;
 }
 
 void ArcBallCamera::setup()
 {
+  //LOG_INFO << __FUNCTION__ << "Look At" << m_lookAt.x << m_lookAt.y << m_lookAt.z;
   glLoadIdentity();
 
-  glTranslatef(-m_lookAt.x, -m_lookAt.y, -m_distance);
+  // apply zoom
+  glTranslatef(0, 0, -m_distance);
 
-  glTranslatef(m_lookAt.x, m_lookAt.y, m_lookAt.z);
+  // apply pan
+  glTranslatef(-m_lookAt.x, -m_lookAt.y, -m_lookAt.z);
+
+  // apply rotation
   Matrix m = m_transform;
   m.transpose();
   glMultMatrixf(m);
-  glTranslatef(-m_lookAt.x, -m_lookAt.y, -m_lookAt.z);
 
-#if DISPLAY_LOOKAT > 0
-  // Useful for debug : display a big coord system at camera look at position
+#if DISPLAY_ORIGIN > 0
+  // Useful for debug : display a big coord system at world origin
   glPushMatrix();
-
-  glTranslatef(m_lookAt.x,m_lookAt.y,m_lookAt.z);
+ // glLoadIdentity();
   glBegin(GL_LINES);
     // red X axis
     glColor3f(1.0,0.0,0.0);
@@ -102,22 +109,24 @@ void ArcBallCamera::setup()
   glEnd();
   glPopMatrix();
 #endif  
-#if DISPLAY_ORIGIN > 0
+#if DISPLAY_LOOKAT > 0
   // Useful for debug : display a big coord system at camera look at position
   glPushMatrix();
+  glTranslatef(m_lookAt.x, m_lookAt.y, m_lookAt.z);
+
   glBegin(GL_LINES); 
     // X Axis
-    glColor3f(1.0, 0.0, 0.0);
+    glColor3f(0.5, 0.0, 1.0);
     glVertex3f(0.0, 0.0, 0.0);
     glVertex3f(1.5, 0.0, 0.0);
 
     // Y axis
-    glColor3f(0.0, 1.0, 0.0);
+    glColor3f(1.0, 1.0, 0.0);
     glVertex3f(0.0, 0.0, 0.0);
     glVertex3f(0.0, 1.5, 0.0);
 
     // Z axis
-    glColor3f(0.0, 0.0, 1.0);
+    glColor3f(0.0, 1.0, 1.0);
     glVertex3f(0.0, 0.0, 0.0);
     glVertex3f(0.0, 0.0, 1.5);
   glEnd();
@@ -150,6 +159,7 @@ void ArcBallCamera::updatePos(int x, int y)
 {
   int l_xCurrent = x;
   int l_yCurrent = y;
+
   Vec3D newVec = mapToSphere(x, y);
 
   //Compute the vector perpendicular to the begin and end vectors

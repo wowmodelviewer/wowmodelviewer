@@ -782,7 +782,7 @@ inline void ModelCanvas::RenderModel()
 		glLightModelfv(GL_LIGHT_MODEL_AMBIENT, g_modelViewer->lightControl->lights[0].diffuse);	// use diffuse, as thats our main 'colour setter'
 	}
 	// ==============================================
-			
+
 	// As above for lighting
 	// ************* Relative Lighting *******************
 	// More lighting code, this is to setup the g_modelViewer->lightControl->lights that are 'relative' to the model.
@@ -1531,6 +1531,9 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
 		else if (keycode == '9')
 			animControl->SetAnimSpeed(0.9f);
 		
+    if (m_p_cameraCtrl)
+      m_p_cameraCtrl->onKey(event);
+
 		// --	
 	// }
 }
