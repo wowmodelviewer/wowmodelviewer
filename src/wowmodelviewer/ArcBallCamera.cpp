@@ -11,6 +11,8 @@
 
 #include "quaternion.h"
 
+#include <math.h>
+
 #define DISTANCE_MAX 50
 #define DISTANCE_MIN 1
 
@@ -68,12 +70,11 @@ void ArcBallCamera::zoomIn()
 void ArcBallCamera::pan(float a_xVal, float a_yVal)
 {
   m_lookAt.x += a_xVal;
-  m_lookAt.y += -a_yVal;
+  m_lookAt.y += a_yVal;
 }
 
 void ArcBallCamera::setup()
 {
-  //LOG_INFO << __FUNCTION__ << "Look At" << m_lookAt.x << m_lookAt.y << m_lookAt.z;
   glLoadIdentity();
 
   // apply zoom
@@ -189,9 +190,12 @@ void ArcBallCamera::updatePos(int x, int y)
 }
 
 
-void ArcBallCamera::autofit(const Vec3D & min, const Vec3D & max)
+void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float fov)
 {
-  m_lookAt.x = (min.x + max.x) / 2.;
-  m_lookAt.y = (min.y + max.y) / 2.;
-  m_lookAt.z = (min.z + max.z) / 2.;
+  m_lookAt.x = (minp.z + maxp.z) / 2.;
+  m_lookAt.y = (minp.y + maxp.y) / 2.;
+  m_lookAt.z = (minp.x + maxp.x) / 2.;
+
+  float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
+  m_distance = abs((maxsize /2.)  / sinf(fov/2.*PI/180)) * 1.2;
 }

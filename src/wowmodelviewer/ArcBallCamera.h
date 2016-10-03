@@ -30,7 +30,7 @@ class ArcBallCamera
     void setStartPos(int x, int y);
     void updatePos(int x, int y);
 
-    void autofit(const Vec3D & min, const Vec3D & max);
+    void autofit(const Vec3D & min, const Vec3D & max, const float fov);
     
   protected:
 

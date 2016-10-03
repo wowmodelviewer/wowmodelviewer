@@ -32,11 +32,11 @@ void ArcBallCameraControl::onKey(wxKeyEvent &event)
   }
   else if (event.GetKeyCode() == WXK_LEFT)
   {
-    m_camera.pan(0.1, 0);
+    m_camera.pan(-0.1, 0);
   }
   else if (event.GetKeyCode() == WXK_RIGHT)
   {
-    m_camera.pan(-0.1, 0);
+    m_camera.pan(0.1, 0);
   }
 }
 
