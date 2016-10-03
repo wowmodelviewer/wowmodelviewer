@@ -13,13 +13,8 @@
 
 #include <math.h>
 
-#define DISTANCE_MAX 50
-#define DISTANCE_MIN 1
-
 #define DISPLAY_ORIGIN 0
 #define DISPLAY_LOOKAT 0
-
-Vec3D pan;
 
 ArcBallCamera::ArcBallCamera()
 {
@@ -47,7 +42,7 @@ void ArcBallCamera::reset()
   m_startVec.reset();
 }
 
-void ArcBallCamera::refreshSceneSize(int width, int height)
+void ArcBallCamera::refreshSceneSize(const int width, const int height)
 {
   m_sceneWidth = width;
   m_sceneHeight = height;
@@ -69,7 +64,7 @@ void ArcBallCamera::zoomIn()
   }
 }
 
-void ArcBallCamera::pan(float a_xVal, float a_yVal)
+void ArcBallCamera::pan(const float a_xVal, const float a_yVal)
 {
   m_lookAt.x += a_xVal;
   m_lookAt.y += a_yVal;
@@ -137,7 +132,7 @@ void ArcBallCamera::setup()
 #endif
 }
 
-Vec3D ArcBallCamera::mapToSphere(int x, int y)
+Vec3D ArcBallCamera::mapToSphere(const int x, const int y)
 {
   Vec3D v = Vec3D(1.0*x / m_sceneWidth * 2 - 1.0,
                           1.0*y / m_sceneHeight * 2 - 1.0,
@@ -152,13 +147,13 @@ Vec3D ArcBallCamera::mapToSphere(int x, int y)
   return v;
 }
 
-void ArcBallCamera::setStartPos(int x, int y)
+void ArcBallCamera::setStartPos(const int x, const int y)
 {
   m_startVec = mapToSphere(x, y);
   m_lastRot = m_transform;
 }
 
-void ArcBallCamera::updatePos(int x, int y)
+void ArcBallCamera::updatePos(const int x, const int y)
 {
   int l_xCurrent = x;
   int l_yCurrent = y;

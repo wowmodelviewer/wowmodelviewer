@@ -21,15 +21,15 @@ class ArcBallCamera
     void setup();
     void reset();
 
-    void refreshSceneSize(int width, int height);
+    void refreshSceneSize(const int width, const int height);
 
     void zoomIn();
     void zoomOut();
 
-    void pan(float a_xVal, float a_yVal);
+    void pan(const float a_xVal, const float a_yVal);
 
-    void setStartPos(int x, int y);
-    void updatePos(int x, int y);
+    void setStartPos(const int x, const int y);
+    void updatePos(const int x, const int y);
 
     void autofit(const Vec3D & min, const Vec3D & max, const float fov);
     
@@ -38,7 +38,7 @@ class ArcBallCamera
 
   private:
     void updatePosition();
-    Vec3D mapToSphere(int x, int y);
+    Vec3D mapToSphere(const int x, const int y);
 
     // zoom
     float m_distance;
