@@ -29,6 +29,8 @@ ArcBallCamera::ArcBallCamera()
 void ArcBallCamera::reset()
 {
   m_distance = 5.;
+  m_minZoomDistance = 1;
+  m_maxZoomDistance = 50;
   m_lookAt.reset();
   m_sceneWidth = 0;
   m_sceneHeight = 0;
@@ -53,17 +55,17 @@ void ArcBallCamera::refreshSceneSize(int width, int height)
 
 void ArcBallCamera::zoomOut()
 {
-  if (m_distance < DISTANCE_MAX)
+  if (m_distance < m_maxZoomDistance)
   {
-    m_distance += (m_distance - DISTANCE_MIN) / 5.0;
+    m_distance += (m_distance - m_minZoomDistance) / 5.0;
   }
 }
 
 void ArcBallCamera::zoomIn()
 {
-  if (m_distance > DISTANCE_MIN)
+  if (m_distance > m_minZoomDistance)
   {
-    m_distance -= (m_distance - DISTANCE_MIN) / 5.0;
+    m_distance -= (m_distance - m_minZoomDistance) / 5.0;
   }
 }
 
@@ -192,10 +194,16 @@ void ArcBallCamera::updatePos(int x, int y)
 
 void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float fov)
 {
+  // center view point on center of object
   m_lookAt.x = (minp.z + maxp.z) / 2.;
   m_lookAt.y = (minp.y + maxp.y) / 2.;
   m_lookAt.z = (minp.x + maxp.x) / 2.;
 
+  // adjust current zoom based on object size
   float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
   m_distance = abs((maxsize /2.)  / sinf(fov/2.*PI/180)) * 1.2;
+
+  // set min /max zoom bounds based on optimal zoom
+  m_minZoomDistance = m_distance / 10;
+  m_maxZoomDistance = m_distance * 10;
 }

@@ -25,6 +25,7 @@ class ArcBallCamera
 
     void zoomIn();
     void zoomOut();
+
     void pan(float a_xVal, float a_yVal);
 
     void setStartPos(int x, int y);
@@ -41,6 +42,8 @@ class ArcBallCamera
 
     // zoom
     float m_distance;
+    float m_minZoomDistance;
+    float m_maxZoomDistance;
 
     // camera definition
     Vec3D m_lookAt;
