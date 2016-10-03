@@ -394,6 +394,7 @@ void ModelCanvas::LoadWMO(wxString fn)
 	if (!wmo) {
 		wmo = new WMO(fn.c_str());
 		root->setModel(wmo);
+    arcCamera.autofit(wmo->minCoord, wmo->maxCoord, video.fov);
 	}
 }
 

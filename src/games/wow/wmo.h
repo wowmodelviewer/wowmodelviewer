@@ -111,6 +111,9 @@ public:
 	Vec3D v2; // Bounding box corner 2
 	int LiquidType;
 
+  Vec3D maxCoord;
+  Vec3D minCoord;
+
 	WMOGroup *groups;
 	WMOMaterial *mat;
 	bool ok;

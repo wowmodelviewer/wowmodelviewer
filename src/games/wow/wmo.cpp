@@ -19,7 +19,10 @@ void WMO::flipcc(QString & cc)
   cc = QString(d);
 }
 
-WMO::WMO(QString name): ManagedItem(name)
+WMO::WMO(QString name) : 
+  ManagedItem(name),
+  maxCoord(), 
+  minCoord()
 {
   CASCFile f(name);
   f.open();
@@ -264,6 +267,25 @@ WMO::WMO(QString name): ManagedItem(name)
   delete[] texbuf;
 
 	for (size_t i=0; i<nGroups; i++) groups[i].initDisplayList();
+
+  // compute min/max bounds based on groups
+  for (size_t i = 0; i < nGroups; i++)
+  {
+    if (groups[i].vmin.x < minCoord.x)
+      minCoord.x = groups[i].vmin.x;
+    else if (groups[i].vmax.x > maxCoord.x)
+      maxCoord.x = groups[i].vmax.x;
+
+    if (groups[i].vmin.y < minCoord.y)
+      minCoord.y = groups[i].vmin.y;
+    else if (groups[i].vmax.y > maxCoord.y)
+      maxCoord.y = groups[i].vmax.y;
+
+    if (groups[i].vmin.z < minCoord.z)
+      minCoord.z = groups[i].vmin.z;
+    else if (groups[i].vmax.z > maxCoord.z)
+      maxCoord.z = groups[i].vmax.z;
+  }
 }
 
 WMO::~WMO()
@@ -337,12 +359,6 @@ void WMO::draw()
 {
 	if (!ok) return;
   
-	glRotatef(viewrot.y, 1, 0, 0);
-	glRotatef(viewrot.x, 0, 1, 0);
-	glRotatef(viewrot.z, 0, 0, 1);
-	glTranslatef(-100,0,0);
-	glTranslatef(viewpos.x, viewpos.y, viewpos.z);
-
 	for (size_t i=0; i<nGroups; i++) {
 		groups[i].draw();
 	}
