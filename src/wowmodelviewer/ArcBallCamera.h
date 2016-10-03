@@ -23,8 +23,8 @@ class ArcBallCamera
 
     void refreshSceneSize(const int width, const int height);
 
-    void zoomIn();
-    void zoomOut();
+    void zoomIn(const float speedfactor = 1.);
+    void zoomOut(const float speedfactor = 1.);
 
     void pan(const float a_xVal, const float a_yVal);
 

@@ -48,20 +48,20 @@ void ArcBallCamera::refreshSceneSize(const int width, const int height)
   m_sceneHeight = height;
 }
 
-void ArcBallCamera::zoomOut()
+void ArcBallCamera::zoomOut(const float speedfactor)
 {
-  if (m_distance < m_maxZoomDistance)
-  {
-    m_distance += (m_distance - m_minZoomDistance) / 5.0;
-  }
+  m_distance += ((m_distance - m_minZoomDistance) / 5.0 * speedfactor);
+
+  if (m_distance > m_maxZoomDistance)
+    m_distance = m_maxZoomDistance;
 }
 
-void ArcBallCamera::zoomIn()
+void ArcBallCamera::zoomIn(const float speedfactor)
 {
-  if (m_distance > m_minZoomDistance)
-  {
-    m_distance -= (m_distance - m_minZoomDistance) / 5.0;
-  }
+  m_distance -= ((m_distance - m_minZoomDistance) / 5.0 * speedfactor);
+
+  if (m_distance < (m_minZoomDistance+1.0))
+    m_distance = m_minZoomDistance + 1.0;
 }
 
 void ArcBallCamera::pan(const float a_xVal, const float a_yVal)
