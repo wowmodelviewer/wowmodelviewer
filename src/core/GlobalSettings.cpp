@@ -42,6 +42,11 @@
 // Current library
 #include "Plugin.h"
 
+// if you need extra qualification on software version, move this to 1
+# define _BETAVERSION 0
+# define _ALPHAVERSION 1
+
+
 // Namespaces used
 //--------------------------------------------------------------------
 
@@ -55,12 +60,13 @@ GlobalSettings * GlobalSettings::m_instance = 0;
 GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
-  m_versionMinorNumber = 8;
-  m_versionRevNumber = 5;
+  m_versionMinorNumber = 9;
+  m_versionRevNumber = 0;
 
   m_appName = "WoW Model Viewer";
-  m_buildName = "Bilgewhizzle";
+  m_buildName = "In memory of Cenarius";
 
+ 
   /*
 		--==List of Build Name ideas==--	(Feel free to add!)
 		Bouncing Baracuda
@@ -94,19 +100,20 @@ GlobalSettings::GlobalSettings()
     Christmas Edition ;)
     Archimonde will survive
     Wain's edition
+    Bilgewhizzle
 
    */
 
   // platform 
   m_platform = "Windows 32 bits";
 
-#ifdef _BETAVERSION
+#if _BETAVERSION > 0
   m_isBetaVersion = true;
 #else
   m_isBetaVersion = false;
 #endif
 
-#ifdef _ALPHAVERSION
+#if _ALPHAVERSION > 0
   m_isAlphaVersion = true;
 #else
   m_isAlphaVersion = false;
