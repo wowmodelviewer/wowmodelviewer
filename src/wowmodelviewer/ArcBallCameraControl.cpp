@@ -72,7 +72,7 @@ void ArcBallCameraControl::onMouse(wxMouseEvent &event)
   }
   else if (event.Dragging() && event.RightIsDown())  // pan
   {
-    m_camera.pan(((m_xStart - px) / 100.)*mul, ((m_yStart - py) / 100.)*mul);
+    m_camera.pan(((m_xStart - px) / 100.)*mul, -((m_yStart - py) / 100.)*mul);
     m_xStart = px;
     m_yStart = py;
   }
