@@ -1,5 +1,5 @@
-#ifndef DBCFILE_H
-#define DBCFILE_H
+#ifndef DBFILE_H
+#define DBFILE_H
 
 #include <cassert>
 #include <map>
@@ -8,50 +8,30 @@
 
 #include <QString>
 
-class GameFile;
+#include "CASCFile.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
-#        define _DBCFILE_API_ __declspec(dllexport)
+#        define _DBFILE_API_ __declspec(dllexport)
 #    else
-#        define _DBCFILE_API_ __declspec(dllimport)
+#        define _DBFILE_API_ __declspec(dllimport)
 #    endif
 #else
-#    define _DBCFILE_API_
+#    define _DBFILE_API_
 #endif
 
 
-class _DBCFILE_API_ DBCFile
+class _DBFILE_API_ DBFile : public CASCFile
 {
 public:
-	DBCFile(GameFile *);
-	~DBCFile();
+  explicit DBFile(const QString & file);
+  ~DBFile();
 
 	// Open database. It must be openened before it can be used.
 	bool open();
+  bool close();
 
 	// TODO: Add a close function?
-
-	// Database exceptions
-	class Exception
-	{
-	public:
-		Exception(const std::string &message): message(message)
-		{ }
-		virtual ~Exception()
-		{ }
-		const std::string &getMessage() {return message;}
-	private:
-		std::string message;
-	};
-
-	// 
-	class NotFound: public Exception
-	{
-	public:
-		NotFound(): Exception("Key was not found")
-		{ }
-	};
 
 	// Iteration over database
 	class Iterator;
@@ -101,11 +81,11 @@ public:
 
 
 	private:
-		DBCFile &file;
+  DBFile &file;
 		unsigned char *offset;
-		Record(DBCFile &file, unsigned char *offset): file(file), offset(offset) {}
+    Record(DBFile &file, unsigned char *offset) : file(file), offset(offset) {}
 
-		friend class DBCFile;
+    friend class DBFile;
 		friend class Iterator;
 	};
 
@@ -113,7 +93,7 @@ public:
 	class Iterator
 	{
 	public:
-		Iterator(DBCFile &file, unsigned char *offset): 
+  Iterator(DBFile &file, unsigned char *offset) :
 			record(file, offset) {}
 		/// Advance (prefix only)
 		Iterator & operator++() { 
@@ -138,25 +118,24 @@ public:
 		Record record;
 	};
 
-	// Get record by id
-	Record getRecord(size_t id);
 	/// Get begin iterator over records
 	Iterator begin();
 	/// Get begin iterator over records
 	Iterator end();
+
 	/// Trivial
 	size_t getRecordCount() const { return recordCount; }
-	size_t getFieldCount() const { return fieldCount; }
-	size_t size() const { return recordCount; }
 
 private:
-	GameFile * file;
 	size_t recordSize;
 	size_t recordCount;
 	size_t fieldCount;
 	size_t stringSize;
 	unsigned char *data;
 	unsigned char *stringTable;
+
+  DBFile(const DBFile &);
+  void operator=(const DBFile &);
 };
 
 #endif

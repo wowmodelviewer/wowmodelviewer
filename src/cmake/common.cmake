@@ -65,6 +65,8 @@ macro(use_cximage)
 endmacro()
 
 macro(use_wow)
+  use_core() # if you use wow lib, you are underneath using core lib
+  use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories($ENV{WMV_BASE_PATH}/src/games/wow)
   find_package(Qt5Core)
   find_package(Qt5Xml)

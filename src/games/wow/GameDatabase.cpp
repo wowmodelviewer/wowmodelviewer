@@ -12,7 +12,7 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
-#include "dbcfile.h"
+#include "dbfile.h"
 #include "Game.h"
 #include "logger/Logger.h"
 
@@ -123,7 +123,7 @@ bool GameDatabase::createDatabaseFromXML(const QString & file)
         if(!fillTableFromGameFile(e.tagName(), gamedbfile))
         {
           LOG_ERROR << "Error during filling of database" << e.tagName();
-          return false;
+          //return false;
         }
       }
       else
@@ -216,7 +216,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   if(!fileToOpen)
     return false;
 
-  DBCFile dbc(fileToOpen);
+  DBFile dbc(fileToOpen->fullname());
   if(!dbc.open())
     return false;
 
@@ -242,7 +242,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   int record = 0;
   int nbRecord = dbc.getRecordCount();
  // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
-  for(DBCFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it,record++)
+  for (DBFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it, record++)
   {
     std::vector<std::string> fields = it->get(tableStruct);
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)

@@ -17,8 +17,7 @@
 #include <set>
 
 
-// OUR HEADERS
-#include "dbcfile.h"
+#include <QString>
 
 // wmv database
 class ItemDatabase;

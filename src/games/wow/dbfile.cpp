@@ -1,22 +1,28 @@
-#include "dbcfile.h"
+#include "dbfile.h"
 
 #include <sstream>
 
-#include "GameFile.h"
 #include "logger/Logger.h"
 
-DBCFile::DBCFile(GameFile * f) : file(f)
+DBFile::DBFile(const QString & file) : 
+  CASCFile(file),
+  data(0),
+  stringTable(0),
+  recordSize(0),
+  recordCount(0),
+  fieldCount(0),
+  stringSize(0)
 {
-	data = NULL;
-	stringTable = NULL;
-	recordSize = 0;
-	recordCount = 0;
-	fieldCount = 0;
-	stringSize = 0;
 }
 
-bool DBCFile::open()
+bool DBFile::open()
 {
+  if (!CASCFile::open())
+  {
+    LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname();
+    return false;
+  }
+
 	enum FileType {
 		FT_UNK,
 		FT_WDBC,
@@ -24,10 +30,6 @@ bool DBCFile::open()
 	};
 	int db_type = FT_UNK;
 
-	if(!file)
-	  return false;
-
-	file->open();
 	// Need some error checking, otherwise an unhandled exception error occurs
 	// if people screw with the data path.
 
@@ -37,35 +39,35 @@ bool DBCFile::open()
 	char header[5];
 	unsigned int na,nb,es,ss;
 
-	file->read(header, 4); // File Header
+	read(header, 4); // File Header
 	if (strncmp(header, "WDBC", 4) == 0)
 		db_type = FT_WDBC;
 	else if (strncmp(header, "WDB2", 4) == 0)
 		db_type = FT_WDB2;
 
 	if (db_type == FT_UNK) {
-		file->close();
+		close();
 		data = NULL;
-		LOG_ERROR << "An error occured while trying to read the DBCFile" << file->fullname();
+    LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname() << "header:" << header[0] << header[1] << header[2] << header[3];
 		return false;
 	}
 
 	//assert(header[0]=='W' && header[1]=='D' && header[2]=='B' && header[3] == 'C');
 
-	file->read(&na,4); // Number of records
-	file->read(&nb,4); // Number of fields
-	file->read(&es,4); // Size of a record
-	file->read(&ss,4); // String size
+	read(&na,4); // Number of records
+	read(&nb,4); // Number of fields
+	read(&es,4); // Size of a record
+	read(&ss,4); // String size
 
 	if (db_type == FT_WDB2) {
-		file->seekRelative(28);
+		seekRelative(28);
 		// just some buggy check
 		unsigned int check;
-		file->read(&check, 4);
+		read(&check, 4);
 		if (check == 6) // wrong place
-			file->seekRelative(-20);
+			seekRelative(-20);
 		else // check == 17, right place
-			file->seekRelative(-4);
+			seekRelative(-4);
 	}
 	
 	recordSize = es;
@@ -76,23 +78,29 @@ bool DBCFile::open()
 	// not always true, but it works fine till now
 	assert(fieldCount*4 >= recordSize);
 
-	data = new unsigned char[recordSize*recordCount+stringSize];
-	stringTable = data + recordSize*recordCount;
 	if (db_type == FT_WDB2) {
-		file->seek(file->getSize() - recordSize*recordCount - stringSize);
+		seek(getSize() - recordSize*recordCount - stringSize);
 	}
-	file->read(data, recordSize*recordCount+stringSize);
-	file->close();
+
+  data = getPointer();
+  stringTable = data + recordSize*recordCount;
+
 	return true;
 }
 
-DBCFile::~DBCFile()
+bool DBFile::close()
 {
-	delete [] data;
+  CASCFile::close();
+  return true;
+}
+
+DBFile::~DBFile()
+{
+  close();
 }
 
 
-std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QString, QString> > & structure) const
+std::vector<std::string> DBFile::Record::get(const std::map<int, std::pair<QString, QString> > & structure) const
 {
   std::vector<std::string> result;
   unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
@@ -166,18 +174,12 @@ std::vector<std::string> DBCFile::Record::get(const std::map<int, std::pair<QStr
   return result;
 }
 
-DBCFile::Record DBCFile::getRecord(size_t id)
-{
-	//assert(data);
-	return Record(*this, data + id*recordSize);
-}
-
-DBCFile::Iterator DBCFile::begin()
+DBFile::Iterator DBFile::begin()
 {
 	//assert(data);
 	return Iterator(*this, data);
 }
-DBCFile::Iterator DBCFile::end()
+DBFile::Iterator DBFile::end()
 {
 	//assert(data);
 	return Iterator(*this, stringTable);

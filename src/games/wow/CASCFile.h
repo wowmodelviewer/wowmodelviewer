@@ -30,7 +30,7 @@ class _CASCFILE_API_ CASCFile : public GameFile
   public:
     CASCFile(QString path);
     ~CASCFile();
-    bool open();
+    virtual bool open();
     bool close();
 
   private:

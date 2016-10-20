@@ -24,7 +24,7 @@ set(src animated.cpp
         CharDetails.cpp
         CharTexture.cpp
         database.cpp
-        dbcfile.cpp
+        dbfile.cpp
         ddslib.cpp
         Game.cpp
         GameDatabase.cpp
