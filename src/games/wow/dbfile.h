@@ -25,97 +25,49 @@ class _DBFILE_API_ DBFile : public CASCFile
 {
 public:
   explicit DBFile(const QString & file);
-  ~DBFile();
+  virtual ~DBFile();
 
 	// Open database. It must be openened before it can be used.
 	bool open();
+
+  // to be implemented in inherited classes to perform specific reading at open time
+  virtual bool doSpecializedOpen() = 0;
+
   bool close();
 
-	// TODO: Add a close function?
-
 	// Iteration over database
-	class Iterator;
-	class Record
-	{
-	public:
-		Record& operator= (const Record& r)
-		{
-            file = r.file;
-			offset = r.offset;
-			return *this;
-		}
-		float getFloat(size_t field) const
-		{
-			assert(field < file.fieldCount);
-			return *reinterpret_cast<float*>(offset+field*4);
-		}
-		unsigned int getUInt(size_t field) const
-		{
-			assert(field < file.fieldCount);
-			return *reinterpret_cast<unsigned int*>(offset+(field*4));
-		}
-		int getInt(size_t field) const
-		{
-			assert(field < file.fieldCount);
-			return *reinterpret_cast<int*>(offset+field*4);
-		}
-		unsigned char getByte(size_t ofs) const
-		{
-			assert(ofs < file.recordSize);
-			return *reinterpret_cast<unsigned char*>(offset+ofs);
-		}
-
-
-		std::string getStdString(size_t field) const
-		{
-		  assert(field < file.fieldCount);
-		  size_t stringOffset = getUInt(field);
-		  if (stringOffset >= file.stringSize)
-		    stringOffset = 0;
-		  assert(stringOffset < file.stringSize);
-
-		  return std::string(reinterpret_cast<char*>(file.stringTable + stringOffset));
-		}
-
-		std::vector<std::string> get(const std::map<int, std::pair<QString, QString> > & structure) const;
-
-
-	private:
-  DBFile &file;
-		unsigned char *offset;
-    Record(DBFile &file, unsigned char *offset) : file(file), offset(offset) {}
-
-    friend class DBFile;
-		friend class Iterator;
-	};
-
-	/* Iterator that iterates over records */
 	class Iterator
 	{
-	public:
-  Iterator(DBFile &file, unsigned char *offset) :
-			record(file, offset) {}
-		/// Advance (prefix only)
-		Iterator & operator++() { 
-			record.offset += record.file.recordSize;
-			return *this; 
-		}	
-		/// Return address of current instance
-		Record const & operator*() const { return record; }
-		const Record* operator->() const {
-			return &record;
-		}
-		/// Comparison
-		bool operator==(const Iterator &b) const
-		{
-			return record.offset == b.record.offset;
-		}
-		bool operator!=(const Iterator &b) const
-		{
-			return record.offset != b.record.offset;
-		}
-	private:
-		Record record;
+	  public:
+      Iterator(DBFile &f, unsigned char *off) :
+        file(f), offset(off) {}
+		  
+      /// Advance (prefix only)
+		  Iterator & operator++() 
+      { 
+			  offset += file.recordSize;
+			  return *this; 
+		  }	
+		
+      std::vector<std::string> get(const std::map<int, std::pair<QString, QString> > & structure) const
+      {
+        return file.get(offset, structure);
+      }
+	
+		  /// Comparison
+		  bool operator==(const Iterator &b) const
+		  {
+			  return offset == b.offset;
+		  }
+		
+      bool operator!=(const Iterator &b) const
+		  {
+			  return offset != b.offset;
+		  }
+	  
+    private:
+      DBFile &file;
+		  unsigned char * offset;
 	};
 
 	/// Get begin iterator over records
@@ -126,7 +78,43 @@ public:
 	/// Trivial
 	size_t getRecordCount() const { return recordCount; }
 
-private:
+  float getFloat(unsigned char * recordOffset, size_t field) const
+  {
+    assert(field < file.fieldCount);
+    return *reinterpret_cast<float*>(recordOffset + field * 4);
+  }
+  unsigned int getUInt(unsigned char * recordOffset, size_t field) const
+  {
+    assert(field < file.fieldCount);
+    return *reinterpret_cast<unsigned int*>(recordOffset + (field * 4));
+  }
+  int getInt(unsigned char * recordOffset, size_t field) const
+  {
+    assert(field < file.fieldCount);
+    return *reinterpret_cast<int*>(recordOffset + field * 4);
+  }
+  unsigned char getByte(unsigned char * recordOffset, size_t ofs) const
+  {
+    assert(ofs < file.recordSize);
+    return *reinterpret_cast<unsigned char*>(recordOffset + ofs);
+  }
+
+
+  std::string getStdString(unsigned char * recordOffset, size_t field) const
+  {
+    assert(field < file.fieldCount);
+    size_t stringOffset = getUInt(recordOffset, field);
+    if (stringOffset >= stringSize)
+      stringOffset = 0;
+    assert(stringOffset < file.stringSize);
+
+    return std::string(reinterpret_cast<char*>(stringTable + stringOffset));
+  }
+
+  // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
+  virtual std::vector<std::string> get(unsigned char * recordOffset, const std::map<int, std::pair<QString, QString> > & structure) const = 0;
+
+protected:
 	size_t recordSize;
 	size_t recordCount;
 	size_t fieldCount;
@@ -134,6 +122,7 @@ private:
 	unsigned char *data;
 	unsigned char *stringTable;
 
+  private:
   DBFile(const DBFile &);
   void operator=(const DBFile &);
 };

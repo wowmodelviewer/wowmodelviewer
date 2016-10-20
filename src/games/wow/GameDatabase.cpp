@@ -12,7 +12,7 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
-#include "dbfile.h"
+#include "wdb2file.h"
 #include "Game.h"
 #include "logger/Logger.h"
 
@@ -216,7 +216,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   if(!fileToOpen)
     return false;
 
-  DBFile dbc(fileToOpen->fullname());
+  WDB2File dbc(fileToOpen->fullname());
   if(!dbc.open())
     return false;
 
@@ -244,7 +244,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
  // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
   for (DBFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it, record++)
   {
-    std::vector<std::string> fields = it->get(tableStruct);
+    std::vector<std::string> fields = it.get(tableStruct);
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
     {
       if(field == 0)

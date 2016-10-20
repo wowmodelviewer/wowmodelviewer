@@ -1782,9 +1782,9 @@ void ModelViewer::LoadWoW()
 
   SetStatusText(wxString(GAMEDIRECTORY.locale()), 2);
 
-  /*
+  
   InitDatabase();
-
+  /*
   // Error check
   if (!initDB)
   {
@@ -1799,7 +1799,7 @@ void ModelViewer::LoadWoW()
     fileMenu->Enable(ID_LOAD_WOW, false);
   }
   */
-  wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
+  //wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
 
 
   SetStatusText(wxT("Initializing File Control..."));

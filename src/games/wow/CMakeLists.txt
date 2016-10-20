@@ -47,6 +47,7 @@ set(src animated.cpp
         TabardDetails.cpp
         TextureAnim.cpp
         video.cpp
+		wdb2file.cpp
         wmo.cpp
 		WMOFog.cpp
 		WMOGroup.cpp
