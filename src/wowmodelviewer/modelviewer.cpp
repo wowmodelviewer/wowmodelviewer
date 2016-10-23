@@ -593,7 +593,7 @@ void ModelViewer::InitDatabase()
   wxWindowDisabler disableAll;
   wxBusyInfo info(_T("Please wait during game database analysis..."), this);
 
-  if(!GAMEDATABASE.initFromXML("wow6.xml"))
+  if(!GAMEDATABASE.initFromXML("wow7.xml"))
   {
     initDB = false;
     LOG_ERROR << "Initializing failed !";

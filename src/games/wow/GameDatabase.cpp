@@ -12,7 +12,7 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
-#include "wdb2file.h"
+#include "wdb5file.h"
 #include "Game.h"
 #include "logger/Logger.h"
 
@@ -216,7 +216,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   if(!fileToOpen)
     return false;
 
-  WDB2File dbc(fileToOpen->fullname());
+  WDB5File dbc(fileToOpen->fullname());
   if(!dbc.open())
     return false;
 

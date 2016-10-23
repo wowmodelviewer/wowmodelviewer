@@ -40,8 +40,8 @@ class _GAMEFILE_API_ GameFile : public Component
     virtual bool open() = 0;
     virtual bool close();
 
-    void setFullName(QString & name) { filepath = name; }
-    QString fullname() { return filepath; }
+    void setFullName(const QString & name) { filepath = name; }
+    QString fullname() const { return filepath; }
 
   protected:
     bool eof;

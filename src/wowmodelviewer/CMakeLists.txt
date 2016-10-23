@@ -65,6 +65,7 @@ set(RES_FILES "wmv.rc")
 # extra useful files for visual studio project
 set(useful_files $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
+				 $ENV{WMV_BASE_PATH}/bin_support/wow7.xml
 				 wowmodelviewer.json
 				 )
 
@@ -102,6 +103,7 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                         
 set(EXTRA_FILES $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
         		$ENV{WMV_BASE_PATH}/bin_support/wow6.xml
+				$ENV{WMV_BASE_PATH}/bin_support/wow7.xml
         		$ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
