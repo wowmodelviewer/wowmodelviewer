@@ -94,7 +94,7 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
   return 0;
 }
 
-bool GameDatabase::createDatabaseFromXML(const QString & file)
+bool GameDatabase::readStructureFromXML(const QString & file)
 {
   QDomDocument doc;
 
@@ -107,108 +107,170 @@ bool GameDatabase::createDatabaseFromXML(const QString & file)
 
   QDomElement e = docElem.firstChildElement();
 
-  while(!e.isNull())
+  while (!e.isNull())
   {
-    if(!createTableFromXML(e))
-    {
-      LOG_ERROR << "Impossible to create table" << e.tagName();
-    }
+    tableStructure * tblStruct = new tableStructure();
+    QDomElement child = e.firstChildElement();
+
+    QDomNamedNodeMap attributes = e.attributes();
+    QDomNode hash = attributes.namedItem("layoutHash");
+    QDomNode gamefile = attributes.namedItem("gamefile");
+
+    // table values
+    tblStruct->name = attributes.namedItem("name").nodeValue();
+    if (!hash.isNull())
+      tblStruct->hash = hash.nodeValue().toUInt();
+
+    if (!gamefile.isNull())
+      tblStruct->gamefile = gamefile.nodeValue();
     else
+      tblStruct->gamefile = tblStruct->name;
+
+    int fieldId = 0;
+    while (!child.isNull())
     {
-      LOG_INFO << "Table creation succeed for" << e.tagName();
-      QString gamedbfile = e.firstChildElement("gamefile").attributes().namedItem("name").nodeValue();
-      if(gamedbfile != "")
+      fieldStructure * fieldStruct = new fieldStructure();
+      fieldStruct->id = fieldId;
+      QDomNamedNodeMap attributes = child.attributes();
+
+      // search if name and type are here
+      QDomNode name = attributes.namedItem("name");
+      QDomNode type = attributes.namedItem("type");
+      QDomNode key = attributes.namedItem("primary");
+      QDomNode arraySize = attributes.namedItem("arraySize");
+      QDomNode pos = attributes.namedItem("pos");
+
+      if (!name.isNull() && !type.isNull())
       {
-        LOG_INFO << "Opening game database file" << gamedbfile;
-        if(!fillTableFromGameFile(e.tagName(), gamedbfile))
-        {
-          LOG_ERROR << "Error during filling of database" << e.tagName();
-          //return false;
-        }
+        fieldStruct->name = name.nodeValue();
+        fieldStruct->type = type.nodeValue();
+
+        if (!key.isNull())
+          fieldStruct->isKey = true;
+
+        if (!pos.isNull())
+          fieldStruct->pos = pos.nodeValue().toInt();
+
+        if (!arraySize.isNull())
+          fieldStruct->arraySize = arraySize.nodeValue().toUInt();
+
+        tblStruct->fields.push_back(*fieldStruct);
       }
-      else
-      {
-        LOG_ERROR << "Fail to find gamefile attribute";
-        return false;
-      }
+
+      fieldId++;
+      child = child.nextSiblingElement();
     }
+
+    /*
+    LOG_INFO << "----------------------------";
+    LOG_INFO << "Table" << tblStruct->name.c_str() << "/ hash" << tblStruct->hash;
+    for (unsigned int i = 0; i < tblStruct->fields.size(); i++)
+    {
+      fieldStructure field = tblStruct->fields[i];
+      LOG_INFO << "fieldName =" << field.name.c_str()
+        << "/ fieldType =" << field.type.c_str()
+        << "/ is key ? =" << field.isKey
+        << "/ pos =" << field.pos
+        << "/ arraySize =" << field.arraySize;
+    }
+    LOG_INFO << "----------------------------";
+    */
+    m_dbStruct.push_back(*tblStruct);
 
     e = e.nextSiblingElement();
   }
   return true;
 }
 
-bool GameDatabase::createTableFromXML(const QDomElement & elem)
+bool GameDatabase::createDatabaseFromXML(const QString & file)
 {
-  QDomElement child = elem.firstChildElement();
-  QDomElement lastChild = elem.lastChildElement();
-
-  QString curTable = elem.nodeName();
-  QString create = "CREATE TABLE "+ curTable +" (";
-
-  int curfield = 0;
-  while (!child.isNull())
+  if (!readStructureFromXML(file))
   {
-    QDomNamedNodeMap attributes = child.attributes();
+    LOG_ERROR << "Reading database structure from XML file failed ! Impossible to create database.";
+    return false;
+  }
 
-    // search if name and type are here
-    QDomNode name = attributes.namedItem("name");
-    QDomNode type = attributes.namedItem("type");
-    QDomNode index = attributes.namedItem("index");
+  bool result = true; // ok until we found an issue
 
-    if(!name.isNull() && !type.isNull())
+  for (auto it = m_dbStruct.begin(), itEnd = m_dbStruct.end(); it != itEnd; ++it)
+  {
+    if (it->create())
     {
-      int fieldIndex;
-      if(!index.isNull())
-        fieldIndex = index.nodeValue().toInt();
-      else
-        fieldIndex = curfield++;
-
-      QString fieldName = name.nodeValue();
-      QString fieldType = type.nodeValue();
-
-     //LOG_INFO << "fieldName = " << fieldName << " / fieldType = " << fieldType << " / fieldIndex = " << fieldIndex << std::endl;
-
-      create += fieldName;
-      create += " ";
-      create += fieldType;
-      if(!attributes.namedItem("primary").isNull())
-        create += " PRIMARY KEY NOT NULL";
-      create += ",";
-      m_dbStruct[curTable][fieldIndex] = std::make_pair(fieldName,fieldType);
+      if (!it->fill())
+      {
+        LOG_ERROR << "Error during table filling" << it->name;
+        result = false;
+      }
     }
+    else
+    {
+      LOG_ERROR << "Error during table creation" << it->name;
+      result = false;
+    }
+  }
 
-    child = child.nextSiblingElement();
+  // add indexes to speed up item loading
+  sqlQuery("CREATE INDEX index1 ON TextureFileData(TextureItemID)");
+  sqlQuery("CREATE INDEX index2 ON TextureFileData(TextureType)");
+  sqlQuery("CREATE INDEX index3 ON TextureFileData(FileDataID)");
+ 
+  return result; 
+}
+
+bool GameDatabase::tableStructure::create()
+{
+  LOG_INFO << "Creating table" << name;
+  QString create = "CREATE TABLE "+ name +" (";
+
+  for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
+  {
+    if (it->arraySize == 0) // simple field
+    {
+      create += it->name;
+      create += " ";
+      create += it->type;
+
+      if (it->isKey)
+        create += " PRIMARY KEY NOT NULL";
+
+      create += ",";
+    }
+    else // complex field
+    {
+      for (unsigned int i = 0; i < it->arraySize; i++)
+      {
+        create += it->name;
+        create += QString::number(i);
+        create += " ";
+        create += it->type;
+        create += ",";
+      }
+    }
   }
 
   // remove spurious "," at the end of string, if any
   if(create.lastIndexOf(",") == create.length()-1)
     create.remove(create.length()-1,1);
   create += ");";
+  
+  LOG_INFO << create;
 
-  //std::cout << create << std::endl;
-
-  sqlResult r = sqlQuery(create);
-
-  // add indexes to speed up item loading
-  if(curTable == "TextureFileData")
-  {
-    sqlQuery("CREATE INDEX index1 ON TextureFileData(TextureItemID)");
-    sqlQuery("CREATE INDEX index2 ON TextureFileData(TextureType)");
-    sqlQuery("CREATE INDEX index3 ON TextureFileData(FileDataID)");
-  }
-
+  sqlResult r = GAMEDATABASE.sqlQuery(create);
+ 
+  if (r.valid)
+    LOG_INFO << "Table" << name << "successfully created";
 
   return r.valid;
 }
 
-bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & gamefile)
+bool GameDatabase::tableStructure::fill()
 {
+  LOG_INFO << "Filling table" << name << "...";
   GameFile * fileToOpen = 0;
   // loop over possible extension to check if file exists
   for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
-    fileToOpen = GAMEDIRECTORY.getFile(gamefile+POSSIBLE_DB_EXT[i]);
+    fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\"+gamefile+POSSIBLE_DB_EXT[i]);
     if(fileToOpen)
       break;
   }
@@ -220,31 +282,29 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   if(!dbc.open())
     return false;
 
-  std::map<int, std::pair<QString, QString> > tableStruct = m_dbStruct[table];
-
   QString query = "INSERT INTO ";
-  query += table;
+  query += name;
   query += "(";
-  int nbFields = tableStruct.size();
-  //std::cout << __FUNCTION__ << " nb fields = " << nbFields << std::endl;
+  int nbFields = fields.size();
   int curfield = 0;
-  for(std::map<int, std::pair<QString, QString> >::iterator it = tableStruct.begin(), itEnd = tableStruct.end();
+  for(auto it = fields.begin(), itEnd = fields.end();
       it != itEnd ;
       ++it,curfield++)
   {
-    query += it->second.first;
+    query += it->name;
     if(curfield != nbFields-1)
       query += ",";
   }
 
   query += ") VALUES";
+  
   QString queryBase = query;
   int record = 0;
   int nbRecord = dbc.getRecordCount();
  // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
   for (DBFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it, record++)
   {
-    std::vector<std::string> fields = it.get(tableStruct);
+    std::vector<std::string> fields = it.get(*this);
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
     {
       if(field == 0)
@@ -262,7 +322,7 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
     if(record%200 == 0)
     {
       query += ";";
-      sqlResult r = sqlQuery(query);
+      sqlResult r = GAMEDATABASE.sqlQuery(query);
       if(!r.valid)
         return false;
       query = queryBase;
@@ -275,7 +335,11 @@ bool GameDatabase::fillTableFromGameFile(const QString & table, const QString & 
   }
 
   query += ";";
-  sqlResult r = sqlQuery(query);
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid)
+    LOG_INFO << "table" << name << "successfuly filled";
+
   return r.valid;
 }
 

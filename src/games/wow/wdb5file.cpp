@@ -56,8 +56,7 @@ bool WDB5File::doSpecializedOpen()
   LOG_INFO << "--------------------------";
   for (uint i = 0; i < fieldCount; i++)
   {
-    LOG_INFO << "size" << fieldStructure[i].size << (32 - fieldStructure[i].size) / 8;
-    LOG_INFO << "position" << fieldStructure[i].position;
+    LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
   }
   LOG_INFO << "--------------------------";
 
@@ -83,45 +82,55 @@ WDB5File::~WDB5File()
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned char * recordOffset, const std::map<int, std::pair<QString, QString> > & structure) const
+std::vector<std::string> WDB5File::get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const
 {
   std::vector<std::string> result;
-
+  
   uint recordIndex = (uint)(recordOffset - data) / recordSize;
-  std::map<int, std::pair<QString, QString> >::const_iterator it = structure.begin();
 
-  // ID
-  // Todo : manage case where id is a real field, not a separated table
-  std::stringstream ss;
-  ss << IDs[recordIndex];
-  result.push_back(ss.str());
-
-  ++it;
-
-  for (std::map<int, std::pair<QString, QString> >::const_iterator itEnd = structure.end();
+  for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
        it != itEnd;
        ++it)
   {
-    int fieldSize = (32 - fieldStructure[it->first-1].size) / 8;
-    unsigned char * val = new unsigned char[fieldSize];
-    memcpy(val, recordOffset + fieldStructure[it->first-1].position, fieldSize);
-    
-    if (it->second.second == "text")
+    //LOG_INFO << "Reading field" << it->name;
+    if (it->isKey)
     {
+      //LOG_INFO << "is key";
+      // Todo : manage case where id is a real field, not a separated table
+      std::stringstream ss;
+      ss << IDs[recordIndex];
+    //  LOG_INFO << "value" << ss.str().c_str();
+      result.push_back(ss.str());
+      continue;
+    }
+
+
+    int fieldSize = (32 - fieldStructure[it->id-1].size) / 8;
+    unsigned char * val = new unsigned char[fieldSize];
+    memcpy(val, recordOffset + fieldStructure[it->id-1].position, fieldSize);
+    
+    if (it->type == "text")
+    {
+    //  LOG_INFO << "field type = text";
       std::string value(reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val)));
       std::replace(value.begin(), value.end(), '"', '\'');
+//      LOG_INFO << "value" << value.c_str();
       result.push_back(value);
     }
     else if (fieldSize == 2)
     {
+ //     LOG_INFO << "fieldsize == 2";
       std::stringstream ss;
       ss << *reinterpret_cast<short*>(val);
+   //   LOG_INFO << "value" << ss.str().c_str();
       result.push_back(ss.str());
     }
     else
     {
+ //     LOG_INFO << "fieldsize != 2";
       std::stringstream ss;
       ss << *reinterpret_cast<int*>(val);
+ //     LOG_INFO << "value" << ss.str().c_str();
       result.push_back(ss.str());
     }
   }

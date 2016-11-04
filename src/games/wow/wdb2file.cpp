@@ -85,50 +85,50 @@ WDB2File::~WDB2File()
   close();
 }
 
-std::vector<std::string> WDB2File::get(unsigned char * recordOffset, const std::map<int, std::pair<QString, QString> > & structure) const
+std::vector<std::string> WDB2File::get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const
 {
   std::vector<std::string> result;
   unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
-  for (std::map<int, std::pair<QString, QString> >::const_iterator it = structure.begin(), itEnd = structure.end();
+  for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
        it != itEnd;
        ++it)
   {
     // std::cout << it->second.first << " => ";
-    if (it->second.second == "uint")
+    if (it->type == "uint")
     {
       // std::cout << "uint => " << it->first << " => ";
       std::stringstream ss;
-      ss << getUInt(recordOffset, it->first);
+      ss << getUInt(recordOffset, it->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->second.second == "int")
+    else if (it->type == "int")
     {
       // std::cout << "uint => " << it->first << " => ";
       std::stringstream ss;
-      ss << getInt(recordOffset, it->first);
+      ss << getInt(recordOffset, it->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->second.second == "text")
+    else if (it->type == "text")
     {
       // as " character cause weird issues with sql queries, replace it with '
-      std::string val = getStdString(recordOffset, it->first);
+      std::string val = getStdString(recordOffset, it->id);
       std::replace(val.begin(), val.end(), '"', '\'');
       result.push_back(val);
     }
-    else if (it->second.second == "float")
+    else if (it->type == "float")
     {
       // std::cout << "float => " << it->first << " => ";
       std::stringstream ss;
-      ss << getFloat(recordOffset, it->first);
+      ss << getFloat(recordOffset, it->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->second.second == "byte")
+    else if (it->type == "byte")
     {
       unsigned int decal = 0;
       switch (offset)
@@ -148,7 +148,7 @@ std::vector<std::string> WDB2File::get(unsigned char * recordOffset, const std::
       }
 
       std::stringstream ss;
-      unsigned int val = getUInt(recordOffset, it->first - offset);
+      unsigned int val = getUInt(recordOffset, it->id - offset);
       ss << ((val >> decal) & 0x000000FF);
       std::string field = ss.str();
       // std::cout << field << std::endl;

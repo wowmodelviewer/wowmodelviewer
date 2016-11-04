@@ -9,6 +9,7 @@
 #include <QString>
 
 #include "CASCFile.h"
+#include "GameDatabase.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -49,7 +50,7 @@ public:
 			  return *this; 
 		  }	
 		
-      std::vector<std::string> get(const std::map<int, std::pair<QString, QString> > & structure) const
+      std::vector<std::string> get(const GameDatabase::tableStructure & structure) const
       {
         return file.get(offset, structure);
       }
@@ -112,7 +113,7 @@ public:
   }
 
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned char * recordOffset, const std::map<int, std::pair<QString, QString> > & structure) const = 0;
+  virtual std::vector<std::string> get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const = 0;
 
 protected:
 	size_t recordSize;

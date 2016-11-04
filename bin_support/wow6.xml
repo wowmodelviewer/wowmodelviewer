@@ -1,16 +1,14 @@
 ﻿<?xml version="1.0"?>
 <database>
-  <AnimationData>
-    <gamefile name="DBFilesClient\AnimationData" />
-    <field primary="yes" type="uint" name="ID" />
-    <field type="text" name="Name" />
-    <field type="uint" name="Flags" />
-    <field type="uint" name="Fallback" />
-    <field type="uint" name="BehaviorID" />
-    <field type="uint" name="BehaviorFly" />
-  </AnimationData>
-  <CharacterFacialHairStyles>
-    <gamefile name="DBFilesClient\CharacterFacialHairStyles" />
+  <table name="AnimationData">
+  <field primary="yes" type="uint" name="ID" />
+  <field type="text" name="Name" />
+  <field type="uint" name="Flags" />
+  <field type="uint" name="Fallback" />
+  <field type="uint" name="BehaviorID" />
+  <field type="uint" name="BehaviorFly" />
+  </table>
+  <table name="CharacterFacialHairStyles">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="RaceID" />
     <field type="uint" name="SexID" />
@@ -20,15 +18,13 @@
     <field type="uint" name="Geoset3" />
     <field type="uint" name="Geoset4" />
     <field type="uint" name="Geoset5" />
-  </CharacterFacialHairStyles>
-  <CharComponentTextureLayouts>
-    <gamefile name="DBFilesClient\CharComponentTextureLayouts" />
+  </table>
+  <table name="CharComponentTextureLayouts">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Width" />
     <field type="uint" name="Height" />
-  </CharComponentTextureLayouts>
-  <CharComponentTextureSections>
-    <gamefile name="DBFilesClient\CharComponentTextureSections" />
+  </table>
+  <table name="CharComponentTextureSections">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="LayoutID" />
     <field type="uint" name="Section" />
@@ -36,9 +32,8 @@
     <field type="uint" name="Y" />
     <field type="uint" name="Width" />
     <field type="uint" name="Height" />
-  </CharComponentTextureSections>
-  <CharHairGeoSets>
-    <gamefile name="DBFilesClient\CharHairGeoSets" />
+  </table>
+  <table name="CharHairGeoSets">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="RaceID" />
     <field type="uint" name="SexID" />
@@ -48,9 +43,8 @@
     <field type="uint" name="GeoSetType" />
     <field type="uint" name="ShowScalp" />
     <field type="uint" name="ColorIndex" />
-  </CharHairGeoSets>
-  <CharSections>
-    <gamefile name="DBFilesClient\CharSections" />
+  </table>
+  <table name="CharSections">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="RaceID" />
     <field type="uint" name="SexID" />
@@ -61,9 +55,8 @@
     <field type="uint" name="Flags" />
     <field type="uint" name="VariationIndex" />
     <field type="uint" name="ColorIndex" />
-  </CharSections>
-  <CharStartOutfit>
-    <gamefile name="DBFilesClient\CharStartOutfit" />
+  </table>
+  <table name="CharStartOutfit">
     <field primary="yes" type="uint" name="ID" />
     <field type="int" name="item1" />
     <field type="int" name="item2" />
@@ -93,14 +86,12 @@
     <field type="byte" name="classID" />
     <field type="byte" name="sexID" />
     <field type="byte" name="petFamily" />
-  </CharStartOutfit>
-  <ChrClasses>
-    <gamefile name="DBFilesClient\ChrClasses" />
+  </table>
+  <table name="ChrClasses">
     <field primary="yes" type="uint" name="ID" index="0" />
     <field type="text" name="name" index="3" />
-  </ChrClasses>
-  <ChrRaces>
-    <gamefile name="DBFilesClient\ChrRaces" />
+  </table>
+  <table name="ChrRaces">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="uint" name="FactionID" />
@@ -140,16 +131,14 @@
     <field type="uint" name="HighResMaleDisplayId" />
     <field type="uint" name="HighResFemaleDisplayId" />
     <field type="uint" name="CharComponentTexLayoutHiResID" />
-  </ChrRaces>
-  <Creature>
-    <gamefile name="DBFilesClient\Creature" />
+  </table>
+  <table name="Creature">
     <field primary="yes" type="uint" name="ID" index="0" />
     <field type="uint" name="CreatureTypeID" index="1" />
     <field type="uint" name="DisplayID" index="6" />
     <field type="text" name="Name" index="14"/>
-  </Creature>
-  <CreatureDisplayInfo>
-    <gamefile name="DBFilesClient\CreatureDisplayInfo" />
+  </table>
+  <table name="CreatureDisplayInfo">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="ModelID" />
     <field type="uint" name="SoundID" />
@@ -171,10 +160,9 @@
     <field type="uint" name="AnimReplacementSetID" />
     <field type="uint" name="Flags" />
     <field type="uint" name="Gender" />
-    <field type="uint" name="StateSpellVisualKitID" />  
-  </CreatureDisplayInfo>
-  <CreatureDisplayInfoExtra>
-    <gamefile name="DBFilesClient\CreatureDisplayInfoExtra" />
+    <field type="uint" name="StateSpellVisualKitID" />
+  </table>
+  <table name="CreatureDisplayInfoExtra">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="DisplayRaceID" />
     <field type="uint" name="DisplaySexID" />
@@ -197,9 +185,8 @@
     <field type="uint" name="Flags" />
     <field type="uint" name="FileDataID" />
     <field type="uint" name="HdFileDataID" />
-  </CreatureDisplayInfoExtra>
-  <CreatureModelData>
-    <gamefile name="DBFilesClient\CreatureModelData" />
+  </table>
+  <table name="CreatureModelData">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="uint" name="FileDataID" />
@@ -231,24 +218,21 @@
     <field type="float" name="OverrideLootEffectScale" />
     <field type="float" name="OverrideNameScale" />
     <field type="float" name="OverrideSelectionRadius" />
-    <field type="float" name="TamedPetBaseScale" />   
-    <field type="uint" name="CreatureGeosetDataID" />  
+    <field type="float" name="TamedPetBaseScale" />
+    <field type="uint" name="CreatureGeosetDataID" />
     <field type="float" name="HoverHeight" />
-  </CreatureModelData>
-  <CreatureType>
-    <gamefile name="DBFilesClient\CreatureType" />
+  </table>
+  <table name="CreatureType">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="Name" />
     <field type="uint" name="Flags" />
-  </CreatureType>
-  <FileData>
-    <gamefile name="DBFilesClient\FileData" />
+  </table>
+  <table name="FileData">
     <field primary="yes" type="uint" name="id" />
     <field type="text" name="name" />
     <field type="text" name="path" />
-  </FileData>
-  <HelmetGeosetVisData>
-    <gamefile name="DBFilesClient\HelmetGeosetVisData" />
+  </table>
+  <table name="HelmetGeosetVisData">
     <field primary="yes" type="uint" name="ID" />
     <field type="int" name="HideGeoset1" />
     <field type="int" name="HideGeoset2" />
@@ -257,9 +241,8 @@
     <field type="int" name="HideGeoset5" />
     <field type="int" name="HideGeoset6" />
     <field type="int" name="HideGeoset7" />
-  </HelmetGeosetVisData>
-  <Item>
-    <gamefile name="DBFilesClient\Item" />
+  </table>
+  <table name="Item">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Class" />
     <field type="uint" name="SubClass" />
@@ -269,22 +252,19 @@
     <field type="uint" name="Sheath" />
     <field type="uint" name="Icon" />
     <field type="uint" name="col8" />
-  </Item>
-  <ItemAppearance>
-    <gamefile name="DBFilesClient\ItemAppearance" />
+  </table>
+  <table name="ItemAppearance">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="ItemDisplayInfoID" />
     <field type="uint" name="Icon" />
-  </ItemAppearance>
-  <ItemClass>
-    <gamefile name="DBFilesClient\ItemClass" />
+  </table>
+  <table name="ItemClass">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Flags" />
     <field type="float" name="priceModifier" />
     <field type="text" name="Name" />
-  </ItemClass>
-  <ItemDisplayInfo>
-    <gamefile name="DBFilesClient\ItemDisplayInfo" />
+  </table>
+  <table name="ItemDisplayInfo">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="Model1" />
     <field type="text" name="Model2" />
@@ -308,18 +288,16 @@
     <field type="uint" name="TextureID9" />
     <field type="uint" name="ItemVisual" />
     <field type="uint" name="ParticleColorID" />
-  </ItemDisplayInfo>
-  <ItemModifiedAppearance>
-    <gamefile name="DBFilesClient\ItemModifiedAppearance" />
+  </table>
+  <table name="ItemModifiedAppearance">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="ItemID" />
     <field type="uint" name="col2" />
     <field type="uint" name="ItemAppearanceID" />
     <field type="uint" name="col4" />
     <field type="uint" name="ItemLevel" />
-  </ItemModifiedAppearance>
-  <ItemSet>
-    <gamefile name="DBFilesClient\ItemSet" />
+  </table>
+  <table name="ItemSet">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="name" />
     <field type="uint" name="item1" />
@@ -330,15 +308,13 @@
     <field type="uint" name="item6" />
     <field type="uint" name="item7" />
     <field type="uint" name="item8" />
-  </ItemSet>
-  <ItemSparse>
-    <gamefile name="DBFilesClient\Item-sparse" />
+  </table>
+  <table name="ItemSparse" gamefile="Item-sparse">
     <field primary="yes" type="uint" name="ID" index="0" />
     <field type="uint" name="Quality" index="1" />
     <field type="text" name="Name" index="70" />
-  </ItemSparse>
-  <ItemSubClass>
-    <gamefile name="DBFilesClient\ItemSubClass" />
+  </table>
+  <table name="ItemSubClass">
     <field primary="yes" type="uint" name="col0" />
     <field type="uint" name="ID" />
     <field type="uint" name="SubClassID" />
@@ -352,28 +328,24 @@
     <field type="uint" name="col10" />
     <field type="text" name="Name" />
     <field type="text" name="VerboseName" />
-  </ItemSubClass>
-  <ItemVisualEffects>
-    <gamefile name="DBFilesClient\ItemVisualEffects" />
+  </table>
+  <table name="ItemVisualEffects">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="path" />
-  </ItemVisualEffects>
-  <ItemVisuals>
-    <gamefile name="DBFilesClient\ItemVisuals" />
+  </table>
+  <table name="ItemVisuals">
     <field primary="yes" type="uint" name="ID" />
     <field type="int" name="itemVisualEffects1" />
     <field type="int" name="itemVisualEffects2" />
     <field type="int" name="itemVisualEffects3" />
     <field type="int" name="itemVisualEffects4" />
     <field type="int" name="itemVisualEffects5" />
-  </ItemVisuals>
-  <LightSkybox>
-    <gamefile name="DBFilesClient\LightSkybox" />
+  </table>
+  <table name="LightSkybox">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="name" />
-  </LightSkybox>
-  <Mount>
-    <gamefile name="DBFilesClient\Mount" />
+  </table>
+  <table name="Mount">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="SpellID" />
     <field type="uint" name="MountCapability" />
@@ -382,11 +354,10 @@
     <field type="text" name="Name" />
     <field type="text" name="Description" />
     <field type="text" name="Info" />
-    <field type="uint" name="SourceType" /> 
+    <field type="uint" name="SourceType" />
     <field type="uint" name="PlayerCondition" />
-  </Mount>
-  <ParticleColor>
-    <gamefile name="DBFilesClient\ParticleColor" />
+  </table>
+  <table name="ParticleColor">
     <field primary="yes" type="uint" name="ID" />
     <field type="int" name="StartColor1" />
     <field type="int" name="StartColor2" />
@@ -397,9 +368,8 @@
     <field type="int" name="EndColor1" />
     <field type="int" name="EndColor2" />
     <field type="int" name="EndColor3" />
-  </ParticleColor>
-  <SpellItemEnchantment>
-    <gamefile name="DBFilesClient\SpellItemEnchantment" />
+  </table>
+  <table name="SpellItemEnchantment">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="Charges" />
     <field type="uint" name="Effect1" />
@@ -413,13 +383,13 @@
     <field type="uint" name="EffectArg3" />
     <field type="text" name="Name" />
     <field type="uint" name="VisualID" />
-  </SpellItemEnchantment>
-  <TextureFileData>
-    <gamefile name="DBFilesClient\TextureFileData" />
+  </table>
+  <table name="TextureFileData">
     <field primary="yes" type="uint" name="ID" />
     <field type="uint" name="TextureItemID" />
     <field type="uint" name="col2" />
     <field type="uint" name="TextureType" />
     <field type="uint" name="FileDataID" />
-  </TextureFileData>
+  </table>
+
 </database>

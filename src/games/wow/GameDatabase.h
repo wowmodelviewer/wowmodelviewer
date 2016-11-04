@@ -50,18 +50,56 @@ class _GAMEDATABASE_API_ GameDatabase
 
     ~GameDatabase();
 
+    // table structures as defined in xml file
+    class fieldStructure
+    {
+      public:
+        fieldStructure() :
+          name(""),
+          type(""),
+          isKey(false),
+          pos(-1),
+          arraySize(0),
+          id(0)
+        {}
+
+        QString name;
+        QString type;
+        bool isKey;
+        int pos;
+        unsigned int arraySize;
+        int id;
+    };
+
+    class tableStructure
+    {
+      public:
+        tableStructure() :
+          name(""),
+          gamefile(""),
+          hash(0)
+        {}
+
+        QString name;
+        QString gamefile;
+        unsigned int hash;
+        std::vector<fieldStructure> fields;
+
+        bool create();
+        bool fill();
+    };
+
+
   private:
     static int treatQuery(void *NotUsed, int nbcols, char ** values , char ** cols);
     static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
+    bool readStructureFromXML(const QString & file);
     bool createDatabaseFromXML(const QString & file);
-    bool createTableFromXML(const QDomElement &);
-    bool fillTableFromGameFile(const QString & table, const QString & gamefile);
 
     sqlite3 *m_db;
-    // std::map<TableName, [fieldID] <fieldName,fieldType> >
-    // ie m_dbStruct["FileData"][0] => pair<"id","uint">
-    std::map<QString, std::map<int, std::pair<QString, QString> > >  m_dbStruct;
+
+    std::vector<tableStructure> m_dbStruct;
 
     bool m_fastMode;
 };
