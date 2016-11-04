@@ -47,6 +47,7 @@ class ArcBallCamera
 
     // camera definition
     Vec3D m_lookAt;
+	Vec3D m_modelCenter;
 
     // scene size
     int m_sceneWidth;

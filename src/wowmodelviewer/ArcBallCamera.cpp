@@ -80,10 +80,12 @@ void ArcBallCamera::setup()
   // apply pan
   glTranslatef(-m_lookAt.x, -m_lookAt.y, -m_lookAt.z);
 
-  // apply rotation
+  // apply rotation around model center
+  glTranslatef(m_modelCenter.x, m_modelCenter.y, m_modelCenter.z);
   Matrix m = m_transform;
   m.transpose();
   glMultMatrixf(m);
+  glTranslatef(-m_modelCenter.x, -m_modelCenter.y, -m_modelCenter.z);
 
 #if DISPLAY_ORIGIN > 0
   // Useful for debug : display a big coord system at world origin
@@ -189,10 +191,15 @@ void ArcBallCamera::updatePos(const int x, const int y)
 
 void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float fov)
 {
+  reset();
+
   // center view point on center of object
   m_lookAt.x = (minp.z + maxp.z) / 2.;
   m_lookAt.y = (minp.y + maxp.y) / 2.;
   m_lookAt.z = (minp.x + maxp.x) / 2.;
+
+  // save current model center to allow rotation around it
+  m_modelCenter = m_lookAt;
 
   // adjust current zoom based on object size
   float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);

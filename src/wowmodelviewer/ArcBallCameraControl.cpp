@@ -24,19 +24,19 @@ void ArcBallCameraControl::onKey(wxKeyEvent &event)
 {
   if (event.GetKeyCode() == WXK_UP)
   {
-    m_camera.pan(0, 0.1);
+    m_camera.pan(0, -0.1);
   }
   else if (event.GetKeyCode() == WXK_DOWN)
   {
-    m_camera.pan(0, -0.1);
+    m_camera.pan(0, 0.1);
   }
   else if (event.GetKeyCode() == WXK_LEFT)
   {
-    m_camera.pan(-0.1, 0);
+    m_camera.pan(0.1, 0);
   }
   else if (event.GetKeyCode() == WXK_RIGHT)
   {
-    m_camera.pan(0.1, 0);
+    m_camera.pan(-0.1, 0);
   }
 }
 
