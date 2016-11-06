@@ -40,35 +40,35 @@ public:
 	class Iterator
 	{
 	  public:
-      Iterator(DBFile &f, unsigned char *off) :
-        file(f), offset(off) {}
+    Iterator(DBFile &f, unsigned int index) :
+      file(f), recordIndex(index) {}
 		  
       /// Advance (prefix only)
 		  Iterator & operator++() 
       { 
-			  offset += file.recordSize;
+        recordIndex++;
 			  return *this; 
 		  }	
 		
       std::vector<std::string> get(const GameDatabase::tableStructure & structure) const
       {
-        return file.get(offset, structure);
+        return file.get(recordIndex, structure);
       }
 	
 		  /// Comparison
 		  bool operator==(const Iterator &b) const
 		  {
-			  return offset == b.offset;
+        return recordIndex == b.recordIndex;
 		  }
 		
       bool operator!=(const Iterator &b) const
 		  {
-			  return offset != b.offset;
+        return recordIndex != b.recordIndex;
 		  }
 	  
     private:
       DBFile &file;
-		  unsigned char * offset;
+      unsigned int recordIndex;
 	};
 
 	/// Get begin iterator over records
@@ -113,7 +113,7 @@ public:
   }
 
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const = 0;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const = 0;
 
 protected:
 	size_t recordSize;

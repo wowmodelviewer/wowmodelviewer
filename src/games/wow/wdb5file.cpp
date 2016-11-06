@@ -4,11 +4,12 @@
 
 #include <sstream>
 
+#include <bitset>
+
 WDB5File::WDB5File(const QString & file) :
-DBFile(file), fieldStructure(0)
+DBFile(file), m_isSparseTable(false)
 {
 }
-
 
 struct wdb5_db2_header
 {
@@ -51,12 +52,13 @@ bool WDB5File::doSpecializedOpen()
   fieldCount = header.field_count;
 
 
-  fieldStructure = new field_structure[fieldCount];
+  field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
   LOG_INFO << "--------------------------";
   for (uint i = 0; i < fieldCount; i++)
   {
     LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
+    m_fieldSizes[fieldStructure[i].position] = fieldStructure[i].size;
   }
   LOG_INFO << "--------------------------";
 
@@ -66,12 +68,51 @@ bool WDB5File::doSpecializedOpen()
   data = getPointer();
   stringTable = data + recordSize*recordCount;
 
-  // read IDs
-  seekRelative(recordSize*recordCount + stringSize);
-  if ((header.flags & 0x04) != 0)
+  if ((header.flags & 0x01) != 0)
   {
-    IDs = new uint32[recordCount];
-    read(IDs, recordCount * sizeof(uint32));
+    m_isSparseTable = true;
+    seek(stringSize);
+   
+    LOG_INFO << "record count - before " << recordCount;
+
+    recordCount = 0;
+
+    for (uint i = 0; i < (header.max_id - header.min_id + 1); i++)
+    {
+      uint32 offset;
+      uint16 length;
+
+      read(&offset, sizeof(offset));
+      read(&length, sizeof(length));
+
+      if ((offset == 0) || (length == 0))
+        continue;
+
+      m_sparseRecords.push_back(std::make_tuple(offset,length));
+
+      recordCount++;
+    }
+
+    LOG_INFO << "record count - after" << recordCount;
+
+  }
+  else
+  {
+    // read IDs
+    seekRelative(recordSize*recordCount + stringSize);
+    if ((header.flags & 0x04) != 0)
+    {
+      m_IDs = new uint32[recordCount];
+      read(m_IDs, recordCount * sizeof(uint32));
+    }
+    else
+    {
+      m_IDs = 0;
+      m_indexPos = fieldStructure[header.id_index].position;
+      LOG_INFO << "m_indexPos" << m_indexPos;
+      m_indexSize = ((32 - fieldStructure[header.id_index].size) / 8);
+      LOG_INFO << "m_indexSize" << m_indexSize;
+    }
   }
 
   return true;
@@ -82,11 +123,16 @@ WDB5File::~WDB5File()
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const
+std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const
 {
   std::vector<std::string> result;
-  
-  uint recordIndex = (uint)(recordOffset - data) / recordSize;
+
+  unsigned char * recordOffset = data + (recordIndex*recordSize);
+
+  if (m_isSparseTable)
+  {
+    recordOffset = buffer + std::get<0>(m_sparseRecords[recordIndex]);
+  }
 
   for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
        it != itEnd;
@@ -95,42 +141,73 @@ std::vector<std::string> WDB5File::get(unsigned char * recordOffset, const GameD
     //LOG_INFO << "Reading field" << it->name;
     if (it->isKey)
     {
-      //LOG_INFO << "is key";
-      // Todo : manage case where id is a real field, not a separated table
-      std::stringstream ss;
-      ss << IDs[recordIndex];
-    //  LOG_INFO << "value" << ss.str().c_str();
-      result.push_back(ss.str());
+      if (m_IDs != 0)
+      {
+        std::stringstream ss;
+        ss << m_IDs[recordIndex];
+        //  LOG_INFO << "value" << ss.str().c_str();
+        result.push_back(ss.str());
+      }
+      else
+      {
+        unsigned char * val = new unsigned char[m_indexSize];
+        memcpy(val, recordOffset + m_indexPos, m_indexSize);
+        std::stringstream ss;
+
+        unsigned int mask = 0xFFFFFFFF;
+        if (m_indexSize == 1)
+          mask = 0x000000FF;
+        else if (m_indexSize == 2)
+          mask = 0x0000FFFF;
+        else if (m_indexSize == 3)
+          mask = 0x00FFFFFF;
+       
+        ss << (*reinterpret_cast<unsigned int*>(val) & mask);
+        result.push_back(ss.str());
+      }
+     
       continue;
     }
 
-
-    int fieldSize = (32 - fieldStructure[it->id-1].size) / 8;
+    int fieldSize = (32 - m_fieldSizes.at(it->pos)) / 8;
     unsigned char * val = new unsigned char[fieldSize];
-    memcpy(val, recordOffset + fieldStructure[it->id-1].position, fieldSize);
+    
+    memcpy(val, recordOffset + it->pos, fieldSize);
     
     if (it->type == "text")
     {
-    //  LOG_INFO << "field type = text";
-      std::string value(reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val)));
+      char * stringPtr;
+      if (m_isSparseTable)
+        stringPtr = reinterpret_cast<char *>(recordOffset + it->pos);
+      else
+        stringPtr = reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val));
+
+      std::string value(stringPtr);
       std::replace(value.begin(), value.end(), '"', '\'');
-//      LOG_INFO << "value" << value.c_str();
       result.push_back(value);
+    }
+    else if (it->type == "float")
+    {
+      std::stringstream ss;
+      ss << *reinterpret_cast<float*>(val);
+      result.push_back(ss.str());
+    }
+    else if (it->type == "byte")
+    {
+      std::stringstream ss;
+      ss << (*reinterpret_cast<unsigned int*>(val) & 0x000000FF);
+      result.push_back(ss.str());
     }
     else if (fieldSize == 2)
     {
- //     LOG_INFO << "fieldsize == 2";
       std::stringstream ss;
       ss << *reinterpret_cast<short*>(val);
-   //   LOG_INFO << "value" << ss.str().c_str();
       result.push_back(ss.str());
     }
     else
     {
- //     LOG_INFO << "fieldsize != 2";
       std::stringstream ss;
       ss << *reinterpret_cast<int*>(val);
- //     LOG_INFO << "value" << ss.str().c_str();
       result.push_back(ss.str());
     }
   }

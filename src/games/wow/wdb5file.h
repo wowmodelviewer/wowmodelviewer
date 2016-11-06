@@ -26,7 +26,7 @@ public:
 	// Open database. It must be openened before it can be used.
   bool doSpecializedOpen();
 
-  std::vector<std::string> get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const;
+  std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
 
 private:
   struct field_structure
@@ -35,8 +35,13 @@ private:
     uint16 position;
   };
 
-  field_structure * fieldStructure;
-  uint32 * IDs;
+  std::map<int, int> m_fieldSizes;
+  uint32 * m_IDs;
+  uint32 m_indexPos;
+  uint32 m_indexSize;
+
+  bool m_isSparseTable;
+  std::vector<std::tuple<uint32,uint16> > m_sparseRecords;
 };
 
 #endif

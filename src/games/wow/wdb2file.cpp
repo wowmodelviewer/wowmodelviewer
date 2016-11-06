@@ -85,8 +85,9 @@ WDB2File::~WDB2File()
   close();
 }
 
-std::vector<std::string> WDB2File::get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const
+std::vector<std::string> WDB2File::get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const
 {
+  unsigned char * recordOffset = data + (recordIndex * recordSize);
   std::vector<std::string> result;
   unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
   for (auto it = structure.fields.begin(), itEnd = structure.fields.end();

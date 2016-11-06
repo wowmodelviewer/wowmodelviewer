@@ -25,7 +25,7 @@ public:
 	// Open database. It must be openened before it can be used.
   bool doSpecializedOpen();
 
-  std::vector<std::string> get(unsigned char * recordOffset, const GameDatabase::tableStructure & structure) const;
+  std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
 
 private:
 };

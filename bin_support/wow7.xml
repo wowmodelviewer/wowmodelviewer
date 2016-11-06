@@ -1,11 +1,29 @@
 ﻿<?xml version="1.0"?>
 <database>
   <table name="AnimationData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="uint" name="Flags" pos="4" />
+  </table>
+  <table name="Item">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="Class" pos="4" />
+    <field type="byte" name="SubClass" pos="5" />
+    <field type="byte" name="Type" pos="8" />
+    <field type="byte" name="Sheath" pos="9" />
+  </table>
+  <table name="ItemClass">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="4" />
+  </table>
+  <table name="ItemSparse" gamefile="Item-sparse">
+    <field type="byte" name="Quality" pos="226" />
+    <field type="text" name="Name" pos="148" />
+  </table>
+  <table name="ItemModifiedAppearance">
     <field primary="yes" type="uint" name="ID" />
-    <field type="text" name="Name" />
-    <field type="uint" name="Flags" />
-    <field type="uint" name="Fallback" />
-    <field type="uint" name="BehaviorID" />
-    <field type="uint" name="BehaviorFly" />
+    <field type="uint" name="ItemID" pos="0" />
+    <field type="uint" name="ItemAppearanceID" pos="4" />
+    <field type="byte" name="ItemLevel" pos="7" />
   </table>
 </database>
