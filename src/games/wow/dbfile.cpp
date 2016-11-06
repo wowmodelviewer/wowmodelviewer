@@ -37,10 +37,10 @@ DBFile::~DBFile()
 
 DBFile::Iterator DBFile::begin()
 {
-	return Iterator(*this, data);
+	return Iterator(*this, 0);
 }
 DBFile::Iterator DBFile::end()
 {
-	return Iterator(*this, stringTable);
+	return Iterator(*this, recordCount);
 }
 
