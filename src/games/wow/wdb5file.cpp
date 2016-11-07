@@ -7,7 +7,7 @@
 #include <bitset>
 
 WDB5File::WDB5File(const QString & file) :
-DBFile(file), m_isSparseTable(false)
+DBFile(file), m_isSparseTable(false), m_IDs(0)
 {
 }
 
@@ -88,7 +88,7 @@ bool WDB5File::doSpecializedOpen()
       if ((offset == 0) || (length == 0))
         continue;
 
-      m_sparseRecords.push_back(std::make_tuple(offset,length));
+	  m_sparseRecords.push_back(std::make_tuple(offset, length, header.min_id+i));
 
       recordCount++;
     }
@@ -107,7 +107,6 @@ bool WDB5File::doSpecializedOpen()
     }
     else
     {
-      m_IDs = 0;
       m_indexPos = fieldStructure[header.id_index].position;
       LOG_INFO << "m_indexPos" << m_indexPos;
       m_indexSize = ((32 - fieldStructure[header.id_index].size) / 8);
@@ -148,7 +147,13 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
         //  LOG_INFO << "value" << ss.str().c_str();
         result.push_back(ss.str());
       }
-      else
+	  else if (m_isSparseTable)
+	  {
+		std::stringstream ss;
+		ss << std::get<2>(m_sparseRecords[recordIndex]);
+		result.push_back(ss.str());
+	  }
+	  else
       {
         unsigned char * val = new unsigned char[m_indexSize];
         memcpy(val, recordOffset + m_indexPos, m_indexSize);
