@@ -137,14 +137,12 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
        it != itEnd;
        ++it)
   {
-    //LOG_INFO << "Reading field" << it->name;
     if (it->isKey)
     {
       if (m_IDs != 0)
       {
         std::stringstream ss;
         ss << m_IDs[recordIndex];
-        //  LOG_INFO << "value" << ss.str().c_str();
         result.push_back(ss.str());
       }
       else if (m_isSparseTable)
