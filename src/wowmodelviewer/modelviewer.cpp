@@ -609,7 +609,7 @@ void ModelViewer::InitDatabase()
 	initDB = true;
 
 	{
-	  sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID, CreatureTypeID, Name From Creature;");
+	  sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID1, CreatureTypeID, Name From Creature;");
 
 	  if(npc.valid && !npc.empty())
 	  {
