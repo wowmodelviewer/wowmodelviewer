@@ -224,7 +224,7 @@ bool GameDatabase::tableStructure::create()
 
   for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
   {
-    if (it->arraySize == 0) // simple field
+    if (it->arraySize == 1) // simple field
     {
       create += it->name;
       create += " ";
@@ -237,7 +237,7 @@ bool GameDatabase::tableStructure::create()
     }
     else // complex field
     {
-      for (unsigned int i = 0; i < it->arraySize; i++)
+      for (unsigned int i = 1; i <= it->arraySize; i++)
       {
         create += it->name;
         create += QString::number(i);
@@ -291,7 +291,20 @@ bool GameDatabase::tableStructure::fill()
       it != itEnd ;
       ++it,curfield++)
   {
-    query += it->name;
+	if (it->arraySize == 1) // simple field
+	{
+	  query += it->name;
+	}
+	else
+	{
+	  for (unsigned int i = 1; i <= it->arraySize; i++)
+	  {
+		query += it->name;
+		query += QString::number(i);
+		if (i != it->arraySize)
+		  query += ",";
+	  }
+	}
     if(curfield != nbFields-1)
       query += ",";
   }

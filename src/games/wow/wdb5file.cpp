@@ -147,13 +147,13 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
         //  LOG_INFO << "value" << ss.str().c_str();
         result.push_back(ss.str());
       }
-	  else if (m_isSparseTable)
-	  {
-		std::stringstream ss;
-		ss << std::get<2>(m_sparseRecords[recordIndex]);
-		result.push_back(ss.str());
-	  }
-	  else
+      else if (m_isSparseTable)
+      {
+        std::stringstream ss;
+        ss << std::get<2>(m_sparseRecords[recordIndex]);
+        result.push_back(ss.str());
+      }
+      else
       {
         unsigned char * val = new unsigned char[m_indexSize];
         memcpy(val, recordOffset + m_indexPos, m_indexSize);
@@ -166,54 +166,57 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
           mask = 0x0000FFFF;
         else if (m_indexSize == 3)
           mask = 0x00FFFFFF;
-       
-        ss << (*reinterpret_cast<unsigned int*>(val) & mask);
+
+        ss << (*reinterpret_cast<unsigned int*>(val)& mask);
         result.push_back(ss.str());
       }
-     
+
       continue;
     }
 
-    int fieldSize = (32 - m_fieldSizes.at(it->pos)) / 8;
-    unsigned char * val = new unsigned char[fieldSize];
-    
-    memcpy(val, recordOffset + it->pos, fieldSize);
-    
-    if (it->type == "text")
+    for (uint i = 0; i < it->arraySize; i++)
     {
-      char * stringPtr;
-      if (m_isSparseTable)
-        stringPtr = reinterpret_cast<char *>(recordOffset + it->pos);
-      else
-        stringPtr = reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val));
+      int fieldSize = (32 - m_fieldSizes.at(it->pos)) / 8;
+      unsigned char * val = new unsigned char[fieldSize];
 
-      std::string value(stringPtr);
-      std::replace(value.begin(), value.end(), '"', '\'');
-      result.push_back(value);
-    }
-    else if (it->type == "float")
-    {
-      std::stringstream ss;
-      ss << *reinterpret_cast<float*>(val);
-      result.push_back(ss.str());
-    }
-    else if (it->type == "byte")
-    {
-      std::stringstream ss;
-      ss << (*reinterpret_cast<unsigned int*>(val) & 0x000000FF);
-      result.push_back(ss.str());
-    }
-    else if (fieldSize == 2)
-    {
-      std::stringstream ss;
-      ss << *reinterpret_cast<short*>(val);
-      result.push_back(ss.str());
-    }
-    else
-    {
-      std::stringstream ss;
-      ss << *reinterpret_cast<int*>(val);
-      result.push_back(ss.str());
+      memcpy(val, recordOffset + it->pos + i*fieldSize, fieldSize);
+
+      if (it->type == "text")
+      {
+        char * stringPtr;
+        if (m_isSparseTable)
+          stringPtr = reinterpret_cast<char *>(recordOffset + it->pos);
+        else
+          stringPtr = reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val));
+
+        std::string value(stringPtr);
+        std::replace(value.begin(), value.end(), '"', '\'');
+        result.push_back(value);
+      }
+      else if (it->type == "float")
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<float*>(val);
+        result.push_back(ss.str());
+      }
+      else if (it->type == "byte")
+      {
+        std::stringstream ss;
+        ss << (*reinterpret_cast<unsigned int*>(val)& 0x000000FF);
+        result.push_back(ss.str());
+      }
+      else if (fieldSize == 2)
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<unsigned short*>(val);
+        result.push_back(ss.str());
+      }
+      else
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<unsigned int*>(val);
+        result.push_back(ss.str());
+      }
     }
   }
 

@@ -59,7 +59,7 @@ class _GAMEDATABASE_API_ GameDatabase
           type(""),
           isKey(false),
           pos(-1),
-          arraySize(0),
+          arraySize(1),
           id(0)
         {}
 
