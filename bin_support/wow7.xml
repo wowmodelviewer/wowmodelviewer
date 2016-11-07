@@ -55,6 +55,17 @@
   <!-- Character tables - END -->
   
   <!-- Creature tables - BEGIN -->
+  <table name="Creature">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="CreatureTypeID" pos="64" />
+    <field type="uint" name="DisplayID" arraySize="4" pos="16" />
+    <field type="text" name="Name" pos="48"/>
+  </table>
+  <table name="CreatureType">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="byte" name="Flags" pos="4" />
+  </table>
   <!-- Creature tables - END -->
   
   <!-- Item tables - BEGIN -->
