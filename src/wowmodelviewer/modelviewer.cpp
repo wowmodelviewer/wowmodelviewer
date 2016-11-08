@@ -597,7 +597,7 @@ void ModelViewer::InitDatabase()
   {
     initDB = false;
     LOG_ERROR << "Initializing failed !";
-    return;
+   // return;
   }
   else
   {
@@ -1066,6 +1066,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   isChar = false;
   isWMO = false;
 
+  /*
   QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
                           "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
                           "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ParticleColorID , "
@@ -1074,18 +1075,31 @@ void ModelViewer::LoadNPC(unsigned int modelid)
                           "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
                           "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = %1;").arg(modelid);
 
+  */
+
+  QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
+                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
+                          "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
+                          "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+                          "WHERE Creature.ID = %1;").arg(modelid);
+
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
   if(r.valid && !r.empty())
   {
     // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
-    if(r.values[0][5].toInt() == 0)
+    if(r.values[0][4].toInt() == 0)
     {
+      /*
       std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
       wxString name(modelname.c_str());
       LoadModel(GAMEDIRECTORY.getFile(name.c_str()));
       canvas->model->modelType = MT_NORMAL;
       animControl->SetSkinByDisplayID(r.values[0][7].toInt());
+      */
+      LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
+      canvas->model->modelType = MT_NORMAL;
     }
     else
     {

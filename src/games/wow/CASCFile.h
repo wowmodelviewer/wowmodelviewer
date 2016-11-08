@@ -28,14 +28,16 @@ class CASCFolder;
 class _CASCFILE_API_ CASCFile : public GameFile
 {
   public:
-    CASCFile(QString path);
+    CASCFile(QString path, int id = -1);
     ~CASCFile();
     virtual bool open();
     bool close();
+    int fileDataId() { return m_fileDataId; }
 
   private:
     HANDLE m_handle;
     bool m_isMD21;
+    int m_fileDataId;
 };
 
 

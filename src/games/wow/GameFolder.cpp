@@ -39,7 +39,11 @@ void GameFolder::init(const QString & path, const QString & filename)
   {
     QString line = in.readLine().toLower();
 
-    CASCFile * file = new CASCFile(line);
+    QStringList split = line.split(" ");
+    if (split.size() != 2)
+      continue;
+
+    CASCFile * file = new CASCFile(split[0], split[1].toInt());
     file->setName(line.mid(line.lastIndexOf("\\")+1));
     addChild(file);
   }
@@ -140,12 +144,24 @@ GameFile * GameFolder::getFile(QString filename)
 
   GameFile * result = 0;
 
-  std::map<QString, GameFile *>::iterator it = m_childrenMap.find(filename);
-  if(it != m_childrenMap.end())
+  auto it = m_nameMap.find(filename);
+  if (it != m_nameMap.end())
     result = it->second;
 
   return result;
 }
+
+GameFile * GameFolder::getFile(int id)
+{
+  GameFile * result = 0;
+
+ auto it = m_idMap.find(id);
+  if (it != m_idMap.end())
+    result = it->second;
+
+  return result;
+}
+
 
 HANDLE GameFolder::openFile(std::string file)
 {
@@ -179,11 +195,17 @@ int GameFolder::lastError()
 
 void GameFolder::onChildAdded(GameFile * child)
 {
-  m_childrenMap[child->fullname()] = child;
+  m_nameMap[child->fullname()] = child;
+  CASCFile * file = dynamic_cast<CASCFile *>(child);
+  if (child)
+    m_idMap[file->fileDataId()] = child;
 }
 
 void GameFolder::onChildRemoved(GameFile * child)
 {
-  m_childrenMap.erase(child->fullname());
+  m_nameMap.erase(child->fullname());
+  CASCFile * file = dynamic_cast<CASCFile *>(child);
+  if (child)
+    m_idMap.erase(file->fileDataId());
 }
 

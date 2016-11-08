@@ -66,6 +66,17 @@
     <field type="text" name="Name" pos="0" />
     <field type="byte" name="Flags" pos="4" />
   </table>
+  <table name="CreatureDisplayInfo">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ModelID" pos="44" />
+    <field type="uint" name="ExtendedDisplayInfoID" pos="0" />
+    <field type="unit" name="Texture" arraySize="3" pos="12"/>
+  </table>
+  <table name="CreatureModelData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="FileID" pos="95" />
+  </table>
+  
   <!-- Creature tables - END -->
   
   <!-- Item tables - BEGIN -->

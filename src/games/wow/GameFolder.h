@@ -46,6 +46,7 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     void getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension = "");
     void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
     GameFile * getFile(QString filename);
+    GameFile * getFile(int id);
 
     HANDLE openFile(std::string file);
 
@@ -62,7 +63,8 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
 
   private:
     CASCFolder m_CASCFolder;
-    std::map<QString, GameFile *> m_childrenMap;
+    std::map<QString, GameFile *> m_nameMap;
+    std::map<int, GameFile *> m_idMap;
 };
 
 
