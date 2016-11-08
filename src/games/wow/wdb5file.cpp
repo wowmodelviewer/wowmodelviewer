@@ -6,6 +6,8 @@
 
 #include <bitset>
 
+#define WDB5_READ_DEBUG 0
+
 WDB5File::WDB5File(const QString & file) :
 DBFile(file), m_isSparseTable(false), m_IDs(0)
 {
@@ -34,6 +36,7 @@ bool WDB5File::doSpecializedOpen()
   wdb5_db2_header header;
   read(&header, sizeof(wdb5_db2_header)); // File Header
 
+#if WDB5_READ_DEBUG > 0
   LOG_INFO << "magic" << header.magic[0] << header.magic[1] << header.magic[2] << header.magic[3];
   LOG_INFO << "record count" << header.record_count;
   LOG_INFO << "field count" << header.field_count;
@@ -46,6 +49,7 @@ bool WDB5File::doSpecializedOpen()
   LOG_INFO << "copy table size" << header.copy_table_size;
   LOG_INFO << "flags" << header.flags;
   LOG_INFO << "id index" << header.id_index;
+#endif
 
   recordSize = header.record_size;
   recordCount = header.record_count;
@@ -54,14 +58,19 @@ bool WDB5File::doSpecializedOpen()
 
   field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
+#if WDB5_READ_DEBUG > 0
   LOG_INFO << "--------------------------";
+#endif
   for (uint i = 0; i < fieldCount; i++)
   {
+#if WDB5_READ_DEBUG > 0
     LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
+#endif
     m_fieldSizes[fieldStructure[i].position] = fieldStructure[i].size;
   }
+#if WDB5_READ_DEBUG > 0
   LOG_INFO << "--------------------------";
-
+#endif
 
   stringSize = header.string_table_size;
 
@@ -72,8 +81,10 @@ bool WDB5File::doSpecializedOpen()
   {
     m_isSparseTable = true;
     seek(stringSize);
-   
+
+#if WDB5_READ_DEBUG > 0   
     LOG_INFO << "record count - before " << recordCount;
+#endif
 
     recordCount = 0;
 
@@ -88,13 +99,13 @@ bool WDB5File::doSpecializedOpen()
       if ((offset == 0) || (length == 0))
         continue;
 
-	  m_sparseRecords.push_back(std::make_tuple(offset, length, header.min_id+i));
+	    m_sparseRecords.push_back(std::make_tuple(offset, length, header.min_id+i));
 
       recordCount++;
     }
-
+#if WDB5_READ_DEBUG > 0
     LOG_INFO << "record count - after" << recordCount;
-
+#endif
   }
   else
   {
@@ -108,9 +119,13 @@ bool WDB5File::doSpecializedOpen()
     else
     {
       m_indexPos = fieldStructure[header.id_index].position;
+#if WDB5_READ_DEBUG > 0
       LOG_INFO << "m_indexPos" << m_indexPos;
+#endif
       m_indexSize = ((32 - fieldStructure[header.id_index].size) / 8);
+#if WDB5_READ_DEBUG > 0
       LOG_INFO << "m_indexSize" << m_indexSize;
+#endif
     }
   }
 
