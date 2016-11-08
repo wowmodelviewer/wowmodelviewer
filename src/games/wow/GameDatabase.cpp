@@ -253,7 +253,7 @@ bool GameDatabase::tableStructure::create()
     create.remove(create.length()-1,1);
   create += ");";
   
-  LOG_INFO << create;
+  //LOG_INFO << create;
 
   sqlResult r = GAMEDATABASE.sqlQuery(create);
  
