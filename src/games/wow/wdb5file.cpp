@@ -197,22 +197,18 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
         ss << *reinterpret_cast<float*>(val);
         result.push_back(ss.str());
       }
-      else if (it->type == "byte")
-      {
-        std::stringstream ss;
-        ss << (*reinterpret_cast<unsigned int*>(val)& 0x000000FF);
-        result.push_back(ss.str());
-      }
-      else if (fieldSize == 2)
-      {
-        std::stringstream ss;
-        ss << *reinterpret_cast<unsigned short*>(val);
-        result.push_back(ss.str());
-      }
       else
       {
+        unsigned int mask = 0xFFFFFFFF;
+        if (fieldSize == 1)
+          mask = 0x000000FF;
+        else if (fieldSize == 2)
+          mask = 0x0000FFFF;
+        else if (fieldSize == 3)
+          mask = 0x00FFFFFF;
+
         std::stringstream ss;
-        ss << *reinterpret_cast<unsigned int*>(val);
+        ss << (*reinterpret_cast<unsigned int*>(val)& mask);
         result.push_back(ss.str());
       }
     }
