@@ -1066,16 +1066,6 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   isChar = false;
   isWMO = false;
 
-  /*
-  QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
-                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
-                          "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ParticleColorID , "
-                          "CreatureDisplayInfo.ID FROM Creature "
-                          "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID = CreatureDisplayInfo.ID "
-                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                          "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE Creature.ID = %1;").arg(modelid);
-
-  */
 
   QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
                           "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
@@ -1091,15 +1081,9 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
     if(r.values[0][4].toInt() == 0)
     {
-      /*
-      std::string modelname = r.values[0][0].toStdString() + r.values[0][1].toStdString();
-      wxString name(modelname.c_str());
-      LoadModel(GAMEDIRECTORY.getFile(name.c_str()));
-      canvas->model->modelType = MT_NORMAL;
-      animControl->SetSkinByDisplayID(r.values[0][7].toInt());
-      */
       LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
       canvas->model->modelType = MT_NORMAL;
+      animControl->SetSkinByDisplayID(r.values[0][5].toInt());
     }
     else
     {
@@ -1200,37 +1184,28 @@ void ModelViewer::LoadItem(unsigned int id)
 
   try
   {
-    QString query = QString("SELECT Model1, Path, Name, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-	                       "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.TextureItemID "
-	                       "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.ID "
-	                       "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
-	                       "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
+    QString query = QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID FROM ItemDisplayInfo " 
+                            "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
+                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
+                            "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
     sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
     // LOG_INFO << query;
 
     if(itemInfos.valid && !itemInfos.empty())
     {
-      QString model1 = itemInfos.values[0][0];
-      std::string path = itemInfos.values[0][1].toStdString();
-
-      if (model1 != "")
+      if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
       {
-        model1.replace(".mdx", ".m2", Qt::CaseInsensitive);
-        model1 = QString::fromStdString(path) + model1;
-      }
-      std::string texture1 = path + itemInfos.values[0][2].toStdString();
-
-      if(model1 != "" && texture1 != "")
-      {
-        LoadModel(GAMEDIRECTORY.getFile(model1));
+        LOG_INFO << itemInfos.values[0][0] << itemInfos.values[0][1]; 
+        LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
         TextureGroup grp;
         grp.base = TEXTURE_ITEM;
         grp.count = 1;
-        grp.tex[0] = GAMEDIRECTORY.getFile(texture1.c_str());
+        grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
         canvas->model->TextureList.push_back(grp.tex[0]);
         if (grp.tex[0])
-          animControl->SetSkinByDisplayID(itemInfos.values[0][3].toInt());
+          animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
       }
     }
 

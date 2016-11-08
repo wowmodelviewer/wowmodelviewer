@@ -133,7 +133,13 @@
     <field type="uint" name="Flags" pos="4" />
   </table>
   <table name="TextureFileData">
-    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="TextureID" primary="yes" />
+    <field type="uint" name="ID" pos="0" />
   </table>
+  <table name="ModelFileData">
+    <field type="uint" name="ModelID" primary="yes" />
+    <field type="uint" name="ID" pos="4" />
+  </table>
+  
   <!-- Misc tables - END -->
 </database>
