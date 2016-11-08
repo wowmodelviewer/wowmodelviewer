@@ -1197,7 +1197,6 @@ void ModelViewer::LoadItem(unsigned int id)
     {
       if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
       {
-        LOG_INFO << itemInfos.values[0][0] << itemInfos.values[0][1]; 
         LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
         TextureGroup grp;
         grp.base = TEXTURE_ITEM;
