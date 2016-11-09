@@ -32,12 +32,10 @@ class _CASCFILE_API_ CASCFile : public GameFile
     ~CASCFile();
     virtual bool open();
     bool close();
-    int fileDataId() { return m_fileDataId; }
 
   private:
     HANDLE m_handle;
     bool m_isMD21;
-    int m_fileDataId;
 };
 
 

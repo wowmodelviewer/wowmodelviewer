@@ -94,6 +94,7 @@ public:
 	Vec3D *bounds;
   Vec3D minCoord;
   Vec3D maxCoord;
+  GameFile * gamefile;
 
 	std::vector<uint> replacableParticleColorIDs;
 	bool replaceParticleColors;

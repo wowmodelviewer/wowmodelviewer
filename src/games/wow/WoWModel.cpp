@@ -83,7 +83,8 @@ void glInitAll()
 
 WoWModel::WoWModel(GameFile * file, bool forceAnim) :
     ManagedItem(""),
-    forceAnim(forceAnim)
+    forceAnim(forceAnim),
+    gamefile(file)
 {
 	// Initiate our model variables.
 	trans = 1.0f;

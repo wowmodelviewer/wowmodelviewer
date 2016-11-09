@@ -484,20 +484,11 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // see if this model has skins
   LOG_INFO << "Searching skins for" << m->itemName();
 
-  wxString fn = m->itemName().toStdString().c_str();
-  fn.MakeLower();
-
-  wxString modelname = fn.AfterLast(SLASH);
-
-  // remove extension
-  fn = fn.BeforeLast(wxT('.'));
-
-  QString query = QString("SELECT Texture1, Texture2, Texture3, FileData.path, ParticleColorID, "
+  QString query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
                           "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
                           "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-                          "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID "
-                          "WHERE FileData.name = \"%1\" COLLATE NOCASE")
-                          .arg( modelname.c_str());
+                          "WHERE CreatureModelData.FileID = %1")
+                          .arg( m->gamefile->fileDataId());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   PCRList.clear();
@@ -511,17 +502,17 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       {
         if(!r.values[i][skin].isEmpty())
         {
-          GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][3] + r.values[i][skin] + ".blp");
+          GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][skin].toInt());
           alreadyUsedTextures.insert(tex);
           grp.tex[skin] = tex;
           count++;
         }
       }
-      int cdi = r.values[i][5].toInt();
+      int cdi = r.values[i][4].toInt();
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.definedTexture = true;
       grp.count = count;
-      int pci = r.values[i][4].toInt(); // particleColorIndex, for replacing particle color
+      int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;

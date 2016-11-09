@@ -196,16 +196,12 @@ int GameFolder::lastError()
 void GameFolder::onChildAdded(GameFile * child)
 {
   m_nameMap[child->fullname()] = child;
-  CASCFile * file = dynamic_cast<CASCFile *>(child);
-  if (child)
-    m_idMap[file->fileDataId()] = child;
+  m_idMap[child->fileDataId()] = child;
 }
 
 void GameFolder::onChildRemoved(GameFile * child)
 {
   m_nameMap.erase(child->fullname());
-  CASCFile * file = dynamic_cast<CASCFile *>(child);
-  if (child)
-    m_idMap.erase(file->fileDataId());
+  m_idMap.erase(child->fileDataId());
 }
 

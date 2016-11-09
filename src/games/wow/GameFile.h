@@ -26,7 +26,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile(QString path):eof(true),buffer(0),pointer(0),size(0), filepath(path), md21offset(0) {}
+    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), md21offset(0), m_fileDataId(id) {}
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -42,6 +42,7 @@ class _GAMEFILE_API_ GameFile : public Component
 
     void setFullName(const QString & name) { filepath = name; }
     QString fullname() const { return filepath; }
+    int fileDataId() { return m_fileDataId; }
 
   protected:
     bool eof;
@@ -54,6 +55,8 @@ class _GAMEFILE_API_ GameFile : public Component
     // disable copying
     GameFile(const GameFile &);
     void operator=(const GameFile &);
+
+    int m_fileDataId;
 };
 
 

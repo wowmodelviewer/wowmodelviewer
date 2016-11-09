@@ -70,7 +70,8 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="ModelID" pos="44" />
     <field type="uint" name="ExtendedDisplayInfoID" pos="0" />
-    <field type="unit" name="Texture" arraySize="3" pos="12"/>
+    <field type="uint" name="Texture" arraySize="3" pos="12"/>
+    <field type="uint" name="ParticleColorID" pos="50"/>
   </table>
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
@@ -140,6 +141,11 @@
     <field type="uint" name="ModelID" primary="yes" />
     <field type="uint" name="ID" pos="4" />
   </table>
-  
+  <table name="ParticleColor">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int" name="StartColor" arraySize="3"  pos="0" />
+    <field type="int" name="MidColor" arraySize="3"  pos="12" />
+    <field type="int" name="EndColor" arraySize="3"  pos="24" />
+  </table>
   <!-- Misc tables - END -->
 </database>

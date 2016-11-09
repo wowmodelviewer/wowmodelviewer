@@ -212,6 +212,12 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
         ss << *reinterpret_cast<float*>(val);
         result.push_back(ss.str());
       }
+      else if (it->type == "int")
+      {
+        std::stringstream ss;
+        ss << (*reinterpret_cast<int*>(val));
+        result.push_back(ss.str());
+      }
       else
       {
         unsigned int mask = 0xFFFFFFFF;
