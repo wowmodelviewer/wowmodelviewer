@@ -254,7 +254,7 @@ void CharDetails::updateMaxValues()
   m_skinColorMax = getNbValuesForSection(SkinType);
 
   RaceInfos infos;
-  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
+  RaceInfos::getCurrent(m_model, infos);
 
   QString query = QString("SELECT MAX(VariationID) FROM CharHairGeosets WHERE RaceID=%1 AND SexID=%2")
                         .arg(infos.raceid)
@@ -298,7 +298,7 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
   std::vector<std::string> result;
 
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(m_model->name().toStdString(), infos))
+  if(!RaceInfos::getCurrent(m_model, infos))
     return result;
 
 /*
@@ -385,7 +385,7 @@ int CharDetails::getNbValuesForSection(SectionType section)
   int result = 0;
 
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(m_model->name().toStdString(), infos))
+  if(!RaceInfos::getCurrent(m_model, infos))
     return result;
 
   size_t type = section;
@@ -441,7 +441,7 @@ void CharDetails::updateValidValues()
     return;
 
   RaceInfos infos;
-  RaceInfos::getCurrent(m_model->name().toStdString(), infos);
+  RaceInfos::getCurrent(m_model, infos);
 
   // valid hair colours:
   m_validHairColors.clear();

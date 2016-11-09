@@ -226,7 +226,7 @@ void WoWItem::load()
     return;
 
   RaceInfos infos;
-  RaceInfos::getCurrent(m_charModel->name().toStdString(), infos);
+  RaceInfos::getCurrent(m_charModel, infos);
 
   QString query = QString("SELECT Model1,Model2, \
        FD10.path AS Model1TexPath, FD10.name AS Model1TexName, \
@@ -802,7 +802,7 @@ void WoWItem::refresh()
       // handle 2000* group for hd models
       {
         RaceInfos infos;
-        if(RaceInfos::getCurrent(m_charModel->name().toStdString(), infos) && infos.isHD)
+        if(RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
         {
           m_charModel->cd.geosets[CG_HDFEET] = 2;
         }

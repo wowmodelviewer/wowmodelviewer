@@ -193,7 +193,7 @@ void CharControl::UpdateModel(Attachment *a)
 	Init();
 
 	RaceInfos infos;
-	if(RaceInfos::getCurrent(model->name().toStdString(), infos)) // fails if it is a creature
+	if(RaceInfos::getCurrent(model, infos)) // fails if it is a creature
 	{
 	  cdFrame->Enable(true);
 	  tabardSpins[SPIN_TABARD_ICON]->Enable(true);
@@ -463,7 +463,7 @@ void CharControl::RefreshModel()
 		model->cd.geosets[CG_EARS] = 2;
 
 	RaceInfos infos;
-	if(!RaceInfos::getCurrent(model->name().toStdString(), infos))
+	if(!RaceInfos::getCurrent(model, infos))
 	  return;
 
 	model->tex.reset(infos.textureLayoutID);
@@ -892,7 +892,7 @@ void CharControl::selectSet()
 void CharControl::selectStart()
 {
 	RaceInfos infos;
-	if(!RaceInfos::getCurrent(model->name().toStdString(), infos))
+	if(!RaceInfos::getCurrent(model, infos))
 		return;
 
 	ClearItemDialog();

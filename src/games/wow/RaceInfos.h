@@ -14,6 +14,8 @@
 #    define _RACEINFOS_API_
 #endif
 
+class WoWModel;
+
 class _RACEINFOS_API_ RaceInfos
 {
   public:
@@ -24,11 +26,11 @@ class _RACEINFOS_API_ RaceInfos
     std::string prefix;
     std::string customization[3];
 
-    static bool getCurrent(std::string modelName, RaceInfos & result);
+    static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();
 
   private:
-    static std::map< std::string, RaceInfos> RACES;
+    static std::map< int, RaceInfos> RACES;
 };
 
 

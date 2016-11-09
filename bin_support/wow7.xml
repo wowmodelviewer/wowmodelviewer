@@ -51,6 +51,13 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="FacialHairCustomization" arraySize="2" pos="24" />
     <field type="text" name="HairCustomization" pos="32" />
+    <field type="uint" name="MaleDisplayID" pos="76" />
+    <field type="uint" name="FemaleDisplayID" pos="78" />
+    <field type="uint" name="CharComponentTexLayoutID" pos="95" />
+    <field type="text" name="ClientPrefix" pos="4" />
+    <field type="uint" name="HighResMaleDisplayId" pos="100" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="102" />
+    <field type="uint" name="CharComponentTexLayoutHiResID" pos="99" />
   </table>
   <!-- Character tables - END -->
   
