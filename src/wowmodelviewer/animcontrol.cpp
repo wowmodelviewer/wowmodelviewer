@@ -632,24 +632,12 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   LOG_INFO << "Searching skins for" << m->itemName();
 
-  wxString fn = m->itemName().toStdString().c_str();
-
-  // change M2 to mdx
-  fn = fn.BeforeLast(wxT('.')) + wxT(".mdx");
-
-  // Check to see if it's a helmet model, if so cut the race-
-  // and gender-specific part of the filename off
-  if (fn.Find(wxT("\\head\\")) > wxNOT_FOUND || fn.Find(wxT("\\Head\\")) > wxNOT_FOUND)
-    fn = fn.BeforeLast('_') + wxT(".mdx");
-
-  // just get the file name, exclude the path.
-  fn = fn.AfterLast(MPQ_SLASH);
-
   // query textures for model1
-  QString query= QString("SELECT DISTINCT path, name, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-                         "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.TextureItemID "
-                         "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id "
-                         "WHERE Model1 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
+  QString query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
+                         "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                         "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                         "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
+
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
   if(r.valid && !r.empty())
@@ -660,11 +648,11 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       grp.base = TEXTURE_ITEM;
       grp.definedTexture = true;
       grp.count = 1;
-      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
+      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
-      int cdi = r.values[i][3].toInt();
-      int pci = r.values[i][2].toInt(); // particleColorIndex, for replacing particle color
+      int cdi = r.values[i][2].toInt();
+      int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;
@@ -692,12 +680,13 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       CDIToTexGp[cdi] = grp;
     }
   }
-
+  
   // do the same for model2
-  query= QString("SELECT DISTINCT path, name, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo  "
-                 "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.TextureItemID "
-                 "LEFT JOIN FileData ON TextureFileData.FileDataID = FileData.id "
-                 "WHERE Model2 = \"%1\" COLLATE NOCASE").arg(fn.mb_str());
+  query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
+                 "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.ID "
+                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                 "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
+
   r = GAMEDATABASE.sqlQuery(query);
 
   if(r.valid && !r.empty())
@@ -708,11 +697,11 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       grp.base = TEXTURE_ITEM;
       grp.definedTexture = true;
       grp.count = 1;
-      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0] + r.values[i][1]);
+      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
-      int cdi = r.values[i][3].toInt();
-      int pci = r.values[i][2].toInt(); // particleColorIndex, for replacing particle color
+      int cdi = r.values[i][2].toInt();
+      int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;
