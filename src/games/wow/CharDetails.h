@@ -67,7 +67,7 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     void print();
 
     int getNbValuesForSection(SectionType type);
-    std::vector<std::string> getTextureNameForSection(SectionType);
+    std::vector<int> getTextureForSection(SectionType);
 
 
     // accessors to customization

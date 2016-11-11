@@ -293,9 +293,9 @@ void CharDetails::updateMaxValues()
   if (m_facialHairMax == 0) m_facialHairMax = 1;
 }
 
-std::vector<std::string> CharDetails::getTextureNameForSection(SectionType section)
+std::vector<int> CharDetails::getTextureForSection(SectionType section)
 {
-  std::vector<std::string> result;
+  std::vector<int> result;
 
   RaceInfos infos;
   if(!RaceInfos::getCurrent(m_model, infos))
@@ -318,44 +318,43 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
   if(infos.isHD) // HD layout
     type+=5;
 
-  QString query;
+  QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
+                          "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
+                          "LEFT JOIN TextureFileData AS TFD2 ON TextureName1 = TFD2.ID "
+                          "LEFT JOIN TextureFileData AS TFD3 ON TextureName1 = TFD1.ID ");
   switch(section)
   {
     case SkinType:
     case UnderwearType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(skinColor())
-              .arg(type);
+      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
+                       .arg(infos.raceid)
+                       .arg(infos.sexid)
+                       .arg(skinColor())
+                       .arg(type);
       break;
     case FaceType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-              (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(skinColor())
-              .arg(faceType())
-              .arg(type);
+      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
+                       .arg(infos.raceid)
+                       .arg(infos.sexid)
+                       .arg(skinColor())
+                       .arg(faceType())
+                       .arg(type);
       break;
     case HairType:
-        query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections \
-              WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(hairStyle())
-              .arg(hairColor())
-              .arg(type);
+      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+                       .arg(infos.raceid)
+                       .arg(infos.sexid)
+                       .arg(hairStyle())
+                       .arg(hairColor())
+                       .arg(type);
       break;
     case FacialHairType:
-      query = QString("SELECT TextureName1, TextureName2, TextureName3 FROM CharSections WHERE \
-                  (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
-                  .arg(facialHair())
-                  .arg(hairColor())
-                  .arg(type);
+      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+                       .arg(infos.raceid)
+                       .arg(infos.sexid)
+                       .arg(facialHair())
+                       .arg(hairColor())
+                       .arg(type);
       break;
     default:
       query = "";
@@ -368,7 +367,7 @@ std::vector<std::string> CharDetails::getTextureNameForSection(SectionType secti
     {
       for(size_t i = 0; i < vals.values[0].size() ; i++)
         if(!vals.values[0][i].isEmpty())
-          result.push_back(vals.values[0][i].toStdString());
+          result.push_back(vals.values[0][i].toInt());
     }
     else
     {

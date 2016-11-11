@@ -43,7 +43,7 @@ void CharTexture::reset(unsigned int _layoutSizeId)
   layoutSizeId = _layoutSizeId;
 }
 
-#define DEBUG_TEXTURE 0
+#define DEBUG_TEXTURE 1
 
 void CharTexture::compose(TextureID texID)
 {

@@ -468,14 +468,14 @@ void CharControl::RefreshModel()
 
 	model->tex.reset(infos.textureLayoutID);
 
-	std::vector<std::string> textures = model->cd.getTextureNameForSection(CharDetails::SkinType);
+	std::vector<int> textures = model->cd.getTextureForSection(CharDetails::SkinType);
 
 	if(textures.size() > 0)
-	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_BASE, 0);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_BASE, 0);
 
 	if(textures.size() > 1)
 	{
-	  GameFile * tex = GAMEDIRECTORY.getFile(textures[1].c_str());
+	  GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
 		model->furTex = texturemanager.add(tex);
 	  model->UpdateTextureList(tex, TEXTURE_FUR);
 	}
@@ -483,12 +483,12 @@ void CharControl::RefreshModel()
 	// Display underwear on the model?
 	if (model->cd.showUnderwear)
 	{
-	  textures = model->cd.getTextureNameForSection(CharDetails::UnderwearType);
+	  textures = model->cd.getTextureForSection(CharDetails::UnderwearType);
 	  if(textures.size() > 0)
-	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_PELVIS_UPPER, 1); // pants
+	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_PELVIS_UPPER, 1); // pants
 
 	  if(textures.size() > 1)
-	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_TORSO_UPPER, 1); // top
+	    model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_TORSO_UPPER, 1); // top
 
 	  // pandaren female => need to display tabard2 geosets (need to find something better...)
 	  for (size_t i=0; i<model->geosets.size(); i++)
@@ -508,20 +508,20 @@ void CharControl::RefreshModel()
 	}
 
 	// face
-	textures = model->cd.getTextureNameForSection(CharDetails::FaceType);
+	textures = model->cd.getTextureForSection(CharDetails::FaceType);
 	if(textures.size() > 0)
-	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_FACE_LOWER, 1);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 1);
 
 	if(textures.size() > 1)
-	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 1);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 1);
 
 	// facial hair
-	textures = model->cd.getTextureNameForSection(CharDetails::FacialHairType);
+	textures = model->cd.getTextureForSection(CharDetails::FacialHairType);
 	if(textures.size() > 0)
-	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0].c_str()), CR_FACE_LOWER, 2);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 2);
 
 	if(textures.size() > 1)
-	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 2);
+	  model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 2);
 
   // select hairstyle geoset(s)
   QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
@@ -552,27 +552,27 @@ void CharControl::RefreshModel()
 
 
   // Hair texture
-	textures = model->cd.getTextureNameForSection(CharDetails::HairType);
+	textures = model->cd.getTextureForSection(CharDetails::HairType);
   if(textures.size() > 0)
   {
-    GameFile * tex = GAMEDIRECTORY.getFile(textures[0].c_str());
+    GameFile * tex = GAMEDIRECTORY.getFile(textures[0]);
   	model->hairTex = texturemanager.add(tex);
     model->UpdateTextureList(tex, TEXTURE_HAIR);
 
     if(infos.isHD)
     {
       if(!showScalp && textures.size() > 1)
-        model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_UPPER, 3);
+        model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 3);
     }
     else
     {
       if(!showScalp)
       {
         if(textures.size() > 1)
-          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1].c_str()), CR_FACE_LOWER, 3);
+          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_LOWER, 3);
 
         if(textures.size() > 2)
-          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[2].c_str()), CR_FACE_UPPER, 3);
+          model->tex.addLayer(GAMEDIRECTORY.getFile(textures[2]), CR_FACE_UPPER, 3);
       }
     }
   }
