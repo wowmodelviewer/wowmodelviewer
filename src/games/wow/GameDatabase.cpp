@@ -139,6 +139,7 @@ bool GameDatabase::readStructureFromXML(const QString & file)
       QDomNode key = attributes.namedItem("primary");
       QDomNode arraySize = attributes.namedItem("arraySize");
       QDomNode pos = attributes.namedItem("pos");
+      QDomNode index = attributes.namedItem("createIndex");
 
       if (!name.isNull() && !type.isNull())
       {
@@ -147,6 +148,9 @@ bool GameDatabase::readStructureFromXML(const QString & file)
 
         if (!key.isNull())
           fieldStruct->isKey = true;
+
+        if (!index.isNull())
+          fieldStruct->needIndex = true;
 
         if (!pos.isNull())
           fieldStruct->pos = pos.nodeValue().toInt();
@@ -170,6 +174,7 @@ bool GameDatabase::readStructureFromXML(const QString & file)
       LOG_INFO << "fieldName =" << field.name.c_str()
         << "/ fieldType =" << field.type.c_str()
         << "/ is key ? =" << field.isKey
+        << "/ need Index ? =" << field.needIndex
         << "/ pos =" << field.pos
         << "/ arraySize =" << field.arraySize;
     }
@@ -209,11 +214,6 @@ bool GameDatabase::createDatabaseFromXML(const QString & file)
     }
   }
 
-  // add indexes to speed up item loading
-  sqlQuery("CREATE INDEX index1 ON TextureFileData(TextureItemID)");
-  sqlQuery("CREATE INDEX index2 ON TextureFileData(TextureType)");
-  sqlQuery("CREATE INDEX index3 ON TextureFileData(FileDataID)");
- 
   return result; 
 }
 
@@ -221,6 +221,8 @@ bool GameDatabase::tableStructure::create()
 {
   LOG_INFO << "Creating table" << name;
   QString create = "CREATE TABLE "+ name +" (";
+
+  std::list<QString> indexesToCreate;
 
   for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
   {
@@ -246,6 +248,9 @@ bool GameDatabase::tableStructure::create()
         create += ",";
       }
     }
+
+    if (it->needIndex)
+      indexesToCreate.push_back(it->name);
   }
 
   // remove spurious "," at the end of string, if any
@@ -258,7 +263,16 @@ bool GameDatabase::tableStructure::create()
   sqlResult r = GAMEDATABASE.sqlQuery(create);
  
   if (r.valid)
+  {
     LOG_INFO << "Table" << name << "successfully created";
+
+    // create indexes
+    for (auto it = indexesToCreate.begin(), itEnd = indexesToCreate.end(); it != itEnd; ++it)
+    {
+      QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(*it);
+      GAMEDATABASE.sqlQuery(query);
+    }
+  }
 
   return r.valid;
 }

@@ -60,12 +60,14 @@ class _GAMEDATABASE_API_ GameDatabase
           isKey(false),
           pos(-1),
           arraySize(1),
-          id(0)
+          id(0),
+          needIndex(false)
         {}
 
         QString name;
         QString type;
         bool isKey;
+        bool needIndex;
         int pos;
         unsigned int arraySize;
         int id;
