@@ -63,8 +63,6 @@ class _WOWMODEL_API_ WoWModel: public ManagedItem, public Displayable, public Mo
 	GLuint dlist;
 	bool forceAnim;
 
-
-
 	inline void drawModel();
 	void initCommon(GameFile * f);
 	bool isAnimated(GameFile * f);
@@ -79,7 +77,6 @@ class _WOWMODEL_API_ WoWModel: public ManagedItem, public Displayable, public Mo
 
 	uint16 *boundTris;
 
-
 public:
 	bool animGeometry,animTextures,animBones;
 
@@ -92,8 +89,6 @@ public:
 	RibbonEmitter	*ribbons;
 	ModelEvent		*events;
 	Vec3D *bounds;
-  Vec3D minCoord;
-  Vec3D maxCoord;
   GameFile * gamefile;
 
 	std::vector<uint> replacableParticleColorIDs;
@@ -235,6 +230,8 @@ public:
 
   void save(QXmlStreamWriter &);
   void load(QString &);
+
+  void computeMinMaxCoords(Vec3D & min, Vec3D & max);
 
 };
 

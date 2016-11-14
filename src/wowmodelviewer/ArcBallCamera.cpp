@@ -15,6 +15,7 @@
 
 #define DISPLAY_ORIGIN 0
 #define DISPLAY_LOOKAT 0
+#define DISPLAY_MODELCENTER 0
 
 ArcBallCamera::ArcBallCamera()
 {
@@ -132,6 +133,30 @@ void ArcBallCamera::setup()
   glEnd();
   glPopMatrix();
 #endif
+#if DISPLAY_MODELCENTER > 0
+  // Useful for debug : display a big coord system at model center position
+  glPushMatrix();
+  glTranslatef(m_modelCenter.x, m_modelCenter.y, m_modelCenter.z);
+
+  glBegin(GL_LINES);
+  // X Axis
+  glColor3f(0.5, 0.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(1.5, 0.0, 0.0);
+
+  // Y axis
+  glColor3f(1.0, 1.0, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 1.5, 0.0);
+
+  // Z axis
+  glColor3f(0.0, 1.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, 1.5);
+  glEnd();
+  glPopMatrix();
+#endif
+
 }
 
 Vec3D ArcBallCamera::mapToSphere(const int x, const int y)
@@ -194,9 +219,9 @@ void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float 
   reset();
 
   // center view point on center of object
-  m_lookAt.x = (minp.z + maxp.z) / 2.;
+  m_lookAt.x = (minp.x + maxp.x) / 2.;
   m_lookAt.y = (minp.y + maxp.y) / 2.;
-  m_lookAt.z = (minp.x + maxp.x) / 2.;
+  m_lookAt.z = (minp.z + maxp.z) / 2.;
 
   // save current model center to allow rotation around it
   m_modelCenter = m_lookAt;

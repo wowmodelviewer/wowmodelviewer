@@ -1049,6 +1049,9 @@ void ModelViewer::LoadModel(GameFile * file)
 	modelControl->UpdateModel(modelAtt);
 	modelControl->RefreshModel(canvas->root);
 
+  // auto fit camera
+  canvas->autofit();
+  
 	// Update the animations / skins
 	animControl->UpdateModel(canvas->model);
 	interfaceManager.Update();

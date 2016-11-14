@@ -363,8 +363,7 @@ Attachment* ModelCanvas::LoadCharModel(GameFile * file)
 	ResetView();
 	Attachment *att = root->addChild(model, 0, -1);
 	curAtt = att;
-  arcCamera.autofit(model->minCoord, model->maxCoord, video.fov);
-
+ 
 	return att;
 }
 
@@ -1747,5 +1746,10 @@ void ModelCanvas::SwapBuffers()
 #endif
 }
 
-
+void ModelCanvas::autofit()
+{
+  Vec3D minCoord, maxCoord;
+  model->computeMinMaxCoords(minCoord, maxCoord);
+  arcCamera.autofit(minCoord, maxCoord, video.fov);
+}
 

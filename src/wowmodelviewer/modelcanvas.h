@@ -165,6 +165,8 @@ public:
 	CAVIGenerator cAvi;
 #endif
 
+  void autofit();
+
 private:
   float time, modelsize;
   DWORD lastTime;

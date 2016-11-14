@@ -475,35 +475,21 @@ void WoWModel::initCommon(GameFile * f)
 
 	// Correct the data from the model, so that its using the Y-Up axis mode.
 
-	for (size_t i=0; i<header.nVertices; i++) {
-		origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
-		origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
+  LOG_INFO << "vertices" << vertices;
 
-		// Set the data for our vertices, normals from the model data
-		vertices[i] = origVertices[i].pos;
-		normals[i] = origVertices[i].normal.normalize();
+  for (size_t i = 0; i < header.nVertices; i++) {
+    origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
+    origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
 
-		float len = origVertices[i].pos.lengthSquared();
-		if (len > rad){
-			rad = len;
-		}
+    // Set the data for our vertices, normals from the model data
+    vertices[i] = origVertices[i].pos;
+    normals[i] = origVertices[i].normal.normalize();
 
-    // detect min/max coordinates and set them
-    if (vertices[i].x < minCoord.x)
-      minCoord.x = vertices[i].x;
-    else if (vertices[i].x > maxCoord.x)
-      maxCoord.x = vertices[i].x;
-
-    if (vertices[i].y < minCoord.y)
-      minCoord.y = vertices[i].y;
-    else if (vertices[i].y > maxCoord.y)
-      maxCoord.y = vertices[i].y;
-
-    if (vertices[i].z < minCoord.z)
-      minCoord.z = vertices[i].z;
-    else if (vertices[i].z > maxCoord.z)
-      maxCoord.z = vertices[i].z;
-	}
+    float len = origVertices[i].pos.lengthSquared();
+    if (len > rad){
+      rad = len;
+    }
+  }
 
 	// model vertex radius
 	rad = sqrtf(rad);
@@ -655,6 +641,7 @@ void WoWModel::initCommon(GameFile * f)
 		// int viewLOD = header.nViews - 1; // sets LOD to best
 		setLOD(f, 0); // Set the default Level of Detail to the best possible.
 	}
+  
 }
 
 void WoWModel::initStatic(GameFile * f)
@@ -1532,4 +1519,50 @@ bool WoWModel::canSetTextureFromFile(int texnum)
       return 1;
   }
   return 0;
+}
+
+void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
+{
+  if (video.supportVBO)
+  {
+    // get back vertices
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+    vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
+  }
+
+  for (size_t i = 0; i < passes.size(); i++)
+  {
+    ModelRenderPass &p = passes[i];
+   
+    if (!showGeosets[p.geoset])
+      continue;
+       
+    for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
+    {
+      Vec3D v = vertices[indices[b]];
+      
+      // detect min/max coordinates and set them
+      if (v.x < minCoord.x)
+        minCoord.x = v.x;
+      else if (v.x > maxCoord.x)
+        maxCoord.x = v.x;
+
+      if (v.y < minCoord.y)
+        minCoord.y = v.y;
+      else if (v.y > maxCoord.y)
+        maxCoord.y = v.y;
+
+      if (v.z < minCoord.z)
+        minCoord.z = v.z;
+      else if (v.z > maxCoord.z)
+        maxCoord.z = v.z;
+    }
+  }
+
+  if (video.supportVBO)
+    glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+
+  LOG_INFO << __FUNCTION__;
+  LOG_INFO << "min" << minCoord.x << minCoord.y << minCoord.z;
+  LOG_INFO << "max" << maxCoord.x << maxCoord.y << maxCoord.z;
 }

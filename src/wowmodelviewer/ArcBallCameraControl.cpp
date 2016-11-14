@@ -44,7 +44,6 @@ void ArcBallCameraControl::onMouse(wxMouseEvent &event)
 {
   int px = event.GetX();
   int py = event.GetY();
-  int pz = event.GetWheelRotation();
 
   // mul = multiplier in which to multiply everything to achieve a sense of control over the amount to move stuff by
   float mul = 1.0f;
@@ -78,7 +77,7 @@ void ArcBallCameraControl::onMouse(wxMouseEvent &event)
   }
   else if (event.GetEventType() == wxEVT_MOUSEWHEEL) // zoom
   {
-    if (pz > 0)
+    if (event.GetWheelRotation() > 0)
       m_camera.zoomIn(mul);
     else
       m_camera.zoomOut(mul);
