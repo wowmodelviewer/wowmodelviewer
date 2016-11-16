@@ -474,9 +474,6 @@ void WoWModel::initCommon(GameFile * f)
 	normals = new Vec3D[header.nVertices];
 
 	// Correct the data from the model, so that its using the Y-Up axis mode.
-
-  LOG_INFO << "vertices" << vertices;
-
   for (size_t i = 0; i < header.nVertices; i++) {
     origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
     origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
@@ -1533,14 +1530,14 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
   for (size_t i = 0; i < passes.size(); i++)
   {
     ModelRenderPass &p = passes[i];
-   
+
     if (!showGeosets[p.geoset])
       continue;
-       
+
     for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
-      
+
       // detect min/max coordinates and set them
       if (v.x < minCoord.x)
         minCoord.x = v.x;
@@ -1560,7 +1557,10 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
   }
 
   if (video.supportVBO)
+  {
     glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
+    vertices = 0;
+  }
 
   LOG_INFO << __FUNCTION__;
   LOG_INFO << "min" << minCoord.x << minCoord.y << minCoord.z;

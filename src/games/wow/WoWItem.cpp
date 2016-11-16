@@ -260,8 +260,8 @@ void WoWItem::load()
 
   sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
 
-  if(!iteminfos.valid || iteminfos.values.empty())
-    return;
+  //if(!iteminfos.valid || iteminfos.values.empty())
+  //  return;
 
   switch(m_slot)
   {
@@ -303,20 +303,33 @@ void WoWItem::load()
   }
   case CS_SHOULDER:
   {
+    query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                    "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                    "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                    "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+
+    LOG_INFO << "---------------------------------------------";
+    LOG_INFO << query;
+    LOG_INFO << "---------------------------------------------";
+
+    iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
+    {
+      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
+    }
+
     WoWModel *m = NULL;
     GLuint tex;
 
     // left shoulder
-    QString model = iteminfos.values[0][0];
-    model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    model = GAMEDIRECTORY.getFullPathForFile(model);
-
-    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt()), true);
 
     if (m->ok)
     {
       itemModels[ATT_LEFT_SHOULDER] = m;
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][1].toInt());
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
@@ -326,20 +339,16 @@ void WoWItem::load()
           m->TextureList[x] = texture;
         }
       }
-      m->replaceTextures[TEXTURE_CAPE] = tex;
+      m->replaceTextures[TEXTURE_ITEM] = tex;
     }
-
+    
     // right shoulder
-    model = iteminfos.values[0][1];
-    model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    model = GAMEDIRECTORY.getFullPathForFile(model);
-
-    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
+    m = new WoWModel(GAMEDIRECTORY.getFile(iteminfos.values[1][0].toInt()), true);
 
     if (m->ok)
     {
       itemModels[ATT_RIGHT_SHOULDER] = m;
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][4] + iteminfos.values[0][5]);
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[1][1].toInt());
       tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
@@ -352,6 +361,7 @@ void WoWItem::load()
       m->replaceTextures[TEXTURE_CAPE] = tex;
     }
     break;
+
   }
   case CS_BOOTS:
   {

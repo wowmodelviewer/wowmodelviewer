@@ -127,11 +127,12 @@
     <field type="uint" name="TextureItemID" arraySize="2" pos="4" />
     <field type="byte" name="GeosetGroup" arraySize="3" pos="10" />
     <field type="uint" name="ParticleColorID" pos="26"/>
-    <!--
-    <field type="uint" name="Flags" pos="40" />
-    <field type="uint" name="SpellVisualID" pos="44" />
-    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="48" />
-    -->
+    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="20" />
+  </table>
+  <table name="ItemDisplayInfoMaterialRes">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="0" createIndex="yes" />
+    <field type="uint" name="TextureFileDataID" pos="4" />
   </table>
   <!-- Item tables - END -->
   
