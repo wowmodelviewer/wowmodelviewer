@@ -33,10 +33,10 @@ bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
 void RaceInfos::init()
 {
   sqlResult races = 
-    GAMEDATABASE.sqlQuery("SELECT CMDM.FileID as malemodel, ClientPrefix, CharComponentTexLayoutID, "
-                          "CMDF.FileID AS femalemodel, ClientPrefix, CharComponentTexLayoutID, "
-                          "CMDMHD.FileID as malemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, "
-                          "CMDFHD.FileID AS femalemodelHD, ClientPrefix, CharComponentTexLayoutHiResID, "
+    GAMEDATABASE.sqlQuery("SELECT CMDM.FileID as malemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
+                          "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
+                          "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
+                          "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "ChrRaces.ID, FacialHairCustomization1, FacialHairCustomization2, HairCustomization FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "

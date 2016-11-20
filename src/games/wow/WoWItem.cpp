@@ -41,7 +41,26 @@
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
-map<CharSlots,int> WoWItem::SLOT_LAYERS = WoWItem::initSlotLayers();
+map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
+                                             { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
+                                             { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
+                                             { CS_GLOVES, 20 }, { CS_HAND_RIGHT, 21 }, { CS_HAND_LEFT, 22 },
+                                             { CS_CAPE, 23 }, { CS_QUIVER, 24 } };
+
+
+map<string, int> WoWItem::MODELID_OFFSETS = { { "bef", 0 }, { "bem", 1 },
+                                              { "drf", 2 }, { "drm", 3 },
+                                              { "dwf", 4 }, { "dwm", 5 },
+                                              { "gnf", 6 }, { "gnm", 7 },
+                                              { "gof", 8 }, { "gom", 9 },
+                                              { "huf", 10 }, { "hum", 11 },
+                                              { "nif", 12 }, { "nim", 13 },
+                                              { "orf", 14 }, { "orm", 15 },
+                                              { "scf", 16 }, { "scm", 17 },
+                                              { "taf", 18 }, { "tam", 19 },
+                                              { "trf", 20 }, { "trm", 21 },
+                                              { "wof", 22 }, { "wom", 23 },
+                                              { "paf", 24 }, { "pam", 15 }};
 
 WoWItem::WoWItem(CharSlots slot)
 : m_charModel(0), m_id(-1), m_quality(0),
@@ -164,27 +183,6 @@ void WoWItem::onParentSet(Component * parent)
   m_charModel = dynamic_cast<WoWModel *>(parent);
 }
 
-std::map<CharSlots,int> WoWItem::initSlotLayers()
-{
-  std::map<CharSlots,int> result;
-  result[CS_SHIRT] = 10;
-  result[CS_HEAD] = 11;
-  result[CS_SHOULDER] = 13;
-  result[CS_PANTS] = 14;
-  result[CS_BOOTS] = 15;
-  result[CS_CHEST] = 16;
-  result[CS_TABARD] = 17;
-  result[CS_BELT] = 18;
-  result[CS_BRACERS] = 19;
-  result[CS_GLOVES] = 20;
-  result[CS_HAND_RIGHT] = 21;
-  result[CS_HAND_LEFT] = 22;
-  result[CS_CAPE] = 23;
-  result[CS_QUIVER] = 24;
-
-  return result;
-}
-
 void WoWItem::unload()
 {
   // delete models and clear map
@@ -267,27 +265,35 @@ void WoWItem::load()
   {
   case CS_HEAD:
   {
-    WoWModel *m = NULL;
-    GLuint tex;
-    QString model = iteminfos.values[0][0];
-    // remove .mdx
-    model.remove(".mdx", Qt::CaseInsensitive);
-    // add race prefix
-    model += "_";
-    model += QString::fromStdString(infos.prefix);
-    // add sex suffix
-    model += ((infos.sexid == 0)?"M":"F");
-    // add .m2
-    model += ".m2";
-    model = GAMEDIRECTORY.getFullPathForFile(model);
+    query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                    "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                    "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                    "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
+    iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
+    {
+      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
+      return;
+    }
+
+    int index = getModelIndexFromInfos();
+
+    if (index == -1 || index > (int)iteminfos.values.size())
+    {
+      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - model index =" << index << "result size =" << iteminfos.values.size();
+      return;
+    }
+
+
+    WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(iteminfos.values[index][0].toInt()), true);
 
     if (m->ok)
     {
       itemModels[ATT_HELMET] = m;
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
-      tex = texturemanager.add(texture);
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[index][1].toInt());
+      GLuint tex = texturemanager.add(texture);
       for (size_t x=0;x<m->TextureList.size();x++)
       {
         if (m->TextureList[x]->fullname() == "Special_2")
@@ -307,10 +313,6 @@ void WoWItem::load()
                     "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                     "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                     "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-    LOG_INFO << "---------------------------------------------";
-    LOG_INFO << query;
-    LOG_INFO << "---------------------------------------------";
 
     iteminfos = GAMEDATABASE.sqlQuery(query);
 
@@ -1087,4 +1089,22 @@ void WoWItem::load(QString & f)
       load(); // refresh tabard textures
     }
   }
+}
+
+int WoWItem::getModelIndexFromInfos()
+{
+  int result = -1;
+
+  RaceInfos infos;
+  RaceInfos::getCurrent(m_charModel, infos);
+
+  string prefix = infos.prefix;
+  prefix += ((infos.sexid == 0) ? "m" : "f");
+
+  auto it = MODELID_OFFSETS.find(prefix);
+
+  if (it != MODELID_OFFSETS.end())
+    result = it->second;
+
+  return result;
 }

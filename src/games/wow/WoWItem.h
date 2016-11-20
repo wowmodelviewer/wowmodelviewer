@@ -96,11 +96,13 @@ class _WOWITEM_API_ WoWItem : public Component
     CharSlots m_slot;
 
     static std::map<CharSlots,int> SLOT_LAYERS;
-    static std::map<CharSlots,int> initSlotLayers();
+    static std::map<std::string, int> MODELID_OFFSETS;
 
     std::map<CharRegions, GameFile *> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
+
+    int getModelIndexFromInfos();
 
 };
 
