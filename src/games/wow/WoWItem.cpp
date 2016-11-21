@@ -526,65 +526,24 @@ void WoWItem::load()
     break;
   }
   case CS_HAND_RIGHT:
-  {
-    /*
-    WoWModel *m = NULL;
-    GLuint tex;
-
-    QString itemModel = iteminfos.values[0][0];
-    itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
-
-    m = new WoWModel(GAMEDIRECTORY.getFile(itemModel), true);
-
-    if (m->ok)
-    {
-      itemModels[ATT_RIGHT_PALM] = m;
-
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
-      tex = texturemanager.add(texture);
-      for (size_t x=0;x<m->TextureList.size();x++)
-      {
-        if (m->TextureList[x]->fullname() == "Special_2")
-        {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
-          m->TextureList[x] = texture;
-        }
-      }
-      m->replaceTextures[TEXTURE_CAPE] = tex;
-    }
-    */
-    break;
-  }
   case CS_HAND_LEFT:
   {
-    /*
-    WoWModel *m = NULL;
-    GLuint tex;
+    QString query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                            "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                            "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                            "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-    QString itemModel = iteminfos.values[0][0];
-    itemModel.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    itemModel = GAMEDIRECTORY.getFullPathForFile(itemModel);
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
 
-    m = new WoWModel(GAMEDIRECTORY.getFile(itemModel), true);
-
-    if (m->ok)
+    if (!iteminfos.valid || iteminfos.values.empty())
     {
-      itemModels[ATT_LEFT_PALM] = m;
-
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
-      tex = texturemanager.add(texture);
-      for (size_t x=0;x<m->TextureList.size();x++)
-      {
-        if (m->TextureList[x]->fullname() == "Special_2")
-        {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
-          m->TextureList[x] = texture;
-        }
-      }
-      m->replaceTextures[TEXTURE_CAPE] = tex;
+      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
     }
-    */
+
+    // left shoulder
+    updateItemModel(((m_slot == CS_HAND_RIGHT)?ATT_RIGHT_PALM:ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+
     break;
   }
   case CS_CAPE:
