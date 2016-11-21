@@ -103,6 +103,7 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<int, int> m_levelDisplayMap;
 
     int getModelIndexFromInfos();
+    void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
 
 };
 
