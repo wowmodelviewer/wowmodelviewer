@@ -82,7 +82,7 @@ class _WOWITEM_API_ WoWItem : public Component
   private:
     void unload();
 
-    bool isCustomizableTabard();
+    bool isCustomizableTabard() const;
 
     WoWModel * m_charModel;
 
@@ -102,8 +102,10 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
 
-    int getModelIndexFromInfos();
+    int getModelIndexFromInfos() const;
     void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
+
+    CharRegions getRegionForTexture(GameFile * file) const;
 
 };
 

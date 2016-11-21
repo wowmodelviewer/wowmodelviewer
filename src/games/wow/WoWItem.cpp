@@ -294,32 +294,16 @@ void WoWItem::load()
       return;
     }
 
-    if (iteminfos.values.size() == 1) // foot only
+    for (uint i = 0; i < iteminfos.values.size(); i++)
     {
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
       if (texture)
       {
         texturemanager.add(texture);
-        m_itemTextures[CR_FOOT] = texture;
+        m_itemTextures[getRegionForTexture(texture)] = texture;
       }
+      
     }
-    else // lower leg + foot
-    {
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-      if (texture)
-      {
-        texturemanager.add(texture);
-        m_itemTextures[CR_LEG_LOWER] = texture;
-      }
-
-      texture = GAMEDIRECTORY.getFile(iteminfos.values[1][0].toInt());
-      if (texture)
-      {
-        texturemanager.add(texture);
-        m_itemTextures[CR_FOOT] = texture;
-      }
-    }
-
 
     // now get geoset / model infos
     query = QString("SELECT ModelID, TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
@@ -350,50 +334,52 @@ void WoWItem::load()
   }
   case CS_BELT:
   {
-    /*
-    WoWModel *m = NULL;
-    GLuint tex;
+    // query texture infos from ItemDisplayInfoMaterialRes
+    QString query = QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                            "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                            "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    QString model = iteminfos.values[0][0];
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
 
-    if(!model.isEmpty())
+    if (!iteminfos.valid || iteminfos.values.empty())
     {
-    model.replace(".mdx", ".m2", Qt::CaseInsensitive);
-    model = GAMEDIRECTORY.getFullPathForFile(model);
-
-    m = new WoWModel(GAMEDIRECTORY.getFile(model), true);
-
-    if (m->ok)
-    {
-    itemModels[ATT_BELT_BUCKLE] = m;
-    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
-    tex = texturemanager.add(texture);
-    for (size_t x=0;x<m->TextureList.size();x++)
-    {
-    if (m->TextureList[x]->fullname() == "Special_2")
-    {
-    LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
-    m->TextureList[x] = texture;
-    }
-    }
-    m->replaceTextures[TEXTURE_CAPE] = tex;
-    }
+      LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      LOG_ERROR << query;
+      return;
     }
 
-    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][19] + iteminfos.values[0][20]);
-    if(texture)
+    for (uint i = 0; i < iteminfos.values.size(); i++)
     {
-    texturemanager.add(texture);
-    m_itemTextures[CR_TORSO_LOWER] = texture;
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+      if (texture)
+      {
+        texturemanager.add(texture);
+        m_itemTextures[getRegionForTexture(texture)] = texture;
+      }
+
     }
 
-    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][21] + iteminfos.values[0][22]);
-    if(texture)
+    // now get geoset / model infos
+    query = QString("SELECT ModelID, TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
+                    "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                    "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                    "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+
+    iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
     {
-    texturemanager.add(texture);
-    m_itemTextures[CR_LEG_UPPER] = texture;
+      LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      LOG_ERROR << query;
+      return;
     }
-    */
+
+    // models
+    if (iteminfos.values[0][0].toInt() != 0) // we have a model for belt
+    {
+      updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+    }
+
     break;
   }
   case CS_PANTS:
@@ -977,7 +963,7 @@ void WoWItem::refresh()
   }
 }
 
-bool WoWItem::isCustomizableTabard()
+bool WoWItem::isCustomizableTabard() const
 {
   return (m_id == 5976  || // Guild Tabard
           m_id == 69209 || // Illustrious Guild Tabard
@@ -1082,7 +1068,7 @@ void WoWItem::load(QString & f)
   }
 }
 
-int WoWItem::getModelIndexFromInfos()
+int WoWItem::getModelIndexFromInfos() const
 {
   int result = -1;
 
@@ -1119,4 +1105,53 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     }
     m->replaceTextures[TEXTURE_ITEM] = tex;
   }
+}
+
+CharRegions WoWItem::getRegionForTexture(GameFile * file) const
+{
+  CharRegions result = CR_UNK8;
+
+  if (file)
+  {
+    QString fullname = file->fullname();
+
+    if (fullname.contains("armlowertexture", Qt::CaseInsensitive))
+    {
+      result = CR_ARM_LOWER;
+    }
+    else if (fullname.contains("armuppertexture", Qt::CaseInsensitive))
+    {
+      result = CR_ARM_UPPER;
+    }
+    else if (fullname.contains("foottexture", Qt::CaseInsensitive))
+    {
+      result = CR_FOOT;
+    }
+    else if (fullname.contains("handtexture", Qt::CaseInsensitive))
+    {
+      result = CR_HAND;
+    }
+    else if (fullname.contains("leglowertexture", Qt::CaseInsensitive))
+    {
+      result = CR_LEG_LOWER;
+    }
+    else if (fullname.contains("leguppertexture", Qt::CaseInsensitive))
+    {
+      result = CR_LEG_UPPER;
+    }
+    else if (fullname.contains("torsolowertexture", Qt::CaseInsensitive))
+    {
+      result = CR_TORSO_LOWER;
+    }
+    else if (fullname.contains("torsouppertexture", Qt::CaseInsensitive))
+    {
+      result = CR_TORSO_UPPER;
+    }
+    else
+    {
+      LOG_ERROR << "Unable to determine region for texture" << fullname << " - item" << m_id << "displayid" << m_displayId;
+    }
+  }
+
+  return result;
 }
