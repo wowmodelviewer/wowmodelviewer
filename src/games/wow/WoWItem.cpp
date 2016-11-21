@@ -456,19 +456,32 @@ void WoWItem::load()
     m_itemGeosets[CG_WRISTBANDS] = 1 + iteminfos.values[0][0].toInt();
     m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
 
- 
     break;
   }
   case CS_BRACERS:
   {
-    /*
-    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][13] + iteminfos.values[0][14]);
-    if (texture)
+    // query texture infos from ItemDisplayInfoMaterialRes
+    QString query = QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                            "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                            "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
+
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
     {
-      texturemanager.add(texture);
-      m_itemTextures[CR_ARM_LOWER] = texture;
+      LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
     }
-   */
+
+    for (uint i = 0; i < iteminfos.values.size(); i++)
+    {
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+      if (texture)
+      {
+        texturemanager.add(texture);
+        m_itemTextures[getRegionForTexture(texture)] = texture;
+      }
+    }
     break;
   }
   case CS_GLOVES:
