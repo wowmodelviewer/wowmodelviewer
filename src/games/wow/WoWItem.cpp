@@ -237,7 +237,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
-      LOG_ERROR << query;
       return;
     }
 
@@ -246,7 +245,6 @@ void WoWItem::load()
     if (index == -1 || index > (int)iteminfos.values.size())
     {
       LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - model index =" << index << "result size =" << iteminfos.values.size();
-      LOG_ERROR << query;
       return;
     }
 
@@ -266,7 +264,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-      LOG_ERROR << query;
       return;
     }
 
@@ -290,7 +287,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-      LOG_ERROR << query;
       return;
     }
 
@@ -302,7 +298,6 @@ void WoWItem::load()
         texturemanager.add(texture);
         m_itemTextures[getRegionForTexture(texture)] = texture;
       }
-      
     }
 
     // now get geoset / model infos
@@ -316,7 +311,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-      LOG_ERROR << query;
       return;
     }
 
@@ -344,7 +338,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-      LOG_ERROR << query;
       return;
     }
 
@@ -356,7 +349,6 @@ void WoWItem::load()
         texturemanager.add(texture);
         m_itemTextures[getRegionForTexture(texture)] = texture;
       }
-
     }
 
     // now get geoset / model infos
@@ -370,7 +362,6 @@ void WoWItem::load()
     if (!iteminfos.valid || iteminfos.values.empty())
     {
       LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-      LOG_ERROR << query;
       return;
     }
 
@@ -384,26 +375,44 @@ void WoWItem::load()
   }
   case CS_PANTS:
   {
-    /*
-    m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][7].toInt();
+    // query texture infos from ItemDisplayInfoMaterialRes
+    QString query = QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                            "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                            "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][21] + iteminfos.values[0][22]);
-    if(texture)
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
     {
-      texturemanager.add(texture);
-      m_itemTextures[CR_LEG_UPPER] = texture;
+      LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
     }
 
-    texture = GAMEDIRECTORY.getFile(iteminfos.values[0][23] + iteminfos.values[0][24]);
-    if(texture)
+    for (uint i = 0; i < iteminfos.values.size(); i++)
     {
-      texturemanager.add(texture);
-      m_itemTextures[CR_LEG_LOWER] = texture;
+      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+      if (texture)
+      {
+        texturemanager.add(texture);
+        m_itemTextures[getRegionForTexture(texture)] = texture;
+      }
     }
 
-    if (iteminfos.values[0][8].toInt()==1)
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][8].toInt();
-      */
+    // geosets
+    query = QString("SELECT GeoSetGroup2, GeoSetGroup3 FROM ItemDisplayInfo "
+                    "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+
+    iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
+    {
+      LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
+    }
+
+    m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][0].toInt();
+    m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
+   
     break;
   }
   case CS_SHIRT:
