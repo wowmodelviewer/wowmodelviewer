@@ -45,10 +45,7 @@ private:
   std::vector<uint32> m_IDs;
   std::vector<unsigned char *> m_recordOffsets;
 
-  // sparse table related members
   bool m_isSparseTable;
-  std::vector<std::tuple<uint32, uint16, uint32> > m_sparseRecords; // tuple = offset, length, id
-
 };
 
 #endif

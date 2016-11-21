@@ -99,8 +99,8 @@ bool WDB5File::doSpecializedOpen()
       if ((offset == 0) || (length == 0))
         continue;
 
-	    m_sparseRecords.push_back(std::make_tuple(offset, length, header.min_id+i));
-
+      m_IDs.push_back(header.min_id + i);
+      m_recordOffsets.push_back(buffer + offset);
       recordCount++;
     }
 #if WDB5_READ_DEBUG > 0
@@ -207,13 +207,7 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
 {
   std::vector<std::string> result;
 
-  unsigned char * recordOffset = 0;
-
-  if (m_isSparseTable)
-    recordOffset = buffer + std::get<0>(m_sparseRecords[recordIndex]);
-  else
-    recordOffset = m_recordOffsets[recordIndex];
-
+  unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
   for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
        it != itEnd;
@@ -223,10 +217,7 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
     {
       std::stringstream ss;
 
-      if (m_isSparseTable)
-        ss << std::get<2>(m_sparseRecords[recordIndex]);
-      else
-        ss << m_IDs[recordIndex];
+      ss << m_IDs[recordIndex];
 
       result.push_back(ss.str());
 
