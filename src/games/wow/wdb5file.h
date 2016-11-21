@@ -35,13 +35,20 @@ private:
     uint16 position;
   };
 
-  std::map<int, int> m_fieldSizes;
-  uint32 * m_IDs;
-  uint32 m_indexPos;
-  uint32 m_indexSize;
+  struct copy_table_entry
+  {
+    uint32 newRowId;
+    uint32 copiedRowId;
+  };
 
+  std::map<int, int> m_fieldSizes;
+  std::vector<uint32> m_IDs;
+  std::vector<unsigned char *> m_recordOffsets;
+
+  // sparse table related members
   bool m_isSparseTable;
-  std::vector<std::tuple<uint32,uint16, uint32> > m_sparseRecords; // tuple = offset, length,id
+  std::vector<std::tuple<uint32, uint16, uint32> > m_sparseRecords; // tuple = offset, length, id
+
 };
 
 #endif

@@ -9,7 +9,7 @@
 #define WDB5_READ_DEBUG 0
 
 WDB5File::WDB5File(const QString & file) :
-DBFile(file), m_isSparseTable(false), m_IDs(0)
+DBFile(file), m_isSparseTable(false)
 {
 }
 
@@ -109,24 +109,90 @@ bool WDB5File::doSpecializedOpen()
   }
   else
   {
+    m_IDs.reserve(recordCount);
+    m_recordOffsets.reserve(recordCount);
+
     // read IDs
     seekRelative(recordSize*recordCount + stringSize);
     if ((header.flags & 0x04) != 0)
     {
-      m_IDs = new uint32[recordCount];
-      read(m_IDs, recordCount * sizeof(uint32));
+      uint32 * vals = new uint32[recordCount];
+      read(vals, recordCount * sizeof(uint32));
+      m_IDs.assign(vals, vals + recordCount);
+      delete[] vals;
     }
     else
     {
-      m_indexPos = fieldStructure[header.id_index].position;
+      uint32 indexPos = fieldStructure[header.id_index].position;
 #if WDB5_READ_DEBUG > 0
-      LOG_INFO << "m_indexPos" << m_indexPos;
+      LOG_INFO << "indexPos" << indexPos;
 #endif
-      m_indexSize = ((32 - fieldStructure[header.id_index].size) / 8);
+      uint32 indexSize = ((32 - fieldStructure[header.id_index].size) / 8);
+      uint32 indexMask;
+      switch (indexSize)
+      {
+        case 1:
+          indexMask = 0x000000FF;
+          break;
+        case 2:
+          indexMask = 0x0000FFFF;
+          break;
+        case 3:
+          indexMask = 0x00FFFFFF;
+          break;
+        default:
+          indexMask = 0xFFFFFFFF;
+          break;
+      }
 #if WDB5_READ_DEBUG > 0
-      LOG_INFO << "m_indexSize" << m_indexSize;
+      LOG_INFO << "indexSize" << indexSize;
+      LOG_INFO << "indexMask" << indexMask;
 #endif
+
+      // read ids from data
+      for (uint i = 0; i < recordCount; i++)
+      {
+        unsigned char * recordOffset = data + (i*recordSize);
+        unsigned char * val = new unsigned char[indexSize];
+        memcpy(val, recordOffset + indexPos, indexSize);
+        m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)& indexMask));
+      }
     }
+
+    // store offsets
+    for (uint i = 0; i < recordCount; i++)
+      m_recordOffsets.push_back(data + (i*recordSize));
+  }
+
+  // copy table
+  if (header.copy_table_size > 0)
+  {
+    uint nbEntries = header.copy_table_size / sizeof(copy_table_entry);
+    
+    m_IDs.reserve(recordCount + nbEntries);
+    m_recordOffsets.reserve(recordCount + nbEntries);
+
+    copy_table_entry * copyTable = new copy_table_entry[nbEntries];
+    read(copyTable, header.copy_table_size);
+    
+    // create a id->offset map
+    std::map<uint32, unsigned char*> IDToOffsetMap;
+
+    for (uint i = 0; i < recordCount; i++)
+    {
+      IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
+    }
+
+    for (uint i = 0; i < nbEntries; i++)
+    {
+      copy_table_entry entry = copyTable[i];
+      m_IDs.push_back(entry.newRowId);
+      m_recordOffsets.push_back(IDToOffsetMap[entry.copiedRowId]);
+    }
+
+    delete[] copyTable;
+
+    recordCount += nbEntries;
   }
 
   return true;
@@ -141,12 +207,13 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
 {
   std::vector<std::string> result;
 
-  unsigned char * recordOffset = data + (recordIndex*recordSize);
+  unsigned char * recordOffset = 0;
 
   if (m_isSparseTable)
-  {
     recordOffset = buffer + std::get<0>(m_sparseRecords[recordIndex]);
-  }
+  else
+    recordOffset = m_recordOffsets[recordIndex];
+
 
   for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
        it != itEnd;
@@ -154,35 +221,14 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
   {
     if (it->isKey)
     {
-      if (m_IDs != 0)
-      {
-        std::stringstream ss;
-        ss << m_IDs[recordIndex];
-        result.push_back(ss.str());
-      }
-      else if (m_isSparseTable)
-      {
-        std::stringstream ss;
+      std::stringstream ss;
+
+      if (m_isSparseTable)
         ss << std::get<2>(m_sparseRecords[recordIndex]);
-        result.push_back(ss.str());
-      }
       else
-      {
-        unsigned char * val = new unsigned char[m_indexSize];
-        memcpy(val, recordOffset + m_indexPos, m_indexSize);
-        std::stringstream ss;
+        ss << m_IDs[recordIndex];
 
-        unsigned int mask = 0xFFFFFFFF;
-        if (m_indexSize == 1)
-          mask = 0x000000FF;
-        else if (m_indexSize == 2)
-          mask = 0x0000FFFF;
-        else if (m_indexSize == 3)
-          mask = 0x00FFFFFF;
-
-        ss << (*reinterpret_cast<unsigned int*>(val)& mask);
-        result.push_back(ss.str());
-      }
+      result.push_back(ss.str());
 
       continue;
     }
