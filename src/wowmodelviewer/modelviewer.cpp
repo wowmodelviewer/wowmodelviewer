@@ -2801,22 +2801,29 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	    wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends with /simple or /advanced and does not contains any special character."),wxT("Bad Armory Link"));
 	    return;
 	  }
-	  // retrieve race name from DB
-	  QString query = QString("SELECT ClientFileString FROM ChrRaces WHERE ID = %1").arg(result->raceId);
-	  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	  QString race = r.values[0][0];
+	  // retrieve model files id from DB
+    QString query = QString("SELECT CMDM.FileID as malemodel, CMDF.FileID AS femalemodel, CMDMHD.FileID as malemodelHD, CMDFHD.FileID AS femalemodelHD FROM ChrRaces "
+                            "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
+                            "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
+                            "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
+                            "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
+                            "WHERE ChrRaces.ID = %1").arg(result->raceId);
 
-		// Load the model
-		QString strModel = "Character\\" + race + MPQ_SLASH + result->gender.c_str() + MPQ_SLASH + race + result->gender.c_str() + ".m2";
-		QString strModelHD = "Character\\" + race + MPQ_SLASH + result->gender.c_str() + MPQ_SLASH + race + result->gender.c_str() + "_hd.m2";
+    sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-		// try with hd model first
-		GameFile * file = GAMEDIRECTORY.getFile(strModelHD);
-		if(!file)
-		  file = GAMEDIRECTORY.getFile(strModel);
+    if (!r.valid || r.values.empty())
+    {
+      LOG_ERROR << "Impossible to query model information from armory";
+      wxMessageBox(wxT("An error occured during Armory data interpretation."), wxT("Armory Error"));
+      return;
+    }
 
-		LoadModel(file);
+    int baseIndex = (result->gender == "Male") ? 0 : 1;
+ 	
+    int modelToLoad = (r.values[0][baseIndex+2].toInt() != 0) ? r.values[0][baseIndex+2].toInt() : r.values[0][baseIndex].toInt();
+
+    LoadModel(GAMEDIRECTORY.getFile(modelToLoad));
 
 		if (!g_canvas->model)
 			return;
