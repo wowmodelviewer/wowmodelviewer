@@ -1081,8 +1081,9 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
   if(r.valid && !r.empty())
   {
+    int extraId = r.values[0][4].toInt();
     // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
-    if(r.values[0][4].toInt() == 0)
+    if (extraId == 0)
     {
       LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
       canvas->model->modelType = MT_NORMAL;
@@ -1090,77 +1091,40 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     }
     else
     {
-      QString modelname = r.values[0][0] + r.values[0][1];
-      QString modelnamehd = modelname;
-      modelnamehd.replace(".m2","_hd.m2");
+      LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
 
-      GameFile * model = GAMEDIRECTORY.getFile(modelnamehd);
-      if (!model)
-        model = GAMEDIRECTORY.getFile(modelname);
-
-      LoadModel(model);
-
-      query = QString("SELECT * FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(r.values[0][5]);
+      query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
 
       r = GAMEDATABASE.sqlQuery(query);
 
-      if(r.valid && !r.empty())
+      if (r.valid && !r.empty())
       {
-        g_charControl->model->cd.setSkinColor(r.values[0][3].toInt());
-        g_charControl->model->cd.setFaceType(r.values[0][4].toInt());
-        g_charControl->model->cd.setHairColor(r.values[0][6].toInt());
-        g_charControl->model->cd.setHairStyle(r.values[0][5].toInt());
-        g_charControl->model->cd.setFacialHair(r.values[0][7].toInt());
-
-        WoWItem * item = g_charControl->model->getItem(CS_HEAD);
-        if (item)
-          item->setDisplayId(r.values[0][8].toInt());
-
-        item = g_charControl->model->getItem(CS_SHOULDER);
-        if (item)
-          item->setDisplayId(r.values[0][9].toInt());
-
-        item = g_charControl->model->getItem(CS_SHIRT);
-        if (item)
-          item->setDisplayId(r.values[0][10].toInt());
-
-        item = g_charControl->model->getItem(CS_CHEST);
-        if (item)
-          item->setDisplayId(r.values[0][11].toInt());
-
-        item = g_charControl->model->getItem(CS_BELT);
-        if (item)
-          item->setDisplayId(r.values[0][12].toInt());
-
-        item = g_charControl->model->getItem(CS_PANTS);
-        if (item)
-          item->setDisplayId(r.values[0][13].toInt());
-
-        item = g_charControl->model->getItem(CS_BOOTS);
-        if (item)
-          item->setDisplayId(r.values[0][14].toInt());
-
-        item = g_charControl->model->getItem(CS_BRACERS);
-        if (item)
-          item->setDisplayId(r.values[0][15].toInt());
-
-        item = g_charControl->model->getItem(CS_GLOVES);
-        if (item)
-          item->setDisplayId(r.values[0][16].toInt());
-
-        item = g_charControl->model->getItem(CS_TABARD);
-        if (item)
-          item->setDisplayId(r.values[0][17].toInt());
-
-        item = g_charControl->model->getItem(CS_CAPE);
-        if (item)
-          item->setDisplayId(r.values[0][18].toInt());
-
-        g_charControl->model->cd.isNPC = true;
-        g_charControl->RefreshModel();
-        g_charControl->RefreshEquipment();
+        g_charControl->model->cd.setSkinColor(r.values[0][0].toInt());
+        g_charControl->model->cd.setFaceType(r.values[0][1].toInt());
+        g_charControl->model->cd.setHairColor(r.values[0][2].toInt());
+        g_charControl->model->cd.setHairStyle(r.values[0][3].toInt());
+        g_charControl->model->cd.setFacialHair(r.values[0][4].toInt());
       }
 
+      query = QString("SELECT ItemDisplayInfoID, ItemType FROM NpcModelItemSlotDisplayInfo WHERE CreatureDisplayInfoExtraID = %1").arg(extraId);
+
+      r = GAMEDATABASE.sqlQuery(query);
+
+      if (r.valid && !r.empty())
+      {
+        static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS }, 
+                                                          { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
+        for (uint i = 0; i < r.values.size(); i++)
+        {
+          WoWItem * item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
+          if (item)
+            item->setDisplayId(r.values[i][0].toInt());
+        }
+      }
+
+      g_charControl->model->cd.isNPC = true;
+      g_charControl->RefreshModel();
+      g_charControl->RefreshEquipment();
     }
   }
 

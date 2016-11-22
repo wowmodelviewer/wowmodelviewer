@@ -546,7 +546,6 @@ void WoWItem::load()
       return;
     }
 
-    // left shoulder
     updateItemModel(((m_slot == CS_HAND_RIGHT)?ATT_RIGHT_PALM:ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
     break;

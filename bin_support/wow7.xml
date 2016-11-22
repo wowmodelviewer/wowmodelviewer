@@ -80,6 +80,20 @@
     <field type="uint" name="Texture" arraySize="3" pos="12"/>
     <field type="uint" name="ParticleColorID" pos="50"/>
   </table>
+  <table name="CreatureDisplayInfoExtra">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="Skin" pos="11" />
+    <field type="byte" name="Face" pos="12" />
+    <field type="byte" name="HairStyle" pos="13" />
+    <field type="byte" name="HairColor" pos="14" />
+    <field type="byte" name="FacialHair" pos="15" />
+  </table>
+  <table name="NpcModelItemSlotDisplayInfo">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="CreatureDisplayInfoExtraID" pos="0" createIndex="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="4" />
+    <field type="byte" name="ItemType" pos="8" />
+  </table>  
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="FileID" pos="95" />
