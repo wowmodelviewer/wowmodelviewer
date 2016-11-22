@@ -574,11 +574,11 @@ void WoWItem::load()
   }
   case CS_TABARD:
   {
-    /*
-    m_itemGeosets[CG_TARBARD] = 2;
     if(isCustomizableTabard())
     {
     	m_charModel->td.showCustom = true;
+      m_itemGeosets[CG_TARBARD] = 2;
+
     	GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
       if(texture)
       {
@@ -624,21 +624,57 @@ void WoWItem::load()
     else
     {
     	m_charModel->td.showCustom = false;
-    	GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][17] + iteminfos.values[0][18]);
-      if(texture)
+
+      // query texture infos from ItemDisplayInfoMaterialRes
+      QString query = QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                              "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
+
+      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+
+      if (!iteminfos.valid || iteminfos.values.empty())
       {
-        texturemanager.add(texture);
-        m_itemTextures[CR_TORSO_UPPER] = texture;
+        LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        return;
       }
 
-      texture = GAMEDIRECTORY.getFile(iteminfos.values[0][19] + iteminfos.values[0][20]);
-      if(texture)
+      RaceInfos infos;
+      RaceInfos::getCurrent(m_charModel, infos);
+
+      uint i_start = 0;
+      uint i_incr = 1;
+
+      if (iteminfos.values.size() == 4) // different textures for male & female
       {
-        texturemanager.add(texture);
-        m_itemTextures[CR_TORSO_LOWER] = texture;
+        i_start = (infos.sexid == 1) ? 0 : 1;
+        i_incr = 2;
       }
+
+      for (uint i = i_start; i < iteminfos.values.size(); i+=i_incr)
+      {
+        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+        if (texture)
+        {
+          texturemanager.add(texture);
+          m_itemTextures[getRegionForTexture(texture)] = texture;
+        }
+      }
+
+      // geosets
+      query = QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
+                      "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+
+      iteminfos = GAMEDATABASE.sqlQuery(query);
+
+      if (!iteminfos.valid || iteminfos.values.empty())
+      {
+        LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        return;
+      }
+
+      m_itemGeosets[CG_TARBARD] = 1 + iteminfos.values[0][0].toInt();
     }
-    */
+
     break;
   }
   case CS_QUIVER:
