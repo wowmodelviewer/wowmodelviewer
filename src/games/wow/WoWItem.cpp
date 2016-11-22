@@ -267,11 +267,16 @@ void WoWItem::load()
       return;
     }
 
+    GameFile * file = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
+    int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive)) ? 0 : 1;
+    int rightmodelindex = leftmodelindex ? 0 : 1;
+
+
     // left shoulder
-    updateItemModel(ATT_LEFT_SHOULDER, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+    updateItemModel(ATT_LEFT_SHOULDER, iteminfos.values[leftmodelindex][0].toInt(), iteminfos.values[leftmodelindex][1].toInt());
     
     // right shoulder
-    updateItemModel(ATT_RIGHT_SHOULDER, iteminfos.values[1][0].toInt(), iteminfos.values[1][1].toInt());
+    updateItemModel(ATT_RIGHT_SHOULDER, iteminfos.values[rightmodelindex][0].toInt(), iteminfos.values[rightmodelindex][1].toInt());
 
     break;
   }
