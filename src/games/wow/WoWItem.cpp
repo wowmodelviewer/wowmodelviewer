@@ -548,16 +548,28 @@ void WoWItem::load()
   }
   case CS_CAPE:
   {
-    /*
-    m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][6].toInt();
+    QString query = QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
+                            "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                            "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][2] + iteminfos.values[0][3]);
-    if(texture)
+
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (!iteminfos.valid || iteminfos.values.empty())
+    {
+      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      return;
+    }
+    
+    GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
+    if (texture)
     {
       texturemanager.add(texture);
-      m_itemTextures[CR_CAPE] = texture;
+      m_itemTextures[getRegionForTexture(texture)] = texture;
     }
-    */
+
+    m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][1].toInt();
+
     break;
   }
   case CS_TABARD:
@@ -1134,6 +1146,10 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
     else if (fullname.contains("torsouppertexture", Qt::CaseInsensitive))
     {
       result = CR_TORSO_UPPER;
+    }
+    else if (fullname.contains("cape", Qt::CaseInsensitive))
+    {
+      result = CR_CAPE;
     }
     else
     {
