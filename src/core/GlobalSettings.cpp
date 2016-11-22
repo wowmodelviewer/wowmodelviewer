@@ -121,7 +121,7 @@ GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = "";
+  m_versionSpecialExtend = ".alpha2";
 
   bShowParticle = false;
   bZeroParticle = false;
