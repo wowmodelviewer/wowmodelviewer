@@ -269,6 +269,7 @@ void CharDetails::updateMaxValues()
   else
   {
     LOG_ERROR << "Unable to collect number of hair styles for model" << m_model->name();
+    LOG_ERROR << query;
     m_hairStyleMax = 0;
   }
 
@@ -285,6 +286,7 @@ void CharDetails::updateMaxValues()
   else
   {
     LOG_ERROR << "Unable to collect number of facial hair styles for model" << m_model->name();
+    LOG_ERROR << query;
     m_facialHairMax = 0;
   }
 

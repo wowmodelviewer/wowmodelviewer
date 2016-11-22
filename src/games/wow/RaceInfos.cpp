@@ -25,7 +25,7 @@ bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
     return true;
   }
 
-  LOG_ERROR << "Unable to retrieve race infos for model" << model->gamefile->fullname();
+  LOG_ERROR << "Unable to retrieve race infos for model" << model->gamefile->fullname() << model->gamefile->fileDataId();
  
   return false;
 }
@@ -65,7 +65,7 @@ void RaceInfos::init()
         infos.customization[2] = races.values[i][15].toStdString();
         int modelfileid = races.values[i][r].toInt();
         
-        if (infos.textureLayoutID == 2)
+        if (infos.textureLayoutID == 2 && infos.raceid != 24)
           infos.isHD = true;
         else
           infos.isHD = false;
