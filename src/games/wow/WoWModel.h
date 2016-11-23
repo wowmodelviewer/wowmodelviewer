@@ -232,7 +232,7 @@ public:
   void load(QString &);
 
   void computeMinMaxCoords(Vec3D & min, Vec3D & max);
-
+  static QString getCGGroupName(CharGeosets cg);
 };
 
 

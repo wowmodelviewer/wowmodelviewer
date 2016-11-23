@@ -377,36 +377,28 @@ void ModelControl::Update()
   wxArrayString geosetItems;
   //geosets->Clear();
   // enum CharGeosets
-  wxString meshes[NUM_GEOSETS] = { wxT("Main"), wxT("Facial1"), wxT("Facial2"), wxT("Facial3"), wxT("Braces"),
-                                   wxT("Boots"), wxT("Tail"), wxT("Ears"), wxT("Wristbands"), wxT("Kneepads"),
-                                   wxT("Pants"), wxT("Pants2"), wxT("Tabard"), wxT("Trousers"), wxT("Tabard2"),
-                                   wxT("Cape"), wxT("Feet"), wxT("Eyeglows"), wxT("Belt"), wxT("Tail"), wxT("Feet") };
 
   std::map <size_t,wxTreeItemId> geosetGroupsMap;
   clbGeosets->DeleteAllItems();
   clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
   wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
-  for (size_t i=0; i<model->geosets.size(); i++)
+  for (size_t i = 0; i < model->geosets.size(); i++)
   {
-    /*  size_t mesh = model->geosets[i].id / 100;
-        if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
-          geosetItems.Add(wxString::Format(wxT("%i [%s, %i, %i]"), i, meshes[mesh].c_str(), model->geosets[i].id % 100, model->geosets[i].id), 1);
-        else
-          geosetItems.Add(wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id ), 1);
-    */
     size_t mesh = model->geosets[i].id / 100;
-    if(geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
+    if (geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
     {
-      if (mesh < WXSIZEOF(meshes) && meshes[mesh] != wxEmptyString)
-        geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, meshes[mesh]);
-	 else
-	   geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, wxString::Format(wxT("%i"),mesh));
+      wxString name = WoWModel::getCGGroupName((CharGeosets)mesh).toStdString().c_str();
+      if (name != "")
+        geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, name);
+      else
+        geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, wxString::Format(wxT("%i"), mesh));
     }
+
     GeosetTreeItemData * data = new GeosetTreeItemData();
     data->geosetId = i;
-    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id ),-1,-1,data);
+    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id), -1, -1, data);
     if (model->showGeosets[i] == true)
-       clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
+      clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
   }
 
   //for (size_t i=0; i<model->geosets.size(); i++)
