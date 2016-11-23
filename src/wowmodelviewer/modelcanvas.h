@@ -23,6 +23,7 @@
 #include "AVIGenerator.h"
 #endif
 #include "BaseCanvas.h"
+#include "camera.h"
 #include "enums.h"
 #include "lightcontrol.h"
 #include "maptile.h"
@@ -121,6 +122,12 @@ public:
 	void SetCurrent();
 	void SwapBuffers();
 
+  // view:
+  Vec3D vRot0;
+  Vec3D vPos0;
+  wxCoord mx, my;
+
+  void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
 	void CheckMovement();	// move the character
 	
 	Attachment* LoadModel(GameFile *);
@@ -179,6 +186,7 @@ private:
 
   ArcBallCameraControl * m_p_cameraCtrl;
   ArcBallCamera arcCamera;
+  CCamera camera;
 };
 
 

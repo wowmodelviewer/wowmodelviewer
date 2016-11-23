@@ -25,6 +25,7 @@ set(src  ArcBallCamera.cpp
          AnimExporter.cpp
          app.cpp
          AVIGenerator.cpp
+		 camera.cpp
          charcontrol.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp
