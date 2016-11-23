@@ -214,13 +214,6 @@ bool OBJExporter::exportModel(Model * m, std::string target)
 //--------------------------------------------------------------------
 bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, Vec3D pos) const
 {
-  //@TODO : do better than that
-  QString meshes[NUM_GEOSETS] =
-     {"Hairstyles", "Facial1", "Facial2", "Facial3", "Braces",
-      "Boots", "", "Ears", "Wristbands",  "Kneepads",
-      "Pants", "Pants2", "Tarbard", "Trousers", "Tarbard2",
-      "Cape", "Feet", "Eyeglows", "Belt", "Tail" };
-
   bool vertMsg = false;
   // output all the vertice data
   int vertics = 0;
@@ -336,14 +329,10 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       // Part Names
       int mesh = model->geosets[g].id / 100;
 
+      QString cgGroupName = WoWModel::getCGGroupName((CharGeosets)mesh);
 
-      if (model->modelType == MT_CHAR && mesh < 19 && meshes[mesh] != "")
-      {
-        QString msh = meshes[mesh];
-        msh.replace(" ", "_");
-
-        partName += QString("-%1").arg(msh);
-      }
+      if ((model->modelType == MT_CHAR) && (cgGroupName != ""))
+        partName += QString("-%1").arg(cgGroupName);
 
       file << "g " << partName << "\n";
       file << "usemtl " << matName << "\n";
