@@ -42,6 +42,7 @@ File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\*.dll"
 File "${wmvroot}\bin_support\listfile.txt"
 File "${wmvroot}\bin_support\wow6.xml"
+File "${wmvroot}\bin_support\wow7.xml"
 
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins
