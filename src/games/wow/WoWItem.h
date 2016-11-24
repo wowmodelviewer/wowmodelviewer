@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 
+#include "GameDatabase.h"
 #include "GameFile.h"
 #include "wow_enums.h"
 #include "metaclasses/Component.h"
@@ -102,10 +103,17 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
 
-    int getModelIndexFromInfos() const;
     void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
 
     CharRegions getRegionForTexture(GameFile * file) const;
+
+    enum FilteringType
+    {
+      MODEL,
+      TEXTURE
+    };
+
+    sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
 
 };
 

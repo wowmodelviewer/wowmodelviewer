@@ -26,6 +26,7 @@
 #include "WoWItem.h"
 
 #include <QFile>
+#include <QRegularExpression>
 #include <QString>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -47,20 +48,6 @@ map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, 
                                              { CS_GLOVES, 20 }, { CS_HAND_RIGHT, 21 }, { CS_HAND_LEFT, 22 },
                                              { CS_CAPE, 23 }, { CS_QUIVER, 24 } };
 
-
-map<string, int> WoWItem::MODELID_OFFSETS = { { "bef", 0 }, { "bem", 1 },
-                                              { "drf", 2 }, { "drm", 3 },
-                                              { "dwf", 4 }, { "dwm", 5 },
-                                              { "gnf", 6 }, { "gnm", 7 },
-                                              { "gof", 8 }, { "gom", 9 },
-                                              { "huf", 10 }, { "hum", 11 },
-                                              { "nif", 12 }, { "nim", 13 },
-                                              { "orf", 14 }, { "orm", 15 },
-                                              { "scf", 16 }, { "scm", 17 },
-                                              { "taf", 18 }, { "tam", 19 },
-                                              { "trf", 20 }, { "trm", 21 },
-                                              { "wof", 22 }, { "wom", 23 },
-                                              { "paf", 24 }, { "pam", 15 }};
 
 WoWItem::WoWItem(CharSlots slot)
 : m_charModel(0), m_id(-1), m_quality(0),
@@ -232,7 +219,7 @@ void WoWItem::load()
                     "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                     "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MODEL, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -240,15 +227,7 @@ void WoWItem::load()
       return;
     }
 
-    int index = getModelIndexFromInfos();
-
-    if (index == -1 || index > (int)iteminfos.values.size())
-    {
-      LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - model index =" << index << "result size =" << iteminfos.values.size();
-      return;
-    }
-
-    updateItemModel(ATT_HELMET, iteminfos.values[index][0].toInt(), iteminfos.values[index][1].toInt());
+    updateItemModel(ATT_HELMET, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
     break;
   }
@@ -287,7 +266,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -338,7 +317,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -385,7 +364,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -428,7 +407,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -470,7 +449,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -496,7 +475,7 @@ void WoWItem::load()
                             "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                             "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
     if (!iteminfos.valid || iteminfos.values.empty())
     {
@@ -634,7 +613,7 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -642,19 +621,7 @@ void WoWItem::load()
         return;
       }
 
-      RaceInfos infos;
-      RaceInfos::getCurrent(m_charModel, infos);
-
-      uint i_start = 0;
-      uint i_incr = 1;
-
-      if (iteminfos.values.size() == 4) // different textures for male & female
-      {
-        i_start = (infos.sexid == 1) ? 0 : 1;
-        i_incr = 2;
-      }
-
-      for (uint i = i_start; i < iteminfos.values.size(); i+=i_incr)
+      for (uint i = 0; i < iteminfos.values.size(); i++)
       {
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
@@ -1108,24 +1075,6 @@ void WoWItem::load(QString & f)
   }
 }
 
-int WoWItem::getModelIndexFromInfos() const
-{
-  int result = -1;
-
-  RaceInfos infos;
-  RaceInfos::getCurrent(m_charModel, infos);
-
-  string prefix = infos.prefix;
-  prefix += ((infos.sexid == 0) ? "m" : "f");
-
-  auto it = MODELID_OFFSETS.find(prefix);
-
-  if (it != MODELID_OFFSETS.end())
-    result = it->second;
-
-  return result;
-}
-
 void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 {
   WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
@@ -1195,6 +1144,68 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
     {
       LOG_ERROR << "Unable to determine region for texture" << fullname << " - item" << m_id << "displayid" << m_displayId;
     }
+  }
+
+  return result;
+}
+
+sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filterType, uint itemToFilter) const
+{
+  sqlResult result;
+  result.valid = sql.valid;
+
+  if (!sql.empty() && (itemToFilter < sql.values[0].size()))
+  {
+    RaceInfos infos;
+    RaceInfos::getCurrent(m_charModel, infos);
+
+    QString filter = "_";
+    if (filterType == MODEL)
+    {
+      filter += QString::fromStdString(infos.prefix);
+      filter += (infos.sexid == 0) ? "m" : "f";
+    }
+    else
+    {
+      filter += "[";
+      filter += (infos.sexid == 0) ? "m" : "f";
+      filter += "u";
+      filter += "]";
+    }
+
+    filter += "\\.";
+
+    LOG_INFO << __FUNCTION__ << filter;
+
+    QRegularExpression re(filter);
+
+    for (uint i = 0; i < sql.values.size(); i++)
+    {
+      GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
+      if (f)
+      {
+        QRegularExpressionMatch r = re.match(f->fullname());
+
+        if (r.hasMatch())
+          result.values.push_back(sql.values[i]);
+      }
+    }
+  }
+
+  LOG_INFO << __FUNCTION__ << "---- BEFORE -----";
+  for (uint i = 0; i < sql.values.size(); i++)
+  {
+    GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
+    if (f)
+      LOG_INFO << f->fullname();
+  }
+
+  LOG_INFO << __FUNCTION__ << "---- AFTER -----";
+  for (uint i = 0; i < result.values.size(); i++)
+  {
+    GameFile * f = GAMEDIRECTORY.getFile(result.values[i][itemToFilter].toInt());
+    if (f)
+      LOG_INFO << f->fullname();
   }
 
   return result;
