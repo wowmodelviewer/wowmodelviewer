@@ -233,10 +233,9 @@ void WoWItem::load()
   }
   case CS_SHOULDER:
   {
-    QString query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                    "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                    "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                    "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+    QString query = QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2 FROM ItemDisplayInfo "
+                            "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+
 
     sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
 
@@ -246,17 +245,78 @@ void WoWItem::load()
       return;
     }
 
-    GameFile * file = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-    int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive)) ? 0 : 1;
-    int rightmodelindex = leftmodelindex ? 0 : 1;
+    if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
+    {
+      sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
+      sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]));
 
+      if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
+      {
+        LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        return;
+      }
 
-    // left shoulder
-    updateItemModel(ATT_LEFT_SHOULDER, iteminfos.values[leftmodelindex][0].toInt(), iteminfos.values[leftmodelindex][1].toInt());
-    
-    // right shoulder
-    updateItemModel(ATT_RIGHT_SHOULDER, iteminfos.values[rightmodelindex][0].toInt(), iteminfos.values[rightmodelindex][1].toInt());
+      GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
+      int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive)) ? 0 : 1;
+      int rightmodelindex = leftmodelindex ? 0 : 1;
 
+      // left shoulder
+      updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+
+      // right shoulder
+      updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+    }
+    else if (iteminfos.values[0][2].toInt() == 0) // only right shoulder
+    {
+      sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
+      sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]));
+
+      if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
+      {
+        LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        return;
+      }
+
+      int leftmodelindex = -1;
+
+      for (uint i = 0; i < modelinfos.values.size(); i++)
+      {
+        GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
+        if (file)
+        {
+          if (file->fullname().contains("lshoulder", Qt::CaseInsensitive))
+            leftmodelindex = i;
+        }
+      }
+
+      updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+    }
+    else if (iteminfos.values[0][0].toInt() == 0) // only right shoulder 
+    {
+      sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][2]));
+      sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][3]));
+
+      if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
+      {
+        LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        return;
+      }
+
+      int rightmodelindex = -1;
+
+      for (uint i = 0; i < modelinfos.values.size(); i++)
+      {
+        GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
+        if (file)
+        {
+          if (file->fullname().contains("rshoulder", Qt::CaseInsensitive))
+            rightmodelindex = i;
+        }
+      }
+
+      if (rightmodelindex != -1)
+        updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+    }
     break;
   }
   case CS_BOOTS:
