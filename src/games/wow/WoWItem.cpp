@@ -379,7 +379,7 @@ void WoWItem::load()
 
     sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
-    if (!iteminfos.valid || iteminfos.values.empty())
+    if (!iteminfos.valid /* || iteminfos.values.empty() */ ) // some belts have no texture, only model
     {
       LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
       return;
