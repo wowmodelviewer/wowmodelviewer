@@ -267,6 +267,9 @@ bool WowModelViewApp::OnInit()
   }
 #endif
 
+  if (useNewCamera)
+    frame->canvas->activateNewCamera();
+
   // -------
   // Load previously saved layout
   frame->LoadLayout();
@@ -364,6 +367,8 @@ void WowModelViewApp::LoadSettings()
   displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
   ssCounter = config.value("Settings/SSCounter", 100).toInt();
   imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
+
+  useNewCamera = config.value("Unofficial/UseNewCamera", false).toBool();
 }
 
 void WowModelViewApp::SaveSettings()

@@ -66,6 +66,8 @@ public:
 	ModelViewer *frame;
 	
 	wxLocale locale;
+  
+  bool useNewCamera;
 	
 };
 

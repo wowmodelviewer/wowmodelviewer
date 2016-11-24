@@ -153,8 +153,8 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	root = new Attachment(NULL, NULL, -1, -1);
 	sky = new Attachment(NULL, NULL, -1, -1);
 
-  //m_p_cameraCtrl = new ArcBallCameraControl(arcCamera);
   m_p_cameraCtrl = 0;
+  m_useNewCamera = false;
 }
 
 ModelCanvas::~ModelCanvas()
@@ -217,7 +217,8 @@ void ModelCanvas::InitView()
 	video.ResizeGLScene(w, h);
 	video.xRes = w;
 	video.yRes = h;
-  //arcCamera.refreshSceneSize(w, h);
+  if (m_useNewCamera)
+    arcCamera.refreshSceneSize(w, h);
 }
 
 void ModelCanvas::InitShaders()
@@ -394,7 +395,8 @@ void ModelCanvas::LoadWMO(wxString fn)
 	if (!wmo) {
 		wmo = new WMO(fn.c_str());
 		root->setModel(wmo);
-    //arcCamera.autofit(wmo->minCoord, wmo->maxCoord, video.fov);
+    if (m_useNewCamera)
+      arcCamera.autofit(wmo->minCoord, wmo->maxCoord, video.fov);
 	}
 }
 
@@ -432,7 +434,7 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
   if (event.Button(wxMOUSE_BTN_ANY) == true)
     SetFocus();
 
-  if (m_p_cameraCtrl)
+  if (m_useNewCamera)
     m_p_cameraCtrl->onMouse(event);
   else
   {
@@ -926,8 +928,10 @@ inline void ModelCanvas::RenderModel()
 			RenderSkybox();
 	}
 
-  //arcCamera.setup();
-  camera.Setup();
+  if (m_useNewCamera)
+    arcCamera.setup();
+  else
+    camera.Setup();
 
 	// This is redundant and no longer needed.
 	// all lighting stuff needs to be reorganised
@@ -967,7 +971,7 @@ inline void ModelCanvas::RenderModel()
   // The camera class should be taking over this crap
   // *************************
   // setup the view/projection
-  if (model) {
+  if (model && !m_useNewCamera) {
     if (useCamera && model->hasCamera) {
       model->cam[0].setup();
     }
@@ -1237,11 +1241,11 @@ inline void ModelCanvas::RenderWMO()
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
 	glColor3f(1.0f, 1.0f, 1.0f);
 	
-  //arcCamera.setup();
+  
   // --==--
   // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
   // View
-  if (model) {
+  if (model && !m_useNewCamera) {
     glTranslatef(model->pos.x, model->pos.y, -model->pos.z);
     glRotatef(model->rot.x, 1.0f, 0.0f, 0.0f);
     glRotatef(model->rot.y, 0.0f, 1.0f, 0.0f);
@@ -1249,7 +1253,10 @@ inline void ModelCanvas::RenderWMO()
     // --==--
   }
 
-  camera.Setup();
+  if (m_useNewCamera)
+    arcCamera.setup();
+  else
+    camera.Setup();
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -1302,8 +1309,10 @@ inline void ModelCanvas::RenderADT()
 	}
 	*/
 
-  //arcCamera.setup();
-  camera.Setup();
+  if (m_useNewCamera)
+    arcCamera.setup();
+  else
+    camera.Setup();
 
 
 	glEnable(GL_TEXTURE_2D);
@@ -1449,8 +1458,10 @@ void ModelCanvas::RenderToBuffer()
 			RenderSkybox();
 	}
 
-  //arcCamera.setup();
-  camera.Setup();
+  if (m_useNewCamera)
+    arcCamera.setup();
+  else
+    camera.Setup();
 		
 	// Render the grid if wanted and masking isn't enabled
 	if (drawGrid && !video.useMasking)
@@ -1744,7 +1755,7 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
 		else if (keycode == '9')
 			animControl->SetAnimSpeed(0.9f);
 		
-    if (m_p_cameraCtrl)
+    if (m_useNewCamera)
       m_p_cameraCtrl->onKey(event);
 
 		// --	
@@ -1764,21 +1775,23 @@ void ModelCanvas::CheckMovement()
 	if(!wintest)
 		return;
 
-	if (wxGetKeyState(WXK_NUMPAD8))	// Move forward
-		camera.MoveForward(-0.1f);
-	if (wxGetKeyState(WXK_NUMPAD2))	// Move Backwards
-		camera.MoveForward(0.1f);
-	if (wxGetKeyState(WXK_NUMPAD7))	// Rotate left
-		camera.RotateY(1.0f);
-	if (wxGetKeyState(WXK_NUMPAD9))	// Rotate right
-		camera.RotateY(-1.0f);
-	if (wxGetKeyState(WXK_NUMPAD5))	// Reset Camera
-		camera.Reset();
-	if (wxGetKeyState(WXK_NUMPAD4))	// Straff Left
-		camera.Strafe(-0.05f);
-	if (wxGetKeyState(WXK_NUMPAD6))	// Straff Right
-		camera.Strafe(0.05f);
-
+  if (!m_useNewCamera)
+  {
+    if (wxGetKeyState(WXK_NUMPAD8))	// Move forward
+      camera.MoveForward(-0.1f);
+    if (wxGetKeyState(WXK_NUMPAD2))	// Move Backwards
+      camera.MoveForward(0.1f);
+    if (wxGetKeyState(WXK_NUMPAD7))	// Rotate left
+      camera.RotateY(1.0f);
+    if (wxGetKeyState(WXK_NUMPAD9))	// Rotate right
+      camera.RotateY(-1.0f);
+    if (wxGetKeyState(WXK_NUMPAD5))	// Reset Camera
+      camera.Reset();
+    if (wxGetKeyState(WXK_NUMPAD4))	// Straff Left
+      camera.Strafe(-0.05f);
+    if (wxGetKeyState(WXK_NUMPAD6))	// Straff Right
+      camera.Strafe(0.05f);
+  }
 	// M2 Model only stuff below here
 	if (!model || !model->animManager)
 		return;
@@ -1959,8 +1972,18 @@ void ModelCanvas::SwapBuffers()
 
 void ModelCanvas::autofit()
 {
-  Vec3D minCoord, maxCoord;
-  model->computeMinMaxCoords(minCoord, maxCoord);
-  //arcCamera.autofit(minCoord, maxCoord, video.fov);
+  if (m_useNewCamera)
+  { 
+    Vec3D minCoord, maxCoord;
+    model->computeMinMaxCoords(minCoord, maxCoord);
+    arcCamera.autofit(minCoord, maxCoord, video.fov);
+  }
+}
+
+void ModelCanvas::activateNewCamera()
+{
+  m_useNewCamera = true;
+  LOG_INFO << __FUNCTION__;
+  m_p_cameraCtrl = new ArcBallCameraControl(arcCamera);
 }
 

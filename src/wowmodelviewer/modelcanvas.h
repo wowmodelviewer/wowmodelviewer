@@ -174,6 +174,8 @@ public:
 
   void autofit();
 
+  void activateNewCamera();
+
 private:
   float time, modelsize;
   DWORD lastTime;
@@ -184,6 +186,7 @@ private:
 
   bool fxBlur, fxGlow, fxFog;
 
+  bool m_useNewCamera;
   ArcBallCameraControl * m_p_cameraCtrl;
   ArcBallCamera arcCamera;
   CCamera camera;
