@@ -455,7 +455,11 @@ void WoWItem::load()
     }
 
     m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][0].toInt();
-    m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
+
+    const ItemRecord &item = items.getById(m_charModel->getItem(CS_CHEST)->id());
+
+    if (item.type != IT_ROBE)
+      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
    
     break;
   }
