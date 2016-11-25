@@ -28,6 +28,7 @@ class _RACEINFOS_API_ RaceInfos
 
     static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();
+    static int getHDModelForFileID(int);
 
   private:
     static std::map< int, RaceInfos> RACES;

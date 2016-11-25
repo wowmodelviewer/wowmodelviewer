@@ -1091,7 +1091,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     }
     else
     {
-      LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
+      LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0][0].toInt())));
 
       query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
 

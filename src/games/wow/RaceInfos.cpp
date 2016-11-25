@@ -78,3 +78,26 @@ void RaceInfos::init()
   }
 
 }
+
+int RaceInfos::getHDModelForFileID(int fileid)
+{
+  int result = fileid; // return same file id by default
+
+  auto it = RACES.find(fileid);
+  if ((it != RACES.end()) && (it->second.isHD == false))
+  {
+    int raceid = it->second.raceid;
+    int sexid = it->second.sexid;
+
+    for (auto it = RACES.begin(), itEnd = RACES.end(); it != itEnd; ++it)
+    {
+      if ((it->second.raceid == raceid) && (it->second.sexid == sexid) && (it->second.isHD == true))
+      {
+        result = it->first;
+        break;
+      }
+    }
+  }
+
+  return result;
+}
