@@ -17,7 +17,7 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, float rot, Vec3D pos)
+Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, Vec3D rot, Vec3D pos)
 : parent(parent), m_model(0), id(id), slot(slot), scale(scale), rot(rot), pos(pos)
 {
 	setModel(model);
@@ -61,11 +61,12 @@ void Attachment::draw(BaseCanvas *c)
 			if (pos != Vec3D(0.0f, 0.0f, 0.0f))
 				glTranslatef(pos.x, pos.y, pos.z);
 
-			if (rot != Vec3D(0.0f,0.0f,0.0f)) {
-				glRotatef(rot.x, 1.0f, 0.0f, 0.0f);
-				glRotatef(rot.y, 0.0f, 1.0f, 0.0f);
-				glRotatef(rot.z, 0.0f, 0.0f, 1.0f);
-			}
+      
+      if (rot != Vec3D(0.0f, 0.0f, 0.0f)) {
+        glRotatef(rot.x, 1.0f, 0.0f, 0.0f);
+        glRotatef(rot.y, 0.0f, 1.0f, 0.0f);
+        glRotatef(rot.z, 0.0f, 0.0f, 1.0f);
+      }
 
 
 			if (m->showModel && (m->alpha!=1.0f)) {
@@ -202,7 +203,7 @@ void Attachment::setupParticle()
 		parent->m_model->setupAtt2(id);
 }
 
-Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float scale, float rot, Vec3D pos)
+Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float scale, Vec3D rot, Vec3D pos)
 {
 	if (modelfn.length() == 0 || id<0)
 		return 0;
@@ -221,9 +222,9 @@ Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float sc
 	}
 }
 
-Attachment* Attachment::addChild(Displayable *disp, int id, int slot, float scale, float rot, Vec3D pos)
+Attachment* Attachment::addChild(Displayable *disp, int id, int slot, float scale, Vec3D rot, Vec3D pos)
 {
-	LOG_INFO << "Attach on id" << id << "slot" << slot << "scale" << scale << "rot" << rot << "pos (" << pos.x << "," << pos.y << "," << pos.z << ")";
+  LOG_INFO << "Attach on id" << id << "slot" << slot << "scale" << scale << "rot (" << rot.x << "," << rot.y << "," << rot.z << ") pos (" << pos.x << "," << pos.y << "," << pos.z << ")";
 	Attachment *att = new Attachment(this, disp, id, slot, scale, rot, pos);
 	children.push_back(att);
 	return att;

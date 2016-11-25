@@ -30,14 +30,14 @@ class BaseCanvas;
 class _ATTACHMENT_API_ Attachment
 {
 	public:
-		Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f));
+  Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f));
 
 		~Attachment();
 
 		void setup();
 		void setupParticle();
-		Attachment* addChild(std::string fn, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f));
-		Attachment* addChild(Displayable *disp, int id, int slot, float scale=1.0f, float rot=0.0f, Vec3D pos=Vec3D(0.0f, 0.0f, 0.0f));
+    Attachment* addChild(std::string fn, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f));
+    Attachment* addChild(Displayable *disp, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f));
 		void delSlot(int slot);
 		void delChildren();
 		WoWModel* getModelFromSlot(int slot);

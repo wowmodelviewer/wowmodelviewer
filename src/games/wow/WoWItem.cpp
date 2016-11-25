@@ -806,7 +806,12 @@ void WoWItem::refresh()
   			else
   				m_charModel->charModelDetails.closeLHand = true;
 
-  			 m_charModel->attachment->addChild(it->second, attachement, m_slot);
+        Vec3D rot(0., 0., 0.);
+
+        if (item.type == IT_LEFTHANDED)
+          rot.y = 180.;
+
+        m_charModel->attachment->addChild(it->second, attachement, m_slot, 1., rot);
   		}
   	}
     break;
