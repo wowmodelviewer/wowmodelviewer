@@ -753,6 +753,21 @@ void CharControl::RefreshModel()
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEATHKNIGHT, true);
   else
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
+
+  // Quick & Dirty fix for gobelins => deactivate buggy geosets
+  if (infos.raceid == 9)
+  {
+    if (infos.sexid == 0)
+    {
+      model->showGeosets[1] = false;
+      model->showGeosets[6] = false;
+    }
+    else
+    {
+      model->showGeosets[0] = false;
+      model->showGeosets[3] = false;
+    }
+  }
 }
 
 void CharControl::ClearItemDialog()
