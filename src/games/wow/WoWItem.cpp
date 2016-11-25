@@ -455,11 +455,7 @@ void WoWItem::load()
     }
 
     m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][0].toInt();
-
-    const ItemRecord &item = items.getById(m_charModel->getItem(CS_CHEST)->id());
-
-    if (item.type != IT_ROBE)
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
+    m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
    
     break;
   }
@@ -888,9 +884,18 @@ void WoWItem::refresh()
     if(geoIt != m_itemGeosets.end())
       m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
 
+
     geoIt = m_itemGeosets.find(CG_TROUSERS);
-    if(geoIt != m_itemGeosets.end())
-      m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
+
+    if (geoIt != m_itemGeosets.end())
+    {
+      // apply trousers geosets only if character is not already wearing a robe
+      const ItemRecord &item = items.getById(m_charModel->getItem(CS_CHEST)->id());
+
+      if (item.type != IT_ROBE)
+        m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
+    }
+      
 
     std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
     if(it != m_itemTextures.end())
