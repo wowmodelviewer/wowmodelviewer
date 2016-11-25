@@ -65,7 +65,7 @@ void RaceInfos::init()
         infos.customization[2] = races.values[i][15].toStdString();
         int modelfileid = races.values[i][r].toInt();
         
-        if (infos.textureLayoutID == 2 && infos.raceid != 24)
+        if ((r == 6) || (r == 9)) // if we are dealing with a HD model
           infos.isHD = true;
         else
           infos.isHD = false;
