@@ -148,6 +148,10 @@
     <field type="uint" name="ItemDisplayInfoID" pos="0" createIndex="yes" />
     <field type="uint" name="TextureFileDataID" pos="4" />
   </table>
+  <table name="HelmetGeosetVisData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int" name="HideGeoset" arraySize="9" pos="0" />
+  </table>
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->
