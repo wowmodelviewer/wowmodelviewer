@@ -262,6 +262,7 @@ int CascDecrypt(LPBYTE pbOutBuffer, PDWORD pcbOutBuffer, LPBYTE pbInBuffer, DWOR
 
     // Check if we know the key
     pbKey = FindCascKey(KeyName);
+    printf("KeyName %s", KeyName);
     if(pbKey == NULL)
         return ERROR_FILE_ENCRYPTED;
 
