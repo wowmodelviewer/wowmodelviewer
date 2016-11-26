@@ -61,7 +61,11 @@ bool CASCFile::open()
       delete [] buffer;
 
     buffer = new unsigned char[size];
-    CascReadFile(m_handle, buffer, size, &nbBytesRead);
+    if(!CascReadFile(m_handle, 0, size, &nbBytesRead))
+    {
+      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+    }
+
     if(nbBytesRead != 0)
       eof = false;
     else
