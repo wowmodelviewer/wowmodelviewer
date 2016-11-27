@@ -1163,16 +1163,23 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
   {
     itemModels[pos] = m;
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
-    GLuint tex = texturemanager.add(texture);
-    for (size_t x = 0; x < m->TextureList.size(); x++)
+    if (texture)
     {
-      if (m->TextureList[x]->fullname() == "Special_2")
+      GLuint tex = texturemanager.add(texture);
+      for (size_t x = 0; x < m->TextureList.size(); x++)
       {
-        LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
-        m->TextureList[x] = texture;
+        if (m->TextureList[x]->fullname() == "Special_2")
+        {
+          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
+          m->TextureList[x] = texture;
+        }
       }
+      m->replaceTextures[TEXTURE_ITEM] = tex;
     }
-    m->replaceTextures[TEXTURE_ITEM] = tex;
+    else
+    {
+      LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
+    }
   }
 }
 

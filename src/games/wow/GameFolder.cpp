@@ -39,11 +39,11 @@ void GameFolder::init(const QString & path, const QString & filename)
   {
     QString line = in.readLine().toLower();
 
-    QStringList split = line.split(" ");
-    if (split.size() != 2)
-      continue;
-
-    CASCFile * file = new CASCFile(split[0], split[1].toInt());
+    int spaceIndex = line.lastIndexOf(" ");
+    QString filename = line.left(spaceIndex);
+    QString id = line.mid(spaceIndex + 1);
+    
+    CASCFile * file = new CASCFile(filename, id.toInt());
     file->setName(line.mid(line.lastIndexOf("\\")+1));
     addChild(file);
   }
