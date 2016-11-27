@@ -238,9 +238,9 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
       {
         result->tabardIcon = tabard[wxT("icon")].AsInt();
         result->tabardBorder = tabard[wxT("border")].AsInt();
-        result->BorderColor = TabardDetails::borderColorToIndex(QString(tabard[wxT("borderColor")].AsString().Lower().mb_str()));
-        result->Background = TabardDetails::backgroundColorToIndex(QString(tabard[wxT("backgroundColor")].AsString().Lower().mb_str()));
-        result->IconColor = TabardDetails::iconColorToIndex(QString(tabard[wxT("iconColor")].AsString().Lower().mb_str()));
+        result->BorderColor = tabard[wxT("borderColorId")].AsInt();
+        result->Background = tabard[wxT("backgroundColorId")].AsInt();
+        result->IconColor = tabard[wxT("iconColorId")].AsInt();
         result->customTabard = true;
       }
     }

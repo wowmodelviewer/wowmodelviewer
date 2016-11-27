@@ -54,10 +54,6 @@ struct _TABARDDETAILS_API_ TabardDetails
     void save(QXmlStreamWriter &);
     void load(QXmlStreamReader &);
 
-    static unsigned int iconColorToIndex(QString & color);
-    static unsigned int borderColorToIndex(QString & color);
-    static unsigned int backgroundColorToIndex(QString & color);
-
   private:
 	  static const std::vector<QString> ICON_COLOR_VECTOR;
 	  static const std::vector<QString> BORDER_COLOR_VECTOR;
