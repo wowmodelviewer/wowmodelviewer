@@ -248,7 +248,7 @@ void WoWItem::load()
       if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
       {
         sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
-        sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]));
+        sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT ID, TextureID FROM TextureFileData WHERE ID IN( %1, %2)").arg(iteminfos.values[0][1]).arg(iteminfos.values[0][3]));
 
         if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
         {
@@ -256,17 +256,23 @@ void WoWItem::load()
           return;
         }
 
+        // associate left / right model infos
         GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
         int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive)) ? 0 : 1;
         int rightmodelindex = leftmodelindex ? 0 : 1;
 
+        // create texture map to use result correctly (especially when left texture is diffrent from right texture)
+        std::map<QString, int> textures;
+        for (uint i = 0; i < texinfos.values.size(); i++)
+          textures[texinfos.values[i][0]] = texinfos.values[i][1].toInt();
+
         // left shoulder
-        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), textures[iteminfos.values[0][1]]);
 
         // right shoulder
-        updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), texinfos.values[0][0].toInt());
+        updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), textures[iteminfos.values[0][3]]);
       }
-      else if (iteminfos.values[0][2].toInt() == 0) // only right shoulder
+      else if (iteminfos.values[0][2].toInt() == 0) // only left shoulder
       {
         sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
         sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]));
