@@ -84,7 +84,7 @@ void CharTexture::compose(TextureID texID)
 		QImage newImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32);
 		newImage = newImage.scaled(coords.width,coords.height,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
 
-#if DEBUG_TEXTURE > 0
+#if DEBUG_TEXTURE > 1
     QString name = QString("./tex%1.png").arg(tmpidx);
     newImage.save(name);
 #endif
@@ -95,7 +95,7 @@ void CharTexture::compose(TextureID texID)
 		painter.drawImage(destPos, newImage);
 		painter.end();
 
-#if DEBUG_TEXTURE > 0
+#if DEBUG_TEXTURE > 1
 		name = QString("./ComposedTexture%1.png").arg(tmpidx++);
 		destImage.save(name);
 #endif
@@ -104,6 +104,10 @@ void CharTexture::compose(TextureID texID)
 	}
 #if DEBUG_TEXTURE > 0
 	tmpidx += 100;
+#endif
+#if DEBUG_TEXTURE > 0
+  QString name = QString("./FinalTexture%1.png").arg(tmpidx++);
+  destImage.save(name);
 #endif
 
 	// good, upload this to video

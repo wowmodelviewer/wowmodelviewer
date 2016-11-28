@@ -346,7 +346,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
                        .arg(infos.raceid)
                        .arg(infos.sexid)
-                       .arg(hairStyle())
+                       .arg((hairStyle() == 0) ? 1 : hairStyle()) // quick fix for bald characters... VariationIndex = 0 returns no result
                        .arg(hairColor())
                        .arg(type);
       break;
