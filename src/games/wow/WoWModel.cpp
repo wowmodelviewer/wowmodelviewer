@@ -1455,7 +1455,7 @@ void WoWModel::UpdateTextureList(GameFile * tex, int special)
   {
     if (specialTextures[i] == special)
     {
-      LOG_INFO << "Updating" << TextureList[i] << "to" << tex->fullname();
+      LOG_INFO << "Updating" << (TextureList[i] ? TextureList[i]->fullname():"NULL TEXTURE") << "to" << tex->fullname();
       TextureList[i] = tex;
       break;
     }
