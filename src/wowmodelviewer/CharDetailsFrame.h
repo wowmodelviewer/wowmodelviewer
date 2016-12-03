@@ -63,6 +63,8 @@ class CharDetailsFrame : public wxWindow, public Observer
 
     virtual void onEvent(Event *);
 
+    void addControl(wxFlexGridSizer * gs, int type, int id, wxString caption);
+
     CharDetails * m_details;
 };
 
