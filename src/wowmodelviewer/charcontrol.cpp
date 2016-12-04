@@ -73,7 +73,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	wxFlexGridSizer *top = new wxFlexGridSizer(1);
 
 	cdFrame = new CharDetailsFrame(this);
-	top->Add(cdFrame);
+  top->Add(cdFrame, wxSizerFlags(1).Align(wxALIGN_CENTER));
 
 	for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++) {
 		buttons[i] = NULL;

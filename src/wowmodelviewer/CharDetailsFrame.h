@@ -1,12 +1,12 @@
 ﻿/*
  * CharDetailsFrame.h
  *
- *  Created on: 21 déc. 2014
- *      Author: Jerome
+ *  Created on: 21 dec. 2014
+ *      Author: Jeromnimo
  */
 
-#ifndef SRC_WOWMODELVIEWER_CHARDETAILSFRAME_H_
-#define SRC_WOWMODELVIEWER_CHARDETAILSFRAME_H_
+#ifndef _CHARDETAILSFRAME_H_
+#define _CHARDETAILSFRAME_H_
 
 #ifndef WX_PRECOMP
   #include <wx/wx.h>
@@ -70,4 +70,4 @@ class CharDetailsFrame : public wxWindow, public Observer
 };
 
 
-#endif /* SRC_WOWMODELVIEWER_CHARDETAILSFRAME_H_ */
+#endif /* _CHARDETAILSFRAME_H_ */

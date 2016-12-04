@@ -190,6 +190,7 @@ void CharDetails::reset(WoWModel * model)
 
   updateMaxValues();
   updateValidValues();
+  fillCustomizationMap();
 }
 
 void CharDetails::setSkinColor(size_t val)
@@ -487,4 +488,185 @@ void CharDetails::updateValidValues()
     LOG_ERROR << "Unable to collect face types for model " << m_model->name();
   }
 
+}
+
+void CharDetails::fillCustomizationMap()
+{
+  if (!m_model)
+    return;
+
+  RaceInfos infos;
+  RaceInfos::getCurrent(m_model, infos);
+
+  int sectionOffset = 0;
+  if (infos.isHD)
+    sectionOffset = 5;
+
+
+  // clear any previous value found
+  m_customizationParamsMap.clear();
+  m_facialCustomizationMap.clear();
+
+  // common part for all characters
+  // skin
+  CustomizationParam skin;
+  skin.name = "Skin";
+  
+  QString query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+                          .arg(infos.raceid)
+                          .arg(infos.sexid)
+                          .arg(SkinType);
+
+  sqlResult vals = GAMEDATABASE.sqlQuery(query);
+
+  if (vals.valid && !vals.values.empty())
+  {
+    for (uint i = 0; i < vals.values.size(); i++)
+      skin.possibleValues.push_back(vals.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect skin parameters for model" << m_model->name();
+  }
+
+  m_customizationParamsMap.insert({ SKIN_COLOR, skin });
+
+  // face customization
+  // face possible customization depends on current skin color. We fill m_facialCustomizationMap first
+  for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
+  {
+    query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
+                    "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
+                    .arg(infos.raceid)
+                    .arg(infos.sexid)
+                    .arg(*it)
+                    .arg(FaceType + sectionOffset);
+
+    sqlResult faces = GAMEDATABASE.sqlQuery(query);
+
+    CustomizationParam face;
+    face.name = "Face";
+
+    if (faces.valid && !faces.values.empty())
+    {
+      for (uint i = 0; i < faces.values.size(); i++)
+        face.possibleValues.push_back(faces.values[i][0].toInt());
+    }
+    else
+    {
+      LOG_ERROR << "No face customization available for skin color" << *it << "for model" << m_model->name();
+    }
+
+    m_facialCustomizationMap.insert({ *it, face });
+  }
+
+  m_customizationParamsMap.insert({ FACE, m_facialCustomizationMap[m_skinColor] });
+
+  // starting from here, customization may differ based on database values
+  // get customization names
+  query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRaces WHERE ID = %2")
+                  .arg(infos.sexid + 1)
+                  .arg(infos.raceid);
+  
+  sqlResult names = GAMEDATABASE.sqlQuery(query);
+
+  QString facialCustomizationBaseName;
+  QString additionalCustomizationName;
+
+  if (names.valid && !names.values.empty())
+  {
+    facialCustomizationBaseName = names.values[0][0];
+    facialCustomizationBaseName = facialCustomizationBaseName.at(0).toUpper() + facialCustomizationBaseName.mid(1).toLower();
+    if (facialCustomizationBaseName == "Normal") 
+      facialCustomizationBaseName = "Hair";
+
+    additionalCustomizationName = names.values[0][1];
+    additionalCustomizationName = additionalCustomizationName.at(0).toUpper() + additionalCustomizationName.mid(1).toLower();
+    if (additionalCustomizationName == "Normal") 
+      additionalCustomizationName = "Facial Hair";
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect customization names for model" << m_model->name() << "(race id" << infos.raceid << "- sex id" << infos.sexid << ")";
+  }
+
+  // facial style customization
+  query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 AND SectionType = %3")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(HairType + sectionOffset);
+
+  sqlResult styles = GAMEDATABASE.sqlQuery(query);
+
+  CustomizationParam facialCustomizationStyle;
+  facialCustomizationStyle.name = QString(facialCustomizationBaseName + " Style").toStdString();
+
+  if (styles.valid && !styles.values.empty())
+  {
+    for (uint i = 0; i < styles.values.size(); i++)
+      facialCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to facial style parameters for model" << m_model->name();
+  }
+
+  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, facialCustomizationStyle });
+
+
+  // facial color customization
+  query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 AND SectionType = %3")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(HairType + sectionOffset);
+
+  sqlResult colors = GAMEDATABASE.sqlQuery(query);
+
+  CustomizationParam facialCustomizationColor;
+  facialCustomizationColor.name = QString(facialCustomizationBaseName + " Color").toStdString();
+
+  if (styles.valid && !styles.values.empty())
+  {
+    for (uint i = 0; i < styles.values.size(); i++)
+      facialCustomizationColor.possibleValues.push_back(styles.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect facial color parameters for model" << m_model->name();
+  }
+
+  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, facialCustomizationColor });
+
+  // addtional facial customization
+  query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid);
+
+  sqlResult additional = GAMEDATABASE.sqlQuery(query);
+
+  CustomizationParam additionalCustomization;
+  additionalCustomization.name = additionalCustomizationName.toStdString();
+
+  if (additional.valid && !additional.values.empty())
+  {
+    for (uint i = 0; i < additional.values.size(); i++)
+      additionalCustomization.possibleValues.push_back(additional.values[i][0].toInt());
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect additional facial customization parameters for model" << m_model->name();
+  }
+
+  m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
+}
+
+CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
+{
+  auto it = m_customizationParamsMap.find(type);
+
+  if (it != m_customizationParamsMap.end())
+    return it->second;
+
+  CustomizationParam dummy;
+  return dummy;
 }

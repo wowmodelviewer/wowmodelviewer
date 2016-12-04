@@ -27,6 +27,7 @@ set(src  ArcBallCamera.cpp
          AVIGenerator.cpp
 		 camera.cpp
          charcontrol.cpp
+		 CharDetailsCustomizationSpin.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp
          effects.cpp

@@ -34,7 +34,7 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 		CharDetails();
 
     // Types
-    enum SectionType{
+    enum SectionType {
       SkinType = 0,
       FaceType = 1,
       FacialHairType = 2,
@@ -45,6 +45,25 @@ class _CHARDETAILS_API_ CharDetails : public Observable
       FacialHairTypeHD = 7,
       HairTypeHD = 8,
       UnderwearTypeHD = 9
+    };
+
+    enum CustomizationType {
+      SKIN_COLOR = 0,
+      FACE = 1,
+      FACIAL_CUSTOMIZATION_STYLE = 2,
+      FACIAL_CUSTOMIZATION_COLOR = 3,
+      ADDITIONAL_FACIAL_CUSTOMIZATION = 4,
+      DH_TATTOO_STYLE = 5,
+      DH_TATTOO_COLOR = 6,
+      DH_HORN_STYLE = 7,
+      DH_BLINDFOLDS = 8
+    };
+
+    class CustomizationParam
+    {
+      public:
+      std::string name;
+      std::vector<int> possibleValues;
     };
 
     EyeGlowTypes eyeGlowType;
@@ -91,6 +110,8 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     std::vector<int>validHairColors() { return m_validHairColors; }
     std::vector<int>validFaceTypes() { return m_validFaceTypes; }
 
+    CustomizationParam getParams(CustomizationType type);
+
   private:
     unsigned int m_skinColor, m_skinColorMax;
     unsigned int m_faceType;
@@ -105,7 +126,10 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     void updateMaxValues();
     void updateValidValues();
 
+    void fillCustomizationMap();
 
+    std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
+    std::map<int, CustomizationParam> m_facialCustomizationMap;
 };
 
 
