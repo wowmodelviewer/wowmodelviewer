@@ -57,13 +57,14 @@ class CharDetailsFrame : public wxWindow, public Observer
 
     wxSpinButton *spins[NUM_SPIN_BTNS];
     wxStaticText *spinLabels[NUM_SPIN_BTNS];
+    wxFlexGridSizer * charCustomizationGS;
 
     void onSpin(wxSpinEvent &event);
     void onRandomise(wxCommandEvent &event);
 
     virtual void onEvent(Event *);
 
-    void addControl(wxFlexGridSizer * gs, int type, int id, wxString caption);
+    void addControl(int type, int id, wxString caption);
 
     CharDetails * m_details;
 };

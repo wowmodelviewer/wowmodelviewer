@@ -39,18 +39,12 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   wxFlexGridSizer *top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);
 
-  wxFlexGridSizer *gs = new wxFlexGridSizer(3, 0, 5);
-  gs->AddGrowableCol(2);
+  charCustomizationGS = new wxFlexGridSizer(3, 0, 5);
+  charCustomizationGS->AddGrowableCol(2);
   top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1,20), wxALIGN_CENTER),
                             wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
-  
-  addControl(gs, SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color:"));
-  addControl(gs, SPIN_FACE_TYPE, ID_FACE_TYPE, _("Face type:"));
-  addControl(gs, SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color:"));
-  addControl(gs, SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style:"));
-  addControl(gs, SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature:"));
 
-  top->Add(gs,wxSizerFlags().Border(wxBOTTOM, 5).Expand());
+  top->Add(charCustomizationGS, wxSizerFlags().Border(wxBOTTOM, 5).Expand());
   top->Add(new wxButton(this, ID_CHAR_RANDOMISE, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
   SetAutoLayout(true);
   top->SetSizeHints(this);
@@ -58,14 +52,14 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   Layout();
 }
 
-void CharDetailsFrame::addControl(wxFlexGridSizer * gs, int type, int id, wxString caption)
+void CharDetailsFrame::addControl(int type, int id, wxString caption)
 {
-  gs->Add(new wxStaticText(this, wxID_ANY, caption),
+  charCustomizationGS->Add(new wxStaticText(this, wxID_ANY, caption),
           wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).
           Border(wxLEFT, 5));
-  gs->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30, 16),
+  charCustomizationGS->Add(spins[type] = new wxSpinButton(this, id, wxDefaultPosition, wxSize(30, 16),
           wxSP_HORIZONTAL | wxSP_WRAP), wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
-  gs->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("00 / 00")),
+  charCustomizationGS->Add(spinLabels[type] = new wxStaticText(this, wxID_ANY, wxT("00 / 00")),
           wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
 }
 
@@ -73,6 +67,19 @@ void CharDetailsFrame::setModel(CharDetails & details)
 {
   m_details = &details;
   m_details->attach(this);
+
+  charCustomizationGS->Clear(true);
+
+  addControl(SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color:"));
+  addControl(SPIN_FACE_TYPE, ID_FACE_TYPE, _("Face type:"));
+  addControl(SPIN_HAIR_COLOR, ID_HAIR_COLOR, _("Hair color:"));
+  addControl(SPIN_HAIR_STYLE, ID_HAIR_STYLE, _("Hair style:"));
+  addControl(SPIN_FACIAL_HAIR, ID_FACIAL_HAIR, _("Facial feature:"));
+
+  SetAutoLayout(true);
+  GetSizer()->SetSizeHints(this);
+  Layout();
+  GetParent()->Layout();
 }
 
 
