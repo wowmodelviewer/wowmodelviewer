@@ -72,11 +72,11 @@ void CharDetailsFrame::setModel(CharDetails & details)
 
   charCustomizationGS->Clear(true);
 
-  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::SKIN_COLOR), wxSizerFlags(1).Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
-  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACE), wxSizerFlags(1).Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
-  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACIAL_CUSTOMIZATION_STYLE), wxSizerFlags(1).Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
-  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACIAL_CUSTOMIZATION_COLOR), wxSizerFlags(1).Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
-  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION), wxSizerFlags(1).Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL));
+  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::SKIN_COLOR), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACE), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACIAL_CUSTOMIZATION_STYLE), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::FACIAL_CUSTOMIZATION_COLOR), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_details, CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
 
   /*
   addControl(SPIN_SKIN_COLOR, ID_SKIN_COLOR, _("Skin color:"));
