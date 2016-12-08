@@ -73,7 +73,8 @@ class _EVENT_API_ Event
 		~Event();
 
 		// Methods
-		EventType type() { return m_type; }
+    EventType type() const { return m_type; }
+    void setType(EventType type) { m_type = type; }
 
 		Observable * sender() { return m_p_sender; }
 

@@ -9,8 +9,6 @@
 
 #include "CharDetails.h"
 
-#include <wx/spinbutt.h>
-
 IMPLEMENT_CLASS(CharDetailsCustomizationSpin, wxWindow)
 
 BEGIN_EVENT_TABLE(CharDetailsCustomizationSpin, wxWindow)
@@ -19,22 +17,26 @@ END_EVENT_TABLE()
 
 
 CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, CharDetails * details, CharDetails::CustomizationType type)
-  : wxWindow(parent, wxID_ANY), m_type(type)
+: wxWindow(parent, wxID_ANY),  m_type(type), m_details(details)
 {
   wxFlexGridSizer *top = new wxFlexGridSizer(3, 0, 5);
   top->AddGrowableCol(2);
 
-  CharDetails::CustomizationParam params;
+  if (m_details)
+  {
+    m_params = m_details->getParams(m_type);
+    m_details->attach(this);
+  }
 
-  if (details)
-    params = details->getParams(m_type);
-
-  top->Add(new wxStaticText(this, wxID_ANY, params.name.c_str()),
+  top->Add(new wxStaticText(this, wxID_ANY, m_params.name.c_str()),
            wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
-  top->Add(new wxSpinButton(this, wxID_ANY, wxDefaultPosition, wxSize(30, 16),
-    wxSP_HORIZONTAL | wxSP_WRAP), wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
-  top->Add(new wxStaticText(this, wxID_ANY, QString("0/%1").arg(params.possibleValues.size()-1).toStdString()),
-           wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 10));
+
+  m_spin = new wxSpinButton(this, wxID_ANY, wxDefaultPosition, wxSize(30, 16), wxSP_HORIZONTAL | wxSP_WRAP);
+  m_spin->SetRange(0, m_params.possibleValues.size() - 1);
+  top->Add(m_spin, wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
+
+  m_text = new wxStaticText(this, wxID_ANY, wxString::Format(wxT("%2i / %i"), 0, m_params.possibleValues.size() - 1));
+  top->Add(m_text, wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 10));
 
   SetAutoLayout(true);
   top->SetSizeHints(this);
@@ -45,7 +47,13 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
 
 void CharDetailsCustomizationSpin::onSpin(wxSpinEvent &event)
 {
+  m_details->set(m_type, m_params.possibleValues[event.GetPosition()]);
+}
 
+void CharDetailsCustomizationSpin::onEvent(Event *)
+{
+  if (m_text)
+    m_text->SetLabel(wxString::Format(wxT("%2i / %i"), m_spin->GetValue(), m_params.possibleValues.size() - 1));
 }
 
 

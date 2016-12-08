@@ -16,11 +16,11 @@
 
 #include "CharDetails.h"
 
-class wxSpinEvent;
+#include "metaclasses/Observer.h"
 
-class CharDetails;
+#include <wx/spinbutt.h>
 
-class CharDetailsCustomizationSpin : public wxWindow
+class CharDetailsCustomizationSpin : public wxWindow, public Observer
 {
   public:
   CharDetailsCustomizationSpin(wxWindow* parent, CharDetails * details, CharDetails::CustomizationType type);
@@ -30,9 +30,16 @@ class CharDetailsCustomizationSpin : public wxWindow
     DECLARE_EVENT_TABLE()
 
     void onSpin(wxSpinEvent &event);
+    virtual void onEvent(Event *);
 
     CharDetails::CustomizationType m_type;
     std::vector<int> m_values;
+    CharDetails * m_details;
+    CharDetails::CustomizationParam m_params;
+
+    wxSpinButton * m_spin;
+    wxStaticText * m_text;
+
 };
 
 

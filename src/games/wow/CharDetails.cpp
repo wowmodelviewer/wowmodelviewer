@@ -180,6 +180,17 @@ void CharDetails::reset(WoWModel * model)
   m_hairStyle = 0;
   m_facialHair = 0;
 
+  m_currentCustomization.clear();
+  m_currentCustomization.insert({ SKIN_COLOR, 0 });
+  m_currentCustomization.insert({ FACE, 0 });
+  m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
+  m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
+  m_currentCustomization.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
+  m_currentCustomization.insert({ DH_TATTOO_STYLE, 0 });
+  m_currentCustomization.insert({ DH_TATTOO_COLOR, 0 });
+  m_currentCustomization.insert({ DH_HORN_STYLE, 0 });
+  m_currentCustomization.insert({ DH_BLINDFOLDS, 0 });
+
   showUnderwear = true;
   showHair = true;
   showFacialHair = true;
@@ -188,8 +199,8 @@ void CharDetails::reset(WoWModel * model)
 
   isNPC = false;
 
-  updateMaxValues();
-  updateValidValues();
+  //updateMaxValues();
+  //updateValidValues();
   fillCustomizationMap();
 }
 
@@ -200,8 +211,8 @@ void CharDetails::setSkinColor(size_t val)
     m_skinColor = val;
     updateMaxValues();
     updateValidValues();
-    CharDetailsEvent event(this, CharDetailsEvent::SKINCOLOR_CHANGED);
-    notify(event);
+ //   CharDetailsEvent event(this, CharDetailsEvent::SKINCOLOR_CHANGED);
+   // notify(event);
   }
 }
 
@@ -210,8 +221,8 @@ void CharDetails::setFaceType(size_t val)
   if(val != m_faceType && (find(m_validFaceTypes.begin(), m_validFaceTypes.end(), val) != m_validFaceTypes.end()) )
   {
     m_faceType = val;
-    CharDetailsEvent event(this, CharDetailsEvent::FACETYPE_CHANGED);
-    notify(event);
+ //   CharDetailsEvent event(this, CharDetailsEvent::FACETYPE_CHANGED);
+  //  notify(event);
   }
 }
 
@@ -220,8 +231,8 @@ void CharDetails::setHairColor(size_t val)
   if(val != m_hairColor && (find(m_validHairColors.begin(), m_validHairColors.end(), val) != m_validHairColors.end()) )
   {
     m_hairColor = val;
-    CharDetailsEvent event(this, CharDetailsEvent::HAIRCOLOR_CHANGED);
-    notify(event);
+   // CharDetailsEvent event(this, CharDetailsEvent::HAIRCOLOR_CHANGED);
+  //  notify(event);
   }
 }
 
@@ -231,8 +242,8 @@ void CharDetails::setHairStyle(size_t val)
   {
     m_hairStyle = val;
     updateMaxValues();
-    CharDetailsEvent event(this, CharDetailsEvent::HAIRSTYLE_CHANGED);
-    notify(event);
+   // CharDetailsEvent event(this, CharDetailsEvent::HAIRSTYLE_CHANGED);
+  //  notify(event);
   }
 }
 
@@ -242,8 +253,8 @@ void CharDetails::setFacialHair(size_t val)
   {
     m_facialHair = val;
     updateMaxValues();
-    CharDetailsEvent event(this, CharDetailsEvent::FACIALHAIR_CHANGED);
-    notify(event);
+  //  CharDetailsEvent event(this, CharDetailsEvent::FACIALHAIR_CHANGED);
+ //   notify(event);
   }
 }
 
@@ -332,31 +343,31 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
                        .arg(infos.raceid)
                        .arg(infos.sexid)
-                       .arg(skinColor())
+                       .arg(m_currentCustomization[SKIN_COLOR])
                        .arg(type);
       break;
     case FaceType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
                        .arg(infos.raceid)
                        .arg(infos.sexid)
-                       .arg(skinColor())
-                       .arg(faceType())
+                       .arg(m_currentCustomization[SKIN_COLOR])
+                       .arg(m_currentCustomization[FACE])
                        .arg(type);
       break;
     case HairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
                        .arg(infos.raceid)
                        .arg(infos.sexid)
-                       .arg((hairStyle() == 0) ? 1 : hairStyle()) // quick fix for bald characters... VariationIndex = 0 returns no result
-                       .arg(hairColor())
+                       .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
+                       .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
                        .arg(type);
       break;
     case FacialHairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
                        .arg(infos.raceid)
                        .arg(infos.sexid)
-                       .arg(facialHair())
-                       .arg(hairColor())
+                       .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
+                       .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
                        .arg(type);
       break;
     default:
@@ -625,10 +636,10 @@ void CharDetails::fillCustomizationMap()
   CustomizationParam facialCustomizationColor;
   facialCustomizationColor.name = QString(facialCustomizationBaseName + " Color").toStdString();
 
-  if (styles.valid && !styles.values.empty())
+  if (colors.valid && !colors.values.empty())
   {
-    for (uint i = 0; i < styles.values.size(); i++)
-      facialCustomizationColor.possibleValues.push_back(styles.values[i][0].toInt());
+    for (uint i = 0; i < colors.values.size(); i++)
+      facialCustomizationColor.possibleValues.push_back(colors.values[i][0].toInt());
   }
   else
   {
@@ -670,3 +681,50 @@ CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
   CustomizationParam dummy;
   return dummy;
 }
+
+void CharDetails::set(CustomizationType type, unsigned int val)
+{
+  if (val != m_currentCustomization.at(type))
+  {
+    m_currentCustomization[type] = val;
+    CharDetailsEvent event(this, CharDetailsEvent::SKIN_COLOR_CHANGED);
+    switch (type)
+    {
+      case SKIN_COLOR:
+        event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
+        break;
+      case FACE:
+        event.setType((Event::EventType)CharDetailsEvent::FACE_CHANGED);
+        break;
+      case FACIAL_CUSTOMIZATION_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+        break;
+      case FACIAL_CUSTOMIZATION_COLOR:
+        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+        break;
+      case ADDITIONAL_FACIAL_CUSTOMIZATION:
+        event.setType((Event::EventType)CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED);
+        break;
+      case DH_TATTOO_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_STYLE_CHANGED);
+        break;
+      case DH_TATTOO_COLOR:
+        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_COLOR_CHANGED);
+        break;
+      case DH_HORN_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::DH_HORN_STYLE_CHANGED);
+        break;
+      case DH_BLINDFOLDS:
+        event.setType((Event::EventType)CharDetailsEvent::DH_BLINDFOLDS_CHANGED);
+        break;
+    }
+
+    notify(event);
+  }
+}
+
+uint CharDetails::get(CustomizationType type) const
+{
+  return m_currentCustomization.at(type);
+}
+
