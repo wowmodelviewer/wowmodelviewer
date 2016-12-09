@@ -224,8 +224,6 @@ void CharControl::UpdateModel(Attachment *a)
 
 	  g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
-	  cdFrame->refresh();
-
 	  model->td.Icon = randint(0, model->td.maxIcon);
 	  model->td.IconColor = randint(0, model->td.maxIconColor);
 	  model->td.Border = randint(0, model->td.maxBorder);
@@ -406,11 +404,6 @@ void CharControl::OnButton(wxCommandEvent &event)
 	  selectMount();
 	  break;
 	}
-	case ID_CHAR_RANDOMISE:
-	{
-	  cdFrame->randomiseChar();
-	  break;
-	}
 	default:
 	{
 	  for (ssize_t i=0; i<NUM_CHAR_SLOTS; i++)
@@ -527,7 +520,7 @@ void CharControl::RefreshModel()
   QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
-                          .arg(model->cd.hairStyle());
+                          .arg(model->cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
   sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
   if (hairStyle.valid && !hairStyle.values.empty())
@@ -548,7 +541,7 @@ void CharControl::RefreshModel()
     }
   }
   else
-    LOG_ERROR << "Unable to collect hair style " << model->cd.hairStyle() << " for model " << model->name();
+    LOG_ERROR << "Unable to collect hair style " << model->cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE) << " for model " << model->name();
 
 
   // Hair texture
@@ -585,7 +578,7 @@ void CharControl::RefreshModel()
   query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
-                          .arg(model->cd.facialHair());
+                          .arg(model->cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION));
 
   sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
 
@@ -603,7 +596,7 @@ void CharControl::RefreshModel()
   }
   else
   {
-    LOG_ERROR << "Unable to collect number of facial hair style" << model->cd.facialHair() << "for model" << model->name();
+    LOG_ERROR << "Unable to collect number of facial hair style" << model->cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << model->name();
   }
 
 	//refresh equipment

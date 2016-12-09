@@ -9,6 +9,8 @@
 
 #include "CharDetails.h"
 
+#include "logger/Logger.h"
+
 IMPLEMENT_CLASS(CharDetailsCustomizationSpin, wxWindow)
 
 BEGIN_EVENT_TABLE(CharDetailsCustomizationSpin, wxWindow)
@@ -16,17 +18,14 @@ BEGIN_EVENT_TABLE(CharDetailsCustomizationSpin, wxWindow)
 END_EVENT_TABLE()
 
 
-CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, CharDetails * details, CharDetails::CustomizationType type)
+CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type)
 : wxWindow(parent, wxID_ANY),  m_type(type), m_details(details)
 {
   wxFlexGridSizer *top = new wxFlexGridSizer(3, 0, 5);
   top->AddGrowableCol(2);
 
-  if (m_details)
-  {
-    m_params = m_details->getParams(m_type);
-    m_details->attach(this);
-  }
+  m_params = m_details.getParams(m_type);
+  m_details.attach(this);
 
   top->Add(new wxStaticText(this, wxID_ANY, m_params.name.c_str()),
            wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
@@ -47,13 +46,23 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
 
 void CharDetailsCustomizationSpin::onSpin(wxSpinEvent &event)
 {
-  m_details->set(m_type, m_params.possibleValues[event.GetPosition()]);
+  m_details.set(m_type, m_params.possibleValues[event.GetPosition()]);
 }
 
 void CharDetailsCustomizationSpin::onEvent(Event *)
 {
   if (m_text)
-    m_text->SetLabel(wxString::Format(wxT("%2i / %i"), m_spin->GetValue(), m_params.possibleValues.size() - 1));
+  {
+    uint pos = 0;
+    uint currentValue = m_details.get(m_type);
+
+    for (; pos < m_params.possibleValues.size(); pos++)
+      if (m_params.possibleValues[pos] == currentValue) break;
+
+    m_spin->SetValue(currentValue);
+
+    m_text->SetLabel(wxString::Format(wxT("%2i / %i"), pos, m_params.possibleValues.size() - 1));
+  }
 }
 
 

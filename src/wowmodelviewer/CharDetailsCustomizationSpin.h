@@ -23,7 +23,7 @@
 class CharDetailsCustomizationSpin : public wxWindow, public Observer
 {
   public:
-  CharDetailsCustomizationSpin(wxWindow* parent, CharDetails * details, CharDetails::CustomizationType type);
+  CharDetailsCustomizationSpin(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type);
 
   private:
     DECLARE_CLASS(CharDetailsCustomizationSpin)
@@ -34,7 +34,7 @@ class CharDetailsCustomizationSpin : public wxWindow, public Observer
 
     CharDetails::CustomizationType m_type;
     std::vector<int> m_values;
-    CharDetails * m_details;
+    CharDetails & m_details;
     CharDetails::CustomizationParam m_params;
 
     wxSpinButton * m_spin;

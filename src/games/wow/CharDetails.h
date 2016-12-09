@@ -85,49 +85,19 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
     void print();
 
-    int getNbValuesForSection(SectionType type);
     std::vector<int> getTextureForSection(SectionType);
 
 
     // accessors to customization
-    unsigned int skinColor() { return m_currentCustomization[SKIN_COLOR]; }
-    unsigned int skinColorMax() { return m_skinColorMax; }
-    void setSkinColor(unsigned int);
-
-    unsigned int faceType() { return m_currentCustomization[FACE]; }
-    void setFaceType(unsigned int);
-
-    unsigned int hairColor() { return m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]; }
-    void setHairColor(unsigned int);
-
-    unsigned int hairStyle() { return m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]; }
-    unsigned int hairStyleMax() { return m_hairStyleMax; }
-    void setHairStyle(unsigned int);
-
-    unsigned int facialHair() { return m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION]; }
-    unsigned int facialHairMax() { return m_facialHairMax; }
-    void setFacialHair(unsigned int);
-    std::vector<int>validHairColors() { return m_validHairColors; }
-    std::vector<int>validFaceTypes() { return m_validFaceTypes; }
-
     void set(CustomizationType type, uint val);
     uint get(CustomizationType type) const;
 
     CustomizationParam getParams(CustomizationType type);
 
+    void setRandomValue(CustomizationType type);
+
   private:
-    unsigned int m_skinColor, m_skinColorMax;
-    unsigned int m_faceType;
-    unsigned int m_hairColor;
-    unsigned int m_hairStyle, m_hairStyleMax;
-    unsigned int m_facialHair, m_facialHairMax;
-    std::vector<int> m_validHairColors;
-    std::vector<int> m_validFaceTypes;
-
     WoWModel * m_model;
-
-    void updateMaxValues();
-    void updateValidValues();
 
     void fillCustomizationMap();
 

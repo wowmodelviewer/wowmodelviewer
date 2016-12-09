@@ -1099,11 +1099,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
       if (r.valid && !r.empty())
       {
-        g_charControl->model->cd.setSkinColor(r.values[0][0].toInt());
-        g_charControl->model->cd.setFaceType(r.values[0][1].toInt());
-        g_charControl->model->cd.setHairColor(r.values[0][2].toInt());
-        g_charControl->model->cd.setHairStyle(r.values[0][3].toInt());
-        g_charControl->model->cd.setFacialHair(r.values[0][4].toInt());
+        g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
+        g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][2].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][3].toInt());
+        g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
       }
 
       query = QString("SELECT ItemDisplayInfoID, ItemType FROM NpcModelItemSlotDisplayInfo WHERE CreatureDisplayInfoExtraID = %1").arg(extraId);
@@ -2056,19 +2056,19 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
       if(multiVal.size() >= 5)
       {
         LOG_INFO << "skin color" << multiVal[0];
-        charControl->model->cd.setSkinColor(multiVal[0].toInt());
+        charControl->model->cd.set(CharDetails::SKIN_COLOR, multiVal[0].toInt());
 
-        LOG_INFO << "face type" << multiVal[0];
-        charControl->model->cd.setSkinColor(multiVal[1].toInt());
+        LOG_INFO << "face type" << multiVal[1];
+        charControl->model->cd.set(CharDetails::FACE, multiVal[1].toInt());
 
-        LOG_INFO << "hair color" << multiVal[0];
-        charControl->model->cd.setSkinColor(multiVal[2].toInt());
+        LOG_INFO << "hair color" << multiVal[2];
+        charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, multiVal[2].toInt());
 
-        LOG_INFO << "hair style" << multiVal[0];
-        charControl->model->cd.setSkinColor(multiVal[3].toInt());
+        LOG_INFO << "hair style" << multiVal[3];
+        charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, multiVal[3].toInt());
 
-        LOG_INFO << "facial hair" << multiVal[0];
-        charControl->model->cd.setSkinColor(multiVal[4].toInt());
+        LOG_INFO << "facial hair" << multiVal[4];
+        charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, multiVal[4].toInt());
       }
 
       // eye glow (if present)
@@ -2799,11 +2799,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 		}
 
 		// Update the model
-		g_charControl->model->cd.setSkinColor(result->skinColor);
-		g_charControl->model->cd.setFaceType(result->faceType);
-		g_charControl->model->cd.setHairColor(result->hairColor);
-		g_charControl->model->cd.setHairStyle(result->hairStyle);
-		g_charControl->model->cd.setFacialHair(result->facialHair);
+    g_charControl->model->cd.set(CharDetails::SKIN_COLOR, result->skinColor);
+    g_charControl->model->cd.set(CharDetails::FACE, result->faceType);
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, result->hairColor);
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, result->hairStyle);
+    g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, result->facialHair);
 		g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
 
 		if(result->customTabard)

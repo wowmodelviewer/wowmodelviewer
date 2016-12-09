@@ -89,12 +89,12 @@ void ModelBankControl::LoadModel()
 		return;
 
 	if (cd.modelType==MT_CHAR && g_charControl) {
-		g_charControl->model->cd.setFaceType(cd.faceType);
-		g_charControl->model->cd.setFacialHair(cd.facialHair);
-		g_charControl->model->cd.setHairColor(cd.hairColor);
-		g_charControl->model->cd.setHairStyle(cd.hairStyle);
-		g_charControl->model->cd.setSkinColor(cd.skinColor);
-
+		g_charControl->model->cd.set(CharDetails::SKIN_COLOR, cd.skinColor);
+    g_charControl->model->cd.set(CharDetails::FACE, cd.faceType);
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, cd.hairStyle);
+    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, cd.hairColor);
+    g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, cd.facialHair);
+		
 		g_charControl->model->cd.showEars = cd.showEars;
 		g_charControl->model->cd.showFacialHair = cd.showFacialHair;
 		g_charControl->model->cd.showFeet = cd.showFeet;
@@ -153,11 +153,11 @@ void ModelBankControl::AddModel()
 		//for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
 	  //  cd.equipment[i] = g_charControl->model->cd.equipment[i];
 
-		cd.faceType = g_charControl->model->cd.faceType();
-		cd.facialHair = g_charControl->model->cd.facialHair();
-		cd.hairColor = g_charControl->model->cd.hairColor();
-		cd.hairStyle = g_charControl->model->cd.hairStyle();
-		cd.skinColor = g_charControl->model->cd.skinColor();
+		cd.faceType = g_charControl->model->cd.get(CharDetails::FACE);
+    cd.facialHair = g_charControl->model->cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION);
+    cd.hairColor = g_charControl->model->cd.get(CharDetails::FACIAL_CUSTOMIZATION_COLOR);
+    cd.hairStyle = g_charControl->model->cd.get(CharDetails::FACIAL_CUSTOMIZATION_COLOR);
+    cd.skinColor = g_charControl->model->cd.get(CharDetails::SKIN_COLOR);
 
 		cd.showEars = g_charControl->model->cd.showEars;
 		cd.showFacialHair = g_charControl->model->cd.showFacialHair;

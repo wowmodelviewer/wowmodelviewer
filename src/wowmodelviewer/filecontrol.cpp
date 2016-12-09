@@ -406,7 +406,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_LOAD_SET, true);
 		modelviewer->charMenu->Enable(ID_LOAD_START, true);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, true);
-		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, true);
 		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, true);
 	}else if (modelviewer->isADT == true){
 		// If it's an ADT file...
@@ -423,7 +422,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}else if (modelviewer->isWMO == true){
 		// If the object is a WMO file...
@@ -440,7 +438,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}else{
 		// If it's not a 3D file...
@@ -457,7 +454,6 @@ void FileControl::UpdateInterface()
 		modelviewer->charMenu->Enable(ID_LOAD_SET, false);
 		modelviewer->charMenu->Enable(ID_LOAD_START, false);
 		modelviewer->charMenu->Enable(ID_MOUNT_CHARACTER, false);
-		modelviewer->charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		modelviewer->charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 	}
 

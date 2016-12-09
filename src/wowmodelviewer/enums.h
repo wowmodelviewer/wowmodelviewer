@@ -285,6 +285,8 @@ enum ObjectID {
 
 	ID_MOUNT,
 
+  ID_CHAR_RANDOMISE,
+
 	ID_EQUIPMENT = 5000
 };
 

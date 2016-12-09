@@ -8,9 +8,10 @@
 #include "CharDetails.h"
 
 #include <iostream>
+
+#include "animated.h" // randint
 #include "CharDetailsEvent.h"
 #include "Game.h"
-#include "TabardDetails.h"
 #include "WoWModel.h"
 #include "logger/Logger.h"
 
@@ -20,9 +21,7 @@
 
 CharDetails::CharDetails() :
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
-showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), isNPC(true), m_model(0),
-m_skinColor(0), m_skinColorMax(0), m_faceType(0), m_hairColor(0),
-m_hairStyle(0), m_hairStyleMax(0), m_facialHair(0), m_facialHairMax(0)
+showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), isNPC(true), m_model(0)
 {
 
 }
@@ -32,23 +31,23 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeStartElement("CharDetails");
 
   stream.writeStartElement("skinColor");
-  stream.writeAttribute("value", QString::number(m_skinColor));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[SKIN_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("faceType");
-  stream.writeAttribute("value", QString::number(m_faceType));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[FACE]));
   stream.writeEndElement();
 
   stream.writeStartElement("hairColor");
-  stream.writeAttribute("value", QString::number(m_hairColor));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("hairStyle");
-  stream.writeAttribute("value", QString::number(m_hairStyle));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("facialHair");
-  stream.writeAttribute("value", QString::number(m_facialHair));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION]));
   stream.writeEndElement();
 
   stream.writeStartElement("eyeGlowType");
@@ -97,36 +96,31 @@ void CharDetails::load(QString & f)
     {
       if(reader.name() == "skinColor")
       {
-        unsigned int skinColor = reader.attributes().value("value").toString().toUInt();
-        setSkinColor(skinColor);
+        set(SKIN_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if(reader.name() == "faceType")
       {
-        unsigned int faceType = reader.attributes().value("value").toString().toUInt();
-        setFaceType(faceType);
+        set(FACE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if(reader.name() == "hairColor")
       {
-        unsigned int hairColor = reader.attributes().value("value").toString().toUInt();
-        setHairColor(hairColor);
+        set(FACIAL_CUSTOMIZATION_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if(reader.name() == "hairStyle")
       {
-        unsigned int hairStyle = reader.attributes().value("value").toString().toUInt();
-        setHairStyle(hairStyle);
+        set(FACIAL_CUSTOMIZATION_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if(reader.name() == "facialHair")
       {
-        unsigned int facialHair = reader.attributes().value("value").toString().toUInt();
-        setFacialHair(facialHair);
+        set(ADDITIONAL_FACIAL_CUSTOMIZATION, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
@@ -174,12 +168,6 @@ void CharDetails::reset(WoWModel * model)
 {
   m_model = model;
 
-  m_skinColor = 0;
-  m_faceType = 0;
-  m_hairColor = 0;
-  m_hairStyle = 0;
-  m_facialHair = 0;
-
   m_currentCustomization.clear();
   m_currentCustomization.insert({ SKIN_COLOR, 0 });
   m_currentCustomization.insert({ FACE, 0 });
@@ -199,112 +187,7 @@ void CharDetails::reset(WoWModel * model)
 
   isNPC = false;
 
-  //updateMaxValues();
-  //updateValidValues();
   fillCustomizationMap();
-}
-
-void CharDetails::setSkinColor(size_t val)
-{
-  if(val != m_skinColor && val <= m_skinColorMax && val >= 0)
-  {
-    m_skinColor = val;
-    updateMaxValues();
-    updateValidValues();
- //   CharDetailsEvent event(this, CharDetailsEvent::SKINCOLOR_CHANGED);
-   // notify(event);
-  }
-}
-
-void CharDetails::setFaceType(size_t val)
-{
-  if(val != m_faceType && (find(m_validFaceTypes.begin(), m_validFaceTypes.end(), val) != m_validFaceTypes.end()) )
-  {
-    m_faceType = val;
- //   CharDetailsEvent event(this, CharDetailsEvent::FACETYPE_CHANGED);
-  //  notify(event);
-  }
-}
-
-void CharDetails::setHairColor(size_t val)
-{
-  if(val != m_hairColor && (find(m_validHairColors.begin(), m_validHairColors.end(), val) != m_validHairColors.end()) )
-  {
-    m_hairColor = val;
-   // CharDetailsEvent event(this, CharDetailsEvent::HAIRCOLOR_CHANGED);
-  //  notify(event);
-  }
-}
-
-void CharDetails::setHairStyle(size_t val)
-{
-  if(val != m_hairStyle && val <= m_hairStyleMax && val >= 0)
-  {
-    m_hairStyle = val;
-    updateMaxValues();
-   // CharDetailsEvent event(this, CharDetailsEvent::HAIRSTYLE_CHANGED);
-  //  notify(event);
-  }
-}
-
-void CharDetails::setFacialHair(size_t val)
-{
-  if(val != m_facialHair && val <= m_facialHairMax && val >= 0)
-  {
-    m_facialHair = val;
-    updateMaxValues();
-  //  CharDetailsEvent event(this, CharDetailsEvent::FACIALHAIR_CHANGED);
- //   notify(event);
-  }
-}
-
-void CharDetails::updateMaxValues()
-{
-  if(!m_model)
-    return;
-
-  m_skinColorMax = getNbValuesForSection(SkinType);
-
-  RaceInfos infos;
-  RaceInfos::getCurrent(m_model, infos);
-
-  QString query = QString("SELECT MAX(VariationID) FROM CharHairGeosets WHERE RaceID=%1 AND SexID=%2")
-                        .arg(infos.raceid)
-                        .arg(infos.sexid);
-
-  sqlResult hairStyles = GAMEDATABASE.sqlQuery(query);
-
-  if(hairStyles.valid && !hairStyles.values.empty())
-  {
-    m_hairStyleMax = hairStyles.values[0][0].toInt();
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of hair styles for model" << m_model->name();
-    LOG_ERROR << query;
-    m_hairStyleMax = 0;
-  }
-
-
-  query = QString("SELECT MAX(VariationID) FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2")
-                            .arg(infos.raceid)
-                            .arg(infos.sexid);
-
-  sqlResult facialHairStyles = GAMEDATABASE.sqlQuery(query);
-  if(facialHairStyles.valid && !facialHairStyles.values.empty())
-  {
-    m_facialHairMax = facialHairStyles.values[0][0].toInt();
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of facial hair styles for model" << m_model->name();
-    LOG_ERROR << query;
-    m_facialHairMax = 0;
-  }
-
-  if (m_skinColorMax == 0) m_skinColorMax = 1;
-  if (m_hairStyleMax == 0) m_hairStyleMax = 1;
-  if (m_facialHairMax == 0) m_facialHairMax = 1;
 }
 
 std::vector<int> CharDetails::getTextureForSection(SectionType section)
@@ -361,6 +244,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
                        .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
                        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
                        .arg(type);
+      LOG_INFO << query;
       break;
     case FacialHairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
@@ -391,114 +275,6 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
   }
 
   return result;
-}
-
-int CharDetails::getNbValuesForSection(SectionType section)
-{
-  int result = 0;
-
-  RaceInfos infos;
-  if(!RaceInfos::getCurrent(m_model, infos))
-    return result;
-
-  size_t type = section;
-
-  if(infos.isHD)
-    type+=5;
-
-  QString query;
-  switch(section)
-  {
-    case SkinType:
-      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(type);
-      break;
-    case FaceType:
-      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(skinColor())
-              .arg(type);
-      break;
-    case HairType:
-      query = QString("SELECT COUNT(*)-1 FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
-              .arg(infos.raceid)
-              .arg(infos.sexid)
-              .arg(hairStyle())
-              .arg(type);
-      break;
-    default:
-      query = "";
-  }
-
-  sqlResult vals = GAMEDATABASE.sqlQuery(query);
-
-  if(vals.valid && !vals.values.empty())
-  {
-    result = vals.values[0][0].toInt();
-
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of customization for model" << m_model->name();
-  }
-
-  return result;
-}
-
-void CharDetails::updateValidValues()
-{
-  if(!m_model)
-    return;
-
-  RaceInfos infos;
-  RaceInfos::getCurrent(m_model, infos);
-
-  // valid hair colours:
-  m_validHairColors.clear();
-  QString query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID=%1 "
-                          "AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4")
-                           .arg(infos.raceid)
-                           .arg(infos.sexid)
-                           .arg(hairStyle())
-                           .arg(infos.isHD? HairTypeHD : HairType);
-
-  sqlResult hairCols = GAMEDATABASE.sqlQuery(query);
-
-  if(hairCols.valid && !hairCols.values.empty())
-  {
-    for (int i = 0, j = hairCols.values.size(); i < j; i++)
-      m_validHairColors.push_back(hairCols.values[i][0].toInt());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect hair colours for model " << m_model->name();
-  }
-
-
-  // valid face types:
-  m_validFaceTypes.clear();
-  query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
-                  "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
-                           .arg(infos.raceid)
-                           .arg(infos.sexid)
-                           .arg(skinColor())
-                           .arg(infos.isHD? FaceTypeHD : FaceType);
-
-  sqlResult faces = GAMEDATABASE.sqlQuery(query);
-
-  if(faces.valid && !faces.values.empty())
-  {
-    for (int i = 0, j = faces.values.size(); i < j; i++)
-      m_validFaceTypes.push_back(faces.values[i][0].toInt());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect face types for model " << m_model->name();
-  }
-
 }
 
 void CharDetails::fillCustomizationMap()
@@ -571,7 +347,7 @@ void CharDetails::fillCustomizationMap()
     m_facialCustomizationMap.insert({ *it, face });
   }
 
-  m_customizationParamsMap.insert({ FACE, m_facialCustomizationMap[m_skinColor] });
+  m_customizationParamsMap.insert({ FACE, m_facialCustomizationMap[m_currentCustomization[SKIN_COLOR]] });
 
   // starting from here, customization may differ based on database values
   // get customization names
@@ -630,6 +406,8 @@ void CharDetails::fillCustomizationMap()
                   .arg(infos.raceid)
                   .arg(infos.sexid)
                   .arg(HairType + sectionOffset);
+
+  LOG_INFO << query;
 
   sqlResult colors = GAMEDATABASE.sqlQuery(query);
 
@@ -691,6 +469,7 @@ void CharDetails::set(CustomizationType type, unsigned int val)
     switch (type)
     {
       case SKIN_COLOR:
+        m_customizationParamsMap[FACE] = m_facialCustomizationMap[m_currentCustomization[SKIN_COLOR]];
         event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
         break;
       case FACE:
@@ -726,5 +505,11 @@ void CharDetails::set(CustomizationType type, unsigned int val)
 uint CharDetails::get(CustomizationType type) const
 {
   return m_currentCustomization.at(type);
+}
+
+void CharDetails::setRandomValue(CustomizationType type)
+{
+  uint maxVal = m_customizationParamsMap[type].possibleValues.size() - 1;
+  set(type, randint(0, maxVal));
 }
 
