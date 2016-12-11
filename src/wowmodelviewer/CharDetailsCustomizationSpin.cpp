@@ -51,6 +51,9 @@ void CharDetailsCustomizationSpin::onSpin(wxSpinEvent &event)
 
 void CharDetailsCustomizationSpin::onEvent(Event *)
 {
+  // update params for dynamically changing customization stuff (ie face type depends on skin color)
+  m_params = m_details.getParams(m_type);
+
   if (m_text)
   {
     uint pos = 0;
@@ -59,9 +62,13 @@ void CharDetailsCustomizationSpin::onEvent(Event *)
     for (; pos < m_params.possibleValues.size(); pos++)
       if (m_params.possibleValues[pos] == currentValue) break;
 
-    m_spin->SetValue(currentValue);
+    m_spin->SetValue(pos);
 
-    m_text->SetLabel(wxString::Format(wxT("%2i / %i"), pos, m_params.possibleValues.size() - 1));
+    // update max value and range
+    int max = (m_params.possibleValues.size() > 0) ? m_params.possibleValues.size() - 1 : 0;
+    m_spin->SetRange(0, max);
+
+    m_text->SetLabel(wxString::Format(wxT("%2i / %i"), pos, max));
   }
 }
 

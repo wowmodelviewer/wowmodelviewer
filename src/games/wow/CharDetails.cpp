@@ -1,4 +1,4 @@
-/*
+﻿/*
  * CharDetails.cpp
  *
  *  Created on: 26 oct. 2013
@@ -244,7 +244,6 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
                        .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
                        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
                        .arg(type);
-      LOG_INFO << query;
       break;
     case FacialHairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
@@ -292,7 +291,7 @@ void CharDetails::fillCustomizationMap()
 
   // clear any previous value found
   m_customizationParamsMap.clear();
-  m_facialCustomizationMap.clear();
+  m_multiCustomizationMap.clear();
 
   // common part for all characters
   // skin
@@ -319,7 +318,7 @@ void CharDetails::fillCustomizationMap()
   m_customizationParamsMap.insert({ SKIN_COLOR, skin });
 
   // face customization
-  // face possible customization depends on current skin color. We fill m_facialCustomizationMap first
+  // face possible customization depends on current skin color. We fill m_multiCustomizationMap first
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
@@ -344,10 +343,10 @@ void CharDetails::fillCustomizationMap()
       LOG_ERROR << "No face customization available for skin color" << *it << "for model" << m_model->name();
     }
 
-    m_facialCustomizationMap.insert({ *it, face });
+    m_multiCustomizationMap[FACE].insert({ *it, face });
   }
 
-  m_customizationParamsMap.insert({ FACE, m_facialCustomizationMap[m_currentCustomization[SKIN_COLOR]] });
+  m_customizationParamsMap.insert({ FACE, m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]] });
 
   // starting from here, customization may differ based on database values
   // get customization names
@@ -401,30 +400,35 @@ void CharDetails::fillCustomizationMap()
   m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, facialCustomizationStyle });
 
 
-  // facial color customization
-  query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 AND SectionType = %3")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
-                  .arg(HairType + sectionOffset);
-
-  LOG_INFO << query;
-
-  sqlResult colors = GAMEDATABASE.sqlQuery(query);
-
-  CustomizationParam facialCustomizationColor;
-  facialCustomizationColor.name = QString(facialCustomizationBaseName + " Color").toStdString();
-
-  if (colors.valid && !colors.values.empty())
+  // facial color customization depends on current facial style. We fill m_multiCustomizationMap first
+  for (auto it = facialCustomizationStyle.possibleValues.begin(), itEnd = facialCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
   {
-    for (uint i = 0; i < colors.values.size(); i++)
-      facialCustomizationColor.possibleValues.push_back(colors.values[i][0].toInt());
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect facial color parameters for model" << m_model->name();
+    query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 "
+                    "AND SectionType = %3 AND VariationIndex = %4")
+                    .arg(infos.raceid)
+                    .arg(infos.sexid)
+                    .arg(HairType + sectionOffset)
+                    .arg(*it);
+
+    sqlResult colors = GAMEDATABASE.sqlQuery(query);
+
+    CustomizationParam facialColor;
+    facialColor.name = QString(facialCustomizationBaseName + " Color").toStdString();
+
+    if (colors.valid && !colors.values.empty())
+    {
+      for (uint i = 0; i < colors.values.size(); i++)
+        facialColor.possibleValues.push_back(colors.values[i][0].toInt());
+    }
+    else
+    {
+      LOG_ERROR << "No facial color available for facial customization style " << *it << "for model" << m_model->name();
+    }
+
+    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, facialColor });
   }
 
-  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, facialCustomizationColor });
+  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]] });
 
   // addtional facial customization
   query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2")
@@ -469,15 +473,32 @@ void CharDetails::set(CustomizationType type, unsigned int val)
     switch (type)
     {
       case SKIN_COLOR:
-        m_customizationParamsMap[FACE] = m_facialCustomizationMap[m_currentCustomization[SKIN_COLOR]];
+      {
+        m_customizationParamsMap[FACE] = m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]];
+
+        // reset current face if not available for this skin color
+        std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
+        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
+          m_currentCustomization[FACE] = vec[0];
+
         event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
         break;
+      }
       case FACE:
         event.setType((Event::EventType)CharDetailsEvent::FACE_CHANGED);
         break;
       case FACIAL_CUSTOMIZATION_STYLE:
+      {
+        m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR] = m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]];
+
+        // reset current hair color if not available for this hair style
+        std::vector<int> & vec = m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
+        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
+          m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
+
         event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
         break;
+      }
       case FACIAL_CUSTOMIZATION_COLOR:
         event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
         break;

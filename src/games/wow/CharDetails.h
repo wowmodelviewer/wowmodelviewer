@@ -102,7 +102,8 @@ class _CHARDETAILS_API_ CharDetails : public Observable
     void fillCustomizationMap();
 
     std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
-    std::map<int, CustomizationParam> m_facialCustomizationMap;
+    std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
+
 
     std::map<CustomizationType, uint> m_currentCustomization;
 };
