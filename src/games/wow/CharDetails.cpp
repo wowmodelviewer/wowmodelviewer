@@ -534,3 +534,25 @@ void CharDetails::setRandomValue(CustomizationType type)
   set(type, randint(0, maxVal));
 }
 
+std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions() const
+{
+  std::vector<CustomizationType> result;
+
+  RaceInfos infos;
+  if (!RaceInfos::getCurrent(m_model, infos))
+    return result;
+
+
+  LOG_INFO << __FUNCTION__ << infos.raceid << infos.sexid;
+
+  result.push_back(SKIN_COLOR);
+  result.push_back(FACE);
+  result.push_back(FACIAL_CUSTOMIZATION_STYLE);
+  // pandaren male hair color can't be defined
+  if (!((infos.raceid == 24) && (infos.sexid == 0)))
+    result.push_back(FACIAL_CUSTOMIZATION_COLOR);
+  result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
+
+  return result;
+}
+

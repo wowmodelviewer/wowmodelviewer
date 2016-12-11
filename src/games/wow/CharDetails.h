@@ -96,6 +96,8 @@ class _CHARDETAILS_API_ CharDetails : public Observable
 
     void setRandomValue(CustomizationType type);
 
+    std::vector<CustomizationType> getCustomizationOptions() const;
+
   private:
     WoWModel * m_model;
 
