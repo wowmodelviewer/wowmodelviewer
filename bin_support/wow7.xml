@@ -110,8 +110,9 @@
     <field type="byte" name="Sheath" pos="9" />
   </table>
   <table name="ItemClass">
-    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="col0" primary="yes" />
     <field type="text" name="Name" pos="4" />
+    <field type="uint" name="ID" pos="8" createIndex="yes" />
   </table>
   <table name="ItemSubClass">
     <field type="uint" name="col0" primary="yes" />
