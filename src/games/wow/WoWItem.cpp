@@ -815,7 +815,9 @@ void WoWItem::refresh()
           Vec3D rot(0., 0., 0.);
 
           // if item is a warglaive, mirror it in hand
-          if ((item.itemclass == 2) && (item.subclass == 9))
+          if (((item.itemclass == 2) && (item.subclass == 9) && (item.sheath == 27)) ||
+              // and same if it's a fist
+              ((item.itemclass == 2) && (item.subclass == 13)))
             rot.y = 180.;
 
           m_charModel->attachment->addChild(it->second, attachement, m_slot, 1., rot);
