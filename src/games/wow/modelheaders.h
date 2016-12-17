@@ -23,13 +23,11 @@ struct CharModelDetails {
 	bool closeLHand;
 
 	bool isChar;
-	bool isMounted;
 
 	void Reset() {
 		closeRHand = false;
 		closeLHand = false;
 		isChar = false;
-		isMounted = false;
 	}
 };
 

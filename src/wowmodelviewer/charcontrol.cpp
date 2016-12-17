@@ -1188,7 +1188,6 @@ void CharControl::OnUpdateItem(int type, int id)
       if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
       {
         // clearing the mount
-        model->charModelDetails.isMounted = false;
         g_canvas->model = model;
         g_canvas->ResetView();
         if (charAtt)
@@ -1263,10 +1262,10 @@ void CharControl::OnUpdateItem(int type, int id)
         model->animManager->SetAnim(0,(short)model->currentAnim,0);
       }		
       g_canvas->curAtt = g_canvas->root;
-      model->charModelDetails.isMounted = true;
+  
       if (charAtt)
       { 
-        charAtt->parent = g_canvas->root;
+         charAtt->parent = g_canvas->root;
           // Need to set this - but from what
           // Model data doesn't contain sizes for different race/gender
           // Character data doesn't contain sizes for different mounts

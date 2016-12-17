@@ -1132,8 +1132,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
   // wxAUI
   // hide charControl if current model is not a Character one.
-  if(!g_charControl->model->charModelDetails.isChar)
-    interfaceManager.GetPane(charControl).Show(false);
+  interfaceManager.GetPane(charControl).Show(isChar);
 
   interfaceManager.Update();
 }
