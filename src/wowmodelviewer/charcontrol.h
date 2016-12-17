@@ -3,7 +3,7 @@
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 // stl
@@ -28,60 +28,60 @@ class ModelViewer;
 
 bool slotHasModel(size_t i);
 
-class CharControl: public wxWindow, public Observer
+class CharControl : public wxWindow, public Observer
 {
-	DECLARE_CLASS(CharControl)
-    DECLARE_EVENT_TABLE()
+  DECLARE_CLASS(CharControl)
+  DECLARE_EVENT_TABLE()
 
-	wxSpinButton *tabardSpins[NUM_TABARD_BTNS];
-	wxButton *buttons[NUM_CHAR_SLOTS];
-	wxComboBox *levelboxes[NUM_CHAR_SLOTS];
-	wxStaticText *labels[NUM_CHAR_SLOTS];
-	wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
-	CharDetailsFrame * cdFrame;
+  wxSpinButton *tabardSpins[NUM_TABARD_BTNS];
+  wxButton *buttons[NUM_CHAR_SLOTS];
+  wxComboBox *levelboxes[NUM_CHAR_SLOTS];
+  wxStaticText *labels[NUM_CHAR_SLOTS];
+  wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
+  CharDetailsFrame * cdFrame;
 
-	void onEvent(Event *);
-	void tryToEquipItem(int id);
+  void onEvent(Event *);
+  void tryToEquipItem(int id);
 
-public:
-	// Item selection stuff
-	ChoiceDialog *itemDialog;
-	ssize_t choosingSlot;
-	std::vector<int> numbers, cats;
-	wxArrayString choices, catnames;
+  public:
+  // Item selection stuff
+  ChoiceDialog *itemDialog;
+  ssize_t choosingSlot;
+  std::vector<int> numbers, cats;
+  wxArrayString choices, catnames;
 
-	CharControl(wxWindow* parent, wxWindowID id);
-	~CharControl();
+  CharControl(wxWindow* parent, wxWindowID id);
+  ~CharControl();
 
-	bool Init();
-	void UpdateModel(Attachment *a);
-	
-	void RefreshModel();
-	void RefreshEquipment();
-	inline void RandomiseChar();
+  bool Init();
+  void UpdateModel(Attachment *a);
 
-	void OnTabardSpin(wxSpinEvent &event);
-	void OnCheck(wxCommandEvent &event);
-	void OnButton(wxCommandEvent &event);
-	void OnItemLevelChange(wxCommandEvent& event);
+  void RefreshModel();
+  void RefreshEquipment();
+  inline void RandomiseChar();
 
-	void OnUpdateItem(int type, int id);
+  void OnTabardSpin(wxSpinEvent &event);
+  void OnCheck(wxCommandEvent &event);
+  void OnButton(wxCommandEvent &event);
+  void OnItemLevelChange(wxCommandEvent& event);
 
-	Attachment *charAtt;
-	WoWModel *model;
+  void OnUpdateItem(int type, int id);
 
-	wxString customSkin;
+  Attachment *charAtt;
+  WoWModel *model;
 
-	void ClearItemDialog();
+  wxString customSkin;
 
-	void selectItem(ssize_t type, ssize_t slot, const wxChar *caption=wxT("Item"));
-	void selectSet();
-	void selectStart();
-	void selectMount();
-	void selectNPC(ssize_t type);
+  void ClearItemDialog();
 
-	const wxString selectCharModel();
-	static QString getItemName(ItemRecord &);
+  void selectItem(ssize_t type, ssize_t slot, const wxChar *caption = wxT("Item"));
+  void selectSet();
+  void selectStart();
+  void selectMount();
+  void selectNPC(ssize_t type);
+
+  const wxString selectCharModel();
+  static QString getItemName(ItemRecord &);
 };
 
 

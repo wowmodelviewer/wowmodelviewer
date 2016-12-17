@@ -18,7 +18,7 @@
 IMPLEMENT_CLASS(CharDetailsFrame, wxWindow)
 
 BEGIN_EVENT_TABLE(CharDetailsFrame, wxWindow)
-  EVT_BUTTON(wxID_ANY, CharDetailsFrame::onRandomise)
+EVT_BUTTON(wxID_ANY, CharDetailsFrame::onRandomise)
 END_EVENT_TABLE()
 
 
@@ -32,8 +32,8 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 
   charCustomizationGS = new wxFlexGridSizer(1);
   charCustomizationGS->AddGrowableCol(0);
-  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1,20), wxALIGN_CENTER),
-                            wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
+  top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1, 20), wxALIGN_CENTER),
+           wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
 
   top->Add(charCustomizationGS, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
   top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
@@ -46,7 +46,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
 void CharDetailsFrame::setModel(CharDetails & details)
 {
   m_details = &details;
- 
+
   charCustomizationGS->Clear(true);
 
   std::vector<CharDetails::CustomizationType> options = m_details->getCustomizationOptions();

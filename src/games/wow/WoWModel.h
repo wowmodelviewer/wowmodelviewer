@@ -53,173 +53,175 @@ class QXmlStreamReader;
 #    define _WOWMODEL_API_
 #endif
 
-class _WOWMODEL_API_ WoWModel: public ManagedItem, public Displayable, public Model, public Container<WoWItem>
+class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
-	// VBO Data
-	GLuint vbuf, nbuf, tbuf;
-	size_t vbufsize;
+  // VBO Data
+  GLuint vbuf, nbuf, tbuf;
+  size_t vbufsize;
 
-	// Non VBO Data
-	GLuint dlist;
-	bool forceAnim;
+  // Non VBO Data
+  GLuint dlist;
+  bool forceAnim;
 
-	inline void drawModel();
-	void initCommon(GameFile * f);
-	bool isAnimated(GameFile * f);
-	void initAnimated(GameFile * f);
-	void initStatic(GameFile * f);
+  inline void drawModel();
+  void initCommon(GameFile * f);
+  bool isAnimated(GameFile * f);
+  void initAnimated(GameFile * f);
+  void initStatic(GameFile * f);
 
-	void animate(ssize_t anim);
-	void calcBones(ssize_t anim, size_t time);
+  void animate(ssize_t anim);
+  void calcBones(ssize_t anim, size_t time);
 
-	void lightsOn(GLuint lbase);
-	void lightsOff(GLuint lbase);
+  void lightsOn(GLuint lbase);
+  void lightsOff(GLuint lbase);
 
-	uint16 *boundTris;
+  uint16 *boundTris;
 
 public:
-	bool animGeometry,animTextures,animBones;
+  bool animGeometry, animTextures, animBones;
 
-	TextureAnim		*texAnims;
-	uint32			*globalSequences;
-	ModelColor		*colors;
-	ModelTransparency *transparency;
-	ModelLight		*lights;
-	ParticleSystem	*particleSystems;
-	RibbonEmitter	*ribbons;
-	ModelEvent		*events;
-	Vec3D *bounds;
+  TextureAnim		*texAnims;
+  uint32			*globalSequences;
+  ModelColor		*colors;
+  ModelTransparency *transparency;
+  ModelLight		*lights;
+  ParticleSystem	*particleSystems;
+  RibbonEmitter	*ribbons;
+  ModelEvent		*events;
+  Vec3D *bounds;
   GameFile * gamefile;
 
-	std::vector<uint> replacableParticleColorIDs;
-	bool replaceParticleColors;
+  std::vector<uint> replacableParticleColorIDs;
+  bool replaceParticleColors;
 
-	// Start, Mid and End colours, for cases where the model's particle colours are
-	// overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
-	typedef std::vector<Vec4D> particleColorSet;
+  // Start, Mid and End colours, for cases where the model's particle colours are
+  // overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
+  typedef std::vector<Vec4D> particleColorSet;
 
-	// The particle will get its replacement colour set from 0, 1 or 2,
-	// depending on whether its ParticleColorIndex is set to 11, 12 or 13:
-	std::vector<particleColorSet> particleColorReplacements;
-	// Raw Data
-	ModelVertex *origVertices;
+  // The particle will get its replacement colour set from 0, 1 or 2,
+  // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
+  std::vector<particleColorSet> particleColorReplacements;
+  // Raw Data
+  ModelVertex *origVertices;
 
-	Vec3D *vertices, *normals;
-	Vec2D *texCoords;
-	uint16 *indices;
-	uint32 nIndices;
-	std::vector<GameFile *> TextureList;
-	// --
+  Vec3D *vertices, *normals;
+  Vec2D *texCoords;
+  uint16 *indices;
+  uint32 nIndices;
+  std::vector<GameFile *> TextureList;
+  // --
 
-	WoWModel(GameFile * file, bool forceAnim=false);
-	~WoWModel();
+  WoWModel(GameFile * file, bool forceAnim = false);
+  ~WoWModel();
 
-	std::vector<ModelCamera> cam;
-	std::string modelname;
-	std::string lodname;
-	
-	std::vector<ModelRenderPass> passes;
-	std::vector<ModelGeosetHD> geosets;
+  std::vector<ModelCamera> cam;
+  std::string modelname;
+  std::string lodname;
 
-	// ===============================
-	// Toggles
-	bool *showGeosets;
-	bool showBones;
-	bool showBounds;
-	bool showWireframe;
-	bool showParticles;
-	bool showModel;
-	bool showTexture;
-	float alpha;
+  std::vector<ModelRenderPass> passes;
+  std::vector<ModelGeosetHD> geosets;
 
-	// Position and rotation vector
-	Vec3D pos;
-	Vec3D rot;
+  // ===============================
+  // Toggles
+  bool *showGeosets;
+  bool showBones;
+  bool showBounds;
+  bool showWireframe;
+  bool showParticles;
+  bool showModel;
+  bool showTexture;
+  float alpha;
 
-	//
-	bool ok;
-	bool ind;
-	bool hasCamera;
-	bool hasParticles;
-	bool isWMO;
-	bool isMount;
-	bool animated;
+  // Position and rotation vector
+  Vec3D pos;
+  Vec3D rot;
 
-	// Misc values
-	float rad;
-	float trans;
+  //
+  bool ok;
+  bool ind;
+  bool hasCamera;
+  bool hasParticles;
+  bool isWMO;
+  bool isMount;
+  bool animated;
 
-	// -------------------------------
+  // Misc values
+  float rad;
+  float trans;
 
-	// ===============================
-	// Bone & Animation data
-	// ===============================
-	ModelAnimation *anims;
-	int16 *animLookups;
-	AnimManager *animManager;
-	Bone *bones;
-	std::vector<GameFile *> animfiles;
+  // -------------------------------
 
-	size_t currentAnim;
-	bool animcalc;
-	size_t anim, animtime;
+  // ===============================
+  // Bone & Animation data
+  // ===============================
+  ModelAnimation *anims;
+  int16 *animLookups;
+  AnimManager *animManager;
+  Bone *bones;
+  std::vector<GameFile *> animfiles;
 
-	void reset() { 
-		animcalc = false; 
-	}
+  size_t currentAnim;
+  bool animcalc;
+  size_t anim, animtime;
 
-	
-	void update(int dt) {  // (float dt)
-		if (animated)
-			animManager->Tick(dt);
+  void reset()
+  {
+    animcalc = false;
+  }
 
-		updateEmitters((dt/1000.0f)); 
-	};
-	// -------------------------------
 
-	// ===============================
-	// Texture data
-	// ===============================
-	TextureID *textures;
-	int specialTextures[TEXTURE_MAX];
-	GLuint replaceTextures[TEXTURE_MAX];
-	bool useReplaceTextures[TEXTURE_MAX];
-	CharTexture tex;
-	// -------------------------------
+  void update(int dt)
+  {  // (float dt)
+    if (animated)
+      animManager->Tick(dt);
 
-	// ===============================
-	// 
+    updateEmitters((dt / 1000.0f));
+  };
+  // -------------------------------
 
-	// ===============================
-	// Rendering Routines
-	// ===============================
-	void drawBones();
-	void drawBoundingVolume();
-	void drawParticles();
-	void draw();
-	// -------------------------------
-	
-	void updateEmitters(float dt);
-	void setLOD(GameFile * f, int index);
+  // ===============================
+  // Texture data
+  // ===============================
+  TextureID *textures;
+  int specialTextures[TEXTURE_MAX];
+  GLuint replaceTextures[TEXTURE_MAX];
+  bool useReplaceTextures[TEXTURE_MAX];
+  CharTexture tex;
+  // -------------------------------
 
-	void setupAtt(int id);
-	void setupAtt2(int id);
+  // ===============================
+  // 
 
-	std::vector<ModelAttachment> atts;
-	static const size_t ATT_MAX = 60;
-	int16 attLookup[ATT_MAX];
-	int16 keyBoneLookup[BONE_MAX];
+  // ===============================
+  // Rendering Routines
+  // ===============================
+  void drawBones();
+  void drawBoundingVolume();
+  void drawParticles();
+  void draw();
+  // -------------------------------
 
-	ModelType modelType;
-	CharModelDetails charModelDetails;
-	CharDetails cd;
-	TabardDetails td;
-	ModelHeader header;
-	TextureID charTex, hairTex, furTex, capeTex, gobTex;
+  void updateEmitters(float dt);
+  void setLOD(GameFile * f, int index);
 
-	bool bSheathe;
+  void setupAtt(int id);
+  void setupAtt2(int id);
 
-	friend struct ModelRenderPass;
+  std::vector<ModelAttachment> atts;
+  static const size_t ATT_MAX = 60;
+  int16 attLookup[ATT_MAX];
+  int16 keyBoneLookup[BONE_MAX];
+
+  ModelType modelType;
+  CharModelDetails charModelDetails;
+  CharDetails cd;
+  TabardDetails td;
+  ModelHeader header;
+  TextureID charTex, hairTex, furTex, capeTex, gobTex;
+
+  bool bSheathe;
+
+  friend struct ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
   void UpdateTextureList(GameFile * tex, int special);

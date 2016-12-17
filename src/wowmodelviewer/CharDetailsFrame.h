@@ -9,8 +9,9 @@
 #define _CHARDETAILSFRAME_H_
 
 #ifndef WX_PRECOMP
-  #include <wx/wx.h>
+#  include <wx/wx.h>
 #endif
+
 #include <wx/window.h>
 class wxSpinButton;
 class wxSpinEvent;
@@ -21,25 +22,25 @@ class wxStaticText;
 
 class CharDetailsFrame : public wxWindow
 {
-  public:
-    CharDetailsFrame(wxWindow* parent);
+public:
+  CharDetailsFrame(wxWindow* parent);
 
-    void randomiseChar();
-    void setModel(CharDetails & details);
-
-
-  protected:
+  void randomiseChar();
+  void setModel(CharDetails & details);
 
 
-  private:
-    DECLARE_CLASS(CharDetailsFrame)
-      DECLARE_EVENT_TABLE()
+protected:
 
-    wxFlexGridSizer * charCustomizationGS;
 
-    void onRandomise(wxCommandEvent &event);
+private:
+  DECLARE_CLASS(CharDetailsFrame)
+  DECLARE_EVENT_TABLE()
 
-    CharDetails * m_details;
+  wxFlexGridSizer * charCustomizationGS;
+
+  void onRandomise(wxCommandEvent &event);
+
+  CharDetails * m_details;
 };
 
 
