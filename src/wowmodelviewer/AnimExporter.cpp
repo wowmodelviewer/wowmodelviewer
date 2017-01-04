@@ -77,7 +77,7 @@ void CAnimationExporter::Init(const wxString fn)
 	m_iNewWidth = 0;
 	m_iNewHeight = 0;
 
-	m_iTotalAnimFrames = g_canvas->model->animManager->GetFrameCount();
+	m_iTotalAnimFrames = g_canvas->model()->animManager->GetFrameCount();
 	m_strFilename = fn;
 
 	lblFile->SetLabel(fn);
@@ -113,7 +113,7 @@ CAnimationExporter::~CAnimationExporter()
 // This must be called before any frame-saving is attempted.
 void CAnimationExporter::CreateGif()
 {
-	if (!g_canvas || !g_canvas->model || !g_canvas->model->animManager) {
+	if (!g_canvas || !g_canvas->model() || !g_canvas->model()->animManager) {
 		wxMessageBox(wxT("Unable to create animated GIF!"), wxT("Error"));
 		LOG_ERROR << "Unable to created animated GIF.  A required objects pointer was null!";
 		Show(false);
@@ -137,10 +137,10 @@ void CAnimationExporter::CreateGif()
 	// Pause our rendering to screen so we can focus on making the animated image
 	video.render = false;
 	
-	m_fAnimSpeed = g_canvas->model->animManager->GetSpeed(); // Save the old animation speed
-	g_canvas->model->animManager->SetSpeed(1.0f);	// Set it to the normal speed.
+	m_fAnimSpeed = g_canvas->model()->animManager->GetSpeed(); // Save the old animation speed
+	g_canvas->model()->animManager->SetSpeed(1.0f);	// Set it to the normal speed.
 
-	m_iTotalAnimFrames = g_canvas->model->animManager->GetFrameCount();
+	m_iTotalAnimFrames = g_canvas->model()->animManager->GetFrameCount();
 	wxString(txtFrames->GetValue()).ToLong((long*)&m_iTotalFrames);
 	wxString(txtDelay->GetValue()).ToLong((long*)&m_iDelay);
 
@@ -200,9 +200,9 @@ void CAnimationExporter::CreateGif()
 	}
 	
 	// Stop our animation
-	g_canvas->model->animManager->Pause(true);
-	g_canvas->model->animManager->Stop();
-	g_canvas->model->animManager->AnimateParticles();
+	g_canvas->model()->animManager->Pause(true);
+	g_canvas->model()->animManager->Stop();
+	g_canvas->model()->animManager->AnimateParticles();
 
 	// Size of our buffer to hold the pixel data
 	m_iSize = m_iWidth*m_iHeight*4;	// (width*height*bytesPerPixel)	
@@ -225,8 +225,8 @@ void CAnimationExporter::CreateGif()
 		newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth*4), false);
 
 		// not needed due to the code just below, which fixes the issue with particles
-		//g_canvas->model->animManager->SetTimeDiff(m_iTimeStep);
-		//g_canvas->model->animManager->Tick(m_iTimeStep);
+		//g_canvas->model()->animManager->SetTimeDiff(m_iTimeStep);
+		//g_canvas->model()->animManager->Tick(m_iTimeStep);
 
 		if (g_canvas->root)
 			g_canvas->root->tick((float)m_iTimeStep);
@@ -295,8 +295,8 @@ void CAnimationExporter::CreateGif()
 		}
 
 		// not needed due to the code just below, which fixes the issue with particles
-		//g_canvas->model->animManager->SetTimeDiff(m_iTimeStep);
-		//g_canvas->model->animManager->Tick(m_iTimeStep);
+		//g_canvas->model()->animManager->SetTimeDiff(m_iTimeStep);
+		//g_canvas->model()->animManager->Tick(m_iTimeStep);
 		if (g_canvas->root)
 			g_canvas->root->tick((float)m_iTimeStep);
 		if (g_canvas->sky)
@@ -384,8 +384,8 @@ void CAnimationExporter::CreateGif()
 
 	LOG_INFO << "GIF Animation successfully created.";
 
-	g_canvas->model->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
-	g_canvas->model->animManager->Play();
+	g_canvas->model()->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
+	g_canvas->model()->animManager->Play();
 
 	Show(false);
 
@@ -434,7 +434,7 @@ void CAnimationExporter::OnCheck(wxCommandEvent &event)
 void CAnimationExporter::CreateAvi(wxString fn)
 {
 
-	if (!g_canvas || !g_canvas->model || !g_canvas->model->animManager) {
+	if (!g_canvas || !g_canvas->model() || !g_canvas->model()->animManager) {
 		wxMessageBox(wxT("Unable to create AVI animation!"), wxT("Error"));
 		LOG_ERROR << "Unable to created AVI animation.  A required object pointer was null!";
 		return;
@@ -444,10 +444,10 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	video.render = false;
 
 	// Save the old animation speed and set back to default
-	m_fAnimSpeed = g_canvas->model->animManager->GetSpeed(); 
-	g_canvas->model->animManager->SetSpeed(1.0f);	// Set it to the normal speed.
+	m_fAnimSpeed = g_canvas->model()->animManager->GetSpeed(); 
+	g_canvas->model()->animManager->SetSpeed(1.0f);	// Set it to the normal speed.
 
-	m_iTotalAnimFrames = g_canvas->model->animManager->GetFrameCount();
+	m_iTotalAnimFrames = g_canvas->model()->animManager->GetFrameCount();
 	m_iTotalFrames = (m_iTotalAnimFrames / 25);
 
 	if (video.supportPBO || video.supportVBO) { // if either are supported use our 'RenderTexture' object.
@@ -508,9 +508,9 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	AviGen.InitEngineForWrite((HWND)this->GetParent()->GetHandle());
 	
 	// Stop our animation
-	g_canvas->model->animManager->Pause(true);
-	g_canvas->model->animManager->Stop();
-	g_canvas->model->animManager->AnimateParticles();
+	g_canvas->model()->animManager->Pause(true);
+	g_canvas->model()->animManager->Stop();
+	g_canvas->model()->animManager->AnimateParticles();
 
 	// Create one frame to make our optimal colour palette from.
 	unsigned char *buffer = new unsigned char[bufSize];
@@ -522,8 +522,8 @@ void CAnimationExporter::CreateAvi(wxString fn)
 		AviGen.AddFrame(buffer);
 
 		// not needed due to the code just below
-		//g_canvas->model->animManager->SetTimeDiff(timeStep);
-		//g_canvas->model->animManager->Tick(timeStep);
+		//g_canvas->model()->animManager->SetTimeDiff(timeStep);
+		//g_canvas->model()->animManager->Tick(timeStep);
 
 		// Animate particles
 		if (g_canvas->root)
@@ -547,8 +547,8 @@ void CAnimationExporter::CreateAvi(wxString fn)
 		wxDELETE(g_canvas->rt);
 	}
 
-	g_canvas->model->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
-	g_canvas->model->animManager->Play();
+	g_canvas->model()->animManager->SetSpeed(m_fAnimSpeed); // Return the animation speed back to whatever it was previously set as
+	g_canvas->model()->animManager->Play();
 	video.render = true;
 	g_canvas->InitView();
 }

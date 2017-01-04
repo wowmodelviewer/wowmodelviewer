@@ -82,9 +82,10 @@ void ModelBankControl::LoadModel()
 
 	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(cd.fileName.c_str()));
 
-	if (g_canvas->model) {
-		g_canvas->model->pos = cd.pos;
-		g_canvas->model->rot = cd.rot;
+	if (g_canvas->model()) {
+    WoWModel * m = const_cast<WoWModel *>(g_canvas->model());
+		m->pos = cd.pos;
+		m->rot = cd.rot;
 	} else
 		return;
 
@@ -121,7 +122,7 @@ void ModelBankControl::LoadModel()
 
 void ModelBankControl::AddModel()
 {
-	if (!g_canvas || !g_canvas->model)
+	if (!g_canvas || !g_canvas->model())
 		return;
 
 	if (txtName->GetValue().IsEmpty() == true)
@@ -129,20 +130,20 @@ void ModelBankControl::AddModel()
 
 	ModelBank cd;
 
-	cd.fileName = wxString(g_canvas->model->name().toStdString());
+	cd.fileName = wxString(g_canvas->model()->name().toStdString());
 	cd.name = txtName->GetValue();
 
-	cd.pos = g_canvas->model->pos;
-	cd.rot = g_canvas->model->rot;
+	cd.pos = g_canvas->model()->pos;
+	cd.rot = g_canvas->model()->rot;
 
-	cd.modelType = g_canvas->model->modelType;
+	cd.modelType = g_canvas->model()->modelType;
 
 	if (cd.modelType == MT_NORMAL) {
 		int val = g_animControl->skinList->GetSelection();
 		TextureGroup *grp = (TextureGroup*) g_animControl->skinList->GetClientData(val);
 
 		for (size_t i=0; i<grp->count; i++) {
-			if (g_canvas->model->useReplaceTextures[grp->base+i]) {
+			if (g_canvas->model()->useReplaceTextures[grp->base+i]) {
 				cd.textures.push_back(grp->tex[i]);
 			}
 		}

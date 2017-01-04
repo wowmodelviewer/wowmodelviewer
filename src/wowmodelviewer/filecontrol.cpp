@@ -353,7 +353,7 @@ void FileControl::ClearCanvas()
 			modelviewer->charControl->charAtt = NULL;
 		}
 		//wxDELETE(modelviewer->canvas->model); // may memory leak
-		modelviewer->canvas->model = NULL;
+		modelviewer->canvas->setModel(NULL);
 	} else if (modelviewer->isADT) {
 		wxDELETE(modelviewer->canvas->adt);
 		modelviewer->canvas->adt = NULL;
@@ -482,7 +482,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 	if (filterMode == FILE_FILTER_MODEL) {
 	  wxString rootfn(data->file->fullname().toStdString());
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model && !modelviewer->canvas->model->name().isEmpty() && modelviewer->canvas->model->name().toStdString() == std::string(rootfn.c_str()))
+		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdString() == std::string(rootfn.c_str()))
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();

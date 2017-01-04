@@ -861,8 +861,8 @@ void ModelViewer::SaveSession()
       config.setValue("Session/BackgroundImage", "");
 
     // model file
-    if (canvas->model)
-      config.setValue("Session/Model", canvas->model->name());
+    if (canvas->model())
+      config.setValue("Session/Model", canvas->model()->name());
   }
 }
 
@@ -946,22 +946,23 @@ void ModelViewer::LoadModel(GameFile * file)
     }
 
     // add children to manage items equipped
-    canvas->model->addChild(new WoWItem(CS_SHIRT));
-    canvas->model->addChild(new WoWItem(CS_HEAD));
-    canvas->model->addChild(new WoWItem(CS_SHOULDER));
-    canvas->model->addChild(new WoWItem(CS_PANTS));
-    canvas->model->addChild(new WoWItem(CS_BOOTS));
-    canvas->model->addChild(new WoWItem(CS_CHEST));
-    canvas->model->addChild(new WoWItem(CS_TABARD));
-    canvas->model->addChild(new WoWItem(CS_BELT));
-    canvas->model->addChild(new WoWItem(CS_BRACERS));
-    canvas->model->addChild(new WoWItem(CS_GLOVES));
-    canvas->model->addChild(new WoWItem(CS_HAND_RIGHT));
-    canvas->model->addChild(new WoWItem(CS_HAND_LEFT));
-    canvas->model->addChild(new WoWItem(CS_CAPE));
-    canvas->model->addChild(new WoWItem(CS_QUIVER));
-    canvas->model->modelType = MT_CHAR;
-    canvas->model->cd.reset(canvas->model);
+    WoWModel * m = const_cast<WoWModel *>(canvas->model());
+    m->addChild(new WoWItem(CS_SHIRT));
+    m->addChild(new WoWItem(CS_HEAD));
+    m->addChild(new WoWItem(CS_SHOULDER));
+    m->addChild(new WoWItem(CS_PANTS));
+    m->addChild(new WoWItem(CS_BOOTS));
+    m->addChild(new WoWItem(CS_CHEST));
+    m->addChild(new WoWItem(CS_TABARD));
+    m->addChild(new WoWItem(CS_BELT));
+    m->addChild(new WoWItem(CS_BRACERS));
+    m->addChild(new WoWItem(CS_GLOVES));
+    m->addChild(new WoWItem(CS_HAND_RIGHT));
+    m->addChild(new WoWItem(CS_HAND_LEFT));
+    m->addChild(new WoWItem(CS_CAPE));
+    m->addChild(new WoWItem(CS_QUIVER));
+    m->modelType = MT_CHAR;
+    m->cd.reset(m);
   }
   else
   {
@@ -974,23 +975,25 @@ void ModelViewer::LoadModel(GameFile * file)
       return;
     }
     // creature model, keep left/right hand only as equipment
-    canvas->model->addChild(new WoWItem(CS_HAND_RIGHT));
-    canvas->model->addChild(new WoWItem(CS_HAND_LEFT));
-    canvas->model->modelType = MT_NORMAL;
+    WoWModel * m = const_cast<WoWModel *>(canvas->model());
+    m->addChild(new WoWItem(CS_HAND_RIGHT));
+    m->addChild(new WoWItem(CS_HAND_LEFT));
+    m->modelType = MT_NORMAL;
   }
 
   // Error check,  make sure the model was actually loaded and set to canvas->model
-  if (!canvas->model)
+  if (!canvas->model())
   {
     LOG_ERROR << "[ModelViewer::LoadModel()]  Model* Canvas::model is null!";
     return;
   }
 
-  SetStatusText(canvas->model->name().toStdString());
-  canvas->model->charModelDetails.isChar = isChar;
+  SetStatusText(canvas->model()->name().toStdString());
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  m->charModelDetails.isChar = isChar;
 
-  viewMenu->Enable(ID_USE_CAMERA, canvas->model->hasCamera);
-  if (canvas->useCamera && !canvas->model->hasCamera)
+  viewMenu->Enable(ID_USE_CAMERA, canvas->model()->hasCamera);
+  if (canvas->useCamera && !canvas->model()->hasCamera)
   {
     canvas->useCamera = false;
     viewMenu->Check(ID_USE_CAMERA, false);
@@ -1056,7 +1059,7 @@ void ModelViewer::LoadModel(GameFile * file)
   canvas->autofit();
 
   // Update the animations / skins
-  animControl->UpdateModel(canvas->model);
+  animControl->UpdateModel(m);
   interfaceManager.Update();
 }
 
@@ -1064,9 +1067,7 @@ void ModelViewer::LoadModel(GameFile * file)
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
   canvas->clearAttachments();
-  //if (!isChar) // may memory leak
-  //	wxDELETE(canvas->model);
-  canvas->model = NULL;
+  canvas->setModel(NULL);
 
   isModel = true;
   isChar = false;
@@ -1089,7 +1090,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
     if (extraId == 0)
     {
       LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
-      canvas->model->modelType = MT_NORMAL;
+      WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      m->modelType = MT_NORMAL;
       animControl->SetSkinByDisplayID(r.values[0][5].toInt());
     }
     else
@@ -1143,9 +1145,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 void ModelViewer::LoadItem(unsigned int id)
 {
   canvas->clearAttachments();
-  //if (!isChar) // may memory leak
-  //	wxDELETE(canvas->model);
-  canvas->model = NULL;
+  canvas->setModel(NULL);
 
   isModel = true;
   isChar = false;
@@ -1171,7 +1171,8 @@ void ModelViewer::LoadItem(unsigned int id)
         grp.base = TEXTURE_ITEM;
         grp.count = 1;
         grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
-        canvas->model->TextureList.push_back(grp.tex[0]);
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+        m->TextureList.push_back(grp.tex[0]);
         if (grp.tex[0])
           animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
       }
@@ -1347,8 +1348,11 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       break;
 
     case ID_SHOW_BOUNDS:
-      if (canvas->model)
-        canvas->model->showBounds = !canvas->model->showBounds;
+      if (canvas->model())
+      {
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+        m->showBounds = !m->showBounds;
+      }
       break;
 
     case ID_SHOW_GRID:
@@ -1614,15 +1618,16 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
 void ModelViewer::OnCamMenu(wxCommandEvent &event)
 {
   int id = event.GetId();
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
   if (id == ID_CAM_FRONT)
-    canvas->model->rot.y = -90.0f;
+    m->rot.y = -90.0f;
   else if (id == ID_CAM_BACK)
-    canvas->model->rot.y = 90.0f;
+    m->rot.y = 90.0f;
   else if (id == ID_CAM_SIDE)
-    canvas->model->rot.y = 0.0f;
+    m->rot.y = 0.0f;
   else if (id == ID_CAM_ISO) {
-    canvas->model->rot.y = -40.0f;
-    canvas->model->rot.x = 20.0f;
+    m->rot.y = -40.0f;
+    m->rot.x = 20.0f;
   }
 
   //viewControl->Update();	
@@ -1841,7 +1846,7 @@ void ModelViewer::OnSave(wxCommandEvent &event)
 {
   static wxFileName dir = cfgPath;
 
-  if (!canvas || (!canvas->model && !canvas->wmo))
+  if (!canvas || (!canvas->model() && !canvas->wmo))
     return;
 
   if (event.GetId() == ID_FILE_SCREENSHOT) {
@@ -1866,7 +1871,7 @@ void ModelViewer::OnSave(wxCommandEvent &event)
     if (canvas->wmo)
       return;
 
-    if (!canvas->model)
+    if (!canvas->model())
       return;
 
     if (!video.supportFBO && !video.supportPBO) {
@@ -1887,7 +1892,7 @@ void ModelViewer::OnSave(wxCommandEvent &event)
 
   }
   else if (event.GetId() == ID_FILE_EXPORTAVI) {
-    if (canvas->wmo && !canvas->model)
+    if (canvas->wmo && !canvas->model())
       return;
 
     if (!video.supportFBO && !video.supportPBO) {
@@ -1988,14 +1993,15 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
   stream.writeStartElement("SavedCharacter");
   stream.writeAttribute("version", "1.0");
   // save model itself
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
   if (!equipmentOnly)
-    canvas->model->save(stream);
+    m->save(stream);
 
   // then save equipment
   stream.writeStartElement("equipment");
 
-  for (WoWModel::iterator it = canvas->model->begin();
-       it != canvas->model->end();
+  for (WoWModel::iterator it = m->begin();
+       it != m->end();
        ++it)
        (*it)->save(stream);
 
@@ -2028,8 +2034,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
     else if (isModel)
     {
       canvas->clearAttachments();
-      delete canvas->model;
-      canvas->model = NULL;
+      canvas->setModel(NULL);
     }
   }
 
@@ -2062,7 +2067,8 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
         // Load the model
         LoadModel(GAMEDIRECTORY.getFile(values[lineIndex]));
-        canvas->model->modelType = MT_CHAR;
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+        m->modelType = MT_CHAR;
         lineIndex++;
       }
 
@@ -2149,7 +2155,8 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
         {
           QString modelname = reader.attributes().value("name").toString();
           LoadModel(GAMEDIRECTORY.getFile(modelname));
-          canvas->model->load(fn);
+          WoWModel * m = const_cast<WoWModel *>(canvas->model());
+          m->load(fn);
         }
         else
         {
@@ -2160,8 +2167,9 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
       if (reader.name() == "equipment")
       {
-        for (WoWModel::iterator it = canvas->model->begin();
-             it != canvas->model->end();
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+        for (WoWModel::iterator it = m->begin();
+             it != m->end();
              ++it)
              (*it)->load(fn);
       }
@@ -2316,9 +2324,9 @@ void ModelViewer::UpdateCanvasStatus()
 
 void ModelViewer::ModelInfo()
 {
-  if (!canvas->model)
+  if (!canvas->model())
     return;
-  WoWModel *m = canvas->model;
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
   wxString fn = wxT("ModelInfo.xml");
   // FIXME: ofstream is not compatible with multibyte path name
   ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
@@ -2743,16 +2751,17 @@ void ModelViewer::OnExportOther(wxCommandEvent &event)
 
 void ModelViewer::UpdateControls()
 {
-  if (!canvas || !canvas->model || !canvas->root)
+  if (!canvas || !canvas->model() || !canvas->root)
     return;
 
-  if (canvas->model->modelType == MT_CHAR)
+  WoWModel * m = const_cast<WoWModel *>(canvas->model());
+  if (m->modelType == MT_CHAR)
     charControl->RefreshModel();
   else
   {
     //refresh equipment
-    for (WoWModel::iterator it = canvas->model->begin();
-         it != canvas->model->end();
+    for (WoWModel::iterator it = m->begin();
+         it != m->end();
          ++it)
          (*it)->refresh();
   }
@@ -2807,7 +2816,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     LoadModel(GAMEDIRECTORY.getFile(modelToLoad));
 
-    if (!g_canvas->model)
+    if (!g_canvas->model())
       return;
 
     if (result->hasTransmogGear == true)
@@ -2885,16 +2894,17 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       // if exporter supports animations, we have to chose which one to export
       if (plugin->canExportAnimation())
       {
-        std::map<int, std::string> animsMap = canvas->model->getAnimsMap();
+        WoWModel * m = const_cast<WoWModel *>(canvas->model());
+        std::map<int, std::string> animsMap = m->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
         std::vector<int> ids;
         ids.resize(animsMap.size());
         unsigned int i = 0;
 
-        for (size_t i = 0; i < canvas->model->header.nAnimations; i++)
+        for (size_t i = 0; i < canvas->model()->header.nAnimations; i++)
         {
-          wxString animName = animsMap[canvas->model->anims[i].animID];
+          wxString animName = animsMap[canvas->model()->anims[i].animID];
           animName << " [";
           animName << i;
           animName << "]";
@@ -2911,15 +2921,15 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for (unsigned int i = 0; i < selection.GetCount(); i++)
-          animsToExport.push_back(canvas->model->anims[selection[i]].Index);
+          animsToExport.push_back(canvas->model()->anims[selection[i]].Index);
 
         plugin->setAnimationsToExport(animsToExport);
 
       }
 
       // END OF HACK
-
-      if (!plugin->exportModel(canvas->model, saveFileDialog.GetPath().mb_str()))
+      WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      if (!plugin->exportModel(m, saveFileDialog.GetPath().mb_str()))
       {
         wxMessageBox(wxT("An error occurred during export."), wxT("Export Error"), wxOK | wxICON_ERROR);
       }

@@ -52,7 +52,7 @@ void Attachment::draw(BaseCanvas *c)
       return;
     }
 
-    if (c->model) {
+    if (c->model() != 0) {
       // no need to scale if its already 100%
       // scaling manually set from model control panel
       if (scale != 1.0f)
@@ -88,7 +88,7 @@ void Attachment::draw(BaseCanvas *c)
     }
 
     // shift or rotate the attached model
-    if (c->model && c->model != m) {
+    if (c->model() && c->model() != m) {
       if (m->pos != Vec3D(0.0f, 0.0f, 0.0f))
         glTranslatef(m->pos.x, m->pos.y, m->pos.z);
 
@@ -104,7 +104,7 @@ void Attachment::draw(BaseCanvas *c)
     // and we do the 'showmodel' check inside the function
     m_model->draw();
 
-    if (c->model) {
+    if (c->model()) {
       if (m->showModel && (m->alpha != 1.0f)) {
         float a[] = { 1.0f, 1.0f, 1.0f, 1.0f };
         glMaterialfv(GL_FRONT, GL_DIFFUSE, a);

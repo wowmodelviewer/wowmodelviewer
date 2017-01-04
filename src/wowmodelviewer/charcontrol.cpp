@@ -1183,12 +1183,12 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         delete g_canvas->root->model();
         g_canvas->root->setModel(0);
-        g_canvas->model = 0;
+        g_canvas->setModel(0);
       }
       if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
       {
         // clearing the mount
-        g_canvas->model = model;
+        g_canvas->setModel(model);
         g_canvas->ResetView();
         if (charAtt)
         {
@@ -1244,7 +1244,7 @@ void CharControl::OnUpdateItem(int type, int id)
       m = new WoWModel(GAMEDIRECTORY.getFile(modelName), false);
       m->isMount = true;
       g_canvas->root->setModel(m);
-      g_canvas->model = m;
+      g_canvas->setModel(m);
       g_animControl->UpdateModel(m);
       // add specific textures for proper mounts. Must do this after model is updated.
       if (!cats[id] && (grp.tex[0] != 0))
@@ -1279,7 +1279,7 @@ void CharControl::OnUpdateItem(int type, int id)
       }
       g_canvas->ResetView();
       model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
-      g_canvas->model->rot.x = 0.0f; // mounted characters look better from the side
+      m->rot.x = 0.0f; // mounted characters look better from the side
       break;
     }
     case UPDATE_CREATURE_ITEM:
@@ -1305,7 +1305,7 @@ void CharControl::OnUpdateItem(int type, int id)
 
 void CharControl::OnTabardSpin(wxSpinEvent &event)
 {
-  if (!g_canvas || !g_canvas->model || g_canvas->model->modelType == MT_NPC)
+  if (!g_canvas || !g_canvas->model() || g_canvas->model()->modelType == MT_NPC)
   {
     LOG_ERROR << "Model Not Present, or can't use a tabard.";
     return;
