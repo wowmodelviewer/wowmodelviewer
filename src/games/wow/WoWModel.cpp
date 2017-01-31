@@ -112,7 +112,7 @@ gamefile(file)
   dlist = 0;
   bounds = 0;
   boundTris = 0;
-  showGeosets = 0;
+  showGeosets.clear();
 
   hasCamera = false;
   hasParticles = false;
@@ -132,11 +132,11 @@ gamefile(file)
 
   vbuf = nbuf = tbuf = 0;
 
-  origVertices = 0;
+  origVertices.clear();
   vertices = 0;
   normals = 0;
   texCoords = 0;
-  indices = 0;
+  indices.clear();
 
   animtime = 0;
   anim = 0;
@@ -159,106 +159,7 @@ gamefile(file)
   modelType = MT_NORMAL;
   attachment = 0;
 
-  // --
-  ok = false;
-
-  if (!file)
-    return;
-
-  if (!file->open() || file->isEof() || (file->getSize() < sizeof(ModelHeader)))
-  {
-    LOG_ERROR << "Unable to load model:" << file->fullname();
-    file->close();
-    return;
-  }
-
-  setItemName(file->fullname());
-
-  // replace .MDX with .M2
-  QString tempname = file->fullname();
-  tempname.replace(".mdx", ".m2");
-
-  ok = true;
-
-  memcpy(&header, file->getBuffer(), sizeof(ModelHeader));
-
-  LOG_INFO << "Loading model:" << tempname << "size:" << file->getSize();
-
-  //displayHeader(header);
-
-  if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
-  {
-    LOG_ERROR << "Invalid model!  May be corrupted.";
-    ok = false;
-    file->close();
-    return;
-  }
-
-  animated = isAnimated(file) || forceAnim;  // isAnimated will set animGeometry and animTextures
-
-  modelname = tempname.toStdString();
-  QStringList list = tempname.split("\\");
-  setName(list[list.size() - 1].replace(".m2", ""));
-  if (header.nameOfs != 304 && header.nameOfs != 320)
-  {
-    LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
-    ok = false;
-    file->close();
-    return;
-  }
-
-  // Error check
-  // 10 1 0 0 = WoW 5.0 models (as of 15464)
-  // 10 1 0 0 = WoW 4.0.0.12319 models
-  // 9 1 0 0 = WoW 4.0 models
-  // 8 1 0 0 = WoW 3.0 models
-  // 4 1 0 0 = WoW 2.0 models
-  // 0 1 0 0 = WoW 1.0 models
-
-  //if (header.version[0] != 4 && header.version[1] != 1 && header.version[2] != 0 && header.version[3] != 0) {
-  if (0)
-  {
-    LOG_ERROR << "Model version is incorrect! Make sure you are loading models from World of Warcraft 2.0.1 or newer client.";
-    ok = false;
-    file->close();
-
-    /*
-     @TODO : replace with exceptions
-     if (header.version[0] == 0)
-     wxMessageBox(wxString::Format(wxT("An error occured while trying to load the model %s.\nWoW Model Viewer 0.5.x only supports loading WoW 2.0 models\nModels from WoW 1.12 or earlier are not supported"), tempname.c_str()), wxT("Error: Unable to load model"), wxICON_ERROR);
-     */
-    return;
-  }
-
-  if (file->getSize() < header.ofsParticleEmitters)
-  {
-    LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
-    file->close();
-    return;
-  }
-
-  if (header.nGlobalSequences)
-  {
-    globalSequences = new uint32[header.nGlobalSequences];
-    memcpy(globalSequences, (file->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
-  }
-
-  if (forceAnim)
-    animBones = true;
-
-  if (animated)
-    initAnimated(file);
-  else
-    initStatic(file);
-
-  file->close();
-
-  // Ready to render.
-  showModel = true;
-  if (hasParticles)
-    showParticles = true;
-  alpha = 1.0f;
-
+  initCommon(file);
 }
 
 WoWModel::~WoWModel()
@@ -280,7 +181,7 @@ WoWModel::~WoWModel()
       delete[] globalSequences; globalSequences = 0;
       delete[] bounds; bounds = 0;
       delete[] boundTris; boundTris = 0;
-      delete[] showGeosets; showGeosets = 0;
+      showGeosets.clear();
       delete animManager; animManager = 0;
 
       if (animated)
@@ -301,10 +202,10 @@ WoWModel::~WoWModel()
         delete[] vertices; vertices = 0;
         delete[] texCoords; texCoords = 0;
 
-        delete[] indices; indices = 0;
+        indices.clear();
         delete[] anims; anims = 0;
         delete[] animLookups; animLookups = 0;
-        delete[] origVertices; origVertices = 0;
+        origVertices.clear();
 
         delete[] bones; bones = 0;
         delete[] texAnims; texAnims = 0;
@@ -408,13 +309,14 @@ bool WoWModel::isAnimated(GameFile * f)
   ind = false;
 
   ModelVertex *verts = (ModelVertex*)(f->getBuffer() + header.ofsVertices);
-  for (size_t i = 0; i < header.nVertices && !animGeometry; i++)
+  
+  for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); (ov_it != ov_end) && !animGeometry; ++ov_it)
   {
     for (size_t b = 0; b < 4; b++)
     {
-      if (verts[i].weights[b]>0)
+      if (ov_it->weights[b]>0)
       {
-        ModelBoneDef &bb = bo[verts[i].bones[b]];
+        ModelBoneDef &bb = bo[ov_it->bones[b]];
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
         {
           if (bb.flags & MODELBONE_BILLBOARD)
@@ -489,23 +391,101 @@ bool WoWModel::isAnimated(GameFile * f)
 
 void WoWModel::initCommon(GameFile * f)
 {
-  // assume: origVertices already set
+  // --
+  ok = false;
+
+  if (!f)
+    return;
+
+  if (!f->open() || f->isEof() || (f->getSize() < sizeof(ModelHeader)))
+  {
+    LOG_ERROR << "Unable to load model:" << f->fullname();
+    f->close();
+    return;
+  }
+
+  setItemName(f->fullname());
+
+  // replace .MDX with .M2
+  QString tempname = f->fullname();
+  tempname.replace(".mdx", ".m2");
+
+  ok = true;
+
+  memcpy(&header, f->getBuffer(), sizeof(ModelHeader));
+
+  LOG_INFO << "Loading model:" << tempname << "size:" << f->getSize();
+
+  //displayHeader(header);
+
+  if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
+  {
+    LOG_ERROR << "Invalid model!  May be corrupted.";
+    ok = false;
+    f->close();
+    return;
+  }
+
+  modelname = tempname.toStdString();
+  QStringList list = tempname.split("\\");
+  setName(list[list.size() - 1].replace(".m2", ""));
+  if (header.nameOfs != 304 && header.nameOfs != 320)
+  {
+    LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
+    ok = false;
+    f->close();
+    return;
+  }
+
+  // Error check
+  // 10 1 0 0 = WoW 5.0 models (as of 15464)
+  // 10 1 0 0 = WoW 4.0.0.12319 models
+  // 9 1 0 0 = WoW 4.0 models
+  // 8 1 0 0 = WoW 3.0 models
+  // 4 1 0 0 = WoW 2.0 models
+  // 0 1 0 0 = WoW 1.0 models
+
+  if (f->getSize() < header.ofsParticleEmitters)
+  {
+    LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
+    f->close();
+    return;
+  }
+
+  if (header.nGlobalSequences)
+  {
+    globalSequences = new uint32[header.nGlobalSequences];
+    memcpy(globalSequences, (f->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
+  }
+
+  if (forceAnim)
+    animBones = true;
+
+  // Ready to render.
+  showModel = true;
+  if (hasParticles)
+    showParticles = true;
+  alpha = 1.0f;
+
+  ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
+  origVertices.assign(mv, mv + header.nVertices);
 
   // This data is needed for both VBO and non-VBO cards.
-  vertices = new Vec3D[header.nVertices];
-  normals = new Vec3D[header.nVertices];
+  vertices = new Vec3D[origVertices.size()];
+  normals = new Vec3D[origVertices.size()];
 
   // Correct the data from the model, so that its using the Y-Up axis mode.
-  for (size_t i = 0; i < header.nVertices; i++)
+  uint i = 0;
+  for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
   {
-    origVertices[i].pos = fixCoordSystem(origVertices[i].pos);
-    origVertices[i].normal = fixCoordSystem(origVertices[i].normal);
+    ov_it->pos = fixCoordSystem(ov_it->pos);
+    ov_it->normal = fixCoordSystem(ov_it->normal);
 
     // Set the data for our vertices, normals from the model data
-    vertices[i] = origVertices[i].pos;
-    normals[i] = origVertices[i].normal.normalize();
+    vertices[i] = ov_it->pos;
+    normals[i] = ov_it->normal.normalize();
 
-    float len = origVertices[i].pos.lengthSquared();
+    float len = ov_it->pos.lengthSquared();
     if (len > rad)
     {
       rad = len;
@@ -681,14 +661,20 @@ void WoWModel::initCommon(GameFile * f)
     setLOD(f, 0); // Set the default Level of Detail to the best possible.
   }
 
+  // proceed with specialized init depending on model "type"
+
+  animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
+
+  if (animated)
+    initAnimated(f);
+  else
+    initStatic(f);
+
+  f->close();
 }
 
 void WoWModel::initStatic(GameFile * f)
 {
-  origVertices = (ModelVertex*)(f->getBuffer() + header.ofsVertices);
-
-  initCommon(f);
-
   dlist = glGenLists(1);
   glNewList(dlist, GL_COMPILE);
 
@@ -699,7 +685,7 @@ void WoWModel::initStatic(GameFile * f)
   // clean up vertices, indices etc
   delete[] vertices; vertices = 0;
   delete[] normals; normals = 0;
-  delete[] indices; indices = 0;
+  indices.clear();
 
   delete[] colors; colors = 0;
   delete[] transparency; transparency = 0;
@@ -707,17 +693,6 @@ void WoWModel::initStatic(GameFile * f)
 
 void WoWModel::initAnimated(GameFile * f)
 {
-  if (origVertices)
-  {
-    delete[] origVertices;
-    origVertices = NULL;
-  }
-
-  origVertices = new ModelVertex[header.nVertices];
-  memcpy(origVertices, f->getBuffer() + header.ofsVertices, header.nVertices * sizeof(ModelVertex));
-
-  initCommon(f);
-
   if (header.nAnimations > 0)
   {
     anims = new ModelAnimation[header.nAnimations];
@@ -804,12 +779,13 @@ void WoWModel::initAnimated(GameFile * f)
     memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
   }
 
-  const size_t size = (header.nVertices * sizeof(float));
+  const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
-  texCoords = new Vec2D[header.nVertices];
-  for (size_t i = 0; i < header.nVertices; i++)
-    texCoords[i] = origVertices[i].texcoords;
+  texCoords = new Vec2D[origVertices.size()];
+  auto ov_it = origVertices.begin();
+  for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
+    texCoords[i] = ov_it->texcoords;
 
   if (video.supportVBO)
   {
@@ -970,8 +946,8 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
   uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
   nIndices = view->nTris;
-  delete[] indices; indices = 0;
-  indices = new uint16[nIndices];
+  indices.clear();
+  indices.reserve(nIndices);
   for (size_t i = 0; i < nIndices; i++)
   {
     indices[i] = indexLookup[triangles[i]];
@@ -985,9 +961,9 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
   int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
-  delete[] showGeosets;
+  showGeosets.clear();
 
-  showGeosets = new bool[view->nSub];
+  showGeosets.resize(view->nSub);
 
   uint32 start = 0;
   for (size_t i = 0; i < view->nSub; i++)
@@ -1280,43 +1256,36 @@ void WoWModel::animate(ssize_t anim)
     calcBones(anim, t);
 
   if (animGeometry)
-  {
-
+  { 
     if (video.supportVBO)
     {
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
       glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
+
       vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
 
-      // Something has been changed in the past couple of days that is causing nasty bugs
-      // this is an extra error check to prevent the program from crashing.
-      if (!vertices)
-      {
-        LOG_ERROR << "void Model::animate(int anim), Vertex Buffer is null";
-        return;
-      }
     }
 
     // transform vertices
-    ModelVertex *ov = origVertices;
-    for (size_t i = 0; i < header.nVertices; ++i, ++ov)
+    auto ov_it = origVertices.begin();
+    for (size_t i = 0; ov_it != origVertices.end(); ++i, ++ov_it)
     { //,k=0
       Vec3D v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b = 0; b < 4; b++)
       {
-        if (ov->weights[b] > 0)
+        if (ov_it->weights[b] > 0)
         {
-          Vec3D tv = bones[ov->bones[b]].mat * ov->pos;
-          Vec3D tn = bones[ov->bones[b]].mrot * ov->normal;
-          v += tv * ((float)ov->weights[b] / 255.0f);
-          n += tn * ((float)ov->weights[b] / 255.0f);
+          Vec3D tv = bones[ov_it->bones[b]].mat * ov_it->pos;
+          Vec3D tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
+          v += tv * ((float)ov_it->weights[b] / 255.0f);
+          n += tn * ((float)ov_it->weights[b] / 255.0f);
         }
       }
 
       vertices[i] = v;
       if (video.supportVBO)
-        vertices[header.nVertices + i] = n.normalize(); // shouldn't these be normal by default?
+        vertices[origVertices.size() + i] = n.normalize(); // shouldn't these be normal by default?
       else
         normals[i] = n;
     }
@@ -1410,7 +1379,7 @@ inline void WoWModel::drawModel()
         // I can't notice a difference but I guess it can't hurt
         if (video.supportVBO && video.supportDrawRangeElements)
         {
-          glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+          glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, &indices[p.indexStart]);
         }
         else
         {

@@ -102,11 +102,12 @@ public:
   // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
   // Raw Data
-  ModelVertex *origVertices;
+  std::vector<ModelVertex> origVertices;
 
-  Vec3D *vertices, *normals;
+  Vec3D *normals;
   Vec2D *texCoords;
-  uint16 *indices;
+  Vec3D *vertices;
+  std::vector<uint16> indices;
   uint32 nIndices;
   std::vector<GameFile *> TextureList;
   // --
@@ -123,7 +124,7 @@ public:
 
   // ===============================
   // Toggles
-  bool *showGeosets;
+  std::vector<bool> showGeosets;
   bool showBones;
   bool showBounds;
   bool showWireframe;
