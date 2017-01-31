@@ -12,7 +12,6 @@
 #include "ArcBallCameraControl.h"
 #include "animcontrol.h"
 #include "Attachment.h"
-#include "Game.h"
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
@@ -363,9 +362,7 @@ Attachment* ModelCanvas::LoadCharModel(GameFile * file)
 	}
 
 	ResetView();
-
 	Attachment *att = root->addChild(m, 0, -1);
-
 	curAtt = att;
  
 	return att;
