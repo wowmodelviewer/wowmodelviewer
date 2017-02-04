@@ -21,13 +21,17 @@ add_definitions(-DQT_PLUGIN)
 
 set(src WowheadImporter.cpp)
 
+set(headers WowheadImporter.h)
+
+source_group("Header Files" FILES ${headers})
+
 set(useful_files wowheadimporter.json)
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 use_core()
 use_wow()
 
-add_library(wowhead SHARED ${src} ${useful_files})
+add_library(wowhead SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET wowhead PROPERTY FOLDER "plugins")
 
 target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core wow)

@@ -22,11 +22,15 @@ set(CMAKE_AUTOMOC ON)
 
 set(src main.cpp
         UpdateManager.cpp)
+
+set(headers UpdateManager.h)
+
+source_group("Header Files" FILES ${headers})
         
 use_core()
 use_wow()
 
-add_executable(UpdateManager WIN32 ${src})
+add_executable(UpdateManager WIN32 ${src} ${headers})
 set_property(TARGET UpdateManager PROPERTY FOLDER "executables")
 
 target_link_libraries(UpdateManager core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)

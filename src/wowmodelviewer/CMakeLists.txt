@@ -18,12 +18,12 @@ find_package(Qt5Gui)
 find_package(Qt5Network)
 
 # add wmv source files compilation
-set(src  ArcBallCamera.cpp
-		 ArcBallCameraControl.cpp
-         AnimationExportChoiceDialog.cpp
+set(src  AnimationExportChoiceDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
-         app.cpp
+		 app.cpp
+		 ArcBallCamera.cpp
+		 ArcBallCameraControl.cpp
          AVIGenerator.cpp
 		 camera.cpp
          charcontrol.cpp
@@ -52,6 +52,44 @@ set(src  ArcBallCamera.cpp
          UserSkins.cpp
          util.cpp)
 
+set(headers AnimationExportChoiceDialog.h
+			animcontrol.h
+			AnimExporter.h
+			app.h
+			ArcBallCamera.h
+			ArcBallCameraControl.h
+			AVIGenerator.h
+			camera.h
+			charcontrol.h
+			CharDetailsCustomizationSpin.h
+			CharDetailsFrame.h
+			DisplaySettings.h
+			effects.h
+			enums.h
+			ExportSettings.h
+			filecontrol.h
+			GeneralSettings.h
+			imagecontrol.h
+			ItemImporterDialog.h
+			itemselection.h
+			lightcontrol.h
+			liquid.h
+			LogStackWalker.h
+			maptile.h
+			modelbankcontrol.h
+			modelcanvas.h
+			modelcontrol.h
+			modelviewer.h
+			NPCImporterDialog.h
+			Quantize.h
+			resource1.h
+			SettingsControl.h
+			shaders.h
+			UserSkins.h
+			util.h)
+
+source_group("Header Files" FILES ${headers})
+
 # add external code usage
 use_glew()
 # reset extralibs to clean up wxwidgets (use_glew actually links with wx gl lib)
@@ -73,7 +111,7 @@ set(useful_files $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
-add_executable(wowmodelviewer WIN32 ${src} ${RES_FILES} ${useful_files})
+add_executable(wowmodelviewer WIN32 ${src} ${headers} ${RES_FILES} ${useful_files})
 
 set_property(TARGET wowmodelviewer PROPERTY FOLDER "executables")
 

@@ -57,6 +57,61 @@ set(src animated.cpp
         WoWItem.cpp
         WoWModel.cpp)
 
+set(headers animated.h
+			AnimManager.h
+			Attachment.h
+			BaseCanvas.h
+			Bone.h
+			CASCFile.h
+			CASCFolder.h
+			CharDetails.h
+			CharDetailsEvent.h
+			CharTexture.h
+			database.h
+			dbfile.h
+			ddslib.h
+			displayable.h
+			FileTreeItem.h
+			Game.h
+			GameDatabase.h
+			GameFile.h
+			GameFolder.h
+			globalvars.h
+			HardDriveFile.h
+			manager.h
+			matrix.h
+			ModelAttachment.h
+			ModelCamera.h
+			ModelColor.h
+			ModelEvent.h
+			modelheaders.h
+			ModelLight.h
+			ModelManager.h
+			ModelRenderPass.h
+			ModelTransparency.h
+			OpenGLHeaders.h
+			particle.h
+			quaternion.h
+			RaceInfos.h
+			RenderTexture.h
+			TabardDetails.h
+			TextureAnim.h
+			types.h
+			vec3d.h
+			video.h
+			wdb2file.h
+			wdb5file.h
+			wmo.h
+			WMOFog.h
+			WMOGroup.h
+			WMOLight.h
+			WMOModelInstance.h
+			wow_enums.h
+			WoWItem.h
+			WoWModel.h)
+
+source_group("Header Files" FILES ${headers})
+
 use_core()
 use_glew()
 use_casclib()
@@ -65,7 +120,7 @@ use_sqlite()
 
 add_definitions(-DBUILDING_WOW_DLL)
 
-add_library(wow SHARED ${src})
+add_library(wow SHARED ${src} ${headers})
 set_property(TARGET wow PROPERTY FOLDER "libraries")
 
 target_link_libraries(wow core CascLib Qt5::Core Qt5::Xml Qt5::Gui)

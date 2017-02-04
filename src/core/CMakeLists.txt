@@ -31,12 +31,35 @@ set(src CharInfos.cpp
         logger/LogOutputConsole.cpp
         logger/LogOutputFile.cpp)
 
+set(headers CharInfos.h
+			ExporterPlugin.h
+			FileDownloader.h
+			GlobalSettings.h
+			ImporterPlugin.h
+			Model.h
+			NPCInfos.h
+			Plugin.h
+			PluginManager.h
+			VersionManager.h
+			metaclasses/BaseIterator.h
+			metaclasses/Component.h
+			metaclasses/Container.h
+			metaclasses/Event.h
+			metaclasses/Observable.h
+			metaclasses/Observer.h
+			logger/Logger.h
+			logger/LogOutput.h
+			logger/LogOutputConsole.h
+			logger/LogOutputFile.h)
+
+source_group("Header Files" FILES ${headers})
+			
 use_glew()
 use_cximage()
 
 add_definitions(-DBUILDING_CORE_DLL)
 
-add_library(core SHARED ${src})
+add_library(core SHARED ${src} ${headers})
 set_property(TARGET core PROPERTY FOLDER "libraries")
 
 target_link_libraries(core Qt5::Core Qt5::Network Qt5::Gui ${extralibs})
