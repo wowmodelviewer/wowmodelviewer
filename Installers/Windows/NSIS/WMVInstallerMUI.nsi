@@ -40,9 +40,6 @@ setOutPath $INSTDIR
 File "${wmvroot}\bin\wowmodelviewer.exe"
 File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\*.dll"
-File "${wmvroot}\bin_support\listfile.txt"
-File "${wmvroot}\bin_support\wow6.xml"
-File "${wmvroot}\bin_support\wow7.xml"
 
 CreateDirectory $INSTDIR\plugins
 SetOutPath $INSTDIR\plugins
@@ -50,6 +47,11 @@ File "${wmvroot}\bin\plugins\*"
 SetOutPath $INSTDIR\plugins\imageformats
 File "${wmvroot}\bin\plugins\imageformats\*"
 
+CreateDirectory $INSTDIR\games\wow
+SetOutPath $INSTDIR\games\wow\7.1
+File "${wmvroot}\bin_support\wow\7.1\*"
+SetOutPath $INSTDIR\games\wow\7.2
+File "${wmvroot}\bin_support\wow\7.2\*"
 
 CreateDirectory $INSTDIR\mo
 SetOutPath $INSTDIR\mo

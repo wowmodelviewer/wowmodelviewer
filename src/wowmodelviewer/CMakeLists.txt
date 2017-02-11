@@ -108,7 +108,8 @@ set(useful_files $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml
-				 wowmodelviewer.json)
+				 wowmodelviewer.json
+				 $ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi)
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
