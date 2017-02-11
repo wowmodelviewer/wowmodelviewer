@@ -103,12 +103,12 @@ use_wxwidgets()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
-set(useful_files 
-				 $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
+set(useful_files $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml
-				 wowmodelviewer.json
-				 )
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml
+				 wowmodelviewer.json)
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -149,6 +149,9 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
 set(GAMEFILES_WOW7_1 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
         		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml)
 
+set(GAMEFILES_WOW7_2 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
+        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
+
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
@@ -157,3 +160,4 @@ install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/platfor
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/plugins/imageformats)
 
 install(FILES ${GAMEFILES_WOW7_1} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.1)
+install(FILES ${GAMEFILES_WOW7_2} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.2)
