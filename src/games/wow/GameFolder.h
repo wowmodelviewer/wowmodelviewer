@@ -35,7 +35,8 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     GameFolder();
     virtual ~GameFolder() {}
 
-    void init(const QString & path, const QString & file);
+    void init(const QString & path);
+    void initFiles(const QString & file);
     void addCustomFiles(const QString & path, bool bypassOriginalFiles);
 
     // return full path for a given file ie :

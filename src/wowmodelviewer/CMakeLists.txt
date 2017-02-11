@@ -103,9 +103,10 @@ use_wxwidgets()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
-set(useful_files $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
+set(useful_files 
 				 $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
-				 $ENV{WMV_BASE_PATH}/bin_support/wow7.xml
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml
 				 wowmodelviewer.json
 				 )
 
@@ -141,12 +142,12 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
                         
-set(EXTRA_FILES $ENV{WMV_BASE_PATH}/bin_support/listfile.txt
-        		$ENV{WMV_BASE_PATH}/bin_support/wow6.xml
-				$ENV{WMV_BASE_PATH}/bin_support/wow7.xml
-        		$ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
+set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
+
+set(GAMEFILES_WOW7_1 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
+        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml)
 
 
 set(files ${QT_FILES} ${EXTRA_FILES})
@@ -154,3 +155,5 @@ set(files ${QT_FILES} ${EXTRA_FILES})
 install(FILES ${files} DESTINATION $ENV{WMV_BASE_PATH}/bin)
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/plugins/imageformats)
+
+install(FILES ${GAMEFILES_WOW7_1} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.1)

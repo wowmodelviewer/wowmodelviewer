@@ -21,10 +21,14 @@ GameFolder::GameFolder()
 {
 }
 
-void GameFolder::init(const QString & path, const QString & filename)
+void GameFolder::init(const QString & path)
 {
   m_CASCFolder.init(path);
+}
 
+
+void GameFolder::initFiles(const QString & filename)
+{
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
