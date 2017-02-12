@@ -103,15 +103,25 @@ use_wxwidgets()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
-set(useful_files $ENV{WMV_BASE_PATH}/bin_support/wow6.xml
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml
-				 wowmodelviewer.json
+set(common_files wowmodelviewer.json
 				 $ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi)
 
+
+set(wow6_files $ENV{WMV_BASE_PATH}/bin_support/wow6.xml)
+source_group("wow6" FILES ${wow6_files})
+
+set(wow7_1_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml)
+source_group("wow7.1" FILES ${wow7_1_files})
+
+set(wow7_2_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
+source_group("wow7.2" FILES ${wow7_2_files})
+
+set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files})
+
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+
 
 add_executable(wowmodelviewer WIN32 ${src} ${headers} ${RES_FILES} ${useful_files})
 
