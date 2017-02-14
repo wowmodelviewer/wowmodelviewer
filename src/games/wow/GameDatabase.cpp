@@ -14,6 +14,7 @@
 
 #include "wdb2file.h"
 #include "wdb5file.h"
+#include "wdb6file.h"
 #include "Game.h"
 #include "logger/Logger.h"
 
@@ -294,6 +295,8 @@ DBFile * GameDatabase::createDBFile(GameFile * fileToOpen)
         result = new WDB2File(fileToOpen->fullname());
       else if (strncmp(header, "WDB5", 4) == 0)
         result = new WDB5File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB6", 4) == 0)
+        result = new WDB6File(fileToOpen->fullname());
 
       // reset read pointer to make sure further reading will start from the begining
       fileToOpen->seek(0);

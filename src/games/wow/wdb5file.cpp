@@ -13,28 +13,10 @@ DBFile(file), m_isSparseTable(false)
 {
 }
 
-struct wdb5_db2_header
+WDB5File::header WDB5File::readHeader()
 {
-  char magic[4];                                               // 'WDB5' for .db2 (database)
-  uint32 record_count;
-  uint32 field_count;                                         // for the first time, this counts arrays as '1'; in the past, only the WCH* variants have counted arrays as 1 field
-  uint32 record_size;
-  uint32 string_table_size;                                   // if flags & 0x01 != 0, this field takes on a new meaning - it becomes an absolute offset to the beginning of the offset_map
-  uint32 table_hash;
-  uint32 layout_hash;                                         // used to be 'build', but after build 21737, this is a new hash field that changes only when the structure of the data changes
-  uint32 min_id;
-  uint32 max_id;
-  uint32 locale;                                              // as seen in TextWowEnum
-  uint32 copy_table_size;
-  uint16 flags;                                               // in WDB3/WCH4, this field was in the WoW executable's DBCMeta; possible values are listed in Known Flag Meanings
-  uint16 id_index;                                            // new in WDB5 (and only after build 21737), this is the index of the field containing ID values; this is ignored if flags & 0x04 != 0
-};
-
-
-bool WDB5File::doSpecializedOpen()
-{
-  wdb5_db2_header header;
-  read(&header, sizeof(wdb5_db2_header)); // File Header
+  WDB5File::header header;
+  read(&header, sizeof(WDB5File::header)); // File Header
 
 #if WDB5_READ_DEBUG > 0
   LOG_INFO << "magic" << header.magic[0] << header.magic[1] << header.magic[2] << header.magic[3];
@@ -51,10 +33,17 @@ bool WDB5File::doSpecializedOpen()
   LOG_INFO << "id index" << header.id_index;
 #endif
 
+  return header;
+}
+
+
+bool WDB5File::doSpecializedOpen()
+{
+  WDB5File::header header = readHeader();
+  
   recordSize = header.record_size;
   recordCount = header.record_count;
   fieldCount = header.field_count;
-
 
   field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
@@ -116,10 +105,17 @@ bool WDB5File::doSpecializedOpen()
     seekRelative(recordSize*recordCount + stringSize);
     if ((header.flags & 0x04) != 0)
     {
+#if WDB5_READ_DEBUG > 0
+      LOG_INFO << "(header.flags & 0x04) != 0 -- BEGIN";
+#endif
       uint32 * vals = new uint32[recordCount];
       read(vals, recordCount * sizeof(uint32));
       m_IDs.assign(vals, vals + recordCount);
       delete[] vals;
+#if WDB5_READ_DEBUG > 0
+      LOG_INFO << "(header.flags & 0x04) != 0 -- END";
+#endif
+
     }
     else
     {
@@ -194,6 +190,10 @@ bool WDB5File::doSpecializedOpen()
 
     recordCount += nbEntries;
   }
+
+#if WDB5_READ_DEBUG > 0
+  LOG_INFO << "End of" << __FUNCTION__;
+#endif
 
   return true;
 }
