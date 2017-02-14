@@ -12,6 +12,9 @@
 #include <vector>
 #include "sqlite3.h"
 
+class DBFile;
+class GameFile;
+
 class QDomElement;
 #include <QString>
 
@@ -98,6 +101,9 @@ class _GAMEDATABASE_API_ GameDatabase
 
     bool readStructureFromXML(const QString & file);
     bool createDatabaseFromXML(const QString & file);
+
+
+    static DBFile * createDBFile(GameFile *);
 
     sqlite3 *m_db;
 

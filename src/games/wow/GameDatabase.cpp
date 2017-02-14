@@ -12,6 +12,7 @@
 #include <QDomNamedNodeMap>
 #include <QFile>
 
+#include "wdb2file.h"
 #include "wdb5file.h"
 #include "Game.h"
 #include "logger/Logger.h"
@@ -277,6 +278,31 @@ bool GameDatabase::tableStructure::create()
   return r.valid;
 }
 
+
+DBFile * GameDatabase::createDBFile(GameFile * fileToOpen)
+{
+  DBFile * result = 0;
+  if (fileToOpen)
+  {
+    if (fileToOpen->open())
+    {
+      char header[5];
+      
+      fileToOpen->read(header, 4);
+
+      if (strncmp(header, "WDB2", 4) == 0)
+        result = new WDB2File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB5", 4) == 0)
+        result = new WDB5File(fileToOpen->fullname());
+
+      // reset read pointer to make sure further reading will start from the begining
+      fileToOpen->seek(0);
+    }
+  }
+
+  return result;
+}
+
 bool GameDatabase::tableStructure::fill()
 {
   LOG_INFO << "Filling table" << name << "...";
@@ -292,8 +318,8 @@ bool GameDatabase::tableStructure::fill()
   if(!fileToOpen)
     return false;
 
-  WDB5File dbc(fileToOpen->fullname());
-  if(!dbc.open())
+  DBFile * dbc = GameDatabase::createDBFile(fileToOpen);
+  if(!dbc || !dbc->open())
     return false;
 
   QString query = "INSERT INTO ";
@@ -327,9 +353,9 @@ bool GameDatabase::tableStructure::fill()
   
   QString queryBase = query;
   int record = 0;
-  int nbRecord = dbc.getRecordCount();
- // std::cout << "nb fields (from dbc) : " << dbc.getFieldCount() << std::endl;
-  for (DBFile::Iterator it = dbc.begin(), itEnd = dbc.end(); it != itEnd; ++it, record++)
+  int nbRecord = dbc->getRecordCount();
+  
+  for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
     std::vector<std::string> fields = it.get(*this);
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
@@ -366,6 +392,8 @@ bool GameDatabase::tableStructure::fill()
 
   if (r.valid)
     LOG_INFO << "table" << name << "successfuly filled";
+
+  delete dbc;
 
   return r.valid;
 }
