@@ -51,13 +51,13 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="FacialHairCustomization" arraySize="2" pos="24" />
     <field type="text" name="HairCustomization" pos="32" />
-    <field type="uint" name="MaleDisplayID" pos="76" />
-    <field type="uint" name="FemaleDisplayID" pos="78" />
-    <field type="uint" name="CharComponentTexLayoutID" pos="95" />
+    <field type="uint" name="MaleDisplayID" pos="74" />
+    <field type="uint" name="FemaleDisplayID" pos="76" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="89" />
     <field type="text" name="ClientPrefix" pos="4" />
-    <field type="uint" name="HighResMaleDisplayId" pos="100" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="102" />
-    <field type="uint" name="CharComponentTexLayoutHiResID" pos="99" />
+    <field type="uint" name="HighResMaleDisplayId" pos="94" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="96" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="93" />
   </table>
   <!-- Character tables - END -->
   
@@ -75,10 +75,10 @@
   </table>
   <table name="CreatureDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ModelID" pos="44" />
-    <field type="uint" name="ExtendedDisplayInfoID" pos="0" />
+    <field type="uint" name="ModelID" pos="28" />
+    <field type="uint" name="ExtendedDisplayInfoID" pos="4" />
     <field type="uint" name="Texture" arraySize="3" pos="12"/>
-    <field type="uint" name="ParticleColorID" pos="50"/>
+    <field type="uint" name="ParticleColorID" pos="8"/>
   </table>
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
@@ -121,10 +121,10 @@
     <field type="text" name="Name" pos="0" />
     <field type="text" name="VerboseName" pos="4" />
   </table>
-  <table name="ItemSparse" gamefile="Item-sparse">
+  <table name="ItemSparse">
     <field type="uint" name="ID" primary="yes" />
     <field type="byte" name="Quality" pos="226" />
-    <field type="text" name="Name" pos="132" />
+    <field type="text" name="Name" pos="128" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />

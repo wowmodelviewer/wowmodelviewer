@@ -6,7 +6,7 @@
 
 #include <bitset>
 
-#define WDB6_READ_DEBUG 1
+#define WDB6_READ_DEBUG 0
 
 WDB6File::WDB6File(const QString & file) :
 WDB5File(file)
@@ -39,7 +39,12 @@ WDB5File::header WDB6File::readHeader()
 
 bool WDB6File::doSpecializedOpen()
 {
-  return WDB5File::doSpecializedOpen();
+  if (!WDB5File::doSpecializedOpen())
+    return false;
+
+  // add zero column reading here
+
+  return true;
 }
 
 WDB6File::~WDB6File()

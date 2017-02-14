@@ -84,7 +84,10 @@ int main(int argc, char ** argv)
     QStringList list = line.split(" ");
     QString filename = list[0];
 
-    out << filename << " " << CascGetFileId(CascStorage, filename.toStdString().c_str()) << endl;
+    DWORD id = CascGetFileId(CascStorage, filename.toStdString().c_str());
+
+    if (id != 0)
+      out << filename << " " << id << endl;
   }
 
   return 0;
