@@ -724,9 +724,8 @@ void WoWModel::initAnimated(GameFile * f)
       tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(animsWotLK.subAnimID, 2, 10, QChar('0'));
 
       GameFile * anim = GAMEDIRECTORY.getFile(tempname);
-      if (anim)
+      if (anim && anim->open())
       {
-        anim->open();
         animfiles.push_back(anim);
       }
       else
