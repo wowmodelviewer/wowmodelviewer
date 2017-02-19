@@ -48,6 +48,7 @@ class _CASCFOLDER_API_ CASCFolder
     bool fileExists(std::string file);
 
     HANDLE openFile(std::string file);
+    bool closeFile(HANDLE file);
 
     int fileDataId(std::string & filename);
 

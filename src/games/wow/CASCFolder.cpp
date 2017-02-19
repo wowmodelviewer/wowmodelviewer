@@ -219,6 +219,11 @@ HANDLE CASCFolder::openFile(std::string file)
   return result;
 }
 
+bool CASCFolder::closeFile(HANDLE file)
+{
+  return CascCloseFile(file);
+}
+
 int CASCFolder::fileDataId(std::string & filename)
 {
   return CascGetFileId(hStorage, filename.c_str());

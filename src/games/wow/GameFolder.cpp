@@ -155,9 +155,25 @@ GameFile * GameFolder::getFile(int id)
 {
   GameFile * result = 0;
 
- auto it = m_idMap.find(id);
+  auto it = m_idMap.find(id);
   if (it != m_idMap.end())
     result = it->second;
+
+  if (!result) // if not found, try to force open by id
+  {
+    // Build File########.unk filename needed for CASC lib to open file based on id
+    QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
+    HANDLE newfile = m_CASCFolder.openFile(filename.toStdString());
+
+    if (newfile)
+    {
+      m_CASCFolder.closeFile(newfile);
+      CASCFile * file = new CASCFile(filename, id);
+      file->setName(filename);
+      addChild(file);
+      result = file;
+    }
+  }
 
   return result;
 }
