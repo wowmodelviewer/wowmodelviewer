@@ -219,3 +219,8 @@ HANDLE CASCFolder::openFile(std::string file)
   return result;
 }
 
+int CASCFolder::fileDataId(std::string & filename)
+{
+  return CascGetFileId(hStorage, filename.c_str());
+}
+

@@ -49,6 +49,8 @@ class _CASCFOLDER_API_ CASCFolder
 
     HANDLE openFile(std::string file);
 
+    int fileDataId(std::string & filename);
+
   private:
     CASCFolder(const CASCFolder &);
 

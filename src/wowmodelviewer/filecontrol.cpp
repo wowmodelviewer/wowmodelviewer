@@ -57,7 +57,7 @@ static wxString chos[] = {wxT("Models (*.m2)"), wxT("WMOs (*.wmo)"), wxT("ADTs (
 
 void beautifyFileName(QString & file)
 {
-  file = file.toLower();
+  file = file.toLower().replace('/','\\');
   QString firstLetter = file[0];
   firstLetter = firstLetter.toUpper();
   file[0] = firstLetter[0];

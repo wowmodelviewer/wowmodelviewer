@@ -1711,17 +1711,6 @@ void ModelViewer::LoadWoW()
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
 
-  QStringList ver = GAMEDIRECTORY.version().split('.');
-  
-  QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
-
-  LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
-
-  GAMEDIRECTORY.initFiles(baseConfigFolder + "listfile.txt");
-
-  if (!customDirectoryPath.IsEmpty())
-    Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
-
   // init game locale
   std::vector<std::string> localesFound = GAMEDIRECTORY.localesFound();
 
@@ -1761,8 +1750,21 @@ void ModelViewer::LoadWoW()
 
   SetStatusText(wxString(GAMEDIRECTORY.locale()), 2);
 
+  // init file list
+  QStringList ver = GAMEDIRECTORY.version().split('.');
 
+  QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+
+  LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
+
+  GAMEDIRECTORY.initFiles(baseConfigFolder + "listfile.txt");
+
+  if (!customDirectoryPath.IsEmpty())
+    Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
+
+  // init database
   InitDatabase(baseConfigFolder);
+
   /*
   // Error check
   if (!initDB)

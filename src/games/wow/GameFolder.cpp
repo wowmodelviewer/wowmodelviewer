@@ -42,13 +42,9 @@ void GameFolder::initFiles(const QString & filename)
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
-
-    int spaceIndex = line.lastIndexOf(" ");
-    QString filename = line.left(spaceIndex);
-    QString id = line.mid(spaceIndex + 1);
-    
-    CASCFile * file = new CASCFile(filename, id.toInt());
-    file->setName(line.mid(line.lastIndexOf("\\")+1));
+   
+    CASCFile * file = new CASCFile(line, m_CASCFolder.fileDataId(line.toStdString()));
+    file->setName(line.mid(line.lastIndexOf('/')+1));
     addChild(file);
   }
   LOG_INFO << "GameFolder - Hierarchy creation done";
@@ -144,7 +140,7 @@ void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
 
 GameFile * GameFolder::getFile(QString filename)
 {
-  filename = filename.toLower();
+  filename = filename.toLower().replace('\\','/');
 
   GameFile * result = 0;
 
