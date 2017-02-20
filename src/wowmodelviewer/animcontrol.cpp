@@ -419,7 +419,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	// get wmo name or current wmogroup name/descr
 	if (group>=-1 && group<(int)g_selWMO->nGroups) {
 		wxString label = w->itemName().toStdString().c_str();
-		label = label.AfterLast(MPQ_SLASH);
+		label = label.AfterLast('/');
 		if (group>=0) {
 			label += wxT(" - ") + g_selWMO->groups[group].name;
 			if (g_selWMO->groups[group].desc.length()) {
@@ -461,7 +461,7 @@ void AnimControl::SetSkinByDisplayID(int cdi)
 
 QString AnimControl::GetModelFolder(WoWModel *m)
 {
-  return QString(m->itemName().toStdString().c_str()).section(MPQ_SLASH, 0, -2) + MPQ_SLASH;
+  return QString(m->itemName().toStdString().c_str()).section('/', 0, -2) + '/';
 }
 
 Vec4D AnimControl::fromARGB(int color)
@@ -854,7 +854,7 @@ void AnimControl::SyncBLPSkinList()
     if (tex)
     {
       texname = tex->fullname().toStdString().c_str();
-      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      texname = texname.AfterLast('/').BeforeLast('.');
     }
     currTextures[i] = texname;
   }
@@ -868,7 +868,7 @@ void AnimControl::SyncBLPSkinList()
     {
       GameFile * tex = it->tex[0];
       wxString texname = tex->fullname().toStdString().c_str();
-      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      texname = texname.AfterLast('/').BeforeLast('.');
       if (texname == currTextures[0])
         BLPSkinList1->SetSelection(num);
       if (texname == currTextures[1])
@@ -891,7 +891,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
   {
     GameFile * tex = it->tex[0];
     wxString texname = tex->fullname().toStdString().c_str();
-    wxString selectorName = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+    wxString selectorName = texname.AfterLast('/').BeforeLast('.');
     if (it->definedTexture)
       selectorName.MakeUpper();
     skinList->Append(selectorName);
@@ -922,7 +922,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
     {
       GameFile * tex = it->tex[0];
       wxString texname = tex->fullname().toStdString().c_str();
-      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      texname = texname.AfterLast('/').BeforeLast('.');
       if (!item)
         LOG_INFO << "TextureList[" << g_selModel->TextureList.size() << "] : added "
                  << texname.c_str() << " via FillBLPSkinSelector";
@@ -1207,7 +1207,7 @@ void AnimControl::SetSkin(int num)
     if (tex)
     {
       texname = tex->fullname().toStdString().c_str();
-      texname = texname.AfterLast(MPQ_SLASH).BeforeLast('.');
+      texname = texname.AfterLast('/').BeforeLast('.');
     }
     currTextures[i] = texname;
 
