@@ -36,9 +36,15 @@ public:
 
   WDB5File::header readHeader();
 
+  std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
+
 private:
 
   header m_header;
+  
+  // Common data values => map[column id] => (tuple(map[id] => value (raw), type))
+  std::map<uint32, std::tuple<std::map<uint32, uint32>, uint8> > m_commonData;
+
 };
 
 #endif

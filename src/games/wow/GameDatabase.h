@@ -64,7 +64,8 @@ class _GAMEDATABASE_API_ GameDatabase
           pos(-1),
           arraySize(1),
           id(0),
-          needIndex(false)
+          needIndex(false),
+          isCommonData(false)
         {}
 
         QString name;
@@ -72,6 +73,7 @@ class _GAMEDATABASE_API_ GameDatabase
         bool isKey;
         bool needIndex;
         int pos;
+        bool isCommonData;
         unsigned int arraySize;
         int id;
     };

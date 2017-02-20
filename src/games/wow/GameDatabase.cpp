@@ -141,6 +141,7 @@ bool GameDatabase::readStructureFromXML(const QString & file)
       QDomNode key = attributes.namedItem("primary");
       QDomNode arraySize = attributes.namedItem("arraySize");
       QDomNode pos = attributes.namedItem("pos");
+      QDomNode commonData = attributes.namedItem("commonData");
       QDomNode index = attributes.namedItem("createIndex");
 
       if (!name.isNull() && !type.isNull())
@@ -156,6 +157,9 @@ bool GameDatabase::readStructureFromXML(const QString & file)
 
         if (!pos.isNull())
           fieldStruct->pos = pos.nodeValue().toInt();
+
+        if (!commonData.isNull())
+          fieldStruct->isCommonData = true;
 
         if (!arraySize.isNull())
           fieldStruct->arraySize = arraySize.nodeValue().toUInt();
@@ -334,22 +338,22 @@ bool GameDatabase::tableStructure::fill()
       it != itEnd ;
       ++it,curfield++)
   {
-	if (it->arraySize == 1) // simple field
-	{
-	  query += it->name;
-	}
-	else
-	{
-	  for (unsigned int i = 1; i <= it->arraySize; i++)
+	  if (it->arraySize == 1) // simple field
 	  {
-		query += it->name;
-		query += QString::number(i);
-		if (i != it->arraySize)
-		  query += ",";
+	    query += it->name;
 	  }
-	}
-    if(curfield != nbFields-1)
-      query += ",";
+	  else
+	  {
+	    for (unsigned int i = 1; i <= it->arraySize; i++)
+	    {
+		  query += it->name;
+		  query += QString::number(i);
+		  if (i != it->arraySize)
+		    query += ",";
+	    }
+	  }
+      if(curfield != nbFields-1)
+        query += ",";
   }
 
   query += ") VALUES";

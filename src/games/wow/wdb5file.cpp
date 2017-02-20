@@ -224,6 +224,9 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatab
       continue;
     }
 
+    if (it->isCommonData) // managed in wdb6 reader
+      continue;
+
     for (uint i = 0; i < it->arraySize; i++)
     {
       int fieldSize = (32 - m_fieldSizes.at(it->pos)) / 8;

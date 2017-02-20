@@ -46,7 +46,10 @@ public:
 
   virtual header readHeader();
 
-  std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
+
+protected:
+  std::vector<uint32> m_IDs;
 
 private:
   struct field_structure
@@ -62,7 +65,6 @@ private:
   };
 
   std::map<int, int> m_fieldSizes;
-  std::vector<uint32> m_IDs;
   std::vector<unsigned char *> m_recordOffsets;
 
   bool m_isSparseTable;
