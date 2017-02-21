@@ -158,8 +158,7 @@
   <!-- Misc tables - BEGIN -->
   <table name="AnimationData">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="Name" pos="0" />
-    <field type="uint" name="Flags" pos="4" />
+    <field type="text" name="Name" pos="4" />
   </table>
   <table name="TextureFileData">
     <field type="uint" name="TextureID" primary="yes" />
