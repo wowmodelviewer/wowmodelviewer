@@ -6,7 +6,7 @@
 
 #include <bitset>
 
-#define WDB5_READ_DEBUG 1
+#define WDB5_READ_DEBUG 0
 
 WDB5File::WDB5File(const QString & file) :
 DBFile(file), m_isSparseTable(false)
