@@ -607,6 +607,12 @@ void ModelViewer::InitDatabase(const QString & configFolder)
     LOG_INFO << "Initializing succeeded.";
   }
 
+  // init texture regions
+  CharTexture::initRegions();
+
+  // init Race informations
+  RaceInfos::init();
+
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
   initDB = true;
@@ -651,12 +657,6 @@ void ModelViewer::InitDatabase(const QString & configFolder)
       return;
     }
   }
-
-  // init texture regions
-  CharTexture::initRegions();
-
-  // init Race informations
-  RaceInfos::init();
 
   LOG_INFO << "Finished initiating database files.";
   SetStatusText(wxT("Finished initiating database files."));;

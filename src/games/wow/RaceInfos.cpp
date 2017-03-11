@@ -6,7 +6,7 @@
 
 #include "logger/Logger.h"
 
-
+#define DEBUG_RACEINFOS 0
 
 std::map< int, RaceInfos> RaceInfos::RACES;
 
@@ -73,6 +73,19 @@ void RaceInfos::init()
         if (RACES.find(modelfileid) == RACES.end())
           RACES[modelfileid] = infos;
 
+#if DEBUG_RACEINFOS > 0
+        LOG_INFO << "---------------------------";
+        LOG_INFO << "modelfileid ->" << modelfileid;
+        LOG_INFO << "infos.prefix =" << infos.prefix.c_str();
+        LOG_INFO << "infos.textureLayoutID =" << infos.textureLayoutID;
+        LOG_INFO << "infos.raceid =" << infos.raceid;
+        LOG_INFO << "infos.sexid =" << infos.sexid;
+        LOG_INFO << "infos.customization[0] =" << infos.customization[0].c_str();
+        LOG_INFO << "infos.customization[1] =" << infos.customization[1].c_str();
+        LOG_INFO << "infos.customization[2] =" << infos.customization[2].c_str();
+        LOG_INFO << "infos.isHD =" << infos.isHD;
+        LOG_INFO << "---------------------------";
+#endif
       }
     }
   }
