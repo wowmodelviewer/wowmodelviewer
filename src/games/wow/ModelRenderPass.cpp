@@ -15,6 +15,18 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
+#define INVALID_TEX 50000
+
+ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
+  useTex2(false), useEnvMap(false), cull(false), trans(false), 
+  unlit(false), noZWrite(false), billboard(false),
+  texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX), geoset(m->geosets[geo]),
+  swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
+  model(m), geoIndex(geo)
+{
+
+}
+
 void ModelRenderPass::deinit()
 {
   glDisable(GL_BLEND);
@@ -72,28 +84,30 @@ void ModelRenderPass::deinit()
 }
 
 
-bool ModelRenderPass::init(WoWModel *m)
+bool ModelRenderPass::init()
 {
   // May as well check that we're going to render the geoset before doing all this crap.
-  if (!m->showGeosets[geoset])
+  if (!model || (!model->showGeosets[geoIndex]))
     return false;
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  ocol = Vec4D(1.0f, 1.0f, 1.0f, m->trans);
+  ocol = Vec4D(1.0f, 1.0f, 1.0f, model->trans);
   ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
 
   // emissive colors
-  if (color!=-1 && m->colors && m->colors[color].color.uses(0))
+  if (color != -1 && model->colors && model->colors[color].color.uses(0))
   {
     Vec3D c;
     /* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
-    c = m->colors[color].color.getValue(0, m->animtime);
-    if (m->colors[color].opacity.uses(m->anim))
-      ocol.w = m->colors[color].opacity.getValue(m->anim, m->animtime);
+    c = model->colors[color].color.getValue(0, model->animtime);
+    if (model->colors[color].opacity.uses(model->anim))
+      ocol.w = model->colors[color].opacity.getValue(model->anim, model->animtime);
 
     if (unlit)
-    { ocol.x = c.x; ocol.y = c.y; ocol.z = c.z; }
+    {
+      ocol.x = c.x; ocol.y = c.y; ocol.z = c.z;
+    }
     else
       ocol.x = ocol.y = ocol.z = 0;
 
@@ -102,26 +116,29 @@ bool ModelRenderPass::init(WoWModel *m)
   }
 
   // opacity
-  if (opacity!=-1)
+  if (opacity != -1)
   {
     /* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
-    if (m->transparency && m->transparency[opacity].trans.uses(0))
-      ocol.w *= m->transparency[opacity].trans.getValue(0, m->animtime);
+    if (model->transparency && model->transparency[opacity].trans.uses(0))
+      ocol.w *= model->transparency[opacity].trans.getValue(0, model->animtime);
   }
 
   // exit and return false before affecting the opengl render state
-  if (!((ocol.w > 0) && (color==-1 || ecol.w > 0)))
+  if (!((ocol.w > 0) && (color == -1 || ecol.w > 0)))
     return false;
 
 
   // TEXTURE
   // bind to our texture
-  GLuint bindtex = 0;
-  if (m->specialTextures[tex]==-1)
-    bindtex = m->textures[tex];
-  else
-    bindtex = m->replaceTextures[m->specialTextures[tex]];
-  glBindTexture(GL_TEXTURE_2D, bindtex);
+  if (tex != INVALID_TEX)
+  {
+    GLuint bindtex = 0;
+    if (model->specialTextures[tex] == -1)
+      bindtex = model->textures[tex];
+    else
+      bindtex = model->replaceTextures[model->specialTextures[tex]];
+    glBindTexture(GL_TEXTURE_2D, bindtex);
+  }
 
   // ALPHA BLENDING
   // blend mode
@@ -204,7 +221,7 @@ bool ModelRenderPass::init(WoWModel *m)
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
 
-    m->texAnims[texanim].setup(texanim);
+    model->texAnims[texanim].setup(texanim);
   }
 
   // color
@@ -219,4 +236,45 @@ bool ModelRenderPass::init(WoWModel *m)
     glEnable(GL_BLEND);
 
   return true;
+}
+
+void ModelRenderPass::render(bool animated)
+{
+  // we don't want to render completely transparent parts
+
+  // render
+  if (animated)
+  {
+    //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
+    // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
+    // I can't notice a difference but I guess it can't hurt
+    if (video.supportVBO && video.supportDrawRangeElements)
+    {
+      glDrawRangeElements(GL_TRIANGLES, geoset.vstart, geoset.vstart + geoset.vcount, geoset.icount, GL_UNSIGNED_SHORT, &model->indices[geoset.istart]);
+    }
+    else
+    {
+      glBegin(GL_TRIANGLES);
+      for (size_t k = 0, b = geoset.istart; k < geoset.icount; k++, b++)
+      {
+        uint16 a = model->indices[b];
+        glNormal3fv(model->normals[a]);
+        glTexCoord2fv(model->origVertices[a].texcoords);
+        glVertex3fv(model->vertices[a]);
+      }
+      glEnd();
+    }
+  }
+  else
+  {
+    glBegin(GL_TRIANGLES);
+    for (size_t k = 0, b = geoset.istart; k < geoset.icount; k++, b++)
+    {
+      uint16 a = model->indices[b];
+      glNormal3fv(model->normals[a]);
+      glTexCoord2fv(model->origVertices[a].texcoords);
+      glVertex3fv(model->vertices[a]);
+    }
+    glEnd();
+  }
 }
