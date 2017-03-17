@@ -248,26 +248,44 @@ struct ModelGeoset {
 // same as ModelGeoset but with a uint32 as istart, to handle index > 65535 (present in HD models)
 class ModelGeosetHD {
   public:
-  ModelGeosetHD(ModelGeoset & geo) :
-    id(geo.id&0x7FFF), vstart(geo.vstart), vcount(geo.vcount),
-    istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
-    StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), radius(geo.radius)
-    {
-      BoundingBox[0] = geo.BoundingBox[0];
-      BoundingBox[1] = geo.BoundingBox[1];
-    }
+    ModelGeosetHD():
+      id(-1), vstart(0), vcount(0),
+      istart(0), icount(0), nSkinnedBones(0),
+      StartBones(0), rootBone(0), nBones(0), radius(0)
+      { 
+        BoundingBox[0] = Vec3D(0, 0, 0);
+        BoundingBox[1] = Vec3D(0, 0, 0);
+      }
 
-  uint32 id;    // mesh part id?
-  uint16 vstart;  // first vertex, Starting vertex number.
-  uint16 vcount;  // num vertices, Number of vertices.
-  uint32 istart;  // first index, Starting triangle index (that's 3* the number of triangles drawn so far).
-  uint16 icount;  // num indices, Number of triangle indices.
-  uint16 nSkinnedBones; // number of bone indices, Number of elements in the bone lookup table.
-  uint16 StartBones;    // ? always 1 to 4, Starting index in the bone lookup table.
-  uint16 rootBone;    // root bone?
-  uint16 nBones;    //
-  Vec3D BoundingBox[2];
-  float radius;
+    ModelGeosetHD(ModelGeoset & geo) :
+      id(geo.id&0x7FFF), vstart(geo.vstart), vcount(geo.vcount),
+      istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
+      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), radius(geo.radius)
+      {
+        BoundingBox[0] = geo.BoundingBox[0];
+        BoundingBox[1] = geo.BoundingBox[1];
+      }
+
+    ModelGeosetHD(const ModelGeosetHD & geo) :
+      id(geo.id), vstart(geo.vstart), vcount(geo.vcount),
+      istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
+      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), radius(geo.radius)
+      {
+        BoundingBox[0] = geo.BoundingBox[0];
+        BoundingBox[1] = geo.BoundingBox[1];
+      }
+
+    uint32 id;    // mesh part id?
+    uint16 vstart;  // first vertex, Starting vertex number.
+    uint16 vcount;  // num vertices, Number of vertices.
+    uint32 istart;  // first index, Starting triangle index (that's 3* the number of triangles drawn so far).
+    uint16 icount;  // num indices, Number of triangle indices.
+    uint16 nSkinnedBones; // number of bone indices, Number of elements in the bone lookup table.
+    uint16 StartBones;    // ? always 1 to 4, Starting index in the bone lookup table.
+    uint16 rootBone;    // root bone?
+    uint16 nBones;    //
+    Vec3D BoundingBox[2];
+    float radius;
 };
 
 

@@ -221,9 +221,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass &p = model->passes[i];
 
-    if (p.init(model))
+    if (p.init())
     {
-      for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++)
+      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec3D vert;
@@ -264,9 +264,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass &p = model->passes[i];
     // we don't want to render completely transparent parts
-    if (p.init(model))
+    if (p.init())
     {
-      for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++)
+      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec2D tc =  model->origVertices[a].texcoords;
@@ -283,9 +283,9 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   for (size_t i=0; i<model->passes.size(); i++)
   {
     ModelRenderPass &p = model->passes[i];
-    if (p.init(model))
+    if (p.init())
     {
-      for (size_t k=0, b=p.indexStart; k<p.indexCount; k++,b++)
+      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec3D n = model->origVertices[a].normal;
@@ -305,14 +305,14 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass &p = model->passes[i];
 
-    if (p.init(model))
+    if (p.init())
     {
       // Build Vert2Point DB
-      size_t *Vert2Point = new size_t[p.vertexEnd];
-      for (size_t v=p.vertexStart; v<p.vertexEnd; v++, pointnum++)
+      uint16 *Vert2Point = new uint16[p.geoset.vstart + p.geoset.vcount];
+      for (uint16 v = p.geoset.vstart; v<(p.geoset.vstart + p.geoset.vcount); v++, pointnum++)
         Vert2Point[v] = pointnum;
 
-      int g = p.geoset;
+      int g = p.geoset.id;
 
       QString val;
       val.sprintf("Geoset_%03i",g);
@@ -338,7 +338,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       file << "usemtl " << matName << "\n";
       file << "s 1" << "\n";
       int triangles = 0;
-      for (size_t k=0; k<p.indexCount; k+=3)
+      for (size_t k=0; k<p.geoset.icount; k+=3)
       {
         file << "f ";
         file << QString("%1/%1/%1 ").arg(counter);
@@ -365,7 +365,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
   {
     ModelRenderPass &p = model->passes[i];
 
-    if (p.init(model))
+    if (p.init())
     {
       QString tex = model->TextureList[p.tex]->fullname();
       QString texfile = QFileInfo(tex).completeBaseName();

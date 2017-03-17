@@ -108,7 +108,6 @@ public:
   Vec2D *texCoords;
   Vec3D *vertices;
   std::vector<uint16> indices;
-  uint32 nIndices;
   std::vector<GameFile *> TextureList;
   // --
 
@@ -222,7 +221,7 @@ public:
 
   bool bSheathe;
 
-  friend struct ModelRenderPass;
+  friend class ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
   void UpdateTextureList(GameFile * tex, int special);

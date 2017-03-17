@@ -28,6 +28,12 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
+#define WIP_DH_SUPPORT 0
+
+#if WIP_DH_SUPPORT > 0
+WoWModel * dh = 0;
+#endif
+
 void
 glGetAll()
 {
@@ -944,10 +950,10 @@ void WoWModel::setLOD(GameFile * f, int index)
   // Indices,  Triangles
   uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
   uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
-  nIndices = view->nTris;
   indices.clear();
-  indices.reserve(nIndices);
-  for (size_t i = 0; i < nIndices; i++)
+  indices.resize(view->nTris);
+
+  for (size_t i = 0; i < view->nTris; i++)
   {
     indices[i] = indexLookup[triangles[i]];
   }
@@ -964,42 +970,26 @@ void WoWModel::setLOD(GameFile * f, int index)
 
   showGeosets.resize(view->nSub);
 
-  uint32 start = 0;
+  uint32 istart = 0;
+  uint32 vstart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
     ModelGeosetHD hdgeo(ops[i]);
-    hdgeo.istart = start;
-    start += hdgeo.icount;
+    hdgeo.istart = istart;
+    istart += hdgeo.icount;
+    vstart += hdgeo.vcount;
     geosets.push_back(hdgeo);
     showGeosets[i] = true;
   }
-
+ 
   passes.clear();
   for (size_t j = 0; j < view->nTex; j++)
   {
-    ModelRenderPass pass;
-
-    pass.useTex2 = false;
-    pass.useEnvMap = false;
-    pass.cull = false;
-    pass.trans = false;
-    pass.unlit = false;
-    pass.noZWrite = false;
-    pass.billboard = false;
-    pass.texanim = -1; // no texture animation
-
-    //pass.texture2 = 0;
-    size_t geoset = tex[j].op;
-
-    pass.geoset = (int)geoset;
-
-    pass.indexStart = geosets[geoset].istart;
-    pass.indexCount = geosets[geoset].icount;
-    pass.vertexStart = geosets[geoset].vstart;
-    pass.vertexEnd = pass.vertexStart + geosets[geoset].vcount;
+    ModelRenderPass pass(this, tex[j].op);
 
     //TextureID texid = textures[texlookup[tex[j].textureid]];
     //pass.texture = texid;
+    
     pass.tex = texlookup[tex[j].textureid];
 
     // TODO: figure out these flags properly -_-
@@ -1030,8 +1020,6 @@ void WoWModel::setLOD(GameFile * f, int index)
     // ToDo: Work out the correct way to get the true/false of transparency
     pass.trans = (pass.blendmode > 0) && (pass.opacity > 0);	// Transparency - not the correct way to get transparency
 
-    pass.p = ops[geoset].BoundingBox[0].z;
-
     // Texture flags
     pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
     pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
@@ -1044,7 +1032,73 @@ void WoWModel::setLOD(GameFile * f, int index)
 
     passes.push_back(pass);
   }
+#if WIP_DH_SUPPORT > 0
+  if (name().contains("bloodelfmale_hd"))
+  {
+    dh = new WoWModel(GAMEDIRECTORY.getFile(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2")), true);
 
+    for (auto it : dh->passes)
+    {
+      passes.push_back(it);
+    }
+  }
+  /*
+    uint nbGeoset = geosets.size();
+    uint nbVertices = origVertices.size();
+    uint nbIndices = indices.size();
+
+    LOG_INFO << "nbGeosets =" << nbGeoset;
+    LOG_INFO << "nbVertices =" << nbVertices;
+    LOG_INFO << "nbIndices =" << nbIndices;
+
+    for (auto it = dh->geosets.begin(), itEnd = dh->geosets.end(); it != itEnd; ++it)
+    {
+      ModelGeosetHD newgeo(*it);
+      newgeo.istart = it->istart + view->nTris;
+      newgeo.vstart = it->vstart + nbVertices;
+      geosets.push_back(newgeo); 
+      showGeosets.push_back(false);
+    }
+
+    origVertices.resize(origVertices.size() + dh->origVertices.size());
+    origVertices.insert(origVertices.end(), dh->origVertices.begin(), dh->origVertices.end());
+    
+    indices.reserve(indices.size() + dh->indices.size());
+    for (auto it = dh->indices.begin(); it != dh->indices.end(); ++it)
+    {
+      indices.push_back(*it + nbVertices);
+    }
+
+    delete[] vertices;
+    delete[] normals;
+
+    vertices = new Vec3D[origVertices.size()];
+    normals = new Vec3D[origVertices.size()];
+
+    uint i = 0;
+    for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
+    {
+      // Set the data for our vertices, normals from the model data
+      vertices[i] = ov_it->pos;
+      normals[i] = ov_it->normal.normalize();
+    }
+
+    for (auto it = dh->passes.begin(), itEnd = dh->passes.end(); it != itEnd; ++it)
+    {
+      it->geoset += nbGeoset;
+      it->indexStart = geosets[it->geoset].istart;
+      it->vertexStart = geosets[it->geoset].vstart;
+      it->vertexEnd = it->vertexStart + geosets[it->geoset].vcount;
+    }
+
+    
+
+    passes.insert(passes.end(), dh->passes.begin(), dh->passes.end());
+
+    delete dh;
+  }
+  */
+#endif
   g->close();
   // transparent parts come later
   std::sort(passes.begin(), passes.end());
@@ -1252,7 +1306,13 @@ void WoWModel::animate(ssize_t anim)
   this->anim = anim;
 
   if (animBones) // && (!animManager->IsPaused() || !animManager->IsParticlePaused()))
+  {
     calcBones(anim, t);
+#if WIP_DH_SUPPORT > 0
+    if (dh)
+      dh->calcBones(anim, t);
+#endif
+  }
 
   if (animGeometry)
   { 
@@ -1288,6 +1348,33 @@ void WoWModel::animate(ssize_t anim)
       else
         normals[i] = n;
     }
+#if WIP_DH_SUPPORT > 0
+    if (dh)
+    {
+      auto ov_it = dh->origVertices.begin();
+      for (size_t i = 0; ov_it != dh->origVertices.end(); ++i, ++ov_it)
+      { //,k=0
+        Vec3D v(0, 0, 0), n(0, 0, 0);
+
+        for (size_t b = 0; b < 4; b++)
+        {
+          if (ov_it->weights[b] > 0)
+          {
+            Vec3D tv = bones[ov_it->bones[b]].mat * ov_it->pos;
+            Vec3D tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
+            v += tv * ((float)ov_it->weights[b] / 255.0f);
+            n += tn * ((float)ov_it->weights[b] / 255.0f);
+          }
+        }
+
+        dh->vertices[i] = v;
+        if (video.supportVBO)
+          dh->vertices[dh->origVertices.size() + i] = n.normalize(); // shouldn't these be normal by default?
+        else
+          dh->normals[i] = n;
+      }
+    }
+#endif
 
     // clear bind
     if (video.supportVBO)
@@ -1362,54 +1449,15 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
-  for (size_t i = 0; i < passes.size(); i++)
+  for (auto it : passes)
   {
-    ModelRenderPass &p = passes[i];
-
-    if (p.init(this))
+    if (it.init())
     {
-      // we don't want to render completely transparent parts
-
-      // render
-      if (animated)
-      {
-        //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-        // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
-        // I can't notice a difference but I guess it can't hurt
-        if (video.supportVBO && video.supportDrawRangeElements)
-        {
-          glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, &indices[p.indexStart]);
-        }
-        else
-        {
-          glBegin(GL_TRIANGLES);
-          for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
-          {
-            uint16 a = indices[b];
-            glNormal3fv(normals[a]);
-            glTexCoord2fv(origVertices[a].texcoords);
-            glVertex3fv(vertices[a]);
-          }
-          glEnd();
-        }
-      }
-      else
-      {
-        glBegin(GL_TRIANGLES);
-        for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
-        {
-          uint16 a = indices[b];
-          glNormal3fv(normals[a]);
-          glTexCoord2fv(origVertices[a].texcoords);
-          glVertex3fv(vertices[a]);
-        }
-        glEnd();
-      }
-
-      p.deinit();
+      it.render(animated);
+      it.deinit();
     }
   }
-
+  
   if (showWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -1418,6 +1466,7 @@ inline void WoWModel::drawModel()
   {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
+
   // done with all render ops
 }
 
@@ -1647,10 +1696,10 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
   {
     ModelRenderPass &p = passes[i];
 
-    if (!showGeosets[p.geoset])
+    if (!showGeosets[p.geoset.id])
       continue;
 
-    for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
+    for (size_t k = 0, b = p.geoset.istart; k < p.geoset.icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 

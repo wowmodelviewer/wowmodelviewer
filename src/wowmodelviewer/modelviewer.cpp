@@ -2538,10 +2538,10 @@ void ModelViewer::ModelInfo()
   for (size_t i = 0; i < m->passes.size(); i++) {
     xml << "	  <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass &p = m->passes[i];
-    xml << "      <indexStart>" << p.indexStart << "</indexStart>" << endl;
-    xml << "      <indexCount>" << p.indexCount << "</indexCount>" << endl;
-    xml << "      <vertexStart>" << p.vertexStart << "</vertexStart>" << endl;
-    xml << "      <vertexEnd>" << p.vertexEnd << "</vertexEnd>" << endl;
+    xml << "      <indexStart>" << p.geoset.istart << "</indexStart>" << endl;
+    xml << "      <indexCount>" << p.geoset.icount << "</indexCount>" << endl;
+    xml << "      <vertexStart>" << p.geoset.vstart << "</vertexStart>" << endl;
+    xml << "      <vertexEnd>" << p.geoset.vstart + p.geoset.vcount << "</vertexEnd>" << endl;
     xml << "      <tex>" << p.tex << "</tex>" << endl;
     if (p.tex >= 0)
       xml << "      <texName>" << m->TextureList[p.tex]->fullname().toStdString() << "</texName>" << endl;
@@ -2552,12 +2552,11 @@ void ModelViewer::ModelInfo()
     xml << "      <unlit>" << p.unlit << "</unlit>" << endl;
     xml << "      <noZWrite>" << p.noZWrite << "</noZWrite>" << endl;
     xml << "      <billboard>" << p.billboard << "</billboard>" << endl;
-    xml << "      <p>" << p.p << "</p>" << endl;
     xml << "      <texanim>" << p.texanim << "</texanim>" << endl;
     xml << "      <color>" << p.color << "</color>" << endl;
     xml << "      <opacity>" << p.opacity << "</opacity>" << endl;
     xml << "      <blendmode>" << p.blendmode << "</blendmode>" << endl;
-    xml << "      <geoset>" << p.geoset << "</geoset>" << endl;
+    xml << "      <geoset>" << p.geoset.id << "</geoset>" << endl;
     xml << "      <swrap>" << p.swrap << "</swrap>" << endl;
     xml << "      <twrap>" << p.twrap << "</twrap>" << endl;
     xml << "      <ocol>" << p.ocol << "</ocol>" << endl;

@@ -264,7 +264,7 @@ void FBXExporter::createMesh()
   for (size_t i = 0; i < num_of_passes; i++)
   {
     ModelRenderPass& p = m_p_model->passes[i];
-    if (p.init(m_p_model))
+    if (p.init())
     {
       // Build material name.
       FbxString mtrl_name = "testToChange";
@@ -275,7 +275,7 @@ void FBXExporter::createMesh()
       FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
       m_p_meshNode->AddMaterial(material);
 
-      ModelGeosetHD g = m_p_model->geosets[p.geoset];
+      ModelGeosetHD g = p.geoset;
       size_t num_of_faces = g.icount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
@@ -617,7 +617,7 @@ void FBXExporter::createMaterials()
   for (unsigned int i = 0; i < m_p_model->passes.size(); i++)
   {
     ModelRenderPass& pass = m_p_model->passes[i];
-    if (pass.init(m_p_model))
+    if (pass.init())
     {
       // Build material name.
       FbxString mtrl_name = m_p_model->name().toStdString().c_str();
