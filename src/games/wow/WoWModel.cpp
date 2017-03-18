@@ -28,7 +28,7 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
-#define WIP_DH_SUPPORT 0
+#define WIP_DH_SUPPORT 1
 
 #if WIP_DH_SUPPORT > 0
 WoWModel * dh = 0;

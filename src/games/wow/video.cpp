@@ -14,6 +14,8 @@
 // gl
 #include "OpenGLHeaders.h"
 
+#define WIP_DH_SUPPORT 1
+
 #ifdef _LINUX // Linux
 	void (*wglGetProcAddress(const char *function_name))(void)
 	{
@@ -133,7 +135,11 @@ bool VideoSettings::Init()
 	supportShaders = (supportFragProg && supportVertexProg);
 	supportMultiTex = glewIsSupported("GL_ARB_multitexture") == GL_TRUE ? true : false;
 	supportDrawRangeElements = glewIsSupported("GL_EXT_draw_range_elements") == GL_TRUE ? true : false;
-	supportVBO = glewIsSupported("GL_ARB_vertex_buffer_object") == GL_TRUE ? true : false;
+#if WIP_DH_SUPPORT > 0
+  supportVBO = false;
+#else
+  supportVBO = glewIsSupported("GL_ARB_vertex_buffer_object") == GL_TRUE ? true : false;
+#endif
 	supportCompression = glewIsSupported("GL_ARB_texture_compression GL_ARB_texture_cube_map GL_EXT_texture_compression_s3tc") == GL_TRUE ? true : false;
 	supportPointSprites = glewIsSupported("GL_ARB_point_sprite GL_ARB_point_parameters") == GL_TRUE ? true : false;
 #ifdef _WINDOWS
