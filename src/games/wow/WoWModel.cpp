@@ -114,7 +114,6 @@ gamefile(file)
   dlist = 0;
   bounds = 0;
   boundTris = 0;
-  showGeosets.clear();
 
   hasCamera = false;
   hasParticles = false;
@@ -183,7 +182,6 @@ WoWModel::~WoWModel()
       delete[] globalSequences; globalSequences = 0;
       delete[] bounds; bounds = 0;
       delete[] boundTris; boundTris = 0;
-      showGeosets.clear();
       delete animManager; animManager = 0;
 
       if (animated)
@@ -962,10 +960,6 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
   int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
-  showGeosets.clear();
-
-  showGeosets.resize(view->nSub);
-
   uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
@@ -973,10 +967,11 @@ void WoWModel::setLOD(GameFile * f, int index)
     hdgeo.istart = istart;
     istart += hdgeo.icount;
     geosets.push_back(hdgeo);
-    showGeosets[i] = true;
+    showGeoset(i, true);
   }
  
   passes.clear();
+ 
   for (size_t j = 0; j < view->nTex; j++)
   {
     ModelRenderPass pass(this, tex[j].op);
@@ -1033,6 +1028,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
     uint nbVertices = origVertices.size();
     uint nbIndices = indices.size();
+    uint nbGeosets = geosets.size();
 
     LOG_INFO << "---- ORIGINAL ----";
     LOG_INFO << "nbGeosets =" << geosets.size();
@@ -1046,7 +1042,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     LOG_INFO << "nbIndices =" << dh->indices.size();
     LOG_INFO << "nbPasses =" << dh->passes.size();
 
-    for (auto it : dh->geosets)
+    for (auto & it : dh->geosets)
     {
       if (it.id == 2401)
       {
@@ -1057,8 +1053,10 @@ void WoWModel::setLOD(GameFile * f, int index)
       }
 
       it.istart += nbIndices;
-      geosets.push_back(it); 
-      showGeosets.push_back(false);
+      it.vstart += nbVertices;
+      it.display = false;
+
+      geosets.push_back(it);
 
       if (it.id == 2401)
       {
@@ -1074,7 +1072,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     origVertices.insert(origVertices.end(), dh->origVertices.begin(), dh->origVertices.end());
     
     indices.reserve(indices.size() + dh->indices.size());
-    for (auto it : dh->indices)
+    for (auto & it : dh->indices)
     {
       indices.push_back(it + nbVertices);
     }
@@ -1086,7 +1084,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     normals = new Vec3D[origVertices.size()];
 
     uint i = 0;
-    for (auto ov_it : origVertices)
+    for (auto & ov_it : origVertices)
     {
       // Set the data for our vertices, normals from the model data
       vertices[i] = ov_it.pos;
@@ -1098,6 +1096,11 @@ void WoWModel::setLOD(GameFile * f, int index)
     {
       it.model = this;
       it.geoset.istart += nbIndices;
+     // it.geoIndex += nbGeosets;
+      //it.geoset = &geosets[it.geoIndex];
+     // LOG_INFO << "p.geoIndex" << it.geoIndex;
+     // LOG_INFO << "p.geoset" << it.geoset;
+      LOG_INFO << "p.model" << it.model;
       passes.push_back(it);
     }
 
@@ -1106,7 +1109,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     LOG_INFO << "nbVertices =" << origVertices.size();
     LOG_INFO << "nbIndices =" << indices.size();
     LOG_INFO << "nbPasses =" << passes.size();
-
+                                                                            
     const size_t size = (origVertices.size() * sizeof(float));
     vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
@@ -1136,7 +1139,6 @@ void WoWModel::setLOD(GameFile * f, int index)
       // clean bind
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
     }
-
   }
 #endif
   g->close();
@@ -1458,7 +1460,7 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
-  for (auto it : passes)
+  for (auto & it : passes)
   {
     if (it.init())
     {
@@ -1702,14 +1704,12 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
     vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
   }
 
-  for (size_t i = 0; i < passes.size(); i++)
+  for (auto & it : passes)
   {
-    ModelRenderPass &p = passes[i];
-
-    if (!showGeosets[p.geoset.id])
+    if (!it.geoset.display)
       continue;
 
-    for (size_t k = 0, b = p.geoset.istart; k < p.geoset.icount; k++, b++)
+    for (size_t k = 0, b = it.geoset.istart; k < it.geoset.icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1760,3 +1760,20 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
 
   return result;
 }
+
+void WoWModel::showGeoset(uint geosetindex, bool value)
+{
+  if (geosetindex < geosets.size())
+    geosets[geosetindex].display = value;
+}
+
+bool WoWModel::isGeosetDisplayed(uint geosetindex)
+{
+  bool result = false;
+
+  if (geosetindex < geosets.size())
+    result = geosets[geosetindex].display;
+
+  return result;
+}
+

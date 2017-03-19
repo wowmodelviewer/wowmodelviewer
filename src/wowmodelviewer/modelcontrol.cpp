@@ -397,7 +397,7 @@ void ModelControl::Update()
     GeosetTreeItemData * data = new GeosetTreeItemData();
     data->geosetId = i;
     wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id), -1, -1, data);
-    if (model->showGeosets[i] == true)
+    if (model->isGeosetDisplayed(i) == true)
       clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
   }
 
@@ -587,9 +587,9 @@ void ModelControl::OnList(wxTreeEvent &event)
     if(data)
     {
       size_t geosetIndex = data->geosetId;
-      model->showGeosets[geosetIndex] = !model->showGeosets[geosetIndex];
+      model->showGeoset(geosetIndex, !model->isGeosetDisplayed(geosetIndex));
       clbGeosets->SetItemBackgroundColour(curItem,
-                    (model->showGeosets[geosetIndex])?*wxGREEN:*wxWHITE);
+                                          (model->isGeosetDisplayed(geosetIndex)) ? *wxGREEN : *wxWHITE);
     }
     else
       std::cout << "data is null !!!" << std::endl;

@@ -251,7 +251,7 @@ class ModelGeosetHD {
     ModelGeosetHD():
       id(-1), vstart(0), vcount(0),
       istart(0), icount(0), nSkinnedBones(0),
-      StartBones(0), rootBone(0), nBones(0), radius(0)
+      StartBones(0), rootBone(0), nBones(0), radius(0), display(false)
       { 
         BoundingBox[0] = Vec3D(0, 0, 0);
         BoundingBox[1] = Vec3D(0, 0, 0);
@@ -260,7 +260,8 @@ class ModelGeosetHD {
     ModelGeosetHD(ModelGeoset & geo) :
       id(geo.id&0x7FFF), vstart(geo.vstart), vcount(geo.vcount),
       istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
-      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), radius(geo.radius)
+      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
+      radius(geo.radius), display(false)
       {
         BoundingBox[0] = geo.BoundingBox[0];
         BoundingBox[1] = geo.BoundingBox[1];
@@ -269,7 +270,8 @@ class ModelGeosetHD {
     ModelGeosetHD(const ModelGeosetHD & geo) :
       id(geo.id), vstart(geo.vstart), vcount(geo.vcount),
       istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
-      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), radius(geo.radius)
+      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
+      radius(geo.radius), display(geo.display)
       {
         BoundingBox[0] = geo.BoundingBox[0];
         BoundingBox[1] = geo.BoundingBox[1];
@@ -286,6 +288,7 @@ class ModelGeosetHD {
     uint16 nBones;    //
     Vec3D BoundingBox[2];
     float radius;
+    bool display;
 };
 
 

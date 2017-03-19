@@ -87,7 +87,7 @@ void ModelRenderPass::deinit()
 bool ModelRenderPass::init()
 {
   // May as well check that we're going to render the geoset before doing all this crap.
-  if (!model || (!model->showGeosets[geoIndex]))
+  if (!model || !geoset.display)
     return false;
 
   // COLOUR

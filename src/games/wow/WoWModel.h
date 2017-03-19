@@ -123,7 +123,6 @@ public:
 
   // ===============================
   // Toggles
-  std::vector<bool> showGeosets;
   bool showBones;
   bool showBounds;
   bool showWireframe;
@@ -235,6 +234,11 @@ public:
 
   void computeMinMaxCoords(Vec3D & min, Vec3D & max);
   static QString getCGGroupName(CharGeosets cg);
+
+  // @TODO use geoset id instead of geoset index in vector
+  void showGeoset(uint geosetindex, bool value);
+  bool isGeosetDisplayed(uint geosetindex);
+
 };
 
 
