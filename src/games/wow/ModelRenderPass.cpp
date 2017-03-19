@@ -241,7 +241,6 @@ bool ModelRenderPass::init()
 void ModelRenderPass::render(bool animated)
 {
   // we don't want to render completely transparent parts
-
   // render
   if (animated)
   {
@@ -257,10 +256,20 @@ void ModelRenderPass::render(bool animated)
       glBegin(GL_TRIANGLES);
       for (size_t k = 0, b = geoset.istart; k < geoset.icount; k++, b++)
       {
-        uint16 a = model->indices[b];
+        uint32 a = model->indices[b];
         glNormal3fv(model->normals[a]);
         glTexCoord2fv(model->origVertices[a].texcoords);
         glVertex3fv(model->vertices[a]);
+        /*
+        if (geoset.id == 2401 && k < 10)
+        {
+          LOG_INFO << "b" << b;
+          LOG_INFO << "a" << model->indices[b] << a;
+          LOG_INFO << "model->normals[a]" << model->normals[a].x << model->normals[a].y << model->normals[a].z;
+          LOG_INFO << "model->vertices[a]" << model->vertices[a].x << model->vertices[a].y << model->vertices[a].z;
+        }
+        */
+
       }
       glEnd();
     }

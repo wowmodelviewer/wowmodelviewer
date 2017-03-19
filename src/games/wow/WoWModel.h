@@ -107,7 +107,7 @@ public:
   Vec3D *normals;
   Vec2D *texCoords;
   Vec3D *vertices;
-  std::vector<uint16> indices;
+  std::vector<uint32> indices;
   std::vector<GameFile *> TextureList;
   // --
 

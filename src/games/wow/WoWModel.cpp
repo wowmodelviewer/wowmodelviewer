@@ -30,10 +30,6 @@ enum TextureFlags
 
 #define WIP_DH_SUPPORT 1
 
-#if WIP_DH_SUPPORT > 0
-WoWModel * dh = 0;
-#endif
-
 void
 glGetAll()
 {
@@ -971,13 +967,11 @@ void WoWModel::setLOD(GameFile * f, int index)
   showGeosets.resize(view->nSub);
 
   uint32 istart = 0;
-  uint32 vstart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
     ModelGeosetHD hdgeo(ops[i]);
     hdgeo.istart = istart;
     istart += hdgeo.icount;
-    vstart += hdgeo.vcount;
     geosets.push_back(hdgeo);
     showGeosets[i] = true;
   }
@@ -1035,38 +1029,54 @@ void WoWModel::setLOD(GameFile * f, int index)
 #if WIP_DH_SUPPORT > 0
   if (name().contains("bloodelfmale_hd"))
   {
-    dh = new WoWModel(GAMEDIRECTORY.getFile(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2")), true);
+    WoWModel * dh = new WoWModel(GAMEDIRECTORY.getFile(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2")), true);
 
-    for (auto it : dh->passes)
-    {
-      passes.push_back(it);
-    }
-  }
-  /*
-    uint nbGeoset = geosets.size();
     uint nbVertices = origVertices.size();
     uint nbIndices = indices.size();
 
-    LOG_INFO << "nbGeosets =" << nbGeoset;
+    LOG_INFO << "---- ORIGINAL ----";
+    LOG_INFO << "nbGeosets =" << geosets.size();
     LOG_INFO << "nbVertices =" << nbVertices;
     LOG_INFO << "nbIndices =" << nbIndices;
+    LOG_INFO << "nbPasses =" << passes.size();
 
-    for (auto it = dh->geosets.begin(), itEnd = dh->geosets.end(); it != itEnd; ++it)
+    LOG_INFO << "---- DH ----";
+    LOG_INFO << "nbGeosets =" << dh->geosets.size();
+    LOG_INFO << "nbVertices =" << dh->origVertices.size();
+    LOG_INFO << "nbIndices =" << dh->indices.size();
+    LOG_INFO << "nbPasses =" << dh->passes.size();
+
+    for (auto it : dh->geosets)
     {
-      ModelGeosetHD newgeo(*it);
-      newgeo.istart = it->istart + view->nTris;
-      newgeo.vstart = it->vstart + nbVertices;
-      geosets.push_back(newgeo); 
+      if (it.id == 2401)
+      {
+        LOG_INFO << "it.istart" << it.istart;
+        LOG_INFO << "it.icount" << it.icount;
+        LOG_INFO << "it.vstart" << it.vstart;
+        LOG_INFO << "it.vcount" << it.vcount;
+      }
+
+      it.istart += nbIndices;
+      geosets.push_back(it); 
       showGeosets.push_back(false);
+
+      if (it.id == 2401)
+      {
+        LOG_INFO << "it.istart" << it.istart;
+        LOG_INFO << "it.icount" << it.icount;
+        LOG_INFO << "it.vstart" << it.vstart;
+        LOG_INFO << "it.vcount" << it.vcount;
+      }
+
     }
 
-    origVertices.resize(origVertices.size() + dh->origVertices.size());
+    origVertices.reserve(origVertices.size() + dh->origVertices.size());
     origVertices.insert(origVertices.end(), dh->origVertices.begin(), dh->origVertices.end());
     
     indices.reserve(indices.size() + dh->indices.size());
-    for (auto it = dh->indices.begin(); it != dh->indices.end(); ++it)
+    for (auto it : dh->indices)
     {
-      indices.push_back(*it + nbVertices);
+      indices.push_back(it + nbVertices);
     }
 
     delete[] vertices;
@@ -1076,28 +1086,58 @@ void WoWModel::setLOD(GameFile * f, int index)
     normals = new Vec3D[origVertices.size()];
 
     uint i = 0;
-    for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
+    for (auto ov_it : origVertices)
     {
       // Set the data for our vertices, normals from the model data
-      vertices[i] = ov_it->pos;
-      normals[i] = ov_it->normal.normalize();
+      vertices[i] = ov_it.pos;
+      normals[i] = ov_it.normal.normalize();
+      ++i;
     }
-
-    for (auto it = dh->passes.begin(), itEnd = dh->passes.end(); it != itEnd; ++it)
-    {
-      it->geoset += nbGeoset;
-      it->indexStart = geosets[it->geoset].istart;
-      it->vertexStart = geosets[it->geoset].vstart;
-      it->vertexEnd = it->vertexStart + geosets[it->geoset].vcount;
-    }
-
     
+    for (auto it : dh->passes)
+    {
+      it.model = this;
+      it.geoset.istart += nbIndices;
+      passes.push_back(it);
+    }
 
-    passes.insert(passes.end(), dh->passes.begin(), dh->passes.end());
+    LOG_INFO << "---- FINAL ----";
+    LOG_INFO << "nbGeosets =" << geosets.size();
+    LOG_INFO << "nbVertices =" << origVertices.size();
+    LOG_INFO << "nbIndices =" << indices.size();
+    LOG_INFO << "nbPasses =" << passes.size();
 
-    delete dh;
+    const size_t size = (origVertices.size() * sizeof(float));
+    vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
+
+    if (video.supportVBO)
+    {
+      glDeleteBuffersARB(1, &nbuf);
+      glDeleteBuffersARB(1, &vbuf);
+
+      // Vert buffer
+      glGenBuffersARB(1, &vbuf);
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+      glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+      delete[] vertices; vertices = 0;
+
+      // Texture buffer
+    //  glGenBuffersARB(1, &tbuf);
+    //  glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
+    //  glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
+    //  delete[] texCoords; texCoords = 0;
+
+      // normals buffer
+      glGenBuffersARB(1, &nbuf);
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
+      glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+      delete[] normals; normals = 0;
+
+      // clean bind
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    }
+
   }
-  */
 #endif
   g->close();
   // transparent parts come later
@@ -1308,10 +1348,6 @@ void WoWModel::animate(ssize_t anim)
   if (animBones) // && (!animManager->IsPaused() || !animManager->IsParticlePaused()))
   {
     calcBones(anim, t);
-#if WIP_DH_SUPPORT > 0
-    if (dh)
-      dh->calcBones(anim, t);
-#endif
   }
 
   if (animGeometry)
@@ -1348,33 +1384,6 @@ void WoWModel::animate(ssize_t anim)
       else
         normals[i] = n;
     }
-#if WIP_DH_SUPPORT > 0
-    if (dh)
-    {
-      auto ov_it = dh->origVertices.begin();
-      for (size_t i = 0; ov_it != dh->origVertices.end(); ++i, ++ov_it)
-      { //,k=0
-        Vec3D v(0, 0, 0), n(0, 0, 0);
-
-        for (size_t b = 0; b < 4; b++)
-        {
-          if (ov_it->weights[b] > 0)
-          {
-            Vec3D tv = bones[ov_it->bones[b]].mat * ov_it->pos;
-            Vec3D tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
-            v += tv * ((float)ov_it->weights[b] / 255.0f);
-            n += tn * ((float)ov_it->weights[b] / 255.0f);
-          }
-        }
-
-        dh->vertices[i] = v;
-        if (video.supportVBO)
-          dh->vertices[dh->origVertices.size() + i] = n.normalize(); // shouldn't these be normal by default?
-        else
-          dh->normals[i] = n;
-      }
-    }
-#endif
 
     // clear bind
     if (video.supportVBO)
@@ -1483,7 +1492,7 @@ inline void WoWModel::draw()
   }
   else
   {
-    if (ind)
+  /*  if (ind)
     {
       animate(currentAnim);
     }
@@ -1495,6 +1504,7 @@ inline void WoWModel::draw()
         //animcalc = true; // Not sure what this is really for but it breaks WMO animation
       }
     }
+    */
 
     if (showModel)
       drawModel();

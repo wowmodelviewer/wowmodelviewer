@@ -45,6 +45,8 @@ public:
   // colours
   Vec4D ocol, ecol;
 
+  WoWModel * model;
+
   bool init();
   int BlendValueForMode(int mode);
 
@@ -67,7 +69,6 @@ public:
   }
 
 private:
-  WoWModel * model;
   int geoIndex;
 
 };
