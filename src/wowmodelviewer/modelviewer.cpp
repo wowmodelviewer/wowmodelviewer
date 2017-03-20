@@ -2537,30 +2537,30 @@ void ModelViewer::ModelInfo()
   xml << "	<RenderPasses size=\"" << m->passes.size() << "\">" << endl;
   for (size_t i = 0; i < m->passes.size(); i++) {
     xml << "	  <RenderPass id=\"" << i << "\">" << endl;
-    ModelRenderPass &p = m->passes[i];
-    xml << "      <indexStart>" << p.geoset.istart << "</indexStart>" << endl;
-    xml << "      <indexCount>" << p.geoset.icount << "</indexCount>" << endl;
-    xml << "      <vertexStart>" << p.geoset.vstart << "</vertexStart>" << endl;
-    xml << "      <vertexEnd>" << p.geoset.vstart + p.geoset.vcount << "</vertexEnd>" << endl;
-    xml << "      <tex>" << p.tex << "</tex>" << endl;
-    if (p.tex >= 0)
-      xml << "      <texName>" << m->TextureList[p.tex]->fullname().toStdString() << "</texName>" << endl;
-    xml << "      <useTex2>" << p.useTex2 << "</useTex2>" << endl;
-    xml << "      <useEnvMap>" << p.useEnvMap << "</useEnvMap>" << endl;
-    xml << "      <cull>" << p.cull << "</cull>" << endl;
-    xml << "      <trans>" << p.trans << "</trans>" << endl;
-    xml << "      <unlit>" << p.unlit << "</unlit>" << endl;
-    xml << "      <noZWrite>" << p.noZWrite << "</noZWrite>" << endl;
-    xml << "      <billboard>" << p.billboard << "</billboard>" << endl;
-    xml << "      <texanim>" << p.texanim << "</texanim>" << endl;
-    xml << "      <color>" << p.color << "</color>" << endl;
-    xml << "      <opacity>" << p.opacity << "</opacity>" << endl;
-    xml << "      <blendmode>" << p.blendmode << "</blendmode>" << endl;
-    xml << "      <geoset>" << p.geoset.id << "</geoset>" << endl;
-    xml << "      <swrap>" << p.swrap << "</swrap>" << endl;
-    xml << "      <twrap>" << p.twrap << "</twrap>" << endl;
-    xml << "      <ocol>" << p.ocol << "</ocol>" << endl;
-    xml << "      <ecol>" << p.ecol << "</ecol>" << endl;
+    ModelRenderPass * p = m->passes[i];
+    xml << "      <indexStart>" << p->geoset->istart << "</indexStart>" << endl;
+    xml << "      <indexCount>" << p->geoset->icount << "</indexCount>" << endl;
+    xml << "      <vertexStart>" << p->geoset->vstart << "</vertexStart>" << endl;
+    xml << "      <vertexEnd>" << p->geoset->vstart + p->geoset->vcount << "</vertexEnd>" << endl;
+    xml << "      <tex>" << p->tex << "</tex>" << endl;
+    if (p->tex >= 0)
+      xml << "      <texName>" << m->TextureList[p->tex]->fullname().toStdString() << "</texName>" << endl;
+    xml << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
+    xml << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
+    xml << "      <cull>" << p->cull << "</cull>" << endl;
+    xml << "      <trans>" << p->trans << "</trans>" << endl;
+    xml << "      <unlit>" << p->unlit << "</unlit>" << endl;
+    xml << "      <noZWrite>" << p->noZWrite << "</noZWrite>" << endl;
+    xml << "      <billboard>" << p->billboard << "</billboard>" << endl;
+    xml << "      <texanim>" << p->texanim << "</texanim>" << endl;
+    xml << "      <color>" << p->color << "</color>" << endl;
+    xml << "      <opacity>" << p->opacity << "</opacity>" << endl;
+    xml << "      <blendmode>" << p->blendmode << "</blendmode>" << endl;
+    xml << "      <geoset>" << p->geoset->id << "</geoset>" << endl;
+    xml << "      <swrap>" << p->swrap << "</swrap>" << endl;
+    xml << "      <twrap>" << p->twrap << "</twrap>" << endl;
+    xml << "      <ocol>" << p->ocol << "</ocol>" << endl;
+    xml << "      <ecol>" << p->ecol << "</ecol>" << endl;
     xml << "	  </RenderPass>" << endl;
   }
   xml << "	</RenderPasses>" << endl;
@@ -2568,18 +2568,18 @@ void ModelViewer::ModelInfo()
   xml << "	<Geosets size=\"" << m->geosets.size() << "\">" << endl;
   for (size_t i = 0; i < m->geosets.size(); i++) {
     xml << "	  <Geoset id=\"" << i << "\">" << endl;
-    xml << "      <id>" << m->geosets[i].id << "</id>" << endl;
-    xml << "      <vstart>" << m->geosets[i].vstart << "</vstart>" << endl;
-    xml << "      <vcount>" << m->geosets[i].vcount << "</vcount>" << endl;
-    xml << "      <istart>" << m->geosets[i].istart << "</istart>" << endl;
-    xml << "      <icount>" << m->geosets[i].icount << "</icount>" << endl;
-    xml << "      <nSkinnedBones>" << m->geosets[i].nSkinnedBones << "</nSkinnedBones>" << endl;
-    xml << "      <StartBones>" << m->geosets[i].StartBones << "</StartBones>" << endl;
-    xml << "      <rootBone>" << m->geosets[i].rootBone << "</rootBone>" << endl;
-    xml << "      <nBones>" << m->geosets[i].nBones << "</nBones>" << endl;
-    xml << "      <BoundingBox>" << m->geosets[i].BoundingBox[0] << "</BoundingBox>" << endl;
-    xml << "      <BoundingBox>" << m->geosets[i].BoundingBox[1] << "</BoundingBox>" << endl;
-    xml << "      <radius>" << m->geosets[i].radius << "</radius>" << endl;
+    xml << "      <id>" << m->geosets[i]->id << "</id>" << endl;
+    xml << "      <vstart>" << m->geosets[i]->vstart << "</vstart>" << endl;
+    xml << "      <vcount>" << m->geosets[i]->vcount << "</vcount>" << endl;
+    xml << "      <istart>" << m->geosets[i]->istart << "</istart>" << endl;
+    xml << "      <icount>" << m->geosets[i]->icount << "</icount>" << endl;
+    xml << "      <nSkinnedBones>" << m->geosets[i]->nSkinnedBones << "</nSkinnedBones>" << endl;
+    xml << "      <StartBones>" << m->geosets[i]->StartBones << "</StartBones>" << endl;
+    xml << "      <rootBone>" << m->geosets[i]->rootBone << "</rootBone>" << endl;
+    xml << "      <nBones>" << m->geosets[i]->nBones << "</nBones>" << endl;
+    xml << "      <BoundingBox>" << m->geosets[i]->BoundingBox[0] << "</BoundingBox>" << endl;
+    xml << "      <BoundingBox>" << m->geosets[i]->BoundingBox[1] << "</BoundingBox>" << endl;
+    xml << "      <radius>" << m->geosets[i]->radius << "</radius>" << endl;
     xml << "	  </Geoset>" << endl;
   }
   xml << "	</Geosets>" << endl;

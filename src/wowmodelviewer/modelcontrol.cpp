@@ -384,7 +384,7 @@ void ModelControl::Update()
   wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
   for (size_t i = 0; i < model->geosets.size(); i++)
   {
-    size_t mesh = model->geosets[i].id / 100;
+    size_t mesh = model->geosets[i]->id / 100;
     if (geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
     {
       wxString name = WoWModel::getCGGroupName((CharGeosets)mesh).toStdString().c_str();
@@ -396,7 +396,7 @@ void ModelControl::Update()
 
     GeosetTreeItemData * data = new GeosetTreeItemData();
     data->geosetId = i;
-    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i].id % 100), model->geosets[i].id), -1, -1, data);
+    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i]->id % 100), model->geosets[i]->id), -1, -1, data);
     if (model->isGeosetDisplayed(i) == true)
       clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
   }

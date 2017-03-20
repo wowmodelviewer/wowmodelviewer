@@ -263,8 +263,8 @@ void FBXExporter::createMesh()
   int mtrl_index = 0;
   for (size_t i = 0; i < num_of_passes; i++)
   {
-    ModelRenderPass& p = m_p_model->passes[i];
-    if (p.init())
+    ModelRenderPass * p = m_p_model->passes[i];
+    if (p->init())
     {
       // Build material name.
       FbxString mtrl_name = "testToChange";
@@ -275,14 +275,14 @@ void FBXExporter::createMesh()
       FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
       m_p_meshNode->AddMaterial(material);
 
-      ModelGeosetHD g = p.geoset;
-      size_t num_of_faces = g.icount / 3;
+      ModelGeosetHD * g = p->geoset;
+      size_t num_of_faces = g->icount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
         mesh->BeginPolygon(mtrl_index);
-        mesh->AddPolygon(m_p_model->indices[g.istart + j * 3]);
-        mesh->AddPolygon(m_p_model->indices[g.istart + j * 3 + 1]);
-        mesh->AddPolygon(m_p_model->indices[g.istart + j * 3 + 2]);
+        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3]);
+        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 1]);
+        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 2]);
         mesh->EndPolygon();
       }
 
@@ -616,8 +616,8 @@ void FBXExporter::createMaterials()
 {
   for (unsigned int i = 0; i < m_p_model->passes.size(); i++)
   {
-    ModelRenderPass& pass = m_p_model->passes[i];
-    if (pass.init())
+    ModelRenderPass * pass = m_p_model->passes[i];
+    if (pass->init())
     {
       // Build material name.
       FbxString mtrl_name = m_p_model->name().toStdString().c_str();
@@ -631,7 +631,7 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      QString tex = m_p_model->TextureList[pass.tex]->fullname();
+      QString tex = m_p_model->TextureList[pass->tex]->fullname();
       QString tex_name = tex.right(tex.lastIndexOf('/')+1);
       tex_name = tex.left(tex.lastIndexOf('.'));
       tex_name += ".png";

@@ -219,11 +219,11 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   int vertics = 0;
   for (size_t i=0; i<model->passes.size(); i++)
   {
-    ModelRenderPass &p = model->passes[i];
+    ModelRenderPass * p = model->passes[i];
 
-    if (p.init())
+    if (p->init())
     {
-      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
+      for (size_t k=0, b=p->geoset->istart; k<p->geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec3D vert;
@@ -262,11 +262,11 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   int textures = 0;
   for (size_t i=0; i<model->passes.size(); i++)
   {
-    ModelRenderPass &p = model->passes[i];
+    ModelRenderPass * p = model->passes[i];
     // we don't want to render completely transparent parts
-    if (p.init())
+    if (p->init())
     {
-      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
+      for (size_t k=0, b=p->geoset->istart; k<p->geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec2D tc =  model->origVertices[a].texcoords;
@@ -282,10 +282,10 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   int normals = 0;
   for (size_t i=0; i<model->passes.size(); i++)
   {
-    ModelRenderPass &p = model->passes[i];
-    if (p.init())
+    ModelRenderPass * p = model->passes[i];
+    if (p->init())
     {
-      for (size_t k=0, b=p.geoset.istart; k<p.geoset.icount; k++,b++)
+      for (size_t k=0, b=p->geoset->istart; k<p->geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
         Vec3D n = model->origVertices[a].normal;
@@ -303,16 +303,16 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   int triangles_total = 0;
   for (size_t i=0; i<model->passes.size(); i++)
   {
-    ModelRenderPass &p = model->passes[i];
+    ModelRenderPass * p = model->passes[i];
 
-    if (p.init())
+    if (p->init())
     {
       // Build Vert2Point DB
-      uint16 *Vert2Point = new uint16[p.geoset.vstart + p.geoset.vcount];
-      for (uint16 v = p.geoset.vstart; v<(p.geoset.vstart + p.geoset.vcount); v++, pointnum++)
+      uint16 *Vert2Point = new uint16[p->geoset->vstart + p->geoset->vcount];
+      for (uint16 v = p->geoset->vstart; v<(p->geoset->vstart + p->geoset->vcount); v++, pointnum++)
         Vert2Point[v] = pointnum;
 
-      int g = p.geoset.id;
+      int g = p->geoset->id;
 
       QString val;
       val.sprintf("Geoset_%03i",g);
@@ -320,14 +320,14 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       matName.replace("\\","_");
       QString partName = matName;
 
-      if (p.unlit == true)
+      if (p->unlit == true)
         matName = matName + "_Lum";
 
-      if (!p.cull)
+      if (!p->cull)
         matName = matName + "_Dbl";
 
       // Part Names
-      int mesh = model->geosets[g].id / 100;
+      int mesh = model->geosets[g]->id / 100;
 
       QString cgGroupName = WoWModel::getCGGroupName((CharGeosets)mesh);
 
@@ -338,7 +338,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       file << "usemtl " << matName << "\n";
       file << "s 1" << "\n";
       int triangles = 0;
-      for (size_t k=0; k<p.geoset.icount; k+=3)
+      for (size_t k=0; k<p->geoset->icount; k+=3)
       {
         file << "f ";
         file << QString("%1/%1/%1 ").arg(counter);
@@ -363,22 +363,22 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
   for (size_t i=0; i<model->passes.size(); i++)
   {
-    ModelRenderPass &p = model->passes[i];
+    ModelRenderPass * p = model->passes[i];
 
-    if (p.init())
+    if (p->init())
     {
-      QString tex = model->TextureList[p.tex]->fullname();
+      QString tex = model->TextureList[p->tex]->fullname();
       QString texfile = QFileInfo(tex).completeBaseName();
       tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
       float amb = 0.25f;
-      Vec4D diff = p.ocol;
+      Vec4D diff = p->ocol;
 
       QString val;
-      val.sprintf("Geoset_%03i",p.geoset);
+      val.sprintf("Geoset_%03i",p->geoset);
       QString material = QString(model->modelname.c_str()) + "_" + val;
       material.replace("\\","_");
-      if (p.unlit == true)
+      if (p->unlit == true)
       {
         // Add Lum, just in case there's a non-luminous surface with the same name.
         material = material + "_Lum";
@@ -387,7 +387,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       }
 
       // If Doublesided
-      if (!p.cull)
+      if (!p->cull)
       {
         material = material + "_Dbl";
       }
@@ -398,7 +398,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       file << val << "\n";
       val.sprintf("Ka %.06f %.06f %.06f", amb, amb, amb);
       file << val << "\n";
-      val.sprintf("Ks %.06f %.06f %.06f", p.ecol.x, p.ecol.y, p.ecol.z);
+      val.sprintf("Ks %.06f %.06f %.06f", p->ecol.x, p->ecol.y, p->ecol.z);
       file << val << "\n";
       file << "Ke 0.000000 0.000000 0.000000" << "\n";
       val.sprintf("Ns %0.6f", 0.0f);
@@ -406,7 +406,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-      texToExport[tex.toStdString()] = model->TextureList[p.tex]->fullname().toStdString();
+      texToExport[tex.toStdString()] = model->TextureList[p->tex]->fullname().toStdString();
     }
   }
 

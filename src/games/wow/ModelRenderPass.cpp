@@ -87,7 +87,7 @@ void ModelRenderPass::deinit()
 bool ModelRenderPass::init()
 {
   // May as well check that we're going to render the geoset before doing all this crap.
-  if (!model || !geoset.display)
+  if (!model || !geoset || !geoset->display)
     return false;
 
   // COLOUR
@@ -216,13 +216,16 @@ bool ModelRenderPass::init()
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
   }
 
-  if (texanim!=-1)
+  /*
+  @TODO : fix texanim copy for dh
+  if (texanim != -1)
   {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
 
     model->texAnims[texanim].setup(texanim);
   }
+  */
 
   // color
   glColor4fv(ocol);
@@ -249,19 +252,19 @@ void ModelRenderPass::render(bool animated)
     // I can't notice a difference but I guess it can't hurt
     if (video.supportVBO && video.supportDrawRangeElements)
     {
-      glDrawRangeElements(GL_TRIANGLES, geoset.vstart, geoset.vstart + geoset.vcount, geoset.icount, GL_UNSIGNED_SHORT, &model->indices[geoset.istart]);
+      glDrawRangeElements(GL_TRIANGLES, geoset->vstart, geoset->vstart + geoset->vcount, geoset->icount, GL_UNSIGNED_SHORT, &model->indices[geoset->istart]);
     }
     else
     {
       glBegin(GL_TRIANGLES);
-      for (size_t k = 0, b = geoset.istart; k < geoset.icount; k++, b++)
+      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint32 a = model->indices[b];
         glNormal3fv(model->normals[a]);
         glTexCoord2fv(model->origVertices[a].texcoords);
         glVertex3fv(model->vertices[a]);
         /*
-        if (geoset.id == 2401 && k < 10)
+        if (geoset->id == 2401 && k < 10)
         {
           LOG_INFO << "b" << b;
           LOG_INFO << "a" << model->indices[b] << a;
@@ -277,7 +280,7 @@ void ModelRenderPass::render(bool animated)
   else
   {
     glBegin(GL_TRIANGLES);
-    for (size_t k = 0, b = geoset.istart; k < geoset.icount; k++, b++)
+    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
       uint16 a = model->indices[b];
       glNormal3fv(model->normals[a]);

@@ -37,7 +37,7 @@ public:
   int16 texanim, color, opacity, blendmode;
   uint16 tex;
 
-  ModelGeosetHD geoset;
+  ModelGeosetHD * geoset;
 
   // texture wrapping
   bool swrap, twrap;
@@ -46,6 +46,8 @@ public:
   Vec4D ocol, ecol;
 
   WoWModel * model;
+
+  int geoIndex;
 
   bool init();
   int BlendValueForMode(int mode);
@@ -67,10 +69,6 @@ public:
     }
     return (trans < m.trans);
   }
-
-private:
-  int geoIndex;
-
 };
 
 

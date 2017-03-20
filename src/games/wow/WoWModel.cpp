@@ -215,6 +215,12 @@ WoWModel::~WoWModel()
         delete[] events; events = 0;
         delete[] particleSystems; particleSystems = 0;
         delete[] ribbons; ribbons = 0;
+
+        for (auto it : passes)
+          delete it;
+
+        for (auto it : geosets)
+          delete it;
       }
       else
       {
@@ -963,9 +969,9 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
-    ModelGeosetHD hdgeo(ops[i]);
-    hdgeo.istart = istart;
-    istart += hdgeo.icount;
+    ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
+    hdgeo->istart = istart;
+    istart += hdgeo->icount;
     geosets.push_back(hdgeo);
     showGeoset(i, true);
   }
@@ -974,49 +980,49 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < view->nTex; j++)
   {
-    ModelRenderPass pass(this, tex[j].op);
+    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
 
     //TextureID texid = textures[texlookup[tex[j].textureid]];
-    //pass.texture = texid;
+    //pass->texture = texid;
     
-    pass.tex = texlookup[tex[j].textureid];
+    pass->tex = texlookup[tex[j].textureid];
 
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
-    pass.blendmode = rf.blend;
+    pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
     //	continue;
 
-    pass.color = tex[j].colorIndex;
-    pass.opacity = transLookup[tex[j].transid];
+    pass->color = tex[j].colorIndex;
+    pass->opacity = transLookup[tex[j].transid];
 
-    pass.unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
+    pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
-    pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
+    pass->cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
 
-    pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
+    pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
 
     // Use environmental reflection effects?
-    pass.useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend > 2; //&& rf.blend<5;
+    pass->useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
 
     // Disable environmental mapping if its been unchecked.
-    if (pass.useEnvMap && !video.useEnvMapping)
-      pass.useEnvMap = false;
+    if (pass->useEnvMap && !video.useEnvMapping)
+      pass->useEnvMap = false;
 
-    pass.noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
+    pass->noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
 
     // ToDo: Work out the correct way to get the true/false of transparency
-    pass.trans = (pass.blendmode > 0) && (pass.opacity > 0);	// Transparency - not the correct way to get transparency
+    pass->trans = (pass->blendmode > 0) && (pass->opacity > 0);	// Transparency - not the correct way to get transparency
 
     // Texture flags
-    pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-    pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
+    pass->swrap = (texdef[pass->tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
+    pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
     if (animTextures && (tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass.texanim = texanimlookup[tex[j].texanimid];
+      pass->texanim = texanimlookup[tex[j].texanimid];
     }
 
     passes.push_back(pass);
@@ -1042,30 +1048,15 @@ void WoWModel::setLOD(GameFile * f, int index)
     LOG_INFO << "nbIndices =" << dh->indices.size();
     LOG_INFO << "nbPasses =" << dh->passes.size();
 
-    for (auto & it : dh->geosets)
+    for (auto it : dh->geosets)
     {
-      if (it.id == 2401)
-      {
-        LOG_INFO << "it.istart" << it.istart;
-        LOG_INFO << "it.icount" << it.icount;
-        LOG_INFO << "it.vstart" << it.vstart;
-        LOG_INFO << "it.vcount" << it.vcount;
-      }
+      ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
 
-      it.istart += nbIndices;
-      it.vstart += nbVertices;
-      it.display = false;
+      newgeo->istart += nbIndices;
+      newgeo->vstart += nbVertices;
+      newgeo->display = false;
 
-      geosets.push_back(it);
-
-      if (it.id == 2401)
-      {
-        LOG_INFO << "it.istart" << it.istart;
-        LOG_INFO << "it.icount" << it.icount;
-        LOG_INFO << "it.vstart" << it.vstart;
-        LOG_INFO << "it.vcount" << it.vcount;
-      }
-
+      geosets.push_back(newgeo);
     }
 
     origVertices.reserve(origVertices.size() + dh->origVertices.size());
@@ -1094,14 +1085,11 @@ void WoWModel::setLOD(GameFile * f, int index)
     
     for (auto it : dh->passes)
     {
-      it.model = this;
-      it.geoset.istart += nbIndices;
-     // it.geoIndex += nbGeosets;
-      //it.geoset = &geosets[it.geoIndex];
-     // LOG_INFO << "p.geoIndex" << it.geoIndex;
-     // LOG_INFO << "p.geoset" << it.geoset;
-      LOG_INFO << "p.model" << it.model;
-      passes.push_back(it);
+      ModelRenderPass * p = new ModelRenderPass(*it);
+      p->model = this;
+      p->geoIndex += nbGeosets;
+      p->geoset = geosets[p->geoIndex];
+      passes.push_back(p);
     }
 
     LOG_INFO << "---- FINAL ----";
@@ -1139,6 +1127,9 @@ void WoWModel::setLOD(GameFile * f, int index)
       // clean bind
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
     }
+
+    // @TODO finalize renderpass copy to be able to delete dh model
+   // delete dh;
   }
 #endif
   g->close();
@@ -1460,12 +1451,12 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
-  for (auto & it : passes)
+  for (auto it : passes)
   {
-    if (it.init())
+    if (it->init())
     {
-      it.render(animated);
-      it.deinit();
+      it->render(animated);
+      it->deinit();
     }
   }
   
@@ -1706,10 +1697,10 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
 
   for (auto & it : passes)
   {
-    if (!it.geoset.display)
+    if (!it->geoset->display)
       continue;
 
-    for (size_t k = 0, b = it.geoset.istart; k < it.geoset.icount; k++, b++)
+    for (size_t k = 0, b = it->geoset->istart; k < it->geoset->icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1764,7 +1755,7 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
 void WoWModel::showGeoset(uint geosetindex, bool value)
 {
   if (geosetindex < geosets.size())
-    geosets[geosetindex].display = value;
+    geosets[geosetindex]->display = value;
 }
 
 bool WoWModel::isGeosetDisplayed(uint geosetindex)
@@ -1772,7 +1763,7 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
   bool result = false;
 
   if (geosetindex < geosets.size())
-    result = geosets[geosetindex].display;
+    result = geosets[geosetindex]->display;
 
   return result;
 }

@@ -118,8 +118,8 @@ public:
   std::string modelname;
   std::string lodname;
 
-  std::vector<ModelRenderPass> passes;
-  std::vector<ModelGeosetHD> geosets;
+  std::vector<ModelRenderPass *> passes;
+  std::vector<ModelGeosetHD *> geosets;
 
   // ===============================
   // Toggles
