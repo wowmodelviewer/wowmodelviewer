@@ -1029,108 +1029,13 @@ void WoWModel::setLOD(GameFile * f, int index)
   }
 #if WIP_DH_SUPPORT > 0
   if (name().contains("bloodelfmale_hd"))
-  {
-    WoWModel * dh = new WoWModel(GAMEDIRECTORY.getFile(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2")), true);
-
-    uint nbVertices = origVertices.size();
-    uint nbIndices = indices.size();
-    uint nbGeosets = geosets.size();
-
-    LOG_INFO << "---- ORIGINAL ----";
-    LOG_INFO << "nbGeosets =" << geosets.size();
-    LOG_INFO << "nbVertices =" << nbVertices;
-    LOG_INFO << "nbIndices =" << nbIndices;
-    LOG_INFO << "nbPasses =" << passes.size();
-
-    LOG_INFO << "---- DH ----";
-    LOG_INFO << "nbGeosets =" << dh->geosets.size();
-    LOG_INFO << "nbVertices =" << dh->origVertices.size();
-    LOG_INFO << "nbIndices =" << dh->indices.size();
-    LOG_INFO << "nbPasses =" << dh->passes.size();
-
-    for (auto it : dh->geosets)
-    {
-      ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
-
-      newgeo->istart += nbIndices;
-      newgeo->vstart += nbVertices;
-      newgeo->display = false;
-
-      geosets.push_back(newgeo);
-    }
-
-    origVertices.reserve(origVertices.size() + dh->origVertices.size());
-    origVertices.insert(origVertices.end(), dh->origVertices.begin(), dh->origVertices.end());
-    
-    indices.reserve(indices.size() + dh->indices.size());
-    for (auto & it : dh->indices)
-    {
-      indices.push_back(it + nbVertices);
-    }
-
-    delete[] vertices;
-    delete[] normals;
-
-    vertices = new Vec3D[origVertices.size()];
-    normals = new Vec3D[origVertices.size()];
-
-    uint i = 0;
-    for (auto & ov_it : origVertices)
-    {
-      // Set the data for our vertices, normals from the model data
-      vertices[i] = ov_it.pos;
-      normals[i] = ov_it.normal.normalize();
-      ++i;
-    }
-    
-    for (auto it : dh->passes)
-    {
-      ModelRenderPass * p = new ModelRenderPass(*it);
-      p->model = this;
-      p->geoIndex += nbGeosets;
-      p->geoset = geosets[p->geoIndex];
-      passes.push_back(p);
-    }
-
-    LOG_INFO << "---- FINAL ----";
-    LOG_INFO << "nbGeosets =" << geosets.size();
-    LOG_INFO << "nbVertices =" << origVertices.size();
-    LOG_INFO << "nbIndices =" << indices.size();
-    LOG_INFO << "nbPasses =" << passes.size();
-                                                                            
-    const size_t size = (origVertices.size() * sizeof(float));
-    vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
-
-    if (video.supportVBO)
-    {
-      glDeleteBuffersARB(1, &nbuf);
-      glDeleteBuffersARB(1, &vbuf);
-
-      // Vert buffer
-      glGenBuffersARB(1, &vbuf);
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-      glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-      delete[] vertices; vertices = 0;
-
-      // Texture buffer
-    //  glGenBuffersARB(1, &tbuf);
-    //  glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-    //  glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
-    //  delete[] texCoords; texCoords = 0;
-
-      // normals buffer
-      glGenBuffersARB(1, &nbuf);
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-      glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-      delete[] normals; normals = 0;
-
-      // clean bind
-      glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-    }
-
-    // @TODO finalize renderpass copy to be able to delete dh model
-   // delete dh;
-  }
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+  else if (name().contains("bloodelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+  else if (name().contains("nightelfmale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+  else if (name().contains("nightelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
 #endif
   g->close();
   // transparent parts come later
@@ -1485,7 +1390,7 @@ inline void WoWModel::draw()
   }
   else
   {
-  /*  if (ind)
+   /* if (ind)
     {
       animate(currentAnim);
     }
@@ -1768,3 +1673,109 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
   return result;
 }
 
+void WoWModel::mergeModel(QString & name)
+{
+  WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
+
+  if (!m->ok)
+    return;
+
+  uint nbVertices = origVertices.size();
+  uint nbIndices = indices.size();
+  uint nbGeosets = geosets.size();
+
+  LOG_INFO << "---- ORIGINAL ----";
+  LOG_INFO << "nbGeosets =" << geosets.size();
+  LOG_INFO << "nbVertices =" << nbVertices;
+  LOG_INFO << "nbIndices =" << nbIndices;
+  LOG_INFO << "nbPasses =" << passes.size();
+
+  LOG_INFO << "---- DH ----";
+  LOG_INFO << "nbGeosets =" << m->geosets.size();
+  LOG_INFO << "nbVertices =" << m->origVertices.size();
+  LOG_INFO << "nbIndices =" << m->indices.size();
+  LOG_INFO << "nbPasses =" << m->passes.size();
+
+  for (auto it : m->geosets)
+  {
+    ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
+
+    newgeo->istart += nbIndices;
+    newgeo->vstart += nbVertices;
+    newgeo->display = false;
+
+    geosets.push_back(newgeo);
+  }
+
+  origVertices.reserve(origVertices.size() + m->origVertices.size());
+  origVertices.insert(origVertices.end(), m->origVertices.begin(), m->origVertices.end());
+
+  indices.reserve(indices.size() + m->indices.size());
+  for (auto & it : m->indices)
+  {
+    indices.push_back(it + nbVertices);
+  }
+
+  delete[] vertices;
+  delete[] normals;
+
+  vertices = new Vec3D[origVertices.size()];
+  normals = new Vec3D[origVertices.size()];
+
+  uint i = 0;
+  for (auto & ov_it : origVertices)
+  {
+    // Set the data for our vertices, normals from the model data
+    vertices[i] = ov_it.pos;
+    normals[i] = ov_it.normal.normalize();
+    ++i;
+  }
+
+  for (auto it : m->passes)
+  {
+    ModelRenderPass * p = new ModelRenderPass(*it);
+    p->model = this;
+    p->geoIndex += nbGeosets;
+    p->geoset = geosets[p->geoIndex];
+    passes.push_back(p);
+  }
+
+  LOG_INFO << "---- FINAL ----";
+  LOG_INFO << "nbGeosets =" << geosets.size();
+  LOG_INFO << "nbVertices =" << origVertices.size();
+  LOG_INFO << "nbIndices =" << indices.size();
+  LOG_INFO << "nbPasses =" << passes.size();
+
+  const size_t size = (origVertices.size() * sizeof(float));
+  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
+
+  if (video.supportVBO)
+  {
+    glDeleteBuffersARB(1, &nbuf);
+    glDeleteBuffersARB(1, &vbuf);
+
+    // Vert buffer
+    glGenBuffersARB(1, &vbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+    delete[] vertices; vertices = 0;
+
+    // Texture buffer
+    //  glGenBuffersARB(1, &tbuf);
+    //  glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
+    //  glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
+    //  delete[] texCoords; texCoords = 0;
+
+    // normals buffer
+    glGenBuffersARB(1, &nbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+    delete[] normals; normals = 0;
+
+    // clean bind
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  }
+
+  // @TODO finalize renderpass copy to be able to delete additional model
+  // delete m;
+}

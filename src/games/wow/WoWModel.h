@@ -239,6 +239,8 @@ public:
   void showGeoset(uint geosetindex, bool value);
   bool isGeosetDisplayed(uint geosetindex);
 
+  void mergeModel(QString & name);
+
 };
 
 
