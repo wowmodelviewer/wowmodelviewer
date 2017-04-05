@@ -952,6 +952,7 @@ void CharControl::selectMount()
   numbers.push_back(-1);
 
   // Proper player mounts:
+  /*
   sqlResult mountQuery = GAMEDATABASE.sqlQuery(
     "SELECT Mount.DisplayID, Mount.Name FROM Mount");
   if (mountQuery.valid && !mountQuery.empty())
@@ -971,12 +972,12 @@ void CharControl::selectMount()
     numbers.push_back(it->id);
     cats.push_back(0);
   }
-
+  */
   // All models from Creature/
   if (creaturemodels.empty())
   {
     std::vector<GameFile *> files;
-    GAMEDIRECTORY.getFilesForFolder(files, QString("creature\\"), QString("m2"));
+    GAMEDIRECTORY.getFilesForFolder(files, QString("creature/"), QString("m2"));
     if (files.size())
     {
       std::vector<GameFile *>::iterator it;
@@ -1244,7 +1245,7 @@ void CharControl::OnUpdateItem(int type, int id)
       m = new WoWModel(GAMEDIRECTORY.getFile(modelName), false);
       m->isMount = true;
       g_canvas->root->setModel(m);
-      g_canvas->setModel(m);
+      g_canvas->setModel(m, true);
       g_animControl->UpdateModel(m);
       // add specific textures for proper mounts. Must do this after model is updated.
       if (!cats[id] && (grp.tex[0] != 0))

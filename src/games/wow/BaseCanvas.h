@@ -16,9 +16,11 @@ class BaseCanvas
     BaseCanvas(): m_p_model(0) {}
 
     WoWModel const * model() const { return m_p_model; }
-    void setModel(WoWModel * m) 
+    void setModel(WoWModel * m, bool keepPrevious = false) 
     {
-      delete m_p_model;
+      if (!keepPrevious)
+        delete m_p_model;
+
       m_p_model = m;
     }
 
