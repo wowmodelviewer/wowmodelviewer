@@ -1181,7 +1181,6 @@ void CharControl::OnUpdateItem(int type, int id)
         return;
       if (g_canvas->root->model())
       {
-        delete g_canvas->root->model();
         g_canvas->root->setModel(0);
         g_canvas->setModel(0);
       }
