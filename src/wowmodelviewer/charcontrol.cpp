@@ -953,7 +953,7 @@ void CharControl::selectMount()
 
   // Proper player mounts:
   sqlResult mountQuery = GAMEDATABASE.sqlQuery(
-    "SELECT Mount.DisplayID, Mount.Name FROM Mount");
+    "SELECT MountXDisplay.DisplayID, Mount.Name FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
   if (mountQuery.valid && !mountQuery.empty())
   {
     for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
@@ -976,7 +976,7 @@ void CharControl::selectMount()
   if (creaturemodels.empty())
   {
     std::vector<GameFile *> files;
-    GAMEDIRECTORY.getFilesForFolder(files, QString("creature\\"), QString("m2"));
+    GAMEDIRECTORY.getFilesForFolder(files, QString("creature/"), QString("m2"));
     if (files.size())
     {
       std::vector<GameFile *>::iterator it;
@@ -1174,14 +1174,13 @@ void CharControl::OnUpdateItem(int type, int id)
     case UPDATE_MOUNT:
     {
       TextureGroup grp;
-      QString modelName;
+      GameFile * modelFile;
       WoWModel *m;
 
       if (!model)
         return;
       if (g_canvas->root->model())
       {
-        delete g_canvas->root->model();
         g_canvas->root->setModel(0);
         g_canvas->setModel(0);
       }
@@ -1209,42 +1208,40 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         int morphID = numbers[id];
         // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-        QString query = QString("SELECT FileData.path, FileData.name, CreatureDisplayInfo.Texture1, "
+        QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
                                 "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
                                 "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                                "LEFT JOIN FileData ON CreatureModelData.FileDataID = FileData.ID WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
+                                "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
 
         sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
         if (!mountQuery.valid || mountQuery.empty())
           break;
-        QString path = mountQuery.values[0][0];
-        modelName = path + mountQuery.values[0][1];
+        modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
         int count = 0;
         for (int i = 0; i < 3; i++)
         {
-          QString tex = "";
-          QString fname = mountQuery.values[0][i + 2];
+          QString fname = mountQuery.values[0][i + 1];
           if (!fname.isEmpty())
           {
-            tex = path + fname + ".blp";
+            grp.tex[i] = GAMEDIRECTORY.getFile(fname.toInt());
             count++;
           }
-          grp.tex[i] = GAMEDIRECTORY.getFile(tex);
+         
         }
         grp.base = TEXTURE_GAMEOBJECT1;
         grp.count = count;
       }
       else if (cats[id] == 1) // create mount from any old creature model file name
       {
-        modelName = creaturemodels[numbers[id]].c_str();
+        modelFile = GAMEDIRECTORY.getFile(creaturemodels[numbers[id]].c_str());
         // that's it. No special textures or anything.
       }
       else
         break; // shouldn't happen
-      m = new WoWModel(GAMEDIRECTORY.getFile(modelName), false);
+      m = new WoWModel(modelFile, false);
       m->isMount = true;
       g_canvas->root->setModel(m);
-      g_canvas->setModel(m);
+      g_canvas->setModel(m, true);
       g_animControl->UpdateModel(m);
       // add specific textures for proper mounts. Must do this after model is updated.
       if (!cats[id] && (grp.tex[0] != 0))

@@ -258,7 +258,7 @@ void WoWItem::load()
 
         // associate left / right model infos
         GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
-        int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive)) ? 0 : 1;
+        int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive) || file->fullname().endsWith("_l.m2", Qt::CaseInsensitive)) ? 0 : 1;
         int rightmodelindex = leftmodelindex ? 0 : 1;
 
         // create texture map to use result correctly (especially when left texture is diffrent from right texture)

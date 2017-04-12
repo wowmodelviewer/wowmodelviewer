@@ -174,5 +174,14 @@
     <field type="int" name="MidColor" arraySize="3"  pos="12" />
     <field type="int" name="EndColor" arraySize="3"  pos="24" />
   </table>
+  <table name="Mount">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="Name" pos="4" />
+  </table>
+  <table name="MountXDisplay">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="MountID" pos="0" />
+    <field type="uint" name="DisplayID" pos="2" />
+  </table>
   <!-- Misc tables - END -->
 </database>
