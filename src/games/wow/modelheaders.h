@@ -358,7 +358,6 @@ struct ModelTransDef {
 	AnimationBlock trans; // (UInt16)
 };
 
-#define	TEXTURE_MAX	32
 struct ModelTextureDef {
 	uint32 type;
 	uint32 flags;
