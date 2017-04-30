@@ -107,8 +107,7 @@ public:
   Vec3D *normals;
   Vec2D *texCoords;
   Vec3D *vertices;
-  std::vector<uint16> indices;
-  uint32 nIndices;
+  std::vector<uint32> indices;
   // --
 
   WoWModel(GameFile * file, bool forceAnim = false);
@@ -118,12 +117,11 @@ public:
   std::string modelname;
   std::string lodname;
 
-  std::vector<ModelRenderPass> passes;
-  std::vector<ModelGeosetHD> geosets;
+  std::vector<ModelRenderPass *> passes;
+  std::vector<ModelGeosetHD *> geosets;
 
   // ===============================
   // Toggles
-  std::vector<bool> showGeosets;
   bool showBones;
   bool showBounds;
   bool showWireframe;
@@ -222,7 +220,7 @@ public:
 
   bool bSheathe;
 
-  friend struct ModelRenderPass;
+  friend class ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
   void UpdateTextureList(GameFile * tex, int special);
@@ -236,6 +234,13 @@ public:
 
   void computeMinMaxCoords(Vec3D & min, Vec3D & max);
   static QString getCGGroupName(CharGeosets cg);
+
+  // @TODO use geoset id instead of geoset index in vector
+  void showGeoset(uint geosetindex, bool value);
+  bool isGeosetDisplayed(uint geosetindex);
+
+  void mergeModel(QString & name);
+
 };
 
 

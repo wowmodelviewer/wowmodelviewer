@@ -8,6 +8,7 @@
 #ifndef _MODELRENDERPASS_H_
 #define _MODELRENDERPASS_H_
 
+#include "modelheaders.h"
 #include "quaternion.h"
 #include "types.h"
 
@@ -24,18 +25,19 @@ class WoWModel;
 #endif
 
 
-struct _MODELRENDERPASS_API_ ModelRenderPass
+class _MODELRENDERPASS_API_ ModelRenderPass
 {
-  uint32 indexStart, indexCount, vertexStart, vertexEnd;
+public:
+
+  ModelRenderPass(WoWModel *, int geo);
+
   //TextureID texture, texture2;
   bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
-  float p;
 
   int16 texanim, color, opacity, blendmode;
   uint16 tex;
 
-  // Geoset ID
-  int geoset;
+  ModelGeosetHD * geoset;
 
   // texture wrapping
   bool swrap, twrap;
@@ -43,8 +45,14 @@ struct _MODELRENDERPASS_API_ ModelRenderPass
   // colours
   Vec4D ocol, ecol;
 
-  bool init(WoWModel *m);
+  WoWModel * model;
+
+  int geoIndex;
+
+  bool init();
   int BlendValueForMode(int mode);
+
+  void render(bool animated);
 
   void deinit();
 
@@ -56,7 +64,7 @@ struct _MODELRENDERPASS_API_ ModelRenderPass
     if (trans == m.trans)
     {
       if (blendmode == m.blendmode)
-        return (geoset < m.geoset);
+        return (geoIndex < m.geoIndex);
       return blendmode < m.blendmode;
     }
     return (trans < m.trans);

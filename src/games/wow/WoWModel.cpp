@@ -28,6 +28,8 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
+#define WIP_DH_SUPPORT 1
+
 void
 glGetAll()
 {
@@ -105,7 +107,6 @@ gamefile(file)
   dlist = 0;
   bounds = 0;
   boundTris = 0;
-  showGeosets.clear();
 
   hasCamera = false;
   hasParticles = false;
@@ -172,7 +173,6 @@ WoWModel::~WoWModel()
       delete[] globalSequences; globalSequences = 0;
       delete[] bounds; bounds = 0;
       delete[] boundTris; boundTris = 0;
-      showGeosets.clear();
       delete animManager; animManager = 0;
 
       if (animated)
@@ -206,6 +206,12 @@ WoWModel::~WoWModel()
         delete[] events; events = 0;
         delete[] particleSystems; particleSystems = 0;
         delete[] ribbons; ribbons = 0;
+
+        for (auto it : passes)
+          delete it;
+
+        for (auto it : geosets)
+          delete it;
       }
       else
       {
@@ -936,10 +942,10 @@ void WoWModel::setLOD(GameFile * f, int index)
   // Indices,  Triangles
   uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
   uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
-  nIndices = view->nTris;
   indices.clear();
-  indices.reserve(nIndices);
-  for (size_t i = 0; i < nIndices; i++)
+  indices.resize(view->nTris);
+
+  for (size_t i = 0; i < view->nTris; i++)
   {
     indices[i] = indexLookup[triangles[i]];
   }
@@ -952,91 +958,77 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
   int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
-  showGeosets.clear();
-
-  showGeosets.resize(view->nSub);
-
-  uint32 start = 0;
+  uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
-    ModelGeosetHD hdgeo(ops[i]);
-    hdgeo.istart = start;
-    start += hdgeo.icount;
+    ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
+    hdgeo->istart = istart;
+    istart += hdgeo->icount;
     geosets.push_back(hdgeo);
-    showGeosets[i] = true;
+    showGeoset(i, true);
   }
-
+ 
   passes.clear();
+ 
   for (size_t j = 0; j < view->nTex; j++)
   {
-    ModelRenderPass pass;
-
-    pass.useTex2 = false;
-    pass.useEnvMap = false;
-    pass.cull = false;
-    pass.trans = false;
-    pass.unlit = false;
-    pass.noZWrite = false;
-    pass.billboard = false;
-    pass.texanim = -1; // no texture animation
-
-    //pass.texture2 = 0;
-    size_t geoset = tex[j].op;
-
-    pass.geoset = (int)geoset;
-
-    pass.indexStart = geosets[geoset].istart;
-    pass.indexCount = geosets[geoset].icount;
-    pass.vertexStart = geosets[geoset].vstart;
-    pass.vertexEnd = pass.vertexStart + geosets[geoset].vcount;
+    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
 
     //TextureID texid = textures[texlookup[tex[j].textureid]];
-    //pass.texture = texid;
-    pass.tex = texlookup[tex[j].textureid];
+    //pass->texture = texid;
+    
+    pass->tex = texlookup[tex[j].textureid];
 
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
-    pass.blendmode = rf.blend;
+    pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
     //	continue;
 
-    pass.color = tex[j].colorIndex;
-    pass.opacity = transLookup[tex[j].transid];
+    pass->color = tex[j].colorIndex;
+    pass->opacity = transLookup[tex[j].transid];
 
-    pass.unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
+    pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
-    pass.cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
+    pass->cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
 
-    pass.billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
+    pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
 
     // Use environmental reflection effects?
-    pass.useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass.billboard && rf.blend > 2; //&& rf.blend<5;
+    pass->useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
 
     // Disable environmental mapping if its been unchecked.
-    if (pass.useEnvMap && !video.useEnvMapping)
-      pass.useEnvMap = false;
+    if (pass->useEnvMap && !video.useEnvMapping)
+      pass->useEnvMap = false;
 
-    pass.noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
+    pass->noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
 
     // ToDo: Work out the correct way to get the true/false of transparency
-    pass.trans = (pass.blendmode > 0) && (pass.opacity > 0);	// Transparency - not the correct way to get transparency
-
-    pass.p = ops[geoset].BoundingBox[0].z;
+    pass->trans = (pass->blendmode > 0) && (pass->opacity > 0);	// Transparency - not the correct way to get transparency
 
     // Texture flags
-    pass.swrap = (texdef[pass.tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-    pass.twrap = (texdef[pass.tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
+    pass->swrap = (texdef[pass->tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
+    pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
     if (animTextures && (tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass.texanim = texanimlookup[tex[j].texanimid];
+      pass->texanim = texanimlookup[tex[j].texanimid];
     }
 
     passes.push_back(pass);
   }
-
+#if WIP_DH_SUPPORT > 0
+  if (name().contains("bloodelfmale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+  else if (name().contains("bloodelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+  else if (name().contains("nightelfmale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+  else if (name().contains("nightelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+#endif
   g->close();
   // transparent parts come later
   std::sort(passes.begin(), passes.end());
@@ -1244,7 +1236,9 @@ void WoWModel::animate(ssize_t anim)
   this->anim = anim;
 
   if (animBones) // && (!animManager->IsPaused() || !animManager->IsParticlePaused()))
+  {
     calcBones(anim, t);
+  }
 
   if (animGeometry)
   { 
@@ -1354,54 +1348,15 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
-  for (size_t i = 0; i < passes.size(); i++)
+  for (auto it : passes)
   {
-    ModelRenderPass &p = passes[i];
-
-    if (p.init(this))
+    if (it->init())
     {
-      // we don't want to render completely transparent parts
-
-      // render
-      if (animated)
-      {
-        //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
-        // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
-        // I can't notice a difference but I guess it can't hurt
-        if (video.supportVBO && video.supportDrawRangeElements)
-        {
-          glDrawRangeElements(GL_TRIANGLES, p.vertexStart, p.vertexEnd, p.indexCount, GL_UNSIGNED_SHORT, &indices[p.indexStart]);
-        }
-        else
-        {
-          glBegin(GL_TRIANGLES);
-          for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
-          {
-            uint16 a = indices[b];
-            glNormal3fv(normals[a]);
-            glTexCoord2fv(origVertices[a].texcoords);
-            glVertex3fv(vertices[a]);
-          }
-          glEnd();
-        }
-      }
-      else
-      {
-        glBegin(GL_TRIANGLES);
-        for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
-        {
-          uint16 a = indices[b];
-          glNormal3fv(normals[a]);
-          glTexCoord2fv(origVertices[a].texcoords);
-          glVertex3fv(vertices[a]);
-        }
-        glEnd();
-      }
-
-      p.deinit();
+      it->render(animated);
+      it->deinit();
     }
   }
-
+  
   if (showWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -1410,6 +1365,7 @@ inline void WoWModel::drawModel()
   {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
+
   // done with all render ops
 }
 
@@ -1426,7 +1382,7 @@ inline void WoWModel::draw()
   }
   else
   {
-    if (ind)
+   /* if (ind)
     {
       animate(currentAnim);
     }
@@ -1438,6 +1394,7 @@ inline void WoWModel::draw()
         //animcalc = true; // Not sure what this is really for but it breaks WMO animation
       }
     }
+    */
 
     if (showModel)
       drawModel();
@@ -1635,14 +1592,12 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
     vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
   }
 
-  for (size_t i = 0; i < passes.size(); i++)
+  for (auto & it : passes)
   {
-    ModelRenderPass &p = passes[i];
-
-    if (!showGeosets[p.geoset])
+    if (!it->geoset->display)
       continue;
 
-    for (size_t k = 0, b = p.indexStart; k < p.indexCount; k++, b++)
+    for (size_t k = 0, b = it->geoset->istart; k < it->geoset->icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1692,4 +1647,127 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
     result = it->second;
 
   return result;
+}
+
+void WoWModel::showGeoset(uint geosetindex, bool value)
+{
+  if (geosetindex < geosets.size())
+    geosets[geosetindex]->display = value;
+}
+
+bool WoWModel::isGeosetDisplayed(uint geosetindex)
+{
+  bool result = false;
+
+  if (geosetindex < geosets.size())
+    result = geosets[geosetindex]->display;
+
+  return result;
+}
+
+void WoWModel::mergeModel(QString & name)
+{
+  WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
+
+  if (!m->ok)
+    return;
+
+  uint nbVertices = origVertices.size();
+  uint nbIndices = indices.size();
+  uint nbGeosets = geosets.size();
+
+  LOG_INFO << "---- ORIGINAL ----";
+  LOG_INFO << "nbGeosets =" << geosets.size();
+  LOG_INFO << "nbVertices =" << nbVertices;
+  LOG_INFO << "nbIndices =" << nbIndices;
+  LOG_INFO << "nbPasses =" << passes.size();
+
+  LOG_INFO << "---- DH ----";
+  LOG_INFO << "nbGeosets =" << m->geosets.size();
+  LOG_INFO << "nbVertices =" << m->origVertices.size();
+  LOG_INFO << "nbIndices =" << m->indices.size();
+  LOG_INFO << "nbPasses =" << m->passes.size();
+
+  for (auto it : m->geosets)
+  {
+    ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
+
+    newgeo->istart += nbIndices;
+    newgeo->vstart += nbVertices;
+    newgeo->display = false;
+
+    geosets.push_back(newgeo);
+  }
+
+  origVertices.reserve(origVertices.size() + m->origVertices.size());
+  origVertices.insert(origVertices.end(), m->origVertices.begin(), m->origVertices.end());
+
+  indices.reserve(indices.size() + m->indices.size());
+  for (auto & it : m->indices)
+  {
+    indices.push_back(it + nbVertices);
+  }
+
+  delete[] vertices;
+  delete[] normals;
+
+  vertices = new Vec3D[origVertices.size()];
+  normals = new Vec3D[origVertices.size()];
+
+  uint i = 0;
+  for (auto & ov_it : origVertices)
+  {
+    // Set the data for our vertices, normals from the model data
+    vertices[i] = ov_it.pos;
+    normals[i] = ov_it.normal.normalize();
+    ++i;
+  }
+
+  for (auto it : m->passes)
+  {
+    ModelRenderPass * p = new ModelRenderPass(*it);
+    p->model = this;
+    p->geoIndex += nbGeosets;
+    p->geoset = geosets[p->geoIndex];
+    passes.push_back(p);
+  }
+
+  LOG_INFO << "---- FINAL ----";
+  LOG_INFO << "nbGeosets =" << geosets.size();
+  LOG_INFO << "nbVertices =" << origVertices.size();
+  LOG_INFO << "nbIndices =" << indices.size();
+  LOG_INFO << "nbPasses =" << passes.size();
+
+  const size_t size = (origVertices.size() * sizeof(float));
+  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
+
+  if (video.supportVBO)
+  {
+    glDeleteBuffersARB(1, &nbuf);
+    glDeleteBuffersARB(1, &vbuf);
+
+    // Vert buffer
+    glGenBuffersARB(1, &vbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+    delete[] vertices; vertices = 0;
+
+    // Texture buffer
+    //  glGenBuffersARB(1, &tbuf);
+    //  glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
+    //  glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
+    //  delete[] texCoords; texCoords = 0;
+
+    // normals buffer
+    glGenBuffersARB(1, &nbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+    delete[] normals; normals = 0;
+
+    // clean bind
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  }
+
+  // @TODO finalize renderpass copy to be able to delete additional model
+  // delete m;
 }

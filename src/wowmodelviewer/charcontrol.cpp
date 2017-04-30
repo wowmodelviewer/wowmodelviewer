@@ -219,7 +219,7 @@ void CharControl::UpdateModel(Attachment *a)
 
     // hide most geosets
     for (size_t i = 0; i < model->geosets.size(); i++) {
-      model->showGeosets[i] = (model->geosets[i].id == 0);
+      model->showGeoset(i, model->geosets[i]->id == 0);
     }
 
     g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
@@ -486,8 +486,8 @@ void CharControl::RefreshModel()
     // pandaren female => need to display tabard2 geosets (need to find something better...)
     for (size_t i = 0; i < model->geosets.size(); i++)
     {
-      if (model->geosets[i].id == 1401)
-        model->showGeosets[i] = true;
+      if (model->geosets[i]->id == 1401)
+        model->showGeoset(i,true);
     }
   }
   else
@@ -495,8 +495,8 @@ void CharControl::RefreshModel()
     // de activate pandaren female tabard2 when no underwear
     for (size_t i = 0; i < model->geosets.size(); i++)
     {
-      if (model->geosets[i].id == 1401)
-        model->showGeosets[i] = false;
+      if (model->geosets[i]->id == 1401)
+        model->showGeoset(i,false);
     }
   }
 
@@ -531,13 +531,13 @@ void CharControl::RefreshModel()
       geosetId = 1;
     for (size_t j = 0; j < model->geosets.size(); j++)
     {
-      int id = model->geosets[j].id;
+      int id = model->geosets[j]->id;
       if (!id) // 0 is for skin, not hairstyle
         continue;
       if (id == geosetId)
-        model->showGeosets[j] = model->cd.showHair;
+        model->showGeoset(j, model->cd.showHair);
       else if (id < 100)
-        model->showGeosets[j] = false;
+        model->showGeoset(j, false);
     }
   }
   else
@@ -625,12 +625,12 @@ void CharControl::RefreshModel()
   // reset geosets
   for (size_t j = 0; j < model->geosets.size(); j++)
   {
-    int id = model->geosets[j].id;
+    int id = model->geosets[j]->id;
     for (size_t i = 1; i < NUM_GEOSETS; i++)
     {
       int a = (int)i * 100, b = ((int)i + 1) * 100;
       if (a != 1400 && id > a && id < b) // skip tabard2 group (1400) -> buggy pandaren female tabard
-        model->showGeosets[j] = (id == (a + model->cd.geosets[i]));
+        model->showGeoset(j, (id == (a + model->cd.geosets[i])));
     }
   }
 
@@ -657,9 +657,9 @@ void CharControl::RefreshModel()
       {
         for (size_t i = 0; i < model->geosets.size(); i++)
         {
-          int id = model->geosets[i].id;
+          int id = model->geosets[i]->id;
           if (id > 0 && id < 100)
-            model->showGeosets[i] = false;
+            model->showGeoset(i, false);
         }
       }
 
@@ -668,9 +668,9 @@ void CharControl::RefreshModel()
       {
         for (size_t i = 0; i < model->geosets.size(); i++)
         {
-          int id = model->geosets[i].id;
+          int id = model->geosets[i]->id;
           if (id > 100 && id < 200)
-            model->showGeosets[i] = false;
+            model->showGeoset(i, false);
         }
       }
 
@@ -679,9 +679,9 @@ void CharControl::RefreshModel()
       {
         for (size_t i = 0; i < model->geosets.size(); i++)
         {
-          int id = model->geosets[i].id;
+          int id = model->geosets[i]->id;
           if (id > 200 && id < 300)
-            model->showGeosets[i] = false;
+            model->showGeoset(i, false);
         }
       }
 
@@ -690,9 +690,9 @@ void CharControl::RefreshModel()
       {
         for (size_t i = 0; i < model->geosets.size(); i++)
         {
-          int id = model->geosets[i].id;
+          int id = model->geosets[i]->id;
           if (id > 300 && id < 400)
-            model->showGeosets[i] = false;
+            model->showGeoset(i, false);
         }
       }
 
@@ -701,9 +701,9 @@ void CharControl::RefreshModel()
       {
         for (size_t i = 0; i < model->geosets.size(); i++)
         {
-          int id = model->geosets[i].id;
+          int id = model->geosets[i]->id;
           if (id > 700 && id < 800)
-            model->showGeosets[i] = false;
+            model->showGeoset(i, false);
         }
       }
     }
@@ -735,9 +735,9 @@ void CharControl::RefreshModel()
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
   for (size_t i = 0; i < model->geosets.size(); i++)
   {
-    int id = model->geosets[i].id;
+    int id = model->geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
-      model->showGeosets[i] = (id == egtId);
+      model->showGeoset(i, (id == egtId));
   }
   // Update Eye Glow Menu
   if (egt == EGT_NONE)
@@ -752,13 +752,13 @@ void CharControl::RefreshModel()
   {
     if (infos.sexid == 0)
     {
-      model->showGeosets[1] = false;
-      model->showGeosets[6] = false;
+      model->showGeoset(1, false);
+      model->showGeoset(6, false);
     }
     else
     {
-      model->showGeosets[0] = false;
-      model->showGeosets[3] = false;
+      model->showGeoset(0, false);
+      model->showGeoset(3, false);
     }
   }
 }
