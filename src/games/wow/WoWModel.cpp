@@ -95,13 +95,6 @@ gamefile(file)
   pos = Vec3D(0.0f, 0.0f, 0.0f);
   rot = Vec3D(0.0f, 0.0f, 0.0f);
 
-  for (size_t i = 0; i < TEXTURE_MAX; i++)
-  {
-    specialTextures[i] = -1;
-    replaceTextures[i] = 0;
-    useReplaceTextures[i] = false;
-  }
-
   for (size_t i = 0; i < ATT_MAX; i++)
     attLookup[i] = -1;
 
@@ -153,7 +146,6 @@ gamefile(file)
   particleSystems = 0;
   ribbons = 0;
   texAnims = 0;
-  textures = 0;
   transparency = 0;
   events = 0;
   modelType = MT_NORMAL;
@@ -177,7 +169,6 @@ WoWModel::~WoWModel()
       // For character models, the texture isn't loaded into the texture manager, manually remove it
       glDeleteTextures(1, &replaceTextures[1]);
 
-      delete[] textures; textures = 0;
       delete[] globalSequences; globalSequences = 0;
       delete[] bounds; bounds = 0;
       delete[] boundTris; boundTris = 0;
@@ -515,16 +506,17 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-    textures = new TextureID[header.nTextures];
+    textures.reserve(header.nTextures);
+
     for (size_t i = 0; i < header.nTextures; i++)
     {
+      specialTextures.push_back(-1);
+      replaceTextures.push_back(0);
+      useReplaceTextures.push_back(false);
+    }
 
-      // Error check
-      if (i > TEXTURE_MAX - 1)
-      {
-        LOG_ERROR << "Model Texture" << header.nTextures << "over" << TEXTURE_MAX;
-        break;
-      }
+    for (size_t i = 0; i < header.nTextures; i++)
+    {
       /*
       Texture Types
       Texture type is 0 for regular textures, nonzero for skinned textures (filename not referenced in the M2 file!)
@@ -585,7 +577,7 @@ void WoWModel::initCommon(GameFile * f)
         LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
         TextureList.push_back(tex);
 
-        if (texdef[i].type < TEXTURE_MAX)
+        if (texdef[i].type < header.nTextures)
           useReplaceTextures[texdef[i].type] = true;
 
         if (texdef[i].type == TEXTURE_ARMORREFLECT)
@@ -1626,7 +1618,7 @@ void WoWModel::load(QString &file)
 
 bool WoWModel::canSetTextureFromFile(int texnum)
 {
-  for (size_t i = 0; i < TEXTURE_MAX; i++)
+  for (size_t i = 0; i < header.nTextures; i++)
   {
     if (specialTextures[i] == texnum)
       return 1;
