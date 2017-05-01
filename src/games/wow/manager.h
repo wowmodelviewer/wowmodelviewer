@@ -109,8 +109,16 @@ public:
 
 	QString get(IDTYPE id)
 	{
-	  return "";
-		//return names[id];
+    QString result = "";
+    for (auto const& it : names)
+    {
+      if (it.second == id)
+      {
+        result = it.first;
+        break;
+      }
+    }
+    return result;
 	}
 
 	void clear()

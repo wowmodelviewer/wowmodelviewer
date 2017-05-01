@@ -512,10 +512,9 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-    textures.reserve(header.nTextures);
-
     for (size_t i = 0; i < header.nTextures; i++)
     {
+      textures.push_back(0);
       specialTextures.push_back(-1);
       replaceTextures.push_back(0);
       useReplaceTextures.push_back(false);
@@ -1676,6 +1675,7 @@ void WoWModel::mergeModel(QString & name)
   uint nbIndices = indices.size();
   uint nbGeosets = geosets.size();
 
+#ifdef DEBUG_DH_SUPPORT
   LOG_INFO << "---- ORIGINAL ----";
   LOG_INFO << "nbGeosets =" << geosets.size();
   LOG_INFO << "nbVertices =" << nbVertices;
@@ -1687,7 +1687,7 @@ void WoWModel::mergeModel(QString & name)
   LOG_INFO << "nbVertices =" << m->origVertices.size();
   LOG_INFO << "nbIndices =" << m->indices.size();
   LOG_INFO << "nbPasses =" << m->passes.size();
-
+#endif
   for (auto it : m->geosets)
   {
     ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
@@ -1729,14 +1729,17 @@ void WoWModel::mergeModel(QString & name)
     p->model = this;
     p->geoIndex += nbGeosets;
     p->geoset = geosets[p->geoIndex];
+    p->tex += header.nTextures;
     passes.push_back(p);
   }
 
+#ifdef DEBUG_DH_SUPPORT
   LOG_INFO << "---- FINAL ----";
   LOG_INFO << "nbGeosets =" << geosets.size();
   LOG_INFO << "nbVertices =" << origVertices.size();
   LOG_INFO << "nbIndices =" << indices.size();
   LOG_INFO << "nbPasses =" << passes.size();
+#endif
 
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
@@ -1752,12 +1755,6 @@ void WoWModel::mergeModel(QString & name)
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
     delete[] vertices; vertices = 0;
 
-    // Texture buffer
-    //  glGenBuffersARB(1, &tbuf);
-    //  glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-    //  glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
-    //  delete[] texCoords; texCoords = 0;
-
     // normals buffer
     glGenBuffersARB(1, &nbuf);
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
@@ -1768,6 +1765,15 @@ void WoWModel::mergeModel(QString & name)
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
 
-  // @TODO finalize renderpass copy to be able to delete additional model
-  // delete m;
+  // add model textures
+  for (auto it : m->TextureList)
+  {
+    textures.push_back(texturemanager.add(it));
+    specialTextures.push_back(-1);
+    replaceTextures.push_back(0);
+    useReplaceTextures.push_back(false);
+    TextureList.push_back(it);
+  }
+
+  delete m;
 }
