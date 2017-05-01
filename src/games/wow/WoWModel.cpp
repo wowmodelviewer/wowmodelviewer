@@ -1769,11 +1769,17 @@ void WoWModel::mergeModel(QString & name)
   for (auto it : m->TextureList)
   {
     textures.push_back(texturemanager.add(it));
-    specialTextures.push_back(-1);
-    replaceTextures.push_back(0);
-    useReplaceTextures.push_back(false);
     TextureList.push_back(it);
   }
+  
+  for (auto it : m->specialTextures)
+    specialTextures.push_back(it);
+
+  for (auto it : m->replaceTextures)
+    replaceTextures.push_back(it);
+
+  for (auto it : m->useReplaceTextures)
+    useReplaceTextures.push_back(it);
 
   delete m;
 }
