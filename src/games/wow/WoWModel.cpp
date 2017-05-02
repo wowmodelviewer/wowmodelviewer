@@ -667,6 +667,17 @@ void WoWModel::initCommon(GameFile * f)
   else
     initStatic(f);
 
+#if WIP_DH_SUPPORT > 0
+  if (name().contains("bloodelfmale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+  else if (name().contains("bloodelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+  else if (name().contains("nightelfmale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+  else if (name().contains("nightelffemale_hd"))
+    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+#endif
+
   f->close();
 }
 
@@ -734,7 +745,6 @@ void WoWModel::initAnimated(GameFile * f)
     animManager = new AnimManager(anims);
   }
 
-  if (animBones)
   {
     // init bones...
     bones = new Bone[header.nBones];
@@ -1018,16 +1028,6 @@ void WoWModel::setLOD(GameFile * f, int index)
 
     passes.push_back(pass);
   }
-#if WIP_DH_SUPPORT > 0
-  if (name().contains("bloodelfmale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
-  else if (name().contains("bloodelffemale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
-  else if (name().contains("nightelfmale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
-  else if (name().contains("nightelffemale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
-#endif
   g->close();
   // transparent parts come later
   std::sort(passes.begin(), passes.end());
@@ -1381,7 +1381,7 @@ inline void WoWModel::draw()
   }
   else
   {
-   /* if (ind)
+    if (ind)
     {
       animate(currentAnim);
     }
@@ -1393,7 +1393,6 @@ inline void WoWModel::draw()
         //animcalc = true; // Not sure what this is really for but it breaks WMO animation
       }
     }
-    */
 
     if (showModel)
       drawModel();
@@ -1688,6 +1687,7 @@ void WoWModel::mergeModel(QString & name)
   LOG_INFO << "nbIndices =" << m->indices.size();
   LOG_INFO << "nbPasses =" << m->passes.size();
 #endif
+
   for (auto it : m->geosets)
   {
     ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
@@ -1698,6 +1698,44 @@ void WoWModel::mergeModel(QString & name)
 
     geosets.push_back(newgeo);
   }
+
+  // build bone corresponsance table
+  uint32 nbBonesInNewModel = m->header.nBones;
+  int16 * boneConvertTable = new int16[nbBonesInNewModel];
+
+  for (uint i = 0; i < nbBonesInNewModel; ++i)
+    boneConvertTable[i] = i;
+
+  for (uint i = 0; i < nbBonesInNewModel; ++i)
+  {
+    Vec3D pivot = m->bones[i].pivot;
+    for (uint b = 0; b < header.nBones; ++b)
+    {
+      Vec3D p = bones[b].pivot;
+      if (p == pivot)
+      {
+        boneConvertTable[i] = b;
+        break;
+      }
+    }
+  }
+
+#ifdef DEBUG_DH_SUPPORT
+  for (uint i = 0; i < nbBonesInNewModel; ++i)
+    LOG_INFO << i << "=>" << boneConvertTable[i];
+#endif
+
+  // change bone from new model to character one
+  for (auto & it : m->origVertices)
+  {
+    for (uint i = 0; i < 4; ++i)
+    {
+      if (it.weights[i] > 0)
+        it.bones[i] = boneConvertTable[it.bones[i]];
+    }
+  }
+
+  delete[] boneConvertTable;
 
   origVertices.reserve(origVertices.size() + m->origVertices.size());
   origVertices.insert(origVertices.end(), m->origVertices.begin(), m->origVertices.end());

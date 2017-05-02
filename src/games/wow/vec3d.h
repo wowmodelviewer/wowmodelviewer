@@ -160,6 +160,11 @@ public:
 		return out;
 	}
 
+  friend bool operator==(const Vec3D& lhs, const Vec3D& rhs)
+  {
+    return (abs(lhs.x - rhs.x) < 0.0001) && (abs(lhs.y - rhs.y) < 0.0001) && (abs(lhs.z - rhs.z) < 0.0001);
+  }
+
 	operator float*()
 	{
 		return (float*)this;
@@ -171,6 +176,8 @@ public:
 	  return result;
 	}
 };
+
+
 
 
 class Vec2D {
