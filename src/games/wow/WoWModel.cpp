@@ -28,8 +28,6 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
-#define WIP_DH_SUPPORT 1
-
 void
 glGetAll()
 {
@@ -666,17 +664,6 @@ void WoWModel::initCommon(GameFile * f)
     initAnimated(f);
   else
     initStatic(f);
-
-#if WIP_DH_SUPPORT > 0
-  if (name().contains("bloodelfmale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
-  else if (name().contains("bloodelffemale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
-  else if (name().contains("nightelfmale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
-  else if (name().contains("nightelffemale_hd"))
-    mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
-#endif
 
   f->close();
 }
@@ -1820,4 +1807,322 @@ void WoWModel::mergeModel(QString & name)
     useReplaceTextures.push_back(it);
 
   delete m;
+}
+
+void WoWModel::refresh()
+{
+  hairTex = 0;
+  furTex = 0;
+  gobTex = 0;
+  capeTex = 0;
+  bool showScalp = true;
+
+  // Reset geosets
+  for (size_t i = 0; i < NUM_GEOSETS; i++)
+    cd.geosets[i] = 1;
+  cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
+
+  // show ears, if toggled
+  if (cd.showEars)
+    cd.geosets[CG_EARS] = 2;
+
+  RaceInfos infos;
+  if (!RaceInfos::getCurrent(this, infos))
+    return;
+
+  tex.reset(infos.textureLayoutID);
+
+  std::vector<int> textures = cd.getTextureForSection(CharDetails::SkinType);
+
+  if (textures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_BASE, 0);
+
+  if (textures.size() > 1)
+  {
+    GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
+    furTex = texturemanager.add(tex);
+    UpdateTextureList(tex, TEXTURE_FUR);
+  }
+
+  // Display underwear on the model?
+  if (cd.showUnderwear)
+  {
+    textures = cd.getTextureForSection(CharDetails::UnderwearType);
+    if (textures.size() > 0)
+      tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_PELVIS_UPPER, 1); // pants
+
+    if (textures.size() > 1)
+      tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_TORSO_UPPER, 1); // top
+
+    // pandaren female => need to display tabard2 geosets (need to find something better...)
+    for (size_t i = 0; i < geosets.size(); i++)
+    {
+      if (geosets[i]->id == 1401)
+        showGeoset(i, true);
+    }
+  }
+  else
+  {
+    // de activate pandaren female tabard2 when no underwear
+    for (size_t i = 0; i < geosets.size(); i++)
+    {
+      if (geosets[i]->id == 1401)
+        showGeoset(i, false);
+    }
+  }
+
+  // face
+  textures = cd.getTextureForSection(CharDetails::FaceType);
+  if (textures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 1);
+
+  if (textures.size() > 1)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 1);
+
+  // facial hair
+  textures = cd.getTextureForSection(CharDetails::FacialHairType);
+  if (textures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 2);
+
+  if (textures.size() > 1)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 2);
+
+  // select hairstyle geoset(s)
+  QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+    .arg(infos.raceid)
+    .arg(infos.sexid)
+    .arg(cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
+  sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
+
+  if (hairStyle.valid && !hairStyle.values.empty())
+  {
+    showScalp = (bool)hairStyle.values[0][1].toInt();
+    unsigned int geosetId = hairStyle.values[0][0].toInt();
+    if (!geosetId)  // adds missing scalp if no other hair geoset used. Seems to work that way, anyway...
+      geosetId = 1;
+    for (size_t j = 0; j < geosets.size(); j++)
+    {
+      int id = geosets[j]->id;
+      if (!id) // 0 is for skin, not hairstyle
+        continue;
+      if (id == geosetId)
+        showGeoset(j, cd.showHair);
+      else if (id < 100)
+        showGeoset(j, false);
+    }
+  }
+  else
+    LOG_ERROR << "Unable to collect hair style " << cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE) << " for model " << name();
+
+
+  // Hair texture
+  textures = cd.getTextureForSection(CharDetails::HairType);
+  if (textures.size() > 0)
+  {
+    GameFile * texture = GAMEDIRECTORY.getFile(textures[0]);
+    hairTex = texturemanager.add(texture);
+    UpdateTextureList(texture, TEXTURE_HAIR);
+
+    if (infos.isHD)
+    {
+      if (!showScalp && textures.size() > 1)
+        tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 3);
+    }
+    else
+    {
+      if (!showScalp)
+      {
+        if (textures.size() > 1)
+          tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_LOWER, 3);
+
+        if (textures.size() > 2)
+          tex.addLayer(GAMEDIRECTORY.getFile(textures[2]), CR_FACE_UPPER, 3);
+      }
+    }
+  }
+  else
+  {
+    hairTex = 0;
+  }
+
+  // select facial geoset(s)
+  query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
+    .arg(infos.raceid)
+    .arg(infos.sexid)
+    .arg(cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION));
+
+  sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
+
+  if (facialHairStyle.valid && !facialHairStyle.values.empty() && cd.showFacialHair)
+  {
+    LOG_INFO << "Facial GeoSets : " << facialHairStyle.values[0][0].toInt()
+      << " " << facialHairStyle.values[0][1].toInt()
+      << " " << facialHairStyle.values[0][2].toInt()
+      << " " << facialHairStyle.values[0][3].toInt()
+      << " " << facialHairStyle.values[0][4].toInt();
+
+    cd.geosets[CG_GEOSET100] = facialHairStyle.values[0][0].toInt();
+    cd.geosets[CG_GEOSET200] = facialHairStyle.values[0][2].toInt();
+    cd.geosets[CG_GEOSET300] = facialHairStyle.values[0][1].toInt();
+  }
+  else
+  {
+    LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
+  }
+
+  //refresh equipment
+
+  for (WoWModel::iterator it = begin();
+       it != end();
+       ++it)
+       (*it)->refresh();
+
+  LOG_INFO << "Current Equipment :"
+    << "Head" << getItem(CS_HEAD)->id()
+    << "Shoulder" << getItem(CS_SHOULDER)->id()
+    << "Shirt" << getItem(CS_SHIRT)->id()
+    << "Chest" << getItem(CS_CHEST)->id()
+    << "Belt" << getItem(CS_BELT)->id()
+    << "Legs" << getItem(CS_PANTS)->id()
+    << "Boots" << getItem(CS_BOOTS)->id()
+    << "Bracers" << getItem(CS_BRACERS)->id()
+    << "Gloves" << getItem(CS_GLOVES)->id()
+    << "Cape" << getItem(CS_CAPE)->id()
+    << "Right Hand" << getItem(CS_HAND_RIGHT)->id()
+    << "Left Hand" << getItem(CS_HAND_LEFT)->id()
+    << "Quiver" << getItem(CS_QUIVER)->id()
+    << "Tabard" << getItem(CS_TABARD)->id();
+
+  // reset geosets
+  for (size_t j = 0; j < geosets.size(); j++)
+  {
+    int id = geosets[j]->id;
+    for (size_t i = 1; i < NUM_GEOSETS; i++)
+    {
+      int a = (int)i * 100, b = ((int)i + 1) * 100;
+      if (a != 1400 && id > a && id < b) // skip tabard2 group (1400) -> buggy pandaren female tabard
+        showGeoset(j, (id == (a + cd.geosets[i])));
+    }
+  }
+
+  // gloves - this is so gloves have preference over shirt sleeves.
+  if (cd.geosets[CG_GLOVES] > 1)
+    cd.geosets[CG_WRISTBANDS] = 0;
+
+  WoWItem * headItem = getItem(CS_HEAD);
+
+  if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
+  {
+    QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
+                            "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
+                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
+                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+                            .arg(headItem->id());
+
+    sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
+
+    if (helmetInfos.valid && !helmetInfos.values.empty())
+    {
+      // hair styles
+      if (helmetInfos.values[0][0].toInt() != 0)
+      {
+        for (size_t i = 0; i < geosets.size(); i++)
+        {
+          int id = geosets[i]->id;
+          if (id > 0 && id < 100)
+            showGeoset(i, false);
+        }
+      }
+
+      // facial 1
+      if (helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
+      {
+        for (size_t i = 0; i < geosets.size(); i++)
+        {
+          int id = geosets[i]->id;
+          if (id > 100 && id < 200)
+            showGeoset(i, false);
+        }
+      }
+
+      // facial 2
+      if (helmetInfos.values[0][2].toInt() != 0 && infos.customization[1] != "FEATURES")
+      {
+        for (size_t i = 0; i < geosets.size(); i++)
+        {
+          int id = geosets[i]->id;
+          if (id > 200 && id < 300)
+            showGeoset(i, false);
+        }
+      }
+
+      // facial 3
+      if (helmetInfos.values[0][3].toInt() != 0)
+      {
+        for (size_t i = 0; i < geosets.size(); i++)
+        {
+          int id = geosets[i]->id;
+          if (id > 300 && id < 400)
+            showGeoset(i, false);
+        }
+      }
+
+      // ears
+      if (helmetInfos.values[0][4].toInt() != 0)
+      {
+        for (size_t i = 0; i < geosets.size(); i++)
+        {
+          int id = geosets[i]->id;
+          if (id > 700 && id < 800)
+            showGeoset(i, false);
+        }
+      }
+    }
+  }
+
+  // finalize character texture
+  tex.compose(charTex);
+
+  // set replacable textures
+  replaceTextures[TEXTURE_BODY] = charTex;
+  replaceTextures[TEXTURE_CAPE] = capeTex;
+  replaceTextures[TEXTURE_HAIR] = hairTex;
+  replaceTextures[TEXTURE_FUR] = furTex;
+  replaceTextures[TEXTURE_GAMEOBJECT1] = gobTex;
+
+  // If model is one of these races, show the feet (don't wear boots)
+  if (infos.raceid == RACE_TAUREN ||
+      infos.raceid == RACE_TROLL ||
+      infos.raceid == RACE_DRAENEI ||
+      infos.raceid == RACE_NAGA ||
+      infos.raceid == RACE_BROKEN ||
+      infos.raceid == RACE_WORGEN)
+  {
+    cd.showFeet = true;
+  }
+
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  size_t egt = cd.eyeGlowType;
+  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i = 0; i < geosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
+      showGeoset(i, (id == egtId));
+  }
+
+  // Quick & Dirty fix for gobelins => deactivate buggy geosets
+  if (infos.raceid == 9)
+  {
+    if (infos.sexid == 0)
+    {
+      showGeoset(1, false);
+      showGeoset(6, false);
+    }
+    else
+    {
+      showGeoset(0, false);
+      showGeoset(3, false);
+    }
+  }
 }

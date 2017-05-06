@@ -241,6 +241,8 @@ public:
 
   void mergeModel(QString & name);
 
+  void refresh();
+
 };
 
 

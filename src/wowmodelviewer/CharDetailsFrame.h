@@ -26,7 +26,7 @@ public:
   CharDetailsFrame(wxWindow* parent);
 
   void randomiseChar();
-  void setModel(CharDetails & details);
+  void setModel(WoWModel * model);
 
 
 protected:
@@ -37,10 +37,12 @@ private:
   DECLARE_EVENT_TABLE()
 
   wxFlexGridSizer * charCustomizationGS;
+  wxCheckBox * dhMode;
 
   void onRandomise(wxCommandEvent &event);
+  void onDHMode(wxCommandEvent &event);
 
-  CharDetails * m_details;
+  WoWModel * m_model;
 };
 
 
