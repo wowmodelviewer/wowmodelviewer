@@ -77,6 +77,8 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   uint16 *boundTris;
 
+  QString mergedModel;
+
 public:
   bool animGeometry, animTextures, animBones;
 
@@ -240,6 +242,7 @@ public:
   bool isGeosetDisplayed(uint geosetindex);
 
   void mergeModel(QString & name);
+  void unmergeModel();
 
   void refresh();
 

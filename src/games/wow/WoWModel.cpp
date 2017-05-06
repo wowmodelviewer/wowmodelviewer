@@ -87,7 +87,7 @@ void glInitAll()
 WoWModel::WoWModel(GameFile * file, bool forceAnim):
 ManagedItem(""),
 forceAnim(forceAnim),
-gamefile(file)
+gamefile(file), mergedModel("")
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -1806,7 +1806,76 @@ void WoWModel::mergeModel(QString & name)
   for (auto it : m->useReplaceTextures)
     useReplaceTextures.push_back(it);
 
+  mergedModel = name;
+
   delete m;
+}
+
+void WoWModel::unmergeModel()
+{
+  if (mergedModel == "")
+    return;
+
+  WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(mergedModel), true);
+
+  if (!m->ok)
+    return;
+
+  geosets.resize(geosets.size() - m->geosets.size());
+  origVertices.resize(origVertices.size() - m->origVertices.size());
+  indices.resize(indices.size() - m->indices.size());
+  
+  delete[] vertices;
+  delete[] normals;
+
+  vertices = new Vec3D[origVertices.size()];
+  normals = new Vec3D[origVertices.size()];
+
+  uint i = 0;
+  for (auto & ov_it : origVertices)
+  {
+    // Set the data for our vertices, normals from the model data
+    vertices[i] = ov_it.pos;
+    normals[i] = ov_it.normal.normalize();
+    ++i;
+  }
+
+  passes.resize(passes.size() - m->passes.size());
+
+  const size_t size = (origVertices.size() * sizeof(float));
+  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
+
+  if (video.supportVBO)
+  {
+    glDeleteBuffersARB(1, &nbuf);
+    glDeleteBuffersARB(1, &vbuf);
+
+    // Vert buffer
+    glGenBuffersARB(1, &vbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+    delete[] vertices; vertices = 0;
+
+    // normals buffer
+    glGenBuffersARB(1, &nbuf);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+    delete[] normals; normals = 0;
+
+    // clean bind
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  }
+
+  // @TODO delete teextures in texturemanager
+  textures.resize(textures.size() - m->textures.size());
+  TextureList.resize(TextureList.size() - m->TextureList.size());
+
+  specialTextures.resize(specialTextures.size() - m->specialTextures.size());
+  replaceTextures.resize(replaceTextures.size() - m->replaceTextures.size());
+  useReplaceTextures.resize(useReplaceTextures.size() - m->useReplaceTextures.size());
+
+  mergedModel = "";
+
 }
 
 void WoWModel::refresh()

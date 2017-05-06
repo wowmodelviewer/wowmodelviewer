@@ -93,14 +93,21 @@ void CharDetailsFrame::onDHMode(wxCommandEvent &event)
   if (!m_model)
     return;
 
-  if (m_model->name().contains("bloodelfmale_hd"))
-    m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
-  else if (m_model->name().contains("bloodelffemale_hd"))
-    m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
-  else if (m_model->name().contains("nightelfmale_hd"))
-    m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
-  else if (m_model->name().contains("nightelffemale_hd"))
-    m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+  if (event.IsChecked())
+  {
+    if (m_model->name().contains("bloodelfmale_hd"))
+      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+    else if (m_model->name().contains("bloodelffemale_hd"))
+      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+    else if (m_model->name().contains("nightelfmale_hd"))
+      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+    else if (m_model->name().contains("nightelffemale_hd"))
+      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+  }
+  else
+  {
+    m_model->unmergeModel();
+  }
 
   m_model->refresh();
 }
