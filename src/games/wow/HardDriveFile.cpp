@@ -12,8 +12,8 @@
 #include "logger/Logger.h"
 
 
-HardDriveFile::HardDriveFile(QString path, QString real)
- : GameFile(path), opened(false), realpath(real)
+HardDriveFile::HardDriveFile(QString path, QString real, int id)
+ : GameFile(path, id), opened(false), realpath(real)
 {
 }
 

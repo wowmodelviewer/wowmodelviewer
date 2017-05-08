@@ -24,7 +24,7 @@
 class _HARDDRIVEFILE_API_ HardDriveFile : public GameFile
 {
   public:
-    HardDriveFile(QString path, QString realpath);
+    HardDriveFile(QString path, QString realpath, int id = -1);
     ~HardDriveFile();
     bool open();
     bool close();

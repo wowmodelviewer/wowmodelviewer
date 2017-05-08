@@ -65,7 +65,6 @@ void GameFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
       QString toRemove = path;
       toRemove += "\\";
       filePath.replace(0, toRemove.size(), "");
-      filePath.replace("/","\\");
 
       GameFile * originalFile = getFile(filePath);
       bool addnewfile = true;
@@ -86,8 +85,8 @@ void GameFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
       if(addnewfile)
       {
         LOG_INFO << "Add custom file" << filePath << "from hard drive location" << dirIt.filePath();
-        HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath());
-        file->setName(filePath.mid(filePath.lastIndexOf("\\")+1));
+        HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalFile ? originalFile->fileDataId() : -1);
+        file->setName(filePath.mid(filePath.lastIndexOf("/")+1));
         addChild(file);
       }
     }
