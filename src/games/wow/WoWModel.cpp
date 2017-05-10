@@ -28,6 +28,8 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
+#define TEXTURE_MAX 32
+
 void
 glGetAll()
 {
@@ -95,6 +97,10 @@ gamefile(file), mergedModel("")
   pos = Vec3D(0.0f, 0.0f, 0.0f);
   rot = Vec3D(0.0f, 0.0f, 0.0f);
 
+  specialTextures.resize(TEXTURE_MAX, -1);
+  replaceTextures.resize(TEXTURE_MAX, 0);
+  useReplaceTextures.resize(TEXTURE_MAX, false);
+  
   for (size_t i = 0; i < ATT_MAX; i++)
     attLookup[i] = -1;
 
@@ -510,13 +516,7 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-    for (size_t i = 0; i < header.nTextures; i++)
-    {
-      textures.push_back(0);
-      specialTextures.push_back(-1);
-      replaceTextures.push_back(0);
-      useReplaceTextures.push_back(false);
-    }
+	textures.resize(TEXTURE_MAX, 0);
 
     for (size_t i = 0; i < header.nTextures; i++)
     {
@@ -580,7 +580,7 @@ void WoWModel::initCommon(GameFile * f)
         LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
         TextureList.push_back(tex);
 
-        if (texdef[i].type < header.nTextures)
+		if (texdef[i].type < TEXTURE_MAX)
           useReplaceTextures[texdef[i].type] = true;
 
         if (texdef[i].type == TEXTURE_ARMORREFLECT)
@@ -1560,7 +1560,7 @@ void WoWModel::load(QString &file)
 
 bool WoWModel::canSetTextureFromFile(int texnum)
 {
-  for (size_t i = 0; i < header.nTextures; i++)
+  for (size_t i = 0; i < TEXTURE_MAX; i++)
   {
     if (specialTextures[i] == texnum)
       return 1;
