@@ -28,8 +28,6 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
-#define TEXTURE_MAX 32
-
 void
 glGetAll()
 {
