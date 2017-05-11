@@ -361,10 +361,11 @@ bool GameDatabase::tableStructure::fill()
   QString queryBase = query;
   int record = 0;
   int nbRecord = dbc->getRecordCount();
-  
+
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
     std::vector<std::string> fields = it.get(*this);
+
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
     {
       if(field == 0)
@@ -377,9 +378,10 @@ bool GameDatabase::tableStructure::fill()
       else
         query += ")";
     }
-    // inserting all items at once make application crash,
-    // so insert by chunk of 200 lines
-    if(record%200 == 0)
+    // inserting all records at once makes the application crash, so
+    // insert in chunks of 200 lines. If it's the last record anyway
+    // then don't, as the final query after the for() loop will do it:
+    if(record%200 == 0 && record != nbRecord-1)
     {
       query += ";";
       sqlResult r = GAMEDATABASE.sqlQuery(query);
