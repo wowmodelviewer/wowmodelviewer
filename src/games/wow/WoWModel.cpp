@@ -462,8 +462,6 @@ void WoWModel::initCommon(GameFile * f)
 
   // Ready to render.
   showModel = true;
-  if (hasParticles)
-    showParticles = true;
   alpha = 1.0f;
 
   ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
@@ -827,6 +825,7 @@ void WoWModel::initAnimated(GameFile * f)
     M2ParticleDef *pdef;
     particleSystems = new ParticleSystem[header.nParticleEmitters];
     hasParticles = true;
+    showParticles = true;
     for (size_t i = 0; i < header.nParticleEmitters; i++)
     {
       pdef = (M2ParticleDef *)&pdefs[i];
