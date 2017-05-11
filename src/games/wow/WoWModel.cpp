@@ -512,7 +512,7 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-	textures.resize(TEXTURE_MAX, 0);
+	  textures.resize(TEXTURE_MAX, 0);
 
     for (size_t i = 0; i < header.nTextures; i++)
     {
@@ -1751,7 +1751,7 @@ void WoWModel::mergeModel(QString & name)
     p->model = this;
     p->geoIndex += nbGeosets;
     p->geoset = geosets[p->geoIndex];
-    p->tex += header.nTextures;
+    p->tex += TEXTURE_MAX;
     passes.push_back(p);
   }
 
@@ -1790,10 +1790,13 @@ void WoWModel::mergeModel(QString & name)
   // add model textures
   for (auto it : m->TextureList)
   {
-    textures.push_back(texturemanager.add(it));
+    texturemanager.add(it);
     TextureList.push_back(it);
   }
-  
+
+  for (auto it : m->textures)
+    textures.push_back(it);
+
   for (auto it : m->specialTextures)
     specialTextures.push_back(it);
 
