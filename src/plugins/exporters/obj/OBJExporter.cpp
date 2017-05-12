@@ -327,7 +327,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
         matName = matName + "_Dbl";
 
       // Part Names
-      int mesh = model->geosets[g]->id / 100;
+      int mesh = g / 100;
 
       QString cgGroupName = WoWModel::getCGGroupName((CharGeosets)mesh);
 
@@ -375,7 +375,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       Vec4D diff = p->ocol;
 
       QString val;
-      val.sprintf("Geoset_%03i",p->geoset);
+      val.sprintf("Geoset_%03i",p->geoset->id);
       QString material = QString(model->modelname.c_str()) + "_" + val;
       material.replace("\\","_");
       if (p->unlit == true)
