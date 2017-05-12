@@ -632,11 +632,12 @@ void FBXExporter::createMaterials()
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
       QString tex = m_p_model->TextureList[pass->tex]->fullname();
-      QString tex_name = tex.right(tex.lastIndexOf('/')+1);
-      tex_name = tex.left(tex.lastIndexOf('.'));
-      tex_name += ".png";
-      QString tex_fullpath_filename = QString(m_filename.c_str()).right(tex.lastIndexOf('/')+1) + '/' + tex_name;
-      //wxString tex_fullpath_filename = wxString(m_filename.c_str()).BeforeLast(SLASH) + wxT(SLASH) + tex_name.c_str();
+
+      QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
+      tex_name = tex_name.replace(".blp", ".png");
+
+      QString tex_fullpath_filename = m_filename.c_str();
+      tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
 
       if(tex_name.contains("Body", Qt::CaseInsensitive))
         m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = m_p_model->replaceTextures[TEXTURE_BODY];
