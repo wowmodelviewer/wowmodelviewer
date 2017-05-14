@@ -72,7 +72,7 @@
 //--------------------------------------------------------------------
 bool ArmoryImporter::acceptURL(std::string url) const
 {
-  return (url.find("battle.net") != std::string::npos);
+  return ((url.find("battle.net") != std::string::npos) || (url.find("worldofwarcraft.com") != std::string::npos));
 }
 
 
@@ -354,30 +354,55 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
        */
       wxString strURL(url);
 
-      // Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
-      if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) &&
-          (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
+      wxString region = "";
+      wxString realm = "";
+      wxString charName = "";
+
+      if (strURL.Find(wxT("battle.net")) != wxNOT_FOUND)
       {
-        // due to Qt plugin, this cause application crash
-        // temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
-        //wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-        LOG_INFO << wxT("Improperly Formatted URL. Lacks /simple and /advanced");
+        // Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
+
+        if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) &&
+            (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
+        {
+          // due to Qt plugin, this cause application crash
+          // temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
+          //wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
+          LOG_INFO << wxT("Improperly Formatted URL. Lacks /simple and /advanced");
+          return 2;
+        }
+
+        region = strURL.Mid(7).BeforeFirst('/').BeforeFirst('.');
+        realm = strURL.BeforeLast('/').BeforeLast('/').AfterLast('/');
+        charName = strURL.BeforeLast('/').AfterLast('/');
+      }
+      else if (strURL.Find(wxT("worldofwarcraft.com")) != wxNOT_FOUND)
+      {
+        // Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
+
+        region = strURL.Mid(9).AfterFirst('/').BeforeFirst('/');
+        realm = strURL.BeforeLast('/').AfterLast('/');
+        charName = strURL.AfterLast('/');
+
+        if ((region.IsSameAs("fr-fr", false)) || (region.IsSameAs("en-gb", false)))
+          region = "eu";
+        else if ((region.IsSameAs("en-us", false)))
+          region = "us";
+        else if ((region.IsSameAs("zh-tw", false)))
+          region = "tw";
+        else if ((region.IsSameAs("ko-kr", false)))
+          region = "kr";
+      }
+      else
+      {
+        LOG_INFO << wxT("Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com");
         return 2;
       }
-      wxString strDomain = strURL.Mid(7).BeforeFirst('/');
-      wxString strPage = strURL.Mid(7).Mid(strDomain.Len());
 
-      wxString Region = strDomain.BeforeFirst('.');
-
-      wxString strp = strPage.BeforeLast('/');	// No simple/advanced
-      wxString CharName = strp.AfterLast('/');
-      strp = strp.BeforeLast('/');				// Update strp
-      wxString Realm = strp.AfterLast('/');
-
-      LOG_INFO << "Loading Battle.Net Armory. Region: " << Region << ", Realm: " << Realm.c_str() << ", Character: " << CharName.c_str();
+      LOG_INFO << "Loading Battle.Net Armory. Region:" << region << ", Realm:" << realm << ", Character:" << charName;
 
       apiPage = wxT("https://wowmodelviewer.net/armory.php?region=");
-      apiPage << Region << "&realm=" << Realm << "&char=" << CharName;
+      apiPage << region << "&realm=" << realm << "&char=" << charName;
       break;
     }
     case ITEM:
