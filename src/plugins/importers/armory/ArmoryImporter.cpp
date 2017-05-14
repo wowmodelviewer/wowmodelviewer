@@ -368,7 +368,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
           // due to Qt plugin, this cause application crash
           // temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
           //wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-          LOG_INFO << wxT("Improperly Formatted URL. Lacks /simple and /advanced");
+          LOG_ERROR << "Improperly Formatted URL. Lacks /simple and /advanced";
           return 2;
         }
 
@@ -395,13 +395,13 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       }
       else
       {
-        LOG_INFO << wxT("Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com");
+        LOG_ERROR << "Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com";
         return 2;
       }
 
       LOG_INFO << "Loading Battle.Net Armory. Region:" << region << ", Realm:" << realm << ", Character:" << charName;
 
-      apiPage = wxT("https://wowmodelviewer.net/armory.php?region=");
+      apiPage = "https://wowmodelviewer.net/armory.php?region=";
       apiPage << region << "&realm=" << realm << "&char=" << charName;
       break;
     }
@@ -420,7 +420,7 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 
       LOG_INFO << "Loading Battle.Net Armory. Item: " << itemNumber.c_str();
 
-      apiPage = wxT("https://wowmodelviewer.net/armory.php?item=");
+      apiPage = "https://wowmodelviewer.net/armory.php?item=";
       apiPage << itemNumber;
 
       break;
@@ -441,8 +441,6 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
   loop.exec();
 
   QByteArray bts = reply->readAll();
-
-  LOG_INFO << __FUNCTION__ << bts;
 
   wxJSONReader reader;
   return reader.Parse(bts.data(),&result);
