@@ -301,7 +301,7 @@ void CharDetails::fillCustomizationMap()
   QString query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
                           .arg(infos.raceid)
                           .arg(infos.sexid)
-                          .arg(SkinType);
+                          .arg(SkinType + sectionOffset);
 
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
 
