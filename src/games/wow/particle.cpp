@@ -21,6 +21,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
 {
   flags = mta.flags;
   multitexture = flags & MODELPARTICLE_FLAGS_MULTITEXTURE;
+  doNotTrail = flags & MODELPARTICLE_FLAGS_DONOTTRAIL;
   speed.init (mta.EmissionSpeed, f, globals);
   variation.init (mta.SpeedVariation, f, globals);
   spread.init (mta.VerticalRange, f, globals);
@@ -49,6 +50,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   slowdown = mta.p.slowdown;
   rotation = mta.p.rotation;
   pos = fixCoordSystem(mta.pos);
+  tpos = fixCoordSystem(mta.pos);
   texture = model->textures[mta.texture];
   blend = mta.blend;
   rows = mta.rows;
@@ -134,6 +136,10 @@ void ParticleSystem::initTile(Vec2D *tc, int num)
 
 void ParticleSystem::update(float dt)
 {
+  if (!dt)
+    return;
+  dt = abs(dt);  // dt can be negative if animation slider is used, but that would break particle anims
+
   size_t l_manim = manim;
   if (GLOBALSETTINGS.bZeroParticle)
     l_manim = 0;
@@ -141,7 +147,8 @@ void ParticleSystem::update(float dt)
   float deaccel = deacceleration.getValue(l_manim, mtime);
 
   // spawn new particles
-  if (emitter) {
+  if (emitter)
+  {
     float frate = rate.getValue(l_manim, mtime);
     float flife = lifespan.getValue(l_manim, mtime);
 
@@ -150,11 +157,14 @@ void ParticleSystem::update(float dt)
       ftospawn = (dt * frate / flife) + rem;
     else
       ftospawn = rem;
-    if (ftospawn < 1.0f) {
+    if (ftospawn < 1.0f)
+    {
       rem = ftospawn;
       if (rem < 0)
         rem = 0;
-    } else {
+    }
+    else
+    {
       unsigned int tospawn = (int)ftospawn;
 
       if ((tospawn + particles.size()) > MAX_PARTICLES) // Error check to prevent the program from trying to load insane amounts of particles.
@@ -173,8 +183,10 @@ void ParticleSystem::update(float dt)
         en = enabled.getValue(manim, mtime)!=0;
 
       //rem = 0;
-      if (en) {
-        for (size_t i=0; i<tospawn; i++) {
+      if (en)
+      {
+        for (size_t i=0; i<tospawn; i++)
+        {
           Particle p = emitter->newParticle(manim, mtime, w, l, spd, var, spr, spr2);
           // sanity check:
           if (particles.size() < MAX_PARTICLES) // No need to check this every loop iteration. Already checked above.
@@ -204,15 +216,18 @@ void ParticleSystem::update(float dt)
     colVals[1] = colors[1];
     colVals[2] = colors[2];
   }
-  for (ParticleList::iterator it = particles.begin(); it != particles.end(); ) {
+
+  Matrix m = parent->mat;
+
+  for (ParticleList::iterator it = particles.begin(); it != particles.end(); )
+  {
     Particle &p = *it;
     p.speed += p.down * grav * dt - p.dir * deaccel * dt;
 
-    if (slowdown>0) {
+    if (slowdown>0)
       mspeed = expf(-1.0f * slowdown * p.life);
-    }
     p.pos += p.speed * mspeed * dt;
-
+    p.tpos = m * p.pos;
     p.life += dt;
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
@@ -257,7 +272,7 @@ void ParticleSystem::draw()
     blend = 2;
   switch (blend)
   {
-    case BM_OPAQUE:	         // 0
+    case BM_OPAQUE:	          // 0
       glDisable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -282,17 +297,17 @@ void ParticleSystem::draw()
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       break;
-    case BM_MODULATE:	         // 5
+    case BM_MODULATE:	      // 5
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_DST_COLOR, GL_ZERO);
       break;
-    case BM_MODULATEX2:	    // 6
+    case BM_MODULATEX2:	      // 6
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
       break;
-    case BM_7:	               // 7, new in WoD
+    case BM_7:	              // 7, new in WoD
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -378,7 +393,10 @@ void ParticleSystem::draw()
       break;
     glColor4fv(it->color);
     size = it->size;
-    pos = it->pos;
+    if (doNotTrail)
+      pos = it->tpos;
+    else
+      pos = it->pos;
     if (ParticleType == 0 || ParticleType > 1)
     {
       // TODO: figure out type 2 (deeprun tram subway sign)
@@ -457,21 +475,24 @@ void ParticleSystem::draw()
 }
 
 //Generates the rotation matrix based on spread
-static Matrix	SpreadMat;
+static Matrix SpreadMat;
+
 void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 {
   int i,j;
   float a[2],c[2],s[2];
-  Matrix	Temp;
+  Matrix Temp;
 
   SpreadMat.unit();
 
   a[0]=randfloat(-Spread1,Spread1)/2.0f;
   a[1]=randfloat(-Spread2,Spread2)/2.0f;
 
-  /*SpreadMat.m[0][0]*=l;
+/*
+    SpreadMat.m[0][0]*=l;
 	SpreadMat.m[1][1]*=l;
-	SpreadMat.m[2][2]*=w;*/
+	SpreadMat.m[2][2]*=w;
+*/
 
   for(i=0;i<2;i++)
   {
@@ -511,10 +532,8 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = sys->parent->mat * (sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w)));
-
+    p.pos = (sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w)));
     const float t = randfloat(0.0f, float(2*PI));
-
     p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
@@ -532,7 +551,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
     //p.speed = dir.normalize() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = sys->parent->mat * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
+    p.pos = (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
     Vec3D dir = Vec3D(sys->parent->mat.m[1][0],sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
     p.speed = dir.normalize() * spd * randfloat(0, var*2);
 
@@ -543,7 +562,6 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
   } else {
     p.pos = sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w));
-    p.pos = sys->parent->mat * p.pos;
 
     //Vec3D dir = mrot * Vec3D(0,1,0);
     Vec3D dir = sys->parent->mrot * Vec3D(0,1,0);
@@ -553,13 +571,14 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
     p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));
   }
 
-  if(!sys->billboard)	{
+  if(!sys->billboard)
+  {
     p.corners[0] = mrot * Vec3D(-1,0,+1);
     p.corners[1] = mrot * Vec3D(+1,0,+1);
     p.corners[2] = mrot * Vec3D(+1,0,-1);
     p.corners[3] = mrot * Vec3D(-1,0,-1);
   }
-
+  p.tpos = sys->parent->mat * p.pos;
   p.life = 0;
   size_t l_anim = anim;
   if (GLOBALSETTINGS.bZeroParticle)
@@ -568,7 +587,9 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   if (p.maxlife == 0)
     p.maxlife = 1;
 
-  p.origin = p.pos;
+  p.origin = p.tpos;
+  if (!sys->doNotTrail)
+    p.pos = p.tpos;
 
   p.tile = randint(0, sys->rows*sys->cols-1);
   return p;
@@ -608,26 +629,27 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   // Vec3D bdir(w*cosf(t), 0.0f, l*sinf(t));
   // --
 
-  // TODO: fix shpere emitters to work properly
-  /* // Old Method
-	//Vec3D bdir(l*cosf(t), 0, w*sinf(t));
-	//Vec3D bdir(0, w*cosf(t), l*sinf(t));
+  // TODO: fix sphere emitters to work properly
+/*
+    // Old Method
+    //Vec3D bdir(l*cosf(t), 0, w*sinf(t));
+    //Vec3D bdir(0, w*cosf(t), l*sinf(t));
 
 
-	float theta_range = sys->spread.getValue(anim, time);
-	float theta = -0.5f* theta_range + randfloat(0, theta_range);
-	Vec3D bdir(0, l*cosf(theta), w*sinf(theta));
+    float theta_range = sys->spread.getValue(anim, time);
+    float theta = -0.5f* theta_range + randfloat(0, theta_range);
+    Vec3D bdir(0, l*cosf(theta), w*sinf(theta));
 
-	float phi_range = sys->lat.getValue(anim, time);
-	float phi = randfloat(0, phi_range);
-	rotate(0,0, &bdir.z, &bdir.x, phi);
-   */
+    float phi_range = sys->lat.getValue(anim, time);
+    float phi = randfloat(0, phi_range);
+    rotate(0,0, &bdir.z, &bdir.x, phi);
+*/
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
     Vec3D bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
 
     p.pos = sys->pos + bdir;
-    p.pos = sys->parent->mat * p.pos;
+    p.tpos = sys->parent->mat * p.pos;
 
     if (bdir.lengthSquared()==0)
       p.speed = Vec3D(0,0,0);
@@ -645,11 +667,8 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     bdir.z = bdir.y;
     bdir.y = temp;
 
-    p.pos = sys->parent->mat * sys->pos + bdir;
-
-
-    //p.pos = sys->pos + bdir;
-    //p.pos = sys->parent->mat * p.pos;
+    p.pos = sys->pos + bdir;
+    p.tpos = sys->parent->mat * p.pos;
 
 
     if ((bdir.lengthSquared()==0) && ((sys->flags&0x100)!=0x100))
@@ -678,7 +697,9 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   if (p.maxlife == 0)
     p.maxlife = 1;
 
-  p.origin = p.pos;
+  p.origin = p.tpos;
+  if (!sys->doNotTrail)
+    p.pos = p.tpos;
 
   p.tile = randint(0, sys->rows*sys->cols-1);
   return p;

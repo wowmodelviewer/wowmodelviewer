@@ -202,7 +202,6 @@ void CAnimationExporter::CreateGif()
 	// Stop our animation
 	g_canvas->model()->animManager->Pause(true);
 	g_canvas->model()->animManager->Stop();
-	g_canvas->model()->animManager->AnimateParticles();
 
 	// Size of our buffer to hold the pixel data
 	m_iSize = m_iWidth*m_iHeight*4;	// (width*height*bytesPerPixel)	
@@ -510,7 +509,6 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	// Stop our animation
 	g_canvas->model()->animManager->Pause(true);
 	g_canvas->model()->animManager->Stop();
-	g_canvas->model()->animManager->AnimateParticles();
 
 	// Create one frame to make our optimal colour palette from.
 	unsigned char *buffer = new unsigned char[bufSize];

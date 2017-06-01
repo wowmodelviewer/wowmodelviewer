@@ -8,10 +8,6 @@
 //#include <crtdbg.h>
 
 // Our files
-#include "AnimManager.h"
-
-
-
 #include "Model.h"
 #include "animated.h"
 #include "AnimManager.h"
@@ -171,14 +167,8 @@ public:
     animcalc = false;
   }
 
+  void update(int dt);
 
-  void update(int dt)
-  {  // (float dt)
-    if (animated)
-      animManager->Tick(dt);
-
-    updateEmitters((dt / 1000.0f));
-  };
   // -------------------------------
 
   // ===============================

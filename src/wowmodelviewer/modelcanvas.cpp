@@ -1575,9 +1575,10 @@ void ModelCanvas::tick()
 		if (model()->animManager && !wmo) {
 			if (model()->animManager->IsPaused())
 				ddt = 0;
-			
+/*		
 			if (!model()->animManager->IsParticlePaused())
 				ddt = model()->animManager->GetTimeDiff();
+*/
 		}
 		
 		root->tick(ddt);

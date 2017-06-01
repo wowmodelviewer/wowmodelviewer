@@ -61,7 +61,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 
   const wxString strLoops[10] = { wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"),
                                   wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
-	
+  
   animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,16), 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation"));
   animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,16), 0,
@@ -142,11 +142,11 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
   btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
   btnStop = new wxButton(this, ID_STOP, _("Stop"), wxPoint(115,40), wxSize(45,20));
-	
+  
   btnClear = new wxButton(this, ID_CLEARANIM, _("Clear"), wxPoint(10,64), wxSize(45,20));
   btnPrev = new wxButton(this, ID_PREVANIM, wxT("<<"), wxPoint(62,64), wxSize(45,20));
   btnNext = new wxButton(this, ID_NEXTANIM, wxT(">>"), wxPoint(115,64), wxSize(45,20));
-	
+  
   lockAnims = new wxCheckBox(this, ID_ANIM_LOCK, _("Lock Animations"), wxPoint(170,64), wxDefaultSize, 0);
   bLockAnims = true;
   lockAnims->SetValue(bLockAnims);
@@ -274,24 +274,24 @@ void AnimControl::UpdateModel(WoWModel *m)
   // A small attempt at keeping the 'previous' animation that was selected when changing
   // the selected model via the model control.
   /*
-	// Alfred 2009.07.19 keep currentAnim may crash others if it doesn't have, we should save the animID, not currentAnim
-	if (g_selModel->currentAnim > 0)
-		useanim = g_selModel->currentAnim;
+  // Alfred 2009.07.19 keep currentAnim may crash others if it doesn't have, we should save the animID, not currentAnim
+  if (g_selModel->currentAnim > 0)
+    useanim = g_selModel->currentAnim;
    */
 
   /*
-	if (g_selModel->charModelDetails.isChar) { // only display the "secondary" animation list if its a character
-		animCList2->Select(useanim);
-		animCList2->Show(true);
-		lockAnims->Show(true);
-		loopList->Show(true);
-		btnAdd->Show(true);
-	} else {
-		animCList2->Show(false);
-		lockAnims->Show(true);
-		loopList->Show(false);
-		btnAdd->Show(false);
-	}
+  if (g_selModel->charModelDetails.isChar) { // only display the "secondary" animation list if its a character
+    animCList2->Select(useanim);
+    animCList2->Show(true);
+    lockAnims->Show(true);
+    loopList->Show(true);
+    btnAdd->Show(true);
+  } else {
+    animCList2->Show(false);
+    lockAnims->Show(true);
+    loopList->Show(false);
+    btnAdd->Show(false);
+  }
    */
 
   // Animation stuff
@@ -344,8 +344,10 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    frameSlider->SetRange(g_selModel->anims[useanim].timeStart, g_selModel->anims[useanim].timeEnd);
+    frameSlider->SetRange(g_selModel->anims[useanim].timeStart, g_selModel->anims[useanim].timeEnd - 1);
     frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
+    frameSlider->SetValue(g_selModel->anims[useanim].timeStart);
+    frameLabel->SetLabel(wxString("Frame: 0"));
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -517,8 +519,8 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       {
         grp.particleColInd = pci;
         QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-	      "WHERE ID = %1;").arg(pci);
+        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+        "WHERE ID = %1;").arg(pci);
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
@@ -657,8 +659,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       {
         grp.particleColInd = pci;
         QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-	      "WHERE ID = %1;").arg(pci);
+        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+        "WHERE ID = %1;").arg(pci);
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
@@ -706,8 +708,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       {
         grp.particleColInd = pci;
         QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-	      "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-	      "WHERE ID = %1;").arg(pci);
+        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+        "WHERE ID = %1;").arg(pci);
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
@@ -1002,103 +1004,103 @@ void AnimControl::OnButton(wxCommandEvent &event)
 
 void AnimControl::OnCheck(wxCommandEvent &event)
 {
-	if (event.GetId() == ID_OLDSTYLE)
-		bOldStyle = event.IsChecked();
-	else if (event.GetId() == ID_ANIM_LOCK) {
-		bLockAnims = event.IsChecked();
+  if (event.GetId() == ID_OLDSTYLE)
+    bOldStyle = event.IsChecked();
+  else if (event.GetId() == ID_ANIM_LOCK) {
+    bLockAnims = event.IsChecked();
 
-		if (bLockAnims == false) {
-			animCList2->Enable(true);
-			animCList2->Show(true);
-			lockText->Enable(true);
-			lockText->Show(true);
-			animCList3->Enable(true);
-			animCList3->Show(true);
-			speedMouthSlider->Show(true);
-			speedMouthLabel->Show(true);
-			//btnPauseMouth->Show(true);
-		} else {
-			if (g_selModel)
-				g_selModel->animManager->ClearSecondary();
-			animCList2->Enable(false);
-			animCList2->Show(false);
-			lockText->Enable(false);
-			lockText->Show(false);
-			animCList3->Enable(false);
-			animCList3->Show(false);
-			speedMouthSlider->Show(false);
-			speedMouthLabel->Show(false);
-			//btnPauseMouth->Show(false);
-		}
-	} else if  (event.GetId() == ID_ANIM_NEXT) {
-		bNextAnims = event.IsChecked();
-		if (bNextAnims && g_selModel) {
-			int NextAnimation = selectedAnim;
-			for(size_t i=1; i<4; i++) {
-				NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-				if (NextAnimation >= 0)
-					g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-				else
-					break;
-			}
-		} else {
-			g_selModel->animManager->SetCount(1);
-		}
-	}
+    if (bLockAnims == false) {
+      animCList2->Enable(true);
+      animCList2->Show(true);
+      lockText->Enable(true);
+      lockText->Show(true);
+      animCList3->Enable(true);
+      animCList3->Show(true);
+      speedMouthSlider->Show(true);
+      speedMouthLabel->Show(true);
+      //btnPauseMouth->Show(true);
+    } else {
+      if (g_selModel)
+        g_selModel->animManager->ClearSecondary();
+      animCList2->Enable(false);
+      animCList2->Show(false);
+      lockText->Enable(false);
+      lockText->Show(false);
+      animCList3->Enable(false);
+      animCList3->Show(false);
+      speedMouthSlider->Show(false);
+      speedMouthLabel->Show(false);
+      //btnPauseMouth->Show(false);
+    }
+  } else if  (event.GetId() == ID_ANIM_NEXT) {
+    bNextAnims = event.IsChecked();
+    if (bNextAnims && g_selModel) {
+      int NextAnimation = selectedAnim;
+      for(size_t i=1; i<4; i++) {
+        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        if (NextAnimation >= 0)
+          g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+        else
+          break;
+      }
+    } else {
+      g_selModel->animManager->SetCount(1);
+    }
+  }
 }
 
 void AnimControl::OnAnim(wxCommandEvent &event)
 {
-	if (event.GetId() == ID_ANIM) {
-		if (g_selModel) {
-			wxString val = animCList->GetValue();
-			int first = val.Find('[')+1;
-			int last = val.Find(']');
-			selectedAnim = wxAtoi(val.Mid(first, last-first));
-			
-			if (bLockAnims) {
-				//selectedAnim2 = -1;
-				animCList2->SetSelection(event.GetSelection());
-			}
+  if (event.GetId() == ID_ANIM) {
+    if (g_selModel) {
+      wxString val = animCList->GetValue();
+      int first = val.Find('[')+1;
+      int last = val.Find(']');
+      selectedAnim = wxAtoi(val.Mid(first, last-first));
+      
+      if (bLockAnims) {
+        //selectedAnim2 = -1;
+        animCList2->SetSelection(event.GetSelection());
+      }
 
-			if (bOldStyle == true) {
-				g_selModel->currentAnim = selectedAnim;
-				g_selModel->animManager->Stop();
-				g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
-				if (bNextAnims && g_selModel) {
-					int NextAnimation = selectedAnim;
-					for(size_t i=1; i<4; i++) {
-						NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-						if (NextAnimation >= 0)
-							g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-						else
-							break;
-					}
-				}
-				g_selModel->animManager->Play();
-				
-				frameSlider->SetRange(g_selModel->anims[selectedAnim].timeStart, g_selModel->anims[selectedAnim].timeEnd);
-				frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
-			}
-		}
+      if (bOldStyle == true) {
+        g_selModel->currentAnim = selectedAnim;
+        g_selModel->animManager->Stop();
+        g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+        if (bNextAnims && g_selModel) {
+          int NextAnimation = selectedAnim;
+          for(size_t i=1; i<4; i++) {
+            NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+            if (NextAnimation >= 0)
+              g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+            else
+              break;
+          }
+        }
+        g_selModel->animManager->Play();
+        
+        frameSlider->SetRange(g_selModel->anims[selectedAnim].timeStart, g_selModel->anims[selectedAnim].timeEnd);
+        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
+      }
+    }
 
-		//canvas->resetTime();
-	} else if (event.GetId() == ID_ANIM_SECONDARY) {
-		wxString val = animCList2->GetValue();
-		int first = val.Find('[')+1;
-		int last = val.Find(']');
-		selectedAnim2 = wxAtoi(val.Mid(first, last-first));
+    //canvas->resetTime();
+  } else if (event.GetId() == ID_ANIM_SECONDARY) {
+    wxString val = animCList2->GetValue();
+    int first = val.Find('[')+1;
+    int last = val.Find(']');
+    selectedAnim2 = wxAtoi(val.Mid(first, last-first));
 
-		g_selModel->animManager->SetSecondary(selectedAnim2);
-	} else if (event.GetId() == ID_ANIM_MOUTH) {
-		wxString val = animCList3->GetValue();
-		int first = val.Find('[')+1;
-		int last = val.Find(']');
-		selectedAnim3 = wxAtoi(val.Mid(first, last-first));
+    g_selModel->animManager->SetSecondary(selectedAnim2);
+  } else if (event.GetId() == ID_ANIM_MOUTH) {
+    wxString val = animCList3->GetValue();
+    int first = val.Find('[')+1;
+    int last = val.Find(']');
+    selectedAnim3 = wxAtoi(val.Mid(first, last-first));
 
-		//canvas->g_selModel->animManager->SetSecondary(selectedAnim2);
-		g_selModel->animManager->SetMouth(event.GetSelection());
-	}
+    //canvas->g_selModel->animManager->SetSecondary(selectedAnim2);
+    g_selModel->animManager->SetMouth(event.GetSelection());
+  }
 }
 
 void AnimControl::OnSkin(wxCommandEvent &event)
@@ -1138,48 +1140,53 @@ void AnimControl::OnBLPSkin(wxCommandEvent &event)
 
 void AnimControl::OnItemSet(wxCommandEvent &event)
 {
-	if (g_selWMO) {
-		int sel = event.GetSelection();
-		// -1 for no doodads
-		g_selWMO->showDoodadSet(sel - 1);
-	}
+  if (g_selWMO) {
+    int sel = event.GetSelection();
+    // -1 for no doodads
+    g_selWMO->showDoodadSet(sel - 1);
+  }
 }
 
 void AnimControl::OnSliderUpdate(wxCommandEvent &event)
 {
-	if (event.GetId() == ID_SPEED) {
-		SetAnimSpeed(speedSlider->GetValue() / 10.0f);
+  if (event.GetId() == ID_SPEED)
+  {
+    SetAnimSpeed(speedSlider->GetValue() / 10.0f);
 
-	} else if (event.GetId() == ID_SPEED_MOUTH) {
-		if (!g_selModel || !g_selModel->animManager)
-			return;
-		
-		float speed = speedMouthSlider->GetValue() / 10.0f;
-		g_selModel->animManager->SetMouthSpeed(speed);
-		speedMouthLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
+  }
+  else if (event.GetId() == ID_SPEED_MOUTH)
+  {
+    if (!g_selModel || !g_selModel->animManager)
+      return;
+    
+    float speed = speedMouthSlider->GetValue() / 10.0f;
+    g_selModel->animManager->SetMouthSpeed(speed);
+    speedMouthLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
 
-	} else if (event.GetId() == ID_FRAME)
-		SetAnimFrame(frameSlider->GetValue());
-
+  }
+  else if (event.GetId() == ID_FRAME)
+  {
+    SetAnimFrame(frameSlider->GetValue());
+  }
 }
 
 void AnimControl::OnLoop(wxCommandEvent &)
 {
-	if (bOldStyle == true) {
-		g_selModel->animManager->Stop();
-		g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
-		if (bNextAnims && g_selModel) {
-			int NextAnimation = selectedAnim;
-			for(size_t i=1; i<4; i++) {
-				NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
-				if (NextAnimation >= 0)
-					g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
-				else
-					break;
-			}
-		}
-		g_selModel->animManager->Play();
-	} 
+  if (bOldStyle == true) {
+    g_selModel->animManager->Stop();
+    g_selModel->animManager->SetAnim(0, selectedAnim, loopList->GetSelection());
+    if (bNextAnims && g_selModel) {
+      int NextAnimation = selectedAnim;
+      for(size_t i=1; i<4; i++) {
+        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        if (NextAnimation >= 0)
+          g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
+        else
+          break;
+      }
+    }
+    g_selModel->animManager->Play();
+  } 
 }
 
 void AnimControl::SetSkin(int num)
@@ -1289,23 +1296,23 @@ int AnimControl::AddSkin(TextureGroup grp)
 
 void AnimControl::SetAnimSpeed(float speed)
 {
-	if (!g_selModel || !g_selModel->animManager)
-		return;
+  if (!g_selModel || !g_selModel->animManager)
+    return;
 
-	g_selModel->animManager->SetSpeed(speed);
-	
-	speedLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
+  g_selModel->animManager->SetSpeed(speed);
+  
+  speedLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
 }
 
 void AnimControl::SetAnimFrame(size_t frame)
 {
-	if (!g_selModel || !g_selModel->animManager)
-		return;
+  if (!g_selModel || !g_selModel->animManager)
+    return;
 
-	g_selModel->animManager->SetFrame(frame);
-	
-	size_t frameNum = (frame - g_selModel->anims[g_selModel->currentAnim].timeStart);
+  g_selModel->animManager->SetFrame(frame);
+  
+  size_t frameNum = (frame - g_selModel->anims[g_selModel->currentAnim].timeStart);
 
-	frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frameNum));
-	frameSlider->SetValue((int)frame);
+  frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frameNum));
+  frameSlider->SetValue((int)frame);
 }

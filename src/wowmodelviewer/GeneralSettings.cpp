@@ -71,7 +71,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   top->Add(gbox, 0, wxALL, 5);
   wxStaticText *customFileMsg = new wxStaticText(this, wxID_ANY,
                                                  _("Custom files should be placed in a folder hierarchy that mirrors "
-                                                   "the game database (ie <Custom Folder>/Creature/Dragon/Dragon.m2)"),
+                                                   "the game database (e.g. <Custom Folder>/Creature/Dragon/Dragon.m2)"),
                                                  wxDefaultPosition, wxDefaultSize, 0);
   customFileMsg->Wrap(350);
 

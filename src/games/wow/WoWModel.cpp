@@ -726,6 +726,7 @@ void WoWModel::initAnimated(GameFile * f)
     }
 
     animManager = new AnimManager(anims);
+    animManager->model = this;
   }
 
   {
@@ -1494,6 +1495,13 @@ WoWItem * WoWModel::getItem(CharSlots slot)
   }
 
   return 0;
+}
+
+void WoWModel::update(int dt) // (float dt)
+{
+  if (animated)
+    animManager->Tick(dt);
+  updateEmitters((dt/1000.0f));
 }
 
 void WoWModel::UpdateTextureList(GameFile * tex, int special)
