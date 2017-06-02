@@ -136,8 +136,38 @@ void ParticleSystem::initTile(Vec2D *tc, int num)
 
 void ParticleSystem::update(float dt)
 {
+  Vec4D colVals[3];
+
+  if (replaceParticleColors && particleColID >= 11 && particleColID <= 13)
+  {
+    int id = particleColID - 11;
+    colVals[0] = particleColorReplacements[id][0];
+    colVals[1] = particleColorReplacements[id][1];
+    colVals[2] = particleColorReplacements[id][2];
+    // need to add the particle alphas:
+    colVals[0][3] = colors[0][3];
+    colVals[1][3] = colors[1][3];
+    colVals[2][3] = colors[2][3];
+  }
+  else
+  {
+    colVals[0] = colors[0];
+    colVals[1] = colors[1];
+    colVals[2] = colors[2];
+  }
   if (!dt)
+  {
+    // Animation is stopped, so no new/moved particles. Just update particle colour
+    // in case it changed (if someone selects a new skin while model stopped):
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it)
+    {
+      Particle &p = *it;
+      float rlife = p.life / p.maxlife;
+      p.color = lifeRamp<Vec4D>(rlife, mid, colVals[0], colVals[1], colVals[2]);
+    }
     return;
+  }
+
   dt = abs(dt);  // dt can be negative if animation slider is used, but that would break particle anims
 
   size_t l_manim = manim;
@@ -197,25 +227,6 @@ void ParticleSystem::update(float dt)
   }
 
   float mspeed = 1.0f;
-  Vec4D colVals[3];
-
-  if (replaceParticleColors && particleColID >= 11 && particleColID <= 13)
-  {
-    int id = particleColID - 11;
-    colVals[0] = particleColorReplacements[id][0];
-    colVals[1] = particleColorReplacements[id][1];
-    colVals[2] = particleColorReplacements[id][2];
-    // need to add the particle alphas:
-    colVals[0][3] = colors[0][3];
-    colVals[1][3] = colors[1][3];
-    colVals[2][3] = colors[2][3];
-  }
-  else
-  {
-    colVals[0] = colors[0];
-    colVals[1] = colors[1];
-    colVals[2] = colors[2];
-  }
 
   Matrix m = parent->mat;
 
