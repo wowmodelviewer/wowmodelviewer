@@ -1,9 +1,9 @@
 /*
- * CharDetailsFrame.cpp
- *
- *  Created on: 21 dec. 2014
- *      Author: Jeromnimo
- */
+* CharDetailsFrame.cpp
+*
+*  Created on: 21 dec. 2014
+*      Author: Jeromnimo
+*/
 
 #include "CharDetailsFrame.h"
 
@@ -65,14 +65,12 @@ void CharDetailsFrame::setModel(WoWModel * model)
   for (auto it = options.begin(), itEnd = options.end(); it != itEnd; ++it)
     charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, *it), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
 
-  dhMode->SetValue(false);
-
   RaceInfos infos;
   if (RaceInfos::getCurrent(model, infos))
   {
     if ((infos.raceid == RACE_NIGHTELF) ||
         (infos.raceid == RACE_BLOODELF))
-      dhMode->Enable(true);
+        dhMode->Enable(true);
     else
       dhMode->Enable(false);
   }
@@ -103,12 +101,17 @@ void CharDetailsFrame::onDHMode(wxCommandEvent &event)
       m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
     else if (m_model->name().contains("nightelffemale_hd"))
       m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+  
+    dhMode->SetValue(true);
   }
   else
   {
+    dhMode->SetValue(false);
     m_model->unmergeModel();
   }
 
+  m_model->cd.reset(m_model);
+  setModel(m_model);
   m_model->refresh();
 }
 

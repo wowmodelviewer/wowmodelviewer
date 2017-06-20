@@ -1,9 +1,9 @@
 ﻿/*
- * CharDetails.cpp
- *
- *  Created on: 26 oct. 2013
- *
- */
+* CharDetails.cpp
+*
+*  Created on: 26 oct. 2013
+*
+*/
 
 #include "CharDetails.h"
 
@@ -19,7 +19,7 @@
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
-CharDetails::CharDetails() :
+CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), isNPC(true), m_model(0)
 {
@@ -80,7 +80,7 @@ void CharDetails::save(QXmlStreamWriter & stream)
 void CharDetails::load(QString & f)
 {
   QFile file(f);
-  if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
     LOG_ERROR << "Fail to open" << f;
     return;
@@ -94,67 +94,67 @@ void CharDetails::load(QString & f)
   {
     if (reader.isStartElement())
     {
-      if(reader.name() == "skinColor")
+      if (reader.name() == "skinColor")
       {
         set(SKIN_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if(reader.name() == "faceType")
+      if (reader.name() == "faceType")
       {
         set(FACE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if(reader.name() == "hairColor")
+      if (reader.name() == "hairColor")
       {
         set(FACIAL_CUSTOMIZATION_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if(reader.name() == "hairStyle")
+      if (reader.name() == "hairStyle")
       {
         set(FACIAL_CUSTOMIZATION_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if(reader.name() == "facialHair")
+      if (reader.name() == "facialHair")
       {
         set(ADDITIONAL_FACIAL_CUSTOMIZATION, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if(reader.name() == "eyeGlowType")
+      if (reader.name() == "eyeGlowType")
       {
         eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
 
-      if(reader.name() == "showUnderwear")
+      if (reader.name() == "showUnderwear")
       {
         showUnderwear = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
 
-      if(reader.name() == "showEars")
+      if (reader.name() == "showEars")
       {
         showEars = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
 
-      if(reader.name() == "showHair")
+      if (reader.name() == "showHair")
       {
         showHair = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
 
-      if(reader.name() == "showFacialHair")
+      if (reader.name() == "showFacialHair")
       {
         showFacialHair = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
 
-      if(reader.name() == "showFeet")
+      if (reader.name() == "showFeet")
       {
         showFeet = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
@@ -195,10 +195,10 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
   std::vector<int> result;
 
   RaceInfos infos;
-  if(!RaceInfos::getCurrent(m_model, infos))
+  if (!RaceInfos::getCurrent(m_model, infos))
     return result;
 
-/*
+  /*
   LOG_INFO << __FUNCTION__;
   LOG_INFO << "----------------------------------------------";
   LOG_INFO << "infos.raceid = " << infos.raceid;
@@ -208,62 +208,62 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
   LOG_INFO << "cd.skinColor() = " << skinColor();
   LOG_INFO << "section = " << section;
   LOG_INFO << "----------------------------------------------";
-*/
+  */
 
   size_t type = section;
 
-  if(infos.isHD) // HD layout
-    type+=5;
+  if (infos.isHD) // HD layout
+    type += 5;
 
   QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
                           "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
                           "LEFT JOIN TextureFileData AS TFD2 ON TextureName2 = TFD2.ID "
                           "LEFT JOIN TextureFileData AS TFD3 ON TextureName3 = TFD3.ID ");
-  switch(section)
+  switch (section)
   {
     case SkinType:
     case UnderwearType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
-                       .arg(infos.raceid)
-                       .arg(infos.sexid)
-                       .arg(m_currentCustomization[SKIN_COLOR])
-                       .arg(type);
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(m_currentCustomization[SKIN_COLOR])
+        .arg(type);
       break;
     case FaceType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
-                       .arg(infos.raceid)
-                       .arg(infos.sexid)
-                       .arg(m_currentCustomization[SKIN_COLOR])
-                       .arg(m_currentCustomization[FACE])
-                       .arg(type);
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(m_currentCustomization[SKIN_COLOR])
+        .arg(m_currentCustomization[FACE])
+        .arg(type);
       break;
     case HairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-                       .arg(infos.raceid)
-                       .arg(infos.sexid)
-                       .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
-                       .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
-                       .arg(type);
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
+        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
+        .arg(type);
       break;
     case FacialHairType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-                       .arg(infos.raceid)
-                       .arg(infos.sexid)
-                       .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
-                       .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
-                       .arg(type);
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
+        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
+        .arg(type);
       break;
     default:
       query = "";
   }
 
-  if(query != "")
+  if (query != "")
   {
     sqlResult vals = GAMEDATABASE.sqlQuery(query);
-    if(vals.valid && !vals.values.empty())
+    if (vals.valid && !vals.values.empty())
     {
-      for(size_t i = 0; i < vals.values[0].size() ; i++)
-        if(!vals.values[0][i].isEmpty())
+      for (size_t i = 0; i < vals.values[0].size(); i++)
+        if (!vals.values[0][i].isEmpty())
           result.push_back(vals.values[0][i].toInt());
     }
     else
@@ -297,11 +297,11 @@ void CharDetails::fillCustomizationMap()
   // skin
   CustomizationParam skin;
   skin.name = "Skin";
-  
+
   QString query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
-                          .arg(infos.raceid)
-                          .arg(infos.sexid)
-                          .arg(SkinType + sectionOffset);
+    .arg(infos.raceid)
+    .arg(infos.sexid)
+    .arg(SkinType + sectionOffset);
 
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
 
@@ -351,9 +351,9 @@ void CharDetails::fillCustomizationMap()
   // starting from here, customization may differ based on database values
   // get customization names
   query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRaces WHERE ID = %2")
-                  .arg(infos.sexid + 1)
-                  .arg(infos.raceid);
-  
+    .arg(infos.sexid + 1)
+    .arg(infos.raceid);
+
   sqlResult names = GAMEDATABASE.sqlQuery(query);
 
   QString facialCustomizationBaseName;
@@ -363,12 +363,12 @@ void CharDetails::fillCustomizationMap()
   {
     facialCustomizationBaseName = names.values[0][0];
     facialCustomizationBaseName = facialCustomizationBaseName.at(0).toUpper() + facialCustomizationBaseName.mid(1).toLower();
-    if (facialCustomizationBaseName == "Normal") 
+    if (facialCustomizationBaseName == "Normal")
       facialCustomizationBaseName = "Hair";
 
     additionalCustomizationName = names.values[0][1];
     additionalCustomizationName = additionalCustomizationName.at(0).toUpper() + additionalCustomizationName.mid(1).toLower();
-    if (additionalCustomizationName == "Normal") 
+    if (additionalCustomizationName == "Normal")
       additionalCustomizationName = "Facial Hair";
   }
   else
@@ -378,9 +378,9 @@ void CharDetails::fillCustomizationMap()
 
   // facial style customization
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 AND SectionType = %3")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
-                  .arg(HairType + sectionOffset);
+    .arg(infos.raceid)
+    .arg(infos.sexid)
+    .arg(HairType + sectionOffset);
 
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
@@ -432,8 +432,8 @@ void CharDetails::fillCustomizationMap()
 
   // addtional facial customization
   query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid);
+    .arg(infos.raceid)
+    .arg(infos.sexid);
 
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
@@ -451,6 +451,77 @@ void CharDetails::fillCustomizationMap()
   }
 
   m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
+
+  // Tatoos
+  // skin
+  CustomizationParam tatoos;
+  tatoos.name = "Tatoo";
+
+  query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+    .arg(infos.raceid)
+    .arg(infos.sexid)
+    .arg(TatooType);
+
+  vals = GAMEDATABASE.sqlQuery(query);
+
+  if (vals.valid && (vals.values.size() > 1))
+  {
+    // harcoded for now (dh tatoos are 36 sequential values in CharSections table...)
+    // tatoo style = 0 to 6 (0 = no tatoo)
+
+    tatoos.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
+    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tatoos });
+
+    for (auto it = tatoos.possibleValues.begin(), itEnd = tatoos.possibleValues.end(); it != itEnd; ++it)
+    {
+      // tatoo color = 0 to 5 for each tatoo style
+      CustomizationParam tatooColor;
+      tatooColor.name = "Tatoo Color";
+      tatooColor.possibleValues = { 0, 1, 2, 3, 4, 5 };
+
+      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tatooColor });
+    }
+
+    m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
+  }
+
+  // horns => check geoset group #24
+  std::unordered_set<int> hornsGeoset;
+  for (auto it : m_model->geosets)
+  {
+    if ((it->id / 100) == 24)
+      hornsGeoset.insert(it->id);
+  }
+
+  if (hornsGeoset.size() > 0)
+  {
+    CustomizationParam horns;
+    horns.name = "Horns";
+
+    for (uint i = 0; i <= hornsGeoset.size(); i++)
+      horns.possibleValues.push_back(i);
+
+    m_customizationParamsMap.insert({ DH_HORN_STYLE, horns });
+  }
+
+  // blindfolds => check geoset group #25
+  std::unordered_set<int> blindfoldGeoset;
+  for (auto it : m_model->geosets)
+  {
+    if ((it->id / 100) == 25)
+      blindfoldGeoset.insert(it->id);
+  }
+
+  if (blindfoldGeoset.size() > 0)
+  {
+    CustomizationParam blindfold;
+    blindfold.name = "Blindfolds";
+
+    for (uint i = 0; i <= blindfoldGeoset.size(); i++)
+      blindfold.possibleValues.push_back(i);
+
+    m_customizationParamsMap.insert({ DH_BLINDFOLDS, blindfold });
+  }
 }
 
 CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
@@ -553,6 +624,21 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
+  auto it = m_customizationParamsMap.find(DH_TATTOO_STYLE);
+  if (it != m_customizationParamsMap.end())
+    result.push_back(DH_TATTOO_STYLE);
+
+  it = m_customizationParamsMap.find(DH_TATTOO_COLOR);
+  if (it != m_customizationParamsMap.end())
+    result.push_back(DH_TATTOO_COLOR);
+
+  it = m_customizationParamsMap.find(DH_HORN_STYLE);
+  if (it != m_customizationParamsMap.end())
+    result.push_back(DH_HORN_STYLE);
+
+  it = m_customizationParamsMap.find(DH_BLINDFOLDS);
+  if (it != m_customizationParamsMap.end())
+    result.push_back(DH_BLINDFOLDS);
+
   return result;
 }
-
