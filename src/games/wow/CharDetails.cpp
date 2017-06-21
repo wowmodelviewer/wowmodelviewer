@@ -613,7 +613,6 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
   if (!RaceInfos::getCurrent(m_model, infos))
     return result;
 
-
   LOG_INFO << __FUNCTION__ << infos.raceid << infos.sexid;
 
   result.push_back(SKIN_COLOR);
@@ -624,20 +623,16 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
-  auto it = m_customizationParamsMap.find(DH_TATTOO_STYLE);
-  if (it != m_customizationParamsMap.end())
+  if (m_customizationParamsMap.find(DH_TATTOO_STYLE) != m_customizationParamsMap.end())
     result.push_back(DH_TATTOO_STYLE);
 
-  it = m_customizationParamsMap.find(DH_TATTOO_COLOR);
-  if (it != m_customizationParamsMap.end())
+  if (m_customizationParamsMap.find(DH_TATTOO_COLOR) != m_customizationParamsMap.end())
     result.push_back(DH_TATTOO_COLOR);
 
-  it = m_customizationParamsMap.find(DH_HORN_STYLE);
-  if (it != m_customizationParamsMap.end())
+  if (m_customizationParamsMap.find(DH_HORN_STYLE) != m_customizationParamsMap.end())
     result.push_back(DH_HORN_STYLE);
 
-  it = m_customizationParamsMap.find(DH_BLINDFOLDS);
-  if (it != m_customizationParamsMap.end())
+  if (m_customizationParamsMap.find(DH_BLINDFOLDS) != m_customizationParamsMap.end())
     result.push_back(DH_BLINDFOLDS);
 
   return result;
