@@ -212,7 +212,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
 
   size_t type = section;
 
-  if (infos.isHD) // HD layout
+  if (infos.isHD && type != TatooType) // HD layout
     type += 5;
 
   QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
@@ -251,6 +251,13 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
         .arg(infos.sexid)
         .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
         .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
+        .arg(type);
+      break;
+    case TatooType:
+      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4)")
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(m_currentCustomization[DH_TATTOO_STYLE] * (m_customizationParamsMap[DH_TATTOO_COLOR].possibleValues.size() -1) + m_currentCustomization[DH_TATTOO_COLOR])
         .arg(type);
       break;
     default:

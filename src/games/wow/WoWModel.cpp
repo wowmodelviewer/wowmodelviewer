@@ -2048,7 +2048,15 @@ void WoWModel::refresh()
   }
 
   // DH customization
+  // tatoos
+  textures = cd.getTextureForSection(CharDetails::TatooType);
+  if (textures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_TORSO_UPPER, 2);
+
+  // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
+
+  // blindfolds
   cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::DH_BLINDFOLDS);
 
   //refresh equipment
