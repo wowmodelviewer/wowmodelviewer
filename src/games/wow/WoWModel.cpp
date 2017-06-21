@@ -2047,6 +2047,10 @@ void WoWModel::refresh()
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
   }
 
+  // DH customization
+  cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
+  cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::DH_BLINDFOLDS);
+
   //refresh equipment
 
   for (WoWModel::iterator it = begin();
