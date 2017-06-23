@@ -343,7 +343,7 @@ void ModelViewer::InitMenu()
   viewMenu->Append(ID_VIEW_ITEM, _("View Item"));
   viewMenu->AppendSeparator();
   viewMenu->Append(ID_SHOW_FILE_LIST, _("Show file list"));
-  viewMenu->Append(ID_SHOW_ANIM, _("Show animaton control"));
+  viewMenu->Append(ID_SHOW_ANIM, _("Show animation control"));
   viewMenu->Append(ID_SHOW_CHAR, _("Show character control"));
   viewMenu->Append(ID_SHOW_LIGHT, _("Show light control"));
   viewMenu->Append(ID_SHOW_MODEL, _("Show model control"));
