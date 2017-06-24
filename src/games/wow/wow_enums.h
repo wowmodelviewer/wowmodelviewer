@@ -127,6 +127,7 @@ enum CharRegions {
   CR_UNK8 = 9,
   CR_FACE_UPPER = 10,
   CR_FACE_LOWER = 11,
+  CR_DH_TATOOS = 13,
   NUM_REGIONS,
 
   CR_LEG_UPPER = CR_PELVIS_UPPER,

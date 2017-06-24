@@ -2051,7 +2051,7 @@ void WoWModel::refresh()
   // tatoos
   textures = cd.getTextureForSection(CharDetails::TatooType);
   if (textures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_TORSO_UPPER, 2);
+    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_DH_TATOOS, 1);
 
   // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
