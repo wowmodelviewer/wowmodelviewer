@@ -257,7 +257,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4)")
         .arg(infos.raceid)
         .arg(infos.sexid)
-        .arg(m_currentCustomization[DH_TATTOO_STYLE] * (m_customizationParamsMap[DH_TATTOO_COLOR].possibleValues.size() -1) + m_currentCustomization[DH_TATTOO_COLOR])
+        .arg((m_customizationParamsMap[DH_TATTOO_STYLE].possibleValues.size() - 1) * m_currentCustomization[DH_TATTOO_COLOR] + m_currentCustomization[DH_TATTOO_STYLE])
         .arg(type);
       break;
     default:
