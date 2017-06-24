@@ -1912,7 +1912,7 @@ void WoWModel::refresh()
   std::vector<int> textures = cd.getTextureForSection(CharDetails::SkinType);
 
   if (textures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_BASE, 0);
+    tex.setBaseImage(GAMEDIRECTORY.getFile(textures[0]));
 
   if (textures.size() > 1)
   {
@@ -1926,7 +1926,7 @@ void WoWModel::refresh()
   {
     textures = cd.getTextureForSection(CharDetails::UnderwearType);
     if (textures.size() > 0)
-      tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_PELVIS_UPPER, 1); // pants
+      tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_LEG_UPPER, 1); // pants
 
     if (textures.size() > 1)
       tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_TORSO_UPPER, 1); // top

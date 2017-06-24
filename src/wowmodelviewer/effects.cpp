@@ -106,9 +106,9 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 
 void EnchantsDialog::InitObjects()
 {
-	wxString slots[2] = {wxT("Right Hand"), wxT("Left Hand")};
+	wxString handSlots[2] = {wxT("Right Hand"), wxT("Left Hand")};
 
-	slot = new wxRadioBox(this, -1, wxT("Apply effects to:"), wxPoint(10,10), wxSize(180, 80), 2, slots, 4, wxRA_SPECIFY_ROWS, wxDefaultValidator, wxT("radioBox"));
+  slot = new wxRadioBox(this, -1, wxT("Apply effects to:"), wxPoint(10, 10), wxSize(180, 80), 2, handSlots, 4, wxRA_SPECIFY_ROWS, wxDefaultValidator, wxT("radioBox"));
 
 	text1 = new wxStaticText(this, -1, wxT("Enchantments:"), wxPoint(10, 110), wxDefaultSize);
 	effectsListbox = new wxListBox(this, -1, wxPoint(10,130), wxSize(180,160), choices, wxLB_SINGLE);

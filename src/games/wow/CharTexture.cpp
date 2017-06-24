@@ -11,14 +11,12 @@
 #include <map>
 #include <string>
 
-#include <QImage>
 #include <QPainter>
 
 #include "Game.h"
 #include "GameDatabase.h"
 #include "GameFile.h"
 #include "types.h"
-#include "wow_enums.h" // NUM_REGIONS
 
 #include "logger/Logger.h"
 
@@ -59,64 +57,28 @@ void CharTexture::compose(TextureID texID)
 
 	std::sort(m_components.begin(), m_components.end());
 
-	QImage destImage(layoutInfos.first.width,layoutInfos.first.height,QImage::Format_ARGB32_Premultiplied);
-#if DEBUG_TEXTURE >0
+  // burn base image
+  QImage * img = gameFileToQImage(baseImage);
+
+#if DEBUG_TEXTURE > 0
 	static int tmpidx = 0;
 #endif
-	for (std::vector<CharTextureComponent>::iterator it = m_components.begin(); it != m_components.end(); ++it)
-	{
-		CharTextureComponent &comp = *it;
-		const CharRegionCoords &coords = layoutInfos.second[comp.region];
-
-		TextureID temptex = texturemanager.add(comp.file);
-		Texture * tex = dynamic_cast<Texture*>(texturemanager.items[temptex]);
-
-		// Alfred 2009.07.03, tex width or height can't be zero
-		if (tex->w == 0 || tex->h == 0)
-		{
-			texturemanager.del(temptex);
-			continue;
-		}
-
-		unsigned char * tempbuf = (unsigned char*)malloc(tex->w*tex->h*4);
-
-		tex->getPixels(tempbuf, GL_BGRA_EXT);
-		QImage newImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32);
-		newImage = newImage.scaled(coords.width,coords.height,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-
+  for (auto it : m_components)
+  {
+    burnComponent(*img, it);
 #if DEBUG_TEXTURE > 1
-    QString name = QString("./tex%1.png").arg(tmpidx);
-    newImage.save(name);
+    img->save(QString("./ComposedTexture%1.png").arg(tmpidx++));
 #endif
-
-		QPoint destPos = QPoint(coords.xpos, coords.ypos);
-		QPainter painter(&destImage);
-		painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-		painter.drawImage(destPos, newImage);
-		painter.end();
-
-#if DEBUG_TEXTURE > 1
-		name = QString("./ComposedTexture%1.png").arg(tmpidx++);
-		destImage.save(name);
-#endif
-		free(tempbuf);
-		texturemanager.del(temptex);
-	}
-#if DEBUG_TEXTURE > 0
-	tmpidx += 100;
-#endif
-#if DEBUG_TEXTURE > 0
-  QString name = QString("./FinalTexture%1.png").arg(tmpidx++);
-  destImage.save(name);
-#endif
+  }
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layoutInfos.first.width, layoutInfos.first.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, destImage.bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layoutInfos.first.width, layoutInfos.first.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img->bits());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-}
 
+  delete img;
+}
 
 void CharTexture::initRegions()
 {
@@ -162,11 +124,70 @@ void CharTexture::initRegions()
       coords.width = regions.values[r][3].toInt();
       coords.height = regions.values[r][4].toInt();
       //LOG_INFO << regions.values[r][0].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
-      regionCoords[regions.values[r][0].toInt()+1] = coords;
+      regionCoords[regions.values[r][0].toInt()] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
     CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);
   }
 
+}
+
+void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct)
+{
+  std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
+
+  const CharRegionCoords &coords = layoutInfos.second[ct.region];
+
+  QImage * tmp = gameFileToQImage(ct.file);
+
+  if (!tmp)
+    return;
+
+  QImage newImage = tmp->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+
+#if DEBUG_TEXTURE > 1
+  int region = ct.region;
+  int x = coords.xpos;
+  int y = coords.ypos;
+  int width = coords.width;
+  int height = coords.height;
+  LOG_INFO << __FUNCTION__ << region << x << y << width << height;
+  newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
+#endif
+
+  QPoint destPos = QPoint(coords.xpos, coords.ypos);
+  QPainter painter(&destImage);
+  painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+  painter.drawImage(destPos, newImage);
+  painter.end();
+}
+
+void imageCleanUpHandler(void * ptr)
+{
+  free(ptr);
+}
+
+QImage * CharTexture::gameFileToQImage(GameFile * file)
+{
+  QImage * result = 0;
+  TextureID temptex = texturemanager.add(file);
+  Texture * tex = dynamic_cast<Texture*>(texturemanager.items[temptex]);
+
+  // Alfred 2009.07.03, tex width or height can't be zero
+  if (tex->w == 0 || tex->h == 0)
+  {
+    texturemanager.del(temptex);
+    return result;
+  }
+
+  unsigned char * tempbuf = (unsigned char*)malloc(tex->w*tex->h * 4);
+
+  tex->getPixels(tempbuf, GL_BGRA_EXT);
+  result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
+  
+  texturemanager.del(temptex);
+
+  return result;
 }
 

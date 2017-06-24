@@ -11,6 +11,8 @@
 #include <map>
 #include "video.h" // TextureID
 
+#include <QImage>
+
 class GameFile;
 
 struct CharRegionCoords {
@@ -50,6 +52,7 @@ class _CHARTEXTURE_API_ CharTexture
   : layoutSizeId(_layoutSizeId)
   {}
 
+    void setBaseImage(GameFile * img) { baseImage = img; }
     void addLayer(GameFile *, int region, int layer);
 
     void compose(TextureID texID);
@@ -59,7 +62,10 @@ class _CHARTEXTURE_API_ CharTexture
     static void initRegions();
 
   private:
+    void burnComponent(QImage & destImage, CharTextureComponent &);
+    static QImage * gameFileToQImage(GameFile * file);
     unsigned int layoutSizeId;
+    GameFile * baseImage;
     std::vector<CharTextureComponent> m_components;
     static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
 };
