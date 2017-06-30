@@ -122,7 +122,7 @@ set(wow7_3_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
 source_group("wow7.3" FILES ${wow7_3_files})
 
-set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files} ${wow7_2_files})
+set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files} ${wow7_3_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
