@@ -1,0 +1,187 @@
+﻿<?xml version="1.0"?>
+<database>
+  <!-- Character tables - BEGIN -->
+  <table name="CharacterFacialHairStyles">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="RaceID" pos="20" />
+    <field type="byte" name="SexID" pos="21" />
+    <field type="byte" name="VariationID" pos="22" />
+    <field type="uint" name="Geoset" arraySize="5" pos="0" />
+  </table>
+  <table name="CharComponentTextureLayouts">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Width" pos="0" />
+    <field type="uint" name="Height" pos="2" />
+  </table>
+  <table name="CharComponentTextureSections">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="LayoutID" pos="8" />
+    <field type="byte" name="Section" pos="9" />
+    <field type="uint" name="X" pos="0" />
+    <field type="uint" name="Y" pos="2" />
+    <field type="uint" name="Width" pos="4" />
+    <field type="uint" name="Height" pos="6" />
+  </table>
+  <table name="CharHairGeoSets">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="byte" name="RaceID" pos="4" />
+    <field type="byte" name="SexID" pos="5" />
+    <field type="byte" name="VariationID" pos="6" />
+    <field type="byte" name="VariationType" pos="7" />
+    <field type="byte" name="GeoSetID" pos="8" />
+    <field type="byte" name="GeoSetType" pos="9" />
+    <field type="byte" name="ShowScalp" pos="10" />
+    <field type="uint" name="ColorIndex" pos="11" />
+  </table>
+  <table name="CharSections">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="RaceID" pos="14" />
+    <field type="byte" name="SexID" pos="15" />
+    <field type="byte" name="SectionType" pos="16" />
+    <field type="uint" name="TextureName" arraySize="3" pos="0" />
+    <field type="uint" name="Flags" pos="12" />
+    <field type="byte" name="VariationIndex" pos="17" />
+    <field type="byte" name="ColorIndex" pos="18" />
+  </table>
+  <table name="ChrClasses">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="name" pos="12" />
+  </table>
+  <table name="ChrRaces">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="FacialHairCustomization" arraySize="2" pos="24" />
+    <field type="text" name="HairCustomization" pos="32" />
+    <field type="uint" name="MaleDisplayID" pos="74" />
+    <field type="uint" name="FemaleDisplayID" pos="76" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="89" />
+    <field type="text" name="ClientPrefix" pos="4" />
+    <field type="uint" name="HighResMaleDisplayId" pos="94" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="96" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="93" />
+  </table>
+  <!-- Character tables - END -->
+  
+  <!-- Creature tables - BEGIN -->
+  <table name="Creature">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="CreatureTypeID" pos="64" />
+    <field type="uint" name="DisplayID" arraySize="4" pos="16" />
+    <field type="text" name="Name" pos="48"/>
+  </table>
+  <table name="CreatureType">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="byte" name="Flags" pos="4" />
+  </table>
+  <table name="CreatureDisplayInfo">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ModelID" pos="8" />
+    <field type="uint" name="ExtendedDisplayInfoID" pos="15" />
+    <field type="uint" name="Texture" arraySize="3" pos="18"/>
+    <field type="uint" name="ParticleColorID" pos="15" commonData="yes" />
+  </table>
+  <table name="CreatureDisplayInfoExtra">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="Skin" pos="11" />
+    <field type="byte" name="Face" pos="12" />
+    <field type="byte" name="HairStyle" pos="13" />
+    <field type="byte" name="HairColor" pos="14" />
+    <field type="byte" name="FacialHair" pos="15" />
+  </table>
+  <table name="NpcModelItemSlotDisplayInfo">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="CreatureDisplayInfoExtraID" pos="0" createIndex="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="4" />
+    <field type="byte" name="ItemType" pos="8" />
+  </table>  
+  <table name="CreatureModelData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="FileID" pos="95" />
+  </table>
+  
+  <!-- Creature tables - END -->
+  
+  <!-- Item tables - BEGIN -->
+  <table name="Item">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="Class" pos="4" />
+    <field type="byte" name="SubClass" pos="5" />
+    <field type="byte" name="Type" pos="8" />
+    <field type="byte" name="Sheath" pos="9" />
+  </table>
+  <table name="ItemClass">
+    <field type="uint" name="col0" primary="yes" />
+    <field type="text" name="Name" pos="4" />
+    <field type="uint" name="ID" pos="8" createIndex="yes" />
+  </table>
+  <table name="ItemSubClass">
+    <field type="uint" name="col0" primary="yes" />
+    <field type="byte" name="ID" pos="10" />
+    <field type="byte" name="SubClassID" pos="11" />
+    <field type="text" name="Name" pos="0" />
+    <field type="text" name="VerboseName" pos="4" />
+  </table>
+  <table name="ItemSparse">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="Quality" pos="226" />
+    <field type="text" name="Name" pos="132" />
+  </table>
+  <table name="ItemAppearance">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="0" />
+  </table>
+  <table name="ItemModifiedAppearance">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ItemID" pos="0" />
+    <field type="uint" name="ItemAppearanceID" pos="4" />
+    <field type="byte" name="ItemLevel" pos="7" />
+  </table>
+  <table name="ItemDisplayInfo">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Model" arraySize="2" pos="0" />
+    <field type="uint" name="TextureItemID" arraySize="2" pos="4" />
+    <field type="byte" name="GeosetGroup" arraySize="3" pos="10" />
+    <field type="uint" name="ParticleColorID" pos="26"/>
+    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="20" />
+  </table>
+  <table name="ItemDisplayInfoMaterialRes">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="0" createIndex="yes" />
+    <field type="uint" name="TextureFileDataID" pos="4" />
+  </table>
+  <table name="HelmetGeosetVisData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int" name="HideGeoset" arraySize="9" pos="0" />
+  </table>
+  <!-- Item tables - END -->
+  
+  <!-- Misc tables - BEGIN -->
+  <table name="AnimationData">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="4" />
+  </table>
+  <table name="TextureFileData">
+    <field type="uint" name="TextureID" primary="yes" />
+    <field type="uint" name="ID" pos="0" createIndex="yes" />
+  </table>
+  <table name="ModelFileData">
+    <field type="uint" name="ModelID" primary="yes" />
+    <field type="uint" name="ID" pos="4" createIndex="yes" />
+  </table>
+  <table name="ParticleColor">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int" name="StartColor" arraySize="3"  pos="0" />
+    <field type="int" name="MidColor" arraySize="3"  pos="12" />
+    <field type="int" name="EndColor" arraySize="3"  pos="24" />
+  </table>
+  <table name="Mount">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="Name" pos="4" />
+  </table>
+  <table name="MountXDisplay">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="MountID" pos="0" />
+    <field type="uint" name="DisplayID" pos="2" />
+  </table>
+  <!-- Misc tables - END -->
+</database>

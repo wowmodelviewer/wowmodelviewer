@@ -118,7 +118,11 @@ set(wow7_2_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
 source_group("wow7.2" FILES ${wow7_2_files})
 
-set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files})
+set(wow7_3_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
+source_group("wow7.3" FILES ${wow7_3_files})
+
+set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files} ${wow7_2_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -163,6 +167,8 @@ set(GAMEFILES_WOW7_1 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
 set(GAMEFILES_WOW7_2 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
         		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
 
+set(GAMEFILES_WOW7_3 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
+        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
@@ -172,3 +178,4 @@ install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/plugi
 
 install(FILES ${GAMEFILES_WOW7_1} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.1)
 install(FILES ${GAMEFILES_WOW7_2} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.2)
+install(FILES ${GAMEFILES_WOW7_3} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.3)
