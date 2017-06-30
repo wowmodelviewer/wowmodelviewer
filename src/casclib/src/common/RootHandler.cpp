@@ -17,19 +17,19 @@
 
 int RootHandler_Insert(TRootHandler * pRootHandler, const char * szFileName, LPBYTE pbEncodingKey)
 {
-    if(pRootHandler == NULL || pRootHandler->Insert == NULL)
+    if(pRootHandler == NULL || pRootHandler->Insert == NULL || pbEncodingKey == NULL)
         return ERROR_NOT_SUPPORTED;
 
     return pRootHandler->Insert(pRootHandler, szFileName, pbEncodingKey);
 }
 
-LPBYTE RootHandler_Search(TRootHandler * pRootHandler, struct _TCascSearch * pSearch, PDWORD PtrFileSize, PDWORD PtrLocaleFlags)
+LPBYTE RootHandler_Search(TRootHandler * pRootHandler, struct _TCascSearch * pSearch, PDWORD PtrFileSize, PDWORD PtrLocaleFlags, PDWORD PtrFileDataId)
 {
     // Check if the root structure is valid at all
     if(pRootHandler == NULL)
         return NULL;
 
-    return pRootHandler->Search(pRootHandler, pSearch, PtrFileSize, PtrLocaleFlags);
+    return pRootHandler->Search(pRootHandler, pSearch, PtrFileSize, PtrLocaleFlags, PtrFileDataId);
 }
 
 void RootHandler_EndSearch(TRootHandler * pRootHandler, struct _TCascSearch * pSearch)
@@ -79,10 +79,10 @@ void RootHandler_Close(TRootHandler * pRootHandler)
 
 DWORD RootHandler_GetFileId(TRootHandler * pRootHandler, const char * szFileName)
 {
-  // Check if the root structure is valid at all
-  if (pRootHandler == NULL)
-    return NULL;
+    // Check if the root structure is valid at all
+    if(pRootHandler == NULL)
+        return 0;
 
-  return pRootHandler->GetFileId(pRootHandler, szFileName);
+    return pRootHandler->GetFileId(pRootHandler, szFileName);
 }
 
