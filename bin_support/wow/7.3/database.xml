@@ -56,7 +56,7 @@
     <field type="byte" name="CharComponentTexLayoutID" pos="93" />
     <field type="text" name="ClientPrefix" pos="12" />
     <field type="uint" name="HighResMaleDisplayId" pos="98" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="102" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="100" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="97" />
   </table>
   <!-- Character tables - END -->
