@@ -141,8 +141,8 @@
     <field type="uint" name="Model" arraySize="2" pos="0" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="4" />
     <field type="byte" name="GeosetGroup" arraySize="4" pos="10" />
-    <field type="uint" name="ParticleColorID" pos="34"/>
-    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="28" />
+    <field type="uint" name="ParticleColorID" pos="28"/>
+    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="22" />
   </table>
   <table name="ItemDisplayInfoMaterialRes">
     <field type="uint" name="ID" primary="yes" />
