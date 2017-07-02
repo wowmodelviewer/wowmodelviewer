@@ -49,15 +49,15 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="FacialHairCustomization" arraySize="2" pos="24" />
-    <field type="text" name="HairCustomization" pos="32" />
-    <field type="uint" name="MaleDisplayID" pos="74" />
-    <field type="uint" name="FemaleDisplayID" pos="76" />
-    <field type="byte" name="CharComponentTexLayoutID" pos="89" />
-    <field type="text" name="ClientPrefix" pos="4" />
-    <field type="uint" name="HighResMaleDisplayId" pos="94" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="96" />
-    <field type="byte" name="CharComponentTexLayoutHiResID" pos="93" />
+    <field type="text" name="FacialHairCustomization" arraySize="2" pos="32" />
+    <field type="text" name="HairCustomization" pos="40" />
+    <field type="uint" name="MaleDisplayID" pos="4" />
+    <field type="uint" name="FemaleDisplayID" pos="8" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="93" />
+    <field type="text" name="ClientPrefix" pos="12" />
+    <field type="uint" name="HighResMaleDisplayId" pos="98" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="102" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="97" />
   </table>
   <!-- Character tables - END -->
   
@@ -140,9 +140,9 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="Model" arraySize="2" pos="0" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="4" />
-    <field type="byte" name="GeosetGroup" arraySize="3" pos="10" />
-    <field type="uint" name="ParticleColorID" pos="26"/>
-    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="20" />
+    <field type="byte" name="GeosetGroup" arraySize="4" pos="10" />
+    <field type="uint" name="ParticleColorID" pos="34"/>
+    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="28" />
   </table>
   <table name="ItemDisplayInfoMaterialRes">
     <field type="uint" name="ID" primary="yes" />
