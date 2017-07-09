@@ -106,14 +106,6 @@ set(RES_FILES "wmv.rc")
 set(common_files wowmodelviewer.json
 				 $ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi)
 
-
-set(wow6_files $ENV{WMV_BASE_PATH}/bin_support/wow6.xml)
-source_group("wow6" FILES ${wow6_files})
-
-set(wow7_1_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml)
-source_group("wow7.1" FILES ${wow7_1_files})
-
 set(wow7_2_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
 source_group("wow7.2" FILES ${wow7_2_files})
@@ -122,7 +114,7 @@ set(wow7_3_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
 source_group("wow7.3" FILES ${wow7_3_files})
 
-set(useful_files ${common_files} ${wow6_files} ${wow7_1_files} ${wow7_2_files} ${wow7_3_files})
+set(useful_files ${common_files} ${wow7_2_files} ${wow7_3_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -161,9 +153,6 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
-set(GAMEFILES_WOW7_1 $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/listfile.txt
-        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.1/database.xml)
-
 set(GAMEFILES_WOW7_2 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
         		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
 
@@ -176,6 +165,5 @@ install(FILES ${files} DESTINATION $ENV{WMV_BASE_PATH}/bin)
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION $ENV{WMV_BASE_PATH}/bin/plugins/imageformats)
 
-install(FILES ${GAMEFILES_WOW7_1} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.1)
 install(FILES ${GAMEFILES_WOW7_2} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.2)
 install(FILES ${GAMEFILES_WOW7_3} DESTINATION $ENV{WMV_BASE_PATH}/bin/games/wow/7.3)
