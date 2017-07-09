@@ -2,6 +2,8 @@
 
 #include "logger/Logger.h"
 
+#include "Game.h" // GAMEDIRECTORY Singleton
+
 #include <sstream>
 
 #include <bitset>
@@ -64,10 +66,15 @@ bool WDB6File::doSpecializedOpen()
       std::map<uint32, uint32> values;
 
       uint32 size = 4;
-      if (type == 1)
-        size = 2;
-      else if (type == 2)
-        size = 1;
+
+      // starting from 7.3 version, data in common data is stored in 4 bytes, not dynamic size anymore
+      if (!GAMEDIRECTORY.version().contains("7.3"))
+      {
+        if (type == 1)
+          size = 2;
+        else if (type == 2)
+          size = 1;
+      }
 
       for (uint i = 0; i < nbrecords; i++)
       {
