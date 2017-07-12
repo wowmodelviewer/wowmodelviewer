@@ -69,6 +69,8 @@ public:
     }
     return (trans < m.trans);
   }
+
+  static const uint16 INVALID_TEX = 50000;
 };
 
 

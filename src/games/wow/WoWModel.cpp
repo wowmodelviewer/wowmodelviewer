@@ -1753,13 +1753,25 @@ void WoWModel::mergeModel(QString & name)
     ++i;
   }
 
+  // retrieve tex id associated to model hands (needed for DH)
+  uint16 handTex = ModelRenderPass::INVALID_TEX;
+  for (auto it : passes)
+  {
+    if (it->geoset->id / 100 == 23)
+      handTex = it->tex;
+  }
+
   for (auto it : m->passes)
   {
     ModelRenderPass * p = new ModelRenderPass(*it);
     p->model = this;
     p->geoIndex += nbGeosets;
     p->geoset = geosets[p->geoIndex];
-    p->tex += TEXTURE_MAX;
+    if (p->geoset->id / 100 != 23) // don't copy texture for hands
+      p->tex += TEXTURE_MAX;
+    else
+      p->tex = handTex; // use regular model texture instead
+
     passes.push_back(p);
   }
 

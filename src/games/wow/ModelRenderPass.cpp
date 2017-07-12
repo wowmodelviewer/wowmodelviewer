@@ -15,8 +15,6 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-#define INVALID_TEX 50000
-
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
   unlit(false), noZWrite(false), billboard(false),
