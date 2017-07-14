@@ -21,7 +21,8 @@
 
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
-showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), isNPC(true), m_model(0)
+showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
+isNPC(true), m_isDemonHunter(false), m_model(0)
 {
 
 }
@@ -74,6 +75,26 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeAttribute("value", QString::number(showFeet));
   stream.writeEndElement();
 
+  stream.writeStartElement("isDemonHunter");
+  stream.writeAttribute("value", QString::number(m_isDemonHunter));
+  stream.writeEndElement();
+
+  stream.writeStartElement("DHTatooStyle");
+  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_STYLE]));
+  stream.writeEndElement();
+
+  stream.writeStartElement("DHTatooColor");
+  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_COLOR]));
+  stream.writeEndElement();
+
+  stream.writeStartElement("DHHornStyle");
+  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_HORN_STYLE]));
+  stream.writeEndElement();
+
+  stream.writeStartElement("DHBlindFolds");
+  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_BLINDFOLDS]));
+  stream.writeEndElement();
+
   stream.writeEndElement(); // CharDetails
 }
 
@@ -90,7 +111,7 @@ void CharDetails::load(QString & f)
   reader.setDevice(&file);
 
   int nbValuesRead = 0;
-  while (!reader.atEnd() && nbValuesRead != 11)
+  while (!reader.atEnd() && nbValuesRead != 16)
   {
     if (reader.isStartElement())
     {
@@ -159,6 +180,38 @@ void CharDetails::load(QString & f)
         showFeet = reader.attributes().value("value").toString().toUInt();
         nbValuesRead++;
       }
+
+      if (reader.name() == "isDemonHunter")
+      {
+        LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
+        setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
+        nbValuesRead++;
+      }
+
+      if (reader.name() == "DHTatooStyle")
+      {
+        set(DH_TATTOO_STYLE, reader.attributes().value("value").toString().toUInt());
+        nbValuesRead++;
+      }
+
+      if (reader.name() == "DHTatooColor")
+      {
+        set(DH_TATTOO_COLOR, reader.attributes().value("value").toString().toUInt());
+        nbValuesRead++;
+      }
+
+      if (reader.name() == "DHHornStyle")
+      {
+        set(DH_HORN_STYLE, reader.attributes().value("value").toString().toUInt());
+        nbValuesRead++;
+      }
+
+      if (reader.name() == "DHBlindFolds")
+      {
+        set(DH_BLINDFOLDS, reader.attributes().value("value").toString().toUInt());
+        nbValuesRead++;
+      }
+
     }
     reader.readNext();
   }
@@ -186,6 +239,8 @@ void CharDetails::reset(WoWModel * model)
   showFeet = false;
 
   isNPC = false;
+
+  m_isDemonHunter = false;
 
   fillCustomizationMap();
 }
@@ -643,4 +698,31 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(DH_BLINDFOLDS);
 
   return result;
+}
+
+void CharDetails::setDemonHunterMode(bool val)
+{
+  if (val != m_isDemonHunter)
+  {
+    m_isDemonHunter = val;
+    if (m_isDemonHunter)
+    {
+      if (m_model->name().contains("bloodelfmale_hd"))
+        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+      else if (m_model->name().contains("bloodelffemale_hd"))
+        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+      else if (m_model->name().contains("nightelfmale_hd"))
+        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+      else if (m_model->name().contains("nightelffemale_hd"))
+        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+    }
+    else
+    {
+      m_model->unmergeModel();
+    }
+
+    fillCustomizationMap();
+    CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED);
+    notify(event);
+  }
 }

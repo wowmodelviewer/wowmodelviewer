@@ -32,6 +32,8 @@ class CharDetailsCustomizationSpin : public wxWindow, public Observer
     void onSpin(wxSpinEvent &event);
     virtual void onEvent(Event *);
 
+    void refresh();
+
     CharDetails::CustomizationType m_type;
     std::vector<int> m_values;
     CharDetails & m_details;

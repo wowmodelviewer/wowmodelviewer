@@ -13,6 +13,7 @@
 
 #include "charcontrol.h"
 #include "CharDetailsCustomizationSpin.h"
+#include "CharDetailsEvent.h"
 #include "enums.h"
 #include "globalvars.h"
 #include "WoWModel.h"
@@ -57,6 +58,7 @@ void CharDetailsFrame::setModel(WoWModel * model)
     return;
 
   m_model = model;
+  m_model->cd.attach(this);
 
   charCustomizationGS->Clear(true);
 
@@ -75,6 +77,8 @@ void CharDetailsFrame::setModel(WoWModel * model)
       dhMode->Enable(false);
   }
 
+  dhMode->SetValue(model->cd.isDemonHunter());
+
   SetAutoLayout(true);
   GetSizer()->SetSizeHints(this);
   Layout();
@@ -92,28 +96,23 @@ void CharDetailsFrame::onDHMode(wxCommandEvent &event)
     return;
 
   if (event.IsChecked())
-  {
-    if (m_model->name().contains("bloodelfmale_hd"))
-      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
-    else if (m_model->name().contains("bloodelffemale_hd"))
-      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
-    else if (m_model->name().contains("nightelfmale_hd"))
-      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
-    else if (m_model->name().contains("nightelffemale_hd"))
-      m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
-  
-    dhMode->SetValue(true);
-  }
+    m_model->cd.setDemonHunterMode(true);
   else
-  {
-    dhMode->SetValue(false);
-    m_model->unmergeModel();
-  }
+    m_model->cd.setDemonHunterMode(false);
 
-  m_model->cd.reset(m_model);
   setModel(m_model);
   m_model->refresh();
 }
+
+void CharDetailsFrame::onEvent(Event * event)
+{
+  if (event->type() == CharDetailsEvent::DH_MODE_CHANGED)
+  {
+    dhMode->SetValue(m_model->cd.isDemonHunter());
+    setModel(m_model);
+  }
+}
+
 
 void CharDetailsFrame::randomiseChar()
 {
@@ -126,4 +125,12 @@ void CharDetailsFrame::randomiseChar()
   m_model->cd.setRandomValue(CharDetails::FACIAL_CUSTOMIZATION_STYLE);
   m_model->cd.setRandomValue(CharDetails::FACIAL_CUSTOMIZATION_COLOR);
   m_model->cd.setRandomValue(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION);
+
+  if (m_model->cd.isDemonHunter())
+  {
+    m_model->cd.setRandomValue(CharDetails::DH_TATTOO_STYLE);
+    m_model->cd.setRandomValue(CharDetails::DH_TATTOO_COLOR);
+    m_model->cd.setRandomValue(CharDetails::DH_HORN_STYLE);
+    m_model->cd.setRandomValue(CharDetails::DH_BLINDFOLDS);
+  }
 }

@@ -40,6 +40,9 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);
+
+  refresh();
+
   Layout();
 }
 
@@ -53,7 +56,11 @@ void CharDetailsCustomizationSpin::onEvent(Event *)
 {
   // update params for dynamically changing customization stuff (ie face type depends on skin color)
   m_params = m_details.getParams(m_type);
+  refresh();
+}
 
+void  CharDetailsCustomizationSpin::refresh()
+{
   if (m_text)
   {
     uint pos = 0;

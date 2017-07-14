@@ -17,10 +17,11 @@ class wxSpinButton;
 class wxSpinEvent;
 class wxStaticText;
 
-
 #include "CharDetails.h"
 
-class CharDetailsFrame : public wxWindow
+#include "metaclasses/Observer.h"
+
+class CharDetailsFrame : public wxWindow, public Observer
 {
 public:
   CharDetailsFrame(wxWindow* parent);
@@ -28,6 +29,7 @@ public:
   void randomiseChar();
   void setModel(WoWModel * model);
 
+  virtual void onEvent(Event *);
 
 protected:
 

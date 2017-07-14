@@ -101,6 +101,9 @@ public:
 
   std::vector<CustomizationType> getCustomizationOptions() const;
 
+  void setDemonHunterMode(bool);
+  bool isDemonHunter() const { return m_isDemonHunter; }
+
 private:
   WoWModel * m_model;
 
@@ -111,6 +114,8 @@ private:
 
 
   std::map<CustomizationType, uint> m_currentCustomization;
+
+  bool m_isDemonHunter;
 };
 
 
