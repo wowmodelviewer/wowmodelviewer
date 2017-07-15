@@ -105,9 +105,25 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     if (app[wxT("customDisplayOptions")].Size() > 0)
     {
       result->isDemonHunter = true;
-      result->DHTatoo = app[wxT("customDisplayOptions")][0].AsInt();
       result->DHHorns = app[wxT("customDisplayOptions")][1].AsInt();
       result->DHBlindfolds = app[wxT("customDisplayOptions")][2].AsInt();
+
+      int tatoo = app[wxT("customDisplayOptions")][0].AsInt();
+
+      if (tatoo != 0)
+      {
+        int tatooStyle = tatoo % 6;
+        int tatooColor = tatoo / 6;
+
+        if (tatooStyle == 0)
+        {
+          tatooStyle = 6;
+          tatooColor--;
+        }
+
+        result->DHTatooStyle = tatooStyle;
+        result->DHTatooColor = tatooColor;
+      }    
     }
 
     // Gather Items

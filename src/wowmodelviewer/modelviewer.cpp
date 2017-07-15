@@ -2848,6 +2848,8 @@ void ModelViewer::ImportArmoury(wxString strURL)
       g_charControl->model->cd.setDemonHunterMode(true);
       g_charControl->model->cd.set(CharDetails::DH_HORN_STYLE, result->DHHorns);
       g_charControl->model->cd.set(CharDetails::DH_BLINDFOLDS, result->DHBlindfolds);
+      g_charControl->model->cd.set(CharDetails::DH_TATTOO_STYLE, result->DHTatooStyle);
+      g_charControl->model->cd.set(CharDetails::DH_TATTOO_COLOR, result->DHTatooColor);
     }
 
     if (result->customTabard)

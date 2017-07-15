@@ -65,7 +65,7 @@
 CharInfos::CharInfos()
 : valid(false), customTabard(false), raceId(0), gender(""), hasTransmogGear(false), skinColor(0),
   faceType(0), hairColor(0), hairStyle(0), facialHair(0), eyeGlowType(0),
-  isDemonHunter(false), DHTatoo(0), DHHorns(0), DHBlindfolds(0),
+  isDemonHunter(false), DHTatooStyle(0), DHTatooColor(0), DHHorns(0), DHBlindfolds(0),
   tabardIcon(-1), IconColor(-1), tabardBorder(-1), BorderColor(-1), Background(-1)
 {
 }
