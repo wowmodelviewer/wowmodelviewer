@@ -73,16 +73,21 @@ class _CHARINFOS_API_ CharInfos
     bool valid;
     bool customTabard;
 
-    size_t raceId;
+    unsigned int raceId;
     std::string gender;
     bool hasTransmogGear;
-    size_t skinColor;
-    size_t faceType;
-    size_t hairColor;
-    size_t hairStyle;
-    size_t facialHair;
+    unsigned int skinColor;
+    unsigned int faceType;
+    unsigned int hairColor;
+    unsigned int hairStyle;
+    unsigned int facialHair;
 
-    size_t eyeGlowType;
+    unsigned int eyeGlowType;
+
+    bool isDemonHunter;
+    unsigned int DHTatoo;
+    unsigned int DHHorns;
+    unsigned int DHBlindfolds;
 
     int tabardIcon;
     int IconColor;

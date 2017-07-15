@@ -2842,6 +2842,14 @@ void ModelViewer::ImportArmoury(wxString strURL)
     g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, result->facialHair);
     g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
 
+    // deal with Demon hunter stuff
+    if (result->isDemonHunter == true)
+    {
+      g_charControl->model->cd.setDemonHunterMode(true);
+      g_charControl->model->cd.set(CharDetails::DH_HORN_STYLE, result->DHHorns);
+      g_charControl->model->cd.set(CharDetails::DH_BLINDFOLDS, result->DHBlindfolds);
+    }
+
     if (result->customTabard)
     {
       g_charControl->model->td.showCustom = true;

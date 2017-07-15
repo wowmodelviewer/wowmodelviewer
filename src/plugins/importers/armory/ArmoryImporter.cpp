@@ -101,6 +101,15 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
     result->hairStyle = app[wxT("hairVariation")].AsInt();
     result->facialHair = app[wxT("featureVariation")].AsInt();
 
+    // Gather Demon Hunter options if present
+    if (app[wxT("customDisplayOptions")].Size() > 0)
+    {
+      result->isDemonHunter = true;
+      result->DHTatoo = app[wxT("customDisplayOptions")][0].AsInt();
+      result->DHHorns = app[wxT("customDisplayOptions")][1].AsInt();
+      result->DHBlindfolds = app[wxT("customDisplayOptions")][2].AsInt();
+    }
+
     // Gather Items
     result->hasTransmogGear = false;
     wxJSONValue items = root[wxT("items")];
@@ -345,7 +354,12 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
 						"hairColor":4,
 						"featureVariation":1,
 						"showHelm":true,
-						"showCloak":true
+						"showCloak":true,
+            "customDisplayOptions":[
+            33,
+            0,
+            1
+            ]
 					}
 				}
 
