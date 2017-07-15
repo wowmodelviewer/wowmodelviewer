@@ -428,13 +428,6 @@ void WoWModel::initCommon(GameFile * f)
   modelname = tempname.toStdString();
   QStringList list = tempname.split("\\");
   setName(list[list.size() - 1].replace(".m2", ""));
-  if (header.nameOfs != 304 && header.nameOfs != 320)
-  {
-    LOG_ERROR << "Invalid model nameOfs=" << header.nameOfs << "/" << sizeof(ModelHeader) << "! May be corrupted.";
-    ok = false;
-    f->close();
-    return;
-  }
 
   // Error check
   // 10 1 0 0 = WoW 5.0 models (as of 15464)
