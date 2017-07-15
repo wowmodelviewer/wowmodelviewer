@@ -2220,3 +2220,26 @@ void WoWModel::refresh()
     }
   }
 }
+
+QString WoWModel::getNameForTex(uint16 tex)
+{
+  QString result = "";
+
+  uint texid = 0;
+
+  if (specialTextures[tex] == TEXTURE_BODY)
+  {
+    result = "Body.blp";
+  }
+  else
+  {
+    if (specialTextures[tex] == -1)
+      texid = textures[tex];
+    else
+      texid = replaceTextures[specialTextures[tex]];
+  
+    result = texturemanager.get(texid);
+  }
+
+  return result;
+}

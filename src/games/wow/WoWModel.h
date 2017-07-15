@@ -7,6 +7,8 @@
 //#include <stdlib.h>
 //#include <crtdbg.h>
 
+#include <QString>
+
 // Our files
 #include "Model.h"
 #include "animated.h"
@@ -237,6 +239,8 @@ public:
   void unmergeModel();
 
   void refresh();
+
+  QString getNameForTex(uint16 tex);
 
 };
 
