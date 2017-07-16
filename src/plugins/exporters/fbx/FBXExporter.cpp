@@ -218,7 +218,7 @@ void FBXExporter::createMesh()
   m_p_meshNode = FbxNode::Create(m_p_manager, m_p_model->name().toStdString().c_str());
 
   // Create mesh.
-  size_t num_of_vertices = m_p_model->header.nVertices;
+  size_t num_of_vertices = m_p_model->origVertices.size();
   FbxMesh* mesh = FbxMesh::Create(m_p_manager, m_p_model->name().toStdString().c_str());
   mesh->InitControlPoints((int)num_of_vertices);
   FbxVector4* vertices = mesh->GetControlPoints();
@@ -341,7 +341,7 @@ void FBXExporter::createSkeleton()
   }
 
   // filter out bones without any vertex attached
-  size_t num_of_vertices = m_p_model->header.nVertices;
+  size_t num_of_vertices = m_p_model->origVertices.size();
   std::vector<bool> has_vertex;
   has_vertex.resize(num_of_bones);
 
@@ -433,7 +433,7 @@ void FBXExporter::linkMeshAndSkeleton()
   }
 
   // define control points
-  size_t num_of_vertices = m_p_model->header.nVertices;
+  size_t num_of_vertices = m_p_model->origVertices.size();
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex& vertex = m_p_model->origVertices[i];
@@ -631,7 +631,7 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      QString tex = m_p_model->TextureList[pass->tex]->fullname();
+      QString tex = m_p_model->getNameForTex(pass->tex);
 
       QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
       tex_name = tex_name.replace(".blp", ".png");
