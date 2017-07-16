@@ -225,7 +225,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     {
       for (size_t k=0, b=p->geoset->istart; k<p->geoset->icount; k++,b++)
       {
-        uint16 a = model->indices[b];
+        uint32 a = model->indices[b];
         Vec3D vert;
         if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
         {
@@ -268,7 +268,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     {
       for (size_t k=0, b=p->geoset->istart; k<p->geoset->icount; k++,b++)
       {
-        uint16 a = model->indices[b];
+        uint32 a = model->indices[b];
         Vec2D tc =  model->origVertices[a].texcoords;
         QString val;
         val.sprintf("vt %.06f %.06f", tc.x, 1-tc.y);
