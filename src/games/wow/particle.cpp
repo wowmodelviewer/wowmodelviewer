@@ -5,8 +5,11 @@
 #include "GlobalSettings.h"
 #include "logger/Logger.h"
 
+
+
 #define MAX_PARTICLES 10000
 
+bool ParticleSystem::useDoNotTrail = false;
 
 template<class T>
 T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
@@ -21,7 +24,10 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
 {
   flags = mta.flags;
   multitexture = flags & MODELPARTICLE_FLAGS_MULTITEXTURE;
-  doNotTrail = flags & MODELPARTICLE_FLAGS_DONOTTRAIL;
+  if (ParticleSystem::useDoNotTrail)
+    doNotTrail = flags & MODELPARTICLE_FLAGS_DONOTTRAIL;
+  else
+    doNotTrail = false;
   speed.init (mta.EmissionSpeed, f, globals);
   variation.init (mta.SpeedVariation, f, globals);
   spread.init (mta.VerticalRange, f, globals);

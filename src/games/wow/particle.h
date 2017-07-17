@@ -1,6 +1,16 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
+#ifdef _WIN32
+#    ifdef BUILDING_WOW_DLL
+#        define _PARTICLE_API_ __declspec(dllexport)
+#    else
+#        define _PARTICLE_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _PARTICLE_API_
+#endif
+
 class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
@@ -52,7 +62,7 @@ struct TexCoordSet
   Vec2D tc[4];
 };
 
-class ParticleSystem
+class _PARTICLE_API_ ParticleSystem
 {
   float mid, slowdown, rotation;
   Vec3D pos, tpos;
@@ -150,6 +160,13 @@ public:
     out << "    <tofs>" << v.tofs << "</tofs>" << std::endl;
     return out;
   }
+
+  static void useDoNotTrailInfo()
+  {
+    ParticleSystem::useDoNotTrail = true;
+  }
+
+  static bool useDoNotTrail;
 };
 
 

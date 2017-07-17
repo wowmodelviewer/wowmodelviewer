@@ -369,6 +369,8 @@ void WowModelViewApp::LoadSettings()
   imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 
   useNewCamera = config.value("Unofficial/UseNewCamera", false).toBool();
+  if (config.value("Unofficial/UseDoNotTrailInfo", false).toBool() == true)
+    ParticleSystem::useDoNotTrailInfo();
 }
 
 void WowModelViewApp::SaveSettings()
