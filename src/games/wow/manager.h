@@ -10,6 +10,8 @@
 #include "GameFile.h"
 #include "OpenGLHeaders.h"
 
+#include "logger/Logger.h"
+
 // base class for manager objects
 
 #ifdef _WIN32
@@ -24,24 +26,25 @@
 
 class _MANAGEDITEM_API_ ManagedItem
 {
-	int refcount;
+	int m_refcount;
 	QString m_itemName;
 public:
-	ManagedItem(QString n): refcount(0), m_itemName(n) { }
+  ManagedItem(QString n): m_refcount(0), m_itemName(n) {}
 	virtual ~ManagedItem() {}
 
 	void addref()
 	{
-		++refcount;
+    ++m_refcount;
 	}
 
 	bool delref()
 	{
-		return --refcount==0;
+    return --m_refcount == 0;
 	}
 	
 	void setItemName(QString name) { m_itemName = name; }
-	QString itemName() { return m_itemName; }
+  QString itemName() { return m_itemName; }
+  int refCount() { return m_refcount; }
 };
 
 
@@ -132,6 +135,12 @@ public:
 		names.clear();
 		items.clear();
 	}
+
+  void dump()
+  {
+    for (auto it : items)
+      LOG_INFO << it.second->itemName() << it.second->refCount();
+  }
 
 protected:
 	void do_add(QString name, IDTYPE id, ManagedItem* item)
