@@ -43,6 +43,9 @@ class ModelViewer: public wxFrame
     DECLARE_CLASS(ModelViewer)
     DECLARE_EVENT_TABLE()
 
+    void OnStatusBarRefreshTimer(wxTimerEvent& event);
+    wxTimer timer;
+
 public:
 	// Constructor + Deconstructor
 	ModelViewer();

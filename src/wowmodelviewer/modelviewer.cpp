@@ -38,6 +38,10 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+
+#include <Psapi.h>
+#pragma comment(lib, "psapi.lib") // Added to support GetProcessMemoryInfo()
+
 // default colour values
 const static float def_ambience[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 const static float def_diffuse[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -180,6 +184,9 @@ EVT_MENU(ID_LOAD_TEMP4, ModelViewer::OnToggleCommand)
 // Export
 EVT_MENU(ID_EXPORT_MODEL, ModelViewer::OnExport)
 
+// refesh status bar timer
+EVT_TIMER(ID_STATUS_REFRESH_TIMER, ModelViewer::OnStatusBarRefreshTimer)
+
 END_EVENT_TABLE()
 
 ModelViewer::ModelViewer()
@@ -222,7 +229,8 @@ ModelViewer::ModelViewer()
 
   //wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
   // create our main frame
-  if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) {
+  if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) 
+  {
     SetIcon(wxICON(IDI_ICON1));
     SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 #ifndef	_LINUX // buggy
@@ -271,8 +279,12 @@ ModelViewer::ModelViewer()
     video.InitGL();
 
     SetStatusText(wxEmptyString);
+
+    timer.SetOwner(this, ID_STATUS_REFRESH_TIMER);
+    timer.Start(2000);
   }
-  else {
+  else 
+  {
     LOG_FATAL << "Unable to create the main window for the application.";
     Close(true);
   }
@@ -283,9 +295,9 @@ void ModelViewer::InitMenu()
   LOG_INFO << "Initializing File Menu...";
 
   if (GetStatusBar() == NULL){
-    CreateStatusBar(4);
-    int widths[] = { -1, 100, 50, 125 };
-    SetStatusWidths(4, widths);
+    CreateStatusBar(5);
+    int widths[] = { -1, 100, 50, 125, 125 };
+    SetStatusWidths(5, widths);
     SetStatusText(wxT("Initializing File Menu..."));
   }
 
@@ -2959,6 +2971,22 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
       break;
     }
+  }
+}
+
+void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
+{
+  PROCESS_MEMORY_COUNTERS memCounter;
+  bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
+
+  if (result)
+  {
+    int mem = memCounter.WorkingSetSize / (1024 * 1024);
+    SetStatusText(wxString::Format(wxT("Memory: %i Mo"), mem), 4);
+  }
+  else
+  {
+    SetStatusText(wxString::Format(wxT("Memory: N/A Mo")), 4);
   }
 }
 
