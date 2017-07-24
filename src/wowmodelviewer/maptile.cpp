@@ -420,7 +420,7 @@ MapTile::MapTile(wxString filename): nWMO(0), nMDX(0), topnode(0,0,16)
 						texpath = texshader;
 				}
 
-				texturemanager.add(texpath);
+				TEXTUREMANAGER.add(texpath);
 				textures.push_back(texpath);
 			}
 			delete[] buf;
@@ -773,7 +773,7 @@ MapTile::~MapTile()
 	}
 
 	for (size_t j=0; j<textures.size(); j++) {
-		texturemanager.delbyname(textures[j].c_str());
+		TEXTUREMANAGER.delbyname(textures[j].c_str());
 	}
 
 	/*
@@ -980,7 +980,7 @@ void MapChunk::initTextures(wxString basename, int first, int last)
 	wxString buf;
 	for (ssize_t i=first; i<=last; i++) {
 		buf = wxString::Format(wxT("%s.%d.blp"), (char *)basename.c_str(), i);
-		wTextures.push_back(texturemanager.add(GAMEDIRECTORY.getFile(buf.c_str())));
+		wTextures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(buf.c_str())));
 	}
 }
 
@@ -1255,7 +1255,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 					animated[i] = 0;
 				}
 
-				textures[i] = texturemanager.get(mt->textures[mcly[i].textureId].c_str());
+				textures[i] = TEXTUREMANAGER.get(mt->textures[mcly[i].textureId].c_str());
 			}
 		}
 		else if (strncmp(fcc, "MCRF", 4) == 0) {

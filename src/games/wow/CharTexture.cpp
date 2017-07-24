@@ -173,13 +173,13 @@ void imageCleanUpHandler(void * ptr)
 QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
   QImage * result = 0;
-  TextureID temptex = texturemanager.add(file);
-  Texture * tex = dynamic_cast<Texture*>(texturemanager.items[temptex]);
+  TextureID temptex = TEXTUREMANAGER.add(file);
+  Texture * tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 
   // Alfred 2009.07.03, tex width or height can't be zero
   if (tex->w == 0 || tex->h == 0)
   {
-    texturemanager.del(temptex);
+    TEXTUREMANAGER.del(temptex);
     return result;
   }
 
@@ -188,7 +188,7 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
   tex->getPixels(tempbuf, GL_BGRA_EXT);
   result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
   
-  texturemanager.del(temptex);
+  TEXTUREMANAGER.del(temptex);
 
   return result;
 }

@@ -422,7 +422,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
     }
     else
     {
-      GLuint texID = texturemanager.get(it->second.c_str());
+      GLuint texID = TEXTUREMANAGER.get(it->second.c_str());
       exportGLTexture(texID, it->first);
     }
   }

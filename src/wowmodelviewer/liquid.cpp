@@ -308,7 +308,7 @@ void Liquid::initTextures(wxString basename, int first, int last)
 	wxString buf;
 	for (ssize_t i=first; i<=last; i++) {
 		buf = wxString::Format(wxT("%s.%d.blp"), basename.c_str(), i);
-		int tex = texturemanager.add(GAMEDIRECTORY.getFile(buf.c_str()));
+		int tex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(buf.c_str()));
 		textures.push_back(tex);
 	}
 }
@@ -317,7 +317,7 @@ void Liquid::initTextures(wxString basename, int first, int last)
 Liquid::~Liquid()
 {
 	for (size_t i=0; i<textures.size(); i++) {
-		texturemanager.del(textures[i]);
+		TEXTUREMANAGER.del(textures[i]);
 	}
 }
 

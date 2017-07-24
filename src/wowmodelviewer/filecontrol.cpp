@@ -245,8 +245,8 @@ wxString FileControl::ExportPNG(wxString val)
 	if (fn.GetExt().Lower() != wxT("blp"))
 		return "";
 
-	TextureID temptex = texturemanager.add(GAMEDIRECTORY.getFile(val.c_str()));
-	Texture &tex = *((Texture*)texturemanager.items[temptex]);
+	TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(val.c_str()));
+	Texture &tex = *((Texture*)TEXTUREMANAGER.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return "";
 
@@ -367,7 +367,7 @@ void FileControl::ClearCanvas()
 	LOG_INFO << "Clearing textures from previous model...";
 #endif
 	// Texture clearing and debugging
-	texturemanager.clear();
+	TEXTUREMANAGER.clear();
 
 #ifdef _DEBUG
 	err = glGetError();

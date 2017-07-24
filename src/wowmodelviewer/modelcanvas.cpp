@@ -164,7 +164,7 @@ ModelCanvas::~ModelCanvas()
 #endif
 
 	// Clear remaining textures.
-	texturemanager.clear();
+  TEXTUREMANAGER.clear();
 
 	// Uninitialise shaders
 	UninitShaders();

@@ -94,7 +94,7 @@ WMO::WMO(QString name) :
 
 				QString texpath = QString::fromLatin1(texbuf+m->nameStart);
 
-        m->tex = texturemanager.add(GAMEDIRECTORY.getFile(texpath));
+        m->tex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(texpath));
 				textures.push_back(texpath);
 				
 				// need repeat turned on
@@ -295,7 +295,7 @@ WMO::~WMO()
 	  delete[] groups;
 
 		for (size_t i=0; i<textures.size(); i++) {
-		  texturemanager.delbyname(textures[i]);
+      TEXTUREMANAGER.delbyname(textures[i]);
 		}
 
 		/*

@@ -188,7 +188,7 @@ void WoWItem::unload()
        it != itEnd;
   ++it)
   {
-    texturemanager.delbyname(it->second->fullname());
+    TEXTUREMANAGER.delbyname(it->second->fullname());
   }
   m_itemTextures.clear();
 
@@ -345,7 +345,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -396,7 +396,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -443,7 +443,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -486,7 +486,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -528,7 +528,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -554,7 +554,7 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[getRegionForTexture(texture)] = texture;
         }
       }
@@ -613,7 +613,7 @@ void WoWItem::load()
       GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
       if (texture)
       {
-        texturemanager.add(texture);
+        TEXTUREMANAGER.add(texture);
         m_itemTextures[getRegionForTexture(texture)] = texture;
       }
 
@@ -631,42 +631,42 @@ void WoWItem::load()
         GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_1] = texture;
         }
 
         texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_2] = texture;
         }
 
         texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_UPPER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_3] = texture;
         }
 
         texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_LOWER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_4] = texture;
         }
 
         texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_UPPER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_5] = texture;
         }
 
         texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_LOWER));
         if (texture)
         {
-          texturemanager.add(texture);
+          TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_6] = texture;
         }
       }
@@ -692,7 +692,7 @@ void WoWItem::load()
           GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
           if (texture)
           {
-            texturemanager.add(texture);
+            TEXTUREMANAGER.add(texture);
             m_itemTextures[getRegionForTexture(texture)] = texture;
           }
         }
@@ -1000,7 +1000,7 @@ void WoWItem::refresh()
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
       {
-        m_charModel->capeTex = texturemanager.add(it->second);
+        m_charModel->capeTex = TEXTUREMANAGER.add(it->second);
         m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
       }
       break;
@@ -1168,7 +1168,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
     {
-      GLuint tex = texturemanager.add(texture);
+      GLuint tex = TEXTUREMANAGER.add(texture);
       for (size_t x = 0; x < m->TextureList.size(); x++)
       {
         if (m->TextureList[x]->fullname() == "Special_2")

@@ -26,7 +26,7 @@ public:
 
 };
 
-_TEXTUREMANAGER_API_ extern TextureManager texturemanager;
+_TEXTUREMANAGER_API_ extern TextureManager TEXTUREMANAGER;
 
 #endif
 

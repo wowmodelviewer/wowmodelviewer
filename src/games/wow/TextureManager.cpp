@@ -10,7 +10,7 @@
 
 #include "OpenGLHeaders.h"
 
-_TEXTUREMANAGER_API_ TextureManager texturemanager;
+_TEXTUREMANAGER_API_ TextureManager TEXTUREMANAGER;
 
 GLuint TextureManager::add(GameFile * file)
 {

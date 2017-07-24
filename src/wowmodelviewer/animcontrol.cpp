@@ -1230,7 +1230,7 @@ void AnimControl::SetSkin(int num)
           break;
         }
       }
-      g_selModel->replaceTextures[grp->base+i] = texturemanager.add(tex);
+      g_selModel->replaceTextures[grp->base+i] = TEXTUREMANAGER.add(tex);
     }
   }
 
@@ -1280,7 +1280,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
         break;
       }
     }
-    g_selModel->replaceTextures[base] = texturemanager.add(tex);
+    g_selModel->replaceTextures[base] = TEXTUREMANAGER.add(tex);
   }
 }
 

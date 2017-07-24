@@ -30,7 +30,7 @@ public:
   void load();
 
 private:
-  void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest);
+	void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest);
 
 };
 

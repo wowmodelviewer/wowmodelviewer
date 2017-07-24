@@ -539,7 +539,7 @@ void WoWModel::initCommon(GameFile * f)
       {
         QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
         GameFile * tex = GAMEDIRECTORY.getFile(texname);
-        textures[i] = texturemanager.add(tex);
+        textures[i] = TEXTUREMANAGER.add(tex);
         TextureList.push_back(tex);
         LOG_INFO << "Added" << texname << "to the TextureList[" << TextureList.size() << "]";
       }
@@ -575,7 +575,7 @@ void WoWModel::initCommon(GameFile * f)
         if (texdef[i].type == TEXTURE_ARMORREFLECT)
         {
           // a fix for weapons with type-3 textures.
-          replaceTextures[texdef[i].type] = texturemanager.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
+          replaceTextures[texdef[i].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
         }
       }
     }
@@ -1803,7 +1803,7 @@ void WoWModel::mergeModel(QString & name)
   // add model textures
   for (auto it : m->TextureList)
   {
-    texturemanager.add(it);
+    TEXTUREMANAGER.add(it);
     TextureList.push_back(it);
   }
 
@@ -1879,7 +1879,7 @@ void WoWModel::unmergeModel()
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
 
-  // @TODO delete teextures in texturemanager
+  // @TODO delete teextures in TEXTUREMANAGER
   textures.resize(textures.size() - m->textures.size());
   TextureList.resize(TextureList.size() - m->TextureList.size());
 
@@ -1922,7 +1922,7 @@ void WoWModel::refresh()
   if (textures.size() > 1)
   {
     GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
-    furTex = texturemanager.add(tex);
+    furTex = TEXTUREMANAGER.add(tex);
     UpdateTextureList(tex, TEXTURE_FUR);
   }
 
@@ -2002,7 +2002,7 @@ void WoWModel::refresh()
   if (textures.size() > 0)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textures[0]);
-    hairTex = texturemanager.add(texture);
+    hairTex = TEXTUREMANAGER.add(texture);
     UpdateTextureList(texture, TEXTURE_HAIR);
 
     if (infos.isHD)
@@ -2238,7 +2238,7 @@ QString WoWModel::getNameForTex(uint16 tex)
     else
       texid = replaceTextures[specialTextures[tex]];
   
-    result = texturemanager.get(texid);
+    result = TEXTUREMANAGER.get(texid);
   }
 
   return result;
