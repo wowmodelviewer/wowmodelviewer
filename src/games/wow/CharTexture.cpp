@@ -52,7 +52,8 @@ void CharTexture::compose(TextureID texID)
 	if (m_components.size()==1)
 	{
 		Texture temp(m_components[0].file);
-		texturemanager.LoadBLP(texID, &temp);
+    temp.id = texID;
+    temp.load();
 		return;
 	}
 

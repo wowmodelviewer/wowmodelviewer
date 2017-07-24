@@ -110,13 +110,7 @@ public:
 	bool useEnvMapping;//  = true;
 };
 
-void getTextureData(GLuint tex, unsigned char *buf);
-
 _VIDEO_API_ extern VideoSettings video;
-_VIDEO_API_ extern TextureManager texturemanager;
-
-void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest);
-
 
 #endif
 

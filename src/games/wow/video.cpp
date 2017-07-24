@@ -50,7 +50,6 @@ PIXELFORMATDESCRIPTOR pfd =						// pfd Tells Windows How We Want Things To Be
 #endif
 
 _VIDEO_API_ VideoSettings video;
-_VIDEO_API_ TextureManager texturemanager;
 
 VideoSettings::VideoSettings()
 {
@@ -704,86 +703,4 @@ void VideoSettings::SetCurrent()
 	  render = true;
 	}
 #endif
-}
-
-struct Color {
-	unsigned char r, g, b;
-};
-
-
-void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest)
-{	
-	// DXT1 Textures, currently being handles by our routine below
-	if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) {
-		DDSDecompressDXT1(src, w, h, dest);
-		return;
-	}
-	
-	// DXT3 Textures
-	if (format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) {
-		DDSDecompressDXT3(src, w, h, dest);
-		return;
-	}
-
-	// DXT5 Textures
-	if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)	{
-		//DXT5UnpackAlphaValues(src, w, h, dest);
-		DDSDecompressDXT5(src, w, h, dest);
-		return;
-	}
-
-	/*
-	// sort of copied from linghuye
-	int bsx = (w<4) ? w : 4;
-	int bsy = (h<4) ? h : 4;
-
-	for(int y=0; y<h; y += bsy) {
-		for(int x=0; x<w; x += bsx) {
-			//unsigned long alpha = 0;
-			//unsigned int a0 = 0, a1 = 0;
-
-			unsigned int c0 = *(unsigned short*)(src + 0);
-			unsigned int c1 = *(unsigned short*)(src + 2);
-			src += 4;
-
-			Color color[4];
-			color[0].b = (unsigned char) ((c0 >> 11) & 0x1f) << 3;
-			color[0].g = (unsigned char) ((c0 >>  5) & 0x3f) << 2;
-			color[0].r = (unsigned char) ((c0      ) & 0x1f) << 3;
-			color[1].b = (unsigned char) ((c1 >> 11) & 0x1f) << 3;
-			color[1].g = (unsigned char) ((c1 >>  5) & 0x3f) << 2;
-			color[1].r = (unsigned char) ((c1      ) & 0x1f) << 3;
-
-			if(c0 > c1 || format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) {
-				color[2].r = (color[0].r * 2 + color[1].r) / 3;
-				color[2].g = (color[0].g * 2 + color[1].g) / 3;
-				color[2].b = (color[0].b * 2 + color[1].b) / 3;
-				color[3].r = (color[0].r + color[1].r * 2) / 3;
-				color[3].g = (color[0].g + color[1].g * 2) / 3;
-				color[3].b = (color[0].b + color[1].b * 2) / 3;
-			} else {
-				color[2].r = (color[0].r + color[1].r) / 2;
-				color[2].g = (color[0].g + color[1].g) / 2;
-				color[2].b = (color[0].b + color[1].b) / 2;
-				color[3].r = 0;
-				color[3].g = 0;
-				color[3].b = 0;
-			}
-
-			for (ssize_t j=0; j<bsy; j++) {
-				unsigned int index = *src++;
-				unsigned char* dd = dest + (w*(y+j)+x)*4;
-				for (size_t i=0; i<bsx; i++) {
-					*dd++ = color[index & 0x03].b;
-					*dd++ = color[index & 0x03].g;
-					*dd++ = color[index & 0x03].r;
-					//if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)	{
-						*dd++ = ((index & 0x03) == 3 && c0 <= c1) ? 0 : 255;
-					//}
-					index >>= 2;
-				}
-			}
-		}
-	}
-	*/
 }

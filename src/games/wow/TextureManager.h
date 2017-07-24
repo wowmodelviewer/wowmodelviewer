@@ -20,13 +20,13 @@ class Texture;
 
 class _TEXTUREMANAGER_API_ TextureManager : public Manager<GLuint> 
 {
-	
 public:
 	virtual GLuint add(GameFile *);
 	void doDelete(GLuint id);
 
-	void LoadBLP(GLuint id, Texture *tex);
 };
+
+_TEXTUREMANAGER_API_ extern TextureManager texturemanager;
 
 #endif
 
