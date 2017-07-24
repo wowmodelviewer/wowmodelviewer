@@ -11,6 +11,7 @@
 #include "globalvars.h"
 #include "logger/Logger.h"
 #include "modelviewer.h"
+#include "Texture.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 

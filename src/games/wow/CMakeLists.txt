@@ -45,7 +45,9 @@ set(src animated.cpp
         RaceInfos.cpp
         RenderTexture.cpp
         TabardDetails.cpp
+		Texture.cpp
         TextureAnim.cpp
+		TextureManager.cpp
         video.cpp
 		wdb2file.cpp
 		wdb5file.cpp

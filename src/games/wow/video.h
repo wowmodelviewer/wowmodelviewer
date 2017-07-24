@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "ddslib.h"
-#include "manager.h"
+#include "TextureManager.h"
 #include "RenderTexture.h"
 #include "vec3d.h"
 
@@ -18,29 +18,6 @@ typedef GLuint TextureID;
 #else
 #    define _VIDEO_API_
 #endif
-
-
-class _VIDEO_API_ Texture : public ManagedItem {
-public:
-	int w,h;
-	GLuint id;
-	bool compressed;
-	GameFile * file;
-
-	Texture(GameFile *);
-	void getPixels(unsigned char *buff, unsigned int format=GL_RGBA);
-
-};
-
-
-class _VIDEO_API_ TextureManager : public Manager<GLuint> {
-	
-public:
-	virtual GLuint add(GameFile *);
-	void doDelete(GLuint id);
-
-	void LoadBLP(GLuint id, Texture *tex);
-};
 
 struct VideoCaps
 {
