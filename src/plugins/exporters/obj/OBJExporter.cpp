@@ -39,6 +39,7 @@
 
 // Other libraries
 #include "Bone.h"
+#include "ModelRenderPass.h"
 #include "WoWModel.h"
 
 #include "GlobalSettings.h"

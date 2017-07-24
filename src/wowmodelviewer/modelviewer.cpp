@@ -23,6 +23,7 @@
 #include "Game.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
+#include "ModelRenderPass.h"
 #include "ModelTransparency.h"
 #include "RaceInfos.h"
 #include "TextureAnim.h"

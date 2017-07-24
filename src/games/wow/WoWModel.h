@@ -20,24 +20,23 @@
 #include "modelheaders.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
-#include "ModelRenderPass.h"
 #include "particle.h"
-#include "quaternion.h"
 #include "TabardDetails.h"
 #include "vec3d.h"
-#include "video.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
 #include "metaclasses/Container.h"
 
 class Bone;
+class CASCFile;
+class GameFile;
 struct ModelColor;
 class ModelEvent;
 struct ModelLight;
+class ModelRenderPass;
 struct ModelTransparency;
 class TextureAnim;
-class GameFile;
-class CASCFile;
+
 class QXmlStreamWriter;
 class QXmlStreamReader;
 

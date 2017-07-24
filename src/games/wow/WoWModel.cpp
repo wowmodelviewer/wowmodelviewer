@@ -14,6 +14,7 @@
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
+#include "ModelRenderPass.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
 #include "logger/Logger.h"

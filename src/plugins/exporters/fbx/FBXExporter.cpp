@@ -39,6 +39,7 @@
 // Other libraries
 #include "Bone.h"
 #include "globalvars.h"
+#include "ModelRenderPass.h"
 #include "WoWModel.h"
 
 #include "util.h" // SLASH
