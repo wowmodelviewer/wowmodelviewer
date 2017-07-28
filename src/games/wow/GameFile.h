@@ -26,7 +26,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), md21offset(0), m_fileDataId(id) {}
+    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id) {}
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -49,7 +49,6 @@ class _GAMEFILE_API_ GameFile : public Component
     unsigned char *buffer;
     size_t pointer, size;
     QString filepath;
-    int md21offset;
 
   private:
     // disable copying

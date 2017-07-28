@@ -14,7 +14,7 @@
 
 
 CASCFile::CASCFile(QString path, int id)
-  : GameFile(path, id), m_handle(0), m_isMD21(false)
+  : GameFile(path, id), m_handle(0)
 {
 }
 

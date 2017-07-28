@@ -35,7 +35,6 @@ class _CASCFILE_API_ CASCFile : public GameFile
 
   private:
     HANDLE m_handle;
-    bool m_isMD21;
 };
 
 

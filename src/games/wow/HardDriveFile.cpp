@@ -54,15 +54,6 @@ bool HardDriveFile::open()
   else
     eof = false;
 
-  // MD21 early support - experimental
-  if((size > 8) && (buffer[0] == 'M') && (buffer[1] == 'D') && (buffer[2] == '2') && (buffer[3] == '1'))
-  {
-    LOG_INFO << "MD21 file detected, applying offset to internal buffer";
-    md21offset = 8;
-    buffer += md21offset;
-    size -= md21offset;
-  }
-
   opened = true;
   file.close();
 
