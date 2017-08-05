@@ -34,12 +34,13 @@
 
 #include "Attachment.h"
 #include "database.h" // items
-#include "GameDatabase.h"
 #include "Game.h"
 #include "globalvars.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
+#include "WoWDatabase.h"
 #include "WoWModel.h"
+
 #include "logger/Logger.h"
 
 map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },

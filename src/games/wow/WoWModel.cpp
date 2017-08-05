@@ -8,7 +8,7 @@
 #include "GlobalSettings.h"
 #include "Bone.h"
 #include "CASCFile.h"
-#include "GameDatabase.h"
+#include "WoWDatabase.h"
 #include "Game.h"
 #include "globalvars.h"
 #include "ModelColor.h"
@@ -17,6 +17,8 @@
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
+#include "WoWDatabase.h"
+
 #include "logger/Logger.h"
 
 #include <QFile>

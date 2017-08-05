@@ -46,7 +46,7 @@ public:
 
   virtual header readHeader();
 
-  virtual std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const;
 
 protected:
   std::vector<uint32> m_IDs;

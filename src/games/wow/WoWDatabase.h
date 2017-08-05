@@ -1,12 +1,12 @@
 /*
- * GameDatabase.h
+ * WoWDatabase.h
  *
  *  Created on: 9 nov. 2014
  *      Author: Jerome
  */
 
-#ifndef _GAMEDATABASE_H_
-#define _GAMEDATABASE_H_
+#ifndef _WOWDATABASE_H_
+#define _WOWDATABASE_H_
 
 #include <map>
 #include <vector>
@@ -31,19 +31,19 @@ class sqlResult
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
-#        define _GAMEDATABASE_API_ __declspec(dllexport)
+#        define _WOWDATABASE_API_ __declspec(dllexport)
 #    else
-#        define _GAMEDATABASE_API_ __declspec(dllimport)
+#        define _WOWDATABASE_API_ __declspec(dllimport)
 #    endif
 #else
-#    define _GAMEDATABASE_API_
+#    define _WOWDATABASE_API_
 #endif
 
-class _GAMEDATABASE_API_ GameDatabase
+class _WOWDATABASE_API_ WoWDatabase
 {
   public:
-    GameDatabase();
-    GameDatabase(GameDatabase &);
+    WoWDatabase();
+    WoWDatabase(WoWDatabase &);
 
     bool initFromXML(const QString & file);
 
@@ -51,7 +51,7 @@ class _GAMEDATABASE_API_ GameDatabase
 
     void setFastMode() { m_fastMode = true; }
 
-    ~GameDatabase();
+    ~WoWDatabase();
 
     // table structures as defined in xml file
     class fieldStructure
@@ -116,4 +116,4 @@ class _GAMEDATABASE_API_ GameDatabase
 
 
 
-#endif /* _GAMEDATABASE_H_ */
+#endif /* _WOWDATABASE_H_ */

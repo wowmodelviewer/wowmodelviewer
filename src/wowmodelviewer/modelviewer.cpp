@@ -9,30 +9,31 @@
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 
-#include "CharInfos.h"
-#include "ExporterPlugin.h"
-#include "GlobalSettings.h"
-#include "ImporterPlugin.h"
-#include "PluginManager.h"
+#include "AnimationExportChoiceDialog.h"
 #include "Attachment.h"
+#include "app.h"
 #include "Bone.h"
 #include "CASCFile.h"
 #include "CASCFolder.h"
-#include "globalvars.h"
-#include "GameDatabase.h"
+#include "CharInfos.h"
+#include "ExporterPlugin.h"
 #include "Game.h"
+#include "GlobalSettings.h"
+#include "globalvars.h"
+#include "ImporterPlugin.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
+#include "PluginManager.h"
 #include "RaceInfos.h"
 #include "TextureAnim.h"
-#include "logger/Logger.h"
-#include "app.h"
-#include "AnimationExportChoiceDialog.h"
 #include "SettingsControl.h"
-#include "util.h"
 #include "UserSkins.h"
+#include "util.h"
+#include "WoWDatabase.h"
+
+#include "logger/Logger.h"
 
 #include <QFile>
 #include <QSettings>

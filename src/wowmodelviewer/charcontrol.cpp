@@ -6,15 +6,16 @@
 
 #include "Attachment.h"
 #include "Game.h"
-#include "GameDatabase.h"
 #include "globalvars.h"
 #include "RaceInfos.h"
-#include "logger/Logger.h"
 #include "itemselection.h"
 #include "modelviewer.h"
 #include "util.h"
+#include "WoWDatabase.h"
 #include "WoWModel.h"
 #include "wow_enums.h"
+
+#include "logger/Logger.h"
 
 static wxArrayString creaturemodels;
 IMPLEMENT_CLASS(CharControl, wxWindow)

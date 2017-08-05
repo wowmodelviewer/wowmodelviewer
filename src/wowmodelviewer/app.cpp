@@ -10,13 +10,13 @@
 #include <windows.h>
 
 #include "Game.h"
-#include "GameDatabase.h"
 #include "GlobalSettings.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
 #include "resource1.h"
 #include "UserSkins.h"
 #include "util.h"
+#include "WoWDatabase.h"
 
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"

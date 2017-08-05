@@ -203,7 +203,7 @@ WDB5File::~WDB5File()
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const
+std::vector<std::string> WDB5File::get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const
 {
   std::vector<std::string> result;
 

@@ -96,7 +96,7 @@ bool WDB6File::doSpecializedOpen()
   return true;
 }
 
-std::vector<std::string> WDB6File::get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const
+std::vector<std::string> WDB6File::get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const
 {
   std::vector<std::string> result = WDB5File::get(recordIndex, structure);
 

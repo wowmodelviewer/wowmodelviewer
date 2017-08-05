@@ -1,7 +1,7 @@
 #include "RaceInfos.h"
 
-#include "GameDatabase.h"
 #include "Game.h"
+#include "WoWDatabase.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"

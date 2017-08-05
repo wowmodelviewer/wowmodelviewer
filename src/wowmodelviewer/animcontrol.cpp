@@ -6,11 +6,11 @@
 #include "logger/Logger.h"
 #include "FileTreeItem.h"
 #include "Game.h"
-#include "GameDatabase.h"
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "UserSkins.h"
 #include "util.h"
+#include "WoWDatabase.h"
 #include "WMOGroup.h"
 
 

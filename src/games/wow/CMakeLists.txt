@@ -27,7 +27,6 @@ set(src animated.cpp
         dbfile.cpp
         ddslib.cpp
         Game.cpp
-        GameDatabase.cpp
         GameFile.cpp
         GameFolder.cpp
         globalvars.cpp
@@ -57,6 +56,7 @@ set(src animated.cpp
 		WMOGroup.cpp
 		WMOLight.cpp
 		WMOModelInstance.cpp
+		WoWDatabase.cpp
         WoWItem.cpp
         WoWModel.cpp)
 
@@ -76,7 +76,6 @@ set(headers animated.h
 			displayable.h
 			FileTreeItem.h
 			Game.h
-			GameDatabase.h
 			GameFile.h
 			GameFolder.h
 			globalvars.h
@@ -111,6 +110,7 @@ set(headers animated.h
 			WMOLight.h
 			WMOModelInstance.h
 			wow_enums.h
+			WoWDatabase.h
 			WoWItem.h
 			WoWModel.h)
 

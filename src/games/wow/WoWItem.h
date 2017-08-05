@@ -31,7 +31,7 @@
 #include <string>
 #include <vector>
 
-#include "GameDatabase.h"
+#include "WoWDatabase.h"
 #include "GameFile.h"
 #include "wow_enums.h"
 #include "metaclasses/Component.h"

@@ -1,11 +1,11 @@
 /*
- * GameDatabase.cpp
+ * WoWDatabase.cpp
  *
  *  Created on: 9 nov. 2014
  *      Author: Jerome
  */
 
-#include "GameDatabase.h"
+#include "WoWDatabase.h"
 
 #include <QDomDocument>
 #include <QDomElement>
@@ -20,20 +20,20 @@
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
-GameDatabase::~GameDatabase()
+WoWDatabase::~WoWDatabase()
 {
   if(m_db)
     sqlite3_close(m_db);
 }
 
 
-GameDatabase::GameDatabase()
+WoWDatabase::WoWDatabase()
 : m_db(NULL), m_fastMode(false)
 {
 
 }
 
-bool GameDatabase::initFromXML(const QString & file)
+bool WoWDatabase::initFromXML(const QString & file)
 {
    int rc = 1;
 
@@ -52,16 +52,16 @@ bool GameDatabase::initFromXML(const QString & file)
      LOG_INFO << "Opened database successfully";
    }
 
-   sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
+   sqlite3_profile(m_db, WoWDatabase::logQueryTime, m_db);
    return createDatabaseFromXML(file);
 }
 
-sqlResult GameDatabase::sqlQuery(const QString & query)
+sqlResult WoWDatabase::sqlQuery(const QString & query)
 {
   sqlResult result;
 
   char *zErrMsg = 0;
-  int rc = sqlite3_exec(m_db, query.toStdString().c_str(), GameDatabase::treatQuery, (void *)&result, &zErrMsg);
+  int rc = sqlite3_exec(m_db, query.toStdString().c_str(), WoWDatabase::treatQuery, (void *)&result, &zErrMsg);
   if( rc != SQLITE_OK )
   {
     LOG_ERROR << "Querying in database" << query;
@@ -77,7 +77,7 @@ sqlResult GameDatabase::sqlQuery(const QString & query)
   return result;
 }
 
-int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char ** cols)
+int WoWDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char ** cols)
 {
   sqlResult * r = (sqlResult *)resultPtr;
   if(!r)
@@ -96,7 +96,7 @@ int GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char **
   return 0;
 }
 
-bool GameDatabase::readStructureFromXML(const QString & file)
+bool WoWDatabase::readStructureFromXML(const QString & file)
 {
   QDomDocument doc;
 
@@ -193,7 +193,7 @@ bool GameDatabase::readStructureFromXML(const QString & file)
   return true;
 }
 
-bool GameDatabase::createDatabaseFromXML(const QString & file)
+bool WoWDatabase::createDatabaseFromXML(const QString & file)
 {
   if (!readStructureFromXML(file))
   {
@@ -223,7 +223,7 @@ bool GameDatabase::createDatabaseFromXML(const QString & file)
   return result; 
 }
 
-bool GameDatabase::tableStructure::create()
+bool WoWDatabase::tableStructure::create()
 {
   LOG_INFO << "Creating table" << name;
   QString create = "CREATE TABLE "+ name +" (";
@@ -284,7 +284,7 @@ bool GameDatabase::tableStructure::create()
 }
 
 
-DBFile * GameDatabase::createDBFile(GameFile * fileToOpen)
+DBFile * WoWDatabase::createDBFile(GameFile * fileToOpen)
 {
   DBFile * result = 0;
   if (fileToOpen)
@@ -310,7 +310,7 @@ DBFile * GameDatabase::createDBFile(GameFile * fileToOpen)
   return result;
 }
 
-bool GameDatabase::tableStructure::fill()
+bool WoWDatabase::tableStructure::fill()
 {
   LOG_INFO << "Filling table" << name << "...";
   GameFile * fileToOpen = 0;
@@ -325,7 +325,7 @@ bool GameDatabase::tableStructure::fill()
   if(!fileToOpen)
     return false;
 
-  DBFile * dbc = GameDatabase::createDBFile(fileToOpen);
+  DBFile * dbc = WoWDatabase::createDBFile(fileToOpen);
   if(!dbc || !dbc->open())
     return false;
 
@@ -407,7 +407,7 @@ bool GameDatabase::tableStructure::fill()
   return r.valid;
 }
 
-void GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
+void WoWDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
 {
   if(aTimeInNs/1000000 > 30)
   {

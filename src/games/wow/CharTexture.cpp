@@ -14,10 +14,10 @@
 #include <QPainter>
 
 #include "Game.h"
-#include "GameDatabase.h"
 #include "GameFile.h"
 #include "Texture.h"
 #include "types.h"
+#include "WoWDatabase.h"
 
 #include "logger/Logger.h"
 

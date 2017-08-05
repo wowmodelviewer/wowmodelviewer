@@ -36,7 +36,7 @@ public:
 
   WDB5File::header readHeader();
 
-  std::vector<std::string> get(unsigned int recordIndex, const GameDatabase::tableStructure & structure) const;
+  std::vector<std::string> get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const;
 
 private:
 
