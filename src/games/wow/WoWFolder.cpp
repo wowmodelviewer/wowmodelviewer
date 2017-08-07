@@ -17,17 +17,17 @@
 
 #include "logger/Logger.h"
 
-WoWFolder::WoWFolder()
+wow::WoWFolder::WoWFolder()
 {
 }
 
-void WoWFolder::init(const QString & path)
+void wow::WoWFolder::init(const QString & path)
 {
   m_CASCFolder.init(path);
 }
 
 
-void WoWFolder::initFromListfile(const QString & filename)
+void wow::WoWFolder::initFromListfile(const QString & filename)
 {
   QFile file(filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -50,7 +50,7 @@ void WoWFolder::initFromListfile(const QString & filename)
   LOG_INFO << "WoWFolder - Hierarchy creation done";
 }
 
-void WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
+void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
 {
   LOG_INFO << "Add customFiles from folder" << path;
   QDirIterator dirIt(path, QDirIterator::Subdirectories);
@@ -94,7 +94,7 @@ void WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFiles)
 }
 
 
-GameFile * WoWFolder::getFile(int id)
+GameFile * wow::WoWFolder::getFile(int id)
 {
   GameFile * result = 0;
 
@@ -122,43 +122,43 @@ GameFile * WoWFolder::getFile(int id)
 }
 
 
-HANDLE WoWFolder::openFile(std::string file)
+HANDLE wow::WoWFolder::openFile(std::string file)
 {
   return m_CASCFolder.openFile(file);
 }
 
-QString WoWFolder::version()
+QString wow::WoWFolder::version()
 {
   return m_CASCFolder.version();
 }
 
-std::string WoWFolder::locale()
+std::string wow::WoWFolder::locale()
 {
    return m_CASCFolder.locale();
 }
 
-bool WoWFolder::setLocale(std::string val)
+bool wow::WoWFolder::setLocale(std::string val)
 {
   return m_CASCFolder.setLocale(val);
 }
 
-std::vector<std::string> WoWFolder::localesFound()
+std::vector<std::string> wow::WoWFolder::localesFound()
 {
   return m_CASCFolder.localesFound();
 }
 
-int WoWFolder::lastError()
+int wow::WoWFolder::lastError()
 {
   return m_CASCFolder.lastError();
 }
 
-void WoWFolder::onChildAdded(GameFile * child)
+void wow::WoWFolder::onChildAdded(GameFile * child)
 {
   GameFolder::onChildAdded(child);
   m_idMap[child->fileDataId()] = child;
 }
 
-void WoWFolder::onChildRemoved(GameFile * child)
+void wow::WoWFolder::onChildRemoved(GameFile * child)
 {
   GameFolder::onChildRemoved(child);
   m_idMap.erase(child->fileDataId());

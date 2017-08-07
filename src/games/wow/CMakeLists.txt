@@ -27,7 +27,6 @@ set(src animated.cpp
         dbfile.cpp
         ddslib.cpp
         Game.cpp
-        GameFolder.cpp
         globalvars.cpp
         HardDriveFile.cpp
         ModelAttachment.cpp
@@ -76,7 +75,6 @@ set(headers animated.h
 			displayable.h
 			FileTreeItem.h
 			Game.h
-			GameFolder.h
 			globalvars.h
 			HardDriveFile.h
 			manager.h

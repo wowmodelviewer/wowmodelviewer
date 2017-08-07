@@ -30,36 +30,38 @@
 #    define _WOWFOLDER_API_
 #endif
 
-class _WOWFOLDER_API_ WoWFolder : public GameFolder
+namespace wow
 {
-  public:
-    WoWFolder();
-    virtual ~WoWFolder() {}
+  class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
+  {
+    public:
+      WoWFolder();
+      virtual ~WoWFolder() {}
 
-    void init(const QString & path);
-    void initFromListfile(const QString & file);
-    void addCustomFiles(const QString & path, bool bypassOriginalFiles);
+      void init(const QString & path);
+      void initFromListfile(const QString & file);
+      void addCustomFiles(const QString & path, bool bypassOriginalFiles);
 
-    GameFile * getFile(int id);
-    
-    HANDLE openFile(std::string file);
-  
-    QString version();
+      GameFile * getFile(int id);
 
-    std::string locale();
-    bool setLocale(std::string);
-    std::vector<std::string> localesFound();
+      void * openFile(std::string file);
 
-    int lastError();
+      QString version();
 
-    void onChildAdded(GameFile *);
-    void onChildRemoved(GameFile *);
+      std::string locale();
+      bool setLocale(std::string);
+      std::vector<std::string> localesFound();
 
-  private:
-    CASCFolder m_CASCFolder;
-    std::map<int, GameFile *> m_idMap;
-};
+      int lastError();
 
+      void onChildAdded(GameFile *);
+      void onChildRemoved(GameFile *);
+
+    private:
+      CASCFolder m_CASCFolder;
+      std::map<int, GameFile *> m_idMap;
+  };
+}
 
 
 #endif /* _WOWFOLDER_H_ */

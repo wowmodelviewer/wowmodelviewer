@@ -11,18 +11,14 @@
 #include <QFile>
 #include <QRegularExpression>
 
-#include "CASCFile.h"
-#include "Game.h"
-#include "HardDriveFile.h"
-
 #include "logger/Logger.h"
 
-GameFolder::GameFolder()
+core::GameFolder::GameFolder()
 {
 }
 
 
-QString GameFolder::getFullPathForFile(QString file)
+QString core::GameFolder::getFullPathForFile(QString file)
 {
   file = file.toLower();
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
@@ -34,7 +30,7 @@ QString GameFolder::getFullPathForFile(QString file)
   return "";
 }
 
-void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension)
+void core::GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension)
 {
   for(GameFolder::iterator it = begin() ; it != end() ; ++it)
   {
@@ -47,7 +43,7 @@ void GameFolder::getFilesForFolder(std::vector<GameFile *> &fileNames, QString f
   }
 }
 
-void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
+void core::GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
 {
   QRegularExpression regex(filter);
 
@@ -65,7 +61,7 @@ void GameFolder::getFilteredFiles(std::set<GameFile *> &dest, QString & filter)
   }
 }
 
-GameFile * GameFolder::getFile(QString filename)
+GameFile * core::GameFolder::getFile(QString filename)
 {
   filename = filename.toLower().replace('\\','/');
 
@@ -78,12 +74,12 @@ GameFile * GameFolder::getFile(QString filename)
   return result;
 }
 
-void GameFolder::onChildAdded(GameFile * child)
+void core::GameFolder::onChildAdded(GameFile * child)
 {
   m_nameMap[child->fullname()] = child;
 }
 
-void GameFolder::onChildRemoved(GameFile * child)
+void core::GameFolder::onChildRemoved(GameFile * child)
 {
   m_nameMap.erase(child->fullname());
 }

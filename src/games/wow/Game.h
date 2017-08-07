@@ -13,7 +13,7 @@
 #include "WoWFolder.h"
 #include "GameDatabase.h"
 
-#define GAMEDIRECTORY Game::instance().gameFolder()
+#define GAMEDIRECTORY Game::instance().folder()
 #define GAMEDATABASE Game::instance().database()
 
 #ifdef _WIN32
@@ -40,7 +40,7 @@ class _GAME_API_ Game
     void addCustomFiles(const QString &path, bool bypassOriginalFiles);
 
 
-    GameFolder & gameFolder() { return m_gameFolder; }
+    core::GameFolder & folder() { return m_gameFolder; }
 
     core::GameDatabase & database() { return *m_db; }
 
@@ -52,7 +52,7 @@ class _GAME_API_ Game
     Game(const Game &);
     void operator=(const Game &);
 
-    WoWFolder m_gameFolder;
+    wow::WoWFolder m_gameFolder;
     core::GameDatabase * m_db;
 
     static Game * m_instance;
