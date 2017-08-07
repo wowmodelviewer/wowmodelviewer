@@ -17,6 +17,7 @@ set(src CharInfos.cpp
         ExporterPlugin.cpp
         FileDownloader.cpp
 		GameDatabase.cpp
+		GameFile.cpp
         GlobalSettings.cpp
         ImporterPlugin.cpp
         Model.cpp
@@ -36,6 +37,7 @@ set(headers CharInfos.h
 			ExporterPlugin.h
 			FileDownloader.h
 			GameDatabase.h
+			GameFile.h
 			GlobalSettings.h
 			ImporterPlugin.h
 			Model.h

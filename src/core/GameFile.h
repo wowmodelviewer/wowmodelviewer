@@ -14,7 +14,7 @@
 #include "metaclasses/Component.h"
 
 #ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
+#    ifdef BUILDING_CORE_DLL
 #        define _GAMEFILE_API_ __declspec(dllexport)
 #    else
 #        define _GAMEFILE_API_ __declspec(dllimport)

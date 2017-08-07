@@ -27,7 +27,6 @@ set(src animated.cpp
         dbfile.cpp
         ddslib.cpp
         Game.cpp
-        GameFile.cpp
         GameFolder.cpp
         globalvars.cpp
         HardDriveFile.cpp
@@ -76,7 +75,6 @@ set(headers animated.h
 			displayable.h
 			FileTreeItem.h
 			Game.h
-			GameFile.h
 			GameFolder.h
 			globalvars.h
 			HardDriveFile.h
