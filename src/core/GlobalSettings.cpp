@@ -53,11 +53,11 @@
 
 // Beginning of implementation
 //====================================================================
-GlobalSettings * GlobalSettings::m_instance = 0;
+core::GlobalSettings * core::GlobalSettings::m_instance = 0;
 
 // Constructors 
 //--------------------------------------------------------------------
-GlobalSettings::GlobalSettings()
+core::GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
   m_versionMinorNumber = 9;
@@ -130,14 +130,14 @@ GlobalSettings::GlobalSettings()
 
 // Destructor
 //--------------------------------------------------------------------
-GlobalSettings::~GlobalSettings()
+core::GlobalSettings::~GlobalSettings()
 {
 
 }
 
 // Public methods
 //--------------------------------------------------------------------
-std::string GlobalSettings::appVersion(std::string a_prefix)
+std::string core::GlobalSettings::appVersion(std::string a_prefix)
 {
   std::string l_result = a_prefix;
   std::ostringstream l_oss;
@@ -152,17 +152,17 @@ std::string GlobalSettings::appVersion(std::string a_prefix)
   return l_result;
 }
 
-std::string GlobalSettings::appName()
+std::string core::GlobalSettings::appName()
 {
   return m_appName;
 }
 
-std::string GlobalSettings::buildName()
+std::string core::GlobalSettings::buildName()
 {
   return m_buildName;
 }
 
-std::string GlobalSettings::appTitle()
+std::string core::GlobalSettings::appTitle()
 {
   std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
   if(m_isBetaVersion)

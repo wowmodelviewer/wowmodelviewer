@@ -80,7 +80,7 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
     std::string version() const { return m_version; }
     std::string id() const { return (m_category + "_" + m_internalName); }
 
-    static Plugin * load(std::string path, GlobalSettings &, core::Game &);
+    static Plugin * load(std::string path, core::GlobalSettings &, core::Game &);
 
     // overload from component class
     void doPrint();
@@ -107,7 +107,7 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
 		// Destructors
 	
 		// Methods
-    void transmitSingletonsFromCore(GlobalSettings &, core::Game &);
+    void transmitSingletonsFromCore(core::GlobalSettings &, core::Game &);
 
 		// Members
     std::string m_internalName;
@@ -119,7 +119,7 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
     static QThread * thread;
 
     // Singletons from core application
-    static GlobalSettings * globalSettings;
+    static core::GlobalSettings * globalSettings;
     static core::Game * game;
 
   private slots:

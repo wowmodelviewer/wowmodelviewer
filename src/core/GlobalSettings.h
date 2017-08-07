@@ -56,80 +56,83 @@
 #    define _GLOBALSETTINGS_API_
 #endif
 
-#define GLOBALSETTINGS GlobalSettings::instance()
+#define GLOBALSETTINGS core::GlobalSettings::instance()
 
-class _GLOBALSETTINGS_API_ GlobalSettings
+namespace core
 {
-  public :
-    // Constants / Enums
+  class _GLOBALSETTINGS_API_ GlobalSettings
+  {
+    public:
+      // Constants / Enums
 
-    // Constructors
+      // Constructors
 
-    // Destructors
-    ~GlobalSettings();
+      // Destructors
+      ~GlobalSettings();
 
-    // Methods
-    static GlobalSettings & instance()
-    {
-      if(GlobalSettings::m_instance == 0)
-        GlobalSettings::m_instance = new GlobalSettings();
+      // Methods
+      static GlobalSettings & instance()
+      {
+        if (GlobalSettings::m_instance == 0)
+          GlobalSettings::m_instance = new GlobalSettings();
 
-      return *m_instance;
-    }
+        return *m_instance;
+      }
 
-    std::string appVersion(std::string a_prefix = std::string(""));
-    std::string appName();
-    std::string buildName();
-    std::string appTitle();
+      std::string appVersion(std::string a_prefix = std::string(""));
+      std::string appName();
+      std::string buildName();
+      std::string appTitle();
 
-    bool isBeta() { return m_isBetaVersion; }
+      bool isBeta() { return m_isBetaVersion; }
 
-    // Members
-    // find a better way than a lot of members...
-    bool bShowParticle;
-    bool bZeroParticle;
-    bool bInitPoseOnlyExport;
+      // Members
+      // find a better way than a lot of members...
+      bool bShowParticle;
+      bool bZeroParticle;
+      bool bInitPoseOnlyExport;
 
-  protected :
-    // Constants / Enums
+    protected:
+      // Constants / Enums
 
-    // Constructors
+      // Constructors
 
-    // Destructors
+      // Destructors
 
-    // Methods
+      // Methods
 
-    // Members
+      // Members
 
-  private :
-    // Constants / Enums
+    private:
+      // Constants / Enums
 
-    // Constructors
-    GlobalSettings();
-    GlobalSettings(GlobalSettings &);
+      // Constructors
+      GlobalSettings();
+      GlobalSettings(GlobalSettings &);
 
-    // Destructors
+      // Destructors
 
-    // Methods
+      // Methods
 
-    // Members
+      // Members
 
-    int m_versionMajorNumber;
-    int m_versionMinorNumber;
-    int m_versionRevNumber;
-    std::string m_versionSpecialExtend;
+      int m_versionMajorNumber;
+      int m_versionMinorNumber;
+      int m_versionRevNumber;
+      std::string m_versionSpecialExtend;
 
-    std::string	m_appName;
-    std::string	m_buildName;
-    std::string m_platform;
+      std::string	m_appName;
+      std::string	m_buildName;
+      std::string m_platform;
 
-    bool m_isBetaVersion;
-    bool m_isAlphaVersion;
+      bool m_isBetaVersion;
+      bool m_isAlphaVersion;
 
-    static GlobalSettings * m_instance;
+      static GlobalSettings * m_instance;
 
-    // friend class declarations
-};
+      // friend class declarations
+  };
+}
 
 // static members definition
 #ifdef _GLOBALSETTINGS_CPP_

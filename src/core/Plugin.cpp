@@ -50,7 +50,7 @@
 
 // Beginning of implementation
 //====================================================================
-GlobalSettings * Plugin::globalSettings = 0;
+core::GlobalSettings * Plugin::globalSettings = 0;
 core::Game * Plugin::game = 0;
 
 QCoreApplication * Plugin::app = NULL;
@@ -72,7 +72,7 @@ Plugin::Plugin()
 // Public methods
 //--------------------------------------------------------------------
 // Private Qt application
-Plugin * Plugin::load(std::string path, GlobalSettings & settings, core::Game & game)
+Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::Game & game)
 {
   QString pluginToLoad = QString::fromStdString(path);
   Plugin * newPlugin = NULL;
@@ -118,7 +118,7 @@ void Plugin::doPrint()
 
 // Private methods
 //--------------------------------------------------------------------
-void Plugin::transmitSingletonsFromCore(GlobalSettings & settings, core::Game & game)
+void Plugin::transmitSingletonsFromCore(core::GlobalSettings & settings, core::Game & game)
 {
   Plugin::globalSettings = &settings;
   Plugin::game = &game;
