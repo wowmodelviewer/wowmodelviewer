@@ -10,7 +10,7 @@
 
 #include <QString>
 
-#include "GameFolder.h"
+#include "WoWFolder.h"
 #include "GameDatabase.h"
 
 #define GAMEDIRECTORY Game::instance().gameFolder()
@@ -52,7 +52,7 @@ class _GAME_API_ Game
     Game(const Game &);
     void operator=(const Game &);
 
-    GameFolder m_gameFolder;
+    WoWFolder m_gameFolder;
     core::GameDatabase * m_db;
 
     static Game * m_instance;

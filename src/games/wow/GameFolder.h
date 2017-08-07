@@ -35,9 +35,9 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     GameFolder();
     virtual ~GameFolder() {}
 
-    void init(const QString & path);
-    void initFiles(const QString & file);
-    void addCustomFiles(const QString & path, bool bypassOriginalFiles);
+    virtual void init(const QString & path) = 0 ;
+    virtual void initFromListfile(const QString & file) = 0;
+    virtual void addCustomFiles(const QString & path, bool bypassOriginalFiles) = 0;
 
     // return full path for a given file ie :
     // HumanMale.m2 => Character\Human\male\humanmale.m2
@@ -47,25 +47,23 @@ class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
     void getFilesForFolder(std::vector<GameFile *> &fileNames, QString folderPath, QString extension = "");
     void getFilteredFiles(std::set<GameFile *> &dest, QString & filter);
     GameFile * getFile(QString filename);
-    GameFile * getFile(int id);
+    virtual GameFile * getFile(int id) = 0;
 
-    HANDLE openFile(std::string file);
+    virtual HANDLE openFile(std::string file) = 0;
 
-    QString version();
+    virtual QString version() = 0;
 
-    std::string locale();
-    bool setLocale(std::string);
-    std::vector<std::string> localesFound();
+    virtual std::string locale() = 0;
+    virtual bool setLocale(std::string) = 0;
+    virtual std::vector<std::string> localesFound() = 0;
 
-    int lastError();
+    virtual int lastError() = 0;
 
-    void onChildAdded(GameFile *);
-    void onChildRemoved(GameFile *);
+    virtual void onChildAdded(GameFile *);
+    virtual void onChildRemoved(GameFile *);
 
   private:
-    CASCFolder m_CASCFolder;
     std::map<QString, GameFile *> m_nameMap;
-    std::map<int, GameFile *> m_idMap;
 };
 
 

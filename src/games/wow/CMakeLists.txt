@@ -56,6 +56,7 @@ set(src animated.cpp
 		WMOLight.cpp
 		WMOModelInstance.cpp
 		WoWDatabase.cpp
+		WoWFolder.cpp
         WoWItem.cpp
         WoWModel.cpp)
 
@@ -109,6 +110,7 @@ set(headers animated.h
 			WMOModelInstance.h
 			wow_enums.h
 			WoWDatabase.h
+			WoWFolder.h
 			WoWItem.h
 			WoWModel.h)
 

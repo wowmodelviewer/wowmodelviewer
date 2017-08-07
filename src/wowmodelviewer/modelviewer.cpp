@@ -1771,7 +1771,7 @@ void ModelViewer::LoadWoW()
 
   LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
 
-  GAMEDIRECTORY.initFiles(baseConfigFolder + "listfile.txt");
+  GAMEDIRECTORY.initFromListfile(baseConfigFolder + "listfile.txt");
 
   if (!customDirectoryPath.IsEmpty())
     Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
