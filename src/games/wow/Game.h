@@ -11,10 +11,10 @@
 #include <QString>
 
 #include "GameFolder.h"
-#include "WoWDatabase.h"
+#include "GameDatabase.h"
 
 #define GAMEDIRECTORY Game::instance().gameFolder()
-#define GAMEDATABASE Game::instance().gameDatabase()
+#define GAMEDATABASE Game::instance().database()
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -36,14 +36,16 @@ class _GAME_API_ Game
       return *m_instance;
     }
 
-    void init(const QString & path);
+    void init(const QString & path, core::GameDatabase * db);
     void addCustomFiles(const QString &path, bool bypassOriginalFiles);
 
 
     GameFolder & gameFolder() { return m_gameFolder; }
-    wow::WoWDatabase & gameDatabase() { return m_gameDatabase;}
+
+    core::GameDatabase & database() { return *m_db; }
 
   private:
+
     // disable explicit construct and destruct
     Game();
     virtual ~Game() {}
@@ -51,7 +53,7 @@ class _GAME_API_ Game
     void operator=(const Game &);
 
     GameFolder m_gameFolder;
-    wow::WoWDatabase m_gameDatabase;
+    core::GameDatabase * m_db;
 
     static Game * m_instance;
 };

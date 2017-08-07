@@ -1720,7 +1720,7 @@ void ModelViewer::LoadWoW()
     getGamePath();
   }
 
-  Game::instance().init(QString(gamePath.c_str()));
+  Game::instance().init(QString(gamePath.c_str()), new wow::WoWDatabase());
 
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);

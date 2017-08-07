@@ -10,11 +10,13 @@
 Game * Game::m_instance = 0;
 
 Game::Game()
+  : m_db(0)
 {
 }
 
-void Game::init(const QString & path)
+void Game::init(const QString & path, core::GameDatabase * db)
 {
+  m_db = db;
   m_gameFolder.init(path);
 }
 
