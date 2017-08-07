@@ -51,6 +51,8 @@
 // Beginning of implementation
 //====================================================================
 GlobalSettings * Plugin::globalSettings = 0;
+core::Game * Plugin::game = 0;
+
 QCoreApplication * Plugin::app = NULL;
 QThread * Plugin::thread = NULL;
 
@@ -70,7 +72,7 @@ Plugin::Plugin()
 // Public methods
 //--------------------------------------------------------------------
 // Private Qt application
-Plugin * Plugin::load(std::string path, GlobalSettings & settings)
+Plugin * Plugin::load(std::string path, GlobalSettings & settings, core::Game & game)
 {
   QString pluginToLoad = QString::fromStdString(path);
   Plugin * newPlugin = NULL;
@@ -87,7 +89,7 @@ Plugin * Plugin::load(std::string path, GlobalSettings & settings)
     newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
     newPlugin->m_category = metaInfos.value("category").toString().toStdString();
 
-    newPlugin->transmitGlobalsFromCore(settings);
+    newPlugin->transmitSingletonsFromCore(settings, game);
 
     // waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
     // thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
@@ -116,9 +118,10 @@ void Plugin::doPrint()
 
 // Private methods
 //--------------------------------------------------------------------
-void Plugin::transmitGlobalsFromCore(GlobalSettings & settings)
+void Plugin::transmitSingletonsFromCore(GlobalSettings & settings, core::Game & game)
 {
   Plugin::globalSettings = &settings;
+  Plugin::game = &game;
 }
 
 void Plugin::onExec()

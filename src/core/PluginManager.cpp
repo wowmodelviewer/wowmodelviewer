@@ -43,6 +43,7 @@
 // Other libraries
 
 // Current library
+#include "Game.h"
 #include "GlobalSettings.h"
 
 // Namespaces used
@@ -74,7 +75,7 @@ PluginManager::PluginManager()
    QStringList plugins = pluginDir.entryList(QDir::Files);
    for (int i=0;i<plugins.size();i++)
    {
-     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),GLOBALSETTINGS);
+     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),GLOBALSETTINGS, core::Game::instance());
      if(newPlugin)
        addChild(newPlugin);
    }

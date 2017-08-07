@@ -39,6 +39,7 @@ class QThread;
 class ModelViewer;
 
 // Other libraries
+#include "Game.h"
 #include "GlobalSettings.h"
 #include "logger/Logger.h"
 #include "metaclasses/Component.h"
@@ -79,7 +80,7 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
     std::string version() const { return m_version; }
     std::string id() const { return (m_category + "_" + m_internalName); }
 
-    static Plugin * load(std::string path, GlobalSettings &);
+    static Plugin * load(std::string path, GlobalSettings &, core::Game &);
 
     // overload from component class
     void doPrint();
@@ -106,20 +107,20 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
 		// Destructors
 	
 		// Methods
-    void transmitGlobalsFromCore(GlobalSettings &);
+    void transmitSingletonsFromCore(GlobalSettings &, core::Game &);
 
 		// Members
     std::string m_internalName;
     std::string m_category;
     std::string m_version;
     std::string m_coreVersionNeeded;
-		
-    static GlobalSettings * globalSettings;
+
     static QCoreApplication * app;
     static QThread * thread;
 
-		// friend class declarations
-    friend class GlobalSettings;
+    // Singletons from core application
+    static GlobalSettings * globalSettings;
+    static core::Game * game;
 
   private slots:
     void onExec();
