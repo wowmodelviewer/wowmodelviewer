@@ -32,10 +32,10 @@ namespace core
   class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
   {
     public:
-      GameFolder();
+      explicit GameFolder(const QString & path);
       virtual ~GameFolder() {}
 
-      virtual void init(const QString & path) = 0;
+      virtual void init() = 0;
       virtual void initFromListfile(const QString & file) = 0;
       virtual void addCustomFiles(const QString & path, bool bypassOriginalFiles) = 0;
 
@@ -62,8 +62,11 @@ namespace core
       virtual void onChildAdded(GameFile *);
       virtual void onChildRemoved(GameFile *);
 
+      QString path() { return m_path; }
+
     private:
       std::map<QString, GameFile *> m_nameMap;
+      QString m_path;
   };
 }
 

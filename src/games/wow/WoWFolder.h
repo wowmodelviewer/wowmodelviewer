@@ -35,10 +35,10 @@ namespace wow
   class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
   {
     public:
-      WoWFolder();
+      WoWFolder(const QString & path);
       virtual ~WoWFolder() {}
 
-      void init(const QString & path);
+      void init();
       void initFromListfile(const QString & file);
       void addCustomFiles(const QString & path, bool bypassOriginalFiles);
 

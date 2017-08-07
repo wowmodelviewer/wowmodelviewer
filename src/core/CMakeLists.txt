@@ -16,6 +16,7 @@ set(CMAKE_AUTOMOC ON)
 set(src CharInfos.cpp
         ExporterPlugin.cpp
         FileDownloader.cpp
+		Game.cpp
 		GameDatabase.cpp
 		GameFile.cpp
 		GameFolder.cpp
@@ -37,6 +38,7 @@ set(src CharInfos.cpp
 set(headers CharInfos.h
 			ExporterPlugin.h
 			FileDownloader.h
+			Game.h
 			GameDatabase.h
 			GameFile.h
 			GameFolder.h

@@ -13,7 +13,8 @@
 
 #include "logger/Logger.h"
 
-core::GameFolder::GameFolder()
+core::GameFolder::GameFolder(const QString & path)
+  : m_path(path)
 {
 }
 

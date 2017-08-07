@@ -17,13 +17,14 @@
 
 #include "logger/Logger.h"
 
-wow::WoWFolder::WoWFolder()
+wow::WoWFolder::WoWFolder(const QString & path)
+  : GameFolder(path)
 {
 }
 
-void wow::WoWFolder::init(const QString & path)
+void wow::WoWFolder::init()
 {
-  m_CASCFolder.init(path);
+  m_CASCFolder.init(path());
 }
 
 

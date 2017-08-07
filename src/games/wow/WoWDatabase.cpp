@@ -192,7 +192,7 @@ bool wow::TableStructure::create()
 
   //LOG_INFO << create;
 
-  sqlResult r = Game::instance().database().sqlQuery(create);
+  sqlResult r = core::Game::instance().database().sqlQuery(create);
 
   if (r.valid)
   {
@@ -202,7 +202,7 @@ bool wow::TableStructure::create()
     for (auto it = indexesToCreate.begin(), itEnd = indexesToCreate.end(); it != itEnd; ++it)
     {
       QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(*it);
-      Game::instance().database().sqlQuery(query);
+      core::Game::instance().database().sqlQuery(query);
     }
   }
 

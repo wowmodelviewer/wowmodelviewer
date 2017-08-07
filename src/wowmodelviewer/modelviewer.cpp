@@ -32,6 +32,7 @@
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
+#include "WoWFolder.h"
 
 #include "logger/Logger.h"
 
@@ -1720,7 +1721,7 @@ void ModelViewer::LoadWoW()
     getGamePath();
   }
 
-  Game::instance().init(QString(gamePath.c_str()), new wow::WoWDatabase());
+  core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
 
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
@@ -1774,7 +1775,7 @@ void ModelViewer::LoadWoW()
   GAMEDIRECTORY.initFromListfile(baseConfigFolder + "listfile.txt");
 
   if (!customDirectoryPath.IsEmpty())
-    Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
+    core::Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
   InitDatabase(baseConfigFolder);
