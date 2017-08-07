@@ -16,6 +16,7 @@ set(CMAKE_AUTOMOC ON)
 set(src CharInfos.cpp
         ExporterPlugin.cpp
         FileDownloader.cpp
+		GameDatabase.cpp
         GlobalSettings.cpp
         ImporterPlugin.cpp
         Model.cpp
@@ -34,6 +35,7 @@ set(src CharInfos.cpp
 set(headers CharInfos.h
 			ExporterPlugin.h
 			FileDownloader.h
+			GameDatabase.h
 			GlobalSettings.h
 			ImporterPlugin.h
 			Model.h
@@ -56,6 +58,7 @@ source_group("Header Files" FILES ${headers})
 			
 use_glew()
 use_cximage()
+use_sqlite()
 
 add_definitions(-DBUILDING_CORE_DLL)
 

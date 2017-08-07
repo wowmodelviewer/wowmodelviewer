@@ -20,83 +20,13 @@
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
-WoWDatabase::~WoWDatabase()
-{
-  if(m_db)
-    sqlite3_close(m_db);
-}
-
-
-WoWDatabase::WoWDatabase()
-: m_db(NULL), m_fastMode(false)
+wow::WoWDatabase::WoWDatabase()
+  : GameDatabase()
 {
 
 }
 
-bool WoWDatabase::initFromXML(const QString & file)
-{
-   int rc = 1;
-
-   if(m_fastMode)
-	  rc = sqlite3_open("./wowdb.sqlite", &m_db);
-   else
-	  rc = sqlite3_open(":memory:", &m_db);
-
-   if( rc )
-   {
-     LOG_INFO << "Can't open database:" << sqlite3_errmsg(m_db);
-     return false;
-   }
-   else
-   {
-     LOG_INFO << "Opened database successfully";
-   }
-
-   sqlite3_profile(m_db, WoWDatabase::logQueryTime, m_db);
-   return createDatabaseFromXML(file);
-}
-
-sqlResult WoWDatabase::sqlQuery(const QString & query)
-{
-  sqlResult result;
-
-  char *zErrMsg = 0;
-  int rc = sqlite3_exec(m_db, query.toStdString().c_str(), WoWDatabase::treatQuery, (void *)&result, &zErrMsg);
-  if( rc != SQLITE_OK )
-  {
-    LOG_ERROR << "Querying in database" << query;
-    LOG_ERROR << "SQL error:" << zErrMsg;
-    sqlite3_free(zErrMsg);
-    result.valid = false;
-  }
-  else
-  {
-    result.valid = true; // result is valid
-  }
-
-  return result;
-}
-
-int WoWDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char ** cols)
-{
-  sqlResult * r = (sqlResult *)resultPtr;
-  if(!r)
-    return 1;
-
-  std::vector<QString> values;
-  // update columns
-  for(int i=0; i<nbcols; i++)
-  {
-    values.push_back(QString(vals[i]));
-  }
-
-  r->values.push_back(values);
-  r->nbcols = nbcols;
-
-  return 0;
-}
-
-bool WoWDatabase::readStructureFromXML(const QString & file)
+bool wow::WoWDatabase::readStructureFromXML(const QString & file)
 {
   QDomDocument doc;
 
@@ -111,7 +41,7 @@ bool WoWDatabase::readStructureFromXML(const QString & file)
 
   while (!e.isNull())
   {
-    tableStructure * tblStruct = new tableStructure();
+    wow::TableStructure * tblStruct = new wow::TableStructure();
     QDomElement child = e.firstChildElement();
 
     QDomNamedNodeMap attributes = e.attributes();
@@ -131,10 +61,10 @@ bool WoWDatabase::readStructureFromXML(const QString & file)
     int fieldId = 0;
     while (!child.isNull())
     {
-      fieldStructure * fieldStruct = new fieldStructure();
+      core::FieldStructure * fieldStruct = new core::FieldStructure();
       fieldStruct->id = fieldId;
       QDomNamedNodeMap attributes = child.attributes();
-
+      
       // search if name and type are here
       QDomNode name = attributes.namedItem("name");
       QDomNode type = attributes.namedItem("type");
@@ -186,47 +116,43 @@ bool WoWDatabase::readStructureFromXML(const QString & file)
     }
     LOG_INFO << "----------------------------";
     */
-    m_dbStruct.push_back(*tblStruct);
+    addTable(tblStruct);
 
     e = e.nextSiblingElement();
   }
   return true;
 }
 
-bool WoWDatabase::createDatabaseFromXML(const QString & file)
+DBFile * wow::WoWDatabase::createDBFile(GameFile * fileToOpen)
 {
-  if (!readStructureFromXML(file))
+  DBFile * result = 0;
+  if (fileToOpen)
   {
-    LOG_ERROR << "Reading database structure from XML file failed ! Impossible to create database.";
-    return false;
-  }
-
-  bool result = true; // ok until we found an issue
-
-  for (auto it = m_dbStruct.begin(), itEnd = m_dbStruct.end(); it != itEnd; ++it)
-  {
-    if (it->create())
+    if (fileToOpen->open())
     {
-      if (!it->fill())
-      {
-        LOG_ERROR << "Error during table filling" << it->name;
-        result = false;
-      }
-    }
-    else
-    {
-      LOG_ERROR << "Error during table creation" << it->name;
-      result = false;
+      char header[5];
+      
+      fileToOpen->read(header, 4);
+
+      if (strncmp(header, "WDB2", 4) == 0)
+        result = new WDB2File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB5", 4) == 0)
+        result = new WDB5File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB6", 4) == 0)
+        result = new WDB6File(fileToOpen->fullname());
+
+      // reset read pointer to make sure further reading will start from the begining
+      fileToOpen->seek(0);
     }
   }
 
-  return result; 
+  return result;
 }
 
-bool WoWDatabase::tableStructure::create()
+bool wow::TableStructure::create()
 {
   LOG_INFO << "Creating table" << name;
-  QString create = "CREATE TABLE "+ name +" (";
+  QString create = "CREATE TABLE " + name + " (";
 
   std::list<QString> indexesToCreate;
 
@@ -260,14 +186,14 @@ bool WoWDatabase::tableStructure::create()
   }
 
   // remove spurious "," at the end of string, if any
-  if(create.lastIndexOf(",") == create.length()-1)
-    create.remove(create.length()-1,1);
+  if (create.lastIndexOf(",") == create.length() - 1)
+    create.remove(create.length() - 1, 1);
   create += ");";
-  
+
   //LOG_INFO << create;
 
-  sqlResult r = GAMEDATABASE.sqlQuery(create);
- 
+  sqlResult r = Game::instance().gameDatabase().sqlQuery(create);
+
   if (r.valid)
   {
     LOG_INFO << "Table" << name << "successfully created";
@@ -276,41 +202,14 @@ bool WoWDatabase::tableStructure::create()
     for (auto it = indexesToCreate.begin(), itEnd = indexesToCreate.end(); it != itEnd; ++it)
     {
       QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(*it);
-      GAMEDATABASE.sqlQuery(query);
+      Game::instance().gameDatabase().sqlQuery(query);
     }
   }
 
   return r.valid;
 }
 
-
-DBFile * WoWDatabase::createDBFile(GameFile * fileToOpen)
-{
-  DBFile * result = 0;
-  if (fileToOpen)
-  {
-    if (fileToOpen->open())
-    {
-      char header[5];
-      
-      fileToOpen->read(header, 4);
-
-      if (strncmp(header, "WDB2", 4) == 0)
-        result = new WDB2File(fileToOpen->fullname());
-      else if (strncmp(header, "WDB5", 4) == 0)
-        result = new WDB5File(fileToOpen->fullname());
-      else if (strncmp(header, "WDB6", 4) == 0)
-        result = new WDB6File(fileToOpen->fullname());
-
-      // reset read pointer to make sure further reading will start from the begining
-      fileToOpen->seek(0);
-    }
-  }
-
-  return result;
-}
-
-bool WoWDatabase::tableStructure::fill()
+bool wow::TableStructure::fill()
 {
   LOG_INFO << "Filling table" << name << "...";
   GameFile * fileToOpen = 0;
@@ -325,7 +224,7 @@ bool WoWDatabase::tableStructure::fill()
   if(!fileToOpen)
     return false;
 
-  DBFile * dbc = WoWDatabase::createDBFile(fileToOpen);
+  DBFile * dbc = wow::WoWDatabase::createDBFile(fileToOpen);
   if(!dbc || !dbc->open())
     return false;
 
@@ -407,13 +306,3 @@ bool WoWDatabase::tableStructure::fill()
   return r.valid;
 }
 
-void WoWDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
-{
-  if(aTimeInNs/1000000 > 30)
-  {
-    LOG_ERROR << "LONG QUERY !";
-    LOG_ERROR << aQueryStr;
-    LOG_ERROR << "Query time (ms)" << aTimeInNs/1000000;
-  }
-
-}

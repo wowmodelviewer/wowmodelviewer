@@ -85,7 +85,7 @@ WDB2File::~WDB2File()
   close();
 }
 
-std::vector<std::string> WDB2File::get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const
+std::vector<std::string> WDB2File::get(unsigned int recordIndex, const wow::TableStructure & structure) const
 {
   unsigned char * recordOffset = data + (recordIndex * recordSize);
   std::vector<std::string> result;

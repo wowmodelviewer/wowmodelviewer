@@ -10,7 +10,8 @@
 
 #include <map>
 #include <vector>
-#include "sqlite3.h"
+
+#include "GameDatabase.h"
 
 class DBFile;
 class GameFile;
@@ -18,16 +19,6 @@ class GameFile;
 class QDomElement;
 #include <QString>
 
-class sqlResult
-{
-  public:
-    sqlResult() : valid(false), nbcols(0) {}
-    ~sqlResult() { /* TODO :free char** */ }
-    bool empty() { return values.size() == 0; }
-    bool valid;
-    int nbcols;
-    std::vector<std::vector<QString> > values;
-};
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -39,81 +30,30 @@ class sqlResult
 #    define _WOWDATABASE_API_
 #endif
 
-class _WOWDATABASE_API_ WoWDatabase
+namespace wow
 {
+  class TableStructure : public core::TableStructure
+  {
   public:
-    WoWDatabase();
-    WoWDatabase(WoWDatabase &);
+    virtual bool create(); // @TODO : move into core when Game singleton will be ready
+    virtual bool fill();
+  };
 
-    bool initFromXML(const QString & file);
+  class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
+  {
+    public:
+      WoWDatabase();
+      WoWDatabase(WoWDatabase &);
 
-    sqlResult sqlQuery(const QString &query);
+      ~WoWDatabase() {}
 
-    void setFastMode() { m_fastMode = true; }
+      static DBFile * createDBFile(GameFile *);
 
-    ~WoWDatabase();
+    protected:
+      virtual bool readStructureFromXML(const QString & file);
 
-    // table structures as defined in xml file
-    class fieldStructure
-    {
-      public:
-        fieldStructure() :
-          name(""),
-          type(""),
-          isKey(false),
-          pos(-1),
-          arraySize(1),
-          id(0),
-          needIndex(false),
-          isCommonData(false)
-        {}
+  };
 
-        QString name;
-        QString type;
-        bool isKey;
-        bool needIndex;
-        int pos;
-        bool isCommonData;
-        unsigned int arraySize;
-        int id;
-    };
-
-    class tableStructure
-    {
-      public:
-        tableStructure() :
-          name(""),
-          gamefile(""),
-          hash(0)
-        {}
-
-        QString name;
-        QString gamefile;
-        unsigned int hash;
-        std::vector<fieldStructure> fields;
-
-        bool create();
-        bool fill();
-    };
-
-
-  private:
-    static int treatQuery(void *NotUsed, int nbcols, char ** values , char ** cols);
-    static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
-
-    bool readStructureFromXML(const QString & file);
-    bool createDatabaseFromXML(const QString & file);
-
-
-    static DBFile * createDBFile(GameFile *);
-
-    sqlite3 *m_db;
-
-    std::vector<tableStructure> m_dbStruct;
-
-    bool m_fastMode;
-};
-
-
+}
 
 #endif /* _WOWDATABASE_H_ */

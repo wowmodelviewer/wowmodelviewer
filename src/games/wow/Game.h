@@ -41,7 +41,7 @@ class _GAME_API_ Game
 
 
     GameFolder & gameFolder() { return m_gameFolder; }
-    WoWDatabase & gameDatabase() { return m_gameDatabase;}
+    wow::WoWDatabase & gameDatabase() { return m_gameDatabase;}
 
   private:
     // disable explicit construct and destruct
@@ -51,7 +51,7 @@ class _GAME_API_ Game
     void operator=(const Game &);
 
     GameFolder m_gameFolder;
-    WoWDatabase m_gameDatabase;
+    wow::WoWDatabase m_gameDatabase;
 
     static Game * m_instance;
 };

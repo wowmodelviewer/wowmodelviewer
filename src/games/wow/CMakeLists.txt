@@ -119,7 +119,6 @@ source_group("Header Files" FILES ${headers})
 use_core()
 use_glew()
 use_casclib()
-use_sqlite()
 
 
 add_definitions(-DBUILDING_WOW_DLL)

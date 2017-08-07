@@ -50,7 +50,7 @@ public:
 			  return *this; 
 		  }	
 		
-      std::vector<std::string> get(const WoWDatabase::tableStructure & structure) const
+      std::vector<std::string> get(const wow::TableStructure & structure) const
       {
         return file.get(recordIndex, structure);
       }
@@ -107,7 +107,7 @@ public:
   }
 
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned int recordIndex, const WoWDatabase::tableStructure & structure) const = 0;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const wow::TableStructure & structure) const = 0;
 
 protected:
 	size_t recordSize;
