@@ -17,6 +17,7 @@
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
+#include "WoWFolder.h"
 
 #include "logger/Logger.h"
 #include "logger/LogOutputConsole.h"
@@ -231,6 +232,7 @@ bool WowModelViewApp::OnInit()
     }
     else if (cmd == wxT("-dbfromfile")) {
       LOG_INFO << "Read database from file";
+      core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
       GAMEDATABASE.setFastMode();
     }
     else if (cmd == wxT("-console")) {

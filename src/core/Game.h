@@ -39,6 +39,7 @@ namespace core
       }
 
       void init(core::GameFolder * folder, core::GameDatabase * db);
+      bool initDone() { return ((m_db != 0) && (m_folder != 0)); }
       void addCustomFiles(const QString &path, bool bypassOriginalFiles);
 
       core::GameFolder & folder() { return *m_folder; }

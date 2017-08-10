@@ -1720,8 +1720,9 @@ void ModelViewer::LoadWoW()
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();
   }
-
-  core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
+  
+  if (!core::Game::instance().initDone())
+    core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
 
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
