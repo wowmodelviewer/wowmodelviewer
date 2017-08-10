@@ -48,9 +48,8 @@ namespace wow
 
       static DBFile * createDBFile(GameFile *);
 
-    protected:
-      virtual bool readStructureFromXML(const QString & file);
-
+      core::TableStructure * createTableStructure();
+      core::FieldStructure * createFieldStructure();
   };
 
 }

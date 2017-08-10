@@ -7,11 +7,6 @@
 
 #include "WoWDatabase.h"
 
-#include <QDomDocument>
-#include <QDomElement>
-#include <QDomNamedNodeMap>
-#include <QFile>
-
 #include "wdb2file.h"
 #include "wdb5file.h"
 #include "wdb6file.h"
@@ -24,103 +19,6 @@ wow::WoWDatabase::WoWDatabase()
   : GameDatabase()
 {
 
-}
-
-bool wow::WoWDatabase::readStructureFromXML(const QString & file)
-{
-  QDomDocument doc;
-
-  QFile f(file);
-  f.open(QIODevice::ReadOnly);
-  doc.setContent(&f);
-  f.close();
-
-  QDomElement docElem = doc.documentElement();
-
-  QDomElement e = docElem.firstChildElement();
-
-  while (!e.isNull())
-  {
-    wow::TableStructure * tblStruct = new wow::TableStructure();
-    QDomElement child = e.firstChildElement();
-
-    QDomNamedNodeMap attributes = e.attributes();
-    QDomNode hash = attributes.namedItem("layoutHash");
-    QDomNode gamefile = attributes.namedItem("gamefile");
-
-    // table values
-    tblStruct->name = attributes.namedItem("name").nodeValue();
-    if (!hash.isNull())
-      tblStruct->hash = hash.nodeValue().toUInt();
-
-    if (!gamefile.isNull())
-      tblStruct->gamefile = gamefile.nodeValue();
-    else
-      tblStruct->gamefile = tblStruct->name;
-
-    int fieldId = 0;
-    while (!child.isNull())
-    {
-      core::FieldStructure * fieldStruct = new core::FieldStructure();
-      fieldStruct->id = fieldId;
-      QDomNamedNodeMap attributes = child.attributes();
-      
-      // search if name and type are here
-      QDomNode name = attributes.namedItem("name");
-      QDomNode type = attributes.namedItem("type");
-      QDomNode key = attributes.namedItem("primary");
-      QDomNode arraySize = attributes.namedItem("arraySize");
-      QDomNode pos = attributes.namedItem("pos");
-      QDomNode commonData = attributes.namedItem("commonData");
-      QDomNode index = attributes.namedItem("createIndex");
-
-      if (!name.isNull() && !type.isNull())
-      {
-        fieldStruct->name = name.nodeValue();
-        fieldStruct->type = type.nodeValue();
-
-        if (!key.isNull())
-          fieldStruct->isKey = true;
-
-        if (!index.isNull())
-          fieldStruct->needIndex = true;
-
-        if (!pos.isNull())
-          fieldStruct->pos = pos.nodeValue().toInt();
-
-        if (!commonData.isNull())
-          fieldStruct->isCommonData = true;
-
-        if (!arraySize.isNull())
-          fieldStruct->arraySize = arraySize.nodeValue().toUInt();
-
-        tblStruct->fields.push_back(*fieldStruct);
-      }
-
-      fieldId++;
-      child = child.nextSiblingElement();
-    }
-
-    /*
-    LOG_INFO << "----------------------------";
-    LOG_INFO << "Table" << tblStruct->name.c_str() << "/ hash" << tblStruct->hash;
-    for (unsigned int i = 0; i < tblStruct->fields.size(); i++)
-    {
-      fieldStructure field = tblStruct->fields[i];
-      LOG_INFO << "fieldName =" << field.name.c_str()
-        << "/ fieldType =" << field.type.c_str()
-        << "/ is key ? =" << field.isKey
-        << "/ need Index ? =" << field.needIndex
-        << "/ pos =" << field.pos
-        << "/ arraySize =" << field.arraySize;
-    }
-    LOG_INFO << "----------------------------";
-    */
-    addTable(tblStruct);
-
-    e = e.nextSiblingElement();
-  }
-  return true;
 }
 
 DBFile * wow::WoWDatabase::createDBFile(GameFile * fileToOpen)
@@ -149,6 +47,17 @@ DBFile * wow::WoWDatabase::createDBFile(GameFile * fileToOpen)
   return result;
 }
 
+core::TableStructure *  wow::WoWDatabase::createTableStructure()
+{
+  return new wow::TableStructure;
+}
+
+core::FieldStructure *  wow::WoWDatabase::createFieldStructure()
+{
+  return new core::FieldStructure;
+}
+
+
 bool wow::TableStructure::fill()
 {
   LOG_INFO << "Filling table" << name << "...";
@@ -156,7 +65,7 @@ bool wow::TableStructure::fill()
   // loop over possible extension to check if file exists
   for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
   {
-    fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\"+gamefile+POSSIBLE_DB_EXT[i]);
+    fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\"+file+POSSIBLE_DB_EXT[i]);
     if(fileToOpen)
       break;
   }

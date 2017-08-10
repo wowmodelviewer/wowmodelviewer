@@ -71,12 +71,12 @@ namespace core
   public:
     TableStructure() :
       name(""),
-      gamefile(""),
+      file(""),
       hash(0)
     {}
 
     QString name;
-    QString gamefile;
+    QString file;
     unsigned int hash;
     std::vector<FieldStructure> fields;
 
@@ -101,14 +101,17 @@ namespace core
 
     void addTable(TableStructure *);
 
+    virtual core::TableStructure * createTableStructure() = 0;
+    virtual core::FieldStructure * createFieldStructure() = 0;
+
   protected:
-    virtual bool readStructureFromXML(const QString & file) = 0;
 
   private:
     static int treatQuery(void *NotUsed, int nbcols, char ** values, char ** cols);
     static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
     bool createDatabaseFromXML(const QString & file);
+    bool readStructureFromXML(const QString & file);
 
     sqlite3 *m_db;
 

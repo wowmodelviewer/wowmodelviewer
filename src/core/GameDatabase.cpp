@@ -7,6 +7,11 @@
 
 #include "GameDatabase.h"
 
+#include <QDomDocument>
+#include <QDomElement>
+#include <QDomNamedNodeMap>
+#include <QFile>
+
 #include "logger/Logger.h"
 
 
@@ -131,6 +136,103 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
     LOG_ERROR << "Query time (ms)" << aTimeInNs/1000000;
   }
 
+}
+
+bool core::GameDatabase::readStructureFromXML(const QString & file)
+{
+  QDomDocument doc;
+
+  QFile f(file);
+  f.open(QIODevice::ReadOnly);
+  doc.setContent(&f);
+  f.close();
+
+  QDomElement docElem = doc.documentElement();
+
+  QDomElement e = docElem.firstChildElement();
+
+  while (!e.isNull())
+  {
+    core::TableStructure * tblStruct = createTableStructure();
+    QDomElement child = e.firstChildElement();
+
+    QDomNamedNodeMap attributes = e.attributes();
+    QDomNode hash = attributes.namedItem("layoutHash");
+    QDomNode gamefile = attributes.namedItem("gamefile");
+
+    // table values
+    tblStruct->name = attributes.namedItem("name").nodeValue();
+    if (!hash.isNull())
+      tblStruct->hash = hash.nodeValue().toUInt();
+
+    if (!gamefile.isNull())
+      tblStruct->file = gamefile.nodeValue();
+    else
+      tblStruct->file = tblStruct->name;
+
+    int fieldId = 0;
+    while (!child.isNull())
+    {
+      core::FieldStructure * fieldStruct = createFieldStructure();
+      fieldStruct->id = fieldId;
+      QDomNamedNodeMap attributes = child.attributes();
+
+      // search if name and type are here
+      QDomNode name = attributes.namedItem("name");
+      QDomNode type = attributes.namedItem("type");
+      QDomNode key = attributes.namedItem("primary");
+      QDomNode arraySize = attributes.namedItem("arraySize");
+      QDomNode pos = attributes.namedItem("pos");
+      QDomNode commonData = attributes.namedItem("commonData");
+      QDomNode index = attributes.namedItem("createIndex");
+
+      if (!name.isNull() && !type.isNull())
+      {
+        fieldStruct->name = name.nodeValue();
+        fieldStruct->type = type.nodeValue();
+
+        if (!key.isNull())
+          fieldStruct->isKey = true;
+
+        if (!index.isNull())
+          fieldStruct->needIndex = true;
+
+        if (!pos.isNull())
+          fieldStruct->pos = pos.nodeValue().toInt();
+
+        if (!commonData.isNull())
+          fieldStruct->isCommonData = true;
+
+        if (!arraySize.isNull())
+          fieldStruct->arraySize = arraySize.nodeValue().toUInt();
+
+        tblStruct->fields.push_back(*fieldStruct);
+      }
+
+      fieldId++;
+      child = child.nextSiblingElement();
+    }
+
+    /*
+    LOG_INFO << "----------------------------";
+    LOG_INFO << "Table" << tblStruct->name.c_str() << "/ hash" << tblStruct->hash;
+    for (unsigned int i = 0; i < tblStruct->fields.size(); i++)
+    {
+    fieldStructure field = tblStruct->fields[i];
+    LOG_INFO << "fieldName =" << field.name.c_str()
+    << "/ fieldType =" << field.type.c_str()
+    << "/ is key ? =" << field.isKey
+    << "/ need Index ? =" << field.needIndex
+    << "/ pos =" << field.pos
+    << "/ arraySize =" << field.arraySize;
+    }
+    LOG_INFO << "----------------------------";
+    */
+    addTable(tblStruct);
+
+    e = e.nextSiblingElement();
+  }
+  return true;
 }
 
 bool core::TableStructure::create()

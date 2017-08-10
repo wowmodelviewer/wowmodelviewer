@@ -11,6 +11,8 @@ include_directories(.)
 find_package(Qt5Core) 
 find_package(Qt5Gui) # Qt5Gui is needed for QImage
 find_package(Qt5Network)
+find_package(Qt5Xml)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(src CharInfos.cpp
@@ -71,7 +73,7 @@ add_definitions(-DBUILDING_CORE_DLL)
 add_library(core SHARED ${src} ${headers})
 set_property(TARGET core PROPERTY FOLDER "libraries")
 
-target_link_libraries(core Qt5::Core Qt5::Network Qt5::Gui ${extralibs})
+target_link_libraries(core Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
 
 if(WIN32)
   install(TARGETS core RUNTIME DESTINATION "$ENV{WMV_BASE_PATH}/bin/")
