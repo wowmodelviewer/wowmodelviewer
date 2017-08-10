@@ -69,12 +69,15 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
 
       GameFile * originalFile = GameFolder::getFile(filePath);
       bool addnewfile = true;
+      int originalId = -1;
       if(originalFile)
       {
         if(bypassOriginalFiles)
         {
+          originalId = originalFile->fileDataId();
           removeChild(originalFile);
           delete originalFile;
+          originalFile = 0;
           addnewfile = true;
         }
         else
@@ -86,7 +89,7 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
       if(addnewfile)
       {
         LOG_INFO << "Add custom file" << filePath << "from hard drive location" << dirIt.filePath();
-        HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalFile ? originalFile->fileDataId() : -1);
+        HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalId);
         file->setName(filePath.mid(filePath.lastIndexOf("/")+1));
         addChild(file);
       }
