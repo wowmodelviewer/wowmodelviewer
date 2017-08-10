@@ -213,7 +213,9 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const wow::Tabl
        it != itEnd;
        ++it)
   {
-    if (it->isKey)
+    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(*it);
+
+    if (field->isKey)
     {
       std::stringstream ss;
 
@@ -224,21 +226,21 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const wow::Tabl
       continue;
     }
 
-    if (it->isCommonData) // managed in wdb6 reader
+    if (field->isCommonData) // managed in wdb6 reader
       continue;
 
-    for (uint i = 0; i < it->arraySize; i++)
+    for (uint i = 0; i < field->arraySize; i++)
     {
-      int fieldSize = (32 - m_fieldSizes.at(it->pos)) / 8;
+      int fieldSize = (32 - m_fieldSizes.at(field->pos)) / 8;
       unsigned char * val = new unsigned char[fieldSize];
 
-      memcpy(val, recordOffset + it->pos + i*fieldSize, fieldSize);
+      memcpy(val, recordOffset + field->pos + i*fieldSize, fieldSize);
 
-      if (it->type == "text")
+      if (field->type == "text")
       {
         char * stringPtr;
         if (m_isSparseTable)
-          stringPtr = reinterpret_cast<char *>(recordOffset + it->pos);
+          stringPtr = reinterpret_cast<char *>(recordOffset + field->pos);
         else
           stringPtr = reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val));
 
@@ -246,13 +248,13 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const wow::Tabl
         std::replace(value.begin(), value.end(), '"', '\'');
         result.push_back(value);
       }
-      else if (it->type == "float")
+      else if (field->type == "float")
       {
         std::stringstream ss;
         ss << *reinterpret_cast<float*>(val);
         result.push_back(ss.str());
       }
-      else if (it->type == "int")
+      else if (field->type == "int")
       {
         std::stringstream ss;
         ss << (*reinterpret_cast<int*>(val));

@@ -104,9 +104,14 @@ std::vector<std::string> WDB6File::get(unsigned int recordIndex, const wow::Tabl
        it != itEnd;
        ++it)
   {
-    if (it->isCommonData)
+    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(*it);
+
+    if (!field)
+      continue;
+
+    if (field->isCommonData)
     {
-      auto common = m_commonData.find(it->pos);
+      auto common = m_commonData.find(field->pos);
       if (common != m_commonData.end())
       {
         auto val = std::get<0>(common->second).find(m_IDs[recordIndex]);

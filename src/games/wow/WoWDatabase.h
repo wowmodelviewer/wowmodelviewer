@@ -35,7 +35,27 @@ namespace wow
   class TableStructure : public core::TableStructure
   {
   public:
+    TableStructure() :
+      core::TableStructure(), hash(0)
+    {
+    }
+
+    unsigned int hash;
+
     virtual bool fill();
+  };
+
+  class FieldStructure : public core::FieldStructure
+  {
+  public:
+    FieldStructure() :
+      core::FieldStructure(), pos(-1), isCommonData(false)
+    {
+    }
+
+    int pos;
+    bool isCommonData;
+
   };
 
   class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
@@ -50,6 +70,9 @@ namespace wow
 
       core::TableStructure * createTableStructure();
       core::FieldStructure * createFieldStructure();
+
+      void readSpecificTableAttributes(QDomElement &, core::TableStructure *);
+      void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *);
   };
 
 }

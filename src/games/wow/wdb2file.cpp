@@ -95,41 +95,41 @@ std::vector<std::string> WDB2File::get(unsigned int recordIndex, const wow::Tabl
        ++it)
   {
     // std::cout << it->second.first << " => ";
-    if (it->type == "uint")
+    if ((*it)->type == "uint")
     {
       // std::cout << "uint => " << it->first << " => ";
       std::stringstream ss;
-      ss << getUInt(recordOffset, it->id);
+      ss << getUInt(recordOffset, (*it)->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->type == "int")
+    else if ((*it)->type == "int")
     {
       // std::cout << "uint => " << it->first << " => ";
       std::stringstream ss;
-      ss << getInt(recordOffset, it->id);
+      ss << getInt(recordOffset, (*it)->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->type == "text")
+    else if ((*it)->type == "text")
     {
       // as " character cause weird issues with sql queries, replace it with '
-      std::string val = getStdString(recordOffset, it->id);
+      std::string val = getStdString(recordOffset, (*it)->id);
       std::replace(val.begin(), val.end(), '"', '\'');
       result.push_back(val);
     }
-    else if (it->type == "float")
+    else if ((*it)->type == "float")
     {
       // std::cout << "float => " << it->first << " => ";
       std::stringstream ss;
-      ss << getFloat(recordOffset, it->id);
+      ss << getFloat(recordOffset, (*it)->id);
       std::string field = ss.str();
       // std::cout << field << std::endl;
       result.push_back(field);
     }
-    else if (it->type == "byte")
+    else if ((*it)->type == "byte")
     {
       unsigned int decal = 0;
       switch (offset)
@@ -149,7 +149,7 @@ std::vector<std::string> WDB2File::get(unsigned int recordIndex, const wow::Tabl
       }
 
       std::stringstream ss;
-      unsigned int val = getUInt(recordOffset, it->id - offset);
+      unsigned int val = getUInt(recordOffset, (*it)->id - offset);
       ss << ((val >> decal) & 0x000000FF);
       std::string field = ss.str();
       // std::cout << field << std::endl;

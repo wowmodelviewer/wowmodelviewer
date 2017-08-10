@@ -49,19 +49,17 @@ namespace core
       name(""),
       type(""),
       isKey(false),
-      pos(-1),
       arraySize(1),
       id(0),
-      needIndex(false),
-      isCommonData(false)
+      needIndex(false)
     {}
+
+    virtual ~FieldStructure() {}
 
     QString name;
     QString type;
     bool isKey;
     bool needIndex;
-    int pos;
-    bool isCommonData;
     unsigned int arraySize;
     int id;
   };
@@ -71,14 +69,12 @@ namespace core
   public:
     TableStructure() :
       name(""),
-      file(""),
-      hash(0)
+      file("")
     {}
 
     QString name;
     QString file;
-    unsigned int hash;
-    std::vector<FieldStructure> fields;
+    std::vector<FieldStructure *> fields;
 
     bool create();
     virtual bool fill() = 0;
@@ -103,6 +99,9 @@ namespace core
 
     virtual core::TableStructure * createTableStructure() = 0;
     virtual core::FieldStructure * createFieldStructure() = 0;
+
+    virtual void readSpecificTableAttributes(QDomElement &, core::TableStructure *) = 0;
+    virtual void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *) = 0;
 
   protected:
 

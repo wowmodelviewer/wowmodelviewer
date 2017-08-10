@@ -7,11 +7,14 @@
 
 #include "WoWDatabase.h"
 
+#include <QDomElement>
+#include <QDomNamedNodeMap>
+
+#include "Game.h"
+#include "logger/Logger.h"
 #include "wdb2file.h"
 #include "wdb5file.h"
 #include "wdb6file.h"
-#include "Game.h"
-#include "logger/Logger.h"
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
@@ -54,9 +57,42 @@ core::TableStructure *  wow::WoWDatabase::createTableStructure()
 
 core::FieldStructure *  wow::WoWDatabase::createFieldStructure()
 {
-  return new core::FieldStructure;
+  return new wow::FieldStructure;
 }
 
+void wow::WoWDatabase::readSpecificTableAttributes(QDomElement & e, core::TableStructure * tblStruct)
+{
+  wow::TableStructure * tbl = dynamic_cast<wow::TableStructure *>(tblStruct);
+
+  if (!tbl)
+    return;
+
+  QDomNamedNodeMap attributes = e.attributes();
+  QDomNode hash = attributes.namedItem("layoutHash");
+
+  if (!hash.isNull())
+    tbl->hash = hash.nodeValue().toUInt();
+}
+
+void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldStructure * fieldStruct)
+{
+  wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(fieldStruct);
+
+  if (!field)
+    return;
+
+  QDomNamedNodeMap attributes = e.attributes();
+
+  QDomNode pos = attributes.namedItem("pos");
+  QDomNode commonData = attributes.namedItem("commonData");
+
+  if (!pos.isNull())
+    field->pos = pos.nodeValue().toInt();
+
+  if (!commonData.isNull())
+    field->isCommonData = true;
+
+}
 
 bool wow::TableStructure::fill()
 {
@@ -86,17 +122,17 @@ bool wow::TableStructure::fill()
       it != itEnd ;
       ++it,curfield++)
   {
-	  if (it->arraySize == 1) // simple field
+	  if ((*it)->arraySize == 1) // simple field
 	  {
-	    query += it->name;
+	    query += (*it)->name;
 	  }
 	  else
 	  {
-	    for (unsigned int i = 1; i <= it->arraySize; i++)
+	    for (unsigned int i = 1; i <= (*it)->arraySize; i++)
 	    {
-		  query += it->name;
+		  query += (*it)->name;
 		  query += QString::number(i);
-		  if (i != it->arraySize)
+		  if (i != (*it)->arraySize)
 		    query += ",";
 	    }
 	  }

@@ -157,18 +157,17 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
     QDomElement child = e.firstChildElement();
 
     QDomNamedNodeMap attributes = e.attributes();
-    QDomNode hash = attributes.namedItem("layoutHash");
     QDomNode gamefile = attributes.namedItem("gamefile");
 
     // table values
     tblStruct->name = attributes.namedItem("name").nodeValue();
-    if (!hash.isNull())
-      tblStruct->hash = hash.nodeValue().toUInt();
 
     if (!gamefile.isNull())
       tblStruct->file = gamefile.nodeValue();
     else
       tblStruct->file = tblStruct->name;
+
+    readSpecificTableAttributes(child, tblStruct);
 
     int fieldId = 0;
     while (!child.isNull())
@@ -182,8 +181,6 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
       QDomNode type = attributes.namedItem("type");
       QDomNode key = attributes.namedItem("primary");
       QDomNode arraySize = attributes.namedItem("arraySize");
-      QDomNode pos = attributes.namedItem("pos");
-      QDomNode commonData = attributes.namedItem("commonData");
       QDomNode index = attributes.namedItem("createIndex");
 
       if (!name.isNull() && !type.isNull())
@@ -197,16 +194,12 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
         if (!index.isNull())
           fieldStruct->needIndex = true;
 
-        if (!pos.isNull())
-          fieldStruct->pos = pos.nodeValue().toInt();
-
-        if (!commonData.isNull())
-          fieldStruct->isCommonData = true;
-
         if (!arraySize.isNull())
           fieldStruct->arraySize = arraySize.nodeValue().toUInt();
 
-        tblStruct->fields.push_back(*fieldStruct);
+        readSpecificFieldAttributes(child, fieldStruct);
+
+        tblStruct->fields.push_back(fieldStruct);
       }
 
       fieldId++;
@@ -244,31 +237,31 @@ bool core::TableStructure::create()
 
   for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
   {
-    if (it->arraySize == 1) // simple field
+    if ((*it)->arraySize == 1) // simple field
     {
-      create += it->name;
+      create += (*it)->name;
       create += " ";
-      create += it->type;
+      create += (*it)->type;
 
-      if (it->isKey)
+      if ((*it)->isKey)
         create += " PRIMARY KEY NOT NULL";
 
       create += ",";
     }
     else // complex field
     {
-      for (unsigned int i = 1; i <= it->arraySize; i++)
+      for (unsigned int i = 1; i <= (*it)->arraySize; i++)
       {
-        create += it->name;
+        create += (*it)->name;
         create += QString::number(i);
         create += " ";
-        create += it->type;
+        create += (*it)->type;
         create += ",";
       }
     }
 
-    if (it->needIndex)
-      indexesToCreate.push_back(it->name);
+    if ((*it)->needIndex)
+      indexesToCreate.push_back((*it)->name);
   }
 
   // remove spurious "," at the end of string, if any
