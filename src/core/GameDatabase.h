@@ -80,7 +80,7 @@ namespace core
     unsigned int hash;
     std::vector<FieldStructure> fields;
 
-    virtual bool create() = 0;
+    bool create();
     virtual bool fill() = 0;
   };
 

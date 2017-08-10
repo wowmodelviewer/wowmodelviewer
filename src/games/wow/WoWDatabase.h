@@ -35,7 +35,6 @@ namespace wow
   class TableStructure : public core::TableStructure
   {
   public:
-    virtual bool create(); // @TODO : move into core when Game singleton will be ready
     virtual bool fill();
   };
 

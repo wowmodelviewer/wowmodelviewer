@@ -132,3 +132,63 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
   }
 
 }
+
+bool core::TableStructure::create()
+{
+  LOG_INFO << "Creating table" << name;
+  QString create = "CREATE TABLE " + name + " (";
+
+  std::list<QString> indexesToCreate;
+
+  for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
+  {
+    if (it->arraySize == 1) // simple field
+    {
+      create += it->name;
+      create += " ";
+      create += it->type;
+
+      if (it->isKey)
+        create += " PRIMARY KEY NOT NULL";
+
+      create += ",";
+    }
+    else // complex field
+    {
+      for (unsigned int i = 1; i <= it->arraySize; i++)
+      {
+        create += it->name;
+        create += QString::number(i);
+        create += " ";
+        create += it->type;
+        create += ",";
+      }
+    }
+
+    if (it->needIndex)
+      indexesToCreate.push_back(it->name);
+  }
+
+  // remove spurious "," at the end of string, if any
+  if (create.lastIndexOf(",") == create.length() - 1)
+    create.remove(create.length() - 1, 1);
+  create += ");";
+
+  //LOG_INFO << create;
+
+  sqlResult r = core::Game::instance().database().sqlQuery(create);
+
+  if (r.valid)
+  {
+    LOG_INFO << "Table" << name << "successfully created";
+
+    // create indexes
+    for (auto it = indexesToCreate.begin(), itEnd = indexesToCreate.end(); it != itEnd; ++it)
+    {
+      QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(*it);
+      core::Game::instance().database().sqlQuery(query);
+    }
+  }
+
+  return r.valid;
+}
