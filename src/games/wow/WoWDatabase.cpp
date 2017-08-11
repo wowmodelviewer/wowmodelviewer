@@ -148,7 +148,7 @@ bool wow::TableStructure::fill()
 
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
-    std::vector<std::string> fields = it.get(*this);
+    std::vector<std::string> fields = it.get(this);
 
     for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
     {

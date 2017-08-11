@@ -6,10 +6,12 @@
 
 #include <bitset>
 
+#include "WoWDatabase.h"
+
 #define WDB5_READ_DEBUG 0
 
 WDB5File::WDB5File(const QString & file) :
-DBFile(file), m_isSparseTable(false)
+DBFile(), m_isSparseTable(false), CASCFile(file)
 {
 }
 
@@ -37,8 +39,14 @@ WDB5File::header WDB5File::readHeader()
 }
 
 
-bool WDB5File::doSpecializedOpen()
+bool WDB5File::open()
 {
+  if (!CASCFile::open())
+  {
+    LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname();
+    return false;
+  }
+
   WDB5File::header header = readHeader();
   
   recordSize = header.record_size;
@@ -198,18 +206,23 @@ bool WDB5File::doSpecializedOpen()
   return true;
 }
 
+bool WDB5File::close()
+{
+  return CASCFile::close();
+}
+
 WDB5File::~WDB5File()
 {
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned int recordIndex, const wow::TableStructure & structure) const
+std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
 
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
+  for (auto it = structure->fields.begin(), itEnd = structure->fields.end();
        it != itEnd;
        ++it)
   {

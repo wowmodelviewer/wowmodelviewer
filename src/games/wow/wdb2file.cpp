@@ -8,12 +8,18 @@
 #include <sstream>
 
 WDB2File::WDB2File(const QString & file) :
-  DBFile(file)
+  DBFile(), CASCFile(file)
 {
 }
 
-bool WDB2File::doSpecializedOpen()
+bool WDB2File::open()
 {
+  if (!CASCFile::open())
+  {
+    LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname();
+    return false;
+  }
+
   enum FileType {
     FT_UNK,
     FT_WDBC,
@@ -79,18 +85,22 @@ bool WDB2File::doSpecializedOpen()
   return true;
 }
 
+bool WDB2File::close()
+{
+  return CASCFile::close();
+}
 
 WDB2File::~WDB2File()
 {
   close();
 }
 
-std::vector<std::string> WDB2File::get(unsigned int recordIndex, const wow::TableStructure & structure) const
+std::vector<std::string> WDB2File::get(unsigned int recordIndex, const core::TableStructure * structure) const
 {
   unsigned char * recordOffset = data + (recordIndex * recordSize);
   std::vector<std::string> result;
   unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
-  for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
+  for (auto it = structure->fields.begin(), itEnd = structure->fields.end();
        it != itEnd;
        ++it)
   {

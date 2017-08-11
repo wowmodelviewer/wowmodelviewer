@@ -24,7 +24,6 @@ set(src animated.cpp
         CharDetails.cpp
         CharTexture.cpp
         database.cpp
-        dbfile.cpp
         ddslib.cpp
         globalvars.cpp
         HardDriveFile.cpp
@@ -69,7 +68,6 @@ set(headers animated.h
 			CharDetailsEvent.h
 			CharTexture.h
 			database.h
-			dbfile.h
 			ddslib.h
 			displayable.h
 			FileTreeItem.h

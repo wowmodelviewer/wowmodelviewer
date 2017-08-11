@@ -31,12 +31,13 @@ public:
   explicit WDB6File(const QString & file);
   ~WDB6File();
 
-  // Open database. It must be openened before it can be used.
-  bool doSpecializedOpen();
+  bool open();
+
+  bool close();
 
   WDB5File::header readHeader();
 
-  std::vector<std::string> get(unsigned int recordIndex, const wow::TableStructure & structure) const;
+  std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
 private:
 

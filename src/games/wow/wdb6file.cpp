@@ -8,6 +8,8 @@
 
 #include <bitset>
 
+#include "WoWDatabase.h"
+
 #define WDB6_READ_DEBUG 0
 
 WDB6File::WDB6File(const QString & file) :
@@ -39,9 +41,9 @@ WDB5File::header WDB6File::readHeader()
   return m_header.wdb5header;
 }
 
-bool WDB6File::doSpecializedOpen()
+bool WDB6File::open()
 {
-  if (!WDB5File::doSpecializedOpen())
+  if (!WDB5File::open())
     return false;
 
   // reading common data table values
@@ -96,11 +98,16 @@ bool WDB6File::doSpecializedOpen()
   return true;
 }
 
-std::vector<std::string> WDB6File::get(unsigned int recordIndex, const wow::TableStructure & structure) const
+bool WDB6File::close()
+{
+  return WDB5File::close();
+}
+
+std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result = WDB5File::get(recordIndex, structure);
 
-  for (auto it = structure.fields.begin(), itEnd = structure.fields.end();
+  for (auto it = structure->fields.begin(), itEnd = structure->fields.end();
        it != itEnd;
        ++it)
   {

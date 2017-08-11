@@ -16,6 +16,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
 set(src CharInfos.cpp
+		dbfile.cpp
         ExporterPlugin.cpp
         FileDownloader.cpp
 		Game.cpp
@@ -38,6 +39,7 @@ set(src CharInfos.cpp
         logger/LogOutputFile.cpp)
 
 set(headers CharInfos.h
+			dbfile.h
 			ExporterPlugin.h
 			FileDownloader.h
 			Game.h

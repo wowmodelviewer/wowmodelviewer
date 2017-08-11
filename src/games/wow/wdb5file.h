@@ -6,6 +6,8 @@
 #include "dbfile.h"
 #include "types.h"
 
+#include "CASCFile.h"
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _WDB5FILE_API_ __declspec(dllexport)
@@ -17,7 +19,7 @@
 #endif
 
 
-class _WDB5FILE_API_ WDB5File : public DBFile
+class _WDB5FILE_API_ WDB5File : public DBFile, public CASCFile
 {
 public:
 
@@ -41,12 +43,13 @@ public:
   explicit WDB5File(const QString & file);
   ~WDB5File();
 
-	// Open database. It must be openened before it can be used.
-  virtual bool doSpecializedOpen();
+  virtual bool open();
+
+  virtual bool close();
 
   virtual header readHeader();
 
-  virtual std::vector<std::string> get(unsigned int recordIndex, const wow::TableStructure & structure) const;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
 protected:
   std::vector<uint32> m_IDs;

@@ -8,11 +8,10 @@
 
 #include <QString>
 
-#include "CASCFile.h"
-#include "WoWDatabase.h"
+#include "GameDatabase.h"
 
 #ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
+#    ifdef BUILDING_CORE_DLL
 #        define _DBFILE_API_ __declspec(dllexport)
 #    else
 #        define _DBFILE_API_ __declspec(dllimport)
@@ -22,19 +21,15 @@
 #endif
 
 
-class _DBFILE_API_ DBFile : public CASCFile
+class _DBFILE_API_ DBFile
 {
 public:
-  explicit DBFile(const QString & file);
-  virtual ~DBFile();
+  explicit DBFile();
+  virtual ~DBFile() {};
 
-	// Open database. It must be openened before it can be used.
-	bool open();
+	virtual bool open() = 0;
 
-  // to be implemented in inherited classes to perform specific reading at open time
-  virtual bool doSpecializedOpen() = 0;
-
-  bool close();
+  virtual bool close() = 0;
 
 	// Iteration over database
 	class Iterator
@@ -50,7 +45,7 @@ public:
 			  return *this; 
 		  }	
 		
-      std::vector<std::string> get(const wow::TableStructure & structure) const
+      std::vector<std::string> get(const core::TableStructure * structure) const
       {
         return file.get(recordIndex, structure);
       }
@@ -79,35 +74,8 @@ public:
 	/// Trivial
 	size_t getRecordCount() const { return recordCount; }
 
-  float getFloat(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<float*>(recordOffset + field * 4);
-  }
-  unsigned int getUInt(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<unsigned int*>(recordOffset + (field * 4));
-  }
-  int getInt(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<int*>(recordOffset + field * 4);
-  }
-  unsigned char getByte(unsigned char * recordOffset, size_t ofs) const
-  {
-    return *reinterpret_cast<unsigned char*>(recordOffset + ofs);
-  }
-
-
-  std::string getStdString(unsigned char * recordOffset, size_t field) const
-  {
-    size_t stringOffset = getUInt(recordOffset, field);
-    if (stringOffset >= stringSize)
-      stringOffset = 0;
-
-    return std::string(reinterpret_cast<char*>(stringTable + stringOffset));
-  }
-
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned int recordIndex, const wow::TableStructure & structure) const = 0;
+  virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const = 0;
 
 protected:
 	size_t recordSize;
