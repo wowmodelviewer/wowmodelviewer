@@ -222,11 +222,9 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::Tab
 
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it = structure->fields.begin(), itEnd = structure->fields.end();
-       it != itEnd;
-       ++it)
+  for (auto it : structure->fields)
   {
-    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(*it);
+    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
     if (field->isKey)
     {

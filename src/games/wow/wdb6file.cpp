@@ -107,11 +107,9 @@ std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::Tab
 {
   std::vector<std::string> result = WDB5File::get(recordIndex, structure);
 
-  for (auto it = structure->fields.begin(), itEnd = structure->fields.end();
-       it != itEnd;
-       ++it)
+  for (auto it : structure->fields)
   {
-    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(*it);
+    wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
     if (!field)
       continue;
