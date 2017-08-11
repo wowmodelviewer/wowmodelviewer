@@ -21,6 +21,7 @@
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "ImporterPlugin.h"
+#include "MemoryUtils.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelRenderPass.h"
@@ -42,8 +43,6 @@
 #include <QXmlStreamWriter>
 
 
-#include <Psapi.h>
-#pragma comment(lib, "psapi.lib") // Added to support GetProcessMemoryInfo()
 
 // default colour values
 const static float def_ambience[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -2981,17 +2980,6 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
 void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
 {
-  PROCESS_MEMORY_COUNTERS memCounter;
-  bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
-
-  if (result)
-  {
-    int mem = memCounter.WorkingSetSize / (1024 * 1024);
-    SetStatusText(wxString::Format(wxT("Memory: %i Mo"), mem), 4);
-  }
-  else
-  {
-    SetStatusText(wxString::Format(wxT("Memory: N/A Mo")), 4);
-  }
+  SetStatusText(wxString::Format(wxT("Memory: %i Mo"), core::getMemoryUsed()), 4);
 }
 

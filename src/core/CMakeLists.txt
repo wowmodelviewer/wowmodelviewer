@@ -26,6 +26,7 @@ set(src CharInfos.cpp
 		GameFolder.cpp
         GlobalSettings.cpp
         ImporterPlugin.cpp
+		MemoryUtils.cpp
         Model.cpp
         NPCInfos.cpp
         Plugin.cpp
@@ -50,6 +51,7 @@ set(headers CharInfos.h
 			GameFolder.h
 			GlobalSettings.h
 			ImporterPlugin.h
+			MemoryUtils.h
 			Model.h
 			NPCInfos.h
 			Plugin.h
