@@ -42,7 +42,8 @@ namespace wow
 
     unsigned int hash;
 
-    virtual bool fill();
+    DBFile * createDBFile();
+
   };
 
   class FieldStructure : public core::FieldStructure
@@ -65,8 +66,6 @@ namespace wow
       WoWDatabase(WoWDatabase &);
 
       ~WoWDatabase() {}
-
-      static DBFile * createDBFile(GameFile *);
 
       core::TableStructure * createTableStructure();
       core::FieldStructure * createFieldStructure();

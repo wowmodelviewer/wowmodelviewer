@@ -24,32 +24,6 @@ wow::WoWDatabase::WoWDatabase()
 
 }
 
-DBFile * wow::WoWDatabase::createDBFile(GameFile * fileToOpen)
-{
-  DBFile * result = 0;
-  if (fileToOpen)
-  {
-    if (fileToOpen->open())
-    {
-      char header[5];
-      
-      fileToOpen->read(header, 4);
-
-      if (strncmp(header, "WDB2", 4) == 0)
-        result = new WDB2File(fileToOpen->fullname());
-      else if (strncmp(header, "WDB5", 4) == 0)
-        result = new WDB5File(fileToOpen->fullname());
-      else if (strncmp(header, "WDB6", 4) == 0)
-        result = new WDB6File(fileToOpen->fullname());
-
-      // reset read pointer to make sure further reading will start from the begining
-      fileToOpen->seek(0);
-    }
-  }
-
-  return result;
-}
-
 core::TableStructure *  wow::WoWDatabase::createTableStructure()
 {
   return new wow::TableStructure;
@@ -94,100 +68,45 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldS
 
 }
 
-bool wow::TableStructure::fill()
+DBFile * wow::TableStructure::createDBFile()
 {
-  LOG_INFO << "Filling table" << name << "...";
+  DBFile * result = core::TableStructure::createDBFile();
+
+  if (result != 0)
+    return result;
+
   GameFile * fileToOpen = 0;
   // loop over possible extension to check if file exists
-  for(unsigned int i=0 ; i < POSSIBLE_DB_EXT.size() ; i++)
+  for (unsigned int i = 0; i < POSSIBLE_DB_EXT.size(); i++)
   {
-    fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\"+file+POSSIBLE_DB_EXT[i]);
-    if(fileToOpen)
+    fileToOpen = GAMEDIRECTORY.getFile("DBFilesClient\\" + file + POSSIBLE_DB_EXT[i]);
+    if (fileToOpen)
       break;
   }
 
-  if(!fileToOpen)
-    return false;
+  if (!fileToOpen)
+    return 0;
 
-  DBFile * dbc = wow::WoWDatabase::createDBFile(fileToOpen);
-  if(!dbc || !dbc->open())
-    return false;
-
-  QString query = "INSERT INTO ";
-  query += name;
-  query += "(";
-  int nbFields = fields.size();
-  int curfield = 0;
-  for(auto it = fields.begin(), itEnd = fields.end();
-      it != itEnd ;
-      ++it,curfield++)
-  {
-	  if ((*it)->arraySize == 1) // simple field
-	  {
-	    query += (*it)->name;
-	  }
-	  else
-	  {
-	    for (unsigned int i = 1; i <= (*it)->arraySize; i++)
-	    {
-		  query += (*it)->name;
-		  query += QString::number(i);
-		  if (i != (*it)->arraySize)
-		    query += ",";
-	    }
-	  }
-      if(curfield != nbFields-1)
-        query += ",";
-  }
-
-  query += ") VALUES";
   
-  QString queryBase = query;
-  int record = 0;
-  int nbRecord = dbc->getRecordCount();
-
-  for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
+  if (fileToOpen)
   {
-    std::vector<std::string> fields = it.get(this);
+    if (fileToOpen->open())
+    {
+      char header[5];
 
-    for(int field=0 , nbfield = fields.size(); field < nbfield ; field++)
-    {
-      if(field == 0)
-        query += " (";
-      query += "\"";
-      query += QString::fromStdString(fields[field]);
-      query += "\"";
-      if(field != nbfield-1)
-        query += ",";
-      else
-        query += ")";
-    }
-    // inserting all records at once makes the application crash, so
-    // insert in chunks of 200 lines. If it's the last record anyway
-    // then don't, as the final query after the for() loop will do it:
-    if(record%200 == 0 && record != nbRecord-1)
-    {
-      query += ";";
-      sqlResult r = GAMEDATABASE.sqlQuery(query);
-      if(!r.valid)
-        return false;
-      query = queryBase;
-    }
-    else
-    {
-      if(record != nbRecord-1)
-        query+=",";
+      fileToOpen->read(header, 4);
+
+      if (strncmp(header, "WDB2", 4) == 0)
+        result = new WDB2File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB5", 4) == 0)
+        result = new WDB5File(fileToOpen->fullname());
+      else if (strncmp(header, "WDB6", 4) == 0)
+        result = new WDB6File(fileToOpen->fullname());
+
+      // reset read pointer to make sure further reading will start from the begining
+      fileToOpen->seek(0);
     }
   }
 
-  query += ";";
-  sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-  if (r.valid)
-    LOG_INFO << "table" << name << "successfuly filled";
-
-  delete dbc;
-
-  return r.valid;
+  return result;
 }
-

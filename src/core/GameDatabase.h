@@ -77,7 +77,9 @@ namespace core
     std::vector<FieldStructure *> fields;
 
     bool create();
-    virtual bool fill() = 0;
+    bool fill();
+
+    virtual DBFile * createDBFile();
   };
 
 
