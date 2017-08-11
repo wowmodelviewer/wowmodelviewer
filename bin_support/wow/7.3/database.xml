@@ -156,9 +156,9 @@
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->
-  <table name="AnimationData">
+  <table name="AnimationData" dbfile="AnimationData.csv">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="Name" pos="4" />
+    <field type="text" name="Name" />
   </table>
   <table name="TextureFileData">
     <field type="uint" name="TextureID" primary="yes" />

@@ -52,7 +52,7 @@ bool core::GameDatabase::initFromXML(const QString & file)
    }
 
    sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
-   return createDatabaseFromXML(file);
+   return createDatabaseFromXML(core::Game::instance().configFolder() + file);
 }
 
 sqlResult core::GameDatabase::sqlQuery(const QString & query)
@@ -160,13 +160,13 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
     QDomElement child = e.firstChildElement();
 
     QDomNamedNodeMap attributes = e.attributes();
-    QDomNode gamefile = attributes.namedItem("gamefile");
+    QDomNode dbfile = attributes.namedItem("dbfile");
 
     // table values
     tblStruct->name = attributes.namedItem("name").nodeValue();
 
-    if (!gamefile.isNull())
-      tblStruct->file = gamefile.nodeValue();
+    if (!dbfile.isNull())
+      tblStruct->file = dbfile.nodeValue();
     else
       tblStruct->file = tblStruct->name;
 

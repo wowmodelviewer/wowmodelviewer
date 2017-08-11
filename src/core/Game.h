@@ -45,6 +45,9 @@ namespace core
       core::GameFolder & folder() { return *m_folder; }
       core::GameDatabase & database() { return *m_db; }
 
+      void setConfigFolder(const QString & folder) { m_configFolder = folder; }
+      QString configFolder() { return m_configFolder; }
+
     private:
 
       // disable explicit construct and destruct
@@ -55,6 +58,8 @@ namespace core
 
       core::GameFolder * m_folder;
       core::GameDatabase * m_db;
+
+      QString m_configFolder;
 
       static Game * m_instance;
   };

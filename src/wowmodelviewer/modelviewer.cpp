@@ -603,7 +603,7 @@ void ModelViewer::InitObjects()
   animExporter = new CAnimationExporter(this, wxID_ANY, wxT("Animation Exporter"), wxDefaultPosition, wxSize(350, 220), wxCAPTION | wxSTAY_ON_TOP | wxFRAME_NO_TASKBAR);
 }
 
-void ModelViewer::InitDatabase(const QString & configFolder)
+void ModelViewer::InitDatabase()
 {
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
@@ -611,7 +611,7 @@ void ModelViewer::InitDatabase(const QString & configFolder)
   wxWindowDisabler disableAll;
   wxBusyInfo info(_T("Please wait during game database analysis..."), this);
 
-  if (!GAMEDATABASE.initFromXML(configFolder + "database.xml"))
+  if (!GAMEDATABASE.initFromXML("database.xml"))
   {
     initDB = false;
     LOG_ERROR << "Initializing failed !";
@@ -1772,14 +1772,15 @@ void ModelViewer::LoadWoW()
   QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
 
   LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
+  core::Game::instance().setConfigFolder(baseConfigFolder);
 
-  GAMEDIRECTORY.initFromListfile(baseConfigFolder + "listfile.txt");
+  GAMEDIRECTORY.initFromListfile("listfile.txt");
 
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
-  InitDatabase(baseConfigFolder);
+  InitDatabase();
 
   /*
   // Error check

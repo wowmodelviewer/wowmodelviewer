@@ -30,6 +30,9 @@ public:
   std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
 private:
+  QString m_file;
+  std::vector<QString> m_fields;
+  std::vector<std::vector<std::string> > m_values;
 
 };
 

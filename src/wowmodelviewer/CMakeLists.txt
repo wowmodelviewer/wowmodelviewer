@@ -111,7 +111,9 @@ set(wow7_2_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 source_group("wow7.2" FILES ${wow7_2_files})
 
 set(wow7_3_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
-				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
+				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv)
+
 source_group("wow7.3" FILES ${wow7_3_files})
 
 set(useful_files ${common_files} ${wow7_2_files} ${wow7_3_files})
@@ -157,7 +159,8 @@ set(GAMEFILES_WOW7_2 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
         		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
 
 set(GAMEFILES_WOW7_3 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
-        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml)
+        		     $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
+					 $ENV{WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 

@@ -87,7 +87,7 @@ public:
 	void InitMenu();
 	void InitObjects();
 	void InitDocking();
-	void InitDatabase(const QString & configFolder);
+	void InitDatabase();
 
 	// Save and load various settings between sessions
 	void LoadSession();
