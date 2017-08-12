@@ -17,8 +17,6 @@
 
 #include "logger/Logger.h"
 
-
-
 core::GameDatabase::~GameDatabase()
 {
   if(m_db)
@@ -126,6 +124,9 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
       result = false;
     }
   }
+
+  for (auto it : m_dbStruct)
+    delete it;
 
   return result; 
 }
@@ -384,4 +385,10 @@ DBFile * core::TableStructure::createDBFile()
     result = new CSVFile(file);
 
   return result;
+}
+
+core::TableStructure::~TableStructure()
+{
+  for (auto it : fields)
+    delete it;
 }

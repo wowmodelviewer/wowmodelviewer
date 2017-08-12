@@ -72,6 +72,8 @@ namespace core
       file("")
     {}
 
+    virtual ~TableStructure();
+
     QString name;
     QString file;
     std::vector<FieldStructure *> fields;

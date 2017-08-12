@@ -103,8 +103,7 @@ DBFile * wow::TableStructure::createDBFile()
       else if (strncmp(header, "WDB6", 4) == 0)
         result = new WDB6File(fileToOpen->fullname());
 
-      // reset read pointer to make sure further reading will start from the begining
-      fileToOpen->seek(0);
+      fileToOpen->close();
     }
   }
 

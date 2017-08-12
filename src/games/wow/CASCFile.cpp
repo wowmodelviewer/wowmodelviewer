@@ -27,7 +27,7 @@ CASCFile::~CASCFile()
 bool CASCFile::open()
 {
 #ifdef DEBUG_READ
-  LOG_INFO << __FUNCTION__ << "Opening" << filepath;
+  LOG_INFO << this << __FUNCTION__ << "Opening" << filepath << "handle" << m_handle;
 #endif
 
   if(m_handle) // already opened
@@ -102,7 +102,7 @@ bool CASCFile::open()
 bool CASCFile::close()
 {
 #ifdef DEBUG_READ
-  LOG_INFO << __FUNCTION__ << "Closing" << filepath << m_handle;
+  LOG_INFO << this << __FUNCTION__ << "Closing" << filepath << "handle" << m_handle;
 #endif
   if(m_handle)
   {

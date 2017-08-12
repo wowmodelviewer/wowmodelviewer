@@ -46,11 +46,8 @@ void GameFile::seekRelative(size_t offset)
 
 bool GameFile::close()
 {
-  if(size)
-  {
-    delete [] buffer;
-    buffer = 0;
-  }
+  delete [] buffer;
+  buffer = 0;
   eof = true;
   return true;
 }
