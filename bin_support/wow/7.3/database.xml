@@ -153,6 +153,11 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="int" name="HideGeoset" arraySize="9" pos="0" />
   </table>
+  <table name="ItemSet">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="int" name="Item" arraySize="17" pos="4" />
+  </table>
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->
