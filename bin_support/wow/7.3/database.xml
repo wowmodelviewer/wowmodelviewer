@@ -124,7 +124,7 @@
   <table name="ItemSparse">
     <field type="uint" name="ID" primary="yes" />
     <field type="byte" name="Quality" pos="226" />
-    <field type="text" name="Name" pos="132" />
+    <field type="text" name="Name" pos="136" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
