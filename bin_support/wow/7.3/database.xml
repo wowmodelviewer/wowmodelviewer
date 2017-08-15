@@ -189,4 +189,12 @@
     <field type="uint" name="DisplayID" pos="2" />
   </table>
   <!-- Misc tables - END -->
+
+  <!-- BEBUG PURPOSE -->
+  <!--
+  <table name="FileNames" dbfile="filenames.csv">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="Name" />
+  </table>
+  -->
 </database>

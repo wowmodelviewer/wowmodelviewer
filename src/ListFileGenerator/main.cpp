@@ -39,7 +39,7 @@ int main(int argc, char ** argv)
 {
   if (argc < 4)
   {
-    std::cout << "Usage " << argv[0] << "[input listfile] [data folder] [output listfile]" << std::endl;
+    std::cout << "Usage " << argv[0] << " [input listfile] [data folder] [output listfile]" << std::endl;
     return 1;
   }
 
@@ -76,6 +76,8 @@ int main(int argc, char ** argv)
   QTextStream in(&infile);
   QTextStream out(&outfile);
 
+  out << "Name;ID" << endl;
+
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
@@ -87,7 +89,7 @@ int main(int argc, char ** argv)
     DWORD id = CascGetFileId(CascStorage, filename.toStdString().c_str());
 
     if (id != 0)
-      out << filename << " " << id << endl;
+      out << filename << ";" << id << endl;
   }
 
   return 0;
