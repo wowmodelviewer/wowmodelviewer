@@ -139,7 +139,7 @@ public:
   void dump()
   {
     for (auto it : items)
-      LOG_INFO << it.second->itemName() << it.second->refCount();
+      LOG_INFO << it.first << "->" << it.second->itemName() << "(" << it.second->refCount() << ")";
   }
 
 protected:
