@@ -163,6 +163,8 @@ void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct)
   painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
   painter.drawImage(destPos, newImage);
   painter.end();
+
+  delete tmp;
 }
 
 void imageCleanUpHandler(void * ptr)
