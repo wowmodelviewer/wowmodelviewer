@@ -623,10 +623,10 @@ void ModelViewer::InitDatabase()
 
   // init texture regions
   CharTexture::initRegions();
-
+  
   // init Race informations
   RaceInfos::init();
-
+  
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
   initDB = true;
@@ -650,8 +650,9 @@ void ModelViewer::InitDatabase()
       LOG_ERROR << "Error during NPC detection from database.";
       return;
     }
-  }
 
+  }
+  
   {
     sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath, ItemSparse.Quality FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
 
@@ -1185,8 +1186,6 @@ void ModelViewer::LoadItem(unsigned int id)
         grp.base = TEXTURE_ITEM;
         grp.count = 1;
         grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
-        WoWModel * m = const_cast<WoWModel *>(canvas->model());
-        m->TextureList.push_back(grp.tex[0]);
         if (grp.tex[0])
           animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
       }
@@ -1722,7 +1721,7 @@ void ModelViewer::LoadWoW()
   
   if (!core::Game::instance().initDone())
     core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
-
+  
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
 
@@ -1774,13 +1773,13 @@ void ModelViewer::LoadWoW()
   core::Game::instance().setConfigFolder(baseConfigFolder);
 
   GAMEDIRECTORY.initFromListfile("listfile.txt");
-
+  
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
   InitDatabase();
-
+  
   /*
   // Error check
   if (!initDB)
@@ -1801,7 +1800,7 @@ void ModelViewer::LoadWoW()
 
   SetStatusText(wxT("Initializing File Control..."));
   fileControl->Init(this);
-
+  
   if (charControl->Init() == false)
   {
     SetStatusText(wxT("Error Initializing the Character Controls."));
@@ -2560,7 +2559,7 @@ void ModelViewer::ModelInfo()
     xml << "      <vertexEnd>" << p->geoset->vstart + p->geoset->vcount << "</vertexEnd>" << endl;
     xml << "      <tex>" << p->tex << "</tex>" << endl;
     if (p->tex >= 0)
-      xml << "      <texName>" << m->TextureList[p->tex]->fullname().toStdString() << "</texName>" << endl;
+      xml << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
     xml << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
     xml << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
     xml << "      <cull>" << p->cull << "</cull>" << endl;
@@ -2753,8 +2752,10 @@ void ModelViewer::ModelInfo()
 
   //	xml << "    <>" << m->header. << "</>" << endl;
   xml << "  <TextureLists>" << endl;
-  for (size_t i = 0; i < m->TextureList.size(); i++) {
-    xml << "    <TextureList id=\"" << i << "\">" << m->TextureList[i]->fullname().toStdString() << "</TextureList>" << endl;
+  for (size_t i = 0; i < m->textures.size(); i++) 
+  {
+    if (i != ModelRenderPass::INVALID_TEX)
+      xml << "    <TextureList id=\"" << i << "\">" << TEXTUREMANAGER.get(i).toStdString() << "</TextureList>" << endl;
   }
   xml << "  </TextureLists>" << endl;
 
