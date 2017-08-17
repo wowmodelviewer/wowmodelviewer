@@ -1000,10 +1000,7 @@ void WoWItem::refresh()
 
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
-      {
-        m_charModel->capeTex = TEXTUREMANAGER.add(it->second);
         m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
-      }
       break;
     }
     case CS_TABARD:

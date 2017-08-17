@@ -211,7 +211,6 @@ public:
   CharDetails cd;
   TabardDetails td;
   ModelHeader header;
-  TextureID charTex, hairTex, furTex, capeTex, gobTex;
 
   bool bSheathe;
 
@@ -240,6 +239,7 @@ public:
   void refresh();
 
   QString getNameForTex(uint16 tex);
+  void dumpTextureStatus();
 
 };
 

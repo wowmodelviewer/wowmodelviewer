@@ -1272,7 +1272,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
     GameFile * tex = grp->tex[0];
     LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
     // refresh TextureList for further use
-	for (ssize_t j = 0; j < TEXTURE_MAX; j++)
+	  for (ssize_t j = 0; j < TEXTURE_MAX; j++)
     {
       if (base == g_selModel->specialTextures[j])
       {

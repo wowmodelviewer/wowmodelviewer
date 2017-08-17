@@ -160,12 +160,6 @@ bool CharControl::Init()
   if (!model)
     return true;
 
-  model->charTex = 0;
-  model->hairTex = 0;
-  model->furTex = 0;
-  model->capeTex = 0;
-  model->gobTex = 0;
-
   model->td.showCustom = false;
   model->bSheathe = false;
 
@@ -211,9 +205,6 @@ void CharControl::UpdateModel(Attachment *a)
     cdFrame->setModel(model);
     // The following isn't actually needed,
     // pretty sure all this gets taken care of by TextureManager and CharTexture
-    model->charTex = 0;
-    if (model->charTex == 0)
-      glGenTextures(1, &model->charTex);
 
     //model->cd.reset();
     model->td.showCustom = false;

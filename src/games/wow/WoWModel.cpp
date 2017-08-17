@@ -31,6 +31,32 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
+void WoWModel::dumpTextureStatus()
+{
+  LOG_INFO << "-----------------------------------------";
+
+  for (uint i = 0; i < textures.size(); i++)
+    LOG_INFO << "textures[" << i << "] =" << textures[i];
+
+  for (uint i = 0; i < specialTextures.size(); i++)
+    LOG_INFO << "specialTextures[" << i << "] =" << specialTextures[i];
+
+  for (uint i = 0; i < TextureList.size(); i++)
+    LOG_INFO << "TextureList[" << i << "] =" << TextureList[i] << (TextureList[i] ? TextureList[i]->fullname() : "");
+
+  for (uint i = 0; i < useReplaceTextures.size(); i++)
+    LOG_INFO << "useReplaceTextures[" << i << "] =" << useReplaceTextures[i];
+
+  for (uint i = 0; i < replaceTextures.size(); i++)
+    LOG_INFO << "replaceTextures[" << i << "] =" << replaceTextures[i];
+
+  LOG_INFO << " #### TEXTUREMANAGER ####";
+  TEXTUREMANAGER.dump();
+  LOG_INFO << " ########################";
+
+  LOG_INFO << "-----------------------------------------";
+}
+
 void
 glGetAll()
 {
@@ -99,7 +125,7 @@ gamefile(file), mergedModel("")
   rot = Vec3D(0.0f, 0.0f, 0.0f);
 
   specialTextures.resize(TEXTURE_MAX, -1);
-  replaceTextures.resize(TEXTURE_MAX, 0);
+  replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
   useReplaceTextures.resize(TEXTURE_MAX, false);
   
   for (size_t i = 0; i < ATT_MAX; i++)
@@ -418,7 +444,7 @@ void WoWModel::initCommon(GameFile * f)
 
   LOG_INFO << "Loading model:" << tempname << "size:" << f->getSize();
 
-  //displayHeader(header);
+  // displayHeader(header);
 
   if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
   {
@@ -508,7 +534,7 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-	  textures.resize(TEXTURE_MAX, 0);
+	  textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
     for (size_t i = 0; i < header.nTextures; i++)
     {
@@ -572,17 +598,15 @@ void WoWModel::initCommon(GameFile * f)
         LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
         TextureList.push_back(tex);
 
-		if (texdef[i].type < TEXTURE_MAX)
+        if (texdef[i].type < TEXTURE_MAX)
           useReplaceTextures[texdef[i].type] = true;
 
-        if (texdef[i].type == TEXTURE_ARMORREFLECT)
-        {
-          // a fix for weapons with type-3 textures.
+        if (texdef[i].type == TEXTURE_ARMORREFLECT) // a fix for weapons with type-3 textures.
           replaceTextures[texdef[i].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
-        }
       }
     }
   }
+
   /*
   // replacable textures - it seems to be better to get this info from the texture types
   if (header.nTexReplace) {
@@ -1502,12 +1526,12 @@ void WoWModel::update(int dt) // (float dt)
 
 void WoWModel::UpdateTextureList(GameFile * tex, int special)
 {
-  for (size_t i = 0; i < header.nTextures; i++)
+  LOG_INFO << __FUNCTION__ << __LINE__ << special << "=>" << tex->fullname();
+  for (size_t i = 0; i < specialTextures.size(); i++)
   {
     if (specialTextures[i] == special)
     {
-      LOG_INFO << "Updating" << (TextureList[i] ? TextureList[i]->fullname() : "NULL TEXTURE") << "to" << tex->fullname();
-      TextureList[i] = tex;
+      replaceTextures[special] = TEXTUREMANAGER.add(tex);
       break;
     }
   }
@@ -1806,7 +1830,9 @@ void WoWModel::mergeModel(QString & name)
   // add model textures
   for (auto it : m->TextureList)
   {
-    TEXTUREMANAGER.add(it);
+    if (it->open()) // add to TEXTUREMANAGER only if this file is a real one (not Hair.blp, Special_x, etc.)
+      TEXTUREMANAGER.add(it);
+
     TextureList.push_back(it);
   }
 
@@ -1814,10 +1840,22 @@ void WoWModel::mergeModel(QString & name)
     textures.push_back(it);
 
   for (auto it : m->specialTextures)
-    specialTextures.push_back(it);
+  {
+    int val = it;
+    if (it != -1)
+      val += TEXTURE_MAX;
+
+    specialTextures.push_back(val);
+  }
 
   for (auto it : m->replaceTextures)
-    replaceTextures.push_back(it);
+  {
+    int val = it;
+    if (it != 0)
+      val += TEXTURE_MAX;
+
+    replaceTextures.push_back(val);
+  }
 
   for (auto it : m->useReplaceTextures)
     useReplaceTextures.push_back(it);
@@ -1896,15 +1934,13 @@ void WoWModel::unmergeModel()
 
 void WoWModel::refresh()
 {
-  hairTex = 0;
-  furTex = 0;
-  gobTex = 0;
-  capeTex = 0;
+  TextureID charTex = 0;
   bool showScalp = true;
 
   // Reset geosets
   for (size_t i = 0; i < NUM_GEOSETS; i++)
     cd.geosets[i] = 1;
+
   cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
 
   // show ears, if toggled
@@ -1925,7 +1961,6 @@ void WoWModel::refresh()
   if (textures.size() > 1)
   {
     GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
-    furTex = TEXTUREMANAGER.add(tex);
     UpdateTextureList(tex, TEXTURE_FUR);
   }
 
@@ -2005,7 +2040,6 @@ void WoWModel::refresh()
   if (textures.size() > 0)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textures[0]);
-    hairTex = TEXTUREMANAGER.add(texture);
     UpdateTextureList(texture, TEXTURE_HAIR);
 
     if (infos.isHD)
@@ -2024,10 +2058,6 @@ void WoWModel::refresh()
           tex.addLayer(GAMEDIRECTORY.getFile(textures[2]), CR_FACE_UPPER, 3);
       }
     }
-  }
-  else
-  {
-    hairTex = 0;
   }
 
   // select facial geoset(s)
@@ -2182,10 +2212,6 @@ void WoWModel::refresh()
 
   // set replacable textures
   replaceTextures[TEXTURE_BODY] = charTex;
-  replaceTextures[TEXTURE_CAPE] = capeTex;
-  replaceTextures[TEXTURE_HAIR] = hairTex;
-  replaceTextures[TEXTURE_FUR] = furTex;
-  replaceTextures[TEXTURE_GAMEOBJECT1] = gobTex;
 
   // If model is one of these races, show the feet (don't wear boots)
   if (infos.raceid == RACE_TAUREN ||
