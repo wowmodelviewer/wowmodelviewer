@@ -1000,7 +1000,7 @@ void WoWItem::refresh()
 
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
-        m_charModel->UpdateTextureList(it->second, TEXTURE_CAPE);
+        m_charModel->updateTextureList(it->second, TEXTURE_CAPE);
       break;
     }
     case CS_TABARD:
@@ -1165,22 +1165,9 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     itemModels[pos] = m;
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
-    {
-      GLuint tex = TEXTUREMANAGER.add(texture);
-      for (size_t x = 0; x < m->TextureList.size(); x++)
-      {
-        if (m->TextureList[x]->fullname() == "Special_2")
-        {
-          LOG_INFO << "Replacing ID1's" << m->TextureList[x]->fullname() << "with" << texture->fullname();
-          m->TextureList[x] = texture;
-        }
-      }
-      m->replaceTextures[TEXTURE_ITEM] = tex;
-    }
+      m->updateTextureList(texture, TEXTURE_ITEM);
     else
-    {
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
-    }
   }
 }
 

@@ -41,9 +41,6 @@ void WoWModel::dumpTextureStatus()
   for (uint i = 0; i < specialTextures.size(); i++)
     LOG_INFO << "specialTextures[" << i << "] =" << specialTextures[i];
 
-  for (uint i = 0; i < TextureList.size(); i++)
-    LOG_INFO << "TextureList[" << i << "] =" << TextureList[i] << (TextureList[i] ? TextureList[i]->fullname() : "");
-
   for (uint i = 0; i < useReplaceTextures.size(); i++)
     LOG_INFO << "useReplaceTextures[" << i << "] =" << useReplaceTextures[i];
 
@@ -569,34 +566,11 @@ void WoWModel::initCommon(GameFile * f)
         QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
         GameFile * tex = GAMEDIRECTORY.getFile(texname);
         textures[i] = TEXTUREMANAGER.add(tex);
-        TextureList.push_back(tex);
-        LOG_INFO << "Added" << texname << "to the TextureList[" << TextureList.size() << "]";
       }
       else
       {
         // special texture - only on characters and such...
-        textures[i] = 0;
-        //while (texdef[i].type < TEXTURE_MAX && specialTextures[texdef[i].type]!=-1) texdef[i].type++;
-        //if (texdef[i].type < TEXTURE_MAX)specialTextures[texdef[i].type] = (int)i;
         specialTextures[i] = texdef[i].type;
-
-        GameFile * tex = 0;
-
-        if (modelType == MT_NORMAL)
-        {
-          if (texdef[i].type == TEXTURE_HAIR)
-            tex = new CASCFile("Hair.blp");
-          else if (texdef[i].type == TEXTURE_BODY)
-            tex = new CASCFile("Body.blp");
-          else if (texdef[i].type == TEXTURE_FUR)
-            tex = new CASCFile("Fur.blp");
-        }
-
-        if (!tex)
-          tex = new CASCFile(QString("Special_%1").arg(texdef[i].type));
-
-        LOG_INFO << "Added" << tex->fullname() << "to the TextureList[" << TextureList.size() << "] via specialTextures. Type:" << texdef[i].type;
-        TextureList.push_back(tex);
 
         if (texdef[i].type < TEXTURE_MAX)
           useReplaceTextures[texdef[i].type] = true;
@@ -1524,13 +1498,15 @@ void WoWModel::update(int dt) // (float dt)
   updateEmitters((dt/1000.0f));
 }
 
-void WoWModel::UpdateTextureList(GameFile * tex, int special)
+void WoWModel::updateTextureList(GameFile * tex, int special)
 {
-  LOG_INFO << __FUNCTION__ << __LINE__ << special << "=>" << tex->fullname();
   for (size_t i = 0; i < specialTextures.size(); i++)
   {
     if (specialTextures[i] == special)
     {
+      if (replaceTextures[special] != ModelRenderPass::INVALID_TEX)
+        TEXTUREMANAGER.del(replaceTextures[special]);
+
       replaceTextures[special] = TEXTUREMANAGER.add(tex);
       break;
     }
@@ -1828,16 +1804,12 @@ void WoWModel::mergeModel(QString & name)
   }
 
   // add model textures
-  for (auto it : m->TextureList)
-  {
-    if (it->open()) // add to TEXTUREMANAGER only if this file is a real one (not Hair.blp, Special_x, etc.)
-      TEXTUREMANAGER.add(it);
-
-    TextureList.push_back(it);
-  }
-
   for (auto it : m->textures)
+  {
+    if (it != ModelRenderPass::INVALID_TEX)
+      TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it)));
     textures.push_back(it);
+  }
 
   for (auto it : m->specialTextures)
   {
@@ -1922,7 +1894,6 @@ void WoWModel::unmergeModel()
 
   // @TODO delete teextures in TEXTUREMANAGER
   textures.resize(textures.size() - m->textures.size());
-  TextureList.resize(TextureList.size() - m->TextureList.size());
 
   specialTextures.resize(specialTextures.size() - m->specialTextures.size());
   replaceTextures.resize(replaceTextures.size() - m->replaceTextures.size());
@@ -1961,7 +1932,7 @@ void WoWModel::refresh()
   if (textures.size() > 1)
   {
     GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
-    UpdateTextureList(tex, TEXTURE_FUR);
+    updateTextureList(tex, TEXTURE_FUR);
   }
 
   // Display underwear on the model?
@@ -2040,7 +2011,7 @@ void WoWModel::refresh()
   if (textures.size() > 0)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textures[0]);
-    UpdateTextureList(texture, TEXTURE_HAIR);
+    updateTextureList(texture, TEXTURE_HAIR);
 
     if (infos.isHD)
     {

@@ -179,7 +179,6 @@ public:
   std::vector<int> specialTextures;
   std::vector<GLuint> replaceTextures;
   std::vector<bool> useReplaceTextures;
-  std::vector<GameFile *> TextureList;
   CharTexture tex;
   // -------------------------------
 
@@ -217,9 +216,9 @@ public:
   friend class ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
-  void UpdateTextureList(GameFile * tex, int special);
+  void updateTextureList(GameFile * tex, int special);
   void displayHeader(ModelHeader & a_header);
-  bool WoWModel::canSetTextureFromFile(int texnum);
+  bool canSetTextureFromFile(int texnum);
 
   std::map<int, std::string> getAnimsMap();
 

@@ -897,9 +897,6 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
     if (it->definedTexture)
       selectorName.MakeUpper();
     skinList->Append(selectorName);
-    LOG_INFO << "TextureList[" << g_selModel->TextureList.size() << "] : added " 
-             << texname.c_str() << " via FillSkinSelector";
-    g_selModel->TextureList.push_back(tex);
     TextureGroup *grp = new TextureGroup(*it);
     skinList->SetClientData(num++, grp);
   }
@@ -925,10 +922,6 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
       GameFile * tex = it->tex[0];
       wxString texname = tex->fullname().toStdString().c_str();
       texname = texname.AfterLast('/').BeforeLast('.');
-      if (!item)
-        LOG_INFO << "TextureList[" << g_selModel->TextureList.size() << "] : added "
-                 << texname.c_str() << " via FillBLPSkinSelector";
-      g_selModel->TextureList.push_back(tex);
       TextureGroup *grp = new TextureGroup(*it);
 
       BLPSkinList1->Append(texname);
@@ -1220,18 +1213,7 @@ void AnimControl::SetSkin(int num)
 
     int base = grp->base + i;
     if (g_selModel->useReplaceTextures[base])
-    {
-      // refresh TextureList for further use
-      for (ssize_t j = 0; j < TEXTURE_MAX; j++)
-      {
-        if (base == g_selModel->specialTextures[j])
-        {
-          g_selModel->TextureList[j] = tex;
-          break;
-        }
-      }
-      g_selModel->replaceTextures[grp->base+i] = TEXTUREMANAGER.add(tex);
-    }
+      g_selModel->updateTextureList(tex, base);
   }
 
   if (grp->particleColInd && grp->PCRIndex > -1 && !g_modelViewer->modelControl->IsReplacingParticleColors())
@@ -1271,16 +1253,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
   {
     GameFile * tex = grp->tex[0];
     LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
-    // refresh TextureList for further use
-	  for (ssize_t j = 0; j < TEXTURE_MAX; j++)
-    {
-      if (base == g_selModel->specialTextures[j])
-      {
-        g_selModel->TextureList[j] = tex;
-        break;
-      }
-    }
-    g_selModel->replaceTextures[base] = TEXTUREMANAGER.add(tex);
+    g_selModel->updateTextureList(tex, base);
   }
 }
 
