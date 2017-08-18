@@ -138,6 +138,8 @@ void ModelBankControl::AddModel()
 
 	cd.modelType = g_canvas->model()->modelType;
 
+  // @TODO : to repair
+  /*
 	if (cd.modelType == MT_NORMAL) {
 		int val = g_animControl->skinList->GetSelection();
 		TextureGroup *grp = (TextureGroup*) g_animControl->skinList->GetClientData(val);
@@ -148,9 +150,10 @@ void ModelBankControl::AddModel()
 			}
 		}
 
-	} else if (cd.modelType == MT_CHAR) {
+	} 
+  else if (cd.modelType == MT_CHAR) {
 
-	  // @TODO : to repair
+	  
 		//for (size_t i=0; i<NUM_CHAR_SLOTS; i++)
 	  //  cd.equipment[i] = g_charControl->model->cd.equipment[i];
 
@@ -169,7 +172,7 @@ void ModelBankControl::AddModel()
 	} else if (cd.modelType == MT_WMO) {
 	
 	}
-
+  */
 	bankList.push_back(cd);
 	
 	txtName->Clear();

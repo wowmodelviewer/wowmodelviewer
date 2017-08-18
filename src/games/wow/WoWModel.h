@@ -178,7 +178,6 @@ public:
   std::vector<TextureID> textures;
   std::vector<int> specialTextures;
   std::vector<GLuint> replaceTextures;
-  std::vector<bool> useReplaceTextures;
   CharTexture tex;
   // -------------------------------
 

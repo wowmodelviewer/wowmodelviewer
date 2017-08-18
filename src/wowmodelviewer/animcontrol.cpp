@@ -1212,8 +1212,7 @@ void AnimControl::SetSkin(int num)
     currTextures[i] = texname;
 
     int base = grp->base + i;
-    if (g_selModel->useReplaceTextures[base])
-      g_selModel->updateTextureList(tex, base);
+    g_selModel->updateTextureList(tex, base);
   }
 
   if (grp->particleColInd && grp->PCRIndex > -1 && !g_modelViewer->modelControl->IsReplacingParticleColors())
@@ -1249,12 +1248,9 @@ void AnimControl::SetSingleSkin(int num, int texnum)
   }
 
   int base = grp->base + texnum - 1;
-  if (g_selModel->useReplaceTextures[base])
-  {
-    GameFile * tex = grp->tex[0];
-    LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
-    g_selModel->updateTextureList(tex, base);
-  }
+  GameFile * tex = grp->tex[0];
+  LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
+  g_selModel->updateTextureList(tex, base);
 }
 
 int AnimControl::AddSkin(TextureGroup grp)

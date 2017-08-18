@@ -41,9 +41,6 @@ void WoWModel::dumpTextureStatus()
   for (uint i = 0; i < specialTextures.size(); i++)
     LOG_INFO << "specialTextures[" << i << "] =" << specialTextures[i];
 
-  for (uint i = 0; i < useReplaceTextures.size(); i++)
-    LOG_INFO << "useReplaceTextures[" << i << "] =" << useReplaceTextures[i];
-
   for (uint i = 0; i < replaceTextures.size(); i++)
     LOG_INFO << "replaceTextures[" << i << "] =" << replaceTextures[i];
 
@@ -123,7 +120,6 @@ gamefile(file), mergedModel("")
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
-  useReplaceTextures.resize(TEXTURE_MAX, false);
   
   for (size_t i = 0; i < ATT_MAX; i++)
     attLookup[i] = -1;
@@ -571,9 +567,6 @@ void WoWModel::initCommon(GameFile * f)
       {
         // special texture - only on characters and such...
         specialTextures[i] = texdef[i].type;
-
-        if (texdef[i].type < TEXTURE_MAX)
-          useReplaceTextures[texdef[i].type] = true;
 
         if (texdef[i].type == TEXTURE_ARMORREFLECT) // a fix for weapons with type-3 textures.
           replaceTextures[texdef[i].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
@@ -1829,9 +1822,6 @@ void WoWModel::mergeModel(QString & name)
     replaceTextures.push_back(val);
   }
 
-  for (auto it : m->useReplaceTextures)
-    useReplaceTextures.push_back(it);
-
   mergedModel = name;
 
   delete m;
@@ -1897,7 +1887,6 @@ void WoWModel::unmergeModel()
 
   specialTextures.resize(specialTextures.size() - m->specialTextures.size());
   replaceTextures.resize(replaceTextures.size() - m->replaceTextures.size());
-  useReplaceTextures.resize(useReplaceTextures.size() - m->useReplaceTextures.size());
 
   mergedModel = "";
 
