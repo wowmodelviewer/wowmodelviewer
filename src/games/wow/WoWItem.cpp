@@ -43,6 +43,8 @@
 
 #include "logger/Logger.h"
 
+#define DEBUG_FILTERING 0
+
 map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                              { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
                                              { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
@@ -563,7 +565,7 @@ void WoWItem::load()
       // geosets
       query = QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
+     
       iteminfos = GAMEDATABASE.sqlQuery(query);
 
       if (!iteminfos.valid || iteminfos.values.empty())
@@ -871,13 +873,13 @@ void WoWItem::refresh()
           }
 
           // handle 2000* group for hd models
-      {
-        RaceInfos infos;
-        if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
-        {
-          m_charModel->cd.geosets[CG_HDFEET] = 2;
-        }
-      }
+          {
+            RaceInfos infos;
+            if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
+            {
+              m_charModel->cd.geosets[CG_HDFEET] = 2;
+            }
+          }
         }
 
         std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
@@ -1235,22 +1237,30 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
     RaceInfos::getCurrent(m_charModel, infos);
 
     QString filter = "_";
-    if (filterType == MODEL)
+    switch (filterType)
     {
+    case MODEL:
       filter += QString::fromStdString(infos.prefix);
       filter += (infos.sexid == 0) ? "m" : "f";
-    }
-    else
-    {
+      break;
+    case MERGED_MODEL:
+      filter += QString::fromStdString(infos.prefix);
+      filter += "_";
+      filter += (infos.sexid == 0) ? "m" : "f";
+      break;
+    case TEXTURE:
       filter += "[";
       filter += (infos.sexid == 0) ? "m" : "f";
       filter += "u";
       filter += "]";
+      break;
     }
 
     filter += "\\.";
 
+#if DEBUG_FILTERING > 0
     LOG_INFO << __FUNCTION__ << filter;
+#endif
 
     QRegularExpression re(filter);
 
@@ -1267,6 +1277,7 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
     }
   }
 
+#if DEBUG_FILTERING > 0
   LOG_INFO << __FUNCTION__ << "---- BEFORE -----";
   for (uint i = 0; i < sql.values.size(); i++)
   {
@@ -1282,6 +1293,7 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
     if (f)
       LOG_INFO << f->fullname();
   }
+#endif
 
   return result;
 }

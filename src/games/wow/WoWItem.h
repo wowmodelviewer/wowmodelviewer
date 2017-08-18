@@ -110,6 +110,7 @@ class _WOWITEM_API_ WoWItem : public Component
     enum FilteringType
     {
       MODEL,
+      MERGED_MODEL,
       TEXTURE
     };
 
