@@ -2752,10 +2752,11 @@ void ModelViewer::ModelInfo()
 
   //	xml << "    <>" << m->header. << "</>" << endl;
   xml << "  <TextureLists>" << endl;
-  for (size_t i = 0; i < m->textures.size(); i++) 
+  for (auto it : m->passes) 
   {
-    if (i != ModelRenderPass::INVALID_TEX)
-      xml << "    <TextureList id=\"" << i << "\">" << TEXTUREMANAGER.get(i).toStdString() << "</TextureList>" << endl;
+    GLuint tex = m->getGLTexture(it->tex);
+    if (tex != ModelRenderPass::INVALID_TEX)
+      xml << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>" << endl;
   }
   xml << "  </TextureLists>" << endl;
 

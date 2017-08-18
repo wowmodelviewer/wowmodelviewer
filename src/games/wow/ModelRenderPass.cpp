@@ -129,14 +129,7 @@ bool ModelRenderPass::init()
   // TEXTURE
   // bind to our texture
   if (tex != INVALID_TEX)
-  {
-    GLuint bindtex = 0;
-    if (model->specialTextures[tex] == -1)
-      bindtex = model->textures[tex];
-    else
-      bindtex = model->replaceTextures[model->specialTextures[tex]];
-    glBindTexture(GL_TEXTURE_2D, bindtex);
-  }
+    glBindTexture(GL_TEXTURE_2D, model->getGLTexture(tex));
 
   // ALPHA BLENDING
   // blend mode

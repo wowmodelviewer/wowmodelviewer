@@ -640,10 +640,7 @@ void FBXExporter::createMaterials()
       QString tex_fullpath_filename = m_filename.c_str();
       tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
 
-      if(tex_name.contains("Body", Qt::CaseInsensitive))
-        m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = m_p_model->replaceTextures[TEXTURE_BODY];
-      else
-        m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = TEXTUREMANAGER.get(tex);
+      m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = m_p_model->getGLTexture(pass->tex);
 
       FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
       texture->SetFileName(tex_fullpath_filename.toStdString().c_str());

@@ -62,6 +62,13 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   GLuint dlist;
   bool forceAnim;
 
+  // ===============================
+  // Texture data
+  // ===============================
+  std::vector<TextureID> textures;
+  std::vector<int> specialTextures;
+  std::vector<GLuint> replaceTextures;
+
   inline void drawModel();
   void initCommon(GameFile * f);
   bool isAnimated(GameFile * f);
@@ -172,12 +179,6 @@ public:
 
   // -------------------------------
 
-  // ===============================
-  // Texture data
-  // ===============================
-  std::vector<TextureID> textures;
-  std::vector<int> specialTextures;
-  std::vector<GLuint> replaceTextures;
   CharTexture tex;
   // -------------------------------
 
@@ -237,6 +238,7 @@ public:
   void refresh();
 
   QString getNameForTex(uint16 tex);
+  GLuint getGLTexture(uint16 tex);
   void dumpTextureStatus();
 
 };

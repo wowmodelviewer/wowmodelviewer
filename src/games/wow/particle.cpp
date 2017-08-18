@@ -57,7 +57,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   rotation = mta.p.rotation;
   pos = fixCoordSystem(mta.pos);
   tpos = fixCoordSystem(mta.pos);
-  texture = model->textures[mta.texture];
+  texture = model->getGLTexture(mta.texture);
   blend = mta.blend;
   rows = mta.rows;
   if (rows == 0)
@@ -77,9 +77,9 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   {
     //  when multitexture is flagged, three textures are packed into the one uint16
     //  (5 bits each, plus one bit left over):
-    texture  = model->textures[mta.texture & 0x1f];
-    texture2 = model->textures[(mta.texture >> 5) & 0x1f];
-    texture3 = model->textures[(mta.texture >> 10) & 0x1f];
+    texture  = model->getGLTexture(mta.texture & 0x1f);
+    texture2 = model->getGLTexture((mta.texture >> 5) & 0x1f);
+    texture3 = model->getGLTexture((mta.texture >> 10) & 0x1f);
   }
 
   billboard = !(flags & MODELPARTICLE_FLAGS_DONOTBILLBOARD);
@@ -735,7 +735,7 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, uint32 *globa
   parent = model->bones + mta.bone;
   int *texlist = (int*)(f->getBuffer() + mta.ofsTextures);
   // just use the first texture for now; most models I've checked only had one
-  texture = model->textures[texlist[0]];
+  texture = model->getGLTexture(texlist[0]);
 
   tpos = pos = fixCoordSystem(mta.pos);
 

@@ -2212,23 +2212,16 @@ void WoWModel::refresh()
 
 QString WoWModel::getNameForTex(uint16 tex)
 {
-  QString result = "";
-
-  uint texid = 0;
-
   if (specialTextures[tex] == TEXTURE_BODY)
-  {
-    result = "Body.blp";
-  }
+    return "Body.blp";
   else
-  {
-    if (specialTextures[tex] == -1)
-      texid = textures[tex];
-    else
-      texid = replaceTextures[specialTextures[tex]];
-  
-    result = TEXTUREMANAGER.get(texid);
-  }
+    return TEXTUREMANAGER.get(getGLTexture(tex));
+}
 
-  return result;
+GLuint WoWModel::getGLTexture(uint16 tex)
+{
+  if (specialTextures[tex] == -1)
+    return textures[tex];
+  else
+    return replaceTextures[specialTextures[tex]];
 }
