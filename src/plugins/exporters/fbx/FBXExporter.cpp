@@ -196,12 +196,8 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   }
 
   // delete texture files created during export
-  for(std::map<std::string, GLuint>::iterator it = m_texturesToExport.begin();
-      it != m_texturesToExport.end();
-      ++it)
-  {
-   remove((it->first).c_str());
-  }
+  for(auto it : m_texturesToExport)
+   remove((it.first).c_str());
 
   LOG_INFO << "FBX scene successfully exported";
   return true;
@@ -385,33 +381,28 @@ void FBXExporter::createSkeleton()
 void FBXExporter::linkMeshAndSkeleton()
 {
   // create clusters
-  for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
-            it != m_boneNodes.end();
-            ++it)
+  for(auto it : m_boneNodes)
   {
     FbxCluster* cluster = FbxCluster::Create(m_p_scene, "");
     m_boneClusters.push_back(cluster);
-    cluster->SetLink(it->second);
+    cluster->SetLink(it.second);
     cluster->SetLinkMode(FbxCluster::eTotalOne);
   }
 
   // set initial matrices
   FbxAMatrix matrix = m_p_meshNode->EvaluateGlobalTransform();
-  for(std::vector<FbxCluster*>::iterator it = m_boneClusters.begin() ;
-              it != m_boneClusters.end();
-              ++it)
+  for(auto it : m_boneClusters)
   {
-    (*it)->SetTransformMatrix(matrix);
+    it->SetTransformMatrix(matrix);
   }
 
   // set link matrices
   std::vector<FbxCluster*>::iterator clusterIt = m_boneClusters.begin();
-  for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
-              it != m_boneNodes.end();
-              ++it, ++clusterIt)
+  for(auto it : m_boneNodes)
   {
-    matrix = it->second->EvaluateGlobalTransform();
+    matrix = it.second->EvaluateGlobalTransform();
     (*clusterIt)->SetTransformLinkMatrix(matrix);
+    ++clusterIt;
   }
 
   // define control points
@@ -430,12 +421,8 @@ void FBXExporter::linkMeshAndSkeleton()
   FbxGeometry* lMeshAttribute = (FbxGeometry*) m_p_meshNode->GetNodeAttribute();
   FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
 
-  for(std::vector<FbxCluster*>::iterator it = m_boneClusters.begin() ;
-      it != m_boneClusters.end();
-      ++it)
-  {
-    skin->AddCluster(*it);
-  }
+  for(auto it : m_boneClusters)
+    skin->AddCluster(it);
 
   lMeshAttribute->AddDeformer(skin);
 }
@@ -478,12 +465,10 @@ void FBXExporter::createAnimations()
       FbxTime time;
       time.SetSecondDouble((float)t / 1000.0);
 
-      for(std::map<int,FbxNode*>::iterator it = m_boneNodes.begin() ;
-          it != m_boneNodes.end();
-          ++it)
+      for(auto it : m_boneNodes)
 
       {
-        int b = it->first;
+        int b = it.first;
         Bone& bone = m_p_model->bones[b];
 
         bool rot = bone.rot.uses(cur_anim.Index);
@@ -638,12 +623,9 @@ void FBXExporter::createMaterials()
       m_p_meshNode->AddMaterial(material);
     }
   }
-  for(std::map<std::string, GLuint>::iterator it = m_texturesToExport.begin();
-      it != m_texturesToExport.end();
-      ++it)
-  {
-    exportGLTexture(it->second, it->first);
-  }
+
+  for(auto it : m_texturesToExport)
+    exportGLTexture(it.second, it.first);
 
 }
 
@@ -652,11 +634,9 @@ void FBXExporter::storeBindPose()
   FbxPose* pose = FbxPose::Create(m_p_scene,"Bind Pose");
   pose->SetIsBindPose(true);
 
-  for(std::vector<FbxCluster*>::iterator it = m_boneClusters.begin() ;
-      it != m_boneClusters.end();
-      ++it)
+  for(auto it : m_boneClusters)
   {
-    FbxNode*  node   = (*it)->GetLink();
+    FbxNode*  node   = it->GetLink();
     FbxMatrix matrix = node->EvaluateGlobalTransform();
     pose->Add(node, matrix);
   }
