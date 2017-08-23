@@ -36,7 +36,7 @@ struct ModelHeader {
 	uint8 version[4];
 	uint32 nameLength;
 	uint32 nameOfs;
-	uint32 GlobalModelFlags; // 1: tilt x, 2: tilt y, 4:, 8: add another field in header, 16: ; (no other flags as of 3.1.1);
+	uint32 GlobalModelFlags; // 1: tilt x, 2: tilt y, 4:, 8: add BlendMaps fields in header, 16: ; 0x200000 : 24500 upgraded model format: chunked .anim files, change in the exporter reordering sequence+bone blocks before name
 
 	uint32 nGlobalSequences; // AnimationRelated
 	uint32 ofsGlobalSequences; // A list of timestamps.

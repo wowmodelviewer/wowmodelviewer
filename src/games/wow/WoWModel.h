@@ -87,6 +87,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
 public:
   bool animGeometry, animTextures, animBones;
+  bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
   TextureAnim		*texAnims;
   uint32			*globalSequences;

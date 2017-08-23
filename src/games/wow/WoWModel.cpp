@@ -447,6 +447,9 @@ void WoWModel::initCommon(GameFile * f)
     return;
   }
 
+  if (header.GlobalModelFlags & 0x200000)
+    model24500 = true;
+
   modelname = tempname.toStdString();
   QStringList list = tempname.split("\\");
   setName(list[list.size() - 1].replace(".m2", ""));
