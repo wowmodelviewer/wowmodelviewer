@@ -341,28 +341,9 @@ void FBXExporter::createSkeleton()
     }
   }
 
-  // filter out bones without any vertex attached
-  size_t num_of_vertices = m_p_model->origVertices.size();
-  std::vector<bool> has_vertex;
-  has_vertex.resize(num_of_bones);
-
-  for (size_t i = 0; i < num_of_vertices; i++)
-  {
-    ModelVertex& vertex = m_p_model->origVertices[i];
-    for (size_t j = 0; j < 4; j++)
-    {
-      if ((vertex.bones[j] == 0) && (vertex.weights[j] == 0))
-        continue;
-      has_vertex[vertex.bones[j]] = true;
-    }
-  }
-
   // Create bone.
   for (size_t i = 0; i < num_of_bones; ++i)
   {
-    if(!has_vertex[i] && !has_children[i])
-      continue;
-
     Bone &bone = m_p_model->bones[i];
     Vec3D trans = bone.pivot;
 
@@ -434,16 +415,15 @@ void FBXExporter::linkMeshAndSkeleton()
   }
 
   // define control points
-  size_t num_of_vertices = m_p_model->origVertices.size();
-  for (size_t i = 0; i < num_of_vertices; i++)
+  int i = 0;
+  for (auto it : m_p_model->origVertices)
   {
-    ModelVertex& vertex = m_p_model->origVertices[i];
     for (size_t j = 0; j < 4; j++)
     {
-      if ((vertex.bones[j] == 0) && (vertex.weights[j] == 0))
-        continue;
-      m_boneClusters[vertex.bones[j]]->AddControlPointIndex((int)i, static_cast<double>(vertex.weights[j]) / 255.0);
+      if (it.weights[j] > 0)
+        m_boneClusters[it.bones[j]]->AddControlPointIndex((int)i, static_cast<double>(it.weights[j]) / 255.0);
     }
+    i++;
   }
 
   // add cluster to skin
