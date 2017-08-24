@@ -43,10 +43,14 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
-   
-    CASCFile * file = new CASCFile(line, m_CASCFolder.fileDataId(line.toStdString()));
-    file->setName(line.mid(line.lastIndexOf('/')+1));
-    addChild(file);
+
+    int id = m_CASCFolder.fileDataId(line.toStdString());
+    if (id != 0)
+    {
+      CASCFile * file = new CASCFile(line, id);
+      file->setName(line.mid(line.lastIndexOf('/') + 1));
+      addChild(file);
+    }
   }
   LOG_INFO << "WoWFolder - Hierarchy creation done";
 }
