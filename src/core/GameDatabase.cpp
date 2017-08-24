@@ -135,9 +135,9 @@ void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_
 {
   if(aTimeInNs/1000000 > 30)
   {
-    LOG_ERROR << "LONG QUERY !";
-    LOG_ERROR << aQueryStr;
-    LOG_ERROR << "Query time (ms)" << aTimeInNs/1000000;
+    LOG_WARNING << "LONG QUERY !";
+    LOG_WARNING << aQueryStr;
+    LOG_WARNING << "Query time (ms)" << aTimeInNs / 1000000;
   }
 
 }
