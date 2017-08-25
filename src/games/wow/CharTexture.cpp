@@ -49,9 +49,9 @@ void CharTexture::compose(TextureID texID)
   std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
 	// if we only have one texture then don't bother with compositing
-	if (m_components.size()==1)
+	if (m_components.size()==0)
 	{
-		Texture temp(m_components[0].file);
+		Texture temp(baseImage);
     temp.id = texID;
     temp.load();
 		return;
