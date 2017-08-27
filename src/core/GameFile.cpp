@@ -49,16 +49,33 @@ void GameFile::seekRelative(size_t offset)
 bool GameFile::close()
 {
   delete[] originalBuffer;
+  originalBuffer = 0;
   buffer = 0;
   eof = true;
+  chunks.clear();
   return true;
+}
+
+void GameFile::allocate(unsigned int s)
+{
+  if (originalBuffer)
+    delete[] originalBuffer;
+
+  size = s;
+
+
+
+  originalBuffer = new unsigned char[size];
+  buffer = originalBuffer;
+
+  if (size == 0)
+    eof = true;
+  else
+    eof = false;
 }
 
 bool GameFile::setChunk(std::string chunkName)
 {
-  if (originalBuffer == 0) // save buffer address to keep track of original one
-    originalBuffer = buffer;
-
   LOG_INFO << "Setting chunk to" << chunkName.c_str();
   bool result = false;
   for (auto it : chunks)

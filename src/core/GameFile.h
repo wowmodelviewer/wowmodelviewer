@@ -45,13 +45,21 @@ class _GAMEFILE_API_ GameFile : public Component
     QString fullname() const { return filepath; }
     int fileDataId() { return m_fileDataId; }
 
+    void allocate(unsigned int size);
     bool setChunk(std::string chunkName);
+    bool isChunked() { return chunks.size() > 0; }
 
   protected:
     bool eof;
     unsigned char *buffer;
     size_t pointer, size;
     QString filepath;
+
+    struct chunkHeader
+    {
+      char magic[4];
+      unsigned __int32 size;
+    };
 
     struct Chunk
     {

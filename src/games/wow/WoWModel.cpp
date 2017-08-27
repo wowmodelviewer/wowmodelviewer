@@ -425,6 +425,13 @@ void WoWModel::initCommon(GameFile * f)
     return;
   }
 
+  if (f->isChunked() && !f->setChunk("MD21")) // Legion chunked files
+  {
+    LOG_ERROR << "Unable to set chunk to MD21 for model:" << f->fullname();
+    f->close();
+    return;
+  }
+
   setItemName(f->fullname());
 
   // replace .MDX with .M2

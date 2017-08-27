@@ -23,13 +23,6 @@ CASCFile::~CASCFile()
   close();
 }
 
-struct chunkHeader
-{
-  char magic[4];
-  unsigned __int32 size;
-};
-
-
 bool CASCFile::open()
 {
 #ifdef DEBUG_READ
@@ -63,10 +56,8 @@ bool CASCFile::open()
       return false;
     }
 
-    if(buffer)
-      delete [] buffer;
+    allocate(size);
 
-    buffer = new unsigned char[size];
     if (!CascReadFile(m_handle, buffer, size, &nbBytesRead))
     {
       LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
@@ -87,18 +78,17 @@ bool CASCFile::open()
         chunkHeader chunkHead;
         memcpy(&chunkHead, buffer + offset, sizeof(chunkHeader));
         offset += sizeof(chunkHeader);
-        LOG_INFO << "Chunk :" << chunkHead.magic[0] << chunkHead.magic[1] << chunkHead.magic[2] << chunkHead.magic[3] << chunkHead.size;
-
+        
         Chunk * chunk = new Chunk();
         chunk->magic = std::string(chunkHead.magic,4);
         chunk->start = offset;
         chunk->size = chunkHead.size;
         chunks.push_back(*chunk);
 
+        LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->size;
+
         offset += chunkHead.size;
       }
-
-      setChunk("MD21");
     }
 #ifdef DEBUG_READ
     LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;
