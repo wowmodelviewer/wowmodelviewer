@@ -79,38 +79,26 @@ bool CASCFile::open()
     // md21 file, need to read all chunks
     if ((nbBytesRead >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
     {
-      unsigned char * bufferPtr = buffer;
-
-      unsigned char * md21chunkStart = 0;
-      unsigned __int32 md21chunkSize = 0;
+      unsigned int offset = 0;
 
       LOG_INFO << "Parsing chunks for file" << filepath;
-      while (bufferPtr < buffer + nbBytesRead)
+      while (offset < nbBytesRead)
       {
         chunkHeader chunkHead;
-        memcpy(&chunkHead, bufferPtr, sizeof(chunkHeader));
-        bufferPtr += sizeof(chunkHeader);
+        memcpy(&chunkHead, buffer + offset, sizeof(chunkHeader));
+        offset += sizeof(chunkHeader);
         LOG_INFO << "Chunk :" << chunkHead.magic[0] << chunkHead.magic[1] << chunkHead.magic[2] << chunkHead.magic[3] << chunkHead.size;
 
-        if (chunkHead.magic[0] == 'M' && chunkHead.magic[1] == 'D' && chunkHead.magic[2] == '2' && chunkHead.magic[3] == '1')
-        {
-          md21chunkStart = bufferPtr;
-          md21chunkSize = chunkHead.size;
-        }
+        Chunk * chunk = new Chunk();
+        chunk->magic = std::string(chunkHead.magic,4);
+        chunk->start = offset;
+        chunk->size = chunkHead.size;
+        chunks.push_back(*chunk);
 
-        bufferPtr += chunkHead.size;
+        offset += chunkHead.size;
       }
 
-      // relocate buffer on MD21 chunk
-      if (md21chunkSize != 0)
-      {
-        // relocate buffer on chunk's data
-        unsigned char *newBuffer = new unsigned char[md21chunkSize];
-        memcpy(newBuffer, md21chunkStart, md21chunkSize);
-        delete[] buffer;
-        buffer = newBuffer;
-        size = md21chunkSize; // real size is only chunk' size
-      }
+      setChunk("MD21");
     }
 #ifdef DEBUG_READ
     LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;

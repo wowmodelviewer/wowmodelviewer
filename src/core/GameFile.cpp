@@ -10,6 +10,8 @@
 
 #include <cstring> // memcpy
 
+#include "logger\Logger.h"
+
 size_t GameFile::read(void* dest, size_t bytes)
 {
   if (eof)
@@ -46,10 +48,32 @@ void GameFile::seekRelative(size_t offset)
 
 bool GameFile::close()
 {
-  delete [] buffer;
+  delete[] originalBuffer;
   buffer = 0;
   eof = true;
   return true;
+}
+
+bool GameFile::setChunk(std::string chunkName)
+{
+  if (originalBuffer == 0) // save buffer address to keep track of original one
+    originalBuffer = buffer;
+
+  LOG_INFO << "Setting chunk to" << chunkName.c_str();
+  bool result = false;
+  for (auto it : chunks)
+  {
+    if (it.magic == chunkName)
+    {
+      LOG_INFO << "Found chunk" << chunkName.c_str();
+      buffer = originalBuffer + it.start;
+      pointer = 0;
+      size = it.size;
+      result = true;
+      break;
+    }
+  }
+  return result;
 }
 
 size_t GameFile::getSize()

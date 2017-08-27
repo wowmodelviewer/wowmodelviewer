@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 #include "metaclasses/Component.h"
 
@@ -26,7 +27,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id) {}
+    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id), originalBuffer(0) {}
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -44,11 +45,22 @@ class _GAMEFILE_API_ GameFile : public Component
     QString fullname() const { return filepath; }
     int fileDataId() { return m_fileDataId; }
 
+    bool setChunk(std::string chunkName);
+
   protected:
     bool eof;
     unsigned char *buffer;
     size_t pointer, size;
     QString filepath;
+
+    struct Chunk
+    {
+      std::string magic;
+      unsigned int start;
+      unsigned int size;
+    };
+
+    std::vector<Chunk> chunks;
 
   private:
     // disable copying
@@ -56,6 +68,7 @@ class _GAMEFILE_API_ GameFile : public Component
     void operator=(const GameFile &);
 
     int m_fileDataId;
+    unsigned char * originalBuffer;
 };
 
 
