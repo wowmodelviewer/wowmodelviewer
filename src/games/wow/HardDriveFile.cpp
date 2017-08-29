@@ -13,7 +13,7 @@
 
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
-  : GameFile(path, id), opened(false), realpath(real), file(0)
+  : CASCFile(path, id), opened(false), realpath(real), file(0)
 {
 }
 
@@ -63,33 +63,6 @@ unsigned long HardDriveFile::readFile()
   delete file;
   file = 0;
   return s;
-}
-
-void HardDriveFile::doPostOpenOperation()
-{
-  // md21 file, need to read all chunks
-  if ((size >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
-  {
-    unsigned int offset = 0;
-
-    LOG_INFO << "Parsing chunks for file" << filepath;
-    while (offset < size)
-    {
-      chunkHeader chunkHead;
-      memcpy(&chunkHead, buffer + offset, sizeof(chunkHeader));
-      offset += sizeof(chunkHeader);
-
-      Chunk * chunk = new Chunk();
-      chunk->magic = std::string(chunkHead.magic, 4);
-      chunk->start = offset;
-      chunk->size = chunkHead.size;
-      chunks.push_back(*chunk);
-
-      LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->size;
-
-      offset += chunkHead.size;
-    }
-  }
 }
 
 bool HardDriveFile::doPostCloseOperation()
