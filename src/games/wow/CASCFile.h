@@ -30,8 +30,13 @@ class _CASCFILE_API_ CASCFile : public GameFile
   public:
     CASCFile(QString path, int id = -1);
     ~CASCFile();
-    virtual bool open();
-    bool close();
+
+  protected:
+    virtual bool openFile();
+    virtual bool getFileSize(unsigned int & s);
+    virtual unsigned long readFile();
+    virtual void doPostOpenOperation();
+    virtual bool doPostCloseOperation();
 
   private:
     HANDLE m_handle;

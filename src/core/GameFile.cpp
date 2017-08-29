@@ -46,6 +46,26 @@ void GameFile::seekRelative(size_t offset)
   eof = (pointer >= size);
 }
 
+bool GameFile::open()
+{
+  eof = true;
+
+  if (!openFile())
+    return false;
+
+  if (getFileSize(size))
+  {
+    allocate(size);
+
+    if (readFile() != 0)
+      eof = false;
+
+    doPostOpenOperation();
+  }
+
+  return true;
+}
+
 bool GameFile::close()
 {
   delete[] originalBuffer;
@@ -53,7 +73,7 @@ bool GameFile::close()
   buffer = 0;
   eof = true;
   chunks.clear();
-  return true;
+  return doPostCloseOperation();
 }
 
 void GameFile::allocate(unsigned int s)

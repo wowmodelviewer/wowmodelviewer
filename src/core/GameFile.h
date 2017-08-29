@@ -38,9 +38,9 @@ class _GAMEFILE_API_ GameFile : public Component
     bool isEof();
     void seek(size_t offset);
     void seekRelative(size_t offset);
-    virtual bool open() = 0;
-    virtual bool close();
-
+    bool open();
+    bool close();
+    
     void setFullName(const QString & name) { filepath = name; }
     QString fullname() const { return filepath; }
     int fileDataId() { return m_fileDataId; }
@@ -50,9 +50,16 @@ class _GAMEFILE_API_ GameFile : public Component
     bool isChunked() { return chunks.size() > 0; }
 
   protected:
+
+    virtual bool openFile() = 0;
+    virtual bool getFileSize(unsigned int & s) = 0;
+    virtual unsigned long readFile() = 0;
+    virtual void doPostOpenOperation() = 0;
+    virtual bool doPostCloseOperation() = 0;
+
     bool eof;
     unsigned char *buffer;
-    size_t pointer, size;
+    unsigned int pointer, size;
     QString filepath;
 
     struct chunkHeader

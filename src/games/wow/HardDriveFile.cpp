@@ -13,7 +13,7 @@
 
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
- : GameFile(path, id), opened(false), realpath(real)
+  : GameFile(path, id), opened(false), realpath(real), file(0)
 {
 }
 
@@ -22,14 +22,9 @@ HardDriveFile::~HardDriveFile()
   close();
 }
 
-
-bool HardDriveFile::open()
+bool HardDriveFile::openFile()
 {
-#ifdef DEBUG_READ
-  LOG_INFO << __FUNCTION__ << "Opening" << filepath;
-#endif
-
-  if(opened)
+  if (opened)
   {
 #ifdef DEBUG_READ
     LOG_INFO << filepath << "is already opened";
@@ -37,24 +32,47 @@ bool HardDriveFile::open()
     return true;
   }
 
-  eof = true;
-  QFile file(realpath);
-  if(!file.open(QIODevice::ReadOnly))
+  file = new QFile(realpath);
+  
+  if (!file->open(QIODevice::ReadOnly))
   {
     LOG_ERROR << "Opening" << filepath << "failed.";
     return false;
   }
 
-  allocate(file.size());
-  file.read((char *)buffer, size);
+  opened = true;
+  return true;
+}
 
-  // @TODO : rework to avoid duplicate code from CASCFile
+bool HardDriveFile::getFileSize(unsigned int & s)
+{
+  if (!file && !file->isOpen())
+    return false;
+
+  s = file->size();
+  return true;
+}
+
+unsigned long HardDriveFile::readFile()
+{
+  if (!file && !file->isOpen())
+    return 0;
+
+  unsigned long s = file->read((char *)buffer, size);
+  file->close();
+  delete file;
+  file = 0;
+  return s;
+}
+
+void HardDriveFile::doPostOpenOperation()
+{
   // md21 file, need to read all chunks
   if ((size >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
   {
     unsigned int offset = 0;
 
-    LOG_INFO << "Parsing chunks for file" << realpath;
+    LOG_INFO << "Parsing chunks for file" << filepath;
     while (offset < size)
     {
       chunkHeader chunkHead;
@@ -72,23 +90,15 @@ bool HardDriveFile::open()
       offset += chunkHead.size;
     }
   }
-
-  opened = true;
-  file.close();
-
-  return true;
 }
 
-bool HardDriveFile::close()
+bool HardDriveFile::doPostCloseOperation()
 {
 #ifdef DEBUG_READ
   LOG_INFO << __FUNCTION__ << "Closing" << filepath;
 #endif
   if(opened)
-  {
-    GameFile::close();
     opened = false;
-  }
 
   return true;
 }
