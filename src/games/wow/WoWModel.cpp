@@ -448,7 +448,8 @@ void WoWModel::initCommon(GameFile * f)
 
   if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
   {
-    LOG_ERROR << "Invalid model!  May be corrupted.";
+    LOG_ERROR << "Invalid model!  May be corrupted. Header id:" << header.id[0] << header.id[1] << header.id[2] << header.id[3];
+
     ok = false;
     f->close();
     return;
