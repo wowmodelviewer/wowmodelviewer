@@ -679,15 +679,36 @@ void WoWModel::initStatic(GameFile * f)
   delete[] transparency; transparency = 0;
 }
 
+
+struct AFID
+{
+  uint16 animId;
+  uint16 subAnimId;
+  uint32 fileId;
+};
+
 void WoWModel::initAnimated(GameFile * f)
 {
   if (header.nAnimations > 0)
   {
+    vector<AFID> afids;
+
+    if (f->isChunked())
+    {
+      f->setChunk("AFID");
+      AFID afid;
+      while (!f->isEof())
+      {
+        f->read(&afid, sizeof(AFID));
+        afids.push_back(afid);
+      }
+
+      f->setChunk("MD21", false);
+    }
+
     anims = new ModelAnimation[header.nAnimations];
 
     ModelAnimationWotLK animsWotLK;
-    QString tempname;
-
     //std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
 
     for (size_t i = 0; i < header.nAnimations; i++)
@@ -708,10 +729,27 @@ void WoWModel::initAnimated(GameFile * f)
       anims[i].NextAnimation = animsWotLK.NextAnimation;
       anims[i].Index = animsWotLK.Index;
 
-      tempname = QString::fromStdString(modelname).replace(".m2", "");
-      tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(animsWotLK.subAnimID, 2, 10, QChar('0'));
+      GameFile * anim = 0;
 
-      GameFile * anim = GAMEDIRECTORY.getFile(tempname);
+      // if we have animation file ids from AFID chunk, use them
+      if (afids.size() > 0)
+      {
+        for (auto it : afids)
+        {
+          if ((it.animId == anims[i].animID) && (it.subAnimId == animsWotLK.subAnimID))
+          {
+            anim = GAMEDIRECTORY.getFile(it.fileId);
+            break;
+          }
+        }
+      }
+      else // else use file naming to get them
+      {
+        QString tempname = QString::fromStdString(modelname).replace(".m2", "");
+        tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(animsWotLK.subAnimID, 2, 10, QChar('0'));
+        anim = GAMEDIRECTORY.getFile(tempname);
+      }
+      
       if (anim && anim->open())
       {
         animfiles.push_back(anim);
