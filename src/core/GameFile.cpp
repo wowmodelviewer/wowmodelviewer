@@ -83,8 +83,6 @@ void GameFile::allocate(unsigned int s)
 
   size = s;
 
-
-
   originalBuffer = new unsigned char[size];
   buffer = originalBuffer;
 
@@ -94,17 +92,28 @@ void GameFile::allocate(unsigned int s)
     eof = false;
 }
 
-bool GameFile::setChunk(std::string chunkName)
+bool GameFile::setChunk(std::string chunkName, bool resetToStart)
 {
   LOG_INFO << "Setting chunk to" << chunkName.c_str();
   bool result = false;
+
+  // save current pointer if a chunk is currently under reading
+  for (auto it : chunks)
+  {
+    if (it.magic == curChunk)
+    {
+      it.pointer = pointer;
+      break;
+    }
+  }
+
   for (auto it : chunks)
   {
     if (it.magic == chunkName)
     {
       LOG_INFO << "Found chunk" << chunkName.c_str();
       buffer = originalBuffer + it.start;
-      pointer = 0;
+      pointer = (resetToStart?0:it.pointer);
       size = it.size;
       result = true;
       break;

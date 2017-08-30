@@ -89,6 +89,7 @@ void CASCFile::doPostOpenOperation()
       chunk->magic = std::string(chunkHead.magic, 4);
       chunk->start = offset;
       chunk->size = chunkHead.size;
+      chunk->pointer = 0;
       chunks.push_back(*chunk);
 
       LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->size;

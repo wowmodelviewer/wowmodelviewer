@@ -27,7 +27,12 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id), originalBuffer(0) {}
+    GameFile(QString path, int id = -1) 
+      : eof(true), buffer(0), pointer(0), size(0), 
+        filepath(path), m_fileDataId(id), originalBuffer(0),
+        curChunk("")
+    {}
+
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -46,7 +51,7 @@ class _GAMEFILE_API_ GameFile : public Component
     int fileDataId() { return m_fileDataId; }
 
     void allocate(unsigned int size);
-    bool setChunk(std::string chunkName);
+    bool setChunk(std::string chunkName, bool resetToStart = true);
     bool isChunked() { return chunks.size() > 0; }
 
   protected:
@@ -73,6 +78,7 @@ class _GAMEFILE_API_ GameFile : public Component
       std::string magic;
       unsigned int start;
       unsigned int size;
+      unsigned int pointer;
     };
 
     std::vector<Chunk> chunks;
@@ -84,6 +90,7 @@ class _GAMEFILE_API_ GameFile : public Component
 
     int m_fileDataId;
     unsigned char * originalBuffer;
+    std::string curChunk;
 };
 
 
