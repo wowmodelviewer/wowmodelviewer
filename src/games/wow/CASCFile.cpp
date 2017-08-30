@@ -23,90 +23,88 @@ CASCFile::~CASCFile()
   close();
 }
 
-
-bool CASCFile::open()
+bool  CASCFile::openFile()
 {
-#ifdef DEBUG_READ
-  LOG_INFO << this << __FUNCTION__ << "Opening" << filepath << "handle" << m_handle;
-#endif
-
-  if(m_handle) // already opened
+  if (m_handle) // already opened
   {
 #ifdef DEBUG_READ
-  LOG_INFO << filepath << "is already opened";
+    LOG_INFO << filepath << "is already opened";
 #endif
     return true;
   }
 
-  eof = true;
   m_handle = GAMEDIRECTORY.openFile(filepath.toStdString());
 
-  if(!m_handle)
+  if (!m_handle)
   {
     LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
     return false;
   }
 
-  if(m_handle)
-  {
-    DWORD nbBytesRead = 0;
-    size = CascGetFileSize(m_handle,0);
-    if(size == CASC_INVALID_SIZE)
-    {
-      LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
-      return false;
-    }
-
-    if(buffer)
-      delete [] buffer;
-
-    buffer = new unsigned char[size];
-    if(!CascReadFile(m_handle, buffer, size, &nbBytesRead))
-    {
-      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
-    }
-
-    if(nbBytesRead != 0)
-      eof = false;
-    else
-      eof = true;
-#ifdef DEBUG_READ
-    LOG_INFO << __FUNCTION__ <<  "|" << filepath << "nb bytes read =>" << nbBytesRead << "/" << size;
-#endif
-
-    // if MD21 file, deal with chunks
-    if ((nbBytesRead >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
-    {
-      // read size of first chunk in the file
-      unsigned __int32 chunkSize;
-      memcpy(&chunkSize, buffer + 4, 4);
-
-      // check if there is only one chunk in the file (if chunk size is at least 98% of the file)
-      if ((float)chunkSize / (float)size >= 0.98)
-      {
-        LOG_INFO << __FUNCTION__ << __FILE__ << __LINE__ << "MD21 file detected";
-        // relocate buffer on chunk's data
-        unsigned char *newBuffer = new unsigned char[chunkSize];
-        std::copy(buffer + 8, buffer + 8 + chunkSize, newBuffer);
-        delete[] buffer;
-        buffer = newBuffer;
-        size = chunkSize; // real size is only chunk' size
-      }
-      // @todo else -> multiple chunks in the file, to be implemented when needed
-    }
-  }
-
   return true;
 }
 
-bool CASCFile::close()
+bool CASCFile::getFileSize(unsigned int & s)
+{
+  bool result = false;
+  
+  if (m_handle)
+  {
+    s = CascGetFileSize(m_handle, 0);
+  
+    if (s == CASC_INVALID_SIZE)
+      LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
+    else
+      result = true;
+  }
+
+  return result;
+}
+
+unsigned long CASCFile::readFile()
+{
+  unsigned long result = 0;
+  
+  if (!CascReadFile(m_handle, buffer, size, &result))
+    LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+  
+  return result;
+}
+
+void CASCFile::doPostOpenOperation()
+{
+  // md21 file, need to read all chunks
+  if ((size >= 4) && (buffer[0] == 'M' && buffer[1] == 'D' && buffer[2] == '2' && buffer[3] == '1'))
+  {
+    unsigned int offset = 0;
+
+    LOG_INFO << "Parsing chunks for file" << filepath;
+    while (offset < size)
+    {
+      chunkHeader chunkHead;
+      memcpy(&chunkHead, buffer + offset, sizeof(chunkHeader));
+      offset += sizeof(chunkHeader);
+
+      Chunk * chunk = new Chunk();
+      chunk->magic = std::string(chunkHead.magic, 4);
+      chunk->start = offset;
+      chunk->size = chunkHead.size;
+      chunks.push_back(*chunk);
+
+      LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->size;
+
+      offset += chunkHead.size;
+    }
+  }
+}
+
+bool CASCFile::doPostCloseOperation()
 {
 #ifdef DEBUG_READ
   LOG_INFO << this << __FUNCTION__ << "Closing" << filepath << "handle" << m_handle;
 #endif
   if(m_handle)
   {
-    GameFile::close();
     HANDLE savedHandle = m_handle;
     m_handle = 0;
 

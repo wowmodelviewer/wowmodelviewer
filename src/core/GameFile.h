@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 #include "metaclasses/Component.h"
 
@@ -26,7 +27,7 @@
 class _GAMEFILE_API_ GameFile : public Component
 {
   public:
-    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id) {}
+    GameFile(QString path, int id = -1) :eof(true), buffer(0), pointer(0), size(0), filepath(path), m_fileDataId(id), originalBuffer(0) {}
     virtual ~GameFile() {}
 
     size_t read(void* dest, size_t bytes);
@@ -37,18 +38,44 @@ class _GAMEFILE_API_ GameFile : public Component
     bool isEof();
     void seek(size_t offset);
     void seekRelative(size_t offset);
-    virtual bool open() = 0;
-    virtual bool close();
-
+    bool open();
+    bool close();
+    
     void setFullName(const QString & name) { filepath = name; }
     QString fullname() const { return filepath; }
     int fileDataId() { return m_fileDataId; }
 
+    void allocate(unsigned int size);
+    bool setChunk(std::string chunkName);
+    bool isChunked() { return chunks.size() > 0; }
+
   protected:
+
+    virtual bool openFile() = 0;
+    virtual bool getFileSize(unsigned int & s) = 0;
+    virtual unsigned long readFile() = 0;
+    virtual void doPostOpenOperation() = 0;
+    virtual bool doPostCloseOperation() = 0;
+
     bool eof;
     unsigned char *buffer;
-    size_t pointer, size;
+    unsigned int pointer, size;
     QString filepath;
+
+    struct chunkHeader
+    {
+      char magic[4];
+      unsigned __int32 size;
+    };
+
+    struct Chunk
+    {
+      std::string magic;
+      unsigned int start;
+      unsigned int size;
+    };
+
+    std::vector<Chunk> chunks;
 
   private:
     // disable copying
@@ -56,6 +83,7 @@ class _GAMEFILE_API_ GameFile : public Component
     void operator=(const GameFile &);
 
     int m_fileDataId;
+    unsigned char * originalBuffer;
 };
 
 
