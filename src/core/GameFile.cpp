@@ -116,6 +116,7 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
       pointer = (resetToStart?0:it.pointer);
       size = it.size;
       result = true;
+      eof = (pointer >= size);
       break;
     }
   }
