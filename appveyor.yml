@@ -1,0 +1,22 @@
+version: 1.0.{build}
+image: Visual Studio 2013
+build_script:
+- cmd: >-
+    appveyor DownloadFile https://wowmodelviewer.net/wordpress/wmv_sdk.zip -FileName sdk.zip
+
+    7z x sdk.zip
+
+    cd wmv_sdk
+
+    .\wmv_set_env.bat
+
+    set WMV_BASE_PATH=C:\projects\wowmodelviewer
+
+    mkdir C:\projects\wowmodelviewer\build
+
+    cd C:\projects\wowmodelviewer\build
+
+    cmake -G "NMake Makefiles" ..\src
+
+    nmake install
+test: off
