@@ -48,6 +48,9 @@ void GameFile::seekRelative(size_t offset)
 
 bool GameFile::open()
 {
+  if (isAlreadyOpened())
+    return true;
+
   eof = true;
 
   if (!openFile())

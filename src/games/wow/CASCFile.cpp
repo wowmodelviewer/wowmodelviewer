@@ -25,14 +25,6 @@ CASCFile::~CASCFile()
 
 bool  CASCFile::openFile()
 {
-  if (m_handle) // already opened
-  {
-#ifdef DEBUG_READ
-    LOG_INFO << filepath << "is already opened";
-#endif
-    return true;
-  }
-
   m_handle = GAMEDIRECTORY.openFile(filepath.toStdString());
 
   if (!m_handle)
@@ -42,6 +34,14 @@ bool  CASCFile::openFile()
   }
 
   return true;
+}
+
+bool CASCFile::isAlreadyOpened()
+{
+  if (m_handle)
+    return true;
+  else
+    return false;
 }
 
 bool CASCFile::getFileSize(unsigned int & s)

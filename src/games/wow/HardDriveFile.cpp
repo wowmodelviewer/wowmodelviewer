@@ -24,14 +24,6 @@ HardDriveFile::~HardDriveFile()
 
 bool HardDriveFile::openFile()
 {
-  if (opened)
-  {
-#ifdef DEBUG_READ
-    LOG_INFO << filepath << "is already opened";
-#endif
-    return true;
-  }
-
   file = new QFile(realpath);
   
   if (!file->open(QIODevice::ReadOnly))
@@ -42,6 +34,14 @@ bool HardDriveFile::openFile()
 
   opened = true;
   return true;
+}
+
+bool HardDriveFile::isAlreadyOpened()
+{
+  if (opened)
+    return true;
+  else
+    return false;
 }
 
 bool HardDriveFile::getFileSize(unsigned int & s)

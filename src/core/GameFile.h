@@ -57,6 +57,7 @@ class _GAMEFILE_API_ GameFile : public Component
   protected:
 
     virtual bool openFile() = 0;
+    virtual bool isAlreadyOpened() = 0;
     virtual bool getFileSize(unsigned int & s) = 0;
     virtual unsigned long readFile() = 0;
     virtual void doPostOpenOperation() = 0;
