@@ -104,7 +104,8 @@ set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
 set(common_files wowmodelviewer.json
-				 $ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi)
+				 $ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
+				 $ENV{WMV_BASE_PATH}/appveyor.yml)
 
 set(wow7_2_files $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 				 $ENV{WMV_BASE_PATH}/bin_support/wow/7.2/database.xml)
