@@ -694,16 +694,14 @@ void WoWModel::initAnimated(GameFile * f)
   {
     vector<AFID> afids;
 
-    if (f->isChunked())
+    if (f->isChunked() && f->setChunk("AFID"))
     {
-      f->setChunk("AFID");
       AFID afid;
       while (!f->isEof())
       {
         f->read(&afid, sizeof(AFID));
         afids.push_back(afid);
       }
-
       f->setChunk("MD21", false);
     }
 
