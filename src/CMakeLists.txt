@@ -6,7 +6,10 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # add external libraries compilation
 add_subdirectory(CxImage)
+set(WITH_STATIC ON)
 add_subdirectory(casclib)
+set_property(TARGET casc PROPERTY FOLDER "external libraries")
+set_property(TARGET casc_static PROPERTY FOLDER "external libraries")
         
 # add internal libraries compilation 
 add_subdirectory(core)

@@ -13,7 +13,6 @@
 #include <string>
 #include <vector>
 
-
 #include "CascLib.h"
 
 #include <iostream>

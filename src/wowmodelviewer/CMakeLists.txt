@@ -130,7 +130,6 @@ target_link_libraries(wowmodelviewer
   ${wxWidgets_LIBRARIES}
   wow
   cximage
-  CascLib
 )
 
 install(TARGETS wowmodelviewer 

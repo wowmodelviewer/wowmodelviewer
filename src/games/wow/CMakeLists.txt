@@ -120,7 +120,7 @@ add_definitions(-DBUILDING_WOW_DLL)
 add_library(wow SHARED ${src} ${headers})
 set_property(TARGET wow PROPERTY FOLDER "libraries")
 
-target_link_libraries(wow core CascLib Qt5::Core Qt5::Xml Qt5::Gui)
+target_link_libraries(wow core casc_static Qt5::Core Qt5::Xml Qt5::Gui)
 
 if(WIN32)
   install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
