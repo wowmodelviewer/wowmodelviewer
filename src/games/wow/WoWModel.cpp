@@ -700,7 +700,8 @@ void WoWModel::initAnimated(GameFile * f)
       while (!f->isEof())
       {
         f->read(&afid, sizeof(AFID));
-        afids.push_back(afid);
+        if (afid.fileId != 0)
+          afids.push_back(afid);
       }
       f->setChunk("MD21", false);
     }
