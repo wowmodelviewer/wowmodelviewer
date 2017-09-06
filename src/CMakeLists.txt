@@ -6,8 +6,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # add external libraries compilation
 add_subdirectory(CxImage)
+
+# configure CASC lib for our usage
 set(WITH_STATIC ON CACHE BOOL "Disable CASC dynamic library compilation")
 set(WITH_DYNAMIC OFF CACHE BOOL "Enable CASC static library compilation")
+set(WITH_INSTALL OFF CACHE BOOL "Disable CASC library installation")
 add_subdirectory(casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "external libraries")
         
