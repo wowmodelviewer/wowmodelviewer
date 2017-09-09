@@ -18,5 +18,5 @@ build_script:
 
     cmake -G "Visual Studio 12 2013" ..\src
 
-    cmake --build . --target install --config Release
+    cmake --build . --target release --config Release
 test: off
