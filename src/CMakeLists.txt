@@ -10,8 +10,6 @@ add_subdirectory(CxImage)
 
 # configure CASC lib for our usage
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
-include_directories(${CASCLIB_INSTALL_LOCATION}/include)
-link_directories(${CASCLIB_INSTALL_LOCATION}/lib)
 add_subdirectory(casclib)
 
 # add internal libraries compilation 

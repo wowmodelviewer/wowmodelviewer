@@ -82,7 +82,8 @@ macro(use_core)
 endmacro()
   
 macro(use_casclib)
-  include_directories($ENV{WMV_BASE_PATH}/src/casclib/src)
+  include_directories(${CASCLIB_INSTALL_LOCATION}/include)
+  link_directories(${CASCLIB_INSTALL_LOCATION}/lib)
 endmacro()
 
 macro(use_sqlite)
