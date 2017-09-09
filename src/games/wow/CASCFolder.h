@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#ifndef __CASCLIB_SELF__
+  #define __CASCLIB_SELF__
+#endif
 #include "CascLib.h"
 
 #include <iostream>

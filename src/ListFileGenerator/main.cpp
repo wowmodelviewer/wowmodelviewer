@@ -33,6 +33,7 @@
 #include <QString>
 #include <QTextStream>
 
+#define __CASCLIB_SELF__
 #include "CascLib.h"
 
 int main(int argc, char ** argv)

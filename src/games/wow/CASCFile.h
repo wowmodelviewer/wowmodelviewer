@@ -8,6 +8,9 @@
 #ifndef _CASCFILE_H_
 #define _CASCFILE_H_
 
+#ifndef __CASCLIB_SELF__
+  #define __CASCLIB_SELF__
+#endif
 #include "CascLib.h"
 
 #include <string>

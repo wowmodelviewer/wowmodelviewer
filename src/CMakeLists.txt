@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
+project(WoWModelViewer)
 include(cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
@@ -8,12 +9,11 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_subdirectory(CxImage)
 
 # configure CASC lib for our usage
-set(WITH_STATIC ON CACHE BOOL "Disable CASC dynamic library compilation")
-set(WITH_DYNAMIC OFF CACHE BOOL "Enable CASC static library compilation")
-set(WITH_INSTALL OFF CACHE BOOL "Disable CASC library installation")
+set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
+include_directories(${CASCLIB_INSTALL_LOCATION}/include)
+link_directories(${CASCLIB_INSTALL_LOCATION}/lib)
 add_subdirectory(casclib)
-set_property(TARGET casc_static PROPERTY FOLDER "external libraries")
-        
+
 # add internal libraries compilation 
 add_subdirectory(core)
 add_subdirectory(games)
