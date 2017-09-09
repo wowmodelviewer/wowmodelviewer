@@ -25,8 +25,10 @@ add_subdirectory(ListFileGenerator)
 add_subdirectory(plugins)
 
 add_custom_target(release
-				  DEPENDS
-					install
+				  COMMAND
+					"${CMAKE_COMMAND}" --build . --target clean --config Release
+				  COMMAND
+					"${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
 					$ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "$ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
 				  )
