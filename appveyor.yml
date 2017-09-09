@@ -16,7 +16,7 @@ build_script:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "NMake Makefiles" ..\src
+    cmake -G "Visual Studio 12 2013" ..\src
 
-    nmake release
+    cmake --build . --target install --config Release
 test: off
