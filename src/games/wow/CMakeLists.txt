@@ -121,6 +121,7 @@ add_library(wow SHARED ${src} ${headers})
 set_property(TARGET wow PROPERTY FOLDER "libraries")
 
 target_link_libraries(wow core casc Qt5::Core Qt5::Xml Qt5::Gui)
+add_dependencies(wow casclib)
 
 if(WIN32)
   install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
