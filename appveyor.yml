@@ -2,8 +2,8 @@ version: 1.0.{build}
 image: Visual Studio 2013
 build_script:
 - cmd: >-
-	hg clone https://jeromnimo@bitbucket.org/jeromnimo/wmw_sdk
-
+    hg clone https://jeromnimo@bitbucket.org/jeromnimo/wmw_sdk
+    
     cd wmv_sdk
 
     .\wmv_set_env.bat
