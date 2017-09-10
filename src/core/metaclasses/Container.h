@@ -163,7 +163,7 @@ void Container<DataType>::removeAllChildren()
 {
 	while(!m_children.empty())
 	{
-		removeChild(*m_children.rbegin());
+		removeChild(*m_children.begin());
 	}
 }
 

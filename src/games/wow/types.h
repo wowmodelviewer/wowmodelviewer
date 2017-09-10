@@ -20,7 +20,6 @@
 
 #if defined(_WINDOWS)
   #include <windows.h>
-	#define snprintf _snprintf
 	typedef unsigned char uint8;
 	typedef char int8;
 	typedef unsigned __int16 uint16;
