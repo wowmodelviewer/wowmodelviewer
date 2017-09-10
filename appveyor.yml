@@ -2,9 +2,7 @@ version: 1.0.{build}
 image: Visual Studio 2013
 build_script:
 - cmd: >-
-    appveyor DownloadFile https://wowmodelviewer.net/wordpress/wmv_sdk.zip -FileName sdk.zip
-
-    7z x sdk.zip
+	hg clone https://jeromnimo@bitbucket.org/jeromnimo/wmw_sdk
 
     cd wmv_sdk
 
