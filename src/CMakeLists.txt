@@ -4,6 +4,7 @@ include(cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER QTAutoMoc)
 
 # add external libraries compilation
 add_subdirectory(CxImage)
