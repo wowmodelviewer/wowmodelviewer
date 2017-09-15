@@ -1,5 +1,5 @@
 project(ListFileGenerator)
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${WMV_BASE_PATH}/src/cmake/common.cmake)
 
 cmake_minimum_required(VERSION 2.6)
 message(STATUS "Building ListFileGenerator")
@@ -21,5 +21,5 @@ set_property(TARGET ListFileGenerator PROPERTY FOLDER "executables")
 target_link_libraries(ListFileGenerator wow Qt5::Core)
 
 install(TARGETS ListFileGenerator 
-          RUNTIME DESTINATION $ENV{WMV_BASE_PATH}/bin)
+          RUNTIME DESTINATION ${WMV_BASE_PATH}/bin)
  

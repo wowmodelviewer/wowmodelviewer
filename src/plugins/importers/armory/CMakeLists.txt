@@ -1,7 +1,7 @@
 project(armory)
 cmake_minimum_required(VERSION 2.6)
 
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building armory importer")
 
@@ -43,7 +43,7 @@ set_property(TARGET armory PROPERTY FOLDER "plugins")
 target_link_libraries(armory ${wxWidgets_LIBRARIES} core wow Qt5::Core)
 
 if(WIN32)
-  install(TARGETS armory RUNTIME DESTINATION "$ENV{WMV_BASE_PATH}/bin/plugins")
+  install(TARGETS armory RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")
 endif(WIN32)
 
 

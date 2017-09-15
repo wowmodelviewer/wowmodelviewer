@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
 project(core)
 
@@ -82,5 +82,5 @@ set_property(TARGET core PROPERTY FOLDER "libraries")
 target_link_libraries(core Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
 
 if(WIN32)
-  install(TARGETS core RUNTIME DESTINATION "$ENV{WMV_BASE_PATH}/bin/")
+  install(TARGETS core RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
 endif(WIN32)

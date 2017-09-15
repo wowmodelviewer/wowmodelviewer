@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/common.cmake)
 
 project(wow)
 

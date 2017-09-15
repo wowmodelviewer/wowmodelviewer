@@ -7,11 +7,10 @@
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # define base repo path to use it cross folder
-string (REPLACE "\\" "/" WMV_BASE_PATH $ENV{WMV_BASE_PATH})
-SET(ENV{WMV_BASE_PATH} ${WMV_BASE_PATH})
+SET(WMV_BASE_PATH ${CMAKE_CURRENT_LIST_DIR}/../..)
 
 # define cmake folder to be reusable cross scripts
-SET(WMV_CMAKE_FOLDER $ENV{WMV_BASE_PATH}/src/cmake)
+SET(WMV_CMAKE_FOLDER ${WMV_BASE_PATH}/src/cmake)
 
 # add wmv cmake directory to search path
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
@@ -31,19 +30,19 @@ set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
 #  platform specific part   #
 #############################
 if(WIN32)
-  include($ENV{WMV_BASE_PATH}/src/cmake/windows.cmake)
+  include(${WMV_BASE_PATH}/src/cmake/windows.cmake)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-  include($ENV{WMV_BASE_PATH}/src/cmake/linux.cmake)
+  include(${WMV_BASE_PATH}/src/cmake/linux.cmake)
 elseif(APPLE)
-  include($ENV{WMV_BASE_PATH}/src/cmake/macos.cmake)    
+  include(${WMV_BASE_PATH}/src/cmake/macos.cmake)    
 endif()
 
 ######################################
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories($ENV{WMV_BASE_PATH}/src/glew/include)
-  list(APPEND src $ENV{WMV_BASE_PATH}/src/glew/src/glew.c)
+  include_directories(${WMV_BASE_PATH}/src/glew/include)
+  list(APPEND src ${WMV_BASE_PATH}/src/glew/src/glew.c)
   add_definitions(-DGLEW_STATIC)
   
   # temporary solution, glew needs opengl lib, and right now, wx one is used...
@@ -60,14 +59,14 @@ macro(use_wxwidgets)
 endmacro()
 
 macro(use_cximage)
-  include_directories($ENV{WMV_BASE_PATH}/src/CxImage)
+  include_directories(${WMV_BASE_PATH}/src/CxImage)
   list(APPEND extralibs ${wxWidgets_LIBRARIES} cximage)
 endmacro()
 
 macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
-  include_directories($ENV{WMV_BASE_PATH}/src/games/wow)
+  include_directories(${WMV_BASE_PATH}/src/games/wow)
   find_package(Qt5Core)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
@@ -75,7 +74,7 @@ macro(use_wow)
 endmacro()
 
 macro(use_core)
-  include_directories($ENV{WMV_BASE_PATH}/src/core)
+  include_directories(${WMV_BASE_PATH}/src/core)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)

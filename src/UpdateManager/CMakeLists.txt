@@ -1,5 +1,5 @@
 project(UpdateManager)
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
 cmake_minimum_required(VERSION 2.6)
 message(STATUS "Building UpdateManager")
@@ -36,5 +36,5 @@ set_property(TARGET UpdateManager PROPERTY FOLDER "executables")
 target_link_libraries(UpdateManager core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
 install(TARGETS UpdateManager 
-          RUNTIME DESTINATION $ENV{WMV_BASE_PATH}/bin)
+          RUNTIME DESTINATION ${WMV_BASE_PATH}/bin)
  

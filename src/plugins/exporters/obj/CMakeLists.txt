@@ -1,7 +1,7 @@
 project(obj_exporter)
 cmake_minimum_required(VERSION 2.6)
 
-include($ENV{WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building OBJ exporter")
 
@@ -38,5 +38,5 @@ set_property(TARGET objexporter PROPERTY FOLDER "plugins")
 target_link_libraries(objexporter Qt5::Core core wow)
 
 if(WIN32)
-  install(TARGETS objexporter RUNTIME DESTINATION "$ENV{WMV_BASE_PATH}/bin/plugins")
+  install(TARGETS objexporter RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")
 endif(WIN32)

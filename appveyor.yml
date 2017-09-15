@@ -8,8 +8,6 @@ build_script:
 
     .\wmv_set_env.bat
 
-    set WMV_BASE_PATH=C:\projects\wowmodelviewer
-
     mkdir C:\projects\wowmodelviewer\build
 
     cd C:\projects\wowmodelviewer\build

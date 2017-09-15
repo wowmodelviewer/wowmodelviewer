@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(WoWModelViewer)
-include(cmake/common.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -31,5 +31,5 @@ add_custom_target(release
 				  COMMAND
 					"${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
-					$ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "$ENV{WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+					$ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
 				  )
