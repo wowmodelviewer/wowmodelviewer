@@ -234,6 +234,7 @@ public:
   bool isGeosetDisplayed(uint geosetindex);
 
   void mergeModel(QString & name);
+  void mergeModel(WoWModel * model);
   void unmergeModel();
 
   void refresh();

@@ -1699,6 +1699,11 @@ void WoWModel::mergeModel(QString & name)
   if (!m->ok)
     return;
 
+  mergeModel(m);
+}
+
+void WoWModel::mergeModel(WoWModel * m)
+{
   uint nbVertices = origVertices.size();
   uint nbIndices = indices.size();
   uint nbGeosets = geosets.size();
@@ -1862,15 +1867,9 @@ void WoWModel::mergeModel(QString & name)
   }
 
   for (auto it : m->replaceTextures)
-  {
-    int val = it;
-    if (it != 0)
-      val += TEXTURE_MAX;
+    replaceTextures.push_back(it);
 
-    replaceTextures.push_back(val);
-  }
-
-  mergedModel = name;
+  mergedModel = m->name();
 
   delete m;
 }
@@ -1879,6 +1878,8 @@ void WoWModel::unmergeModel()
 {
   if (mergedModel == "")
     return;
+
+  mergedModel += ".m2";
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(mergedModel), true);
 
@@ -2107,10 +2108,8 @@ void WoWModel::refresh()
 
   //refresh equipment
 
-  for (WoWModel::iterator it = begin();
-       it != end();
-       ++it)
-       (*it)->refresh();
+  for (WoWModel::iterator it = begin(); it != end(); ++it)
+    (*it)->refresh();
 
   LOG_INFO << "Current Equipment :"
     << "Head" << getItem(CS_HEAD)->id()
@@ -2128,6 +2127,10 @@ void WoWModel::refresh()
     << "Quiver" << getItem(CS_QUIVER)->id()
     << "Tabard" << getItem(CS_TABARD)->id();
 
+  // gloves - this is so gloves have preference over shirt sleeves.
+  if (cd.geosets[CG_GLOVES] > 1)
+    cd.geosets[CG_WRISTBANDS] = 0;
+
   // reset geosets
   for (size_t j = 0; j < geosets.size(); j++)
   {
@@ -2139,10 +2142,6 @@ void WoWModel::refresh()
         showGeoset(j, (id == (a + cd.geosets[i])));
     }
   }
-
-  // gloves - this is so gloves have preference over shirt sleeves.
-  if (cd.geosets[CG_GLOVES] > 1)
-    cd.geosets[CG_WRISTBANDS] = 0;
 
   WoWItem * headItem = getItem(CS_HEAD);
 

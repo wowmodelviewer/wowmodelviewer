@@ -43,7 +43,7 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_FILTERING 0
+#define DEBUG_FILTERING 1
 
 map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                              { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
@@ -359,7 +359,7 @@ void WoWItem::load()
                       "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-      iteminfos = GAMEDATABASE.sqlQuery(query);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -372,10 +372,7 @@ void WoWItem::load()
 
       // models
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
-      {
-        // not yet supported
-        // updateItemModel(ATT_GROUND, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-      }
+        mergeModel(iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
@@ -451,11 +448,13 @@ void WoWItem::load()
         }
       }
 
-      // geosets
-      query = QString("SELECT GeosetGroup2, GeosetGroup3 FROM ItemDisplayInfo "
-                      "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+      // geosets / models
+      query = QString("SELECT GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
+        "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+        "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+        "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-      iteminfos = GAMEDATABASE.sqlQuery(query);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 2);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -465,6 +464,9 @@ void WoWItem::load()
 
       m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][0].toInt();
       m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
+
+      if (iteminfos.values[0][2].toInt() != 0)
+        mergeModel(iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
 
       break;
     }
@@ -562,11 +564,13 @@ void WoWItem::load()
         }
       }
 
-      // geosets
-      query = QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
+      // now get geoset / model infos
+      query = QString("SELECT GeoSetGroup1, ModelID, TextureID  FROM ItemDisplayInfo "
+                      "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                      "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-     
-      iteminfos = GAMEDATABASE.sqlQuery(query);
+
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 1);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -575,6 +579,9 @@ void WoWItem::load()
       }
 
       m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
+
+      if (iteminfos.values[0][1].toInt() != 0)
+        mergeModel(iteminfos.values[0][1].toInt(), iteminfos.values[0][2].toInt());
 
       break;
     }
@@ -1173,6 +1180,22 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
   }
 }
 
+void WoWItem::mergeModel(int modelId, int textureId)
+{
+  WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
+  LOG_INFO << __FUNCTION__ << GAMEDIRECTORY.getFile(modelId)->fullname();
+  if (m->ok)
+  {
+    GameFile * texture = GAMEDIRECTORY.getFile(textureId);
+    if (texture)
+      m->updateTextureList(texture, TEXTURE_ITEM);
+    else
+      LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
+
+    m_charModel->mergeModel(m);
+  }
+}
+
 CharRegions WoWItem::getRegionForTexture(GameFile * file) const
 {
   CharRegions result = CR_UNK8;
@@ -1231,7 +1254,7 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
   sqlResult result;
   result.valid = sql.valid;
 
-  if (!sql.empty() && (itemToFilter < sql.values[0].size()))
+  if (sql.valid && !sql.empty() && (itemToFilter < sql.values[0].size()))
   {
     RaceInfos infos;
     RaceInfos::getCurrent(m_charModel, infos);
