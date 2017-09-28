@@ -83,7 +83,14 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   uint16 *boundTris;
 
-  QString mergedModel;
+  void refreshMerging();
+  std::list<WoWModel *> mergedModels;
+
+  // raw values read from file (useful for merging)
+  std::vector<ModelVertex> rawVertices;
+  std::vector<uint32> rawIndices;
+  std::vector<ModelRenderPass *> rawPasses;
+  std::vector<ModelGeosetHD *> rawGeosets;
 
 public:
   bool animGeometry, animTextures, animBones;
@@ -235,7 +242,8 @@ public:
 
   void mergeModel(QString & name);
   void mergeModel(WoWModel * model);
-  void unmergeModel();
+  void unmergeModel(QString & name);
+  void unmergeModel(WoWModel * model);
 
   void refresh();
 

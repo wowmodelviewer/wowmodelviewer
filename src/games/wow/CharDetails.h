@@ -116,6 +116,7 @@ private:
   std::map<CustomizationType, uint> m_currentCustomization;
 
   bool m_isDemonHunter;
+  QString m_dhModel;
 };
 
 

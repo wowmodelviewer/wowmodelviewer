@@ -110,7 +110,7 @@ void glInitAll()
 WoWModel::WoWModel(GameFile * file, bool forceAnim):
 ManagedItem(""),
 forceAnim(forceAnim),
-gamefile(file), mergedModel("")
+gamefile(file)
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -176,6 +176,11 @@ gamefile(file), mergedModel("")
   modelType = MT_NORMAL;
   attachment = 0;
 
+  rawVertices.clear();
+  rawIndices.clear();
+  rawPasses.clear();
+  rawGeosets.clear();
+
   initCommon(file);
 }
 
@@ -218,9 +223,11 @@ WoWModel::~WoWModel()
         delete[] texCoords; texCoords = 0;
 
         indices.clear();
+        rawIndices.clear();
         delete[] anims; anims = 0;
         delete[] animLookups; animLookups = 0;
         origVertices.clear();
+        rawVertices.clear();
 
         delete[] bones; bones = 0;
         delete[] texAnims; texAnims = 0;
@@ -328,8 +335,6 @@ bool WoWModel::isAnimated(GameFile * f)
   animGeometry = false;
   animBones = false;
   ind = false;
-
-  ModelVertex *verts = (ModelVertex*)(f->getBuffer() + header.ofsVertices);
   
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); (ov_it != ov_end) && !animGeometry; ++ov_it)
   {
@@ -491,19 +496,24 @@ void WoWModel::initCommon(GameFile * f)
   alpha = 1.0f;
 
   ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
-  origVertices.assign(mv, mv + header.nVertices);
+  rawVertices.assign(mv, mv + header.nVertices);
+
+  // Correct the data from the model, so that its using the Y-Up axis mode.
+  for (auto & it : rawVertices)
+  {
+     it.pos = fixCoordSystem(it.pos);
+     it.normal = fixCoordSystem(it.normal);
+  }
+
+  origVertices = rawVertices;
 
   // This data is needed for both VBO and non-VBO cards.
   vertices = new Vec3D[origVertices.size()];
   normals = new Vec3D[origVertices.size()];
 
-  // Correct the data from the model, so that its using the Y-Up axis mode.
   uint i = 0;
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
   {
-    ov_it->pos = fixCoordSystem(ov_it->pos);
-    ov_it->normal = fixCoordSystem(ov_it->normal);
-
     // Set the data for our vertices, normals from the model data
     vertices[i] = ov_it->pos;
     normals[i] = ov_it->normal.normalize();
@@ -971,13 +981,15 @@ void WoWModel::setLOD(GameFile * f, int index)
   // Indices,  Triangles
   uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
   uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
-  indices.clear();
-  indices.resize(view->nTris);
+  rawIndices.clear();
+  rawIndices.resize(view->nTris);
 
   for (size_t i = 0; i < view->nTris; i++)
   {
-    indices[i] = indexLookup[triangles[i]];
+    rawIndices[i] = indexLookup[triangles[i]];
   }
+
+  indices = rawIndices;
 
   // render ops
   ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
@@ -993,11 +1005,12 @@ void WoWModel::setLOD(GameFile * f, int index)
     ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
     hdgeo->istart = istart;
     istart += hdgeo->icount;
-    geosets.push_back(hdgeo);
-    showGeoset(i, true);
+    rawGeosets.push_back(hdgeo);
   }
+
+  geosets = rawGeosets;
  
-  passes.clear();
+  rawPasses.clear();
  
   for (size_t j = 0; j < view->nTex; j++)
   {
@@ -1046,11 +1059,12 @@ void WoWModel::setLOD(GameFile * f, int index)
       pass->texanim = texanimlookup[tex[j].texanimid];
     }
 
-    passes.push_back(pass);
+    rawPasses.push_back(pass);
   }
   g->close();
   // transparent parts come later
-  std::sort(passes.begin(), passes.end());
+  std::sort(rawPasses.begin(), rawPasses.end());
+  passes = rawPasses;
 }
 
 void WoWModel::calcBones(ssize_t anim, size_t time)
@@ -1694,6 +1708,12 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::mergeModel(QString & name)
 {
+  LOG_INFO << __FUNCTION__ << name;
+  if(mergedModels.end() != std::find_if(std::begin(mergedModels),
+                           std::end(mergedModels),
+                           [&](const WoWModel * m){ LOG_INFO << m->gamefile->fullname() << "vs" << name;  return m->gamefile->fullname() == name.replace("\\","/"); }))
+      return;
+
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
 
   if (!m->ok)
@@ -1704,80 +1724,146 @@ void WoWModel::mergeModel(QString & name)
 
 void WoWModel::mergeModel(WoWModel * m)
 {
-  uint nbVertices = origVertices.size();
-  uint nbIndices = indices.size();
-  uint nbGeosets = geosets.size();
+  LOG_INFO << __FUNCTION__ << m->name();
+  mergedModels.push_back(m);
 
-#ifdef DEBUG_DH_SUPPORT
-  LOG_INFO << "---- ORIGINAL ----";
-  LOG_INFO << "nbGeosets =" << geosets.size();
-  LOG_INFO << "nbVertices =" << nbVertices;
-  LOG_INFO << "nbIndices =" << nbIndices;
-  LOG_INFO << "nbPasses =" << passes.size();
+  refreshMerging();
+}
+  
+void WoWModel::refreshMerging()
+{
+  LOG_INFO << __FUNCTION__;
+  for (auto it : mergedModels)
+    LOG_INFO << it->name() << it->gamefile->fullname();
 
-  LOG_INFO << "---- DH ----";
-  LOG_INFO << "nbGeosets =" << m->geosets.size();
-  LOG_INFO << "nbVertices =" << m->origVertices.size();
-  LOG_INFO << "nbIndices =" << m->indices.size();
-  LOG_INFO << "nbPasses =" << m->passes.size();
-#endif
+  // first reinit with this model
+  origVertices = rawVertices;
+  indices = rawIndices;
+  passes = rawPasses;
+  geosets = rawGeosets;
 
-  for (auto it : m->geosets)
+  uint mergeIndex = 0;
+  for (auto modelsIt : mergedModels)
   {
-    ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
+    uint nbVertices = origVertices.size();
+    uint nbIndices = indices.size();
+    uint nbGeosets = geosets.size();
 
-    newgeo->istart += nbIndices;
-    newgeo->vstart += nbVertices;
-    newgeo->display = false;
+    // reinit merged model as well, just in case
+    modelsIt->origVertices = modelsIt->rawVertices;
+    modelsIt->indices = modelsIt->rawIndices;
+    modelsIt->passes = modelsIt->rawPasses;
+    modelsIt->geosets = modelsIt->rawGeosets;
 
-    geosets.push_back(newgeo);
-  }
+    mergeIndex++;
 
-  // build bone corresponsance table
-  uint32 nbBonesInNewModel = m->header.nBones;
-  int16 * boneConvertTable = new int16[nbBonesInNewModel];
-
-  for (uint i = 0; i < nbBonesInNewModel; ++i)
-    boneConvertTable[i] = i;
-
-  for (uint i = 0; i < nbBonesInNewModel; ++i)
-  {
-    Vec3D pivot = m->bones[i].pivot;
-    for (uint b = 0; b < header.nBones; ++b)
+    for (auto it : modelsIt->rawGeosets)
     {
-      Vec3D p = bones[b].pivot;
-      if (p == pivot)
+      ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
+
+      newgeo->istart += nbIndices;
+      newgeo->vstart += nbVertices;
+      newgeo->display = false;
+
+      geosets.push_back(newgeo);
+    }
+
+    // build bone corresponsance table
+    uint32 nbBonesInNewModel = modelsIt->header.nBones;
+    int16 * boneConvertTable = new int16[nbBonesInNewModel];
+
+    for (uint i = 0; i < nbBonesInNewModel; ++i)
+      boneConvertTable[i] = i;
+
+    for (uint i = 0; i < nbBonesInNewModel; ++i)
+    {
+      Vec3D pivot = modelsIt->bones[i].pivot;
+      for (uint b = 0; b < header.nBones; ++b)
       {
-        boneConvertTable[i] = b;
-        break;
+        Vec3D p = bones[b].pivot;
+        if (p == pivot)
+        {
+          boneConvertTable[i] = b;
+          break;
+        }
       }
     }
-  }
 
 #ifdef DEBUG_DH_SUPPORT
-  for (uint i = 0; i < nbBonesInNewModel; ++i)
-    LOG_INFO << i << "=>" << boneConvertTable[i];
+    for (uint i = 0; i < nbBonesInNewModel; ++i)
+      LOG_INFO << i << "=>" << boneConvertTable[i];
 #endif
 
-  // change bone from new model to character one
-  for (auto & it : m->origVertices)
-  {
-    for (uint i = 0; i < 4; ++i)
+    // change bone from new model to character one
+    for (auto & it : modelsIt->origVertices)
     {
-      if (it.weights[i] > 0)
-        it.bones[i] = boneConvertTable[it.bones[i]];
+      for (uint i = 0; i < 4; ++i)
+      {
+        if (it.weights[i] > 0)
+          it.bones[i] = boneConvertTable[it.bones[i]];
+      }
     }
-  }
 
-  delete[] boneConvertTable;
+    delete[] boneConvertTable;
 
-  origVertices.reserve(origVertices.size() + m->origVertices.size());
-  origVertices.insert(origVertices.end(), m->origVertices.begin(), m->origVertices.end());
+    origVertices.reserve(origVertices.size() + modelsIt->origVertices.size());
+    origVertices.insert(origVertices.end(), modelsIt->origVertices.begin(), modelsIt->origVertices.end());
 
-  indices.reserve(indices.size() + m->indices.size());
-  for (auto & it : m->indices)
-  {
-    indices.push_back(it + nbVertices);
+    indices.reserve(indices.size() + modelsIt->indices.size());
+
+    for (auto & it : modelsIt->indices)
+      indices.push_back(it + nbVertices);
+
+    // retrieve tex id associated to model hands (needed for DH)
+    uint16 handTex = ModelRenderPass::INVALID_TEX;
+    for (auto it : passes)
+    {
+      if (it->geoset->id / 100 == 23)
+        handTex = it->tex;
+    }
+
+    for (auto it : modelsIt->passes)
+    {
+      ModelRenderPass * p = new ModelRenderPass(*it);
+      p->model = this;
+      p->geoIndex += nbGeosets;
+      p->geoset = geosets[p->geoIndex];
+      if (p->geoset->id / 100 != 23) // don't copy texture for hands
+        p->tex += TEXTURE_MAX;
+      else
+        p->tex = handTex; // use regular model texture instead
+
+      passes.push_back(p);
+    }
+
+#ifdef DEBUG_DH_SUPPORT
+    LOG_INFO << "---- FINAL ----";
+    LOG_INFO << "nbGeosets =" << geosets.size();
+    LOG_INFO << "nbVertices =" << origVertices.size();
+    LOG_INFO << "nbIndices =" << indices.size();
+    LOG_INFO << "nbPasses =" << passes.size();
+#endif
+
+    // add model textures
+    for (auto it : modelsIt->textures)
+    {
+      if (it != ModelRenderPass::INVALID_TEX)
+        TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it)));
+      textures.push_back(it);
+    }
+
+    uint tmax = specialTextures.size();
+    for (auto it : modelsIt->specialTextures)
+    {
+      int val = it;
+      if (it != -1)
+        val += tmax;
+
+      specialTextures.push_back(val);
+    }
+
+    for (auto it : modelsIt->replaceTextures)
+      replaceTextures.push_back(it);
   }
 
   delete[] vertices;
@@ -1794,36 +1880,6 @@ void WoWModel::mergeModel(WoWModel * m)
     normals[i] = ov_it.normal.normalize();
     ++i;
   }
-
-  // retrieve tex id associated to model hands (needed for DH)
-  uint16 handTex = ModelRenderPass::INVALID_TEX;
-  for (auto it : passes)
-  {
-    if (it->geoset->id / 100 == 23)
-      handTex = it->tex;
-  }
-
-  for (auto it : m->passes)
-  {
-    ModelRenderPass * p = new ModelRenderPass(*it);
-    p->model = this;
-    p->geoIndex += nbGeosets;
-    p->geoset = geosets[p->geoIndex];
-    if (p->geoset->id / 100 != 23) // don't copy texture for hands
-      p->tex += TEXTURE_MAX;
-    else
-      p->tex = handTex; // use regular model texture instead
-
-    passes.push_back(p);
-  }
-
-#ifdef DEBUG_DH_SUPPORT
-  LOG_INFO << "---- FINAL ----";
-  LOG_INFO << "nbGeosets =" << geosets.size();
-  LOG_INFO << "nbVertices =" << origVertices.size();
-  LOG_INFO << "nbIndices =" << indices.size();
-  LOG_INFO << "nbPasses =" << passes.size();
-#endif
 
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
@@ -1848,98 +1904,29 @@ void WoWModel::mergeModel(WoWModel * m)
     // clean bind
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
+}
 
-  // add model textures
-  for (auto it : m->textures)
-  {
-    if (it != ModelRenderPass::INVALID_TEX)
-      TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it)));
-    textures.push_back(it);
-  }
+void WoWModel::unmergeModel(QString & name)
+{
+  LOG_INFO << __FUNCTION__ << name;
+  auto it = std::find_if(std::begin(mergedModels),
+                         std::end(mergedModels),
+                         [&](const WoWModel * m){ LOG_INFO << m->gamefile->fullname() << "vs" << name.replace("\\", "/"); return m->gamefile->fullname() == name.replace("\\", "/"); });
 
-  for (auto it : m->specialTextures)
-  {
-    int val = it;
-    if (it != -1)
-      val += TEXTURE_MAX;
+  if (it != mergedModels.end())
+    unmergeModel(*it);
+}
 
-    specialTextures.push_back(val);
-  }
-
-  for (auto it : m->replaceTextures)
-    replaceTextures.push_back(it);
-
-  mergedModel = m->name();
+void WoWModel::unmergeModel(WoWModel * m)
+{
+  LOG_INFO << __FUNCTION__ << m->name();
+  mergedModels.remove(m);
 
   delete m;
+
+  refreshMerging();
 }
 
-void WoWModel::unmergeModel()
-{
-  if (mergedModel == "")
-    return;
-
-  mergedModel += ".m2";
-
-  WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(mergedModel), true);
-
-  if (!m->ok)
-    return;
-
-  geosets.resize(geosets.size() - m->geosets.size());
-  origVertices.resize(origVertices.size() - m->origVertices.size());
-  indices.resize(indices.size() - m->indices.size());
-  
-  delete[] vertices;
-  delete[] normals;
-
-  vertices = new Vec3D[origVertices.size()];
-  normals = new Vec3D[origVertices.size()];
-
-  uint i = 0;
-  for (auto & ov_it : origVertices)
-  {
-    // Set the data for our vertices, normals from the model data
-    vertices[i] = ov_it.pos;
-    normals[i] = ov_it.normal.normalize();
-    ++i;
-  }
-
-  passes.resize(passes.size() - m->passes.size());
-
-  const size_t size = (origVertices.size() * sizeof(float));
-  vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
-
-  if (video.supportVBO)
-  {
-    glDeleteBuffersARB(1, &nbuf);
-    glDeleteBuffersARB(1, &vbuf);
-
-    // Vert buffer
-    glGenBuffersARB(1, &vbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
-    delete[] vertices; vertices = 0;
-
-    // normals buffer
-    glGenBuffersARB(1, &nbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
-    delete[] normals; normals = 0;
-
-    // clean bind
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  }
-
-  // @TODO delete teextures in TEXTUREMANAGER
-  textures.resize(textures.size() - m->textures.size());
-
-  specialTextures.resize(specialTextures.size() - m->specialTextures.size());
-  replaceTextures.resize(replaceTextures.size() - m->replaceTextures.size());
-
-  mergedModel = "";
-
-}
 
 void WoWModel::refresh()
 {

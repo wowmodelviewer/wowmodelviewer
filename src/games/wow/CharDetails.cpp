@@ -22,7 +22,7 @@
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_isDemonHunter(false), m_model(0)
+isNPC(true), m_model(0), m_isDemonHunter(false), m_dhModel("")
 {
 
 }
@@ -708,17 +708,19 @@ void CharDetails::setDemonHunterMode(bool val)
     if (m_isDemonHunter)
     {
       if (m_model->name().contains("bloodelfmale_hd"))
-        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2"));
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2";
       else if (m_model->name().contains("bloodelffemale_hd"))
-        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2"));
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2";
       else if (m_model->name().contains("nightelfmale_hd"))
-        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2"));
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2";
       else if (m_model->name().contains("nightelffemale_hd"))
-        m_model->mergeModel(QString("item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2"));
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2";
+
+      m_model->mergeModel(m_dhModel);
     }
     else
     {
-      m_model->unmergeModel();
+      m_model->unmergeModel(m_dhModel);
     }
 
     fillCustomizationMap();
