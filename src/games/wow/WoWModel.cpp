@@ -1949,26 +1949,26 @@ void WoWModel::refresh()
 
   tex.reset(infos.textureLayoutID);
 
-  std::vector<int> textures = cd.getTextureForSection(CharDetails::SkinType);
+  std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinType);
 
-  if (textures.size() > 0)
-    tex.setBaseImage(GAMEDIRECTORY.getFile(textures[0]));
+  if (foundTextures.size() > 0)
+    tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
 
-  if (textures.size() > 1)
+  if (foundTextures.size() > 1)
   {
-    GameFile * tex = GAMEDIRECTORY.getFile(textures[1]);
+    GameFile * tex = GAMEDIRECTORY.getFile(foundTextures[1]);
     updateTextureList(tex, TEXTURE_FUR);
   }
 
   // Display underwear on the model?
   if (cd.showUnderwear)
   {
-    textures = cd.getTextureForSection(CharDetails::UnderwearType);
-    if (textures.size() > 0)
-      tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_LEG_UPPER, 1); // pants
+    foundTextures = cd.getTextureForSection(CharDetails::UnderwearType);
+    if (foundTextures.size() > 0)
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 1); // pants
 
-    if (textures.size() > 1)
-      tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_TORSO_UPPER, 1); // top
+    if (foundTextures.size() > 1)
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
 
     // pandaren female => need to display tabard2 geosets (need to find something better...)
     for (size_t i = 0; i < geosets.size(); i++)
@@ -1988,20 +1988,20 @@ void WoWModel::refresh()
   }
 
   // face
-  textures = cd.getTextureForSection(CharDetails::FaceType);
-  if (textures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 1);
+  foundTextures = cd.getTextureForSection(CharDetails::FaceType);
+  if (foundTextures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_FACE_LOWER, 1);
 
-  if (textures.size() > 1)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 1);
+  if (foundTextures.size() > 1)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_FACE_UPPER, 1);
 
   // facial hair
-  textures = cd.getTextureForSection(CharDetails::FacialHairType);
-  if (textures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_FACE_LOWER, 2);
+  foundTextures = cd.getTextureForSection(CharDetails::FacialHairType);
+  if (foundTextures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_FACE_LOWER, 2);
 
-  if (textures.size() > 1)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 2);
+  if (foundTextures.size() > 1)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_FACE_UPPER, 2);
 
   // select hairstyle geoset(s)
   QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
@@ -2032,26 +2032,26 @@ void WoWModel::refresh()
 
 
   // Hair texture
-  textures = cd.getTextureForSection(CharDetails::HairType);
-  if (textures.size() > 0)
+  foundTextures = cd.getTextureForSection(CharDetails::HairType);
+  if (foundTextures.size() > 0)
   {
-    GameFile * texture = GAMEDIRECTORY.getFile(textures[0]);
+    GameFile * texture = GAMEDIRECTORY.getFile(foundTextures[0]);
     updateTextureList(texture, TEXTURE_HAIR);
 
     if (infos.isHD)
     {
-      if (!showScalp && textures.size() > 1)
-        tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_UPPER, 3);
+      if (!showScalp && foundTextures.size() > 1)
+        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_FACE_UPPER, 3);
     }
     else
     {
       if (!showScalp)
       {
-        if (textures.size() > 1)
-          tex.addLayer(GAMEDIRECTORY.getFile(textures[1]), CR_FACE_LOWER, 3);
+        if (foundTextures.size() > 1)
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_FACE_LOWER, 3);
 
-        if (textures.size() > 2)
-          tex.addLayer(GAMEDIRECTORY.getFile(textures[2]), CR_FACE_UPPER, 3);
+        if (foundTextures.size() > 2)
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[2]), CR_FACE_UPPER, 3);
       }
     }
   }
@@ -2083,9 +2083,9 @@ void WoWModel::refresh()
 
   // DH customization
   // tatoos
-  textures = cd.getTextureForSection(CharDetails::TatooType);
-  if (textures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(textures[0]), CR_DH_TATOOS, 1);
+  foundTextures = cd.getTextureForSection(CharDetails::TatooType);
+  if (foundTextures.size() > 0)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATOOS, 1);
 
   // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
