@@ -145,7 +145,7 @@ void CASCFile::doPostOpenOperation()
     {
       unsigned int offset = 0;
 
-      LOG_INFO << "Parsing chunks for file" << filepath << "First chunk read :" << magic.c_str();
+      //LOG_INFO << "Parsing chunks for file" << filepath << "First chunk read :" << magic.c_str();
       while (offset < size)
       {
         chunkHeader chunkHead;
@@ -159,7 +159,7 @@ void CASCFile::doPostOpenOperation()
         chunk->pointer = 0;
         chunks.push_back(*chunk);
 
-        LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->start << chunk->size;
+        //LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->start << chunk->size;
 
         offset += chunkHead.size;
       }
