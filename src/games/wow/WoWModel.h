@@ -239,6 +239,7 @@ public:
   // @TODO use geoset id instead of geoset index in vector
   void showGeoset(uint geosetindex, bool value);
   bool isGeosetDisplayed(uint geosetindex);
+  void setGeosetGroupDisplay(CharGeosets group, int val);
 
   void mergeModel(QString & name);
   void mergeModel(WoWModel * model);

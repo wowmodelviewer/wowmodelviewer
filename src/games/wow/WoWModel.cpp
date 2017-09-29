@@ -1706,6 +1706,18 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
   return result;
 }
 
+void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
+{
+  for (uint i = 0; i < geosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    int a = (int)group * 100, b = ((int)group + 1) * 100;
+    if (id > a && id < b)
+      showGeoset(i, (id == (a + val)));
+  }
+}
+
+
 void WoWModel::mergeModel(QString & name)
 {
   if(mergedModels.end() != std::find_if(std::begin(mergedModels),
@@ -1757,15 +1769,11 @@ void WoWModel::refreshMerging()
 
     mergeIndex++;
 
-    for (auto it : modelsIt->rawGeosets)
+    for (auto it : modelsIt->geosets)
     {
-      ModelGeosetHD * newgeo = new ModelGeosetHD(*it);
-
-      newgeo->istart += nbIndices;
-      newgeo->vstart += nbVertices;
-      newgeo->display = false;
-
-      geosets.push_back(newgeo);
+      it->istart += nbIndices;
+      it->vstart += nbVertices;
+      geosets.push_back(it);
     }
 
     // build bone corresponsance table
@@ -2119,16 +2127,13 @@ void WoWModel::refresh()
     cd.geosets[CG_WRISTBANDS] = 0;
 
   // reset geosets
-  for (size_t j = 0; j < geosets.size(); j++)
-  {
-    int id = geosets[j]->id;
-    for (size_t i = 1; i < NUM_GEOSETS; i++)
-    {
-      int a = (int)i * 100, b = ((int)i + 1) * 100;
-      if (a != 1400 && id > a && id < b) // skip tabard2 group (1400) -> buggy pandaren female tabard
-        showGeoset(j, (id == (a + cd.geosets[i])));
-    }
-  }
+  for (uint j = 0; j < rawGeosets.size(); j++)
+    for (uint i = 1; i < NUM_GEOSETS; i++)
+      setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
+
+  // refresh DH geosets
+  setGeosetGroupDisplay(CG_DH_HORNS, cd.geosets[CG_DH_HORNS]);
+  setGeosetGroupDisplay(CG_DH_BLINDFOLDS, cd.geosets[CG_DH_BLINDFOLDS]);
 
   WoWItem * headItem = getItem(CS_HEAD);
 
