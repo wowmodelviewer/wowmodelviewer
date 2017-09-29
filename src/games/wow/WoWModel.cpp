@@ -1708,10 +1708,9 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::mergeModel(QString & name)
 {
-  LOG_INFO << __FUNCTION__ << name;
   if(mergedModels.end() != std::find_if(std::begin(mergedModels),
                            std::end(mergedModels),
-                           [&](const WoWModel * m){ LOG_INFO << m->gamefile->fullname() << "vs" << name;  return m->gamefile->fullname() == name.replace("\\","/"); }))
+                           [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\","/"); }))
       return;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
@@ -1724,9 +1723,7 @@ void WoWModel::mergeModel(QString & name)
 
 void WoWModel::mergeModel(WoWModel * m)
 {
-  LOG_INFO << __FUNCTION__ << m->name();
   mergedModels.push_back(m);
-
   refreshMerging();
 }
   
@@ -1736,11 +1733,14 @@ void WoWModel::refreshMerging()
   for (auto it : mergedModels)
     LOG_INFO << it->name() << it->gamefile->fullname();
 
-  // first reinit with this model
+  // first reinit this model with original data
   origVertices = rawVertices;
   indices = rawIndices;
   passes = rawPasses;
   geosets = rawGeosets;
+  textures.resize(TEXTURE_MAX);
+  replaceTextures.resize(TEXTURE_MAX);
+  specialTextures.resize(TEXTURE_MAX);
 
   uint mergeIndex = 0;
   for (auto modelsIt : mergedModels)
@@ -1829,7 +1829,7 @@ void WoWModel::refreshMerging()
       p->geoIndex += nbGeosets;
       p->geoset = geosets[p->geoIndex];
       if (p->geoset->id / 100 != 23) // don't copy texture for hands
-        p->tex += TEXTURE_MAX;
+        p->tex += (mergeIndex * TEXTURE_MAX);
       else
         p->tex = handTex; // use regular model texture instead
 
@@ -1911,7 +1911,7 @@ void WoWModel::unmergeModel(QString & name)
   LOG_INFO << __FUNCTION__ << name;
   auto it = std::find_if(std::begin(mergedModels),
                          std::end(mergedModels),
-                         [&](const WoWModel * m){ LOG_INFO << m->gamefile->fullname() << "vs" << name.replace("\\", "/"); return m->gamefile->fullname() == name.replace("\\", "/"); });
+                         [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); });
 
   if (it != mergedModels.end())
     unmergeModel(*it);
