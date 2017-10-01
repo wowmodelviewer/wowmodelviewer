@@ -163,7 +163,7 @@ bool OBJExporter::exportModel(Model * m, std::string target)
         it != model->end();
         ++it)
     {
-      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->itemModels;
+      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
       if(!itemModels.empty())
       {
         obj << "# " << "\n";

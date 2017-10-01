@@ -209,11 +209,6 @@ void CharControl::UpdateModel(Attachment *a)
     //model->cd.reset();
     model->td.showCustom = false;
 
-    // hide most geosets
-    for (size_t i = 0; i < model->geosets.size(); i++) {
-      model->showGeoset(i, model->geosets[i]->id == 0);
-    }
-
     g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
     model->td.Icon = randint(0, model->td.maxIcon);

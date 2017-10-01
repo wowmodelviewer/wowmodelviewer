@@ -176,14 +176,14 @@ void WoWItem::onParentSet(Component * parent)
 void WoWItem::unload()
 {
   // delete models and clear map
-  for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(),
-       itEnd = itemModels.end();
+  for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.begin(),
+       itEnd = m_itemModels.end();
        it != itEnd;
   ++it)
   {
     delete it->second;
   }
-  itemModels.clear();
+  m_itemModels.clear();
 
   // release textures and clear map
   for (std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.begin(),
@@ -359,7 +359,7 @@ void WoWItem::load()
                       "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 0);
+      iteminfos = GAMEDATABASE.sqlQuery(query);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -371,8 +371,9 @@ void WoWItem::load()
       m_itemGeosets[CG_BOOTS] = 1 + iteminfos.values[0][2].toInt();
 
       // models
+      iteminfos = filterSQLResultForModel(iteminfos, MERGED_MODEL, 0);
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
-        mergeModel(iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+        mergeModel(CS_BOOTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
@@ -466,7 +467,7 @@ void WoWItem::load()
       m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][1].toInt();
 
       if (iteminfos.values[0][2].toInt() != 0)
-        mergeModel(iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+        mergeModel(CS_PANTS, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
 
       break;
     }
@@ -581,7 +582,7 @@ void WoWItem::load()
       m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
 
       if (iteminfos.values[0][1].toInt() != 0)
-        mergeModel(iteminfos.values[0][1].toInt(), iteminfos.values[0][2].toInt());
+        mergeModel(CS_GLOVES, iteminfos.values[0][1].toInt(), iteminfos.values[0][2].toInt());
 
       break;
     }
@@ -743,8 +744,8 @@ void WoWItem::refresh()
       if (m_charModel->attachment)
       {
         m_charModel->attachment->delSlot(CS_HEAD);
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_HELMET);
-        if (it != itemModels.end())
+        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_HELMET);
+        if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_HELMET, m_slot);
       }
       break;
@@ -755,14 +756,14 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_SHOULDER);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_SHOULDER);
-        if (it != itemModels.end())
+        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_SHOULDER);
+        if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
 
 
-        it = itemModels.find(ATT_RIGHT_SHOULDER);
+        it = m_itemModels.find(ATT_RIGHT_SHOULDER);
 
-        if (it != itemModels.end())
+        if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
       }
       break;
@@ -773,8 +774,8 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_HAND_RIGHT);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_RIGHT_PALM);
-        if (it != itemModels.end())
+        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_RIGHT_PALM);
+        if (it != m_itemModels.end())
         {
           int attachement = ATT_RIGHT_PALM;
           const ItemRecord &item = items.getById(m_id);
@@ -805,8 +806,8 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_HAND_LEFT);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_LEFT_PALM);
-        if (it != itemModels.end())
+        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_PALM);
+        if (it != m_itemModels.end())
         {
           const ItemRecord &item = items.getById(m_id);
           int attachement = ATT_LEFT_PALM;
@@ -841,8 +842,8 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_BELT);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_BELT_BUCKLE);
-        if (it != itemModels.end())
+        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
+        if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
 
         std::map<CharRegions, GameFile *>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
@@ -859,15 +860,22 @@ void WoWItem::refresh()
     {
       if (m_charModel->attachment)
       {
-        m_charModel->attachment->delSlot(CS_BOOTS);
+        WoWModel * mergedModel = 0;
+        auto it = m_itemMergedModels.find(CS_BOOTS);
 
-        /*
-        // not yet supported
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.find(ATT_GROUND);
-        if (it != itemModels.end())
-        m_charModel->attachment->addChild(it->second, ATT_GROUND, m_slot);
-        */
-        std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_BOOTS);
+        if (it != m_itemMergedModels.end())
+        {
+          mergedModel = it->second;
+          m_charModel->mergeModel(mergedModel);
+        }
+     
+        if (mergedModel)
+        {
+          for (uint i = 0; i < mergedModel->geosets.size(); i++)
+            mergedModel->showGeoset(i, false);
+        }
+
+        auto geoIt = m_itemGeosets.find(CG_BOOTS);
 
         if (geoIt != m_itemGeosets.end())
         {
@@ -876,7 +884,11 @@ void WoWItem::refresh()
             WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
 
             if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
+            {
               m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+              if(mergedModel)
+                mergedModel->setGeosetGroupDisplay(CG_BOOTS, geoIt->second);
+            }
           }
 
           // handle 2000* group for hd models
@@ -885,6 +897,8 @@ void WoWItem::refresh()
             if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
             {
               m_charModel->cd.geosets[CG_HDFEET] = 2;
+              if (mergedModel)
+                mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
             }
           }
         }
@@ -1171,7 +1185,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 
   if (m->ok)
   {
-    itemModels[pos] = m;
+    m_itemModels[pos] = m;
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
       m->updateTextureList(texture, TEXTURE_ITEM);
@@ -1180,7 +1194,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
   }
 }
 
-void WoWItem::mergeModel(int modelId, int textureId)
+void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 {
   WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
   LOG_INFO << __FUNCTION__ << GAMEDIRECTORY.getFile(modelId)->fullname();
@@ -1192,7 +1206,7 @@ void WoWItem::mergeModel(int modelId, int textureId)
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
 
-    m_charModel->mergeModel(m);
+    m_itemMergedModels[slot] = m;
   }
 }
 
@@ -1251,52 +1265,52 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
 
 sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filterType, uint itemToFilter) const
 {
+  if (!sql.valid || (sql.values.size() <= 1) || itemToFilter >= sql.values[0].size())
+    return sql;
+
   sqlResult result;
   result.valid = sql.valid;
 
-  if (sql.valid && !sql.empty() && (itemToFilter < sql.values[0].size()))
+  RaceInfos infos;
+  RaceInfos::getCurrent(m_charModel, infos);
+
+  QString filter = "_";
+  switch (filterType)
   {
-    RaceInfos infos;
-    RaceInfos::getCurrent(m_charModel, infos);
+  case MODEL:
+    filter += QString::fromStdString(infos.prefix);
+    filter += (infos.sexid == 0) ? "m" : "f";
+    break;
+  case MERGED_MODEL:
+    filter += QString::fromStdString(infos.prefix);
+    filter += "_";
+    filter += (infos.sexid == 0) ? "m" : "f";
+    break;
+  case TEXTURE:
+    filter += "[";
+    filter += (infos.sexid == 0) ? "m" : "f";
+    filter += "u";
+    filter += "]";
+    break;
+  }
 
-    QString filter = "_";
-    switch (filterType)
-    {
-    case MODEL:
-      filter += QString::fromStdString(infos.prefix);
-      filter += (infos.sexid == 0) ? "m" : "f";
-      break;
-    case MERGED_MODEL:
-      filter += QString::fromStdString(infos.prefix);
-      filter += "_";
-      filter += (infos.sexid == 0) ? "m" : "f";
-      break;
-    case TEXTURE:
-      filter += "[";
-      filter += (infos.sexid == 0) ? "m" : "f";
-      filter += "u";
-      filter += "]";
-      break;
-    }
-
-    filter += "\\.";
+  filter += "\\.";
 
 #if DEBUG_FILTERING > 0
-    LOG_INFO << __FUNCTION__ << filter;
+  LOG_INFO << __FUNCTION__ << filter;
 #endif
 
-    QRegularExpression re(filter);
+  QRegularExpression re(filter);
 
-    for (uint i = 0; i < sql.values.size(); i++)
+  for (uint i = 0; i < sql.values.size(); i++)
+  {
+    GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
+    if (f)
     {
-      GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
-      if (f)
-      {
-        QRegularExpressionMatch r = re.match(f->fullname());
+      QRegularExpressionMatch r = re.match(f->fullname());
 
-        if (r.hasMatch())
-          result.values.push_back(sql.values[i]);
-      }
+      if (r.hasMatch())
+        result.values.push_back(sql.values[i]);
     }
   }
 

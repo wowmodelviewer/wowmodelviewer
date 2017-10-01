@@ -1005,11 +1005,12 @@ void WoWModel::setLOD(GameFile * f, int index)
     ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
     hdgeo->istart = istart;
     istart += hdgeo->icount;
+    hdgeo->display = (hdgeo->id == 0);
     rawGeosets.push_back(hdgeo);
   }
 
-  geosets = rawGeosets;
- 
+  restoreRawGeosets();
+
   rawPasses.clear();
  
   for (size_t j = 0; j < view->nTex; j++)
@@ -1708,7 +1709,7 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
-  for (uint i = 0; i < geosets.size(); i++)
+  for (uint i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;
     int a = (int)group * 100, b = ((int)group + 1) * 100;
@@ -1721,9 +1722,9 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 void WoWModel::mergeModel(QString & name)
 {
   if(mergedModels.end() != std::find_if(std::begin(mergedModels),
-                           std::end(mergedModels),
-                           [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\","/"); }))
-      return;
+                                        std::end(mergedModels),
+                                        [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); }))
+    return;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
 
@@ -1735,8 +1736,14 @@ void WoWModel::mergeModel(QString & name)
 
 void WoWModel::mergeModel(WoWModel * m)
 {
-  mergedModels.push_back(m);
-  refreshMerging();
+  if (mergedModels.empty()  ||
+      (mergedModels.end() == std::find_if(std::begin(mergedModels),
+                             std::end(mergedModels),
+                             [&](const WoWModel * it){ return m->name() == it->name(); })))
+  {
+    mergedModels.push_back(m);
+    refreshMerging();
+  }
 }
   
 void WoWModel::refreshMerging()
@@ -1765,7 +1772,7 @@ void WoWModel::refreshMerging()
     modelsIt->origVertices = modelsIt->rawVertices;
     modelsIt->indices = modelsIt->rawIndices;
     modelsIt->passes = modelsIt->rawPasses;
-    modelsIt->geosets = modelsIt->rawGeosets;
+    modelsIt->restoreRawGeosets();
 
     mergeIndex++;
 
@@ -2127,13 +2134,21 @@ void WoWModel::refresh()
     cd.geosets[CG_WRISTBANDS] = 0;
 
   // reset geosets
-  for (uint j = 0; j < rawGeosets.size(); j++)
-    for (uint i = 1; i < NUM_GEOSETS; i++)
-      setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
+  for (uint i = 1; i < NUM_GEOSETS; i++)
+    setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
 
   // refresh DH geosets
-  setGeosetGroupDisplay(CG_DH_HORNS, cd.geosets[CG_DH_HORNS]);
-  setGeosetGroupDisplay(CG_DH_BLINDFOLDS, cd.geosets[CG_DH_BLINDFOLDS]);
+  for (auto it : mergedModels)
+  {
+    if (it->name().contains("demonhuntergeosets"))
+    {
+      it->setGeosetGroupDisplay(CG_DH_HORNS, cd.geosets[CG_DH_HORNS]);
+      it->setGeosetGroupDisplay(CG_DH_BLINDFOLDS, cd.geosets[CG_DH_BLINDFOLDS]);
+      break;
+    }
+  }
+
+  
 
   WoWItem * headItem = getItem(CS_HEAD);
 
@@ -2263,4 +2278,15 @@ GLuint WoWModel::getGLTexture(uint16 tex)
     return textures[tex];
   else
     return replaceTextures[specialTextures[tex]];
+}
+
+void WoWModel::restoreRawGeosets()
+{
+  for (auto it : geosets)
+    delete it;
+
+  geosets.clear();
+ 
+  for (auto it : rawGeosets)
+    geosets.push_back(new ModelGeosetHD(*it));
 }

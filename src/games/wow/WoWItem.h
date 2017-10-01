@@ -75,7 +75,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     unsigned int nbLevels() { return m_nbLevels; }
 
-    std::map<POSITION_SLOTS, WoWModel *> itemModels;
+    std::map<POSITION_SLOTS, WoWModel *> models() { return m_itemModels; }
 
     void save(QXmlStreamWriter &);
     void load(QString &);
@@ -102,9 +102,11 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<CharRegions, GameFile *> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
+    std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
+    std::map<CharSlots, WoWModel *> m_itemMergedModels;
 
     void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
-    void mergeModel(int modelId, int textureId);
+    void mergeModel(CharSlots slot, int modelId, int textureId);
 
     CharRegions getRegionForTexture(GameFile * file) const;
 
