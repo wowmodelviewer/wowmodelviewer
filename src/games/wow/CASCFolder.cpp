@@ -212,11 +212,10 @@ bool CASCFolder::fileExists(std::string file)
   return false;
 }
 
-HANDLE CASCFolder::openFile(std::string file)
+bool CASCFolder::openFile(std::string file, HANDLE * result)
 {
-  HANDLE result;
-  CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, &result);
-  return result;
+ 
+  return CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, result);
 }
 
 bool CASCFolder::closeFile(HANDLE file)

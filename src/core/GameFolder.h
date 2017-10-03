@@ -49,7 +49,7 @@ namespace core
       GameFile * getFile(QString filename);
       virtual GameFile * getFile(int id) = 0;
 
-      virtual void * openFile(std::string file) = 0;
+      virtual bool openFile(std::string file, void ** result) = 0;
 
       virtual QString version() = 0;
 

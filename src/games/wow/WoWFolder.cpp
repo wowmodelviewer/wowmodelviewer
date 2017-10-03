@@ -106,6 +106,9 @@ GameFile * wow::WoWFolder::getFile(int id)
 {
   GameFile * result = 0;
 
+  if (id <= 0) // bad id given
+    return result;
+
   auto it = m_idMap.find(id);
   if (it != m_idMap.end())
     result = it->second;
@@ -114,10 +117,12 @@ GameFile * wow::WoWFolder::getFile(int id)
   {
     // Build File########.unk filename needed for CASC lib to open file based on id
     QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
-    HANDLE newfile = m_CASCFolder.openFile(filename.toStdString());
+    LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
-    if (newfile)
+    HANDLE newfile;
+    if(m_CASCFolder.openFile(filename.toStdString(), &newfile))
     {
+      LOG_INFO << "Succesfully opened";
       m_CASCFolder.closeFile(newfile);
       CASCFile * file = new CASCFile(filename, id);
       file->setName(filename);
@@ -130,9 +135,9 @@ GameFile * wow::WoWFolder::getFile(int id)
 }
 
 
-HANDLE wow::WoWFolder::openFile(std::string file)
+bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 {
-  return m_CASCFolder.openFile(file);
+  return m_CASCFolder.openFile(file, result);
 }
 
 QString wow::WoWFolder::version()

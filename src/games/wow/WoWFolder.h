@@ -44,7 +44,7 @@ namespace wow
 
       GameFile * getFile(int id);
 
-      void * openFile(std::string file);
+      bool openFile(std::string file, HANDLE * result);
 
       QString version();
 

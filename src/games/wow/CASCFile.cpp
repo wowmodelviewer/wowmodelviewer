@@ -87,9 +87,7 @@ CASCFile::~CASCFile()
 
 bool  CASCFile::openFile()
 {
-  m_handle = GAMEDIRECTORY.openFile(filepath.toStdString());
-
-  if (!m_handle)
+  if (!GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))
   {
     LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
     return false;
