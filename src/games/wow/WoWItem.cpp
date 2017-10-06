@@ -868,12 +868,6 @@ void WoWItem::refresh()
           mergedModel = it->second;
           m_charModel->mergeModel(mergedModel);
         }
-     
-        if (mergedModel)
-        {
-          for (uint i = 0; i < mergedModel->geosets.size(); i++)
-            mergedModel->showGeoset(i, false);
-        }
 
         auto geoIt = m_itemGeosets.find(CG_BOOTS);
 
@@ -1205,6 +1199,9 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
       m->updateTextureList(texture, TEXTURE_ITEM);
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
+
+    for (uint i = 0; i < m->geosets.size(); i++)
+      m->showGeoset(i, false);
 
     m_itemMergedModels[slot] = m;
   }
