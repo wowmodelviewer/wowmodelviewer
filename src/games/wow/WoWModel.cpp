@@ -1790,7 +1790,8 @@ void WoWModel::refreshMerging()
       for (uint b = 0; b < header.nBones; ++b)
       {
         Vec3D p = bones[b].pivot;
-        if (p == pivot)
+        if ((p == pivot) && 
+            (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
           boneConvertTable[i] = b;
           break;
@@ -1914,22 +1915,6 @@ void WoWModel::refreshMerging()
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
 
-  /*
-  for (auto it : geosets)
-  {
-    if (it->id == 501)
-    {
-      LOG_INFO << "---------";
-      LOG_INFO << it->nBones << it->nSkinnedBones << it->rootBone << it->StartBones;
-      for (uint k = 0, b = it->istart; k < it->icount; k++, b++)
-      {
-        ModelVertex mv = origVertices[indices[b]];
-        LOG_INFO << mv.bones[0] << mv.bones[1] << mv.bones[2] << mv.bones[3];
-      }
-      LOG_INFO << "---------";
-    }
-  }
-  */
   refresh();
 }
 
