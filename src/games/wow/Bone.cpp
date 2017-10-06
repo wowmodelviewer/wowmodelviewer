@@ -86,8 +86,6 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<Gam
 
 	boneDef = b;
 
-	//std::cout << __FUNCTION__ << "f.getBuffer() = " << f.getBuffer() << std::endl;
-
 	trans.init(b.translation, f, global, animfiles);
 	rot.init(b.rotation, f, global, animfiles);
 	scale.init(b.scaling, f, global, animfiles);

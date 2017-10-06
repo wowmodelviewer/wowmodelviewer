@@ -778,12 +778,9 @@ void WoWModel::initAnimated(GameFile * f)
     // init bones...
     bones = new Bone[header.nBones];
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+
     for (size_t i = 0; i < header.nBones; i++)
-    {
-      //if (i==0) mb[i].rotation.ofsRanges = 1.0f;
-      bones[i].model = this;
       bones[i].initV3(*f, mb[i], globalSequences, animfiles);
-    }
 
     // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
     if (header.nKeyBoneLookup < BONE_MAX)
@@ -1016,9 +1013,6 @@ void WoWModel::setLOD(GameFile * f, int index)
   for (size_t j = 0; j < view->nTex; j++)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
-
-    //TextureID texid = textures[texlookup[tex[j].textureid]];
-    //pass->texture = texid;
     
     pass->tex = texlookup[tex[j].textureid];
 
@@ -1919,6 +1913,24 @@ void WoWModel::refreshMerging()
     // clean bind
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
+
+  /*
+  for (auto it : geosets)
+  {
+    if (it->id == 501)
+    {
+      LOG_INFO << "---------";
+      LOG_INFO << it->nBones << it->nSkinnedBones << it->rootBone << it->StartBones;
+      for (uint k = 0, b = it->istart; k < it->icount; k++, b++)
+      {
+        ModelVertex mv = origVertices[indices[b]];
+        LOG_INFO << mv.bones[0] << mv.bones[1] << mv.bones[2] << mv.bones[3];
+      }
+      LOG_INFO << "---------";
+    }
+  }
+  */
+  refresh();
 }
 
 void WoWModel::unmergeModel(QString & name)
