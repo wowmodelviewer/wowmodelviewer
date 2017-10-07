@@ -912,9 +912,22 @@ void WoWItem::refresh()
     }
     case CS_PANTS:
     {
+      WoWModel * mergedModel = 0;
+      auto it = m_itemMergedModels.find(CS_PANTS);
+
+      if (it != m_itemMergedModels.end())
+      {
+        mergedModel = it->second;
+        m_charModel->mergeModel(mergedModel);
+      }
+
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_KNEEPADS);
       if (geoIt != m_itemGeosets.end())
+      {
         m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
+        if (mergedModel)
+          mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, geoIt->second);
+      }
 
 
       geoIt = m_itemGeosets.find(CG_TROUSERS);
@@ -925,17 +938,21 @@ void WoWItem::refresh()
         const ItemRecord &item = items.getById(m_charModel->getItem(CS_CHEST)->id());
 
         if (item.type != IT_ROBE)
+        {
           m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
+          if (mergedModel)
+            mergedModel->setGeosetGroupDisplay(CG_TROUSERS, geoIt->second);
+        }
       }
 
 
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_LEG_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
+      auto texIt =  m_itemTextures.find(CR_LEG_UPPER);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
-      it = m_itemTextures.find(CR_LEG_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+      texIt = m_itemTextures.find(CR_LEG_LOWER);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
       break;
     }
