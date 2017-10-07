@@ -43,8 +43,8 @@
 #include "Plugin.h"
 
 // if you need extra qualification on software version, move this to 1
-# define _BETAVERSION 0
-# define _ALPHAVERSION 1
+# define _BETAVERSION 1
+# define _ALPHAVERSION 0
 
 
 // Namespaces used
@@ -121,7 +121,7 @@ core::GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".alpha18";
+  m_versionSpecialExtend = ".beta1";
 
   bShowParticle = false;
   bZeroParticle = false;
