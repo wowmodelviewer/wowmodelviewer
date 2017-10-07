@@ -80,6 +80,12 @@ void WoWItem::setId(int id)
       if (m_slot == CS_HAND_LEFT)
         m_charModel->charModelDetails.closeLHand = false;
 
+      // unload any merged model
+      auto it = m_itemMergedModels.find(m_slot);
+
+      if (it != m_itemMergedModels.end())
+        m_charModel->unmergeModel(it->second);
+
       return;
     }
 
@@ -929,7 +935,6 @@ void WoWItem::refresh()
           mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, geoIt->second);
       }
 
-
       geoIt = m_itemGeosets.find(CG_TROUSERS);
 
       if (geoIt != m_itemGeosets.end())
@@ -944,7 +949,6 @@ void WoWItem::refresh()
             mergedModel->setGeosetGroupDisplay(CG_TROUSERS, geoIt->second);
         }
       }
-
 
       auto texIt =  m_itemTextures.find(CR_LEG_UPPER);
       if (texIt != m_itemTextures.end())
@@ -1221,7 +1225,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 {
   WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
-  LOG_INFO << __FUNCTION__ << GAMEDIRECTORY.getFile(modelId)->fullname();
+
   if (m->ok)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
