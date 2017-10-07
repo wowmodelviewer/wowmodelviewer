@@ -1630,10 +1630,11 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
 
   for (auto & it : passes)
   {
-    if (!it->geoset->display)
+    ModelGeosetHD * geoset = geosets[it->geoIndex];
+    if (!geoset->display)
       continue;
 
-    for (size_t k = 0, b = it->geoset->istart; k < it->geoset->icount; k++, b++)
+    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1823,7 +1824,7 @@ void WoWModel::refreshMerging()
     uint16 handTex = ModelRenderPass::INVALID_TEX;
     for (auto it : passes)
     {
-      if (it->geoset->id / 100 == 23)
+      if (geosets[it->geoIndex]->id / 100 == 23)
         handTex = it->tex;
     }
 
@@ -1832,8 +1833,7 @@ void WoWModel::refreshMerging()
       ModelRenderPass * p = new ModelRenderPass(*it);
       p->model = this;
       p->geoIndex += nbGeosets;
-      p->geoset = geosets[p->geoIndex];
-      if (p->geoset->id / 100 != 23) // don't copy texture for hands
+      if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
         p->tex += (mergeIndex * TEXTURE_MAX);
       else
         p->tex = handTex; // use regular model texture instead
@@ -1978,7 +1978,7 @@ void WoWModel::refresh()
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
 
     // pandaren female => need to display tabard2 geosets (need to find something better...)
-    for (size_t i = 0; i < geosets.size(); i++)
+    for (size_t i = 0; i < rawGeosets.size(); i++)
     {
       if (geosets[i]->id == 1401)
         showGeoset(i, true);
@@ -1987,7 +1987,7 @@ void WoWModel::refresh()
   else
   {
     // de activate pandaren female tabard2 when no underwear
-    for (size_t i = 0; i < geosets.size(); i++)
+    for (size_t i = 0; i < rawGeosets.size(); i++)
     {
       if (geosets[i]->id == 1401)
         showGeoset(i, false);
@@ -2017,13 +2017,17 @@ void WoWModel::refresh()
     .arg(cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
   sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
+  LOG_INFO << query;
+
   if (hairStyle.valid && !hairStyle.values.empty())
   {
     showScalp = (bool)hairStyle.values[0][1].toInt();
     unsigned int geosetId = hairStyle.values[0][0].toInt();
     if (!geosetId)  // adds missing scalp if no other hair geoset used. Seems to work that way, anyway...
       geosetId = 1;
-    for (size_t j = 0; j < geosets.size(); j++)
+    cd.geosets[CG_HAIRSTYLE] = geosetId;
+    /*
+    for (size_t j = 0; j < rawGeosets.size(); j++)
     {
       int id = geosets[j]->id;
       if (!id) // 0 is for skin, not hairstyle
@@ -2033,6 +2037,7 @@ void WoWModel::refresh()
       else if (id < 100)
         showGeoset(j, false);
     }
+    */
   }
   else
     LOG_ERROR << "Unable to collect hair style " << cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE) << " for model " << name();
@@ -2126,7 +2131,7 @@ void WoWModel::refresh()
     cd.geosets[CG_WRISTBANDS] = 0;
 
   // reset geosets
-  for (uint i = 1; i < NUM_GEOSETS; i++)
+  for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
 
   // refresh DH geosets
@@ -2159,7 +2164,7 @@ void WoWModel::refresh()
       // hair styles
       if (helmetInfos.values[0][0].toInt() != 0)
       {
-        for (size_t i = 0; i < geosets.size(); i++)
+        for (size_t i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 0 && id < 100)
@@ -2170,7 +2175,7 @@ void WoWModel::refresh()
       // facial 1
       if (helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
       {
-        for (size_t i = 0; i < geosets.size(); i++)
+        for (size_t i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 100 && id < 200)
@@ -2181,7 +2186,7 @@ void WoWModel::refresh()
       // facial 2
       if (helmetInfos.values[0][2].toInt() != 0 && infos.customization[1] != "FEATURES")
       {
-        for (size_t i = 0; i < geosets.size(); i++)
+        for (size_t i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 200 && id < 300)
@@ -2192,7 +2197,7 @@ void WoWModel::refresh()
       // facial 3
       if (helmetInfos.values[0][3].toInt() != 0)
       {
-        for (size_t i = 0; i < geosets.size(); i++)
+        for (size_t i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 300 && id < 400)
@@ -2203,7 +2208,7 @@ void WoWModel::refresh()
       // ears
       if (helmetInfos.values[0][4].toInt() != 0)
       {
-        for (size_t i = 0; i < geosets.size(); i++)
+        for (size_t i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 700 && id < 800)
@@ -2233,7 +2238,7 @@ void WoWModel::refresh()
   // Eye Glow Geosets are ID 1701, 1702, etc.
   size_t egt = cd.eyeGlowType;
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
-  for (size_t i = 0; i < geosets.size(); i++)
+  for (size_t i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799

@@ -2553,10 +2553,11 @@ void ModelViewer::ModelInfo()
   for (size_t i = 0; i < m->passes.size(); i++) {
     xml << "	  <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass * p = m->passes[i];
-    xml << "      <indexStart>" << p->geoset->istart << "</indexStart>" << endl;
-    xml << "      <indexCount>" << p->geoset->icount << "</indexCount>" << endl;
-    xml << "      <vertexStart>" << p->geoset->vstart << "</vertexStart>" << endl;
-    xml << "      <vertexEnd>" << p->geoset->vstart + p->geoset->vcount << "</vertexEnd>" << endl;
+    ModelGeosetHD * geoset = m->geosets[p->geoIndex];
+    xml << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
+    xml << "      <indexCount>" << geoset->icount << "</indexCount>" << endl;
+    xml << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;
+    xml << "      <vertexEnd>" << geoset->vstart + geoset->vcount << "</vertexEnd>" << endl;
     xml << "      <tex>" << p->tex << "</tex>" << endl;
     if (p->tex >= 0)
       xml << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
@@ -2571,7 +2572,7 @@ void ModelViewer::ModelInfo()
     xml << "      <color>" << p->color << "</color>" << endl;
     xml << "      <opacity>" << p->opacity << "</opacity>" << endl;
     xml << "      <blendmode>" << p->blendmode << "</blendmode>" << endl;
-    xml << "      <geoset>" << p->geoset->id << "</geoset>" << endl;
+    xml << "      <geoset>" << geoset->id << "</geoset>" << endl;
     xml << "      <swrap>" << p->swrap << "</swrap>" << endl;
     xml << "      <twrap>" << p->twrap << "</twrap>" << endl;
     xml << "      <ocol>" << p->ocol << "</ocol>" << endl;

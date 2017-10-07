@@ -272,7 +272,7 @@ void FBXExporter::createMesh()
       FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
       m_p_meshNode->AddMaterial(material);
 
-      ModelGeosetHD * g = p->geoset;
+      ModelGeosetHD * g = m_p_model->geosets[p->geoIndex];
       size_t num_of_faces = g->icount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {

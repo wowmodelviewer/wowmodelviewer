@@ -37,8 +37,6 @@ public:
   int16 texanim, color, opacity, blendmode;
   uint16 tex;
 
-  ModelGeosetHD * geoset;
-
   // texture wrapping
   bool swrap, twrap;
 

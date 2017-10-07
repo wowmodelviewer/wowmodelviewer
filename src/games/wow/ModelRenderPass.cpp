@@ -18,7 +18,7 @@
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
   unlit(false), noZWrite(false), billboard(false),
-  texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX), geoset(m->geosets[geo]),
+  texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX),
   swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
   model(m), geoIndex(geo)
 {
@@ -85,7 +85,7 @@ void ModelRenderPass::deinit()
 bool ModelRenderPass::init()
 {
   // May as well check that we're going to render the geoset before doing all this crap.
-  if (!model || !geoset || !geoset->display)
+  if (!model || geoIndex == -1 || !model->geosets[geoIndex]->display)
     return false;
 
   // COLOUR
@@ -234,10 +234,12 @@ bool ModelRenderPass::init()
 
 void ModelRenderPass::render(bool animated)
 {
+  ModelGeosetHD * geoset = model->geosets[geoIndex];
   // we don't want to render completely transparent parts
   // render
   if (animated)
   {
+    
     //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
     // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
     // I can't notice a difference but I guess it can't hurt
