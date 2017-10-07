@@ -1730,14 +1730,9 @@ void WoWModel::mergeModel(QString & name)
 
 void WoWModel::mergeModel(WoWModel * m)
 {
-  if (mergedModels.empty()  ||
-      (mergedModels.end() == std::find_if(std::begin(mergedModels),
-                             std::end(mergedModels),
-                             [&](const WoWModel * it){ return m->name() == it->name(); })))
-  {
-    mergedModels.push_back(m);
+  auto it = mergedModels.insert(m);
+  if (it.second == true) // new element inserted
     refreshMerging();
-  }
 }
   
 void WoWModel::refreshMerging()
@@ -1932,7 +1927,7 @@ void WoWModel::unmergeModel(QString & name)
 void WoWModel::unmergeModel(WoWModel * m)
 {
   LOG_INFO << __FUNCTION__ << m->name();
-  mergedModels.remove(m);
+  mergedModels.erase(m);
 
   delete m;
 
@@ -2279,11 +2274,26 @@ GLuint WoWModel::getGLTexture(uint16 tex)
 
 void WoWModel::restoreRawGeosets()
 {
+  std::vector<bool> geosetDisplayStatus;
+
   for (auto it : geosets)
+  {
+    geosetDisplayStatus.push_back(it->display);
     delete it;
+  }
 
   geosets.clear();
  
   for (auto it : rawGeosets)
-    geosets.push_back(new ModelGeosetHD(*it));
+  {
+    ModelGeosetHD * geo = new ModelGeosetHD(*it);
+    geosets.push_back(geo);
+  }
+
+  uint i = 0;
+  for (auto it : geosetDisplayStatus)
+  {
+    geosets[i]->display = it;
+    i++;
+  }
 }

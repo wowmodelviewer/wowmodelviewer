@@ -987,11 +987,24 @@ void WoWItem::refresh()
     }
     case CS_GLOVES:
     {
+      WoWModel * mergedModel = 0;
+      auto modelIt = m_itemMergedModels.find(CS_GLOVES);
+
+      if (modelIt != m_itemMergedModels.end())
+      {
+        mergedModel = modelIt->second;
+        m_charModel->mergeModel(mergedModel);
+      }
+
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_GLOVES);
       if (geoIt != m_itemGeosets.end())
+      {
         m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
+        if (mergedModel)
+          mergedModel->setGeosetGroupDisplay(CG_GLOVES, geoIt->second);
+      }
 
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
+      std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
 
       int layer = SLOT_LAYERS[m_slot];
 
@@ -1001,12 +1014,12 @@ void WoWItem::refresh()
       if ((chestItem->m_type == IT_ROBE) && (geoIt->second == 1))
         layer = SLOT_LAYERS[CS_CHEST] - 1;
 
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, layer);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_ARM_LOWER, layer);
 
-      it = m_itemTextures.find(CR_HAND);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_HAND, layer);
+      texIt = m_itemTextures.find(CR_HAND);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_HAND, layer);
       break;
     }
     case CS_CAPE:

@@ -84,7 +84,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   uint16 *boundTris;
 
   void refreshMerging();
-  std::list<WoWModel *> mergedModels;
+  std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
   std::vector<ModelVertex> rawVertices;
