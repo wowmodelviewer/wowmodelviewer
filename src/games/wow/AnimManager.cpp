@@ -229,17 +229,24 @@ void AnimManager::SetFrame(size_t f)  // Only called by the animation slider, or
   // ideal frame interval:
   int frameInterval = (anims[id].timeEnd - anims[id].timeStart) / 60;
 
+  uint i = 1;
+
   // Update the model approx. ideal frame intervals, or rendering may not be smooth if slider is moved quickly...
-  size_t i = round(abs(TimeDiff / frameInterval));  // Number of chunks to break it up into
+  if (frameInterval != 0)
+    i = round(abs(TimeDiff / frameInterval));  // Number of chunks to break it up into
+
   if (i > 1)
   {
-    for (size_t j = 0; j < i; j++)
+    for (uint j = 0; j < i; j++)
     {
-      ForceModelUpdate((float) TimeDiff/i);
+      ForceModelUpdate((float)TimeDiff / i);
     }
   }
   else
+  {
     ForceModelUpdate(TimeDiff);
+  }
+
   Frame = f;
 }
 
