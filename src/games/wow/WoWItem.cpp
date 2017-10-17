@@ -882,12 +882,11 @@ void WoWItem::refresh()
           // don't render boots behind robe
           {
             WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-
             if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
             {
               m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
               if(mergedModel)
-                mergedModel->setGeosetGroupDisplay(CG_BOOTS, geoIt->second);
+                mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
             }
           }
 
@@ -932,7 +931,7 @@ void WoWItem::refresh()
       {
         m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
         if (mergedModel)
-          mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, geoIt->second);
+          mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1);
       }
 
       geoIt = m_itemGeosets.find(CG_TROUSERS);
@@ -946,7 +945,7 @@ void WoWItem::refresh()
         {
           m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
           if (mergedModel)
-            mergedModel->setGeosetGroupDisplay(CG_TROUSERS, geoIt->second);
+            mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
         }
       }
 
@@ -1022,7 +1021,7 @@ void WoWItem::refresh()
       {
         m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
         if (mergedModel)
-          mergedModel->setGeosetGroupDisplay(CG_GLOVES, geoIt->second);
+          mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
       }
 
       std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
