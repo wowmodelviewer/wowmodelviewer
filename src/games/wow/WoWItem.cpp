@@ -504,10 +504,14 @@ void WoWItem::load()
       }
 
       // geosets
-      query = QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3 FROM ItemDisplayInfo "
+      query = QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
+                      "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                      "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-      iteminfos = GAMEDATABASE.sqlQuery(query);
+      LOG_INFO << query;
+
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 3);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
@@ -517,6 +521,9 @@ void WoWItem::load()
 
       m_itemGeosets[CG_WRISTBANDS] = 1 + iteminfos.values[0][0].toInt();
       m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
+
+      if (iteminfos.values[0][3].toInt() != 0)
+        mergeModel(CS_CHEST, iteminfos.values[0][3].toInt(), iteminfos.values[0][4].toInt());
 
       break;
     }
@@ -962,6 +969,23 @@ void WoWItem::refresh()
     case CS_SHIRT:
     case CS_CHEST:
     {
+      WoWModel * mergedModel = 0;
+      auto modelIt = m_itemMergedModels.find(CS_CHEST);
+
+      if (modelIt != m_itemMergedModels.end())
+      {
+        mergedModel = modelIt->second;
+        m_charModel->mergeModel(mergedModel);
+
+        if (mergedModel)
+        {
+          mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
+          mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
+          mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
+        }
+
+      }
+
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
       if (geoIt != m_itemGeosets.end())
         m_charModel->cd.geosets[CG_WRISTBANDS] = geoIt->second;
