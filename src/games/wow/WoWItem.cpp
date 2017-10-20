@@ -55,7 +55,7 @@ map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, 
 WoWItem::WoWItem(CharSlots slot)
   : m_charModel(0), m_id(-1), m_quality(0),
   m_slot(slot), m_displayId(-1), m_level(0),
-  m_nbLevels(0), m_type(0)
+  m_nbLevels(0), m_type(0), m_mergedModel(0)
 {
   setName("---- None ----");
 }
@@ -203,12 +203,14 @@ void WoWItem::unload()
     m_charModel->attachment->delSlot(m_slot);
 
   // unload any merged model
-  auto it = m_itemMergedModels.find(m_slot);
-
-  if (it != m_itemMergedModels.end())
+  if (m_mergedModel != 0)
   {
-    m_itemMergedModels.erase(it);
-    m_charModel->unmergeModel(it->second);
+    // TODO : unmerge trigs refreshMerging that trigs refresh... so m_mergedModel must be null...
+    // need to find a better way to solve this
+    WoWModel * m = m_mergedModel;
+    m_mergedModel = 0;
+    m_charModel->unmergeModel(m);
+    delete m_mergedModel;
   }
 }
 
@@ -865,13 +867,10 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_BELT);
 
-        auto modelIt = m_itemMergedModels.find(CS_BELT);
-
-        if (modelIt != m_itemMergedModels.end())
+        if (m_mergedModel != 0)
         {
-          WoWModel * mergedModel = modelIt->second;
-          m_charModel->mergeModel(mergedModel);
-          mergedModel->setGeosetGroupDisplay(CG_BELT, 1);
+          m_charModel->mergeModel(m_mergedModel);
+          m_mergedModel->setGeosetGroupDisplay(CG_BELT, 1);
         }
 
         std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
@@ -892,14 +891,8 @@ void WoWItem::refresh()
     {
       if (m_charModel->attachment)
       {
-        WoWModel * mergedModel = 0;
-        auto it = m_itemMergedModels.find(CS_BOOTS);
-
-        if (it != m_itemMergedModels.end())
-        {
-          mergedModel = it->second;
-          m_charModel->mergeModel(mergedModel);
-        }
+        if (m_mergedModel != 0)
+          m_charModel->mergeModel(m_mergedModel);
 
         auto geoIt = m_itemGeosets.find(CG_BOOTS);
 
@@ -911,8 +904,8 @@ void WoWItem::refresh()
             if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
             {
               m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
-              if(mergedModel)
-                mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
+              if (m_mergedModel)
+                m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
             }
           }
 
@@ -922,8 +915,8 @@ void WoWItem::refresh()
             if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
             {
               m_charModel->cd.geosets[CG_HDFEET] = 2;
-              if (mergedModel)
-                mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
+              if (m_mergedModel)
+                m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
             }
           }
         }
@@ -943,21 +936,15 @@ void WoWItem::refresh()
     }
     case CS_PANTS:
     {
-      WoWModel * mergedModel = 0;
-      auto it = m_itemMergedModels.find(CS_PANTS);
-
-      if (it != m_itemMergedModels.end())
-      {
-        mergedModel = it->second;
-        m_charModel->mergeModel(mergedModel);
-      }
+      if (m_mergedModel != 0)
+        m_charModel->mergeModel(m_mergedModel);
 
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_KNEEPADS);
       if (geoIt != m_itemGeosets.end())
       {
         m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
-        if (mergedModel)
-          mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1);
+        if (m_mergedModel)
+          m_mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1);
       }
 
       geoIt = m_itemGeosets.find(CG_TROUSERS);
@@ -970,8 +957,8 @@ void WoWItem::refresh()
         if (item.type != IT_ROBE)
         {
           m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
-          if (mergedModel)
-            mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
+          if (m_mergedModel)
+            m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
         }
       }
 
@@ -988,21 +975,12 @@ void WoWItem::refresh()
     case CS_SHIRT:
     case CS_CHEST:
     {
-      WoWModel * mergedModel = 0;
-      auto modelIt = m_itemMergedModels.find(CS_CHEST);
-
-      if (modelIt != m_itemMergedModels.end())
+      if (m_mergedModel != 0)
       {
-        mergedModel = modelIt->second;
-        m_charModel->mergeModel(mergedModel);
-
-        if (mergedModel)
-        {
-          mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
-          mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
-          mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
-        }
-
+        m_charModel->mergeModel(m_mergedModel);
+        m_mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
+        m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
+        m_mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
       }
 
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
@@ -1050,21 +1028,15 @@ void WoWItem::refresh()
     }
     case CS_GLOVES:
     {
-      WoWModel * mergedModel = 0;
-      auto modelIt = m_itemMergedModels.find(CS_GLOVES);
-
-      if (modelIt != m_itemMergedModels.end())
-      {
-        mergedModel = modelIt->second;
-        m_charModel->mergeModel(mergedModel);
-      }
+      if (m_mergedModel != 0)
+        m_charModel->mergeModel(m_mergedModel);
 
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_GLOVES);
       if (geoIt != m_itemGeosets.end())
       {
         m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
-        if (mergedModel)
-          mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
+        if (m_mergedModel)
+          m_mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
       }
 
       std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
@@ -1266,20 +1238,18 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 
 void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 {
-  WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
+  m_mergedModel = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
-  if (m->ok)
+  if (m_mergedModel->ok)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
-      m->updateTextureList(texture, TEXTURE_ITEM);
+      m_mergedModel->updateTextureList(texture, TEXTURE_ITEM);
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
 
-    for (uint i = 0; i < m->geosets.size(); i++)
-      m->showGeoset(i, false);
-
-    m_itemMergedModels[slot] = m;
+    for (uint i = 0; i < m_mergedModel->geosets.size(); i++)
+      m_mergedModel->showGeoset(i, false);
   }
 }
 

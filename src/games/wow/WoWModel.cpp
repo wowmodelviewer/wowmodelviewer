@@ -1716,6 +1716,7 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 
 void WoWModel::mergeModel(QString & name)
 {
+  LOG_INFO << __FUNCTION__ << name;
   if(mergedModels.end() != std::find_if(std::begin(mergedModels),
                                         std::end(mergedModels),
                                         [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); }))
@@ -1731,6 +1732,7 @@ void WoWModel::mergeModel(QString & name)
 
 void WoWModel::mergeModel(WoWModel * m)
 {
+  LOG_INFO << __FUNCTION__ << m;
   auto it = mergedModels.insert(m);
   if (it.second == true) // new element inserted
     refreshMerging();
@@ -1921,15 +1923,16 @@ void WoWModel::unmergeModel(QString & name)
                          [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); });
 
   if (it != mergedModels.end())
+  {
+    delete *it;
     unmergeModel(*it);
+  }
 }
 
 void WoWModel::unmergeModel(WoWModel * m)
 {
   LOG_INFO << __FUNCTION__ << m->name();
   mergedModels.erase(m);
-
-  delete m;
 
   refreshMerging();
 }
