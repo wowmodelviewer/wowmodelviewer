@@ -80,12 +80,6 @@ void WoWItem::setId(int id)
       if (m_slot == CS_HAND_LEFT)
         m_charModel->charModelDetails.closeLHand = false;
 
-      // unload any merged model
-      auto it = m_itemMergedModels.find(m_slot);
-
-      if (it != m_itemMergedModels.end())
-        m_charModel->unmergeModel(it->second);
-
       return;
     }
 
@@ -207,6 +201,15 @@ void WoWItem::unload()
   // remove any existing attachement
   if (m_charModel->attachment)
     m_charModel->attachment->delSlot(m_slot);
+
+  // unload any merged model
+  auto it = m_itemMergedModels.find(m_slot);
+
+  if (it != m_itemMergedModels.end())
+  {
+    m_itemMergedModels.erase(it);
+    m_charModel->unmergeModel(it->second);
+  }
 }
 
 void WoWItem::load()
