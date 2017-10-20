@@ -409,9 +409,11 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      query = QString("SELECT ModelID, TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
-                      "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                      "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+      query = QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID FROM ItemDisplayInfo "
+                      "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
+                      "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
+                      "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
+                      "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
       iteminfos = GAMEDATABASE.sqlQuery(query);
@@ -426,6 +428,11 @@ void WoWItem::load()
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for belt
       {
         updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      }
+      else if (iteminfos.values[0][2].toInt() != 0)
+      {
+        iteminfos = filterSQLResultForModel(iteminfos, MERGED_MODEL, 2);
+        mergeModel(CS_BELT, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
       }
 
       break;
@@ -854,6 +861,15 @@ void WoWItem::refresh()
       if (m_charModel->attachment)
       {
         m_charModel->attachment->delSlot(CS_BELT);
+
+        auto modelIt = m_itemMergedModels.find(CS_BELT);
+
+        if (modelIt != m_itemMergedModels.end())
+        {
+          WoWModel * mergedModel = modelIt->second;
+          m_charModel->mergeModel(mergedModel);
+          mergedModel->setGeosetGroupDisplay(CG_BELT, 1);
+        }
 
         std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
         if (it != m_itemModels.end())
