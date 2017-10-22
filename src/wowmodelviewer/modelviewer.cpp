@@ -1721,37 +1721,39 @@ void ModelViewer::LoadWoW()
   
   if (!core::Game::instance().initDone())
     core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
+
+  // init game config
+  std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
   
-  // init game version
-  SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
-
-  // init game locale
-  std::vector<std::string> localesFound = GAMEDIRECTORY.localesFound();
-
-  if (localesFound.empty())
+  if (configsFound.empty())
   {
     wxString message = wxString::Format(wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
     wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft No locale found"), wxOK | wxICON_ERROR);
     dial->ShowModal();
     return;
   }
+ 
+  core::GameConfig config = configsFound[0];
 
-  std::string locale = localesFound[0];
+  unsigned int nbConfigs = configsFound.size();
 
-  unsigned int nbLocales = localesFound.size();
-
-  if (nbLocales > 1)
+  if (nbConfigs > 1)
   {
-    wxString * availableLocales = new wxString[nbLocales];
-    for (size_t i = 0; i < nbLocales; i++)
-      availableLocales[i] = wxString(localesFound[i].c_str());
+    wxString * availableConfigs = new wxString[nbConfigs];
+    for (size_t i = 0; i < nbConfigs; i++)
+    {
+      QString label = configsFound[i].locale + " (" + configsFound[i].version + ")";
+      availableConfigs[i] = wxString(label.toStdString().c_str());
+    }
 
-    long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbLocales, availableLocales);
+    long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
     if (id != -1)
-      locale = localesFound[id];
+      config = configsFound[id];
+    else
+      return;
   }
 
-  if (!GAMEDIRECTORY.setLocale(locale))
+  if (!GAMEDIRECTORY.setConfig(config))
   {
     wxString message = wxString::Format(wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."), GAMEDIRECTORY.lastError());
     wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"), wxOK | wxICON_ERROR);
@@ -1759,10 +1761,12 @@ void ModelViewer::LoadWoW()
     return;
   }
 
+  // init game version
+  SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
 
-  langName = GAMEDIRECTORY.locale();
+  langName = GAMEDIRECTORY.locale().toStdString();
 
-  SetStatusText(wxString(GAMEDIRECTORY.locale()), 2);
+  SetStatusText(wxString(GAMEDIRECTORY.locale().toStdString()), 2);
 
   // init file list
   QStringList ver = GAMEDIRECTORY.version().split('.');

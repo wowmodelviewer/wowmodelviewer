@@ -22,6 +22,8 @@
 
 #include <QString>
 
+#include "GameFolder.h" // GameConfig
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _CASCFOLDER_API_ __declspec(dllexport)
@@ -39,12 +41,12 @@ class _CASCFOLDER_API_ CASCFolder
 
     void init(const QString & path);
 
-    std::string locale() { return m_currentLocale; }
-    bool setLocale(std::string);
-    std::vector<std::string> localesFound() { return m_localesFound; }
+    QString locale() { return m_currentConfig.locale; }
+    QString version() { return m_currentConfig.version; }
 
-    QString version() { return m_version; }
-
+    std::vector<core::GameConfig> configsFound() { return m_configs; }
+    bool setConfig(core::GameConfig config);
+    
     int lastError() { return m_openError; }
 
     bool fileExists(std::string file);
@@ -59,13 +61,16 @@ class _CASCFOLDER_API_ CASCFolder
 
     void initLocales();
     void initVersion();
-    std::string m_currentLocale;
-    std::vector<std::string> m_localesFound;
-    QString m_version;
+    void initBuildInfo();
+    
     int m_currentCascLocale;
+    core::GameConfig m_currentConfig;
+
     QString m_folder;
     int m_openError;
     HANDLE hStorage;
+
+    std::vector<core::GameConfig> m_configs;
 };
 
 

@@ -29,6 +29,13 @@
 
 namespace core
 {
+  class _GAMEFOLDER_API_ GameConfig
+  {
+    public:
+      QString locale;
+      QString version;
+  };
+
   class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
   {
     public:
@@ -52,10 +59,9 @@ namespace core
       virtual bool openFile(std::string file, void ** result) = 0;
 
       virtual QString version() = 0;
-
-      virtual std::string locale() = 0;
-      virtual bool setLocale(std::string) = 0;
-      virtual std::vector<std::string> localesFound() = 0;
+      virtual QString locale() = 0;
+      virtual bool setConfig(GameConfig config) = 0;
+      virtual std::vector<GameConfig> configsFound() = 0;
 
       virtual int lastError() = 0;
 

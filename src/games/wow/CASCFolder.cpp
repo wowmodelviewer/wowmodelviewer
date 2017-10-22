@@ -21,7 +21,7 @@
 #include "logger/Logger.h"
 
 CASCFolder::CASCFolder()
- : hStorage(NULL),m_currentLocale(""), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
+ : hStorage(NULL), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
 {
 
 }
@@ -33,75 +33,15 @@ void CASCFolder::init(const QString &folder)
   if(m_folder.endsWith("\\"))
     m_folder.remove(m_folder.size()-1,1);
 
-  initLocales();
-  initVersion();
+  initBuildInfo();
 }
 
-void CASCFolder::initLocales()
+bool CASCFolder::setConfig(core::GameConfig config)
 {
-  LOG_INFO << "Determining Locale for:" << m_folder;
+  m_currentConfig = config;
 
-  std::string buildinfofile = m_folder.toStdString()+"\\..\\.build.info";
-  std::ifstream buildinfo(buildinfofile.c_str());
-
-  if(!buildinfo.good())
-  {
-    LOG_ERROR << "Fail to open .build.info to determine locale";
-    return;
-  }
-
-  std::string line, prevline;
-  std::string buildKey = "";
-  std::map<std::string, std::string> buildKeys;
-  // clean up any previously found locale
-  m_localesFound.clear();
-  while(!buildinfo.eof())
-  {
-    buildinfo >> line;
-
-    // find the build key for this locale
-    if (!prevline.empty() && prevline.find("|0|") == std::string::npos &&
-      prevline.find("|1|") == std::string::npos)
-    {
-      std::size_t buildKeyIdx;
-      if ((buildKeyIdx = line.find("|0|")) != std::string::npos ||
-        (buildKeyIdx = line.find("|1|")) != std::string::npos)
-      {
-        buildKey = line.substr(buildKeyIdx + 3, 32);
-      }
-    }
-
-    if(!prevline.empty() && prevline.find("text?") == std::string::npos)
-    {
-      // only add this locale if we don't already have this combination of locale and build key
-      if (line.find("text?") != std::string::npos && (buildKey.empty() ||
-        buildKeys.find(prevline) == buildKeys.end() || buildKeys[prevline] != buildKey))
-      {
-        m_localesFound.push_back(prevline);
-        buildKeys.insert(std::pair<std::string, std::string>(prevline, buildKey));
-      }
-    }
-    prevline = line;
-  }
-
-  if(m_localesFound.empty())
-  {
-    LOG_ERROR << "Fail to grab locale in .build.info file";
-  }
-  else
-  {
-    for(size_t i = 0; i < m_localesFound.size(); i++)
-    {
-      LOG_INFO << "locale found : " << m_localesFound[i].c_str();
-    }
-  }
-}
-
-
-bool CASCFolder::setLocale(std::string locale)
-{
   // init map based on CASCLib
-  std::map<std::string,int> locales;
+  std::map<QString, int> locales;
   locales["frFR"] = CASC_LOCALE_FRFR;
   locales["deDE"] = CASC_LOCALE_DEDE;
   locales["esES"] = CASC_LOCALE_ESES;
@@ -118,49 +58,49 @@ bool CASCFolder::setLocale(std::string locale)
   locales["zhCN"] = CASC_LOCALE_ZHCN;
   locales["zhTW"] = CASC_LOCALE_ZHTW;
 
-  if(!locale.empty())
+  // set locale
+  if (!m_currentConfig.locale.isEmpty())
   {
-    std::map<std::string,int>::iterator it = locales.find(locale);
+    auto it = locales.find(m_currentConfig.locale);
 
-    if(it != locales.end())
+    if (it != locales.end())
     {
       HANDLE dummy;
       LOG_INFO << "Loading Game Folder:" << m_folder;
       // locale found => try to open it
-      if(!CascOpenStorage(m_folder.toStdString().c_str(), it->second, &hStorage))
+      if (!CascOpenStorage(m_folder.toStdString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
         LOG_ERROR << "Opening" << m_folder << "failed." << "Error" << m_openError;
         return false;
       }
 
-      if(CascOpenFile(hStorage,"Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
+      if (CascOpenFile(hStorage, "Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
       {
         CascCloseFile(dummy);
         m_currentCascLocale = it->second;
-        m_currentLocale = locale;
-        LOG_INFO << "Locale succesfully set:" << m_currentLocale.c_str();
+        LOG_INFO << "Locale succesfully set:" << m_currentConfig.locale;
       }
       else
       {
-        LOG_ERROR << "Setting Locale" << locale.c_str() << "for folder" << m_folder << "failed";
+        LOG_ERROR << "Setting Locale" << m_currentConfig.locale << "for folder" << m_folder << "failed";
         return false;
       }
     }
   }
+
   return true;
 }
 
-
-void CASCFolder::initVersion()
+void CASCFolder::initBuildInfo()
 {
-  QString buildinfofile = m_folder+"\\..\\.build.info";
+  QString buildinfofile = m_folder + "\\..\\.build.info";
   LOG_INFO << "buildinfofile : " << buildinfofile;
 
   QFile file(buildinfofile);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
-    LOG_ERROR << "Fail to open .build.info to determine game version";
+    LOG_ERROR << "Fail to open .build.info to grab game config info";
     return;
   }
 
@@ -171,27 +111,54 @@ void CASCFolder::initVersion()
   line = in.readLine();
 
   QStringList headers = line.split('|');
-  int index = 0;
-  for( ; index < headers.size() ; index++)
+  int activeIndex = 0;
+  int versionIndex = 0;
+  int tagIndex = 0;
+  for (int index = 0; index < headers.size(); index++)
   {
-    if(headers[index].contains("VERSION", Qt::CaseInsensitive))
-      break;
+    if (headers[index].contains("Active", Qt::CaseInsensitive))
+      activeIndex = index;
+    else if (headers[index].contains("Version", Qt::CaseInsensitive))
+      versionIndex = index;
+    else if (headers[index].contains("Tags", Qt::CaseInsensitive))
+      tagIndex = index;
   }
 
-  // now that we have index, let's get actual values
-  line = in.readLine();
-  QStringList values = line.split('|');
-  QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
-  QRegularExpressionMatch result = re.match(values[index]);
-  if(result.hasMatch())
-    m_version = result.captured(1)+"."+result.captured(2)+"."+result.captured(3)+" ("+result.captured(4)+")";
+  // now loop across file lines with actual values
+  while (in.readLineInto(&line))
+  {
+    QString version;
+    QStringList values = line.split('|');
 
-  if(m_version.isEmpty())
-    LOG_ERROR << "Fail to grab game version info in .build.info file";
-  else
-    LOG_INFO << "Version successfully found :" << m_version;
+    // if inactive config, skip it
+    if (values[activeIndex] == "0")
+      continue;
 
+    // grab version for this line
+    QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
+    QRegularExpressionMatch result = re.match(values[versionIndex]);
+    if (result.hasMatch())
+      version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + " (" + result.captured(4) + ")";
+
+    // grab locale(s) for this line
+    values = values[tagIndex].split(':');
+    for (int i = 0; i < values.size(); i++)
+    {
+      if (values[i].contains("text?"))
+      {
+        QStringList tags = values[i].split(" ");
+        core::GameConfig config;
+        config.locale = tags[tags.size() - 2];
+        config.version = version;
+        m_configs.push_back(config);
+      }
+    }
+  }
+
+  for (auto it : m_configs)
+    LOG_INFO << "config" << it.locale << it.version;
 }
+
 
 bool CASCFolder::fileExists(std::string file)
 {

@@ -145,19 +145,19 @@ QString wow::WoWFolder::version()
   return m_CASCFolder.version();
 }
 
-std::string wow::WoWFolder::locale()
+QString wow::WoWFolder::locale()
 {
    return m_CASCFolder.locale();
 }
 
-bool wow::WoWFolder::setLocale(std::string val)
+bool wow::WoWFolder::setConfig(core::GameConfig config)
 {
-  return m_CASCFolder.setLocale(val);
+  return m_CASCFolder.setConfig(config);
 }
 
-std::vector<std::string> wow::WoWFolder::localesFound()
+std::vector<core::GameConfig> wow::WoWFolder::configsFound()
 {
-  return m_CASCFolder.localesFound();
+  return m_CASCFolder.configsFound();
 }
 
 int wow::WoWFolder::lastError()

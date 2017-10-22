@@ -47,10 +47,9 @@ namespace wow
       bool openFile(std::string file, HANDLE * result);
 
       QString version();
-
-      std::string locale();
-      bool setLocale(std::string);
-      std::vector<std::string> localesFound();
+      QString locale();
+      bool setConfig(core::GameConfig config);
+      std::vector<core::GameConfig> configsFound();
 
       int lastError();
 
