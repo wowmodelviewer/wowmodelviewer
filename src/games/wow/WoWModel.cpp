@@ -1924,8 +1924,8 @@ void WoWModel::unmergeModel(QString & name)
 
   if (it != mergedModels.end())
   {
-    delete *it;
     unmergeModel(*it);
+    delete *it;
   }
 }
 
