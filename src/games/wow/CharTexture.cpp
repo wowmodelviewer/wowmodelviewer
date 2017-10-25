@@ -25,7 +25,6 @@ std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTextu
 
 void CharTexture::addLayer(GameFile * file, int region, int layer)
 {
-  //std::cout << __FUNCTION__ << " " << fn.mb_str() << " " << region << " " << layer << std::endl;
   if (!file)
     return;
 
@@ -75,7 +74,7 @@ void CharTexture::compose(TextureID texID)
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layoutInfos.first.width, layoutInfos.first.height, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img->bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width(), img->height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img->bits());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 

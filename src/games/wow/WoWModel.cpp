@@ -2274,10 +2274,21 @@ QString WoWModel::getNameForTex(uint16 tex)
 
 GLuint WoWModel::getGLTexture(uint16 tex)
 {
+  if (tex >= specialTextures.size())
+    return ModelRenderPass::INVALID_TEX;
+
   if (specialTextures[tex] == -1)
+  {
     return textures[tex];
+  }
   else
-    return replaceTextures[specialTextures[tex]];
+  {
+    if (specialTextures[tex] == -1)
+      return ModelRenderPass::INVALID_TEX;
+    else
+      return replaceTextures[specialTextures[tex]];
+  }
+    
 }
 
 void WoWModel::restoreRawGeosets()
