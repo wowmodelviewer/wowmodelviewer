@@ -1947,15 +1947,21 @@ void WoWModel::refresh()
   for (size_t i = 0; i < NUM_GEOSETS; i++)
     cd.geosets[i] = 1;
 
+  RaceInfos infos;
+  if (!RaceInfos::getCurrent(this, infos)) // if no race info found, simply update geosets
+  {
+    // reset geosets
+    for (uint i = 0; i < NUM_GEOSETS; i++)
+      setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
+
+    return;
+  }
+   
   cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
 
   // show ears, if toggled
   if (cd.showEars)
     cd.geosets[CG_EARS] = 2;
-
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(this, infos))
-    return;
 
   tex.reset(infos.textureLayoutID);
 
