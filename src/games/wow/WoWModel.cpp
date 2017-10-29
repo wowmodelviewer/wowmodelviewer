@@ -1986,21 +1986,13 @@ void WoWModel::refresh()
     if (foundTextures.size() > 1)
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
 
-    // pandaren female => need to display tabard2 geosets (need to find something better...)
-    for (size_t i = 0; i < rawGeosets.size(); i++)
-    {
-      if (geosets[i]->id == 1401)
-        showGeoset(i, true);
-    }
+    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+      cd.geosets[CG_TARBARD2] = 1;
   }
   else
   {
-    // de activate pandaren female tabard2 when no underwear
-    for (size_t i = 0; i < rawGeosets.size(); i++)
-    {
-      if (geosets[i]->id == 1401)
-        showGeoset(i, false);
-    }
+    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+      cd.geosets[CG_TARBARD2] = 0;
   }
 
   // face
