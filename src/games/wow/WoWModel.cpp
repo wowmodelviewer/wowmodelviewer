@@ -2131,6 +2131,11 @@ void WoWModel::refresh()
   if (cd.geosets[CG_GLOVES] > 1)
     cd.geosets[CG_WRISTBANDS] = 0;
 
+  // pandaren female -> hide tabard geoset if TROUSERS geosets are displayed
+  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE) 
+      && (cd.geosets[CG_TROUSERS] > 1))
+    cd.geosets[CG_TARBARD2] = 0;
+
   // reset geosets
   for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
