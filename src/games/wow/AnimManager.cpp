@@ -24,8 +24,8 @@ AnimManager::AnimManager(ModelAnimation *anim)
 
   if (anims != NULL)
   {
-    Frame = anims[0].timeStart;
-    TotalFrames = anims[0].timeEnd - anims[0].timeStart;
+    Frame = 0;
+    TotalFrames = anims[0].length;
   }
   else
   {
@@ -71,8 +71,8 @@ void AnimManager::SetAnim(short index, unsigned int id, short loops)
   {
     Count = 1;
     PlayIndex = index;
-    Frame = anims[id].timeStart;
-    TotalFrames = anims[id].timeEnd - anims[id].timeStart;
+    Frame = 0;
+    TotalFrames = anims[id].length;
   }
 
   if (index+1 > Count)
@@ -92,7 +92,7 @@ void AnimManager::Stop()
 {
   Paused = true;
   PlayIndex = 0;
-  SetFrame(anims[animList[0].AnimID].timeStart);
+  SetFrame(0);
   CurLoop = animList[0].Loops;
   TotalFrames = GetFrameCount();
 }
@@ -128,7 +128,7 @@ void AnimManager::Next()
       PlayIndex = 0;
   }
 
-  Frame = anims[animList[PlayIndex].AnimID].timeStart;
+  Frame = 0;
   TotalFrames = GetFrameCount();
 }
 
@@ -150,7 +150,7 @@ void AnimManager::Prev()
     CurLoop++;
   }
 
-  Frame = anims[animList[PlayIndex].AnimID].timeEnd;
+  Frame = anims[animList[PlayIndex].AnimID].length;
   TotalFrames = GetFrameCount();
 }
 
@@ -166,10 +166,8 @@ int AnimManager::Tick(int time)
   {
     FrameMouth += (time*mouthSpeed);
 
-    if (FrameMouth >= anims[AnimIDMouth].timeEnd)
-      FrameMouth -= (anims[AnimIDMouth].timeEnd - anims[AnimIDMouth].timeStart);
-    else if (FrameMouth < anims[AnimIDMouth].timeStart)
-      FrameMouth += (anims[AnimIDMouth].timeEnd - anims[AnimIDMouth].timeStart);
+    if (FrameMouth >= anims[AnimIDMouth].length)
+      FrameMouth -= anims[AnimIDMouth].length;
   }
 
   // animate our second (upper body) animation
@@ -177,28 +175,22 @@ int AnimManager::Tick(int time)
   {
     FrameSecondary += (time*Speed);
 
-    if (FrameSecondary >= anims[AnimIDSecondary].timeEnd)
-      FrameSecondary -= (anims[AnimIDSecondary].timeEnd - anims[AnimIDSecondary].timeStart);
-    else if (FrameSecondary < anims[AnimIDSecondary].timeStart)
-      FrameSecondary += (anims[AnimIDSecondary].timeEnd - anims[AnimIDSecondary].timeStart);
+    if (FrameSecondary >= anims[AnimIDSecondary].length)
+      FrameSecondary -= anims[AnimIDSecondary].length;
   }
 
-  if (Frame >= anims[animList[PlayIndex].AnimID].timeEnd)
+  if (Frame >= anims[animList[PlayIndex].AnimID].length)
   {
     Next();
     return 1;
   }
-  else if (Frame < anims[animList[PlayIndex].AnimID].timeStart)
-  {
-    Prev();
-    return 1;
-  }
+
   return 0;
 }
 
 size_t AnimManager::GetFrameCount()
 {
-  return (anims[animList[PlayIndex].AnimID].timeEnd - anims[animList[PlayIndex].AnimID].timeStart);
+  return anims[animList[PlayIndex].AnimID].length;
 }
 
 
@@ -206,8 +198,8 @@ void AnimManager::NextFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  Frame += ((anims[id].timeEnd - anims[id].timeStart) / 60);
-  TimeDiff = ((anims[id].timeEnd - anims[id].timeStart) / 60);
+  TimeDiff = (anims[id].length / 60);
+  Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
 
@@ -215,8 +207,8 @@ void AnimManager::PrevFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  Frame -= ((anims[id].timeEnd - anims[id].timeStart) / 60);
-  TimeDiff = ((anims[id].timeEnd - anims[id].timeStart) / 60) * -1;
+  TimeDiff = (anims[id].length / 60) * -1;
+  Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
 
@@ -227,7 +219,7 @@ void AnimManager::SetFrame(size_t f)  // Only called by the animation slider, or
   ssize_t id = animList[PlayIndex].AnimID;
 
   // ideal frame interval:
-  int frameInterval = (anims[id].timeEnd - anims[id].timeStart) / 60;
+  int frameInterval = anims[id].length / 60;
 
   uint i = 1;
 

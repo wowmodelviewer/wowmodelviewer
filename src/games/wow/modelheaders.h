@@ -121,26 +121,6 @@ struct ModelHeader {
 #define	ANIMATION_LOOPED		0x20 // flags
 // block B - animations, size 68 bytes, WotLK 64 bytes
 struct ModelAnimation {
-	uint32 animID; // AnimationDataDB.ID
-	uint32 timeStart;
-	uint32 timeEnd;
-
-	float moveSpeed;
-
-	uint32 flags;
-	uint16 probability;
-	uint16 unused;
-	uint32 d1;
-	uint32 d2;
-	uint32 playSpeed;  // note: this can't be play speed because it's 0 for some models
-
-	Sphere boundSphere;
-
-	int16 NextAnimation;
-	int16 Index;
-};
-
-struct ModelAnimationWotLK {
 	int16 animID; // AnimationDataDB.ID
 	int16 subAnimID;
 	uint32 length;

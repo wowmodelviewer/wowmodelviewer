@@ -718,26 +718,9 @@ void WoWModel::initAnimated(GameFile * f)
 
     anims = new ModelAnimation[header.nAnimations];
 
-    ModelAnimationWotLK animsWotLK;
-    //std::cout << "header.nAnimations = " << header.nAnimations << std::endl;
-
     for (size_t i = 0; i < header.nAnimations; i++)
     {
-      memcpy(&animsWotLK, f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimationWotLK), sizeof(ModelAnimationWotLK));
-      anims[i].animID = animsWotLK.animID;
-      anims[i].timeStart = 0;
-      anims[i].timeEnd = animsWotLK.length;
-      anims[i].moveSpeed = animsWotLK.moveSpeed;
-      anims[i].flags = animsWotLK.flags;
-      anims[i].probability = animsWotLK.probability;
-      anims[i].d1 = animsWotLK.d1;
-      anims[i].d2 = animsWotLK.d2;
-      anims[i].playSpeed = animsWotLK.playSpeed;
-      anims[i].boundSphere.min = animsWotLK.boundSphere.min;
-      anims[i].boundSphere.max = animsWotLK.boundSphere.max;
-      anims[i].boundSphere.radius = animsWotLK.boundSphere.radius;
-      anims[i].NextAnimation = animsWotLK.NextAnimation;
-      anims[i].Index = animsWotLK.Index;
+      memcpy(&(anims[i]), f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
 
       GameFile * anim = 0;
 
@@ -746,7 +729,7 @@ void WoWModel::initAnimated(GameFile * f)
       {
         for (auto it : afids)
         {
-          if ((it.animId == anims[i].animID) && (it.subAnimId == animsWotLK.subAnimID))
+          if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
           {
             anim = GAMEDIRECTORY.getFile(it.fileId);
             break;
@@ -756,7 +739,7 @@ void WoWModel::initAnimated(GameFile * f)
       else // else use file naming to get them
       {
         QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-        tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(animsWotLK.subAnimID, 2, 10, QChar('0'));
+        tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
         anim = GAMEDIRECTORY.getFile(tempname);
       }
       
@@ -1147,7 +1130,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     if (charModelDetails.closeRHand)
     {
       a = closeFistID;
-      t = anims[closeFistID].timeStart + 1;
+      t = 1;
     }
     else
     {
@@ -1164,7 +1147,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     if (charModelDetails.closeLHand)
     {
       a = closeFistID;
-      t = anims[closeFistID].timeStart + 1;
+      t = 1;
     }
     else
     {
@@ -1247,7 +1230,7 @@ void WoWModel::animate(ssize_t anim)
   size_t t = 0;
 
   ModelAnimation &a = anims[anim];
-  int tmax = (a.timeEnd - a.timeStart);
+  int tmax = a.length;
   if (tmax == 0)
     tmax = 1;
 
@@ -1255,7 +1238,6 @@ void WoWModel::animate(ssize_t anim)
   {
     t = globalTime;
     t %= tmax;
-    t += a.timeStart;
   }
   else
     t = animManager->GetFrame();

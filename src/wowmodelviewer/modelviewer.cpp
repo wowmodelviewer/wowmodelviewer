@@ -2465,7 +2465,7 @@ void ModelViewer::ModelInfo()
       else
         strName = wxT("???");
       xml << "      <animName>" << strName.c_str() << "</animName>" << endl;
-      xml << "      <length>" << m->anims[i].timeEnd << "</length>" << endl;
+      xml << "      <length>" << m->anims[i].length << "</length>" << endl;
       xml << "      <moveSpeed>" << m->anims[i].moveSpeed << "</moveSpeed>" << endl;
       xml << "      <flags>" << m->anims[i].flags << "</flags>" << endl;
       xml << "      <probability>" << m->anims[i].probability << "</probability>" << endl;

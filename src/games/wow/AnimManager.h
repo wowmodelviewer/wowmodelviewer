@@ -72,7 +72,7 @@ public:
   void SetSecondary(int id)
   {
     AnimIDSecondary = id;
-    FrameSecondary = anims[id].timeStart;
+    FrameSecondary = 0;
   }
   void ClearSecondary() { AnimIDSecondary = -1; }
   ssize_t GetSecondaryID() { return AnimIDSecondary; }
@@ -84,7 +84,7 @@ public:
   void SetMouth(int id)
   {
     AnimIDMouth = id;
-    FrameMouth = anims[id].timeStart;
+    FrameMouth = 0;
   }
   void ClearMouth() { AnimIDMouth = -1; }
   ssize_t GetMouthID() { return AnimIDMouth; }

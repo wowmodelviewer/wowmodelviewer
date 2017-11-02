@@ -344,9 +344,9 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    frameSlider->SetRange(g_selModel->anims[useanim].timeStart, g_selModel->anims[useanim].timeEnd - 1);
+    frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
     frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
-    frameSlider->SetValue(g_selModel->anims[useanim].timeStart);
+    frameSlider->SetValue(0);
     frameLabel->SetLabel(wxString("Frame: 0"));
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
@@ -1072,7 +1072,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        frameSlider->SetRange(g_selModel->anims[selectedAnim].timeStart, g_selModel->anims[selectedAnim].timeEnd);
+        frameSlider->SetRange(0, g_selModel->anims[selectedAnim].length);
         frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
       }
     }
@@ -1279,9 +1279,7 @@ void AnimControl::SetAnimFrame(size_t frame)
     return;
 
   g_selModel->animManager->SetFrame(frame);
-  
-  size_t frameNum = (frame - g_selModel->anims[g_selModel->currentAnim].timeStart);
 
-  frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frameNum));
+  frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
   frameSlider->SetValue((int)frame);
 }

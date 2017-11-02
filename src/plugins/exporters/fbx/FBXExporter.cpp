@@ -456,11 +456,11 @@ void FBXExporter::createAnimations()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
     anim_stack->AddMember(anim_layer);
 
-    uint32 timeInc = (cur_anim.timeEnd - cur_anim.timeStart)/60;
+    uint32 timeInc = cur_anim.length/60;
 
     FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
 
-    for(uint32 t = cur_anim.timeStart ; t < cur_anim.timeEnd ; t += timeInc)
+    for(uint32 t = 0 ; t < cur_anim.length ; t += timeInc)
     {
       FbxTime time;
       time.SetSecondDouble((float)t / 1000.0);
