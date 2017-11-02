@@ -31,6 +31,39 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
+struct AFID
+{
+  uint16 animId;
+  uint16 subAnimId;
+  uint32 fileId;
+};
+
+struct SKS1
+{
+  uint32 nGlobalSequences;
+  uint32 ofsGlobalSequences;
+  uint32 nAnimations;
+  uint32 ofsAnimations;
+  uint32 nAnimationLookup;
+  uint32 ofsAnimationLookup;
+};
+
+struct SKA1
+{
+  uint32 nAttachments;
+  uint32 ofsAttachments;
+  uint32 nAttachLookup;
+  uint32 ofsAttachLookup;
+};
+
+struct SKB1
+{
+  uint32 nBones;
+  uint32 ofsBones;
+  uint32 nKeyBoneLookup;
+  uint32 ofsKeyBoneLookup;
+};
+
 void WoWModel::dumpTextureStatus()
 {
   LOG_INFO << "-----------------------------------------";
@@ -482,8 +515,33 @@ void WoWModel::initCommon(GameFile * f)
     return;
   }
 
-  if (header.nGlobalSequences)
+  if (f->isChunked() && f->setChunk("SKID"))
   {
+    uint32 skelFileID;
+    f->read(&skelFileID, sizeof(skelFileID));
+    GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
+
+    if (skelFile->open())
+    {
+      if (skelFile->setChunk("SKS1"))
+      {
+        SKS1 sks1;
+        memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
+
+        if (sks1.nGlobalSequences > 0)
+        {
+          LOG_INFO << "sks1.nGlobalSequences" << sks1.nGlobalSequences;
+          globalSequences = new uint32[sks1.nGlobalSequences];
+          memcpy(globalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences, sks1.nGlobalSequences * sizeof(uint32));
+        }
+      }
+      skelFile->close();
+    }
+    f->setChunk("MD21");
+  }
+  else if (header.nGlobalSequences)
+  {
+    LOG_INFO << "header.nGlobalSequences" << header.nGlobalSequences;
     globalSequences = new uint32[header.nGlobalSequences];
     memcpy(globalSequences, (f->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
   }
@@ -605,29 +663,72 @@ void WoWModel::initCommon(GameFile * f)
   }
   */
 
-  // attachments
-  if (header.nAttachments)
+  if (f->isChunked() && f->setChunk("SKID"))
   {
-    ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f->getBuffer() + header.ofsAttachments);
-    for (size_t i = 0; i < header.nAttachments; i++)
-    {
-      ModelAttachment att;
-      att.model = this;
-      att.init(f, attachments[i], globalSequences);
-      atts.push_back(att);
-    }
-  }
+    uint32 skelFileID;
+    f->read(&skelFileID, sizeof(skelFileID));
+    GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
 
-  if (header.nAttachLookup)
-  {
-    int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
-    if (header.nAttachLookup > ATT_MAX)
-      LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
-    for (size_t i = 0; i < header.nAttachLookup; i++)
+    if (skelFile->open())
     {
-      if (i > ATT_MAX - 1)
-        break;
-      attLookup[i] = p[i];
+      if (skelFile->setChunk("SKA1"))
+      {
+        SKA1 ska1;
+        memcpy(&ska1, skelFile->getBuffer(), sizeof(SKA1));
+        header.nAttachments = ska1.nAttachments;
+        ModelAttachmentDef *attachments = (ModelAttachmentDef*)(skelFile->getBuffer() + ska1.ofsAttachments);
+        for (size_t i = 0; i < ska1.nAttachments; i++)
+        {
+          ModelAttachment att;
+          att.model = this;
+          att.init(skelFile, attachments[i], globalSequences);
+          atts.push_back(att);
+        }
+
+        header.nAttachLookup = ska1.nAttachLookup;
+        if (ska1.nAttachLookup > 0)
+        {
+          int16 *p = (int16*)(skelFile->getBuffer() + ska1.ofsAttachLookup);
+          if (ska1.nAttachLookup > ATT_MAX)
+            LOG_ERROR << "Model AttachLookup" << ska1.nAttachLookup << "over" << ATT_MAX;
+          for (size_t i = 0; i < ska1.nAttachLookup; i++)
+          {
+            if (i > ATT_MAX - 1)
+              break;
+            attLookup[i] = p[i];
+          }
+        }
+      }
+      skelFile->close();
+    }
+    f->setChunk("MD21");
+  }
+  else
+  {
+    // attachments
+    if (header.nAttachments)
+    {
+      ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f->getBuffer() + header.ofsAttachments);
+      for (size_t i = 0; i < header.nAttachments; i++)
+      {
+        ModelAttachment att;
+        att.model = this;
+        att.init(f, attachments[i], globalSequences);
+        atts.push_back(att);
+      }
+    }
+
+    if (header.nAttachLookup)
+    {
+      int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
+      if (header.nAttachLookup > ATT_MAX)
+        LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
+      for (size_t i = 0; i < header.nAttachLookup; i++)
+      {
+        if (i > ATT_MAX - 1)
+          break;
+        attLookup[i] = p[i];
+      }
     }
   }
 
@@ -690,17 +791,112 @@ void WoWModel::initStatic(GameFile * f)
   delete[] transparency; transparency = 0;
 }
 
-
-struct AFID
-{
-  uint16 animId;
-  uint16 subAnimId;
-  uint32 fileId;
-};
-
 void WoWModel::initAnimated(GameFile * f)
 {
-  if (header.nAnimations > 0)
+  if (f->isChunked() && f->setChunk("SKID"))
+  {
+    uint32 skelFileID;
+    f->read(&skelFileID, sizeof(skelFileID));
+    GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
+
+    if (skelFile->open())
+    {
+      vector<AFID> afids;
+
+      if (skelFile->setChunk("AFID"))
+      {
+        AFID afid;
+        while (!skelFile->isEof())
+        {
+          skelFile->read(&afid, sizeof(AFID));
+          if (afid.fileId != 0)
+            afids.push_back(afid);
+        }
+      }
+
+      if (skelFile->setChunk("SKS1"))
+      {
+        SKS1 sks1;
+        skelFile->read(&sks1, sizeof(sks1));
+        memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
+        anims = new ModelAnimation[sks1.nAnimations];
+
+        header.nAnimations = sks1.nAnimations;
+        for (size_t i = 0; i < sks1.nAnimations; i++)
+        {
+          memcpy(&(anims[i]), skelFile->getBuffer() + sks1.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+
+          GameFile * anim = 0;
+
+          // if we have animation file ids from AFID chunk, use them
+          if (afids.size() > 0)
+          {
+            for (auto it : afids)
+            {
+              if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
+              {
+                anim = GAMEDIRECTORY.getFile(it.fileId);
+                break;
+              }
+            }
+          }
+          else // else use file naming to get them
+          {
+            QString tempname = QString::fromStdString(modelname).replace(".m2", "");
+            tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
+            anim = GAMEDIRECTORY.getFile(tempname);
+          }
+
+          if (anim && anim->open() && anim->setChunk("AFSB"))
+          {
+            animfiles.push_back(anim);
+          }
+          else
+          {
+            animfiles.push_back(NULL);
+          }
+        }
+
+        // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
+        if (sks1.nAnimationLookup > 0)
+        {
+          animLookups = new int16[sks1.nAnimationLookup];
+          memcpy(animLookups, skelFile->getBuffer() + sks1.ofsAnimationLookup, sizeof(int16)*sks1.nAnimationLookup);
+        }
+
+        animManager = new AnimManager(anims);
+        animManager->model = this;
+
+        // init bones...
+        if (skelFile->setChunk("SKB1"))
+        {
+          SKB1 skb1;
+          skelFile->read(&skb1, sizeof(skb1));
+          memcpy(&skb1, skelFile->getBuffer(), sizeof(SKB1));
+          header.nBones = skb1.nBones;
+          bones = new Bone[skb1.nBones];
+          ModelBoneDef *mb = (ModelBoneDef*)(skelFile->getBuffer() + skb1.ofsBones);
+
+          for (size_t i = 0; i < skb1.nBones; i++)
+            bones[i].initV3(*skelFile, mb[i], globalSequences, animfiles);
+
+          // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
+          if (skb1.nKeyBoneLookup < BONE_MAX)
+          {
+            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
+          }
+          else
+          {
+            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
+            LOG_ERROR << "KeyBone number" << skb1.nKeyBoneLookup << "over" << BONE_MAX;
+          }
+        }
+      }
+      skelFile->close();
+    }
+    f->setChunk("MD21", false);
+  }
+  else if (header.nAnimations > 0)
   {
     vector<AFID> afids;
 
@@ -755,9 +951,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     animManager = new AnimManager(anims);
     animManager->model = this;
-  }
-
-  {
+ 
     // init bones...
     bones = new Bone[header.nBones];
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
@@ -775,6 +969,14 @@ void WoWModel::initAnimated(GameFile * f)
       memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
       LOG_ERROR << "KeyBone number" << header.nKeyBoneLookup << "over" << BONE_MAX;
     }
+
+    // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
+    if (header.nAnimationLookup > 0)
+    {
+      LOG_INFO << "header.nAnimationLookup" << header.nAnimationLookup;
+      animLookups = new int16[header.nAnimationLookup];
+      memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
+    }
   }
 
   // free MPQFile
@@ -785,13 +987,6 @@ void WoWModel::initAnimated(GameFile * f)
       if (animfiles[i] && (animfiles[i]->getSize() > 0))
         animfiles[i]->close();
     }
-  }
-
-  // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
-  if (header.nAnimationLookup > 0)
-  {
-    animLookups = new int16[header.nAnimationLookup];
-    memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
   }
 
   const size_t size = (origVertices.size() * sizeof(float));

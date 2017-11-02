@@ -30,6 +30,11 @@ std::vector<std::string> KNOWN_CHUNKS =
   "AFM2",
   "AFSA",
   "AFSB",
+  "SKL1",
+  "SKA1",
+  "SKB1",
+  "SKS1",
+  "SKPD"
   /*
   "MOHD",
   "MOTX",
