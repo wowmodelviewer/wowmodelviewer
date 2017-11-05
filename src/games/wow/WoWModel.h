@@ -83,7 +83,8 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void lightsOn(GLuint lbase);
   void lightsOff(GLuint lbase);
 
-  uint16 *boundTris;
+  std::vector<uint16> boundTris;
+  std::vector<Vec3D> bounds;
 
   void refreshMerging();
   std::set<WoWModel *> mergedModels;
@@ -108,7 +109,6 @@ public:
   ParticleSystem	*particleSystems;
   RibbonEmitter	*ribbons;
   ModelEvent		*events;
-  Vec3D *bounds;
   GameFile * gamefile;
 
   std::vector<uint> replacableParticleColorIDs;

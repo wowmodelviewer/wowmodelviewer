@@ -160,10 +160,7 @@ gamefile(file)
   for (size_t i = 0; i < BONE_MAX; i++)
     keyBoneLookup[i] = -1;
 
-
   dlist = 0;
-  bounds = 0;
-  boundTris = 0;
 
   hasCamera = false;
   hasParticles = false;
@@ -192,8 +189,6 @@ gamefile(file)
   animtime = 0;
   anim = 0;
   animManager = 0;
-  bounds = 0;
-  boundTris = 0;
   currentAnim = 0;
   colors = 0;
   globalSequences = 0;
@@ -230,8 +225,6 @@ WoWModel::~WoWModel()
       glDeleteTextures(1, &replaceTextures[1]);
 
       delete[] globalSequences; globalSequences = 0;
-      delete[] bounds; bounds = 0;
-      delete[] boundTris; boundTris = 0;
       delete animManager; animManager = 0;
 
       if (animated)
@@ -585,18 +578,15 @@ void WoWModel::initCommon(GameFile * f)
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    bounds = new Vec3D[header.nBoundingVertices];
     Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
-    for (size_t i = 0; i < header.nBoundingVertices; i++)
-    {
-      bounds[i] = fixCoordSystem(b[i]);
-    }
+    bounds.assign(b, b + header.nBoundingVertices * sizeof(Vec3D));
+    
+    for (uint i = 0; i < bounds.size(); i++)
+      bounds[i] = fixCoordSystem(bounds[i]);
   }
+
   if (header.nBoundingTriangles > 0)
-  {
-    boundTris = new uint16[header.nBoundingTriangles];
-    memcpy(boundTris, f->getBuffer() + header.ofsBoundingTriangles, header.nBoundingTriangles*sizeof(uint16));
-  }
+    boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles*sizeof(uint16));
 
   // textures
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
@@ -1656,10 +1646,10 @@ void WoWModel::drawBoundingVolume()
 {
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   glBegin(GL_TRIANGLES);
-  for (size_t i = 0; i < header.nBoundingTriangles; i++)
+  for (uint i = 0; i < boundTris.size(); i++)
   {
     size_t v = boundTris[i];
-    if (v < header.nBoundingVertices)
+    if (v < bounds.size())
       glVertex3fv(bounds[v]);
     else
       glVertex3f(0, 0, 0);
