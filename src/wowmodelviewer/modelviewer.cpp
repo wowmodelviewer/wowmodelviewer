@@ -2481,11 +2481,9 @@ void ModelViewer::ModelInfo()
   }
   xml << "  </Animations>" << endl;
 
-  xml << "  <AnimationLookups size=\"" << m->header.nAnimationLookup << "\">" << endl;
-  if (m->animLookups) {
-    for (size_t i = 0; i < m->header.nAnimationLookup; i++)
-      xml << "    <AnimationLookup id=\"" << i << "\">" << m->animLookups[i] << "</AnimationLookup>" << endl;
-  }
+  xml << "  <AnimationLookups size=\"" << m->animLookups.size() << "\">" << endl;
+  for (size_t i = 0; i < m->animLookups.size(); i++)
+    xml << "    <AnimationLookup id=\"" << i << "\">" << m->animLookups[i] << "</AnimationLookup>" << endl;
   xml << "  </AnimationLookups>" << endl;
 
   xml << "  <Bones size=\"" << m->bones.size() << "\">" << endl;

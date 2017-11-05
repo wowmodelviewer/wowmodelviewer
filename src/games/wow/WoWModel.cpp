@@ -191,7 +191,6 @@ gamefile(file)
 
   animtime = 0;
   anim = 0;
-  animLookups = 0;
   animManager = 0;
   bounds = 0;
   boundTris = 0;
@@ -255,7 +254,6 @@ WoWModel::~WoWModel()
 
         indices.clear();
         rawIndices.clear();
-        delete[] animLookups; animLookups = 0;
         origVertices.clear();
         rawVertices.clear();
 
@@ -856,10 +854,7 @@ void WoWModel::initAnimated(GameFile * f)
 
         // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
         if (sks1.nAnimationLookup > 0)
-        {
-          animLookups = new int16[sks1.nAnimationLookup];
-          memcpy(animLookups, skelFile->getBuffer() + sks1.ofsAnimationLookup, sizeof(int16)*sks1.nAnimationLookup);
-        }
+          animLookups.assign(skelFile->getBuffer() + sks1.ofsAnimationLookup, skelFile->getBuffer() + sks1.ofsAnimationLookup + sizeof(int16)*sks1.nAnimationLookup);
 
         animManager = new AnimManager(*this);
         
@@ -966,11 +961,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
     if (header.nAnimationLookup > 0)
-    {
-      LOG_INFO << "header.nAnimationLookup" << header.nAnimationLookup;
-      animLookups = new int16[header.nAnimationLookup];
-      memcpy(animLookups, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
-    }
+      animLookups.assign(f->getBuffer() + header.ofsAnimationLookup, f->getBuffer() + header.ofsAnimationLookup + sizeof(int16)*header.nAnimationLookup);
   }
 
   // free MPQFile
@@ -1263,7 +1254,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     */
     // Alfred 2009.07.23 use animLookups to speedup
-    if (header.nAnimationLookup >= ANIMATION_HANDSCLOSED && animLookups[ANIMATION_HANDSCLOSED] > 0) // closed fist
+    if (animLookups.size() >= ANIMATION_HANDSCLOSED && animLookups[ANIMATION_HANDSCLOSED] > 0) // closed fist
       closeFistID = animLookups[ANIMATION_HANDSCLOSED];
 
     // Animate key skeletal bones except the fingers which we do later.

@@ -933,7 +933,7 @@ void CharControl::OnUpdateItem(int type, int id)
       RefreshEquipment();
 
       // Alfred 2009.7.23 use animLookups to speed up
-      if (model->header.nAnimationLookup >= ANIMATION_MOUNT &&
+      if (model->animLookups.size() >= ANIMATION_MOUNT &&
           model->animLookups[ANIMATION_MOUNT] >= 0)
       {
         model->animManager->Stop();

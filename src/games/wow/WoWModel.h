@@ -173,7 +173,7 @@ public:
   // Bone & Animation data
   // ===============================
   std::vector<ModelAnimation> anims;
-  int16 *animLookups;
+  std::vector<int16> animLookups;
   AnimManager *animManager;
   std::vector<Bone> bones;
   std::vector<GameFile *> animfiles;
