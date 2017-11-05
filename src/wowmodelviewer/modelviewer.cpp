@@ -2489,32 +2489,31 @@ void ModelViewer::ModelInfo()
   }
   xml << "  </AnimationLookups>" << endl;
 
-  xml << "  <Bones size=\"" << m->header.nBones << "\">" << endl;
-  if (m->bones) {
-    for (size_t i = 0; i < m->header.nBones; i++) {
-      xml << "    <Bone id=\"" << i << "\">" << endl;
-      xml << "      <keyboneid>" << m->bones[i].boneDef.keyboneid << "</keyboneid>" << endl;
-      xml << "      <billboard>" << m->bones[i].billboard << "</billboard>" << endl;
-      xml << "      <parent>" << m->bones[i].boneDef.parent << "</parent>" << endl;
-      xml << "      <geoid>" << m->bones[i].boneDef.geoid << "</geoid>" << endl;
-      xml << "      <unknown>" << m->bones[i].boneDef.unknown << "</unknown>" << endl;
+  xml << "  <Bones size=\"" << m->bones.size() << "\">" << endl;
+  for (size_t i = 0; i < m->bones.size(); i++)
+  {
+    xml << "    <Bone id=\"" << i << "\">" << endl;
+    xml << "      <keyboneid>" << m->bones[i].boneDef.keyboneid << "</keyboneid>" << endl;
+    xml << "      <billboard>" << m->bones[i].billboard << "</billboard>" << endl;
+    xml << "      <parent>" << m->bones[i].boneDef.parent << "</parent>" << endl;
+    xml << "      <geoid>" << m->bones[i].boneDef.geoid << "</geoid>" << endl;
+    xml << "      <unknown>" << m->bones[i].boneDef.unknown << "</unknown>" << endl;
 #if 1 // too huge
-      // AB translation
-      xml << "      <trans>" << endl;
-      xml << m->bones[i].trans;
-      xml << "      </trans>" << endl;
-      // AB rotation
-      xml << "      <rot>" << endl;
-      xml << m->bones[i].rot;
-      xml << "      </rot>" << endl;
-      // AB scaling
-      xml << "      <scale>" << endl;
-      xml << m->bones[i].scale;
-      xml << "      </scale>" << endl;
+    // AB translation
+    xml << "      <trans>" << endl;
+    xml << m->bones[i].trans;
+    xml << "      </trans>" << endl;
+    // AB rotation
+    xml << "      <rot>" << endl;
+    xml << m->bones[i].rot;
+    xml << "      </rot>" << endl;
+    // AB scaling
+    xml << "      <scale>" << endl;
+    xml << m->bones[i].scale;
+    xml << "      </scale>" << endl;
 #endif
-      xml << "      <pivot>" << m->bones[i].boneDef.pivot << "</pivot>" << endl;
-      xml << "    </Bone>" << endl;
-    }
+    xml << "      <pivot>" << m->bones[i].boneDef.pivot << "</pivot>" << endl;
+    xml << "    </Bone>" << endl;
   }
   xml << "  </Bones>" << endl;
 

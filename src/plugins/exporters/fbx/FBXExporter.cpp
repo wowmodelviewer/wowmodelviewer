@@ -306,7 +306,7 @@ void FBXExporter::createSkeleton()
   m_p_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
 
   std::vector<FbxSkeleton::EType> bone_types;
-  size_t num_of_bones = m_p_model->header.nBones;
+  size_t num_of_bones = m_p_model->bones.size();
 
   // Set bone type.
   std::vector<bool> has_children;

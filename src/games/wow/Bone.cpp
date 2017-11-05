@@ -11,7 +11,7 @@
 
 #include "logger/logger.h"
 
-void Bone::calcMatrix(Bone *allbones, ssize_t anim, size_t time, bool rotate)
+void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate)
 {
 	if (calc)
 		return;

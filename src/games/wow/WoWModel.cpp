@@ -194,7 +194,6 @@ gamefile(file)
   anims = 0;
   animLookups = 0;
   animManager = 0;
-  bones = 0;
   bounds = 0;
   boundTris = 0;
   currentAnim = 0;
@@ -262,7 +261,6 @@ WoWModel::~WoWModel()
         origVertices.clear();
         rawVertices.clear();
 
-        delete[] bones; bones = 0;
         delete[] texAnims; texAnims = 0;
         delete[] colors; colors = 0;
         delete[] transparency; transparency = 0;
@@ -391,10 +389,12 @@ bool WoWModel::isAnimated(GameFile * f)
   }
 
   if (animGeometry)
+  {
     animBones = true;
+  }
   else
   {
-    for (size_t i = 0; i < header.nBones; i++)
+    for (uint i = 0; i < bones.size() ; i++)
     {
       ModelBoneDef &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type)
@@ -873,10 +873,9 @@ void WoWModel::initAnimated(GameFile * f)
           SKB1 skb1;
           skelFile->read(&skb1, sizeof(skb1));
           memcpy(&skb1, skelFile->getBuffer(), sizeof(SKB1));
-          header.nBones = skb1.nBones;
-          bones = new Bone[skb1.nBones];
+          bones.resize(skb1.nBones);
           ModelBoneDef *mb = (ModelBoneDef*)(skelFile->getBuffer() + skb1.ofsBones);
-
+          
           for (size_t i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*skelFile, mb[i], globalSequences, animfiles);
 
@@ -953,10 +952,10 @@ void WoWModel::initAnimated(GameFile * f)
     animManager->model = this;
  
     // init bones...
-    bones = new Bone[header.nBones];
+    bones.resize(header.nBones);
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
-
-    for (size_t i = 0; i < header.nBones; i++)
+   
+    for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*f, mb[i], globalSequences, animfiles);
 
     // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
@@ -1243,9 +1242,9 @@ void WoWModel::setLOD(GameFile * f, int index)
 void WoWModel::calcBones(ssize_t anim, size_t time)
 {
   // Reset all bones to 'false' which means they haven't been animated yet.
-  for (size_t i = 0; i < header.nBones; i++)
+  for (auto & it : bones)
   {
-    bones[i].calc = false;
+    it.calc = false;
   }
 
   // Character specific bone animation calculations.
@@ -1414,9 +1413,9 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
   }
 
   // Animate everything thats left with the 'default' animation
-  for (size_t i = 0; i < header.nBones; i++)
+  for (auto & it : bones)
   {
-    bones[i].calcMatrix(bones, anim, time);
+    it.calcMatrix(bones, anim, time);
   }
 }
 
@@ -1640,13 +1639,13 @@ void WoWModel::drawBones()
 {
   glDisable(GL_DEPTH_TEST);
   glBegin(GL_LINES);
-  for (size_t i = 0; i < header.nBones; i++)
+  for (auto it : bones)
   {
     //for (size_t i=30; i<40; i++) {
-    if (bones[i].parent != -1)
+    if (it.parent != -1)
     {
-      glVertex3fv(bones[i].transPivot);
-      glVertex3fv(bones[bones[i].parent].transPivot);
+      glVertex3fv(it.transPivot);
+      glVertex3fv(bones[it.parent].transPivot);
     }
   }
   glEnd();
@@ -1962,7 +1961,7 @@ void WoWModel::refreshMerging()
     for (uint i = 0; i < nbBonesInNewModel; ++i)
     {
       Vec3D pivot = modelsIt->bones[i].pivot;
-      for (uint b = 0; b < header.nBones; ++b)
+      for (uint b = 0; b < bones.size(); ++b)
       {
         Vec3D p = bones[b].pivot;
         if ((p == pivot) && 

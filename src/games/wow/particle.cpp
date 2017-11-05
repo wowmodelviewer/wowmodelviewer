@@ -69,7 +69,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
   //order = mta.s2;
   order = ParticleType > 0 ? -1 : 0;
 
-  parent = model->bones + mta.bone;
+  parent = &(model->bones[mta.bone]);
 
   // transform = flags & 1024;
 
@@ -732,7 +732,7 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, uint32 *globa
   above.init(mta.above, f, globals);
   below.init(mta.below, f, globals);
 
-  parent = model->bones + mta.bone;
+  parent = &(model->bones[mta.bone]);
   int *texlist = (int*)(f->getBuffer() + mta.ofsTextures);
   // just use the first texture for now; most models I've checked only had one
   texture = model->getGLTexture(texlist[0]);

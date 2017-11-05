@@ -10,24 +10,26 @@
 #include <QString>
 
 // Our files
-#include "Model.h"
+
 #include "animated.h"
 #include "AnimManager.h"
+#include "Bone.h"
 #include "CharDetails.h"
 #include "CharTexture.h"
 #include "displayable.h"
 #include "matrix.h"
-#include "modelheaders.h"
+#include "Model.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
+#include "modelheaders.h"
 #include "particle.h"
 #include "TabardDetails.h"
 #include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
+
 #include "metaclasses/Container.h"
 
-class Bone;
 class CASCFile;
 class GameFile;
 struct ModelColor;
@@ -173,7 +175,7 @@ public:
   ModelAnimation *anims;
   int16 *animLookups;
   AnimManager *animManager;
-  Bone *bones;
+  std::vector<Bone> bones;
   std::vector<GameFile *> animfiles;
 
   size_t currentAnim;
