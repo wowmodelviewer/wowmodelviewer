@@ -21,7 +21,8 @@
 #    define _MODELCAMERA_API_
 #endif
 
-struct _MODELCAMERA_API_ ModelCamera {
+struct _MODELCAMERA_API_ ModelCamera 
+{
 	bool ok;
 
 	Vec3D pos, target;
@@ -29,8 +30,8 @@ struct _MODELCAMERA_API_ ModelCamera {
 	Animated<Vec3D> tPos, tTarget;
 	Animated<float> rot;
 
-	void init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::string modelname);
-	void initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, std::string modelname);
+  void init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname);
+  void initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname);
 	void setup(size_t time=0);
 
 	ModelCamera():ok(false), pos(Vec3D()), target(Vec3D()),

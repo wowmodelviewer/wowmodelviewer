@@ -15,7 +15,7 @@
 
 
 
-void ModelAttachment::init(GameFile *f, ModelAttachmentDef &mad, uint32 *global)
+void ModelAttachment::init(ModelAttachmentDef &mad)
 {
 	pos = fixCoordSystem(mad.pos);
 	bone = mad.bone;

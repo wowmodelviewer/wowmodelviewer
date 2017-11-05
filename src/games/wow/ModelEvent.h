@@ -12,10 +12,11 @@
 
 class GameFile;
 
-class ModelEvent {
+class ModelEvent 
+{
 	ModelEventDef def;
 public:
-	void init(GameFile *, ModelEventDef &mad, uint32 *global);
+	void init(ModelEventDef &med);
 
 	friend std::ostream& operator<<(std::ostream& out, ModelEvent& v)
 	{

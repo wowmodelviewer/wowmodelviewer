@@ -20,7 +20,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
       return interpolate<T>((life-mid) / (1.0f-mid),b,c);
 }
 
-void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, uint32 *globals)
+void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> & globals)
 {
   flags = mta.flags;
   multitexture = flags & MODELPARTICLE_FLAGS_MULTITEXTURE;
@@ -725,7 +725,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 
 
 
-void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, uint32 *globals)
+void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<uint32> & globals)
 {
   color.init(mta.color, f, globals);
   opacity.init(mta.opacity, f, globals);

@@ -191,7 +191,6 @@ gamefile(file)
   animManager = 0;
   currentAnim = 0;
   colors = 0;
-  globalSequences = 0;
   lights = 0;
   particleSystems = 0;
   ribbons = 0;
@@ -223,8 +222,6 @@ WoWModel::~WoWModel()
     {
       // For character models, the texture isn't loaded into the texture manager, manually remove it
       glDeleteTextures(1, &replaceTextures[1]);
-
-      delete[] globalSequences; globalSequences = 0;
       delete animManager; animManager = 0;
 
       if (animated)
@@ -518,11 +515,7 @@ void WoWModel::initCommon(GameFile * f)
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
 
         if (sks1.nGlobalSequences > 0)
-        {
-          LOG_INFO << "sks1.nGlobalSequences" << sks1.nGlobalSequences;
-          globalSequences = new uint32[sks1.nGlobalSequences];
-          memcpy(globalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences, sks1.nGlobalSequences * sizeof(uint32));
-        }
+          globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences * sizeof(uint32));
       }
       skelFile->close();
     }
@@ -530,9 +523,7 @@ void WoWModel::initCommon(GameFile * f)
   }
   else if (header.nGlobalSequences)
   {
-    LOG_INFO << "header.nGlobalSequences" << header.nGlobalSequences;
-    globalSequences = new uint32[header.nGlobalSequences];
-    memcpy(globalSequences, (f->getBuffer() + header.ofsGlobalSequences), header.nGlobalSequences * sizeof(uint32));
+    globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences * sizeof(uint32));
   }
 
   if (forceAnim)
@@ -667,7 +658,7 @@ void WoWModel::initCommon(GameFile * f)
         {
           ModelAttachment att;
           att.model = this;
-          att.init(skelFile, attachments[i], globalSequences);
+          att.init(attachments[i]);
           atts.push_back(att);
         }
 
@@ -699,7 +690,7 @@ void WoWModel::initCommon(GameFile * f)
       {
         ModelAttachment att;
         att.model = this;
-        att.init(f, attachments[i], globalSequences);
+        att.init(attachments[i]);
         atts.push_back(att);
       }
     }
@@ -1007,7 +998,7 @@ void WoWModel::initAnimated(GameFile * f)
     events = new ModelEvent[header.nEvents];
     for (size_t i = 0; i < header.nEvents; i++)
     {
-      events[i].init(f, edefs[i], globalSequences);
+      events[i].init(edefs[i]);
     }
   }
 

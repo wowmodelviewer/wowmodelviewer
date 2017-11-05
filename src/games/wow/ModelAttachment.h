@@ -14,13 +14,14 @@
 class GameFile;
 class WoWModel;
 
-struct ModelAttachment {
+struct ModelAttachment 
+{
 	int id;
 	Vec3D pos;
 	int bone;
 	WoWModel *model;
 
-	void init(GameFile *f, ModelAttachmentDef &mad, uint32 *global);
+  void init(ModelAttachmentDef &mad);
 	void setup();
 	void setupParticle();
 };

@@ -133,7 +133,7 @@ class Animated {
 public:
 
 	ssize_t type, seq;
-	uint32 *globals;
+	std::vector<uint32> globals;
 	std::vector<size_t> times[MAX_ANIMATED];
 	std::vector<T> data[MAX_ANIMATED];
 	// for nonlinear interpolations:
@@ -150,10 +150,8 @@ public:
 	T getValue(ssize_t anim, size_t time)
 	{
 		// obtain a time value and a data range
-		if (seq>-1) {
+		if (seq > 0 && seq < (int)globals.size()) {
 			// TODO
-			if ((!globals)||(!globals[seq]))
-				return T();
 			if (globals[seq]==0) 
 				time = 0;
 			else 
@@ -221,17 +219,11 @@ public:
 
 	}
 
-	void init(AnimationBlock &b, GameFile * f, uint32 *gs)
+	void init(AnimationBlock &b, GameFile * f, std::vector<uint32> & gs)
 	{
 		globals = gs;
 		type = b.type;
 		seq = b.seq;
-		if (seq!=-1) {
-			if (!gs)
-				return;
-			//assert(gs);
-		}
-
 
 		// times
 		if (b.nTimes != b.nKeys)
@@ -279,16 +271,11 @@ public:
 		}
 	}
 
-	void init(AnimationBlock &b, GameFile & f, uint32 *gs, std::vector<GameFile *> & animfiles)
+  void init(AnimationBlock &b, GameFile & f, std::vector<uint32> & gs, std::vector<GameFile *> & animfiles)
 	{
 		globals = gs;
 		type = b.type;
 		seq = b.seq;
-		if (seq!=-1) {
-			if (!gs)
-				return;
-			//assert(gs);
-		}
 
 		// times
 		if (b.nTimes != b.nKeys)

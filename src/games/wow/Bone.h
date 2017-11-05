@@ -36,7 +36,7 @@ public:
 
 	bool calc;
 	void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
-	void initV3(GameFile & f, ModelBoneDef &b, uint32 *global, std::vector<GameFile *> &animfiles);
+  void initV3(GameFile & f, ModelBoneDef &b, std::vector<uint32> & global, std::vector<GameFile *> &animfiles);
 };
 
 

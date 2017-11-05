@@ -7,7 +7,7 @@
 
 #include "ModelEvent.h"
 
-void ModelEvent::init(GameFile *, ModelEventDef &me, uint32 *globals)
+void ModelEvent::init(ModelEventDef &me)
 {
 	def = me;
 }

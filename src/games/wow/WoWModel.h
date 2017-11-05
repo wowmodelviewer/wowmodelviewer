@@ -102,7 +102,6 @@ public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
   TextureAnim		*texAnims;
-  uint32			*globalSequences;
   ModelColor		*colors;
   ModelTransparency *transparency;
   ModelLight		*lights;
@@ -111,6 +110,7 @@ public:
   ModelEvent		*events;
   GameFile * gamefile;
 
+  std::vector<uint32> globalSequences;
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;
 

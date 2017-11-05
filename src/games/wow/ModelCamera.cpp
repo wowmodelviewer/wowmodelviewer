@@ -13,7 +13,7 @@
 #include "GL/glew.h"
 
 
-void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::string modelname)
+void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)
 {
 	LOG_INFO << "Using original Camera Model Definitions.";
 	ok = true;
@@ -29,7 +29,7 @@ void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, uint32 *global, std::s
 	tTarget.fix(fixCoordSystem);
 }
 
-void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, uint32 *global, std::string modelname)
+void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname)
 {
 	LOG_INFO << "Using version 10 Camera Model Definitions.";
 	ok = true;

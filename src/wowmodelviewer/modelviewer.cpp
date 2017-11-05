@@ -2447,8 +2447,8 @@ void ModelViewer::ModelInfo()
 
   xml << "  <SkeletonAndAnimation>" << endl;
 
-  xml << "  <GlobalSequences size=\"" << m->header.nGlobalSequences << "\">" << endl;
-  for (size_t i = 0; i < m->header.nGlobalSequences; i++)
+  xml << "  <GlobalSequences size=\"" << m->globalSequences.size() << "\">" << endl;
+  for (size_t i = 0; i < m->globalSequences.size(); i++)
     xml << "<Sequence>" << m->globalSequences[i] << "</Sequence>" << endl;
   xml << "  </GlobalSequences>" << endl;
 
