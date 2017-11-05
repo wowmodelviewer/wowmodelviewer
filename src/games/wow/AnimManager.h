@@ -37,7 +37,7 @@ class WoWModel;
 
 class _ANIMMANAGER_API_ AnimManager
 {
-  ModelAnimation *anims;
+  WoWModel & model;
 
   bool Paused;
   bool AnimParticles;
@@ -62,7 +62,7 @@ class _ANIMMANAGER_API_ AnimManager
   float mouthSpeed;
 
 public:
-  AnimManager(ModelAnimation *anim);
+  AnimManager(WoWModel & m);
   ~AnimManager();
   void SetCount(int count);
   void AddAnim(unsigned int id, short loop); // Adds an animation to our array.
@@ -120,7 +120,6 @@ public:
   size_t GetAnim() { return animList[PlayIndex].AnimID; }
 
   void ForceModelUpdate(float dt);
-  WoWModel *model;
 };
 
 

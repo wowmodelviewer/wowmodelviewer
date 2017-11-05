@@ -10,22 +10,22 @@
 
 #include "wow_enums.h"
 
-AnimManager::AnimManager(ModelAnimation *anim)
+AnimManager::AnimManager(WoWModel & m)
+  : model(m)
 {
   AnimIDSecondary = -1;
   SecondaryCount = UPPER_BODY_BONES;
   AnimIDMouth = -1;
-  anims = anim;
   Count = 1;
   PlayIndex = 0;
   CurLoop = 0;
   animList[0].AnimID = 0;
   animList[0].Loops = 0;
 
-  if (anims != NULL)
+  if (model.anims.size() > 0)
   {
     Frame = 0;
-    TotalFrames = anims[0].length;
+    TotalFrames = model.anims[0].length;
   }
   else
   {
@@ -39,7 +39,6 @@ AnimManager::AnimManager(ModelAnimation *anim)
 
 AnimManager::~AnimManager()
 {
-  anims = NULL;
 }
 
 void AnimManager::SetCount(int count)
@@ -72,7 +71,7 @@ void AnimManager::SetAnim(short index, unsigned int id, short loops)
     Count = 1;
     PlayIndex = index;
     Frame = 0;
-    TotalFrames = anims[id].length;
+    TotalFrames = model.anims[id].length;
   }
 
   if (index+1 > Count)
@@ -150,7 +149,7 @@ void AnimManager::Prev()
     CurLoop++;
   }
 
-  Frame = anims[animList[PlayIndex].AnimID].length;
+  Frame = model.anims[animList[PlayIndex].AnimID].length;
   TotalFrames = GetFrameCount();
 }
 
@@ -166,8 +165,8 @@ int AnimManager::Tick(int time)
   {
     FrameMouth += (time*mouthSpeed);
 
-    if (FrameMouth >= anims[AnimIDMouth].length)
-      FrameMouth -= anims[AnimIDMouth].length;
+    if (FrameMouth >= model.anims[AnimIDMouth].length)
+      FrameMouth -= model.anims[AnimIDMouth].length;
   }
 
   // animate our second (upper body) animation
@@ -175,11 +174,11 @@ int AnimManager::Tick(int time)
   {
     FrameSecondary += (time*Speed);
 
-    if (FrameSecondary >= anims[AnimIDSecondary].length)
-      FrameSecondary -= anims[AnimIDSecondary].length;
+    if (FrameSecondary >= model.anims[AnimIDSecondary].length)
+      FrameSecondary -= model.anims[AnimIDSecondary].length;
   }
 
-  if (Frame >= anims[animList[PlayIndex].AnimID].length)
+  if (Frame >= model.anims[animList[PlayIndex].AnimID].length)
   {
     Next();
     return 1;
@@ -190,7 +189,7 @@ int AnimManager::Tick(int time)
 
 size_t AnimManager::GetFrameCount()
 {
-  return anims[animList[PlayIndex].AnimID].length;
+  return model.anims[animList[PlayIndex].AnimID].length;
 }
 
 
@@ -198,7 +197,7 @@ void AnimManager::NextFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  TimeDiff = (anims[id].length / 60);
+  TimeDiff = (model.anims[id].length / 60);
   Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
@@ -207,7 +206,7 @@ void AnimManager::PrevFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  TimeDiff = (anims[id].length / 60) * -1;
+  TimeDiff = (model.anims[id].length / 60) * -1;
   Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
@@ -219,7 +218,7 @@ void AnimManager::SetFrame(size_t f)  // Only called by the animation slider, or
   ssize_t id = animList[PlayIndex].AnimID;
 
   // ideal frame interval:
-  int frameInterval = anims[id].length / 60;
+  int frameInterval = model.anims[id].length / 60;
 
   uint i = 1;
 
@@ -254,8 +253,8 @@ void AnimManager::Clear()
 
 void AnimManager::ForceModelUpdate(float dt)
 {
-  model->update(dt);
-  model->drawParticles();
-  model->draw();
+  model.update(dt);
+  model.drawParticles();
+  model.draw();
 }
 

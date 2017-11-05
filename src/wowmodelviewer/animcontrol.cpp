@@ -295,7 +295,7 @@ void AnimControl::UpdateModel(WoWModel *m)
    */
 
   // Animation stuff
-  if (m->animated && m->anims)
+  if (m->animated && m->anims.size() > 0)
   {
     wxString strName;
     wxString strStand;
@@ -303,7 +303,7 @@ void AnimControl::UpdateModel(WoWModel *m)
 
     map<int, string> animsVal = m->getAnimsMap();
 
-    for (size_t i=0; i<m->header.nAnimations; i++)
+    for (size_t i=0; i<m->anims.size(); i++)
     {
       std::stringstream label;
       label << animsVal[m->anims[i].animID];

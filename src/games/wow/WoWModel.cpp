@@ -191,7 +191,6 @@ gamefile(file)
 
   animtime = 0;
   anim = 0;
-  anims = 0;
   animLookups = 0;
   animManager = 0;
   bounds = 0;
@@ -256,7 +255,6 @@ WoWModel::~WoWModel()
 
         indices.clear();
         rawIndices.clear();
-        delete[] anims; anims = 0;
         delete[] animLookups; animLookups = 0;
         origVertices.clear();
         rawVertices.clear();
@@ -819,10 +817,9 @@ void WoWModel::initAnimated(GameFile * f)
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        anims = new ModelAnimation[sks1.nAnimations];
+        anims.resize(sks1.nAnimations);
 
-        header.nAnimations = sks1.nAnimations;
-        for (size_t i = 0; i < sks1.nAnimations; i++)
+        for (uint i = 0; i < anims.size(); i++)
         {
           memcpy(&(anims[i]), skelFile->getBuffer() + sks1.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
 
@@ -864,9 +861,8 @@ void WoWModel::initAnimated(GameFile * f)
           memcpy(animLookups, skelFile->getBuffer() + sks1.ofsAnimationLookup, sizeof(int16)*sks1.nAnimationLookup);
         }
 
-        animManager = new AnimManager(anims);
-        animManager->model = this;
-
+        animManager = new AnimManager(*this);
+        
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
@@ -911,9 +907,9 @@ void WoWModel::initAnimated(GameFile * f)
       f->setChunk("MD21", false);
     }
 
-    anims = new ModelAnimation[header.nAnimations];
+    anims.resize(header.nAnimations);
 
-    for (size_t i = 0; i < header.nAnimations; i++)
+    for (uint i = 0; i < anims.size(); i++)
     {
       memcpy(&(anims[i]), f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
 
@@ -948,8 +944,7 @@ void WoWModel::initAnimated(GameFile * f)
       }
     }
 
-    animManager = new AnimManager(anims);
-    animManager->model = this;
+    animManager = new AnimManager(*this);
  
     // init bones...
     bones.resize(header.nBones);
@@ -979,13 +974,10 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // free MPQFile
-  if (header.nAnimations > 0)
+  for (auto it : animfiles)
   {
-    for (size_t i = 0; i < header.nAnimations; i++)
-    {
-      if (animfiles[i] && (animfiles[i]->getSize() > 0))
-        animfiles[i]->close();
-    }
+    if (it != 0)
+      it->close();
   }
 
   const size_t size = (origVertices.size() * sizeof(float));
@@ -1742,13 +1734,13 @@ void WoWModel::updateTextureList(GameFile * tex, int special)
 std::map<int, std::string> WoWModel::getAnimsMap()
 {
   std::map<int, std::string> result;
-  if (animated && anims)
+  if (animated && anims.size() > 0)
   {
     QString query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
-    for (unsigned int i = 0; i < header.nAnimations; i++)
+    for (unsigned int i = 0; i < anims.size(); i++)
     {
       query += QString::number(anims[i].animID);
-      if (i < header.nAnimations - 1)
+      if (i < anims.size() - 1)
         query += ",";
       else
         query += ")";

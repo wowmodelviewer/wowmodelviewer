@@ -2452,33 +2452,32 @@ void ModelViewer::ModelInfo()
     xml << "<Sequence>" << m->globalSequences[i] << "</Sequence>" << endl;
   xml << "  </GlobalSequences>" << endl;
 
-  xml << "  <Animations size=\"" << m->header.nAnimations << "\">" << endl;
-  if (m->anims) {
-    for (size_t i = 0; i < m->header.nAnimations; i++) {
-      xml << "    <Animation id=\"" << i << "\">" << endl;
-      xml << "      <animID>" << m->anims[i].animID << "</animID>" << endl;
-      wxString strName;
-      QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m->anims[i].animID);
-      sqlResult anim = GAMEDATABASE.sqlQuery(query);
-      if (anim.valid && !anim.empty())
-        strName = anim.values[0][0].toStdString().c_str();
-      else
-        strName = wxT("???");
-      xml << "      <animName>" << strName.c_str() << "</animName>" << endl;
-      xml << "      <length>" << m->anims[i].length << "</length>" << endl;
-      xml << "      <moveSpeed>" << m->anims[i].moveSpeed << "</moveSpeed>" << endl;
-      xml << "      <flags>" << m->anims[i].flags << "</flags>" << endl;
-      xml << "      <probability>" << m->anims[i].probability << "</probability>" << endl;
-      xml << "      <d1>" << m->anims[i].d1 << "</d1>" << endl;
-      xml << "      <d2>" << m->anims[i].d2 << "</d2>" << endl;
-      xml << "      <playSpeed>" << m->anims[i].playSpeed << "</playSpeed>" << endl;
-      xml << "      <boxA>" << m->anims[i].boundSphere.min << "</boxA>" << endl;
-      xml << "      <boxB>" << m->anims[i].boundSphere.max << "</boxB>" << endl;
-      xml << "      <rad>" << m->anims[i].boundSphere.radius << "</rad>" << endl;
-      xml << "      <NextAnimation>" << m->anims[i].NextAnimation << "</NextAnimation>" << endl;
-      xml << "      <Index>" << m->anims[i].Index << "</Index>" << endl;
-      xml << "    </Animation>" << endl;
-    }
+  xml << "  <Animations size=\"" << m->anims.size() << "\">" << endl;
+  for (size_t i = 0; i < m->anims.size(); i++)
+  {
+    xml << "    <Animation id=\"" << i << "\">" << endl;
+    xml << "      <animID>" << m->anims[i].animID << "</animID>" << endl;
+    wxString strName;
+    QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m->anims[i].animID);
+    sqlResult anim = GAMEDATABASE.sqlQuery(query);
+    if (anim.valid && !anim.empty())
+      strName = anim.values[0][0].toStdString().c_str();
+    else
+      strName = wxT("???");
+    xml << "      <animName>" << strName.c_str() << "</animName>" << endl;
+    xml << "      <length>" << m->anims[i].length << "</length>" << endl;
+    xml << "      <moveSpeed>" << m->anims[i].moveSpeed << "</moveSpeed>" << endl;
+    xml << "      <flags>" << m->anims[i].flags << "</flags>" << endl;
+    xml << "      <probability>" << m->anims[i].probability << "</probability>" << endl;
+    xml << "      <d1>" << m->anims[i].d1 << "</d1>" << endl;
+    xml << "      <d2>" << m->anims[i].d2 << "</d2>" << endl;
+    xml << "      <playSpeed>" << m->anims[i].playSpeed << "</playSpeed>" << endl;
+    xml << "      <boxA>" << m->anims[i].boundSphere.min << "</boxA>" << endl;
+    xml << "      <boxB>" << m->anims[i].boundSphere.max << "</boxB>" << endl;
+    xml << "      <rad>" << m->anims[i].boundSphere.radius << "</rad>" << endl;
+    xml << "      <NextAnimation>" << m->anims[i].NextAnimation << "</NextAnimation>" << endl;
+    xml << "      <Index>" << m->anims[i].Index << "</Index>" << endl;
+    xml << "    </Animation>" << endl;
   }
   xml << "  </Animations>" << endl;
 
@@ -2943,7 +2942,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         ids.resize(animsMap.size());
         unsigned int i = 0;
 
-        for (size_t i = 0; i < canvas->model()->header.nAnimations; i++)
+        for (size_t i = 0; i < canvas->model()->anims.size(); i++)
         {
           wxString animName = animsMap[canvas->model()->anims[i].animID];
           animName << " [";

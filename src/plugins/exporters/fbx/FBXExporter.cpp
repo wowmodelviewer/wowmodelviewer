@@ -436,7 +436,7 @@ void FBXExporter::createAnimations()
   }
 
   std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
-  for (unsigned int anim=0; anim<m_p_model->header.nAnimations; anim++)
+  for (unsigned int anim=0; anim<m_p_model->anims.size(); anim++)
   {
     ModelAnimation cur_anim = m_p_model->anims[anim];
 
