@@ -28,6 +28,7 @@ class TextureGroup
     // For particle colour replacements:
     int particleColInd; // ID for ParticleColor.dbc
     int PCRIndex;  // index into PCRList - list of particle color replacement values
+    int creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
 
     TextureGroup() : base(0), count(0)
     {
@@ -37,6 +38,7 @@ class TextureGroup
       }
       particleColInd = 0;
       PCRIndex = -1;
+      creatureGeosetData = 0;
       definedTexture = false;
     }
 
@@ -51,6 +53,7 @@ class TextureGroup
       count = grp.count;
       particleColInd = grp.particleColInd;
       PCRIndex = grp.PCRIndex;
+      creatureGeosetData = grp.creatureGeosetData;
       definedTexture = grp.definedTexture;
     }
 
@@ -67,6 +70,8 @@ class TextureGroup
       }
       if (particleColInd < grp.particleColInd)
         return true;
+      if (creatureGeosetData < grp.creatureGeosetData)
+        return true;
       return false;
     }
 
@@ -78,6 +83,8 @@ class TextureGroup
           return false;
       }
       if (particleColInd != grp.particleColInd)
+        return false;
+      if (creatureGeosetData != grp.creatureGeosetData)
         return false;
       return true;
     }

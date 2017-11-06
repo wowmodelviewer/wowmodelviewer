@@ -487,7 +487,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   LOG_INFO << "Searching skins for" << m->itemName();
 
   QString query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
-                          "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                          "CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
                           "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                           "WHERE CreatureModelData.FileID = %1")
                           .arg( m->gamefile->fileDataId());
@@ -514,6 +514,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.definedTexture = true;
       grp.count = count;
+      grp.creatureGeosetData = r.values[i][5].toInt();
       int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
@@ -1200,6 +1201,30 @@ void AnimControl::SetSkin(int num)
     g_selModel->replaceParticleColors = false;
     return;
   }
+
+  // creatureGeosetData defines geosets that are enabled only when specific displayIDs
+  // are selected from the menu. The position in the hex integer represents the group
+  // number, and the value of the four bits at that position represents the geoset. So
+  // 0x00200000 means geoset 2 of group 600, therefore 602.
+  int cgd = grp->creatureGeosetData;
+  if (cgd > 0)
+  {
+    /*
+      Extract geoset data from cgd and set geosets accordingly.
+    */
+    for (int i = 0; i < 8; i++)
+    {
+      int geo;
+      geo = (cgd >> (i * 4)) & 0x0F;
+      if (geo > 0)
+      {
+        // NOT YET IMPLEMENTED. TO DO : Set geoset on model, for group = i+1.
+        // Do we also need to hide geosets from the same group that weren't selected (in case they were previously)?
+        // Unsure if there are already model functions that handle all this.
+      }
+    }
+  }
+
   for (size_t i=0; i<grp->count; i++)
   {
     wxString texname;

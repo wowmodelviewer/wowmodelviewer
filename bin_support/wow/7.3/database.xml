@@ -75,10 +75,11 @@
   </table>
   <table name="CreatureDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ModelID" pos="8" />
+    <field type="ushort" name="ModelID" pos="8" />
     <field type="uint" name="ExtendedDisplayInfoID" pos="15" />
     <field type="uint" name="Texture" arraySize="3" pos="18"/>
-    <field type="uint" name="ParticleColorID" pos="15" commonData="yes" />
+    <field type="ushort" name="ParticleColorID" pos="15" commonData="yes" />
+    <field type="uint" name="CreatureGeosetData" pos="16" commonData="yes" />
   </table>
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
