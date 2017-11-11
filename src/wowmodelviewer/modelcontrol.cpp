@@ -379,6 +379,7 @@ void ModelControl::Update()
   // enum CharGeosets
 
   std::map <size_t,wxTreeItemId> geosetGroupsMap;
+  GeosetTreeItemIds.clear();
   clbGeosets->DeleteAllItems();
   clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
   wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
@@ -399,6 +400,7 @@ void ModelControl::Update()
     wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i]->id % 100), model->geosets[i]->id), -1, -1, data);
     if (model->isGeosetDisplayed(i) == true)
       clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
+    GeosetTreeItemIds.push_back(item);
   }
 
   //for (size_t i=0; i<model->geosets.size(); i++)
@@ -447,6 +449,20 @@ void ModelControl::Update()
   PC13E->SetColour(wxColour(pcr[2][2][0]*255, pcr[2][2][1]*255, pcr[2][2][2]*255));
   UpdatePCRTexts();
   TogglePCRFields();
+}
+
+void ModelControl::UpdateGeosetSelection()
+{
+  // Sets background colour on geoset tree based on whether geoset is currently displayed on model
+  if (!GeosetTreeItemIds.size())
+    return;
+  for (auto it = begin (GeosetTreeItemIds); it != end (GeosetTreeItemIds); ++it)
+  {
+    GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(*it);
+    size_t id = data->geosetId;
+    clbGeosets->SetItemBackgroundColour(*it,
+                                        (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
+  }
 }
 
 void ModelControl::TogglePCRFields()

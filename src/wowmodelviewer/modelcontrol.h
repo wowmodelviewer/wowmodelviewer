@@ -51,6 +51,8 @@ class ModelControl: public wxWindow
   wxStaticText *PC13SLabel, *PC13MLabel, *PC13ELabel;
   wxStaticText *NoPC, *PCHint;
 
+  std::vector<wxTreeItemId> GeosetTreeItemIds;  // track items added to clbGeosets 
+
   // List of models in the scene.
   //std::vector<Model*> models;
   std::vector<Attachment*> attachments;
@@ -67,6 +69,7 @@ public:
 
   void UpdateModel(Attachment *a);
   void Update();
+  void UpdateGeosetSelection();
   void RefreshModel(Attachment *root);
   void OnCheck(wxCommandEvent &event);
   void OnCombo(wxCommandEvent &event);

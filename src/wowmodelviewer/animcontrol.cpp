@@ -1202,12 +1202,11 @@ void AnimControl::SetSkin(int num)
     return;
   }
 
-  // creatureGeosetData defines geosets that are enabled only when specific displayIDs
-  // are selected from the menu. The position in the hex integer represents the group
-  // number, and the value of the four bits at that position represents the geoset. So
-  // 0x00200000 means geoset 2 of group 600, therefore 602.
+  // creatureGeosetData defines geosets that are enabled only when
+  // specific displayIDs are selected from the menu.
   int cgd = grp->creatureGeosetData;
   g_selModel->setCreatureGeosetData(cgd);
+  g_modelViewer->modelControl->UpdateGeosetSelection();
 
   for (size_t i=0; i<grp->count; i++)
   {
