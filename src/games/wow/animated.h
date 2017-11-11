@@ -150,8 +150,10 @@ public:
 	T getValue(ssize_t anim, size_t time)
 	{
 		// obtain a time value and a data range
-		if (seq > 0 && seq < (int)globals.size()) {
+		if (seq >= 0 && seq < (int)globals.size()) {
 			// TODO
+      if (!globals[seq])
+        return T();
 			if (globals[seq]==0) 
 				time = 0;
 			else 

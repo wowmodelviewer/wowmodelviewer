@@ -516,7 +516,7 @@ void WoWModel::initCommon(GameFile * f)
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
 
         if (sks1.nGlobalSequences > 0)
-          globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences * sizeof(uint32));
+          globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
       }
       skelFile->close();
     }
@@ -524,7 +524,7 @@ void WoWModel::initCommon(GameFile * f)
   }
   else if (header.nGlobalSequences)
   {
-    globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences * sizeof(uint32));
+    globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
   }
 
   if (forceAnim)
@@ -571,14 +571,14 @@ void WoWModel::initCommon(GameFile * f)
   if (header.nBoundingVertices > 0)
   {
     Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
-    bounds.assign(b, b + header.nBoundingVertices * sizeof(Vec3D));
+    bounds.assign(b, b + header.nBoundingVertices);
     
     for (uint i = 0; i < bounds.size(); i++)
       bounds[i] = fixCoordSystem(bounds[i]);
   }
 
   if (header.nBoundingTriangles > 0)
-    boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles*sizeof(uint16));
+    boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles);
 
   // textures
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
@@ -836,7 +836,7 @@ void WoWModel::initAnimated(GameFile * f)
 
         // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
         if (sks1.nAnimationLookup > 0)
-          animLookups.assign(skelFile->getBuffer() + sks1.ofsAnimationLookup, skelFile->getBuffer() + sks1.ofsAnimationLookup + sizeof(int16)*sks1.nAnimationLookup);
+          animLookups.assign(skelFile->getBuffer() + sks1.ofsAnimationLookup, skelFile->getBuffer() + sks1.ofsAnimationLookup + sks1.nAnimationLookup);
 
         animManager = new AnimManager(*this);
         
@@ -943,7 +943,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
     if (header.nAnimationLookup > 0)
-      animLookups.assign(f->getBuffer() + header.ofsAnimationLookup, f->getBuffer() + header.ofsAnimationLookup + sizeof(int16)*header.nAnimationLookup);
+      animLookups.assign(f->getBuffer() + header.ofsAnimationLookup, f->getBuffer() + header.ofsAnimationLookup + header.nAnimationLookup);
   }
 
   // free MPQFile
