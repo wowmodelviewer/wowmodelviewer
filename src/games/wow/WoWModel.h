@@ -222,7 +222,7 @@ public:
   CharDetails cd;
   TabardDetails td;
   ModelHeader header;
-
+  int creatureGeosetData;
   bool bSheathe;
 
   friend class ModelRenderPass;
@@ -244,6 +244,7 @@ public:
   void showGeoset(uint geosetindex, bool value);
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
+  void setCreatureGeosetData(int cgd);
 
   void mergeModel(QString & name);
   void mergeModel(WoWModel * model);

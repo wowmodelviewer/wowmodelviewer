@@ -166,6 +166,7 @@ gamefile(file)
   hasParticles = false;
   replaceParticleColors = false;
   replacableParticleColorIDs.clear();
+  creatureGeosetData = 0;
   isWMO = false;
   isMount = false;
 
@@ -1844,13 +1845,32 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
-  for (uint i = 0; i < rawGeosets.size(); i++)
+  int a = (int)group * 100;
+  int b = ((int)group + 1) * 100;
+  int geosetID = a + val;
+  for (uint i = 0; i < geosets.size(); i++)
   {
     int id = geosets[i]->id;
-    int a = (int)group * 100, b = ((int)group + 1) * 100;
     if (id > a && id < b)
-      showGeoset(i, (id == (a + val)));
+      showGeoset(i, (id == geosetID));
   }
+}
+
+void WoWModel::setCreatureGeosetData(int cgd)
+{
+  // Hide geosets that were set by old creatureGeosetData:
+  if (creatureGeosetData)
+    restoreRawGeosets();
+
+  // Extract geoset data from cgd and set geosets accordingly.
+  for (int i = 0; i < 8; i++)
+  {
+    int geo;
+    geo = (cgd >> (i * 4)) & 0x0F;
+    if (geo > 0)
+      setGeosetGroupDisplay((CharGeosets)(i+1), geo);
+  }
+  creatureGeosetData = cgd;
 }
 
 

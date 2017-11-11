@@ -1207,23 +1207,7 @@ void AnimControl::SetSkin(int num)
   // number, and the value of the four bits at that position represents the geoset. So
   // 0x00200000 means geoset 2 of group 600, therefore 602.
   int cgd = grp->creatureGeosetData;
-  if (cgd > 0)
-  {
-    /*
-      Extract geoset data from cgd and set geosets accordingly.
-    */
-    for (int i = 0; i < 8; i++)
-    {
-      int geo;
-      geo = (cgd >> (i * 4)) & 0x0F;
-      if (geo > 0)
-      {
-        // NOT YET IMPLEMENTED. TO DO : Set geoset on model, for group = i+1.
-        // Do we also need to hide geosets from the same group that weren't selected (in case they were previously)?
-        // Unsure if there are already model functions that handle all this.
-      }
-    }
-  }
+  g_selModel->setCreatureGeosetData(cgd);
 
   for (size_t i=0; i<grp->count; i++)
   {
