@@ -1848,7 +1848,11 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
   int a = (int)group * 100;
   int b = ((int)group + 1) * 100;
   int geosetID = a + val;
-  for (uint i = 0; i < geosets.size(); i++)
+
+  // This loop must be done only on first geosets (original ones) in case of merged models
+  // This is why rawGeosets.size() is used as a stop criteria even if we are looping over
+  // geosets member
+  for (uint i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;
     if (id > a && id < b)
