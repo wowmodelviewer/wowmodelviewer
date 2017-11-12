@@ -189,7 +189,6 @@ gamefile(file)
   anim = 0;
   animManager = 0;
   currentAnim = 0;
-  events = 0;
   modelType = MT_NORMAL;
   attachment = 0;
 
@@ -245,8 +244,7 @@ WoWModel::~WoWModel()
         lights.clear();
         particleSystems.clear();
         ribbons.clear();
-        
-        delete[] events; events = 0;
+        events.clear();
 
         for (auto it : passes)
           delete it;
@@ -986,11 +984,9 @@ void WoWModel::initAnimated(GameFile * f)
   if (header.nEvents)
   {
     ModelEventDef *edefs = (ModelEventDef *)(f->getBuffer() + header.ofsEvents);
-    events = new ModelEvent[header.nEvents];
-    for (size_t i = 0; i < header.nEvents; i++)
-    {
+    events.resize(header.nEvents);
+    for (uint i = 0; i < events.size(); i++)
       events[i].init(edefs[i]);
-    }
   }
 
   // particle systems

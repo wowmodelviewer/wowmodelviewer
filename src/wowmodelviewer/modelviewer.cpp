@@ -2737,13 +2737,12 @@ void ModelViewer::ModelInfo()
   //	}
   //	xml << "  </AttachLookups>" << endl;
 
-  xml << "	<Events size=\"" << m->header.nEvents << "\">" << endl;
-  if (m->events) {
-    for (size_t i = 0; i < m->header.nEvents; i++) {
-      xml << "	  <Event id=\"" << i << "\">" << endl;
-      xml << m->events[i];
-      xml << "	  </Event>" << endl;
-    }
+  xml << "	<Events size=\"" << m->events.size() << "\">" << endl;
+  for (size_t i = 0; i < m->events.size(); i++)
+  {
+    xml << "	  <Event id=\"" << i << "\">" << endl;
+    xml << m->events[i];
+    xml << "	  </Event>" << endl;
   }
   xml << "	</Events>" << endl;
 
