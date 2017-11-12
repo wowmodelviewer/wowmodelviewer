@@ -208,16 +208,14 @@ bool ModelRenderPass::init()
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
   }
 
-  /*
-  @TODO : fix texanim copy for dh
-  if (texanim != -1)
+  if (texanim != -1 && 
+      texanim < (int16)model->texAnims.size())
   {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
 
     model->texAnims[texanim].setup(texanim);
   }
-  */
 
   // color
   glColor4fv(ocol);
