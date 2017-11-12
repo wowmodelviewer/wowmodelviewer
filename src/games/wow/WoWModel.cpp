@@ -189,7 +189,6 @@ gamefile(file)
   anim = 0;
   animManager = 0;
   currentAnim = 0;
-  lights = 0;
   particleSystems = 0;
   ribbons = 0;
   events = 0;
@@ -245,8 +244,8 @@ WoWModel::~WoWModel()
         texAnims.clear();
         colors.clear();
         transparency.clear();
+        lights.clear();
         
-        delete[] lights; lights = 0;
         delete[] events; events = 0;
         delete[] particleSystems; particleSystems = 0;
         delete[] ribbons; ribbons = 0;
@@ -1060,12 +1059,10 @@ void WoWModel::initAnimated(GameFile * f)
   // init lights
   if (header.nLights)
   {
-    lights = new ModelLight[header.nLights];
+    lights.resize(header.nLights);
     ModelLightDef *lDefs = (ModelLightDef*)(f->getBuffer() + header.ofsLights);
-    for (size_t i = 0; i < header.nLights; i++)
-    {
+    for (uint i = 0; i < lights.size(); i++)
       lights[i].init(f, lDefs[i], globalSequences);
-    }
   }
 
   animcalc = false;
@@ -1444,7 +1441,7 @@ void WoWModel::animate(ssize_t anim)
     }
   }
 
-  for (size_t i = 0; i < header.nLights; i++)
+  for (uint i = 0; i < lights.size(); i++)
   {
     if (lights[i].parent >= 0)
     {
@@ -1564,14 +1561,14 @@ inline void WoWModel::draw()
 void WoWModel::lightsOn(GLuint lbase)
 {
   // setup lights
-  for (size_t i = 0, l = lbase; i < header.nLights; i++)
+  for (uint i = 0, l = lbase; i < lights.size(); i++)
     lights[i].setup(animtime, (GLuint)l++);
 }
 
 // These aren't really needed in the model viewer.. only wowmapviewer
 void WoWModel::lightsOff(GLuint lbase)
 {
-  for (size_t i = 0, l = lbase; i < header.nLights; i++)
+  for (uint i = 0, l = lbase; i < lights.size(); i++)
     glDisable((GLenum)l++);
 }
 
