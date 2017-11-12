@@ -2681,24 +2681,23 @@ void ModelViewer::ModelInfo()
 
   xml << "  <Effects>" << endl;
 
-  xml << "	<TexAnims size=\"" << m->header.nTexAnims << "\">" << endl;
-  if (m->texAnims) {
-    for (size_t i = 0; i < m->header.nTexAnims; i++) {
-      xml << "	  <TexAnim id=\"" << i << "\">" << endl;
-      // AB trans
-      xml << "    <trans>" << endl;
-      xml << m->texAnims[i].trans;
-      xml << "    </trans>" << endl;
-      // AB rot
-      xml << "    <rot>" << endl;
-      xml << m->texAnims[i].rot;
-      xml << "    </rot>" << endl;
-      // AB scale
-      xml << "    <scale>" << endl;
-      xml << m->texAnims[i].scale;
-      xml << "    </scale>" << endl;
-      xml << "	  </TexAnim>" << endl;
-    }
+  xml << "	<TexAnims size=\"" << m->texAnims.size() << "\">" << endl;
+  for (uint i = 0; i < m->texAnims.size(); i++)
+  {
+    xml << "	  <TexAnim id=\"" << i << "\">" << endl;
+    // AB trans
+    xml << "    <trans>" << endl;
+    xml << m->texAnims[i].trans;
+    xml << "    </trans>" << endl;
+    // AB rot
+    xml << "    <rot>" << endl;
+    xml << m->texAnims[i].rot;
+    xml << "    </rot>" << endl;
+    // AB scale
+    xml << "    <scale>" << endl;
+    xml << m->texAnims[i].scale;
+    xml << "    </scale>" << endl;
+    xml << "	  </TexAnim>" << endl;
   }
   xml << "	</TexAnims>" << endl;
 

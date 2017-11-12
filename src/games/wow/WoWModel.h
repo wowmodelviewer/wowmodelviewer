@@ -24,6 +24,7 @@
 #include "modelheaders.h"
 #include "particle.h"
 #include "TabardDetails.h"
+#include "TextureAnim.h"
 #include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
@@ -37,7 +38,6 @@ class ModelEvent;
 struct ModelLight;
 class ModelRenderPass;
 struct ModelTransparency;
-class TextureAnim;
 
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -101,7 +101,6 @@ public:
   bool animGeometry, animTextures, animBones;
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
-  TextureAnim		*texAnims;
   ModelColor		*colors;
   ModelTransparency *transparency;
   ModelLight		*lights;
@@ -110,6 +109,7 @@ public:
   ModelEvent		*events;
   GameFile * gamefile;
 
+  std::vector<TextureAnim> texAnims;
   std::vector<uint32> globalSequences;
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;

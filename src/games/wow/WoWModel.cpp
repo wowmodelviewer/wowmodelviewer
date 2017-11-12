@@ -6,7 +6,6 @@
 
 #include "Attachment.h"
 #include "GlobalSettings.h"
-#include "Bone.h"
 #include "CASCFile.h"
 #include "WoWDatabase.h"
 #include "Game.h"
@@ -16,7 +15,6 @@
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
-#include "TextureAnim.h"
 #include "WoWDatabase.h"
 
 #include "logger/Logger.h"
@@ -195,7 +193,6 @@ gamefile(file)
   lights = 0;
   particleSystems = 0;
   ribbons = 0;
-  texAnims = 0;
   transparency = 0;
   events = 0;
   modelType = MT_NORMAL;
@@ -247,8 +244,8 @@ WoWModel::~WoWModel()
         rawIndices.clear();
         origVertices.clear();
         rawVertices.clear();
+        texAnims.clear();
 
-        delete[] texAnims; texAnims = 0;
         delete[] colors; colors = 0;
         delete[] transparency; transparency = 0;
         delete[] lights; lights = 0;
@@ -987,9 +984,10 @@ void WoWModel::initAnimated(GameFile * f)
 
   if (animTextures)
   {
-    texAnims = new TextureAnim[header.nTexAnims];
+    texAnims.resize(header.nTexAnims);
     ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
-    for (size_t i = 0; i < header.nTexAnims; i++)
+                                                                 
+    for (uint i = 0; i < texAnims.size(); i++)
       texAnims[i].init(f, ta[i], globalSequences);
   }
 
@@ -1474,10 +1472,8 @@ void WoWModel::animate(ssize_t anim)
 
   if (animTextures)
   {
-    for (size_t i = 0; i < header.nTexAnims; i++)
-    {
-      texAnims[i].calc(anim, t);
-    }
+    for (auto & it : texAnims)
+      it.calc(anim, t);
   }
 }
 
