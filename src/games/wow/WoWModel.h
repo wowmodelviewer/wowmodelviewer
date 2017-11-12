@@ -97,23 +97,31 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   void restoreRawGeosets();
 
-public:
-  bool animGeometry, animTextures, animBones;
-  bool model24500; // flag for build 24500 model changes to anim chunking and other things
-
-  GameFile * gamefile;
-
+  std::vector<uint32> globalSequences;
+  std::vector<ParticleSystem> particleSystems;
+  std::vector<RibbonEmitter> ribbons;
   std::vector<TextureAnim> texAnims;
   std::vector<ModelColor> colors;
   std::vector<ModelTransparency> transparency;
   std::vector<ModelLight> lights;
-  std::vector<ParticleSystem> particleSystems;
-  std::vector<RibbonEmitter> ribbons;
   std::vector<ModelEvent> events;
 
-  std::vector<uint32> globalSequences;
+  bool animGeometry, animTextures, animBones;
+
+  std::vector<GameFile *> animfiles;
+
+public:
+  bool model24500; // flag for build 24500 model changes to anim chunking and other things
+
+  GameFile * gamefile;
+
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;
+
+  uint nbLights() const
+  {
+    return lights.size();
+  }
 
   // Start, Mid and End colours, for cases where the model's particle colours are
   // overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
@@ -177,7 +185,6 @@ public:
   std::vector<int16> animLookups;
   AnimManager *animManager;
   std::vector<Bone> bones;
-  std::vector<GameFile *> animfiles;
 
   size_t currentAnim;
   bool animcalc;
@@ -259,6 +266,8 @@ public:
   void dumpTextureStatus();
 
   friend _WOWMODEL_API_ std::ostream& operator<<(std::ostream& out, const WoWModel& m);
+
+  friend class ModelRenderPass; // to allow access to rendering elements (texAnims, etc.)
 };
 
 

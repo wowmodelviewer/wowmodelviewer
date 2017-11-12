@@ -943,7 +943,7 @@ inline void ModelCanvas::RenderModel()
 	if (model() && (lightType==LIGHT_MODEL_ONLY)) {
 		Vec4D la;
 
-		if (model()->lights.size() > 0) {
+		if (model()->nbLights() > 0) {
 			la = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
 		} else {
 			la = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
