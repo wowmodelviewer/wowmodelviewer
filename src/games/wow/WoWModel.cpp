@@ -192,7 +192,6 @@ gamefile(file)
   lights = 0;
   particleSystems = 0;
   ribbons = 0;
-  transparency = 0;
   events = 0;
   modelType = MT_NORMAL;
   attachment = 0;
@@ -245,8 +244,8 @@ WoWModel::~WoWModel()
         rawVertices.clear();
         texAnims.clear();
         colors.clear();
-
-        delete[] transparency; transparency = 0;
+        transparency.clear();
+        
         delete[] lights; lights = 0;
         delete[] events; events = 0;
         delete[] particleSystems; particleSystems = 0;
@@ -719,9 +718,9 @@ void WoWModel::initCommon(GameFile * f)
   // init transparency
   if (header.nTransparency)
   {
-    transparency = new ModelTransparency[header.nTransparency];
+    transparency.resize(header.nTransparency);
     ModelTransDef *trDefs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i < header.nTransparency; i++)
+    for (uint i = 0; i < header.nTransparency; i++)
       transparency[i].init(f, trDefs[i], globalSequences);
   }
 
@@ -760,8 +759,6 @@ void WoWModel::initStatic(GameFile * f)
   delete[] vertices; vertices = 0;
   delete[] normals; normals = 0;
   indices.clear();
-
-  delete[] transparency; transparency = 0;
 }
 
 void WoWModel::initAnimated(GameFile * f)

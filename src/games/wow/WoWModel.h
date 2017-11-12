@@ -23,6 +23,7 @@
 #include "ModelCamera.h"
 #include "ModelColor.h"
 #include "modelheaders.h"
+#include "ModelTransparency.h"
 #include "particle.h"
 #include "TabardDetails.h"
 #include "TextureAnim.h"
@@ -37,7 +38,6 @@ class GameFile;
 class ModelEvent;
 struct ModelLight;
 class ModelRenderPass;
-struct ModelTransparency;
 
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -101,7 +101,6 @@ public:
   bool animGeometry, animTextures, animBones;
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
-  ModelTransparency *transparency;
   ModelLight		*lights;
   ParticleSystem	*particleSystems;
   RibbonEmitter	*ribbons;
@@ -110,6 +109,7 @@ public:
 
   std::vector<TextureAnim> texAnims;
   std::vector<ModelColor> colors;
+  std::vector<ModelTransparency> transparency;
 
   std::vector<uint32> globalSequences;
   std::vector<uint> replacableParticleColorIDs;

@@ -2640,16 +2640,15 @@ void ModelViewer::ModelInfo()
   }
   xml << "	</Colors>" << endl;
 
-  xml << "	<Transparency size=\"" << m->header.nTransparency << "\">" << endl;
-  if (m->transparency) {
-    for (size_t i = 0; i < m->header.nTransparency; i++) {
-      xml << "    <Tran id=\"" << i << "\">" << endl;
-      // AB trans
-      xml << "    <trans>" << endl;
-      xml << m->transparency[i].trans;
-      xml << "    </trans>" << endl;
-      xml << "    </Tran>" << endl;
-    }
+  xml << "	<Transparency size=\"" << m->transparency.size() << "\">" << endl;
+  for (uint i = 0; i < m->transparency.size(); i++)
+  {
+    xml << "    <Tran id=\"" << i << "\">" << endl;
+    // AB trans
+    xml << "    <trans>" << endl;
+    xml << m->transparency[i].trans;
+    xml << "    </trans>" << endl;
+    xml << "    </Tran>" << endl;
   }
   xml << "	</Transparency>" << endl;
 
