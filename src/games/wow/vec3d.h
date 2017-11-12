@@ -154,7 +154,7 @@ public:
 		return in;
 	}
 
-	friend std::ostream& operator<<(std::ostream& out, Vec3D& v)
+	friend std::ostream& operator<<(std::ostream& out, const Vec3D& v)
 	{
 		out << "(" << v.x << ", " << v.y << ", " << v.z << ")";
 		return out;

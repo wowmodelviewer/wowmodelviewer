@@ -18,7 +18,7 @@ class ModelEvent
 public:
 	void init(ModelEventDef &med);
 
-	friend std::ostream& operator<<(std::ostream& out, ModelEvent& v)
+	friend std::ostream& operator<<(std::ostream& out, const ModelEvent& v)
 	{
 		out << "		<id>" << v.def.id[0] << v.def.id[1] << v.def.id[2] << v.def.id[3] << "</id>" << std::endl;
 		out << "		<dbid>" << v.def.dbid << "</dbid>" << std::endl;

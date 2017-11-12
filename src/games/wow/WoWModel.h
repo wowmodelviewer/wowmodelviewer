@@ -255,9 +255,10 @@ public:
   void refresh();
 
   QString getNameForTex(uint16 tex);
-  GLuint getGLTexture(uint16 tex);
+  GLuint getGLTexture(uint16 tex) const;
   void dumpTextureStatus();
 
+  friend _WOWMODEL_API_ std::ostream& operator<<(std::ostream& out, const WoWModel& m);
 };
 
 

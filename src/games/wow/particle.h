@@ -133,7 +133,7 @@ public:
   friend class PlaneParticleEmitter;
   friend class SphereParticleEmitter;
   int BlendValueForMode(int mode);
-  friend std::ostream& operator<<(std::ostream& out, ParticleSystem& v)
+  friend std::ostream& operator<<(std::ostream& out, const ParticleSystem& v)
   {
     out << "    <colors>" << v.colors[0] << "</colors>" << std::endl;
     out << "    <colors>" << v.colors[1] << "</colors>" << std::endl;

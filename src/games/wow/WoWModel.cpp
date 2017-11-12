@@ -2417,7 +2417,7 @@ QString WoWModel::getNameForTex(uint16 tex)
     return TEXTUREMANAGER.get(getGLTexture(tex));
 }
 
-GLuint WoWModel::getGLTexture(uint16 tex)
+GLuint WoWModel::getGLTexture(uint16 tex) const
 {
   if (tex >= specialTextures.size())
     return ModelRenderPass::INVALID_TEX;
@@ -2460,4 +2460,407 @@ void WoWModel::restoreRawGeosets()
     geosets[i]->display = it;
     i++;
   }
+}
+
+std::ostream& operator<<(std::ostream& out, const WoWModel& m)
+{
+  out << "<m2>" << endl;
+  out << "  <info>" << endl;
+  out << "    <modelname>" << m.modelname.c_str() << "</modelname>" << endl;
+  out << "  </info>" << endl;
+  out << "  <header>" << endl;
+  //	out << "    <id>" << m.header.id << "</id>" << endl;
+  out << "    <nameLength>" << m.header.nameLength << "</nameLength>" << endl;
+  out << "    <nameOfs>" << m.header.nameOfs << "</nameOfs>" << endl;
+  //	out << "    <name>" << f.getBuffer()+m.header.nameOfs << "</name>" << endl; // @TODO
+  out << "    <GlobalModelFlags>" << m.header.GlobalModelFlags << "</GlobalModelFlags>" << endl;
+  out << "    <nGlobalSequences>" << m.header.nGlobalSequences << "</nGlobalSequences>" << endl;
+  out << "    <ofsGlobalSequences>" << m.header.ofsGlobalSequences << "</ofsGlobalSequences>" << endl;
+  out << "    <nAnimations>" << m.header.nAnimations << "</nAnimations>" << endl;
+  out << "    <ofsAnimations>" << m.header.ofsAnimations << "</ofsAnimations>" << endl;
+  out << "    <nAnimationLookup>" << m.header.nAnimationLookup << "</nAnimationLookup>" << endl;
+  out << "    <ofsAnimationLookup>" << m.header.ofsAnimationLookup << "</ofsAnimationLookup>" << endl;
+  out << "    <nBones>" << m.header.nBones << "</nBones>" << endl;
+  out << "    <ofsBones>" << m.header.ofsBones << "</ofsBones>" << endl;
+  out << "    <nKeyBoneLookup>" << m.header.nKeyBoneLookup << "</nKeyBoneLookup>" << endl;
+  out << "    <ofsKeyBoneLookup>" << m.header.ofsKeyBoneLookup << "</ofsKeyBoneLookup>" << endl;
+  out << "    <nVertices>" << m.header.nVertices << "</nVertices>" << endl;
+  out << "    <ofsVertices>" << m.header.ofsVertices << "</ofsVertices>" << endl;
+  out << "    <nViews>" << m.header.nViews << "</nViews>" << endl;
+  out << "    <lodname>" << m.lodname.c_str() << "</lodname>" << endl;
+  out << "    <nColors>" << m.header.nColors << "</nColors>" << endl;
+  out << "    <ofsColors>" << m.header.ofsColors << "</ofsColors>" << endl;
+  out << "    <nTextures>" << m.header.nTextures << "</nTextures>" << endl;
+  out << "    <ofsTextures>" << m.header.ofsTextures << "</ofsTextures>" << endl;
+  out << "    <nTransparency>" << m.header.nTransparency << "</nTransparency>" << endl;
+  out << "    <ofsTransparency>" << m.header.ofsTransparency << "</ofsTransparency>" << endl;
+  out << "    <nTexAnims>" << m.header.nTexAnims << "</nTexAnims>" << endl;
+  out << "    <ofsTexAnims>" << m.header.ofsTexAnims << "</ofsTexAnims>" << endl;
+  out << "    <nTexReplace>" << m.header.nTexReplace << "</nTexReplace>" << endl;
+  out << "    <ofsTexReplace>" << m.header.ofsTexReplace << "</ofsTexReplace>" << endl;
+  out << "    <nTexFlags>" << m.header.nTexFlags << "</nTexFlags>" << endl;
+  out << "    <ofsTexFlags>" << m.header.ofsTexFlags << "</ofsTexFlags>" << endl;
+  out << "    <nBoneLookup>" << m.header.nBoneLookup << "</nBoneLookup>" << endl;
+  out << "    <ofsBoneLookup>" << m.header.ofsBoneLookup << "</ofsBoneLookup>" << endl;
+  out << "    <nTexLookup>" << m.header.nTexLookup << "</nTexLookup>" << endl;
+  out << "    <ofsTexLookup>" << m.header.ofsTexLookup << "</ofsTexLookup>" << endl;
+  out << "    <nTexUnitLookup>" << m.header.nTexUnitLookup << "</nTexUnitLookup>" << endl;
+  out << "    <ofsTexUnitLookup>" << m.header.ofsTexUnitLookup << "</ofsTexUnitLookup>" << endl;
+  out << "    <nTransparencyLookup>" << m.header.nTransparencyLookup << "</nTransparencyLookup>" << endl;
+  out << "    <ofsTransparencyLookup>" << m.header.ofsTransparencyLookup << "</ofsTransparencyLookup>" << endl;
+  out << "    <nTexAnimLookup>" << m.header.nTexAnimLookup << "</nTexAnimLookup>" << endl;
+  out << "    <ofsTexAnimLookup>" << m.header.ofsTexAnimLookup << "</ofsTexAnimLookup>" << endl;
+  out << "    <collisionSphere>" << endl;
+  out << "      <min>" << m.header.collisionSphere.min << "</min>" << endl;
+  out << "      <max>" << m.header.collisionSphere.max << "</max>" << endl;
+  out << "      <radius>" << m.header.collisionSphere.radius << "</radius>" << endl;
+  out << "    </collisionSphere>" << endl;
+  out << "    <boundSphere>" << endl;
+  out << "      <min>" << m.header.boundSphere.min << "</min>" << endl;
+  out << "      <max>" << m.header.boundSphere.max << "</max>" << endl;
+  out << "      <radius>" << m.header.boundSphere.radius << "</radius>" << endl;
+  out << "    </boundSphere>" << endl;
+  out << "    <nBoundingTriangles>" << m.header.nBoundingTriangles << "</nBoundingTriangles>" << endl;
+  out << "    <ofsBoundingTriangles>" << m.header.ofsBoundingTriangles << "</ofsBoundingTriangles>" << endl;
+  out << "    <nBoundingVertices>" << m.header.nBoundingVertices << "</nBoundingVertices>" << endl;
+  out << "    <ofsBoundingVertices>" << m.header.ofsBoundingVertices << "</ofsBoundingVertices>" << endl;
+  out << "    <nBoundingNormals>" << m.header.nBoundingNormals << "</nBoundingNormals>" << endl;
+  out << "    <ofsBoundingNormals>" << m.header.ofsBoundingNormals << "</ofsBoundingNormals>" << endl;
+  out << "    <nAttachments>" << m.header.nAttachments << "</nAttachments>" << endl;
+  out << "    <ofsAttachments>" << m.header.ofsAttachments << "</ofsAttachments>" << endl;
+  out << "    <nAttachLookup>" << m.header.nAttachLookup << "</nAttachLookup>" << endl;
+  out << "    <ofsAttachLookup>" << m.header.ofsAttachLookup << "</ofsAttachLookup>" << endl;
+  out << "    <nEvents>" << m.header.nEvents << "</nEvents>" << endl;
+  out << "    <ofsEvents>" << m.header.ofsEvents << "</ofsEvents>" << endl;
+  out << "    <nLights>" << m.header.nLights << "</nLights>" << endl;
+  out << "    <ofsLights>" << m.header.ofsLights << "</ofsLights>" << endl;
+  out << "    <nCameras>" << m.header.nCameras << "</nCameras>" << endl;
+  out << "    <ofsCameras>" << m.header.ofsCameras << "</ofsCameras>" << endl;
+  out << "    <nCameraLookup>" << m.header.nCameraLookup << "</nCameraLookup>" << endl;
+  out << "    <ofsCameraLookup>" << m.header.ofsCameraLookup << "</ofsCameraLookup>" << endl;
+  out << "    <nRibbonEmitters>" << m.header.nRibbonEmitters << "</nRibbonEmitters>" << endl;
+  out << "    <ofsRibbonEmitters>" << m.header.ofsRibbonEmitters << "</ofsRibbonEmitters>" << endl;
+  out << "    <nParticleEmitters>" << m.header.nParticleEmitters << "</nParticleEmitters>" << endl;
+  out << "    <ofsParticleEmitters>" << m.header.ofsParticleEmitters << "</ofsParticleEmitters>" << endl;
+  out << "  </header>" << endl;
+
+  out << "  <SkeletonAndAnimation>" << endl;
+
+  out << "  <GlobalSequences size=\"" << m.globalSequences.size() << "\">" << endl;
+  for (size_t i = 0; i < m.globalSequences.size(); i++)
+    out << "<Sequence>" << m.globalSequences[i] << "</Sequence>" << endl;
+  out << "  </GlobalSequences>" << endl;
+
+  out << "  <Animations size=\"" << m.anims.size() << "\">" << endl;
+  for (size_t i = 0; i < m.anims.size(); i++)
+  {
+    out << "    <Animation id=\"" << i << "\">" << endl;
+    out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
+    string strName;
+    QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
+    sqlResult anim = GAMEDATABASE.sqlQuery(query);
+    if (anim.valid && !anim.empty())
+      strName = anim.values[0][0].toStdString();
+    else
+      strName = "???";
+    out << "      <animName>" << strName << "</animName>" << endl;
+    out << "      <length>" << m.anims[i].length << "</length>" << endl;
+    out << "      <moveSpeed>" << m.anims[i].moveSpeed << "</moveSpeed>" << endl;
+    out << "      <flags>" << m.anims[i].flags << "</flags>" << endl;
+    out << "      <probability>" << m.anims[i].probability << "</probability>" << endl;
+    out << "      <d1>" << m.anims[i].d1 << "</d1>" << endl;
+    out << "      <d2>" << m.anims[i].d2 << "</d2>" << endl;
+    out << "      <playSpeed>" << m.anims[i].playSpeed << "</playSpeed>" << endl;
+    out << "      <boxA>" << m.anims[i].boundSphere.min << "</boxA>" << endl;
+    out << "      <boxB>" << m.anims[i].boundSphere.max << "</boxB>" << endl;
+    out << "      <rad>" << m.anims[i].boundSphere.radius << "</rad>" << endl;
+    out << "      <NextAnimation>" << m.anims[i].NextAnimation << "</NextAnimation>" << endl;
+    out << "      <Index>" << m.anims[i].Index << "</Index>" << endl;
+    out << "    </Animation>" << endl;
+  }
+  out << "  </Animations>" << endl;
+
+  out << "  <AnimationLookups size=\"" << m.animLookups.size() << "\">" << endl;
+  for (size_t i = 0; i < m.animLookups.size(); i++)
+    out << "    <AnimationLookup id=\"" << i << "\">" << m.animLookups[i] << "</AnimationLookup>" << endl;
+  out << "  </AnimationLookups>" << endl;
+
+  out << "  <Bones size=\"" << m.bones.size() << "\">" << endl;
+  for (size_t i = 0; i < m.bones.size(); i++)
+  {
+    out << "    <Bone id=\"" << i << "\">" << endl;
+    out << "      <keyboneid>" << m.bones[i].boneDef.keyboneid << "</keyboneid>" << endl;
+    out << "      <billboard>" << m.bones[i].billboard << "</billboard>" << endl;
+    out << "      <parent>" << m.bones[i].boneDef.parent << "</parent>" << endl;
+    out << "      <geoid>" << m.bones[i].boneDef.geoid << "</geoid>" << endl;
+    out << "      <unknown>" << m.bones[i].boneDef.unknown << "</unknown>" << endl;
+#if 1 // too huge
+    // AB translation
+    out << "      <trans>" << endl;
+    out << m.bones[i].trans;
+    out << "      </trans>" << endl;
+    // AB rotation
+    out << "      <rot>" << endl;
+    out << m.bones[i].rot;
+    out << "      </rot>" << endl;
+    // AB scaling
+    out << "      <scale>" << endl;
+    out << m.bones[i].scale;
+    out << "      </scale>" << endl;
+#endif
+    out << "      <pivot>" << m.bones[i].boneDef.pivot << "</pivot>" << endl;
+    out << "    </Bone>" << endl;
+  }
+  out << "  </Bones>" << endl;
+
+  //	out << "  <BoneLookups size=\"" << m.header.nBoneLookup << "\">" << endl;
+  //	uint16 *boneLookup = (uint16 *)(f.getBuffer() + m.header.ofsBoneLookup);
+  //	for(size_t i=0; i<m.header.nBoneLookup; i++) {
+  //		out << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
+  //	}
+  //	out << "  </BoneLookups>" << endl;
+
+  out << "  <KeyBoneLookups size=\"" << m.header.nKeyBoneLookup << "\">" << endl;
+  for (size_t i = 0; i < m.header.nKeyBoneLookup; i++)
+    out << "    <KeyBoneLookup id=\"" << i << "\">" << m.keyBoneLookup[i] << "</KeyBoneLookup>" << endl;
+  out << "  </KeyBoneLookups>" << endl;
+
+  out << "  </SkeletonAndAnimation>" << endl;
+
+  out << "  <GeometryAndRendering>" << endl;
+
+  //	out << "  <Vertices size=\"" << m.header.nVertices << "\">" << endl;
+  //	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + m.header.ofsVertices);
+  //	for(uint32 i=0; i<m.header.nVertices; i++) {
+  //		out << "    <Vertice id=\"" << i << "\">" << endl;
+  //		out << "      <pos>" << verts[i].pos << "</pos>" << endl; // TODO
+  //		out << "    </Vertice>" << endl;
+  //	}
+  out << "  </Vertices>" << endl; // TODO
+  out << "  <Views>" << endl;
+
+  //	out << "  <Indices size=\"" << view->nIndex << "\">" << endl;
+  //	out << "  </Indices>" << endl; // TODO
+  //	out << "  <Triangles size=\""<< view->nTris << "\">" << endl;
+  //	out << "  </Triangles>" << endl; // TODO
+  //	out << "  <Properties size=\"" << view->nProps << "\">" << endl;
+  //	out << "  </Properties>" << endl; // TODO
+  //	out << "  <Subs size=\"" << view->nSub << "\">" << endl;
+  //	out << "  </Subs>" << endl; // TODO
+
+  out << "	<RenderPasses size=\"" << m.passes.size() << "\">" << endl;
+  for (size_t i = 0; i < m.passes.size(); i++)
+  {
+    out << "	  <RenderPass id=\"" << i << "\">" << endl;
+    ModelRenderPass * p = m.passes[i];
+    ModelGeosetHD * geoset = m.geosets[p->geoIndex];
+    out << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
+    out << "      <indexCount>" << geoset->icount << "</indexCount>" << endl;
+    out << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;
+    out << "      <vertexEnd>" << geoset->vstart + geoset->vcount << "</vertexEnd>" << endl;
+    out << "      <tex>" << p->tex << "</tex>" << endl;
+    if (p->tex >= 0)
+      out << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
+    out << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
+    out << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
+    out << "      <cull>" << p->cull << "</cull>" << endl;
+    out << "      <trans>" << p->trans << "</trans>" << endl;
+    out << "      <unlit>" << p->unlit << "</unlit>" << endl;
+    out << "      <noZWrite>" << p->noZWrite << "</noZWrite>" << endl;
+    out << "      <billboard>" << p->billboard << "</billboard>" << endl;
+    out << "      <texanim>" << p->texanim << "</texanim>" << endl;
+    out << "      <color>" << p->color << "</color>" << endl;
+    out << "      <opacity>" << p->opacity << "</opacity>" << endl;
+    out << "      <blendmode>" << p->blendmode << "</blendmode>" << endl;
+    out << "      <geoset>" << geoset->id << "</geoset>" << endl;
+    out << "      <swrap>" << p->swrap << "</swrap>" << endl;
+    out << "      <twrap>" << p->twrap << "</twrap>" << endl;
+    out << "      <ocol>" << p->ocol << "</ocol>" << endl;
+    out << "      <ecol>" << p->ecol << "</ecol>" << endl;
+    out << "	  </RenderPass>" << endl;
+  }
+  out << "	</RenderPasses>" << endl;
+
+  out << "	<Geosets size=\"" << m.geosets.size() << "\">" << endl;
+  for (size_t i = 0; i < m.geosets.size(); i++)
+  {
+    out << "	  <Geoset id=\"" << i << "\">" << endl;
+    out << "      <id>" << m.geosets[i]->id << "</id>" << endl;
+    out << "      <vstart>" << m.geosets[i]->vstart << "</vstart>" << endl;
+    out << "      <vcount>" << m.geosets[i]->vcount << "</vcount>" << endl;
+    out << "      <istart>" << m.geosets[i]->istart << "</istart>" << endl;
+    out << "      <icount>" << m.geosets[i]->icount << "</icount>" << endl;
+    out << "      <nSkinnedBones>" << m.geosets[i]->nSkinnedBones << "</nSkinnedBones>" << endl;
+    out << "      <StartBones>" << m.geosets[i]->StartBones << "</StartBones>" << endl;
+    out << "      <rootBone>" << m.geosets[i]->rootBone << "</rootBone>" << endl;
+    out << "      <nBones>" << m.geosets[i]->nBones << "</nBones>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0] << "</BoundingBox>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1] << "</BoundingBox>" << endl;
+    out << "      <radius>" << m.geosets[i]->radius << "</radius>" << endl;
+    out << "	  </Geoset>" << endl;
+  }
+  out << "	</Geosets>" << endl;
+
+  //	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
+  //	out << "	<TexUnits size=\"" << view->nTex << "\">" << endl;
+  //	for (size_t i=0; i<view->nTex; i++) {
+  //		out << "	  <TexUnit id=\"" << i << "\">" << endl;
+  //		out << "      <flags>" << tex[i].flags << "</flags>" << endl;
+  //		out << "      <shading>" << tex[i].shading << "</shading>" << endl;
+  //		out << "      <op>" << tex[i].op << "</op>" << endl;
+  //		out << "      <op2>" << tex[i].op2 << "</op2>" << endl;
+  //		out << "      <colorIndex>" << tex[i].colorIndex << "</colorIndex>" << endl;
+  //		out << "      <flagsIndex>" << tex[i].flagsIndex << "</flagsIndex>" << endl;
+  //		out << "      <texunit>" << tex[i].texunit << "</texunit>" << endl;
+  //		out << "      <mode>" << tex[i].mode << "</mode>" << endl;
+  //		out << "      <textureid>" << tex[i].textureid << "</textureid>" << endl;
+  //		out << "      <texunit2>" << tex[i].texunit2 << "</texunit2>" << endl;
+  //		out << "      <transid>" << tex[i].transid << "</transid>" << endl;
+  //		out << "      <texanimid>" << tex[i].texanimid << "</texanimid>" << endl;
+  //		out << "	  </TexUnit>" << endl;
+  //	}
+  //	out << "	</TexUnits>" << endl;
+
+  out << "  </Views>" << endl;
+
+  out << "  <RenderFlags></RenderFlags>" << endl;
+
+  out << "	<Colors size=\"" << m.colors.size() << "\">" << endl;
+  for (uint i = 0; i < m.colors.size(); i++)
+  {
+    out << "    <Color id=\"" << i << "\">" << endl;
+    // AB color
+    out << "    <color>" << endl;
+    out << m.colors[i].color;
+    out << "    </color>" << endl;
+    // AB opacity
+    out << "    <opacity>" << endl;
+    out << m.colors[i].opacity;
+    out << "    </opacity>" << endl;
+    out << "    </Color>" << endl;
+  }
+  out << "	</Colors>" << endl;
+
+  out << "	<Transparency size=\"" << m.transparency.size() << "\">" << endl;
+  for (uint i = 0; i < m.transparency.size(); i++)
+  {
+    out << "    <Tran id=\"" << i << "\">" << endl;
+    // AB trans
+    out << "    <trans>" << endl;
+    out << m.transparency[i].trans;
+    out << "    </trans>" << endl;
+    out << "    </Tran>" << endl;
+  }
+  out << "	</Transparency>" << endl;
+
+  out << "  <TransparencyLookup></TransparencyLookup>" << endl;
+
+  //	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m.header.ofsTextures);
+  //	out << "	<Textures size=\"" << m.header.nTextures << "\">" << endl;
+  //	for(size_t i=0; i<m.header.nTextures; i++) {
+  //		out << "	  <Texture id=\"" << i << "\">" << endl;
+  //		out << "      <type>" << texdef[i].type << "</type>" << endl;
+  //		out << "      <flags>" << texdef[i].flags << "</flags>" << endl;
+  //		//out << "      <nameLen>" << texdef[i].nameLen << "</nameLen>" << endl;
+  //		//out << "      <nameOfs>" << texdef[i].nameOfs << "</nameOfs>" << endl;
+  //		if (texdef[i].type == TEXTURE_FILENAME)
+  //			out << "		<name>" << f.getBuffer()+texdef[i].nameOfs  << "</name>" << endl;
+  //		out << "	  </Texture>" << endl;
+  //	}
+  //	out << "	</Textures>" << endl;
+
+  //	out << "  <TexLookups size=\"" << m.header.nTexLookup << "\">" << endl;
+  //	uint16 *texLookup = (uint16 *)(f.getBuffer() + m.header.ofsTexLookup);
+  //	for(size_t i=0; i<m.header.nTexLookup; i++) {
+  //		out << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
+  //	}
+  //	out << "  </TexLookups>" << endl;
+
+  out << "	<ReplacableTextureLookup></ReplacableTextureLookup>" << endl;
+
+  out << "  </GeometryAndRendering>" << endl;
+
+  out << "  <Effects>" << endl;
+
+  out << "	<TexAnims size=\"" << m.texAnims.size() << "\">" << endl;
+  for (uint i = 0; i < m.texAnims.size(); i++)
+  {
+    out << "	  <TexAnim id=\"" << i << "\">" << endl;
+    // AB trans
+    out << "    <trans>" << endl;
+    out << m.texAnims[i].trans;
+    out << "    </trans>" << endl;
+    // AB rot
+    out << "    <rot>" << endl;
+    out << m.texAnims[i].rot;
+    out << "    </rot>" << endl;
+    // AB scale
+    out << "    <scale>" << endl;
+    out << m.texAnims[i].scale;
+    out << "    </scale>" << endl;
+    out << "	  </TexAnim>" << endl;
+  }
+  out << "	</TexAnims>" << endl;
+
+  out << "	<RibbonEmitters></RibbonEmitters>" << endl; // TODO
+
+  out << "	<Particles size=\"" << m.header.nParticleEmitters << "\">" << endl;
+  for (size_t i = 0; i < m.particleSystems.size(); i++)
+  {
+    out << "	  <Particle id=\"" << i << "\">" << endl;
+    out << m.particleSystems[i];
+    out << "	  </Particle>" << endl;
+  }
+  out << "	</Particles>" << endl;
+
+  out << "  </Effects>" << endl;
+
+  out << "	<Miscellaneous>" << endl;
+
+  out << "	<BoundingVolumes></BoundingVolumes>" << endl;
+  out << "	<Lights></Lights>" << endl;
+  out << "	<Cameras></Cameras>" << endl;
+
+  out << "	<Attachments size=\"" << m.header.nAttachments << "\">" << endl;
+  for (size_t i = 0; i < m.header.nAttachments; i++)
+  {
+    out << "	  <Attachment id=\"" << i << "\">" << endl;
+    out << "      <id>" << m.atts[i].id << "</id>" << endl;
+    out << "      <bone>" << m.atts[i].bone << "</bone>" << endl;
+    out << "      <pos>" << m.atts[i].pos << "</pos>" << endl;
+    out << "	  </Attachment>" << endl;
+  }
+  out << "	</Attachments>" << endl;
+
+  out << "  <AttachLookups size=\"" << m.header.nAttachLookup << "\">" << endl;
+  //	int16 *attachLookup = (int16 *)(f.getBuffer() + m.header.ofsAttachLookup);
+  //	for(size_t i=0; i<m.header.nAttachLookup; i++) {
+  //		out << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
+  //	}
+  //	out << "  </AttachLookups>" << endl;
+
+  out << "	<Events size=\"" << m.events.size() << "\">" << endl;
+  for (size_t i = 0; i < m.events.size(); i++)
+  {
+    out << "	  <Event id=\"" << i << "\">" << endl;
+    out << m.events[i];
+    out << "	  </Event>" << endl;
+  }
+  out << "	</Events>" << endl;
+
+  out << "	</Miscellaneous>" << endl;
+
+  //	out << "    <>" << m.header. << "</>" << endl;
+  out << "  <TextureLists>" << endl;
+  for (auto it : m.passes)
+  {
+    GLuint tex = m.getGLTexture(it->tex);
+    if (tex != ModelRenderPass::INVALID_TEX)
+      out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>" << endl;
+  }
+  out << "  </TextureLists>" << endl;
+
+  out << "</m2>" << endl;
+
+  return out;
 }

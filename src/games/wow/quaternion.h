@@ -92,7 +92,7 @@ class _QUATERNION_API_ Vec4D
       return x*v.x + y*v.y + z*v.z + w*v.w;
 	  }
 
-    friend std::ostream& operator<<(std::ostream& out, Vec4D& v)
+    friend std::ostream& operator<<(std::ostream& out, const Vec4D& v)
     {
       out << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
       return out;

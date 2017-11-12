@@ -140,7 +140,7 @@ public:
 	std::vector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
 	size_t sizes; // for fix function
 
-	bool uses(ssize_t anim)
+	bool uses(ssize_t anim) const
 	{
 		if (seq>-1)
 			anim = 0;
@@ -366,7 +366,7 @@ public:
 				break;
 		}
 	}
-	friend std::ostream& operator<<(std::ostream& out, Animated& v)
+	friend std::ostream& operator<<(std::ostream& out, const Animated& v)
 	{
 		if (v.sizes == 0)
 			return out;
