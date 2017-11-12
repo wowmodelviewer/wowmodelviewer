@@ -189,7 +189,6 @@ gamefile(file)
   anim = 0;
   animManager = 0;
   currentAnim = 0;
-  particleSystems = 0;
   ribbons = 0;
   events = 0;
   modelType = MT_NORMAL;
@@ -245,9 +244,9 @@ WoWModel::~WoWModel()
         colors.clear();
         transparency.clear();
         lights.clear();
+        particleSystems.clear();
         
         delete[] events; events = 0;
-        delete[] particleSystems; particleSystems = 0;
         delete[] ribbons; ribbons = 0;
 
         for (auto it : passes)
@@ -1000,10 +999,10 @@ void WoWModel::initAnimated(GameFile * f)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(f->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
-    particleSystems = new ParticleSystem[header.nParticleEmitters];
+    particleSystems.resize(header.nParticleEmitters);
     hasParticles = true;
     showParticles = true;
-    for (size_t i = 0; i < header.nParticleEmitters; i++)
+    for (uint i = 0; i < particleSystems.size(); i++)
     {
       pdef = (M2ParticleDef *)&pdefs[i];
       particleSystems[i].model = this;
@@ -1450,11 +1449,11 @@ void WoWModel::animate(ssize_t anim)
     }
   }
 
-  for (size_t i = 0; i < header.nParticleEmitters; i++)
+  for (auto & it : particleSystems)
   {
     // random time distribution for teh win ..?
     //int pt = a.timeStart + (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
-    particleSystems[i].setup(anim, t);
+    it.setup(anim, t);
   }
 
   for (size_t i = 0; i < header.nRibbonEmitters; i++)
@@ -1578,11 +1577,11 @@ void WoWModel::updateEmitters(float dt)
   if (!ok || !showParticles || !GLOBALSETTINGS.bShowParticle)
     return;
 
-  for (size_t i = 0; i < header.nParticleEmitters; i++)
+  for (auto & it : particleSystems)
   {
-    particleSystems[i].update(dt);
-    particleSystems[i].replaceParticleColors = replaceParticleColors;
-    particleSystems[i].particleColorReplacements = particleColorReplacements;
+    it.update(dt);
+    it.replaceParticleColors = replaceParticleColors;
+    it.particleColorReplacements = particleColorReplacements;
   }
 }
 
@@ -1642,11 +1641,8 @@ void WoWModel::drawBoundingVolume()
 void WoWModel::drawParticles()
 {
   // draw particle systems
-  for (size_t i = 0; i < header.nParticleEmitters; i++)
-  {
-    if (particleSystems != NULL)
-      particleSystems[i].draw();
-  }
+  for (auto & it : particleSystems)
+    it.draw();
 
   // draw ribbons
   for (size_t i = 0; i < header.nRibbonEmitters; i++)

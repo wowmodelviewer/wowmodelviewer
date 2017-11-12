@@ -2704,12 +2704,11 @@ void ModelViewer::ModelInfo()
   xml << "	<RibbonEmitters></RibbonEmitters>" << endl; // TODO
 
   xml << "	<Particles size=\"" << m->header.nParticleEmitters << "\">" << endl;
-  if (m->particleSystems) {
-    for (size_t i = 0; i < m->header.nParticleEmitters; i++) {
-      xml << "	  <Particle id=\"" << i << "\">" << endl;
-      xml << m->particleSystems[i];
-      xml << "	  </Particle>" << endl;
-    }
+  for (size_t i = 0; i < m->particleSystems.size(); i++)
+  {
+    xml << "	  <Particle id=\"" << i << "\">" << endl;
+    xml << m->particleSystems[i];
+    xml << "	  </Particle>" << endl;
   }
   xml << "	</Particles>" << endl;
 
