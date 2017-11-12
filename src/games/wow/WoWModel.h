@@ -21,6 +21,7 @@
 #include "Model.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
+#include "ModelColor.h"
 #include "modelheaders.h"
 #include "particle.h"
 #include "TabardDetails.h"
@@ -33,7 +34,6 @@
 
 class CASCFile;
 class GameFile;
-struct ModelColor;
 class ModelEvent;
 struct ModelLight;
 class ModelRenderPass;
@@ -101,7 +101,6 @@ public:
   bool animGeometry, animTextures, animBones;
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
-  ModelColor		*colors;
   ModelTransparency *transparency;
   ModelLight		*lights;
   ParticleSystem	*particleSystems;
@@ -110,6 +109,8 @@ public:
   GameFile * gamefile;
 
   std::vector<TextureAnim> texAnims;
+  std::vector<ModelColor> colors;
+
   std::vector<uint32> globalSequences;
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;

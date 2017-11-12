@@ -2624,8 +2624,9 @@ void ModelViewer::ModelInfo()
 
   xml << "  <RenderFlags></RenderFlags>" << endl;
 
-  xml << "	<Colors size=\"" << m->header.nColors << "\">" << endl;
-  for (size_t i = 0; i < m->header.nColors; i++) {
+  xml << "	<Colors size=\"" << m->colors.size() << "\">" << endl;
+  for (uint i = 0; i < m->colors.size(); i++)
+  {
     xml << "    <Color id=\"" << i << "\">" << endl;
     // AB color
     xml << "    <color>" << endl;

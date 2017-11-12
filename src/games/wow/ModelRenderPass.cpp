@@ -94,7 +94,7 @@ bool ModelRenderPass::init()
   ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
 
   // emissive colors
-  if (color != -1 && model->colors && model->colors[color].color.uses(0))
+  if (color != -1 && color < (int16)model->colors.size() && model->colors[color].color.uses(0))
   {
     Vec3D c;
     /* Alfred 2008.10.02 buggy opacity make model invisible, TODO */

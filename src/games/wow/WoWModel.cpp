@@ -189,7 +189,6 @@ gamefile(file)
   anim = 0;
   animManager = 0;
   currentAnim = 0;
-  colors = 0;
   lights = 0;
   particleSystems = 0;
   ribbons = 0;
@@ -245,8 +244,8 @@ WoWModel::~WoWModel()
         origVertices.clear();
         rawVertices.clear();
         texAnims.clear();
+        colors.clear();
 
-        delete[] colors; colors = 0;
         delete[] transparency; transparency = 0;
         delete[] lights; lights = 0;
         delete[] events; events = 0;
@@ -711,9 +710,9 @@ void WoWModel::initCommon(GameFile * f)
   // init colors
   if (header.nColors)
   {
-    colors = new ModelColor[header.nColors];
+    colors.resize(header.nColors);
     ModelColorDef *colorDefs = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
-    for (size_t i = 0; i < header.nColors; i++)
+    for (uint i = 0; i < colors.size(); i++)
       colors[i].init(f, colorDefs[i], globalSequences);
   }
 
@@ -762,7 +761,6 @@ void WoWModel::initStatic(GameFile * f)
   delete[] normals; normals = 0;
   indices.clear();
 
-  delete[] colors; colors = 0;
   delete[] transparency; transparency = 0;
 }
 
