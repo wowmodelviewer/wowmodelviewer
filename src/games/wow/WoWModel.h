@@ -101,7 +101,6 @@ public:
   bool animGeometry, animTextures, animBones;
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
-  RibbonEmitter	*ribbons;
   ModelEvent		*events;
   GameFile * gamefile;
 
@@ -110,6 +109,7 @@ public:
   std::vector<ModelTransparency> transparency;
   std::vector<ModelLight> lights;
   std::vector<ParticleSystem> particleSystems;
+  std::vector<RibbonEmitter> ribbons;
 
   std::vector<uint32> globalSequences;
   std::vector<uint> replacableParticleColorIDs;

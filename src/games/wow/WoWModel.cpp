@@ -189,7 +189,6 @@ gamefile(file)
   anim = 0;
   animManager = 0;
   currentAnim = 0;
-  ribbons = 0;
   events = 0;
   modelType = MT_NORMAL;
   attachment = 0;
@@ -245,9 +244,9 @@ WoWModel::~WoWModel()
         transparency.clear();
         lights.clear();
         particleSystems.clear();
+        ribbons.clear();
         
         delete[] events; events = 0;
-        delete[] ribbons; ribbons = 0;
 
         for (auto it : passes)
           delete it;
@@ -1018,8 +1017,8 @@ void WoWModel::initAnimated(GameFile * f)
   if (header.nRibbonEmitters)
   {
     ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f->getBuffer() + header.ofsRibbonEmitters);
-    ribbons = new RibbonEmitter[header.nRibbonEmitters];
-    for (size_t i = 0; i < header.nRibbonEmitters; i++)
+    ribbons.resize(header.nRibbonEmitters);
+    for (uint i = 0; i < ribbons.size(); i++)
     {
       ribbons[i].model = this;
       ribbons[i].init(f, rdefs[i], globalSequences);
@@ -1456,10 +1455,8 @@ void WoWModel::animate(ssize_t anim)
     it.setup(anim, t);
   }
 
-  for (size_t i = 0; i < header.nRibbonEmitters; i++)
-  {
-    ribbons[i].setup(anim, t);
-  }
+  for (auto & it : ribbons)
+    it.setup(anim, t);
 
   if (animTextures)
   {
@@ -1645,11 +1642,8 @@ void WoWModel::drawParticles()
     it.draw();
 
   // draw ribbons
-  for (size_t i = 0; i < header.nRibbonEmitters; i++)
-  {
-    if (ribbons != NULL)
-      ribbons[i].draw();
-  }
+  for (auto & it : ribbons)
+    it.draw();
 }
 
 WoWItem * WoWModel::getItem(CharSlots slot)
