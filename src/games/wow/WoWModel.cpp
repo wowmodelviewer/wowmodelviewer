@@ -823,7 +823,16 @@ void WoWModel::initAnimated(GameFile * f)
 
         // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
         if (sks1.nAnimationLookup > 0)
-          animLookups.assign(skelFile->getBuffer() + sks1.ofsAnimationLookup, skelFile->getBuffer() + sks1.ofsAnimationLookup + sks1.nAnimationLookup);
+        {
+          // for unknown reason, using assign() on vector doesn't work
+          // use intermediate buffer and push back instead...
+          int16 * buffer = new int16[sks1.nAnimationLookup];
+          memcpy(buffer, skelFile->getBuffer() + sks1.ofsAnimationLookup, sizeof(int16)*sks1.nAnimationLookup);
+          for (uint i = 0; i < sks1.nAnimationLookup; i++)
+            animLookups.push_back(buffer[i]);
+
+          delete[] buffer;
+        }
 
         animManager = new AnimManager(*this);
         
@@ -930,7 +939,16 @@ void WoWModel::initAnimated(GameFile * f)
 
     // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
     if (header.nAnimationLookup > 0)
-      animLookups.assign(f->getBuffer() + header.ofsAnimationLookup, f->getBuffer() + header.ofsAnimationLookup + header.nAnimationLookup);
+    {
+      // for unknown reason, using assign() on vector doesn't work
+      // use intermediate buffer and push back instead...
+      int16 * buffer = new int16[header.nAnimationLookup];
+      memcpy(buffer, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
+      for (uint i = 0; i < header.nAnimationLookup; i++)
+        animLookups.push_back(buffer[i]);
+
+      delete[] buffer;
+    }
   }
 
   // free MPQFile
