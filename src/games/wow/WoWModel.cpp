@@ -29,13 +29,6 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
-struct AFID
-{
-  uint16 animId;
-  uint16 subAnimId;
-  uint32 fileId;
-};
-
 struct SKS1
 {
   uint32 nGlobalSequences;
@@ -61,6 +54,13 @@ struct SKB1
   uint32 nKeyBoneLookup;
   uint32 ofsKeyBoneLookup;
 };
+
+struct SKPD
+{
+  uint8 unknown00[8];
+  uint32 parentFileId;
+};
+
 
 void WoWModel::dumpTextureStatus()
 {
@@ -756,6 +756,67 @@ void WoWModel::initStatic(GameFile * f)
   indices.clear();
 }
 
+vector<WoWModel::AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+{
+  vector<AFID> afids;
+
+  if (f->setChunk("AFID"))
+  {
+    AFID afid;
+    while (!f->isEof())
+    {
+      f->read(&afid, sizeof(WoWModel::AFID));
+      if (afid.fileId != 0)
+        afids.push_back(afid);
+    }
+  }
+
+  return afids;
+}
+
+void WoWModel::readAnimsFromFile(GameFile * f, vector<WoWModel::AFID> & afids, uint32 nAnimations, uint32 ofsAnimation)
+{
+  for (uint i = 0; i < nAnimations; i++)
+  {
+    ModelAnimation a;
+    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+
+    anims.push_back(a);
+
+    GameFile * anim = 0;
+
+    // if we have animation file ids from AFID chunk, use them
+    if (afids.size() > 0)
+    {
+      for (auto it : afids)
+      {
+        if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
+        {
+          anim = GAMEDIRECTORY.getFile(it.fileId);
+          break;
+        }
+      }
+    }
+    else // else use file naming to get them
+    {
+      QString tempname = QString::fromStdString(modelname).replace(".m2", "");
+      tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
+      anim = GAMEDIRECTORY.getFile(tempname);
+    }
+
+    if (anim && anim->open())
+    {
+      anim->setChunk("AFSB");
+      animfiles.push_back(anim);
+    }
+    else
+    {
+      animfiles.push_back(NULL);
+    }
+  }
+}
+
+
 void WoWModel::initAnimated(GameFile * f)
 {
   if (f->isChunked() && f->setChunk("SKID"))
@@ -766,60 +827,14 @@ void WoWModel::initAnimated(GameFile * f)
 
     if (skelFile->open())
     {
-      vector<AFID> afids;
-
-      if (skelFile->setChunk("AFID"))
-      {
-        AFID afid;
-        while (!skelFile->isEof())
-        {
-          skelFile->read(&afid, sizeof(AFID));
-          if (afid.fileId != 0)
-            afids.push_back(afid);
-        }
-      }
+      vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        anims.resize(sks1.nAnimations);
-
-        for (uint i = 0; i < anims.size(); i++)
-        {
-          memcpy(&(anims[i]), skelFile->getBuffer() + sks1.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
-
-          GameFile * anim = 0;
-
-          // if we have animation file ids from AFID chunk, use them
-          if (afids.size() > 0)
-          {
-            for (auto it : afids)
-            {
-              if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
-              {
-                anim = GAMEDIRECTORY.getFile(it.fileId);
-                break;
-              }
-            }
-          }
-          else // else use file naming to get them
-          {
-            QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-            tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
-            anim = GAMEDIRECTORY.getFile(tempname);
-          }
-
-          if (anim && anim->open() && anim->setChunk("AFSB"))
-          {
-            animfiles.push_back(anim);
-          }
-          else
-          {
-            animfiles.push_back(NULL);
-          }
-        }
+        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations);
 
         // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
         if (sks1.nAnimationLookup > 0)
@@ -867,55 +882,15 @@ void WoWModel::initAnimated(GameFile * f)
   else if (header.nAnimations > 0)
   {
     vector<AFID> afids;
-
+  
     if (f->isChunked() && f->setChunk("AFID"))
     {
-      AFID afid;
-      while (!f->isEof())
-      {
-        f->read(&afid, sizeof(AFID));
-        if (afid.fileId != 0)
-          afids.push_back(afid);
-      }
+      afids = readAFIDSFromFile(f);
       f->setChunk("MD21", false);
     }
 
-    anims.resize(header.nAnimations);
+    readAnimsFromFile(f, afids, header.nAnimations, header.ofsAnimations);
 
-    for (uint i = 0; i < anims.size(); i++)
-    {
-      memcpy(&(anims[i]), f->getBuffer() + header.ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
-
-      GameFile * anim = 0;
-
-      // if we have animation file ids from AFID chunk, use them
-      if (afids.size() > 0)
-      {
-        for (auto it : afids)
-        {
-          if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
-          {
-            anim = GAMEDIRECTORY.getFile(it.fileId);
-            break;
-          }
-        }
-      }
-      else // else use file naming to get them
-      {
-        QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-        tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
-        anim = GAMEDIRECTORY.getFile(tempname);
-      }
-      
-      if (anim && anim->open())
-      {
-        animfiles.push_back(anim);
-      }
-      else
-      {
-        animfiles.push_back(NULL);
-      }
-    }
 
     animManager = new AnimManager(*this);
  

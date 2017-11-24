@@ -56,6 +56,13 @@ class QXmlStreamReader;
 
 class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
+  struct AFID
+  {
+    uint16 animId;
+    uint16 subAnimId;
+    uint32 fileId;
+  };
+
   // VBO Data
   GLuint vbuf, nbuf, tbuf;
   size_t vbufsize;
@@ -109,6 +116,9 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   bool animGeometry, animTextures, animBones;
 
   std::vector<GameFile *> animfiles;
+
+  vector<AFID> readAFIDSFromFile(GameFile * f);
+  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
