@@ -507,6 +507,32 @@ void WoWModel::initCommon(GameFile * f)
 
         if (sks1.nGlobalSequences > 0)
           globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
+
+        // let's try to read parent skel file if needed
+        if (skelFile->setChunk("SKPD"))
+        {
+          SKPD skpd;
+          memcpy(&skpd, skelFile->getBuffer(), sizeof(SKPD));
+
+          GameFile * parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
+
+          if (parentFile && parentFile->open() && parentFile->setChunk("SKS1"))
+          {
+            SKS1 sks1;
+            memcpy(&sks1, parentFile->getBuffer(), sizeof(SKS1));
+
+            if (sks1.nGlobalSequences > 0)
+            {
+              uint32 * buffer = new uint32[sks1.nGlobalSequences];
+              memcpy(buffer, parentFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
+              for (uint i = 0; i < sks1.nGlobalSequences; i++)
+                globalSequences.push_back(buffer[i]);
+            }
+
+            parentFile->close();
+          }
+        }
+
       }
       skelFile->close();
     }
@@ -848,6 +874,29 @@ void WoWModel::initAnimated(GameFile * f)
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
         readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+
+        // let's try if there is a parent skel file to read
+        if (skelFile->setChunk("SKPD"))
+        {
+          SKPD skpd;
+          skelFile->read(&skpd, sizeof(skpd));
+
+          GameFile * parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
+
+          if (parentFile && parentFile->open())
+          {
+            afids = readAFIDSFromFile(parentFile);
+
+            if (parentFile->setChunk("SKS1"))
+            {
+              SKS1 sks1;
+              parentFile->read(&sks1, sizeof(sks1));
+              readAnimsFromFile(parentFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+            }
+
+            parentFile->close();
+          }
+        }
 
         animManager = new AnimManager(*this);
         
