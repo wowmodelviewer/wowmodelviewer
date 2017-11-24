@@ -774,7 +774,7 @@ vector<WoWModel::AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<WoWModel::AFID> & afids, uint32 nAnimations, uint32 ofsAnimation)
+void WoWModel::readAnimsFromFile(GameFile * f, vector<WoWModel::AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
@@ -806,13 +806,26 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<WoWModel::AFID> & afids, u
 
     if (anim && anim->open())
     {
-      anim->setChunk("AFSB");
+      anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
       animfiles.push_back(anim);
     }
     else
     {
       animfiles.push_back(NULL);
     }
+  }
+
+  // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
+  if (nAnimationLookup > 0)
+  {
+    // for unknown reason, using assign() on vector doesn't work
+    // use intermediate buffer and push back instead...
+    int16 * buffer = new int16[nAnimationLookup];
+    memcpy(buffer, f->getBuffer() + ofsAnimationLookup, sizeof(int16)*nAnimationLookup);
+    for (uint i = 0; i < nAnimationLookup; i++)
+      animLookups.push_back(buffer[i]);
+
+    delete[] buffer;
   }
 }
 
@@ -834,20 +847,7 @@ void WoWModel::initAnimated(GameFile * f)
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations);
-
-        // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
-        if (sks1.nAnimationLookup > 0)
-        {
-          // for unknown reason, using assign() on vector doesn't work
-          // use intermediate buffer and push back instead...
-          int16 * buffer = new int16[sks1.nAnimationLookup];
-          memcpy(buffer, skelFile->getBuffer() + sks1.ofsAnimationLookup, sizeof(int16)*sks1.nAnimationLookup);
-          for (uint i = 0; i < sks1.nAnimationLookup; i++)
-            animLookups.push_back(buffer[i]);
-
-          delete[] buffer;
-        }
+        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
 
         animManager = new AnimManager(*this);
         
@@ -889,8 +889,7 @@ void WoWModel::initAnimated(GameFile * f)
       f->setChunk("MD21", false);
     }
 
-    readAnimsFromFile(f, afids, header.nAnimations, header.ofsAnimations);
-
+    readAnimsFromFile(f, afids, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
 
     animManager = new AnimManager(*this);
  
@@ -910,19 +909,6 @@ void WoWModel::initAnimated(GameFile * f)
     {
       memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
       LOG_ERROR << "KeyBone number" << header.nKeyBoneLookup << "over" << BONE_MAX;
-    }
-
-    // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
-    if (header.nAnimationLookup > 0)
-    {
-      // for unknown reason, using assign() on vector doesn't work
-      // use intermediate buffer and push back instead...
-      int16 * buffer = new int16[header.nAnimationLookup];
-      memcpy(buffer, f->getBuffer() + header.ofsAnimationLookup, sizeof(int16)*header.nAnimationLookup);
-      for (uint i = 0; i < header.nAnimationLookup; i++)
-        animLookups.push_back(buffer[i]);
-
-      delete[] buffer;
     }
   }
 

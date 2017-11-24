@@ -118,7 +118,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<GameFile *> animfiles;
 
   vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation);
+  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
