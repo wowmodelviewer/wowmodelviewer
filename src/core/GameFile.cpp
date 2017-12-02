@@ -147,3 +147,10 @@ unsigned char* GameFile::getPointer()
 {
   return buffer + pointer;
 }
+
+void GameFile::dumpStructure()
+{
+  LOG_INFO << "Structure for file" << filepath;
+  for (auto it : chunks)
+    LOG_INFO << "Chunk :" << it.magic.c_str() << it.start << it.size;
+}

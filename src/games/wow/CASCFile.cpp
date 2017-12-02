@@ -7,6 +7,7 @@
 
 #include "CASCFile.h"
 
+#include "CASCChunks.h"
 #include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
@@ -194,4 +195,61 @@ bool CASCFile::doPostCloseOperation()
   }
 
   return true;
+}
+
+void CASCFile::dumpStructure()
+{
+  LOG_INFO << "Structure for file" << filepath;
+  for (auto it : chunks)
+  {
+    if (it.magic == "AFID")
+    {
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "nb anim file id" << it.size / sizeof(AFID);
+    }
+    else if (it.magic == "SKS1")
+    {
+      setChunk("SKS1");
+      SKS1 sks1;
+      read(&sks1, sizeof(sks1));
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "nGlobalSequences" << sks1.nGlobalSequences << "nAnimations" << sks1.nAnimations << "nAnimationLookup" << sks1.nAnimationLookup;
+    }
+    else if (it.magic == "SKA1")
+    {
+      setChunk("SKA1");
+      SKA1 ska1;
+      read(&ska1, sizeof(ska1));
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "nAttachments" << ska1.nAttachments << "nAttachLookup" << ska1.nAttachLookup;
+    }
+    else if (it.magic == "SKB1")
+    {
+      setChunk("SKB1");
+      SKB1 skb1;
+      read(&skb1, sizeof(skb1));
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "nBones" << skb1.nBones << "nKeyBoneLookup" << skb1.nKeyBoneLookup;
+    }
+    else if (it.magic == "SKPD")
+    {
+      setChunk("SKPD");
+      SKPD skpd;
+      read(&skpd, sizeof(skpd));
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "parentFileId" << skpd.parentFileId;
+    }
+    else if (it.magic == "BFID")
+    {
+      LOG_INFO << "Chunk :" << it.magic.c_str() << "nb bone files id" << it.size / sizeof(uint32);
+      setChunk("BFID");
+      while (!isEof())
+      {
+        uint32 id;
+        read(&id, sizeof(uint32));
+        GameFile * f = GAMEDIRECTORY.getFile(id);
+        if (f)
+          LOG_INFO << f->fullname();
+      }
+    }
+    else
+    {
+      LOG_INFO << "Chunk :" << it.magic.c_str() << it.start << it.size;
+    }
+  }
 }

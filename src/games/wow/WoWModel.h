@@ -14,6 +14,7 @@
 #include "animated.h"
 #include "AnimManager.h"
 #include "Bone.h"
+#include "CASCChunks.h"
 #include "CharDetails.h"
 #include "CharTexture.h"
 #include "displayable.h"
@@ -56,13 +57,6 @@ class QXmlStreamReader;
 
 class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {
-  struct AFID
-  {
-    uint16 animId;
-    uint16 subAnimId;
-    uint32 fileId;
-  };
-
   // VBO Data
   GLuint vbuf, nbuf, tbuf;
   size_t vbufsize;

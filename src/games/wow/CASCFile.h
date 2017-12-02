@@ -34,6 +34,9 @@ class _CASCFILE_API_ CASCFile : public GameFile
     CASCFile(QString path, int id = -1);
     ~CASCFile();
 
+    // re implemented from GameFile
+    void dumpStructure();
+
   protected:
     virtual bool openFile();
     virtual bool isAlreadyOpened();

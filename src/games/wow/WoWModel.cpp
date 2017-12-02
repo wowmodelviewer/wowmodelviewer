@@ -29,39 +29,6 @@ enum TextureFlags
   TEXTURE_WRAPY
 };
 
-struct SKS1
-{
-  uint32 nGlobalSequences;
-  uint32 ofsGlobalSequences;
-  uint32 nAnimations;
-  uint32 ofsAnimations;
-  uint32 nAnimationLookup;
-  uint32 ofsAnimationLookup;
-};
-
-struct SKA1
-{
-  uint32 nAttachments;
-  uint32 ofsAttachments;
-  uint32 nAttachLookup;
-  uint32 ofsAttachLookup;
-};
-
-struct SKB1
-{
-  uint32 nBones;
-  uint32 ofsBones;
-  uint32 nKeyBoneLookup;
-  uint32 ofsKeyBoneLookup;
-};
-
-struct SKPD
-{
-  uint8 unknown00[8];
-  uint32 parentFileId;
-};
-
-
 void WoWModel::dumpTextureStatus()
 {
   LOG_INFO << "-----------------------------------------";
@@ -782,7 +749,7 @@ void WoWModel::initStatic(GameFile * f)
   indices.clear();
 }
 
-vector<WoWModel::AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
   vector<AFID> afids;
 
@@ -791,7 +758,7 @@ vector<WoWModel::AFID> WoWModel::readAFIDSFromFile(GameFile * f)
     AFID afid;
     while (!f->isEof())
     {
-      f->read(&afid, sizeof(WoWModel::AFID));
+      f->read(&afid, sizeof(AFID));
       if (afid.fileId != 0)
         afids.push_back(afid);
     }
@@ -800,7 +767,7 @@ vector<WoWModel::AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<WoWModel::AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
@@ -866,6 +833,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     if (skelFile->open())
     {
+      skelFile->dumpStructure();
       vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
@@ -885,6 +853,7 @@ void WoWModel::initAnimated(GameFile * f)
 
           if (parentFile && parentFile->open())
           {
+            parentFile->dumpStructure();
             afids = readAFIDSFromFile(parentFile);
 
             if (parentFile->setChunk("SKS1"))

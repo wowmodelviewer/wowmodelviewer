@@ -62,6 +62,7 @@ set(headers animated.h
 			Attachment.h
 			BaseCanvas.h
 			Bone.h
+			CASCChunks.h
 			CASCFile.h
 			CASCFolder.h
 			CharDetails.h

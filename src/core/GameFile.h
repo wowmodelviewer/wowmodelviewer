@@ -54,6 +54,8 @@ class _GAMEFILE_API_ GameFile : public Component
     bool setChunk(std::string chunkName, bool resetToStart = true);
     bool isChunked() { return chunks.size() > 0; }
 
+    virtual void dumpStructure();
+
   protected:
 
     virtual bool openFile() = 0;
