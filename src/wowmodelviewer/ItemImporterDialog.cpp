@@ -33,7 +33,7 @@ ItemImporterDialog::ItemImporterDialog(wxWindow * parent /* = NULL */, wxWindowI
 
 	// up part : some explanation + url import choice
 	wxStaticBoxSizer *topSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Import parameters"));
-	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Put in the field below wowhead or wow armory page of wanted item.\nURL scheme must be:\nhttp://XXX.wowhead.com/item=number (where XXX = www or any supported wowhead language) for wowhead query\nhttp://XXX.battle.net/wow/YYY/item/number (where XXX = your corresponding area (eu, us, etc.) and YYY corresponds to your locale) for wow armory query\nWhen done, click import. If everything succeed, just click on Display button to show item in viewer."));
+	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Put in the field below wowhead or wow armory page of wanted item.\nSearch iteam you want on wowhead, then copy and paste URL of this item for wowhead query.\nhttp://XXX.battle.net/wow/YYY/item/number (where XXX = your corresponding area (eu, us, etc.) and YYY corresponds to your locale) for wow armory query\nWhen done, click import. If everything succeed, just click on Display button to show item in viewer."));
 	topSizer->Add(explain, 0, wxALL, 5);
 	wxStaticText *label = new wxStaticText(this, wxID_ANY, _T("URL :"));
 	topSizer->Add(label, 0, wxLEFT|wxRIGHT|wxTOP, 5);
