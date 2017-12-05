@@ -1227,6 +1227,9 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 
   if (m->ok)
   {
+    for (uint i = 0; i < m->geosets.size(); i++)
+      m->showGeoset(i, true);
+
     m_itemModels[pos] = m;
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
