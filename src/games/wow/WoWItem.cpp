@@ -1317,6 +1317,10 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
   RaceInfos infos;
   RaceInfos::getCurrent(m_charModel, infos);
 
+  // consider lightforgeddraenei as draenei for equipment
+  if (infos.prefix == "ld")
+    infos.prefix = "dr";
+
   QString filter = "_";
   switch (filterType)
   {
