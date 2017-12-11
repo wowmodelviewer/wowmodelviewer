@@ -53,6 +53,8 @@ public:
 
 protected:
   std::vector<uint32> m_IDs;
+  std::map<int, int> m_fieldSizes;
+  std::vector<unsigned char *> m_recordOffsets;
 
 private:
   struct field_structure
@@ -66,9 +68,6 @@ private:
     uint32 newRowId;
     uint32 copiedRowId;
   };
-
-  std::map<int, int> m_fieldSizes;
-  std::vector<unsigned char *> m_recordOffsets;
 
   bool m_isSparseTable;
 };

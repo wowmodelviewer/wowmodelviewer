@@ -133,7 +133,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
 
 void core::GameDatabase::logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs)
 {
-  if(aTimeInNs/1000000 > 30)
+  if(aTimeInNs/1000000 > 50)
   {
     LOG_WARNING << "LONG QUERY !";
     LOG_WARNING << aQueryStr;
