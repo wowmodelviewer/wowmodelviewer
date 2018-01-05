@@ -841,15 +841,16 @@ void WoWModel::initAnimated(GameFile * f)
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+       // readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
 
         // let's try if there is a parent skel file to read
+        GameFile * parentFile = 0;
         if (skelFile->setChunk("SKPD"))
         {
           SKPD skpd;
           skelFile->read(&skpd, sizeof(skpd));
 
-          GameFile * parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
+          parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
 
           if (parentFile && parentFile->open())
           {
@@ -872,25 +873,35 @@ void WoWModel::initAnimated(GameFile * f)
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
+          GameFile * fileToUse = skelFile;
+          if (parentFile)
+          {
+            parentFile->open();
+            parentFile->setChunk("SKB1");
+            skelFile->close();
+            fileToUse = parentFile;
+          }
+
           SKB1 skb1;
-          skelFile->read(&skb1, sizeof(skb1));
-          memcpy(&skb1, skelFile->getBuffer(), sizeof(SKB1));
+          fileToUse->read(&skb1, sizeof(skb1));
+          memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
           bones.resize(skb1.nBones);
-          ModelBoneDef *mb = (ModelBoneDef*)(skelFile->getBuffer() + skb1.ofsBones);
+          ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
           
           for (size_t i = 0; i < skb1.nBones; i++)
-            bones[i].initV3(*skelFile, mb[i], globalSequences, animfiles);
+            bones[i].initV3(*fileToUse, mb[i], globalSequences, animfiles);
 
           // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
           if (skb1.nKeyBoneLookup < BONE_MAX)
           {
-            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
+            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
           }
           else
           {
-            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
+            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
             LOG_ERROR << "KeyBone number" << skb1.nKeyBoneLookup << "over" << BONE_MAX;
           }
+          fileToUse->close();
         }
       }
       skelFile->close();
@@ -900,7 +911,7 @@ void WoWModel::initAnimated(GameFile * f)
   else if (header.nAnimations > 0)
   {
     vector<AFID> afids;
-  
+
     if (f->isChunked() && f->setChunk("AFID"))
     {
       afids = readAFIDSFromFile(f);
@@ -910,11 +921,11 @@ void WoWModel::initAnimated(GameFile * f)
     readAnimsFromFile(f, afids, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
 
     animManager = new AnimManager(*this);
- 
+
     // init bones...
     bones.resize(header.nBones);
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
-   
+
     for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*f, mb[i], globalSequences, animfiles);
 
