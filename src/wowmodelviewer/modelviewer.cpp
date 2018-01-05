@@ -1761,6 +1761,23 @@ void ModelViewer::LoadWoW()
     return;
   }
 
+  if (!GAMEDIRECTORY.version().contains("7.3"))
+  {
+    wxString message = wxString::Format(wxT("Fatal Error: WoW Model Viewer requires a 7.3.x version of the game to work correctly. Please update your WoW client."));
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Incorrect version"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
+
+  if (GAMEDIRECTORY.version().contains("7.3.5"))
+  {
+    wxString message = wxString::Format(wxT("Fatal Error: WoW Model Viewer is not yet compatible with 7.3.5 version of the game. Please be patient."));
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Incorrect version"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
+
+
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
 
