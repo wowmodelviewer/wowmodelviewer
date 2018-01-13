@@ -22,6 +22,7 @@
 #include "logger/Logger.h"
 
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
+#define LAYOUT_BASE_REGION -1
 
 void CharTexture::addLayer(GameFile * file, int region, int layer)
 {
@@ -45,40 +46,39 @@ void CharTexture::reset(unsigned int _layoutSizeId)
 
 void CharTexture::compose(TextureID texID)
 {
-  std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
+  if (baseImage == 0)
+    return;
 
-	// if we only have one texture then don't bother with compositing
-	if (m_components.size()==0)
-	{
-		Texture temp(baseImage);
-    temp.id = texID;
-    temp.load();
-		return;
-	}
+  std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
 	std::sort(m_components.begin(), m_components.end());
 
   // burn base image
-  QImage * img = gameFileToQImage(baseImage);
+  const CharRegionCoords &coords = CharTexture::LAYOUTS[layoutSizeId].second[LAYOUT_BASE_REGION];
+  QImage * baseImg = gameFileToQImage(baseImage);
+  QImage img = baseImg->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-#if DEBUG_TEXTURE > 0
-	static int tmpidx = 0;
+#if DEBUG_TEXTURE > 1
+  static int baseidx = 0;
+  int cmpidx = 0;
+  img.save(QString("./ComposedTexture%1_%2.png").arg(++baseidx).arg(cmpidx++));
 #endif
+
   for (auto it : m_components)
   {
-    burnComponent(*img, it);
+    burnComponent(img, it);
 #if DEBUG_TEXTURE > 1
-    img->save(QString("./ComposedTexture%1.png").arg(tmpidx++));
+    img.save(QString("./ComposedTexture%1_%2.png").arg(baseidx).arg(cmpidx++));
 #endif
   }
 
 	// good, upload this to video
 	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img->width(), img->height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img->bits());
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 
-  delete img;
+  delete baseImg;
 }
 
 void CharTexture::initRegions()
@@ -115,7 +115,7 @@ void CharTexture::initRegions()
     base.ypos = 0;
     base.width = texLayout.width;
     base.height = texLayout.height;
-    regionCoords[0] = base;
+    regionCoords[LAYOUT_BASE_REGION] = base;
 
     for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
     {

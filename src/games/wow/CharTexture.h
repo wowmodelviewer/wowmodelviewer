@@ -49,7 +49,7 @@ class _CHARTEXTURE_API_ CharTexture
 {
   public:
     CharTexture(unsigned int _layoutSizeId = 0)
-  : layoutSizeId(_layoutSizeId)
+      : layoutSizeId(_layoutSizeId), baseImage(0)
   {}
 
     void setBaseImage(GameFile * img) { baseImage = img; }
