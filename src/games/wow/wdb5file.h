@@ -52,11 +52,6 @@ public:
   virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
 protected:
-  std::vector<uint32> m_IDs;
-  std::map<int, int> m_fieldSizes;
-  std::vector<unsigned char *> m_recordOffsets;
-
-private:
   struct field_structure
   {
     int16 size;
@@ -69,7 +64,16 @@ private:
     uint32 copiedRowId;
   };
 
+  std::vector<uint32> m_IDs;
+  std::map<int, int> m_fieldSizes;
+  std::vector<unsigned char *> m_recordOffsets;
+
   bool m_isSparseTable;
+
+private:
+ 
+
+  
 };
 
 #endif
