@@ -3,49 +3,49 @@
   <!-- Character tables - BEGIN -->
   <table name="CharacterFacialHairStyles">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="RaceID" pos="20" />
-    <field type="byte" name="SexID" pos="21" />
-    <field type="byte" name="VariationID" pos="22" />
+    <field type="byte" name="RaceID" pos="1" />
+    <field type="byte" name="SexID" pos="2" />
+    <field type="byte" name="VariationID" pos="3" />
     <field type="uint" name="Geoset" arraySize="5" pos="0" />
   </table>
   <table name="CharComponentTextureLayouts">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="Width" pos="0" />
-    <field type="uint" name="Height" pos="2" />
+    <field type="uint" name="Height" pos="1" />
   </table>
   <table name="CharComponentTextureSections">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="LayoutID" pos="8" />
-    <field type="byte" name="Section" pos="9" />
-    <field type="uint" name="X" pos="0" />
+    <field type="byte" name="LayoutID" pos="5" />
+    <field type="byte" name="Section" pos="6" />
+    <field type="uint" name="X" pos="1" />
     <field type="uint" name="Y" pos="2" />
-    <field type="uint" name="Width" pos="4" />
-    <field type="uint" name="Height" pos="6" />
+    <field type="uint" name="Width" pos="3" />
+    <field type="uint" name="Height" pos="4" />
   </table>
   <table name="CharHairGeoSets">
     <field primary="yes" type="uint" name="ID" />
-    <field type="byte" name="RaceID" pos="4" />
-    <field type="byte" name="SexID" pos="5" />
-    <field type="byte" name="VariationID" pos="6" />
-    <field type="byte" name="VariationType" pos="7" />
-    <field type="byte" name="GeoSetID" pos="8" />
-    <field type="byte" name="GeoSetType" pos="9" />
-    <field type="byte" name="ShowScalp" pos="10" />
-    <field type="uint" name="ColorIndex" pos="11" />
+    <field type="byte" name="RaceID" pos="1" />
+    <field type="byte" name="SexID" pos="2" />
+    <field type="byte" name="VariationID" pos="3" />
+    <field type="byte" name="VariationType" pos="4" />
+    <field type="byte" name="GeoSetID" pos="5" />
+    <field type="byte" name="GeoSetType" pos="6" />
+    <field type="byte" name="ShowScalp" pos="7" />
+    <field type="uint" name="ColorIndex" pos="8" />
   </table>
   <table name="CharSections">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="RaceID" pos="14" />
-    <field type="byte" name="SexID" pos="15" />
-    <field type="byte" name="SectionType" pos="16" />
+    <field type="byte" name="RaceID" pos="2" />
+    <field type="byte" name="SexID" pos="3" />
+    <field type="byte" name="SectionType" pos="4" />
     <field type="uint" name="TextureName" arraySize="3" pos="0" />
-    <field type="uint" name="Flags" pos="12" />
-    <field type="byte" name="VariationIndex" pos="17" />
-    <field type="byte" name="ColorIndex" pos="18" />
+    <field type="uint" name="Flags" pos="1" />
+    <field type="byte" name="VariationIndex" pos="5" />
+    <field type="byte" name="ColorIndex" pos="6" />
   </table>
   <table name="ChrClasses">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="name" pos="12" />
+    <field type="text" name="name" pos="1" />
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />

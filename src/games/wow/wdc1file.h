@@ -57,10 +57,6 @@ public:
   std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
 
 private:
-  void readWDBC1Header();
-
-  header m_header;
-
   enum FIELD_COMPRESSION
   {
     // None -- the field is a 8-, 16-, 32-, or 64-bit integer in the record data
@@ -105,9 +101,14 @@ private:
     uint32 val1;
     uint32 val2;
     uint32 val3;
-
   };
 
+  void readWDBC1Header();
+
+  bool readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const;
+  bool readFieldValue(unsigned int recordIndex, field_storage_info info, uint arrayIndex, uint arraySize, unsigned int & result) const;
+
+  header m_header;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
 

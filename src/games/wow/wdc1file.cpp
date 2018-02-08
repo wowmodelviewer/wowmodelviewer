@@ -62,27 +62,26 @@ bool WDC1File::open()
 
   field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
-#if WDB5_READ_DEBUG > 0
+//#if WDC1_READ_DEBUG > 0
   LOG_INFO << "--------------------------";
-#endif
+//#endif
   for (uint i = 0; i < fieldCount; i++)
   {
-#if WDC1_READ_DEBUG > 0
+//#if WDC1_READ_DEBUG > 0
     LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
-#endif
+//#endif
     m_fieldSizes[fieldStructure[i].position] = fieldStructure[i].size;
   }
-#if WDC1_READ_DEBUG > 0
+//#if WDC1_READ_DEBUG > 0
   LOG_INFO << "--------------------------";
-#endif
+//#endif
 
   stringSize = m_header.string_table_size;
 
   data = getPointer();
-  stringTable = data + recordSize*recordCount;
-
+ 
   // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = sizeof(header) + 4 * fieldCount + recordSize * recordCount;
+  uint32 stringTableOffset = sizeof(header) + sizeof(field_structure) * fieldCount + recordSize * recordCount;
 
   // embedded strings in fields instead of stringTable
   if ((m_header.flags & 0x01) != 0)
@@ -91,6 +90,9 @@ bool WDC1File::open()
     stringTableOffset = m_header.offset_map_offset + 6 * (m_header.max_id - m_header.min_id + 1);
   }
   
+  seek(stringTableOffset);
+  stringTable = getPointer();
+
   uint32 IdBlockOffset = stringTableOffset + stringSize;
 
   uint32 copyBlockOffset = IdBlockOffset;
@@ -103,7 +105,7 @@ bool WDC1File::open()
   uint32 commonBlockOffset = palletDataOffset + m_header.pallet_data_size;
   uint32 relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
  
-#if WDC1_READ_DEBUG > 0
+//#if WDC1_READ_DEBUG > 0
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
   LOG_INFO << "stringTableOffset" << stringTableOffset;
@@ -113,7 +115,7 @@ bool WDC1File::open()
   LOG_INFO << "palletDataOffset" << palletDataOffset;
   LOG_INFO << "commonBlockOffset" << commonBlockOffset;
   LOG_INFO << "relationshipDataOffset" << relationshipDataOffset;
-#endif
+//#endif
   /*
   LOG_INFO << fullname();
   LOG_INFO << "copy table size" << m_header.copy_table_size;
@@ -132,7 +134,7 @@ bool WDC1File::open()
       read(&info, sizeof(info));
       m_fieldStorageInfo.push_back(info);
     }
-#if WDC1_READ_DEBUG > 0
+//#if WDC1_READ_DEBUG > 0
     LOG_INFO << fullname() << "----- BEGIN -------";
     for (auto it : m_fieldStorageInfo)
     {
@@ -141,9 +143,12 @@ bool WDC1File::open()
       LOG_INFO << "field offset bits :" << it.field_offset_bits;
       LOG_INFO << "field size bits :" << it.field_size_bits;
       LOG_INFO << "additional data size :" << it.additional_data_size;
+      LOG_INFO << "val1 :" << it.val1;
+      LOG_INFO << "val2 :" << it.val2;
+      LOG_INFO << "val3 :" << it.val3;
     }
     LOG_INFO << fullname() << "----- END -------";
-#endif
+//#endif
   }
 
   // sparse Table
@@ -211,7 +216,7 @@ bool WDC1File::open()
         unsigned char * recordOffset = data + (i*recordSize);
         switch (info.storage_type)
         {
-          case FIELD_COMPRESSION::NONE: // same as wdb5
+          case FIELD_COMPRESSION::NONE:
           {
             unsigned char * val = new unsigned char[info.field_size_bits/8];
             memcpy(val, recordOffset, info.field_size_bits / 8);
@@ -227,18 +232,24 @@ bool WDC1File::open()
             memcpy(val, recordOffset + offset, size);
 
             unsigned int id = (*reinterpret_cast<unsigned int*>(val));
-            // id = id >> (info.field_offset_bits & 7);
             id = id & ((1ull << info.field_size_bits) - 1);
+
             m_IDs.push_back(id);
 
             break;
           }
           case FIELD_COMPRESSION::COMMON_DATA:
-            break;
+            LOG_ERROR << "Reading ID from Common Data is not implemented";
+            return false;
           case FIELD_COMPRESSION::BITPACKED_INDEXED:
-            break;
+            LOG_ERROR << "Reading ID from Bitpacked Indexed is not implemented";
+            return false;
           case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
-            break;
+            LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
+            return false;
+          default:
+            LOG_ERROR << "Reading ID from type" << info.storage_type << "is not implemented";
+            return false;
         }
       }
     }
@@ -247,6 +258,26 @@ bool WDC1File::open()
       for (uint i = 0; i < recordCount; i++)
         m_recordOffsets.push_back(data + (i*recordSize));
     }
+
+    uint id = 0;
+    for (auto it : m_IDs)
+    {
+      if (it == 8)
+        break;
+      id++;
+    }
+
+    uint plop = 0;
+    LOG_INFO << "VALUES FOR ID" << id << "---- BEGIN ----";
+    for (auto it : m_fieldStorageInfo)
+    {
+      unsigned int val = 0;
+      if (!readFieldValue(id, it, 0, 1, val))
+        continue;
+      LOG_INFO << plop++ << val;
+    }
+    LOG_INFO << "VALUES FOR ID" << id << "---- END ----";
+
     return true;
   }
 
@@ -279,21 +310,17 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
 
     for (uint i = 0; i < field->arraySize; i++)
     {
-      result.push_back("");
-      continue;
-
-      int fieldSize = (32 - m_fieldSizes.at(field->pos)) / 8;
-      unsigned char * val = new unsigned char[fieldSize];
-
-      memcpy(val, recordOffset + field->pos + i*fieldSize, fieldSize);
+      unsigned int val = 0;
+      if (!readFieldValue(recordIndex, field->pos, i, field->arraySize, val))
+        continue;
 
       if (field->type == "text")
       {
         char * stringPtr;
         if (m_isSparseTable)
-          stringPtr = reinterpret_cast<char *>(recordOffset + field->pos);
+          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8);
         else
-          stringPtr = reinterpret_cast<char *>(stringTable + *reinterpret_cast<int *>(val));
+          stringPtr = reinterpret_cast<char *>(stringTable + val);
 
         std::string value(stringPtr);
         std::replace(value.begin(), value.end(), '"', '\'');
@@ -302,27 +329,25 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
       else if (field->type == "float")
       {
         std::stringstream ss;
-        ss << *reinterpret_cast<float*>(val);
+        ss << *reinterpret_cast<float *>(&val);
         result.push_back(ss.str());
       }
       else if (field->type == "int")
       {
         std::stringstream ss;
-        ss << (*reinterpret_cast<int*>(val));
+        ss << *reinterpret_cast<int *>(&val);
         result.push_back(ss.str());
       }
-      else
+      else if (field->type == "uint")
       {
-        unsigned int mask = 0xFFFFFFFF;
-        if (fieldSize == 1)
-          mask = 0x000000FF;
-        else if (fieldSize == 2)
-          mask = 0x0000FFFF;
-        else if (fieldSize == 3)
-          mask = 0x00FFFFFF;
-
         std::stringstream ss;
-        ss << (*reinterpret_cast<unsigned int*>(val)& mask);
+        ss << *reinterpret_cast<uint *>(&val);
+        result.push_back(ss.str());
+      }
+      else if (field->type == "byte")
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<uint *>(&val);
         result.push_back(ss.str());
       }
     }
@@ -335,3 +360,80 @@ WDC1File::~WDC1File()
 {
   close();
 }
+
+bool WDC1File::readFieldValue(unsigned int recordIndex, field_storage_info info, uint arrayIndex, uint arraySize, unsigned int & result) const
+{
+  unsigned char * recordOffset = data + (recordIndex*recordSize);
+
+  switch (info.storage_type)
+  {
+    case FIELD_COMPRESSION::NONE:
+    {
+      uint fieldSize = info.field_size_bits / 8;
+      unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
+
+      if (arraySize != 1)
+      {
+        fieldSize /= arraySize;
+        fieldOffset += ((info.field_size_bits / 8 / arraySize) * arrayIndex);
+      }
+
+      unsigned char * val = new unsigned char[fieldSize];
+      memcpy(val, fieldOffset, fieldSize);
+
+      // handle special case => when value is supposed to be 0, values read are all 0xFF
+      // Don't understand why, so I use this ugly stuff...
+      if (arraySize != 1)
+      {
+        uint nbFF = 0;
+        for (uint i = 0; i < fieldSize; i++)
+        {
+          if (val[i] == 0xFF)
+            nbFF++;
+        }
+
+        if (nbFF == fieldSize)
+        {
+          for (uint i = 0; i < fieldSize; i++)
+            val[i] = 0;
+        }
+      }
+      result = (*reinterpret_cast<unsigned int*>(val));
+      result = result & ((1ull << info.field_size_bits / arraySize) - 1);
+      break;
+    }
+    case FIELD_COMPRESSION::BITPACKED:
+    {
+      unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+      unsigned int offset = info.field_offset_bits / 8;
+      unsigned char * v = new unsigned char[size];
+
+      memcpy(v, recordOffset + offset, size);
+     
+      result = (*reinterpret_cast<unsigned int*>(v));
+      result = result & ((1ull << info.field_size_bits) - 1);
+      break;
+    }
+    case FIELD_COMPRESSION::COMMON_DATA:
+      LOG_ERROR << "Reading data from Common Data is not implemented";
+      return false;
+    case FIELD_COMPRESSION::BITPACKED_INDEXED:
+      LOG_ERROR << "Reading data from Bitpacked Indexed is not implemented";
+      return false;
+    case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
+      LOG_ERROR << "Reading data from Bitpacked Indexed Array is not implemented";
+      return false;
+    default:
+      LOG_ERROR << "Reading data from type" << info.storage_type << "is not implemented";
+      return false;
+  }
+  return true;
+}
+
+bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
+{
+  return readFieldValue(recordIndex, m_fieldStorageInfo[fieldIndex], arrayIndex, arraySize, result);
+}
+
+
+
