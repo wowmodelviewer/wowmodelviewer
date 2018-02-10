@@ -138,7 +138,7 @@ size_t GameFile::getPos()
   return pointer;
 }
 
-unsigned char* GameFile::getBuffer()
+unsigned char* GameFile::getBuffer() const
 {
   return buffer;
 }

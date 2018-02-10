@@ -49,16 +49,15 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="FacialHairCustomization" arraySize="2" pos="32" />
-    <field type="text" name="HairCustomization" pos="40" />
-    <field type="uint" name="MaleDisplayID" pos="4" />
+    <field type="uint" name="MaleDisplayID" pos="7" />
     <field type="uint" name="FemaleDisplayID" pos="8" />
-    <field type="byte" name="CharComponentTexLayoutID" pos="93" />
-    <field type="text" name="ClientPrefix" pos="12" />
-    <field type="uint" name="HighResMaleDisplayId" pos="98" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="100" />
-    <field type="byte" name="CharComponentTexLayoutHiResID" pos="97" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="25" />
+    <field type="text" name="ClientPrefix" pos="0" />
+    <field type="uint" name="HighResMaleDisplayId" pos="31" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="32" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="29" />
   </table>
+  
   <!-- Character tables - END -->
   
   <!-- Creature tables - BEGIN -->
@@ -172,7 +171,7 @@
   </table>
   <table name="ModelFileData">
     <field type="uint" name="ModelID" primary="yes" />
-    <field type="uint" name="ID" pos="4" createIndex="yes" />
+    <field type="uint" name="ID" pos="2" createIndex="yes" />
   </table>
   <table name="ParticleColor">
     <field type="uint" name="ID" primary="yes" />

@@ -106,12 +106,13 @@ private:
   void readWDBC1Header();
 
   bool readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const;
-  bool readFieldValue(unsigned int recordIndex, field_storage_info info, uint arrayIndex, uint arraySize, unsigned int & result) const;
+  uint32 readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const;
 
   header m_header;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
-
+  std::map<uint32, uint32> m_palletBlockOffsets;
+  std::map<uint32, std::map<uint32, uint32> > m_commonData;
 };
 
 #endif
