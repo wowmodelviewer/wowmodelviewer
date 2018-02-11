@@ -205,6 +205,15 @@ void CASCFile::dumpStructure()
     if (it.magic == "AFID")
     {
       LOG_INFO << "Chunk :" << it.magic.c_str() << "nb anim file id" << it.size / sizeof(AFID);
+      setChunk("AFID");
+      while (!isEof())
+      {
+        AFID afid;
+        read(&afid, sizeof(AFID));
+        GameFile * f = GAMEDIRECTORY.getFile(afid.fileId);
+        if (f)
+          LOG_INFO << f->fullname();
+      }
     }
     else if (it.magic == "SKS1")
     {

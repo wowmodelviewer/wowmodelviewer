@@ -106,7 +106,7 @@
   </table>  
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="FileID" pos="95" />
+    <field type="uint" name="FileID" pos="19" />
   </table>
   
   <!-- Creature tables - END -->
@@ -177,7 +177,7 @@
   </table>
   <table name="TextureFileData">
     <field type="uint" name="TextureID" primary="yes" />
-    <field type="uint" name="ID" pos="0" createIndex="yes" />
+    <field type="uint" name="ID" pos="1" createIndex="yes" />
   </table>
   <table name="ModelFileData">
     <field type="uint" name="ModelID" primary="yes" />

@@ -37,7 +37,7 @@ void RaceInfos::init()
                           "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
                           "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
-                          "ChrRaces.ID, FacialHairCustomization1, FacialHairCustomization2, HairCustomization FROM ChrRaces "
+                          "ChrRaces.ID FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
@@ -60,9 +60,9 @@ void RaceInfos::init()
         infos.textureLayoutID = races.values[i][r+2].toInt();
         infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-        infos.customization[0] = races.values[i][13].toStdString();
-        infos.customization[1] = races.values[i][14].toStdString();
-        infos.customization[2] = races.values[i][15].toStdString();
+      //  infos.customization[0] = races.values[i][13].toStdString();
+      //  infos.customization[1] = races.values[i][14].toStdString();
+      //  infos.customization[2] = races.values[i][15].toStdString();
         int modelfileid = races.values[i][r].toInt();
         
         if ((r == 6) || (r == 9)) // if we are dealing with a HD model

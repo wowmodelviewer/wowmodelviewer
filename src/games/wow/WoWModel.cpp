@@ -769,6 +769,7 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 
 void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
+  LOG_INFO << __FUNCTION__ << f << f->fullname() << afids.size() << nAnimations << ofsAnimation << nAnimationLookup << ofsAnimationLookup;
   for (uint i = 0; i < nAnimations; i++)
   {
     ModelAnimation a;
@@ -841,7 +842,7 @@ void WoWModel::initAnimated(GameFile * f)
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-       // readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
 
         // let's try if there is a parent skel file to read
         GameFile * parentFile = 0;
@@ -888,6 +889,10 @@ void WoWModel::initAnimated(GameFile * f)
           bones.resize(skb1.nBones);
           ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
           
+          LOG_INFO << "animfiles" << animfiles.size();
+          for (auto it : animfiles)
+            LOG_INFO << it << (it ? it->fullname() : "-");
+
           for (size_t i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*fileToUse, mb[i], globalSequences, animfiles);
 
@@ -925,6 +930,10 @@ void WoWModel::initAnimated(GameFile * f)
     // init bones...
     bones.resize(header.nBones);
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+
+    LOG_INFO << "animfiles" << animfiles.size();
+    for (auto it : animfiles)
+      LOG_INFO << it << (it ? it->fullname() : "-");
 
     for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*f, mb[i], globalSequences, animfiles);
