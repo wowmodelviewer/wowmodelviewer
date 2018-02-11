@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC1_READ_DEBUG 0
+#define WDC1_READ_DEBUG 2
 
 WDC1File::WDC1File(const QString & file):
 WDB5File(file)
@@ -315,6 +315,40 @@ bool WDC1File::open()
       fieldId++;
     }
   }
+
+  if (m_header.relationship_data_size > 0)
+  {
+    struct relationship_entry
+    {
+      uint32 foreign_id;
+      uint32 record_index;
+    };
+
+    seek(relationshipDataOffset);
+    uint32 nbEntries;
+    read(&nbEntries, 4);
+
+    seekRelative(8);
+    for (uint i = 0; i < nbEntries; i++)
+    {
+      uint32 foreignKey;
+      uint32 recordIndex;
+      read(&foreignKey, 4);
+      read(&recordIndex, 4);
+      std::stringstream ss;
+      ss << foreignKey;
+      m_relationShipData[recordIndex] = ss.str();
+    }
+
+#if WDC1_READ_DEBUG > 0
+    LOG_INFO << "---- RELATIONSHIP DATA ----";
+    for (auto it : m_relationShipData)
+      LOG_INFO << it.first << "->" << it.second.c_str();
+    LOG_INFO << "---- RELATIONSHIP DATA ----";
+#endif
+  }
+
+
 #if WDC1_READ_DEBUG > 0
   if (stringSize)
   {
@@ -402,11 +436,19 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
     if (field->isKey)
     {
       std::stringstream ss;
-
       ss << m_IDs[recordIndex];
-
       result.push_back(ss.str());
+      continue;
+    }
 
+    if (field->isRelationshipData)
+    {
+      std::stringstream ss;
+      auto it = m_relationShipData.find(recordIndex);
+      if (it != m_relationShipData.end())
+        result.push_back(it->second);
+      else
+        result.push_back("");
       continue;
     }
 

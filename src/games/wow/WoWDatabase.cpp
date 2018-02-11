@@ -60,6 +60,7 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldS
 
   QDomNode pos = attributes.namedItem("pos");
   QDomNode commonData = attributes.namedItem("commonData");
+  QDomNode relationshipData = attributes.namedItem("relationshipData");
 
   if (!pos.isNull())
     field->pos = pos.nodeValue().toInt();
@@ -67,6 +68,8 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement & e, core::FieldS
   if (!commonData.isNull())
     field->isCommonData = true;
 
+  if (!relationshipData.isNull())
+    field->isRelationshipData = true;
 }
 
 DBFile * wow::TableStructure::createDBFile()

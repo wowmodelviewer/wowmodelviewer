@@ -50,13 +50,13 @@ namespace wow
   {
   public:
     FieldStructure() :
-      core::FieldStructure(), pos(-1), isCommonData(false)
+      core::FieldStructure(), pos(-1), isCommonData(false), isRelationshipData(false)
     {
     }
 
     int pos;
     bool isCommonData;
-
+    bool isRelationshipData;
   };
 
   class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
