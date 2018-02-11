@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC1_READ_DEBUG 2
+#define WDC1_READ_DEBUG 0
 
 WDC1File::WDC1File(const QString & file):
 WDB5File(file)
@@ -363,7 +363,7 @@ bool WDC1File::open()
 #endif
 
 #if WDC1_READ_DEBUG > 1
-  for (uint id = 0; id < 10; id++)
+  for (uint id = 15; id < 30; id++)
   {
     uint plop = 0;
     LOG_INFO << "VALUES FOR ID" << m_IDs[id] << "---- BEGIN ----";
@@ -575,7 +575,7 @@ bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     {
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * 4 + arrayIndex * 4;
+      uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
       memcpy(&result, getBuffer() + offset, 4);
       break;
     }
