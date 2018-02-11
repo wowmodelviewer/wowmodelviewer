@@ -120,20 +120,20 @@
   </table>
   <table name="ItemClass">
     <field type="uint" name="col0" primary="yes" />
-    <field type="text" name="Name" pos="4" />
-    <field type="uint" name="ID" pos="8" createIndex="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="uint" name="ID" pos="2" createIndex="yes" />
   </table>
   <table name="ItemSubClass">
     <field type="uint" name="col0" primary="yes" />
-    <field type="byte" name="ID" pos="10" />
-    <field type="byte" name="SubClassID" pos="11" />
+    <field type="byte" name="ID" pos="3" />
+    <field type="byte" name="SubClassID" pos="4" />
     <field type="text" name="Name" pos="0" />
-    <field type="text" name="VerboseName" pos="4" />
+    <field type="text" name="VerboseName" pos="1" />
   </table>
-  <table name="ItemSparse">
-    <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Quality" pos="226" />
-    <field type="text" name="Name" pos="136" />
+  <table name="ItemSparse" dbfile="itemsearchname">
+    <field type="uint" name="col0" primary="yes" />
+    <field type="byte" name="Quality" pos="4" />
+    <field type="text" name="Name" pos="1" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
@@ -142,21 +142,21 @@
   <table name="ItemModifiedAppearance">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="ItemID" pos="0" />
-    <field type="uint" name="ItemAppearanceID" pos="4" />
-    <field type="byte" name="ItemLevel" pos="7" />
+    <field type="uint" name="ItemAppearanceID" pos="3" />
+    <field type="byte" name="ItemLevel" pos="4" />
   </table>
   <table name="ItemDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="Model" arraySize="2" pos="0" />
-    <field type="uint" name="TextureItemID" arraySize="2" pos="4" />
-    <field type="byte" name="GeosetGroup" arraySize="4" pos="10" />
-    <field type="uint" name="ParticleColorID" pos="28"/>
-    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="22" />
+    <field type="uint" name="Model" arraySize="2" pos="10" />
+    <field type="uint" name="TextureItemID" arraySize="2" pos="11" />
+    <field type="byte" name="GeosetGroup" arraySize="4" pos="12" />
+    <field type="uint" name="ParticleColorID" pos="3"/>
+    <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="14" />
   </table>
   <table name="ItemDisplayInfoMaterialRes">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemDisplayInfoID" pos="0" createIndex="yes" />
-    <field type="uint" name="TextureFileDataID" pos="4" />
+    <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="TextureFileDataID" pos="0" />
   </table>
   <table name="HelmetGeosetVisData">
     <field type="uint" name="ID" primary="yes" />
@@ -165,7 +165,7 @@
   <table name="ItemSet">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="int" name="Item" arraySize="17" pos="4" />
+    <field type="int" name="Item" arraySize="17" pos="1" />
   </table>
   <!-- Item tables - END -->
   
