@@ -482,13 +482,7 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
         ss << *reinterpret_cast<int *>(&val);
         result.push_back(ss.str());
       }
-      else if (field->type == "uint")
-      {
-        std::stringstream ss;
-        ss << *reinterpret_cast<uint *>(&val);
-        result.push_back(ss.str());
-      }
-      else if (field->type == "byte")
+      else
       {
         std::stringstream ss;
         ss << *reinterpret_cast<uint *>(&val);
