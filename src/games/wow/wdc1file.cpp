@@ -21,7 +21,7 @@ void WDC1File::readWDBC1Header()
 {
   read(&m_header, sizeof(WDC1File::header)); // File Header
 
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
   LOG_INFO << "magic" << m_header.magic[0] << m_header.magic[1] << m_header.magic[2] << m_header.magic[3];
   LOG_INFO << "record count" << m_header.record_count;
   LOG_INFO << "field count" << m_header.field_count;
@@ -62,17 +62,17 @@ bool WDC1File::open()
 
   field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
   LOG_INFO << "--------------------------";
 #endif
   for (uint i = 0; i < fieldCount; i++)
   {
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
     LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
 #endif
     m_fieldSizes[fieldStructure[i].position] = fieldStructure[i].size;
   }
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
   LOG_INFO << "--------------------------";
 #endif
 
@@ -105,7 +105,7 @@ bool WDC1File::open()
   uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
   uint32 relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
  
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
   LOG_INFO << "stringTableOffset" << stringTableOffset;
@@ -179,14 +179,14 @@ bool WDC1File::open()
     if ((m_header.flags & 0x04) != 0)
     {
       seek(IdBlockOffset);
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
       LOG_INFO << "(header.flags & 0x04) != 0 -- BEGIN";
 #endif
       uint32 * vals = new uint32[recordCount];
       read(vals, recordCount * sizeof(uint32));
       m_IDs.assign(vals, vals + recordCount);
       delete[] vals;
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 2
       LOG_INFO << "(header.flags & 0x04) != 0 -- END";
 #endif
     }
@@ -194,7 +194,7 @@ bool WDC1File::open()
     {
       field_storage_info info = m_fieldStorageInfo[m_header.id_index];
 
-#if WDC1_READ_DEBUG > 0     
+#if WDC1_READ_DEBUG > 2     
       LOG_INFO << "info.storage_type" << info.storage_type;
       LOG_INFO << "info.field_size_bits" << info.field_size_bits;
       LOG_INFO << "info.field_offset_bits" << info.field_offset_bits;
@@ -328,7 +328,7 @@ bool WDC1File::open()
   }
 #endif
 
-#if WDC1_READ_DEBUG > 0
+#if WDC1_READ_DEBUG > 1
   for (uint id = 0; id < 10; id++)
   {
     uint plop = 0;

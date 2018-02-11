@@ -57,7 +57,16 @@
     <field type="uint" name="HighResFemaleDisplayId" pos="32" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="29" />
   </table>
-  
+  <table name="ChrCustomization">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="name" pos="0" />
+    <Field type="uint" name="Field1" pos="1" />
+    <Field type="byte" name="Field2" pos="2" />
+    <Field type="byte" name="Field3" pos="3" />
+    <Field type="int" name="Field4" arraySize="3" pos="4" />
+  </table>
+
+
   <!-- Character tables - END -->
   
   <!-- Creature tables - BEGIN -->
