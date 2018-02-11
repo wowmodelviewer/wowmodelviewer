@@ -66,21 +66,20 @@
     <field type="int"  name="Field4" arraySize="3" pos="4" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
-
-
+  
   <!-- Character tables - END -->
   
   <!-- Creature tables - BEGIN -->
   <table name="Creature">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="CreatureTypeID" pos="64" />
-    <field type="uint" name="DisplayID" arraySize="4" pos="16" />
-    <field type="text" name="Name" pos="48"/>
+    <field type="byte" name="CreatureTypeID" pos="8" />
+    <field type="uint" name="DisplayID" arraySize="4" pos="6" />
+    <field type="text" name="Name" pos="0"/>
   </table>
   <table name="CreatureType">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="byte" name="Flags" pos="4" />
+    <field type="byte" name="Flags" pos="1" />
   </table>
   <table name="CreatureDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
@@ -92,17 +91,17 @@
   </table>
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Skin" pos="11" />
-    <field type="byte" name="Face" pos="12" />
-    <field type="byte" name="HairStyle" pos="13" />
-    <field type="byte" name="HairColor" pos="14" />
-    <field type="byte" name="FacialHair" pos="15" />
+    <field type="byte" name="Skin" pos="5" />
+    <field type="byte" name="Face" pos="6" />
+    <field type="byte" name="HairStyle" pos="7" />
+    <field type="byte" name="HairColor" pos="8" />
+    <field type="byte" name="FacialHair" pos="9" />
   </table>
   <table name="NpcModelItemSlotDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="CreatureDisplayInfoExtraID" pos="0" createIndex="yes" />
-    <field type="uint" name="ItemDisplayInfoID" pos="4" />
-    <field type="byte" name="ItemType" pos="8" />
+    <field type="uint" name="CreatureDisplayInfoExtraID" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="ItemDisplayInfoID" pos="0" />
+    <field type="byte" name="ItemType" pos="1" />
   </table>  
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
