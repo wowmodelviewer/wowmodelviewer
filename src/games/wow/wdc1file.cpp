@@ -11,6 +11,7 @@
 #include "WoWDatabase.h"
 
 #define WDC1_READ_DEBUG 0
+#define WDC1_READ_DEBUG_FIRST_RECORDS 0
 
 WDC1File::WDC1File(const QString & file):
 WDB5File(file)
@@ -150,7 +151,7 @@ bool WDC1File::open()
   if ((m_header.flags & 0x01) != 0)
   {
     m_isSparseTable = true;
-    seek(stringSize);
+    seek(IdBlockOffset);
 
     recordCount = 0;
 
@@ -362,8 +363,8 @@ bool WDC1File::open()
   }
 #endif
 
-#if WDC1_READ_DEBUG > 1
-  for (uint id = 15; id < 30; id++)
+#if WDC1_READ_DEBUG_FIRST_RECORDS > 0
+  for (uint id = 0; id < 10; id++)
   {
     uint plop = 0;
     LOG_INFO << "VALUES FOR ID" << m_IDs[id] << "---- BEGIN ----";

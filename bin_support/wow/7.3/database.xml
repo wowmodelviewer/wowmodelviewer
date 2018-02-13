@@ -113,10 +113,10 @@
   <!-- Item tables - BEGIN -->
   <table name="Item">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Class" pos="4" />
-    <field type="byte" name="SubClass" pos="5" />
-    <field type="byte" name="Type" pos="8" />
-    <field type="byte" name="Sheath" pos="9" />
+    <field type="byte" name="Class" pos="1" />
+    <field type="byte" name="SubClass" pos="2" />
+    <field type="byte" name="Type" pos="5" />
+    <field type="byte" name="Sheath" pos="6" />
   </table>
   <table name="ItemClass">
     <field type="uint" name="col0" primary="yes" />
@@ -131,9 +131,9 @@
     <field type="text" name="VerboseName" pos="1" />
   </table>
   <table name="ItemSparse" dbfile="itemsearchname">
-    <field type="uint" name="col0" primary="yes" />
     <field type="byte" name="Quality" pos="4" />
     <field type="text" name="Name" pos="1" />
+    <field type="uint" name="ID" pos="2" createIndex="yes" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
