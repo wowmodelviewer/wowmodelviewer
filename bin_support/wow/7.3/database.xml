@@ -184,18 +184,18 @@
   </table>
   <table name="ParticleColor">
     <field type="uint" name="ID" primary="yes" />
-    <field type="int" name="StartColor" arraySize="3"  pos="0" />
-    <field type="int" name="MidColor" arraySize="3"  pos="12" />
-    <field type="int" name="EndColor" arraySize="3"  pos="24" />
+    <field type="int" name="StartColor" arraySize="3"  pos="1" />
+    <field type="int" name="MidColor" arraySize="3"  pos="2" />
+    <field type="int" name="EndColor" arraySize="3"  pos="3" />
   </table>
   <table name="Mount">
-    <field primary="yes" type="uint" name="ID" />
-    <field type="text" name="Name" pos="4" />
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
   </table>
   <table name="MountXDisplay">
-    <field primary="yes" type="uint" name="ID" />
-    <field type="uint" name="MountID" pos="0" />
-    <field type="uint" name="DisplayID" pos="2" />
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="MountID" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="DisplayID" pos="0" />
   </table>
   <!-- Misc tables - END -->
 
