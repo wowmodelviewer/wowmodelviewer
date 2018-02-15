@@ -767,7 +767,7 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, std::vector<std::pair<GameFile *, GameFile *> > & animfiles, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   LOG_INFO << __FUNCTION__ << f << f->fullname() << afids.size() << nAnimations << ofsAnimation << nAnimationLookup << ofsAnimationLookup;
   for (uint i = 0; i < nAnimations; i++)
@@ -801,11 +801,11 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAni
     if (anim && anim->open())
     {
       anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
-      animfiles.push_back(anim);
+      animfiles.push_back(std::make_pair(anim,f));
     }
     else
     {
-      animfiles.push_back(NULL);
+      animfiles.push_back(std::make_pair((GameFile *)0, (GameFile *)0));
     }
   }
 
@@ -826,6 +826,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, uint32 nAni
 
 void WoWModel::initAnimated(GameFile * f)
 {
+  std::vector<std::pair<GameFile *, GameFile *> > animfiles;
   if (f->isChunked() && f->setChunk("SKID"))
   {
     uint32 skelFileID;
@@ -842,7 +843,7 @@ void WoWModel::initAnimated(GameFile * f)
         SKS1 sks1;
         skelFile->read(&sks1, sizeof(sks1));
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        readAnimsFromFile(skelFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+        readAnimsFromFile(skelFile, afids, animfiles, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
 
         // let's try if there is a parent skel file to read
         GameFile * parentFile = 0;
@@ -862,7 +863,7 @@ void WoWModel::initAnimated(GameFile * f)
             {
               SKS1 sks1;
               parentFile->read(&sks1, sizeof(sks1));
-              readAnimsFromFile(parentFile, afids, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+              readAnimsFromFile(parentFile, afids, animfiles, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
             }
 
             parentFile->close();
@@ -891,7 +892,7 @@ void WoWModel::initAnimated(GameFile * f)
           
           LOG_INFO << "animfiles" << animfiles.size();
           for (auto it : animfiles)
-            LOG_INFO << it << (it ? it->fullname() : "-");
+            LOG_INFO << it.first << (it.first ? it.first->fullname() : "-");
 
           for (size_t i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*fileToUse, mb[i], globalSequences, animfiles);
@@ -923,7 +924,7 @@ void WoWModel::initAnimated(GameFile * f)
       f->setChunk("MD21", false);
     }
 
-    readAnimsFromFile(f, afids, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
+    readAnimsFromFile(f, afids, animfiles, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
 
     animManager = new AnimManager(*this);
 
@@ -933,7 +934,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     LOG_INFO << "animfiles" << animfiles.size();
     for (auto it : animfiles)
-      LOG_INFO << it << (it ? it->fullname() : "-");
+      LOG_INFO << it.first << (it.first ? it.first->fullname() : "-");
 
     for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*f, mb[i], globalSequences, animfiles);
@@ -953,8 +954,8 @@ void WoWModel::initAnimated(GameFile * f)
   // free MPQFile
   for (auto it : animfiles)
   {
-    if (it != 0)
-      it->close();
+    if (it.first != 0)
+      it.first->close();
   }
 
   const size_t size = (origVertices.size() * sizeof(float));

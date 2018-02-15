@@ -76,7 +76,7 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 	calc = true;
 }
 
-void Bone::initV3(GameFile & f, ModelBoneDef &b, std::vector<uint32> & global, std::vector<GameFile *> & animfiles)
+void Bone::initV3(GameFile & f, ModelBoneDef &b, std::vector<uint32> & global, std::vector<std::pair<GameFile *, GameFile *> > & animfiles)
 {
 	calc = false;
 
@@ -86,7 +86,7 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, std::vector<uint32> & global, s
 
 	boneDef = b;
 
-	trans.init(b.translation, f, global, animfiles);
+	trans.init(b.translation,f ,global, animfiles);
 	rot.init(b.rotation, f, global, animfiles);
 	scale.init(b.scaling, f, global, animfiles);
 	trans.fix(fixCoordSystem);

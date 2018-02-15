@@ -273,7 +273,7 @@ public:
 		}
 	}
 
-  void init(AnimationBlock &b, GameFile & f, std::vector<uint32> & gs, std::vector<GameFile *> & animfiles)
+  void init(AnimationBlock &b, GameFile & f, std::vector<uint32> & gs, std::vector<std::pair<GameFile *, GameFile *> > & animfiles)
 	{
 		globals = gs;
 		type = b.type;
@@ -287,45 +287,75 @@ public:
 		if( b.nTimes == 0 )
 			return;
 
-		for(size_t j=0; j < b.nTimes; j++) {
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
-			uint32 *ptimes;
-			if (animfiles[j] && (animfiles[j]->getSize() > pHeadTimes->ofsEntrys))
-				ptimes = (uint32*)(animfiles[j]->getBuffer() + pHeadTimes->ofsEntrys);
-			else if (f.getSize() > pHeadTimes->ofsEntrys)
-				ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
-			else
-				continue;
+		for(size_t j=0; j < b.nTimes; j++) 
+    {
+      uint32 *ptimes;
+      AnimationBlockHeader* pHeadTimes;
+      if (animfiles[j].first)
+      {
+        GameFile * animfile = animfiles[j].first;
+        GameFile * skelfile = animfiles[j].second;
+        skelfile->setChunk("SKB1");
+        pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
+        if (animfile->getSize() < pHeadTimes->ofsEntrys)
+          continue;
+      }
+      else
+      {
+        pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
+        if (f.getSize() < pHeadTimes->ofsEntrys)
+          continue;
+      }
+
+      
+
 			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
 				times[j].push_back(ptimes[i]);
 		}
 
 		// keyframes
-		for(size_t j=0; j < b.nKeys; j++) {
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
-			assert((D*)(f.getBuffer() + pHeadKeys->ofsEntrys));
+		for(size_t j=0; j < b.nKeys; j++) 
+    {
 			D *keys;
-			if (animfiles[j] && (animfiles[j]->getSize() > pHeadKeys->ofsEntrys))
-				keys = (D*)(animfiles[j]->getBuffer() + pHeadKeys->ofsEntrys);
-			else if (f.getSize() > pHeadKeys->ofsEntrys)
-				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
-			else
-				continue;
-			switch (type) {
+      AnimationBlockHeader* pHeadKeys;
+      if (animfiles[j].first)
+      {
+        GameFile * animfile = animfiles[j].first;
+        GameFile * skelfile = animfiles[j].second;
+        skelfile->setChunk("SKB1");
+        pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
+        if (animfile->getSize() < pHeadKeys->ofsEntrys)
+          continue;
+      }
+      else
+      {
+        pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
+        if (f.getSize() < pHeadKeys->ofsEntrys)
+          continue;
+      }
+
+			switch (type) 
+      {
 				case INTERPOLATION_NONE:
 				case INTERPOLATION_LINEAR:
 					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
 						data[j].push_back(Conv::conv(keys[i]));
 					break;
 				case INTERPOLATION_HERMITE:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
+					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+          {
 						data[j].push_back(Conv::conv(keys[i*3]));
 						in[j].push_back(Conv::conv(keys[i*3+1]));
 						out[j].push_back(Conv::conv(keys[i*3+2]));
 					}
 					break;
 				case INTERPOLATION_BEZIER:
-					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
+					for (size_t i = 0; i < pHeadKeys->nEntrys; i++) 
+          {
 						data[j].push_back(Conv::conv(keys[i*3]));
 						in[j].push_back(Conv::conv(keys[i*3+1]));
 						out[j].push_back(Conv::conv(keys[i*3+2]));
