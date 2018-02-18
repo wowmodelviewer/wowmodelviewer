@@ -122,8 +122,8 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
     }
   }
 
-  if (!result)
-    LOG_ERROR << __FUNCTION__ << "Cannot find chunk" << chunkName.c_str();
+ // if (!result)
+ //   LOG_ERROR << __FUNCTION__ << "Cannot find chunk" << chunkName.c_str();
 
   return result;
 }

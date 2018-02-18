@@ -2,6 +2,7 @@
 #define ANIMATED_H
 
 #include <cassert>
+#include <map>
 #include <utility>
 #include <vector>
 
@@ -21,6 +22,13 @@
 #    define _ANIMATED_API_
 #endif
 
+class modelAnimData
+{
+public:
+  std::map<uint, int16> animIndexToAnimId;
+  std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
+  std::vector<uint32> globalSequences;  
+};
 
 // interpolation functions
 template<class T>
@@ -273,9 +281,9 @@ public:
 		}
 	}
 
-  void init(AnimationBlock &b, GameFile & f, std::vector<uint32> & gs, std::vector<std::pair<GameFile *, GameFile *> > & animfiles)
+  void init(AnimationBlock &b, GameFile & f, const modelAnimData & modelData)
 	{
-		globals = gs;
+		globals = modelData.globalSequences;
 		type = b.type;
 		seq = b.seq;
 
@@ -291,10 +299,11 @@ public:
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
-      if (animfiles[j].first)
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+      if (it != modelData.animfiles.end())
       {
-        GameFile * animfile = animfiles[j].first;
-        GameFile * skelfile = animfiles[j].second;
+        GameFile * animfile = it->second.first;
+        GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
         pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
@@ -309,8 +318,6 @@ public:
           continue;
       }
 
-      
-
 			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
 				times[j].push_back(ptimes[i]);
 		}
@@ -320,10 +327,11 @@ public:
     {
 			D *keys;
       AnimationBlockHeader* pHeadKeys;
-      if (animfiles[j].first)
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+      if (it != modelData.animfiles.end())
       {
-        GameFile * animfile = animfiles[j].first;
-        GameFile * skelfile = animfiles[j].second;
+        GameFile * animfile = it->second.first;
+        GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
         pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
@@ -396,7 +404,7 @@ public:
 				break;
 		}
 	}
-	friend std::ostream& operator<<(std::ostream& out, const Animated& v)
+  friend std::ostream& operator<<(std::ostream& out, const Animated& v)
 	{
 		if (v.sizes == 0)
 			return out;

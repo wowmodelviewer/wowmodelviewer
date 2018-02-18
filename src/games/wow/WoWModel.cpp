@@ -23,6 +23,8 @@
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
+#include <sstream>
+
 enum TextureFlags
 {
   TEXTURE_WRAPX = 1,
@@ -767,9 +769,8 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, std::vector<std::pair<GameFile *, GameFile *> > & animfiles, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
-  LOG_INFO << __FUNCTION__ << f << f->fullname() << afids.size() << nAnimations << ofsAnimation << nAnimationLookup << ofsAnimationLookup;
   for (uint i = 0; i < nAnimations; i++)
   {
     ModelAnimation a;
@@ -801,11 +802,13 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, std::vector
     if (anim && anim->open())
     {
       anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
-      animfiles.push_back(std::make_pair(anim,f));
-    }
-    else
-    {
-      animfiles.push_back(std::make_pair((GameFile *)0, (GameFile *)0));
+      {     
+        auto animIt = data.animfiles.find(anims[i].animID);
+        if (animIt != data.animfiles.end())
+          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
+      }
+      
+      data.animfiles[anims[i].animID] = std::make_pair(anim, f);
     }
   }
 
@@ -826,7 +829,9 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, std::vector
 
 void WoWModel::initAnimated(GameFile * f)
 {
-  std::vector<std::pair<GameFile *, GameFile *> > animfiles;
+  modelAnimData data;
+  data.globalSequences = globalSequences;
+
   if (f->isChunked() && f->setChunk("SKID"))
   {
     uint32 skelFileID;
@@ -835,15 +840,12 @@ void WoWModel::initAnimated(GameFile * f)
 
     if (skelFile->open())
     {
-      skelFile->dumpStructure();
+      // skelFile->dumpStructure();
       vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
         SKS1 sks1;
-        skelFile->read(&sks1, sizeof(sks1));
-        memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-        readAnimsFromFile(skelFile, afids, animfiles, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
 
         // let's try if there is a parent skel file to read
         GameFile * parentFile = 0;
@@ -856,18 +858,24 @@ void WoWModel::initAnimated(GameFile * f)
 
           if (parentFile && parentFile->open())
           {
-            parentFile->dumpStructure();
+            // parentFile->dumpStructure();
             afids = readAFIDSFromFile(parentFile);
 
             if (parentFile->setChunk("SKS1"))
             {
               SKS1 sks1;
               parentFile->read(&sks1, sizeof(sks1));
-              readAnimsFromFile(parentFile, afids, animfiles, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+              readAnimsFromFile(parentFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
             }
 
             parentFile->close();
           }
+        }
+        else
+        {
+          skelFile->read(&sks1, sizeof(sks1));
+          memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
+          readAnimsFromFile(skelFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
         }
 
         animManager = new AnimManager(*this);
@@ -889,13 +897,12 @@ void WoWModel::initAnimated(GameFile * f)
           memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
           bones.resize(skb1.nBones);
           ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
-          
-          LOG_INFO << "animfiles" << animfiles.size();
-          for (auto it : animfiles)
-            LOG_INFO << it.first << (it.first ? it.first->fullname() : "-");
+
+          for (uint i = 0; i < anims.size(); i++)
+            data.animIndexToAnimId[i] = anims[i].animID;
 
           for (size_t i = 0; i < skb1.nBones; i++)
-            bones[i].initV3(*fileToUse, mb[i], globalSequences, animfiles);
+            bones[i].initV3(*fileToUse, mb[i], data);
 
           // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
           if (skb1.nKeyBoneLookup < BONE_MAX)
@@ -924,7 +931,7 @@ void WoWModel::initAnimated(GameFile * f)
       f->setChunk("MD21", false);
     }
 
-    readAnimsFromFile(f, afids, animfiles, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
+    readAnimsFromFile(f, afids, data, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
 
     animManager = new AnimManager(*this);
 
@@ -932,12 +939,11 @@ void WoWModel::initAnimated(GameFile * f)
     bones.resize(header.nBones);
     ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
 
-    LOG_INFO << "animfiles" << animfiles.size();
-    for (auto it : animfiles)
-      LOG_INFO << it.first << (it.first ? it.first->fullname() : "-");
+    for (uint i = 0; i < anims.size(); i++)
+      data.animIndexToAnimId[i] = anims[i].animID;
 
     for (uint i = 0; i < bones.size(); i++)
-      bones[i].initV3(*f, mb[i], globalSequences, animfiles);
+      bones[i].initV3(*f, mb[i], data);
 
     // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
     if (header.nKeyBoneLookup < BONE_MAX)
@@ -952,10 +958,10 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // free MPQFile
-  for (auto it : animfiles)
+  for (auto it : data.animfiles)
   {
-    if (it.first != 0)
-      it.first->close();
+    if (it.second.first != 0)
+      it.second.first->close();
   }
 
   const size_t size = (origVertices.size() * sizeof(float));
@@ -2479,6 +2485,7 @@ void WoWModel::restoreRawGeosets()
     i++;
   }
 }
+
 
 std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 {
