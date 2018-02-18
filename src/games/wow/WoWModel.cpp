@@ -2090,8 +2090,9 @@ void WoWModel::unmergeModel(QString & name)
 
   if (it != mergedModels.end())
   {
-    unmergeModel(*it);
-    delete *it;
+    WoWModel * m = *it;
+    unmergeModel(m);
+    delete m;
   }
 }
 
@@ -2099,7 +2100,6 @@ void WoWModel::unmergeModel(WoWModel * m)
 {
   LOG_INFO << __FUNCTION__ << m->name();
   mergedModels.erase(m);
-
   refreshMerging();
 }
 
