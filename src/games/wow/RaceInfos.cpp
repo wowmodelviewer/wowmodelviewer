@@ -8,7 +8,7 @@
 
 #define DEBUG_RACEINFOS 0
 
-std::map< int, RaceInfos> RaceInfos::RACES;
+std::map<int, RaceInfos> RaceInfos::RACES;
 
 bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
 {
@@ -60,9 +60,7 @@ void RaceInfos::init()
         infos.textureLayoutID = races.values[i][r+2].toInt();
         infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-      //  infos.customization[0] = races.values[i][13].toStdString();
-      //  infos.customization[1] = races.values[i][14].toStdString();
-      //  infos.customization[2] = races.values[i][15].toStdString();
+      
         int modelfileid = races.values[i][r].toInt();
         
         if ((r == 6) || (r == 9)) // if we are dealing with a HD model

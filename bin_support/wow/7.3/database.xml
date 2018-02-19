@@ -66,6 +66,12 @@
     <field type="int"  name="Field4" arraySize="3" pos="4" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
+  <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="text" name="FacialHairCustomization1" />
+    <field type="text" name="FacialHairCustomization2" />
+    <field type="text" name="HairCustomization" />
+  </table>
   
   <!-- Character tables - END -->
   

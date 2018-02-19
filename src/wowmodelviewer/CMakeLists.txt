@@ -113,7 +113,8 @@ source_group("wow7.2" FILES ${wow7_2_files})
 
 set(wow7_3_files ${WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
 				 ${WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv)
+				 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv
+				 ${WMV_BASE_PATH}/bin_support/wow/7.3/ChrRacesCustomization.csv)
 
 source_group("wow7.3" FILES ${wow7_3_files})
 
@@ -160,7 +161,8 @@ set(GAMEFILES_WOW7_2 ${WMV_BASE_PATH}/bin_support/wow/7.2/listfile.txt
 
 set(GAMEFILES_WOW7_3 ${WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
         		     ${WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv)
+					 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv
+					 ${WMV_BASE_PATH}/bin_support/wow/7.3/ChrRacesCustomization.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 

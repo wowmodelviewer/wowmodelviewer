@@ -412,7 +412,7 @@ void CharDetails::fillCustomizationMap()
 
   // starting from here, customization may differ based on database values
   // get customization names
-  query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRaces WHERE ID = %2")
+  query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRacesCustomization WHERE ID = %2")
     .arg(infos.sexid + 1)
     .arg(infos.raceid);
 
