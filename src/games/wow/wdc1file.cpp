@@ -151,7 +151,7 @@ bool WDC1File::open()
   if ((m_header.flags & 0x01) != 0)
   {
     m_isSparseTable = true;
-    seek(IdBlockOffset);
+    seek(m_header.offset_map_offset);
 
     recordCount = 0;
 
@@ -362,6 +362,7 @@ bool WDC1File::open()
     LOG_INFO << "---- STRING TABLE ----";
   }
 #endif
+
 
 #if WDC1_READ_DEBUG_FIRST_RECORDS > 0
   for (uint id = 0; id < 10; id++)

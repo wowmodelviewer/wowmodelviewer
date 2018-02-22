@@ -17,7 +17,7 @@ _DATABASE_API_ std::vector<NPCRecord> npcs;
 ItemRecord::ItemRecord(const std::vector<QString> & vals)
   : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
-  if(vals.size() < 7)
+  if(vals.size() < 6)
       return;
 
   id = vals[0].toInt();
@@ -25,7 +25,7 @@ ItemRecord::ItemRecord(const std::vector<QString> & vals)
   itemclass = vals[3].toInt();
   subclass = vals[4].toInt();
   model = 1;
-  quality = vals[6].toInt();
+  quality = 0;
   switch(vals[5].toInt())
   {
     case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;

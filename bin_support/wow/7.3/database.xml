@@ -136,10 +136,9 @@
     <field type="text" name="Name" pos="0" />
     <field type="text" name="VerboseName" pos="1" />
   </table>
-  <table name="ItemSparse" dbfile="itemsearchname">
-    <field type="byte" name="Quality" pos="4" />
+  <table name="ItemSparse">
+    <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="1" />
-    <field type="uint" name="ID" pos="2" createIndex="yes" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
