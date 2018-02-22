@@ -255,6 +255,38 @@ bool WDC1File::open()
       m_recordOffsets.push_back(data + (i*recordSize));
   }
 
+  // copy table
+  if (m_header.copy_table_size > 0)
+  {
+    seek(copyBlockOffset);
+    uint nbEntries = m_header.copy_table_size / sizeof(copy_table_entry);
+
+    m_IDs.reserve(recordCount + nbEntries);
+    m_recordOffsets.reserve(recordCount + nbEntries);
+
+    copy_table_entry * copyTable = new copy_table_entry[nbEntries];
+    read(copyTable, m_header.copy_table_size);
+
+    // create a id->offset map
+    std::map<uint32, unsigned char*> IDToOffsetMap;
+
+    for (uint i = 0; i < recordCount; i++)
+    {
+      IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
+    }
+
+    for (uint i = 0; i < nbEntries; i++)
+    {
+      copy_table_entry entry = copyTable[i];
+      m_IDs.push_back(entry.newRowId);
+      m_recordOffsets.push_back(IDToOffsetMap[entry.copiedRowId]);
+    }
+
+    delete[] copyTable;
+
+    recordCount += nbEntries;
+  }
+
   if (m_header.common_data_size > 0)
   {
     uint fieldId = 0;
@@ -428,7 +460,6 @@ bool WDC1File::close()
 std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
-  
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
   for (auto it : structure->fields)
@@ -503,7 +534,7 @@ WDC1File::~WDC1File()
 
 bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
 {
-  unsigned char * recordOffset = data + (recordIndex*recordSize);
+  unsigned char * recordOffset = m_recordOffsets[recordIndex];
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
   switch (info.storage_type)
   {
