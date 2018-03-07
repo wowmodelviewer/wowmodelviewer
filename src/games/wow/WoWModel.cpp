@@ -133,7 +133,7 @@ gamefile(file)
   hasParticles = false;
   replaceParticleColors = false;
   replacableParticleColorIDs.clear();
-  creatureGeosetData = 0;
+  creatureGeosetData.clear();
   isWMO = false;
   isMount = false;
 
@@ -1858,24 +1858,14 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
   }
 }
 
-void WoWModel::setCreatureGeosetData(int cgd)
+void WoWModel::setCreatureGeosetData(std::vector<GeosetNum> cgd)
 {
   // Hide geosets that were set by old creatureGeosetData:
-  if (creatureGeosetData)
+  if (creatureGeosetData.size() > 0)
     restoreRawGeosets();
 
-  // Extract geoset data from cgd and set geosets accordingly.
-  // creatureGeosetData defines geosets that are enabled only when specific displayIDs
-  // are selected from the menu. The position in the hex integer represents the group
-  // number, and the value of the four bits at that position represents the geoset. So
-  // 0x00200000 means geoset 2 of group 600, therefore 602.
-  for (int i = 0; i < 8; i++)
-  {
-    int geo;
-    geo = (cgd >> (i * 4)) & 0x0F;
-    if (geo > 0)
-      setGeosetGroupDisplay((CharGeosets)(i+1), geo);
-  }
+  for (auto &it : cgd)
+    setGeosetGroupDisplay((CharGeosets)it.first, it.second);
   creatureGeosetData = cgd;
 }
 

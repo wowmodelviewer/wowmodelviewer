@@ -486,11 +486,27 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
   // see if this model has skins
   LOG_INFO << "Searching skins for" << m->itemName();
 
-  QString query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
-                          "CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
-                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-                          "WHERE CreatureModelData.FileID = %1")
-                          .arg( m->gamefile->fileDataId());
+  QString query;
+
+  if (GAMEDIRECTORY.version().contains("8.0"))
+  {
+    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
+                    "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                    "LEFT JOIN CreatureModelData "
+                    "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                    "WHERE CreatureModelData.FileID = %1")
+                    .arg( m->gamefile->fileDataId());
+  }
+  else
+  { 
+    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
+                    "CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
+                    "LEFT JOIN CreatureModelData "
+                    "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                    "WHERE CreatureModelData.FileID = %1")
+                    .arg( m->gamefile->fileDataId());
+  } 
+
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   PCRList.clear();
@@ -514,7 +530,39 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.definedTexture = true;
       grp.count = count;
-      grp.creatureGeosetData = r.values[i][5].toInt();
+      if (GAMEDIRECTORY.version().contains("8.0"))
+      {
+        QString query2 = QString("SELECT GeosetType, GeosetID "
+                                "FROM CreatureDisplayInfoGeosetData "
+                                "WHERE DisplayID = %1")
+                                .arg( cdi );
+        sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
+        if(r2.valid && !r2.values.empty())
+        {
+          for(size_t j = 0 ; j < r2.values.size() ; j++)
+          {
+            int geotype = r2.values[j][0].toInt();
+            int geoid = r2.values[j][1].toInt();
+            if (geoid > 0)
+              grp.creatureGeosetData.push_back(std::make_pair(geotype+1, geoid));
+          }
+        }
+      }
+      else
+      {
+        // Extract geoset data from cgd and set geosets accordingly.
+        // creatureGeosetData defines geosets that are enabled only when specific displayIDs
+        // are selected from the menu. The position in the hex integer represents the group
+        // number, and the value of the four bits at that position represents the geoset. So
+        // 0x00200000 means geoset 2 of group 600, therefore 602.
+        int cgd = r.values[i][5].toInt();
+        for (int i = 0; i < 8; i++)
+        {
+          int geo = (cgd >> (i * 4)) & 0x0F;
+          if (geo > 0)
+            grp.creatureGeosetData.push_back(std::make_pair(i+1, geo));
+        }
+      }
       int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
@@ -1204,7 +1252,7 @@ void AnimControl::SetSkin(int num)
 
   // creatureGeosetData defines geosets that are enabled only when
   // specific displayIDs are selected from the menu.
-  int cgd = grp->creatureGeosetData;
+  std::vector<GeosetNum> cgd = grp->creatureGeosetData;
   g_selModel->setCreatureGeosetData(cgd);
   g_modelViewer->modelControl->UpdateGeosetSelection();
 

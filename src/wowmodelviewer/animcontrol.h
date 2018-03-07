@@ -16,6 +16,8 @@ extern float animSpeed;
 // AnimationData.dbc
 #define	ANIM_STAND	0
 
+typedef std::pair<int, int> GeosetNum;
+
 class TextureGroup
 {
   public:
@@ -28,7 +30,7 @@ class TextureGroup
     // For particle colour replacements:
     int particleColInd; // ID for ParticleColor.dbc
     int PCRIndex;  // index into PCRList - list of particle color replacement values
-    int creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
+    std::vector<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
 
     TextureGroup() : base(0), count(0)
     {
@@ -38,7 +40,7 @@ class TextureGroup
       }
       particleColInd = 0;
       PCRIndex = -1;
-      creatureGeosetData = 0;
+      creatureGeosetData.clear();
       definedTexture = false;
     }
 

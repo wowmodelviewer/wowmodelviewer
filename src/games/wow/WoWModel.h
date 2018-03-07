@@ -135,6 +135,8 @@ public:
   // Raw Data
   std::vector<ModelVertex> origVertices;
 
+  typedef std::pair<int, int> GeosetNum;
+
   Vec3D *normals;
   Vec2D *texCoords;
   Vec3D *vertices;
@@ -232,7 +234,7 @@ public:
   CharDetails cd;
   TabardDetails td;
   ModelHeader header;
-  int creatureGeosetData;
+  std::vector<GeosetNum> creatureGeosetData;
   bool bSheathe;
 
   friend class ModelRenderPass;
@@ -254,7 +256,7 @@ public:
   void showGeoset(uint geosetindex, bool value);
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
-  void setCreatureGeosetData(int cgd);
+  void setCreatureGeosetData(std::vector<GeosetNum> cgd);
 
   void mergeModel(QString & name);
   void mergeModel(WoWModel * model);
