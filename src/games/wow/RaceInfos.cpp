@@ -37,7 +37,7 @@ void RaceInfos::init()
                           "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
                           "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
-                          "ChrRaces.ID FROM ChrRaces "
+                          "ChrRaces.ID, ItemDisplayRaceID FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
@@ -51,12 +51,20 @@ void RaceInfos::init()
 
   for(int i=0, imax = races.values.size() ; i < imax ; i++)
   {
+    std::string displayPrefix = "";
+    if (races.values[i][13].toInt() != 0)
+    {
+      QString query = QString("SELECT lower(ClientPrefix) FROM ChrRaces WHERE ID = %1").arg(races.values[i][13].toInt());
+      sqlResult display = GAMEDATABASE.sqlQuery(query);
+      displayPrefix = display.values[0][0].toStdString();
+    }
+
     for(int r = 0; r <12 ; r+=3)
     {
       if(races.values[i][r] != "")
       {
         RaceInfos infos;
-        infos.prefix = races.values[i][r+1].toStdString();
+        infos.prefix = (displayPrefix != "") ? displayPrefix : races.values[i][r + 1].toStdString();
         infos.textureLayoutID = races.values[i][r+2].toInt();
         infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;

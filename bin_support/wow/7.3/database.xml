@@ -56,6 +56,7 @@
     <field type="uint" name="HighResMaleDisplayId" pos="31" />
     <field type="uint" name="HighResFemaleDisplayId" pos="32" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="29" />
+    <field type="uint" name="ItemDisplayRaceID" pos="28" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
