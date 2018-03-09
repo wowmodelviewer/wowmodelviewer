@@ -530,39 +530,45 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       grp.base = TEXTURE_GAMEOBJECT1;
       grp.definedTexture = true;
       grp.count = count;
+
+      // Configure geosets that are switched on only for certain displayIDs.
+      // This is handled differently in BfA (has its own table) compared
+      // to Legion (compressed into a single integer in CreatureDisplayInfo) :
       if (GAMEDIRECTORY.version().contains("8.0"))
       {
         QString query2 = QString("SELECT GeosetType, GeosetID "
-                                "FROM CreatureDisplayInfoGeosetData "
-                                "WHERE DisplayID = %1")
+                                 "FROM CreatureDisplayInfoGeosetData "
+                                 "WHERE DisplayID = %1")
                                 .arg( cdi );
         sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
         if(r2.valid && !r2.values.empty())
         {
           for(size_t j = 0 ; j < r2.values.size() ; j++)
           {
-            int geotype = r2.values[j][0].toInt();
+            int geotype = 100 * (r2.values[j][0].toInt() + 1);
             int geoid = r2.values[j][1].toInt();
             if (geoid > 0)
-              grp.creatureGeosetData.push_back(std::make_pair(geotype+1, geoid));
+              grp.creatureGeosetData.insert(geotype + geoid);
           }
         }
       }
-      else
+      else  // Legion:
       {
-        // Extract geoset data from cgd and set geosets accordingly.
-        // creatureGeosetData defines geosets that are enabled only when specific displayIDs
-        // are selected from the menu. The position in the hex integer represents the group
-        // number, and the value of the four bits at that position represents the geoset. So
-        // 0x00200000 means geoset 2 of group 600, therefore 602.
+        // Geoset data is compressed into a single integer.
+        // The position of the hex digit (from right) represents
+        // the group number, and the value of the four bits at
+        // that position represents the geoset. So 0x00200000
+        // means geoset 2 of group 600, therefore 602.
         int cgd = r.values[i][5].toInt();
         for (int i = 0; i < 8; i++)
         {
-          int geo = (cgd >> (i * 4)) & 0x0F;
-          if (geo > 0)
-            grp.creatureGeosetData.push_back(std::make_pair(i+1, geo));
+          int geotype = 100 * (i + 1);
+          int geoid = (cgd >> (i * 4)) & 0x0F;
+          if (geoid > 0)
+            grp.creatureGeosetData.insert(geotype + geoid);
         }
       }
+
       int pci = r.values[i][3].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
@@ -1252,7 +1258,7 @@ void AnimControl::SetSkin(int num)
 
   // creatureGeosetData defines geosets that are enabled only when
   // specific displayIDs are selected from the menu.
-  std::vector<GeosetNum> cgd = grp->creatureGeosetData;
+  std::set<GeosetNum> cgd = grp->creatureGeosetData;
   g_selModel->setCreatureGeosetData(cgd);
   g_modelViewer->modelControl->UpdateGeosetSelection();
 

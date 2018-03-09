@@ -1858,15 +1858,35 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
   }
 }
 
-void WoWModel::setCreatureGeosetData(std::vector<GeosetNum> cgd)
+void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 {
   // Hide geosets that were set by old creatureGeosetData:
   if (creatureGeosetData.size() > 0)
     restoreRawGeosets();
 
-  for (auto &it : cgd)
-    setGeosetGroupDisplay((CharGeosets)it.first, it.second);
   creatureGeosetData = cgd;
+  if (!cgd.size())
+    return;
+  int geomax = *cgd.rbegin() + 1; // highest value in set
+
+  // We should only be dealing with geosets below 900, but just in case
+  // Blizzard changes this, we'll set the max higher and log that it's happened:
+  if (geomax > 900)
+  {
+    LOG_ERROR << "setCreatureGeosetData value of " << geomax <<
+                 " detected. We were assuming the maximum was 899.";
+    geomax = ((geomax/100)+1)*100;  // round the max up to the next 100 (next geoset group)
+  }
+  else
+    geomax = 900;
+  // If creatureGeosetData is used then we switch off
+  // ALL geosets from 1 to 899 that aren't specified by it:
+  for (uint i = 0; i < rawGeosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    if (id > 0 && id < geomax)
+      showGeoset(i, cgd.count(id) > 0);
+  }
 }
 
 
