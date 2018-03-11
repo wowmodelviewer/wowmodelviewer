@@ -87,7 +87,8 @@ public:
   WoWModel *model;
   float tofs;
   Animated<uint16> enabled;
-  Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
+  Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw;
+  //Animated<float>  deacceleration;
   Vec4D colors[3];
   float sizes[3];
   bool multitexture, doNotTrail;

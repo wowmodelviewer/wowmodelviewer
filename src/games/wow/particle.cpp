@@ -37,7 +37,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   rate.init (mta.EmissionRate, f, globals);
   areal.init (mta.EmissionAreaLength, f, globals);
   areaw.init (mta.EmissionAreaWidth, f, globals);
-  deacceleration.init (mta.Gravity2, f, globals);
+  // deacceleration.init (mta.Gravity2, f, globals);
   enabled.init (mta.EnabledIn, f, globals);
   particleColID = mta.ParticleColorIndex;
 
@@ -180,7 +180,7 @@ void ParticleSystem::update(float dt)
   if (GLOBALSETTINGS.bZeroParticle)
     l_manim = 0;
   float grav = gravity.getValue(l_manim, mtime);
-  float deaccel = deacceleration.getValue(l_manim, mtime);
+  // float deaccel = deacceleration.getValue(l_manim, mtime);
 
   // spawn new particles
   if (emitter)
@@ -239,7 +239,8 @@ void ParticleSystem::update(float dt)
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); )
   {
     Particle &p = *it;
-    p.speed += p.down * grav * dt - p.dir * deaccel * dt;
+    // p.speed += p.down * grav * dt - p.dir * deaccel * dt;
+    p.speed += p.down * grav * dt - p.dir * dt;
 
     if (slowdown>0)
       mspeed = expf(-1.0f * slowdown * p.life);

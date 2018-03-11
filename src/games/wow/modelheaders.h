@@ -487,7 +487,7 @@ struct M2ParticleDef
   int32 unknown2;
   AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
   AnimationBlock EmissionAreaWidth; // (Float)
-  AnimationBlock Gravity2; // (Float) second gravity?
+  AnimationBlock zSource; // When greater than 0, the initial velocity of the particle is (particle.position - C3Vector(0, 0, zSource)).Normalize()
   ModelParticleParams p;
   AnimationBlock EnabledIn; // (UInt16)
   vector_2fp_6_9 multiTextureParam0[2];
