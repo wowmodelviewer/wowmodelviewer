@@ -177,9 +177,13 @@ bool ModelRenderPass::init()
 
   if (cull)
     glEnable(GL_CULL_FACE);
+  else
+    glDisable(GL_CULL_FACE);
   // no writing to the depth buffer.
   if (noZWrite)
     glDepthMask(GL_FALSE);
+  else
+    glDepthMask(GL_TRUE);
 
   // Texture wrapping around the geometry
   if (swrap)

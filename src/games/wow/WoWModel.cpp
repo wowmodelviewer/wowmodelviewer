@@ -352,8 +352,6 @@ bool WoWModel::isAnimated(GameFile * f)
     }
   }
 
-  animTextures = header.nTexAnims > 0;
-
   bool animMisc = header.nCameras > 0 || // why waste time, pretty much all models with cameras need animation
     header.nLights > 0 || // same here
     header.nParticleEmitters > 0 ||
@@ -391,7 +389,7 @@ bool WoWModel::isAnimated(GameFile * f)
   }
 
   // guess not...
-  return animGeometry || animTextures || animMisc;
+  return animGeometry || (header.nTexAnims > 0) || animMisc;
 }
 
 void WoWModel::initCommon(GameFile * f)
@@ -726,7 +724,7 @@ void WoWModel::initCommon(GameFile * f)
 
   // proceed with specialized init depending on model "type"
 
-  animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry and animTextures
+  animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry
 
   if (animated)
     initAnimated(f);
@@ -996,7 +994,7 @@ void WoWModel::initAnimated(GameFile * f)
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
 
-  if (animTextures)
+  if (header.nTexAnims > 0)
   {
     texAnims.resize(header.nTexAnims);
     ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
@@ -1163,9 +1161,9 @@ void WoWModel::setLOD(GameFile * f, int index)
   for (size_t j = 0; j < view->nTex; j++)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
-    
+     
     pass->tex = texlookup[tex[j].textureid];
-
+ 
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
@@ -1174,6 +1172,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     //	continue;
 
     pass->color = tex[j].colorIndex;
+
     pass->opacity = transLookup[tex[j].transid];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
@@ -1199,7 +1198,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
-    if (animTextures && (tex[j].flags & TEXTUREUNIT_STATIC) == 0)
+    if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
       pass->texanim = texanimlookup[tex[j].texanimid];
     }
@@ -1478,11 +1477,8 @@ void WoWModel::animate(ssize_t anim)
   for (auto & it : ribbons)
     it.setup(anim, t);
 
-  if (animTextures)
-  {
-    for (auto & it : texAnims)
-      it.calc(anim, t);
-  }
+  for (auto & it : texAnims)
+    it.calc(anim, t);
 }
 
 inline void WoWModel::drawModel()

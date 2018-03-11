@@ -107,7 +107,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<ModelLight> lights;
   std::vector<ModelEvent> events;
 
-  bool animGeometry, animTextures, animBones;
+  bool animGeometry, animBones;
 
   vector<AFID> readAFIDSFromFile(GameFile * f);
   void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
