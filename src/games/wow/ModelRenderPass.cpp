@@ -135,11 +135,7 @@ bool ModelRenderPass::init()
 
   // ALPHA BLENDING
   // blend mode
-  if (blendmode < 0)
-    blendmode = 0;
-  else if (blendmode > 7)
-    blendmode = 2;
-
+  
   switch (blendmode)
   {
   case BM_OPAQUE:	         // 0
@@ -176,7 +172,7 @@ bool ModelRenderPass::init()
   default:
     LOG_ERROR << "Unknown blendmode:" << blendmode;
     glEnable(GL_BLEND);
-    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
   if (cull)
