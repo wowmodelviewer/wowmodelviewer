@@ -240,7 +240,7 @@ void ParticleSystem::update(float dt)
   {
     Particle &p = *it;
     // p.speed += p.down * grav * dt - p.dir * deaccel * dt;
-    p.speed += p.down * grav * dt - p.dir * dt;
+    p.speed += p.down * grav * dt;
 
     if (slowdown>0)
       mspeed = expf(-1.0f * slowdown * p.life);
