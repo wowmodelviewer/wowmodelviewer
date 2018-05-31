@@ -570,18 +570,25 @@ void WoWModel::initCommon(GameFile * f)
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
     vector<TXID> txids;
+
     if (f->isChunked() && f->setChunk("TXID"))
     {
       txids = readTXIDSFromFile(f);
       f->setChunk("MD21", false);
     }
+
     for (size_t i = 0; i < header.nTextures; i++)
     {
       /*
       Texture Types
-      Texture type is 0 for textures whose file IDs are contained in the TXID chunk of the model file.
+      Texture type is 0 for textures whose file IDs or names are contained in the the model file.
+      The older implementation has full file paths, but the newer uses file data IDs
+      contained in a TXID chunk. We have to support both for now.
+
       All other texture types (nonzero) are for textures that are obtained from other files.
-      For instance, in the NightElfFemale model, her eye glow is a type 0 texture and has a file name. Her other 3 textures have types of 1, 2 and 6. The texture filenames for these come from client database files:
+      For instance, in the NightElfFemale model, her eye glow is a type 0 texture and has a
+      file name. Her other 3 textures have types of 1, 2 and 6. The texture filenames for these
+      come from client database files:
 
       DBFilesClient\CharSections.dbc
       DBFilesClient\CreatureDisplayInfo.dbc
@@ -605,7 +612,16 @@ void WoWModel::initCommon(GameFile * f)
 
       if (texdef[i].type == TEXTURE_FILENAME)  // 0
       {
-        GameFile * tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
+        GameFile * tex;
+        if (txids.size() > 0)
+        {
+          tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
+        }
+        else
+        {
+          QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
+          tex = GAMEDIRECTORY.getFile(texname);
+        }
         textures[i] = TEXTUREMANAGER.add(tex);
       }
       else  // non-zero
