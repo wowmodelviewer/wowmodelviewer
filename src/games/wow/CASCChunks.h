@@ -49,5 +49,9 @@ struct SKPD
   uint32 parentFileId;
 };
 
+struct TXID
+{
+  uint32 fileDataId;
+};
 
 #endif /* _CASCCHUNKS_H_ */

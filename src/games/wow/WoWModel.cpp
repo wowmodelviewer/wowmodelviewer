@@ -567,15 +567,21 @@ void WoWModel::initCommon(GameFile * f)
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
-	  textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
+    textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
+    vector<TXID> txids;
+    if (f->isChunked() && f->setChunk("TXID"))
+    {
+      txids = readTXIDSFromFile(f);
+      f->setChunk("MD21", false);
+    }
     for (size_t i = 0; i < header.nTextures; i++)
     {
       /*
       Texture Types
-      Texture type is 0 for regular textures, nonzero for skinned textures (filename not referenced in the M2 file!)
-      For instance, in the NightElfFemale model, her eye glow is a type 0 texture and has a file name,
-      the other 3 textures have types of 1, 2 and 6. The texture filenames for these come from client database files:
+      Texture type is 0 for textures whose file IDs are contained in the TXID chunk of the model file.
+      All other texture types (nonzero) are for textures that are obtained from other files.
+      For instance, in the NightElfFemale model, her eye glow is a type 0 texture and has a file name. Her other 3 textures have types of 1, 2 and 6. The texture filenames for these come from client database files:
 
       DBFilesClient\CharSections.dbc
       DBFilesClient\CreatureDisplayInfo.dbc
@@ -584,12 +590,12 @@ void WoWModel::initCommon(GameFile * f)
 
       0	 Texture given in filename
       1	 Body + clothes
-      2	Cape
-      6	Hair, beard
-      8	Tauren fur
-      11	Skin for creatures #1
-      12	Skin for creatures #2
-      13	Skin for creatures #3
+      2	 Cape
+      6	 Hair, beard
+      8	 Tauren fur
+      11 Skin for creatures #1
+      12 Skin for creatures #2
+      13 Skin for creatures #3
 
       Texture Flags
       Value	 Meaning
@@ -597,13 +603,12 @@ void WoWModel::initCommon(GameFile * f)
       2	Texture wrap Y
       */
 
-      if (texdef[i].type == TEXTURE_FILENAME)
+      if (texdef[i].type == TEXTURE_FILENAME)  // 0
       {
-        QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
-        GameFile * tex = GAMEDIRECTORY.getFile(texname);
+        GameFile * tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
         textures[i] = TEXTUREMANAGER.add(tex);
       }
-      else
+      else  // non-zero
       {
         // special texture - only on characters and such...
         specialTextures[i] = texdef[i].type;
@@ -747,6 +752,22 @@ void WoWModel::initStatic(GameFile * f)
   delete[] vertices; vertices = 0;
   delete[] normals; normals = 0;
   indices.clear();
+}
+
+vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
+{
+  vector<TXID> txids;
+
+  if (f->setChunk("TXID"))
+  {
+    TXID txid;
+    while (!f->isEof())
+    {
+      f->read(&txid, sizeof(TXID));
+      txids.push_back(txid);
+    }
+  }
+  return txids;
 }
 
 vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)

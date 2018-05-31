@@ -28,6 +28,8 @@ std::vector<std::string> KNOWN_CHUNKS =
   "PSBC",
   "PEDC",
   "SKID",
+  "TXID",
+  "LDV1",
   "AFM2",
   "AFSA",
   "AFSB",
