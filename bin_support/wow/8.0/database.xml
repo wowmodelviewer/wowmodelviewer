@@ -49,13 +49,15 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="MaleDisplayID" pos="7" />
-    <field type="uint" name="FemaleDisplayID" pos="8" />
-    <field type="byte" name="CharComponentTexLayoutID" pos="25" />
+    <field type="uint" name="MaleDisplayID" pos="8" />
+    <field type="uint" name="FemaleDisplayID" pos="9" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="34" />
     <field type="text" name="ClientPrefix" pos="0" />
-    <field type="uint" name="HighResMaleDisplayId" pos="31" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="32" />
-    <field type="byte" name="CharComponentTexLayoutHiResID" pos="29" />
+    <field type="uint" name="HighResMaleDisplayId" pos="10" />
+    <field type="uint" name="HighResFemaleDisplayId" pos="11" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
+    <!-- not working for now, not the right index in BfA-->
+    <field type="byte" name="ItemDisplayRaceID" pos="36" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
@@ -63,7 +65,7 @@
     <field type="uint" name="Field1" pos="1" />
     <field type="byte" name="Field2" pos="2" />
     <field type="byte" name="Field3" pos="3" />
-    <field type="int"  name="Field4" arraySize="3" pos="4" />
+    <field type="int"  name="Field4" arraySize="3" pos="5" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
@@ -89,10 +91,10 @@
   </table>
   <table name="CreatureDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="ushort" name="ModelID" pos="2" />
+    <field type="uint16" name="ModelID" pos="1" />
     <field type="uint" name="ExtendedDisplayInfoID" pos="7" />
-    <field type="uint" name="Texture" arraySize="3" pos="22" />
-    <field type="ushort" name="ParticleColorID" pos="14" />
+    <field type="uint" name="Texture" arraySize="3" pos="24" />
+    <field type="unit16" name="ParticleColorID" pos="9" />
   </table>
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
@@ -118,7 +120,7 @@
   </table>  
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="FileID" pos="19" />
+    <field type="uint" name="FileID" pos="2" />
   </table>
   
   <!-- Creature tables - END -->
@@ -188,7 +190,7 @@
   </table>
   <table name="TextureFileData">
     <field type="uint" name="TextureID" primary="yes" />
-    <field type="uint" name="ID" pos="1" createIndex="yes" />
+    <field type="uint" name="ID" pos="2" createIndex="yes" />
   </table>
   <table name="ModelFileData">
     <field type="uint" name="ModelID" primary="yes" />

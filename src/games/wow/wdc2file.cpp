@@ -143,12 +143,9 @@ bool WDC2File::open()
 
   uint32 IdBlockOffset = stringTableOffset + stringSize;
 
-  uint32 copyBlockOffset = IdBlockOffset;
+  uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
 
-  if ((m_header.flags & 0x04) != 0)
-    copyBlockOffset += (recordCount * 4);
-
-  uint32 relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
+  uint32 relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_size;
  
 #if WDC2_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
@@ -230,7 +227,7 @@ bool WDC2File::open()
           case FIELD_COMPRESSION::NONE:
           {
             unsigned char * val = new unsigned char[info.field_size_bits/8];
-            memcpy(val, recordOffset, info.field_size_bits / 8);
+            memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
             m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
             break;
           }
@@ -253,8 +250,12 @@ bool WDC2File::open()
             LOG_ERROR << "Reading ID from Common Data is not implemented";
             return false;
           case FIELD_COMPRESSION::BITPACKED_INDEXED:
-            LOG_ERROR << "Reading ID from Bitpacked Indexed is not implemented";
-            return false;
+          case FIELD_COMPRESSION::BITPACKED_SIGNED:
+          {
+            uint id = readBitpackedValue(info, recordOffset);
+            m_IDs.push_back(id);
+            break;
+          }
           case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
             LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
             return false;
@@ -270,10 +271,11 @@ bool WDC2File::open()
       m_recordOffsets.push_back(data + (i*recordSize));
   }
 
+  seekRelative(sectionHeader[0].id_list_size);
+
   // copy table
   if (sectionHeader[0].copy_table_size > 0)
   {
-    seek(copyBlockOffset);
     uint nbEntries = sectionHeader[0].copy_table_size / sizeof(copy_table_entry);
 
     m_IDs.reserve(recordCount + nbEntries);
@@ -302,41 +304,55 @@ bool WDC2File::open()
     recordCount += nbEntries;
   }
 
-  if (m_header.common_data_size > 0)
+  /*
   {
-    uint fieldId = 0;
-    for (auto it : m_fieldStorageInfo)
+    seek(relationshipDataOffset);
+
+    while (getPos() < (pos + sectionHeader[0].relationship_data_size))
     {
-      if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
-      {
-        seek(commonBlockOffset);
-
-        std::map<uint32, uint32> commonVals;
-#if WDC2_READ_DEBUG > 0
-        LOG_INFO << "Field" << fieldId;
-#endif
-        for (uint i = 0; i < it.additional_data_size / 8; i++)
-        {
-          uint32 id;
-          uint32 val;
-          read(&id, 4);
-          read(&val, 4);
-#if WDC2_READ_DEBUG > 0
-          LOG_INFO << id << "=>" << val;
-#endif
-          commonVals[id] = val;
-        }
-        m_commonData[fieldId] = commonVals;
-        commonBlockOffset += it.additional_data_size; 
-
-      }
-      fieldId++;
+      uint32 val;
+      LOG_INFO << read(&val, 4) << getPos() << val;
     }
+
+    seek(pos);
+  }
+  */
+
+  if (sectionHeader[0].relationship_data_size > 0)
+  {
+    seek(relationshipDataOffset);
+    struct relationship_entry
+    {
+      uint32 foreign_id;
+      uint32 record_index;
+    };
+
+    uint32 nbEntries;
+    read(&nbEntries, 4);
+
+    seekRelative(8);
+    for (uint i = 0; i < nbEntries; i++)
+    {
+      uint32 foreignKey;
+      uint32 recordIndex;
+      read(&foreignKey, 4);
+      read(&recordIndex, 4);
+      std::stringstream ss;
+      ss << foreignKey;
+      m_relationShipData[recordIndex] = ss.str();
+    }
+
+#if WDC2_READ_DEBUG > 5
+    LOG_INFO << "---- RELATIONSHIP DATA ----";
+    for (auto it : m_relationShipData)
+      LOG_INFO << it.first << "->" << it.second.c_str();
+    LOG_INFO << "---- RELATIONSHIP DATA ----";
+#endif
   }
 
   if (m_header.pallet_data_size > 0)
   {
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 5
     seek(palletBlockOffset);
     LOG_INFO << "PALLET DATA";
     for (uint i = 0; i < m_header.pallet_data_size; i++)
@@ -363,39 +379,39 @@ bool WDC2File::open()
       fieldId++;
     }
   }
- 
 
-  if (sectionHeader[0].relationship_data_size > 0)
+  if (m_header.common_data_size > 0)
   {
-    struct relationship_entry
+    uint fieldId = 0;
+    for (auto it : m_fieldStorageInfo)
     {
-      uint32 foreign_id;
-      uint32 record_index;
-    };
+      if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
+      {
+        seek(commonBlockOffset);
 
-    seek(relationshipDataOffset);
-    uint32 nbEntries;
-    read(&nbEntries, 4);
-
-    seekRelative(8);
-    for (uint i = 0; i < nbEntries; i++)
-    {
-      uint32 foreignKey;
-      uint32 recordIndex;
-      read(&foreignKey, 4);
-      read(&recordIndex, 4);
-      std::stringstream ss;
-      ss << foreignKey;
-      m_relationShipData[recordIndex] = ss.str();
-    }
-
+        std::map<uint32, uint32> commonVals;
 #if WDC2_READ_DEBUG > 0
-    LOG_INFO << "---- RELATIONSHIP DATA ----";
-    for (auto it : m_relationShipData)
-      LOG_INFO << it.first << "->" << it.second.c_str();
-    LOG_INFO << "---- RELATIONSHIP DATA ----";
+        LOG_INFO << "Field" << fieldId;
 #endif
+        for (uint i = 0; i < it.additional_data_size / 8; i++)
+        {
+          uint32 id;
+          uint32 val;
+          read(&id, 4);
+          read(&val, 4);
+#if WDC2_READ_DEBUG > 0
+          LOG_INFO << id << "=>" << val;
+#endif
+          commonVals[id] = val;
+        }
+        m_commonData[fieldId] = commonVals;
+        commonBlockOffset += it.additional_data_size;
+
+      }
+      fieldId++;
+    }
   }
+
 
 #if WDC2_READ_DEBUG > 0
   if (stringSize)
@@ -512,7 +528,7 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
         if (m_isSparseTable)
           stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8);
         else
-          stringPtr = reinterpret_cast<char *>(stringTable + val);
+          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val);
 
         std::string value(stringPtr);
         std::replace(value.begin(), value.end(), '"', '\'');
@@ -527,7 +543,7 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
       else if (field->type == "int")
       {
         std::stringstream ss;
-        ss << *reinterpret_cast<int *>(&val);
+        ss << *reinterpret_cast<int32 *>(&val);
         result.push_back(ss.str());
       }
       else if (field->type == "uint16")
@@ -536,10 +552,16 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
         ss << *reinterpret_cast<uint16 *>(&val);
         result.push_back(ss.str());
       }
+      else if (field->type == "byte")
+      {
+        std::stringstream ss;
+        ss << (*reinterpret_cast<uint16 *>(&val) & 0x000000FF);
+        result.push_back(ss.str());
+      }
       else
       {
         std::stringstream ss;
-        ss << *reinterpret_cast<uint *>(&val);
+        ss << *reinterpret_cast<uint32 *>(&val);
         result.push_back(ss.str());
       }
     }
@@ -615,7 +637,6 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     case FIELD_COMPRESSION::BITPACKED_INDEXED:
     {                                          
       uint32 index = readBitpackedValue(info, recordOffset);
-      LOG_INFO << __FUNCTION__ << index;
       auto it = m_palletBlockOffsets.find(fieldIndex);
       uint32 offset = it->second + index * 4;
       memcpy(&result, getBuffer() + offset, 4);
