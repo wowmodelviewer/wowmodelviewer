@@ -15,12 +15,12 @@
   </table>
   <table name="CharComponentTextureSections">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="LayoutID" pos="5" />
-    <field type="byte" name="Section" pos="6" />
-    <field type="uint" name="X" pos="1" />
-    <field type="uint" name="Y" pos="2" />
-    <field type="uint" name="Width" pos="3" />
-    <field type="uint" name="Height" pos="4" />
+    <field type="byte" name="LayoutID" pos="0" />
+    <field type="byte" name="Section" pos="1" />
+    <field type="uint" name="X" pos="2" />
+    <field type="uint" name="Y" pos="3" />
+    <field type="uint" name="Width" pos="4" />
+    <field type="uint" name="Height" pos="5" />
   </table>
   <table name="CharHairGeoSets">
     <field primary="yes" type="uint" name="ID" />
