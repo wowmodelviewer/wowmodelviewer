@@ -96,8 +96,6 @@ bool WDC2File::open()
   // read storage info
   if (m_header.field_storage_info_size > 0)
   {
-    //  seek(fieldStorageInfoOffset);
-
     for (uint i = 0; i < (m_header.field_storage_info_size / sizeof(field_storage_info)); i++)
     {
       field_storage_info info;
@@ -124,11 +122,11 @@ bool WDC2File::open()
 
   uint32 palletBlockOffset = getPos();
   uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
-
-  data = getPointer();
  
   // only one secion used in dbc files so far, so no loop for now
   seek(sectionHeader[0].file_offset);
+
+  data = getPointer();
 
   // compute various offset needed to read data in the file 
   uint32 stringTableOffset = getPos() + recordSize * recordCount;
@@ -150,18 +148,17 @@ bool WDC2File::open()
   if ((m_header.flags & 0x04) != 0)
     copyBlockOffset += (recordCount * 4);
 
-  uint32 fieldStorageInfoOffset = copyBlockOffset + sectionHeader[0].copy_table_size;
   uint32 relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
  
 #if WDC2_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
+  LOG_INFO << "palletBlockOffset" << palletBlockOffset;
+  LOG_INFO << "commonBlockOffset" << commonBlockOffset;
+  LOG_INFO << "sectionHeader[0].file_offset" << sectionHeader[0].file_offset;
   LOG_INFO << "stringTableOffset" << stringTableOffset;
   LOG_INFO << "IdBlockOffset" << IdBlockOffset;
   LOG_INFO << "copyBlockOffset" << copyBlockOffset;
-  LOG_INFO << "fieldStorageInfoOffset" << fieldStorageInfoOffset;
-  LOG_INFO << "palletBlockOffset" << palletBlockOffset;
-  LOG_INFO << "commonBlockOffset" << commonBlockOffset;
   LOG_INFO << "relationshipDataOffset" << relationshipDataOffset;
 #endif
 
@@ -337,6 +334,35 @@ bool WDC2File::open()
     }
   }
 
+  if (m_header.pallet_data_size > 0)
+  {
+#if WDC2_READ_DEBUG > 0
+    seek(palletBlockOffset);
+    LOG_INFO << "PALLET DATA";
+    for (uint i = 0; i < m_header.pallet_data_size; i++)
+    {
+      uint32 val = 0;
+      read(&val, 1);
+      LOG_INFO << getPos() - 1 << val;
+    }
+    LOG_INFO << "PALLET DATA";
+#endif
+    uint fieldId = 0;
+    for (auto it : m_fieldStorageInfo)
+    {
+      if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
+        it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
+        (it.additional_data_size != 0))
+      {
+        m_palletBlockOffsets[fieldId] = palletBlockOffset;
+#if WDC2_READ_DEBUG > 0
+        LOG_INFO << fieldId << "=>" << palletBlockOffset;
+#endif
+        palletBlockOffset += it.additional_data_size;
+      }
+      fieldId++;
+    }
+  }
  
 
   if (sectionHeader[0].relationship_data_size > 0)
@@ -504,6 +530,12 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
         ss << *reinterpret_cast<int *>(&val);
         result.push_back(ss.str());
       }
+      else if (field->type == "uint16")
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<uint16 *>(&val);
+        result.push_back(ss.str());
+      }
       else
       {
         std::stringstream ss;
@@ -581,8 +613,9 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
       break;
     }
     case FIELD_COMPRESSION::BITPACKED_INDEXED:
-    {
+    {                                          
       uint32 index = readBitpackedValue(info, recordOffset);
+      LOG_INFO << __FUNCTION__ << index;
       auto it = m_palletBlockOffsets.find(fieldIndex);
       uint32 offset = it->second + index * 4;
       memcpy(&result, getBuffer() + offset, 4);
@@ -617,6 +650,7 @@ uint32 WDC2File::readBitpackedValue(field_storage_info info, unsigned char * rec
   result = result & ((1ull << info.field_size_bits) - 1);
   return result;
 }
+
 
 
 
