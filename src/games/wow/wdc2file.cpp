@@ -78,17 +78,17 @@ bool WDC2File::open()
 
   field_structure * fieldStructure = new field_structure[fieldCount];
   read(fieldStructure, fieldCount * sizeof(field_structure));
-#if WDC2_READ_DEBUG > 2
+#if WDC2_READ_DEBUG > 3
   LOG_INFO << "--------------------------";
 #endif
   for (uint i = 0; i < fieldCount; i++)
   {
-#if WDC2_READ_DEBUG > 2
+#if WDC2_READ_DEBUG > 3
     LOG_INFO << "pos" << fieldStructure[i].position << "size :" << fieldStructure[i].size << "->" << (32 - fieldStructure[i].size) / 8 << "bytes";
 #endif
     m_fieldSizes[fieldStructure[i].position] = fieldStructure[i].size;
   }
-#if WDC2_READ_DEBUG > 2
+#if WDC2_READ_DEBUG > 3
   LOG_INFO << "--------------------------";
 #endif
 
@@ -102,7 +102,7 @@ bool WDC2File::open()
       read(&info, sizeof(info));
       m_fieldStorageInfo.push_back(info);
     }
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 2
     LOG_INFO << fullname() << "----- BEGIN -------";
     uint fieldId = 0;
     for (auto it : m_fieldStorageInfo)
@@ -342,7 +342,7 @@ bool WDC2File::open()
       m_relationShipData[recordIndex] = ss.str();
     }
 
-#if WDC2_READ_DEBUG > 5
+#if WDC2_READ_DEBUG > 4
     LOG_INFO << "---- RELATIONSHIP DATA ----";
     for (auto it : m_relationShipData)
       LOG_INFO << it.first << "->" << it.second.c_str();
@@ -352,7 +352,7 @@ bool WDC2File::open()
 
   if (m_header.pallet_data_size > 0)
   {
-#if WDC2_READ_DEBUG > 5
+#if WDC2_READ_DEBUG > 4
     seek(palletBlockOffset);
     LOG_INFO << "PALLET DATA";
     for (uint i = 0; i < m_header.pallet_data_size; i++)
@@ -371,7 +371,7 @@ bool WDC2File::open()
         (it.additional_data_size != 0))
       {
         m_palletBlockOffsets[fieldId] = palletBlockOffset;
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 4
         LOG_INFO << fieldId << "=>" << palletBlockOffset;
 #endif
         palletBlockOffset += it.additional_data_size;
@@ -390,7 +390,7 @@ bool WDC2File::open()
         seek(commonBlockOffset);
 
         std::map<uint32, uint32> commonVals;
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 4
         LOG_INFO << "Field" << fieldId;
 #endif
         for (uint i = 0; i < it.additional_data_size / 8; i++)
@@ -399,7 +399,7 @@ bool WDC2File::open()
           uint32 val;
           read(&id, 4);
           read(&val, 4);
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 4
           LOG_INFO << id << "=>" << val;
 #endif
           commonVals[id] = val;
@@ -413,7 +413,7 @@ bool WDC2File::open()
   }
 
 
-#if WDC2_READ_DEBUG > 0
+#if WDC2_READ_DEBUG > 4
   if (stringSize)
   {
     LOG_INFO << "---- STRING TABLE ----";

@@ -80,8 +80,8 @@
   <!-- Creature tables - BEGIN -->
   <table name="Creature">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="CreatureTypeID" pos="8" />
-    <field type="uint" name="DisplayID" arraySize="4" pos="6" />
+    <field type="byte" name="CreatureTypeID" pos="5" />
+    <field type="uint" name="DisplayID" arraySize="4" pos="8" />
     <field type="text" name="Name" pos="0"/>
   </table>
   <table name="CreatureType">
@@ -98,11 +98,11 @@
   </table>
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Skin" pos="5" />
-    <field type="byte" name="Face" pos="6" />
-    <field type="byte" name="HairStyle" pos="7" />
-    <field type="byte" name="HairColor" pos="8" />
-    <field type="byte" name="FacialHair" pos="9" />
+    <field type="byte" name="Skin" pos="3" />
+    <field type="byte" name="Face" pos="4" />
+    <field type="byte" name="HairStyle" pos="5" />
+    <field type="byte" name="HairColor" pos="6" />
+    <field type="byte" name="FacialHair" pos="7" />
   </table>
 
   <table name="CreatureDisplayInfoGeosetData">
@@ -128,34 +128,38 @@
   <!-- Item tables - BEGIN -->
   <table name="Item">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="Class" pos="1" />
-    <field type="byte" name="SubClass" pos="2" />
-    <field type="byte" name="Type" pos="5" />
-    <field type="byte" name="Sheath" pos="6" />
+    <field type="byte" name="Class" pos="0" />
+    <field type="byte" name="SubClass" pos="1" />
+    <field type="byte" name="Type" pos="3" />
+    <field type="byte" name="Sheath" pos="4" />
   </table>
   <table name="ItemClass">
     <field type="uint" name="col0" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="uint" name="ID" pos="2" createIndex="yes" />
+    <field type="uint" name="ID" pos="1" createIndex="yes" />
   </table>
   <table name="ItemSubClass">
     <field type="uint" name="col0" primary="yes" />
-    <field type="byte" name="ID" pos="3" />
-    <field type="byte" name="SubClassID" pos="4" />
+    <field type="byte" name="ID" pos="2" />
+    <field type="byte" name="SubClassID" pos="3" />
     <field type="text" name="Name" pos="0" />
     <field type="text" name="VerboseName" pos="1" />
   </table>
   <table name="ItemSparse">
     <field type="uint" name="ID" primary="yes" />
-    <field type="text" name="Name" pos="1" />
+    <field type="text" name="Name" pos="5" />
+    <field type="text" name="Name1" pos="1" />
+    <field type="text" name="Name2" pos="2" />
+    <field type="text" name="Name3" pos="3" />
+    <field type="text" name="Name4" pos="4" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemDisplayInfoID" pos="0" />
+    <field type="uint" name="ItemDisplayInfoID" pos="1" />
   </table>
   <table name="ItemModifiedAppearance">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemID" pos="0" />
+    <field type="uint" name="ItemID" pos="1" />
     <field type="uint" name="ItemAppearanceID" pos="3" />
     <field type="byte" name="ItemLevel" pos="4" />
   </table>
@@ -170,7 +174,7 @@
   <table name="ItemDisplayInfoMaterialRes">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" createIndex="yes" />
-    <field type="uint" name="TextureFileDataID" pos="0" />
+    <field type="uint" name="TextureFileDataID" pos="1" />
   </table>
   <table name="HelmetGeosetVisData">
     <field type="uint" name="ID" primary="yes" />
@@ -179,7 +183,7 @@
   <table name="ItemSet">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="int" name="Item" arraySize="17" pos="1" />
+    <field type="int" name="Item" arraySize="17" pos="4" />
   </table>
   <!-- Item tables - END -->
   
