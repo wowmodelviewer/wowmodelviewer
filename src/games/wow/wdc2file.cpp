@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC2_READ_DEBUG 2
+#define WDC2_READ_DEBUG 0
 #define WDC2_READ_DEBUG_FIRST_RECORDS 0
 
 WDC2File::WDC2File(const QString & file):
@@ -22,7 +22,7 @@ void WDC2File::readWDBC2Header()
 {
   read(&m_header, sizeof(WDC2File::header)); // File Header
 
-#if WDC2_READ_DEBUG > 2
+#if WDC2_READ_DEBUG > 1
   LOG_INFO << "magic" << m_header.magic[0] << m_header.magic[1] << m_header.magic[2] << m_header.magic[3];
   LOG_INFO << "record count" << m_header.record_count;
   LOG_INFO << "field count" << m_header.field_count;
@@ -62,7 +62,7 @@ bool WDC2File::open()
   section_header * sectionHeader = new section_header[m_header.section_count];
   read(sectionHeader, sizeof(section_header) * m_header.section_count);
 
-#if WDC2_READ_DEBUG > 2
+#if WDC2_READ_DEBUG > 1
   for (uint i = 0; i < m_header.section_count; i++)
   {
     LOG_INFO << "wdc2_unk_header1" << sectionHeader[i].wdc2_unk_header1;
@@ -271,11 +271,10 @@ bool WDC2File::open()
       m_recordOffsets.push_back(data + (i*recordSize));
   }
 
-  seekRelative(sectionHeader[0].id_list_size);
-
   // copy table
   if (sectionHeader[0].copy_table_size > 0)
   {
+    seek(copyBlockOffset);
     uint nbEntries = sectionHeader[0].copy_table_size / sizeof(copy_table_entry);
 
     m_IDs.reserve(recordCount + nbEntries);
