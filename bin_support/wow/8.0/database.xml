@@ -147,11 +147,12 @@
   </table>
   <table name="ItemSparse">
     <field type="uint" name="ID" primary="yes" />
+    <field type="uint64" name="allowableRace" pos="0" />
+    <field type="text" name="Description" pos="1" />
+    <field type="text" name="DisplayLang3" pos="2" />
+    <field type="text" name="DisplayLang2" pos="3" />
+    <field type="text" name="DisplayLang1" pos="4" />
     <field type="text" name="Name" pos="5" />
-    <field type="text" name="Name1" pos="1" />
-    <field type="text" name="Name2" pos="2" />
-    <field type="text" name="Name3" pos="3" />
-    <field type="text" name="Name4" pos="4" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
@@ -185,6 +186,7 @@
     <field type="text" name="Name" pos="0" />
     <field type="int" name="Item" arraySize="17" pos="4" />
   </table>
+  
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->

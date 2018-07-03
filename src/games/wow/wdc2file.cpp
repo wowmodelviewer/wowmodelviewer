@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC2_READ_DEBUG 3
+#define WDC2_READ_DEBUG 2
 #define WDC2_READ_DEBUG_FIRST_RECORDS 0
 
 WDC2File::WDC2File(const QString & file):
@@ -412,6 +412,19 @@ bool WDC2File::open()
     }
   }
 
+  /*
+   // For reverse engineering purpose only
+  for (uint r = 69; r < 75; r++)
+  {
+    unsigned char * offset = m_recordOffsets[r];
+    unsigned char * nextoff = m_recordOffsets[r+1];
+    for (uint i = 0; i < (nextoff - offset); i++)
+    {
+      LOG_INFO << i << *(offset + i) << *(reinterpret_cast<char *>(offset + i));
+
+    }
+  }
+  */
 
 #if WDC2_READ_DEBUG > 4
   if (stringSize)
@@ -526,9 +539,30 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
       {
         char * stringPtr;
         if (m_isSparseTable)
-          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8);
+        {
+          unsigned char * ptr = recordOffset;
+          // iterate along record to get right position
+          for (int f = 0; f <= field->pos; f++)
+          {
+            if (structure->fields[f]->isKey)
+              continue;
+
+            if (structure->fields[f]->type == "uint64")
+            {
+              ptr += 8;
+            }
+            else
+            {
+              std::string val(reinterpret_cast<char *>(ptr));
+              ptr = ptr + val.size() + 1;
+            }
+          }
+          stringPtr = reinterpret_cast<char *>(ptr);
+        }
         else
+        {
           stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val);
+        }
 
         std::string value(stringPtr);
         std::replace(value.begin(), value.end(), '"', '\'');
@@ -556,6 +590,12 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
       {
         std::stringstream ss;
         ss << (*reinterpret_cast<uint16 *>(&val) & 0x000000FF);
+        result.push_back(ss.str());
+      }
+      else if (field->type == "uint64")
+      {
+        std::stringstream ss;
+        ss << *reinterpret_cast<long *>(&val);
         result.push_back(ss.str());
       }
       else
