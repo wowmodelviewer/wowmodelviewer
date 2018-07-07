@@ -200,7 +200,7 @@
   </table>
   <table name="ModelFileData">
     <field type="uint" name="ModelID" primary="yes" />
-    <field type="uint" name="ID" pos="2" createIndex="yes" />
+    <field type="uint" name="ID" pos="2" relationshipData="yes" createIndex="yes" />
   </table>
   <table name="ParticleColor">
     <field type="uint" name="ID" primary="yes" />
