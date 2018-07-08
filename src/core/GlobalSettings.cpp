@@ -121,7 +121,7 @@ core::GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".beta8";
+  m_versionSpecialExtend = ".beta9";
 
   bShowParticle = false;
   bZeroParticle = false;
