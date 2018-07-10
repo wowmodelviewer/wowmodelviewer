@@ -858,6 +858,7 @@ void CharControl::OnUpdateItem(int type, int id)
       TextureGroup grp;
       GameFile * modelFile;
       WoWModel *m;
+      int morphID = 0;
 
       if (!model)
         return;
@@ -888,7 +889,7 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (cats[id] == 0) // create proper mount from model ID
       {
-        int morphID = numbers[id];
+        morphID = numbers[id];
         // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
         QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
                                 "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
@@ -899,19 +900,6 @@ void CharControl::OnUpdateItem(int type, int id)
         if (!mountQuery.valid || mountQuery.empty())
           break;
         modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
-        int count = 0;
-        for (int i = 0; i < 3; i++)
-        {
-          QString fname = mountQuery.values[0][i + 1];
-          if (!fname.isEmpty())
-          {
-            grp.tex[i] = GAMEDIRECTORY.getFile(fname.toInt());
-            count++;
-          }
-         
-        }
-        grp.base = TEXTURE_GAMEOBJECT1;
-        grp.count = count;
       }
       else if (cats[id] == 1) // create mount from any old creature model file name
       {
@@ -925,9 +913,10 @@ void CharControl::OnUpdateItem(int type, int id)
       g_canvas->root->setModel(m);
       g_canvas->setModel(m, true);
       g_animControl->UpdateModel(m);
-      // add specific textures for proper mounts. Must do this after model is updated.
-      if (!cats[id] && (grp.tex[0] != 0))
-        g_animControl->AddSkin(grp);
+
+      // for official mounts with display IDs:
+      if (morphID > 0)
+        g_animControl->SetSkinByDisplayID(morphID);
 
       model->bSheathe = true;
       RefreshEquipment();
