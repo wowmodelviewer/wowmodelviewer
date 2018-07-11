@@ -7,6 +7,7 @@
 
 #include "WoWFolder.h"
 
+#include <QDir>
 #include <QDirIterator>
 #include <QFile>
 #include <QRegularExpression>
@@ -43,7 +44,7 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
-
+    line = QDir::fromNativeSeparators(line); // ensures path is UNIX format
     int id = m_CASCFolder.fileDataId(line.toStdString());
     if (id != 0)
     {
