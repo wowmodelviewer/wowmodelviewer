@@ -46,7 +46,7 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     QString line = in.readLine().toLower();
     line = QDir::fromNativeSeparators(line); // ensures path is UNIX format
     int id = m_CASCFolder.fileDataId(line.toStdString());
-    if (id != 0)
+    if (id != -1)
     {
       CASCFile * file = new CASCFile(line, id);
       file->setName(line.mid(line.lastIndexOf('/') + 1));
