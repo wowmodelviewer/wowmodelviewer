@@ -46,12 +46,14 @@ macro(use_glew)
   add_definitions(-DGLEW_STATIC)
   
   # temporary solution, glew needs opengl lib, and right now, wx one is used...
+  set(wxWidgets_USE_UNICODE ON)
   find_package(wxWidgets REQUIRED gl core base)
   
   list(APPEND extralibs ${wxWidgets_LIBRARIES})
 endmacro()
 
 macro(use_wxwidgets)
+	set(wxWidgets_USE_UNICODE ON)
 	find_package(wxWidgets REQUIRED net gl aui xml adv core base)
 	list(APPEND extralibs ${wxWidgets_LIBRARIES})
 endmacro()

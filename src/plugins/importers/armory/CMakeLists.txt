@@ -5,6 +5,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building armory importer")
 
+set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets REQUIRED net core)
 include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})
