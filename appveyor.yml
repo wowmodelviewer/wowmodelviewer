@@ -2,7 +2,7 @@ version: 1.0.{build}
 image: Visual Studio 2013
 build_script:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r efc3999
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 3911b29
 
     cd wmv_sdk
 
