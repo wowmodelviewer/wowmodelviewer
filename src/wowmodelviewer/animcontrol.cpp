@@ -254,7 +254,7 @@ void AnimControl::UpdateModel(WoWModel *m)
   // Find any textures that exist for the model
   bool res = false;
 
-  wxString fn = m->itemName().toStdString().c_str();
+  wxString fn = m->itemName().toStdWString();
   fn = fn.Lower();
 
   if (fn.substr(0,4) != wxT("char"))
@@ -301,11 +301,11 @@ void AnimControl::UpdateModel(WoWModel *m)
     wxString strStand;
     int selectAnim = 0;
 
-    map<int, string> animsVal = m->getAnimsMap();
+    map<int, wstring> animsVal = m->getAnimsMap();
 
     for (size_t i=0; i<m->anims.size(); i++)
     {
-      std::stringstream label;
+      std::wstringstream label;
       label << animsVal[m->anims[i].animID];
       label << " [";
       label << i;
@@ -347,7 +347,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
     frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
     frameSlider->SetValue(0);
-    frameLabel->SetLabel(wxString("Frame: 0"));
+    frameLabel->SetLabel(L"Frame: 0");
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -420,7 +420,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 
 	// get wmo name or current wmogroup name/descr
 	if (group>=-1 && group<(int)g_selWMO->nGroups) {
-		wxString label = w->itemName().toStdString().c_str();
+		wxString label = w->itemName().toStdWString();
 		label = label.AfterLast('/');
 		if (group>=0) {
 			label += wxT(" - ") + g_selWMO->groups[group].name;
@@ -910,7 +910,7 @@ void AnimControl::SyncBLPSkinList()
     GameFile * tex = grp->tex[i];
     if (tex)
     {
-      texname = tex->fullname().toStdString().c_str();
+      texname = tex->fullname().toStdWString();
       texname = texname.AfterLast('/').BeforeLast('.');
     }
     currTextures[i] = texname;
@@ -924,7 +924,7 @@ void AnimControl::SyncBLPSkinList()
     for (TextureSet::iterator it = BLPskins.begin(); it != BLPskins.end(); ++it)
     {
       GameFile * tex = it->tex[0];
-      wxString texname = tex->fullname().toStdString().c_str();
+      wxString texname = tex->fullname().toStdWString();
       texname = texname.AfterLast('/').BeforeLast('.');
       if (texname == currTextures[0])
         BLPSkinList1->SetSelection(num);
@@ -947,7 +947,7 @@ bool AnimControl::FillSkinSelector(TextureSet &skins)
   for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it)
   {
     GameFile * tex = it->tex[0];
-    wxString texname = tex->fullname().toStdString().c_str();
+    wxString texname = tex->fullname().toStdWString();
     wxString selectorName = texname.AfterLast('/').BeforeLast('.');
     if (it->definedTexture)
       selectorName.MakeUpper();
@@ -975,7 +975,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet &skins, bool item)
     for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it)
     {
       GameFile * tex = it->tex[0];
-      wxString texname = tex->fullname().toStdString().c_str();
+      wxString texname = tex->fullname().toStdWString();
       texname = texname.AfterLast('/').BeforeLast('.');
       TextureGroup *grp = new TextureGroup(*it);
 
@@ -1268,7 +1268,7 @@ void AnimControl::SetSkin(int num)
     GameFile * tex = grp->tex[i];
     if (tex)
     {
-      texname = tex->fullname().toStdString().c_str();
+      texname = tex->fullname().toStdWString();
       texname = texname.AfterLast('/').BeforeLast('.');
     }
     currTextures[i] = texname;

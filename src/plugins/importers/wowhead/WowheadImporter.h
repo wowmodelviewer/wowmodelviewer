@@ -64,11 +64,11 @@ class WowheadImporter : public ImporterPlugin
     ~WowheadImporter() {}
 
     // Methods
-    bool acceptURL(std::string url) const;
+    bool acceptURL(std::wstring url) const;
 
-    NPCInfos * importNPC(std::string url) const;
-    CharInfos * importChar(std::string url) const {return NULL;}
-    ItemRecord * importItem(std::string url) const;
+    NPCInfos * importNPC(std::wstring url) const;
+    CharInfos * importChar(std::wstring url) const {return NULL;}
+    ItemRecord * importItem(std::wstring url) const;
 
     // Members
 

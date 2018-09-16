@@ -27,7 +27,7 @@ END_EVENT_TABLE()
 
 ItemImporterDialog::ItemImporterDialog(wxWindow * parent /* = NULL */, wxWindowID id /* = 1 */, const wxString & title /* = "Import from URL" */,
         							 const wxPoint & position /* = wxDefaultPosition */, const wxSize & size /*= wxSize(300, 300) */)
-: wxDialog( parent, id, title, position, size, wxRAISED_BORDER|wxDEFAULT_DIALOG_STYLE|wxCAPTION|wxTHICK_FRAME|wxSYSTEM_MENU )
+: wxDialog( parent, id, title, position, size, wxRAISED_BORDER|wxDEFAULT_DIALOG_STYLE|wxCAPTION|wxSYSTEM_MENU )
 {
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxVERTICAL);
 
@@ -109,7 +109,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-	  std::string url = m_URLname->GetValue().ToAscii();
+	  std::wstring url = m_URLname->GetValue();
 
 	  for(PluginManager::iterator it = PLUGINMANAGER.begin();
 	      it != PLUGINMANAGER.end() ;

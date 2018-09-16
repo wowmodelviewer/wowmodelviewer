@@ -786,9 +786,9 @@ void ModelViewer::ResetLayout()
 
 void ModelViewer::LoadSession()
 {
-  LOG_INFO << "Loading Session settings from:" << cfgPath.c_str();
+  LOG_INFO << "Loading Session settings from:" << QString::fromWCharArray(cfgPath.c_str());
 
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   // Application Config Settings
   useRandomLooks = config.value("Session/RandomLooks", true).toBool();
@@ -799,14 +799,14 @@ void ModelViewer::LoadSession()
   // Background and Custom Colours
   wxString colStr;
   wxColour bgCol;
-  colStr = config.value("Session/bgCol", "#475F79").toString().toStdString(); // #475F79 = (71, 95, 121)
+  colStr = config.value("Session/bgCol", "#475F79").toString().toStdWString(); // #475F79 = (71, 95, 121)
   if (!bgCol.Set(colStr))
     bgCol = wxColour(71, 95, 121);
   bgDialogData.SetColour(bgCol);
   for (int i = 0; i < 16; i++)
   {
     wxColour custCol;
-    colStr = config.value(QString("Session/bgCustCol%1").arg(i), wxEmptyString).toString().toStdString();
+    colStr = config.value(QString("Session/bgCustCol%1").arg(i), wxEmptyString).toString().toStdWString();
     if ((colStr != wxEmptyString) && custCol.Set(colStr))
       bgDialogData.SetCustomColour(i, custCol);
   }
@@ -820,7 +820,7 @@ void ModelViewer::LoadSession()
 
     // boolean vars
     canvas->drawBackground = config.value("Session/DBackground", false).toBool();
-    bgImagePath = config.value("Session/BackgroundImage", false).toString().toStdString();
+    bgImagePath = config.value("Session/BackgroundImage", false).toString().toStdWString();
 
     if (!bgImagePath.IsEmpty())
       canvas->LoadBackground(bgImagePath);
@@ -829,7 +829,7 @@ void ModelViewer::LoadSession()
 
 void ModelViewer::SaveSession()
 {
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   config.setValue("Graphics/FSAA", video.curCap.aaSamples);
   config.setValue("Graphics/AccumulationBuffer", video.curCap.accum);
@@ -851,13 +851,13 @@ void ModelViewer::SaveSession()
   // Background and Custom Colours
   wxColour bgCol;
   bgCol = bgDialogData.GetColour();
-  config.setValue("Session/bgCol", bgCol.GetAsString(wxC2S_HTML_SYNTAX).mb_str());
+  config.setValue("Session/bgCol", QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
   for (int i = 0; i < 16; i++)
   {
     bgCol = bgDialogData.GetCustomColour(i);
     if (!bgCol.IsOk())  // skip undefined custom colours
       continue;
-    config.setValue(QString("Session/bgCustCol%1").arg(i), bgCol.GetAsString(wxC2S_HTML_SYNTAX).mb_str());
+    config.setValue(QString("Session/bgCustCol%1").arg(i), QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
   }
 
 
@@ -871,7 +871,7 @@ void ModelViewer::SaveSession()
     config.setValue("Session/DBackground", canvas->drawBackground);
 
     if (canvas->drawBackground)
-      config.setValue("Session/BackgroundImage", bgImagePath.c_str());
+      config.setValue("Session/BackgroundImage", QString::fromWCharArray(bgImagePath.c_str()));
     else
       config.setValue("Session/BackgroundImage", "");
 
@@ -883,19 +883,19 @@ void ModelViewer::SaveSession()
 
 void ModelViewer::LoadLayout()
 {
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   int posx = config.value("Session/PositionX", "").toInt();
   int posy = config.value("Session/PositionY", "").toInt();
 
   SetPosition(wxPoint(posx, posy));
 
-  wxString layout = config.value("Session/Layout", "").toString().toStdString();
+  wxString layout = config.value("Session/Layout", "").toString().toStdWString();
 
   // if the layout data exists,  load it.
   if (!layout.IsNull() // something goes wrong
       && !layout.IsEmpty() // empty value
-      && !layout.EndsWith("canvas")) // old saving badly read by Qt, ignore
+      && !layout.EndsWith(L"canvas")) // old saving badly read by Qt, ignore
   {
     if (!interfaceManager.LoadPerspective(layout, false))
     {
@@ -927,9 +927,9 @@ void ModelViewer::LoadLayout()
 
 void ModelViewer::SaveLayout()
 {
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-  config.setValue("Session/Layout", interfaceManager.SavePerspective().c_str());
+  config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
 
   wxPoint pos = GetPosition();
   config.setValue("Session/PositionX", pos.x);
@@ -1003,7 +1003,7 @@ void ModelViewer::LoadModel(GameFile * file)
     return;
   }
 
-  SetStatusText(canvas->model()->name().toStdString());
+  SetStatusText(canvas->model()->name().toStdWString());
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   m->charModelDetails.isChar = isChar;
 
@@ -1389,7 +1389,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
     {
       wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
       if (saveDialog.ShowModal() == wxID_OK)
-        SaveChar(saveDialog.GetPath().c_str());
+        SaveChar(QString::fromWCharArray(saveDialog.GetPath().c_str()));
     }
     break;
     case ID_LOAD_CHAR:
@@ -1397,7 +1397,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if (loadDialog.ShowModal() == wxID_OK)
       {
-        LOG_INFO << "Loading character from a save file:" << loadDialog.GetPath().c_str();
+        LOG_INFO << "Loading character from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
         if (charControl->model) // if a model is already present, unload equipment
         {
           for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
@@ -1407,7 +1407,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
               item->setId(0);
           }
         }
-        LoadChar(loadDialog.GetPath().c_str());
+        LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()));
       }
     }
     fileControl->UpdateInterface();
@@ -1417,7 +1417,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
     {
       wxFileDialog dialog(this, wxT("Save equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
       if (dialog.ShowModal() == wxID_OK)
-        SaveChar(dialog.GetPath().c_str(), true);
+        SaveChar(QString::fromWCharArray(dialog.GetPath().c_str()), true);
       break;
     }
 
@@ -1426,7 +1426,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       wxFileDialog loadDialog(this, wxT("Load equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
       if (loadDialog.ShowModal() == wxID_OK)
       {
-        LOG_INFO << "Loading equipment from a save file:" << loadDialog.GetPath().c_str();
+        LOG_INFO << "Loading equipment from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
         if (charControl->model) // if a model is already present, unload equipment
         {
           for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
@@ -1436,7 +1436,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
               item->setId(0);
           }
         }
-        LoadChar(loadDialog.GetPath().c_str(), true);
+        LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()), true);
       }
       break;
     }
@@ -1446,7 +1446,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
       if (dialog.ShowModal() == wxID_OK){
         armoryPath = dialog.GetValue();
-        LOG_INFO << "Importing character from the Armory:" << armoryPath.c_str();
+        LOG_INFO << "Importing character from the Armory:" << QString::fromWCharArray(armoryPath.c_str());
         ImportArmoury(armoryPath);
       }
     }
@@ -1720,7 +1720,7 @@ void ModelViewer::LoadWoW()
   }
   
   if (!core::Game::instance().initDone())
-    core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
+    core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
 
   // init game config
   std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
@@ -1743,7 +1743,7 @@ void ModelViewer::LoadWoW()
     for (size_t i = 0; i < nbConfigs; i++)
     {
       QString label = configsFound[i].locale + " (" + configsFound[i].version + ")";
-      availableConfigs[i] = wxString(label.toStdString().c_str());
+      availableConfigs[i] = wxString(label.toStdWString().c_str());
     }
 
     long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
@@ -1762,11 +1762,11 @@ void ModelViewer::LoadWoW()
   }
 
   // init game version
-  SetStatusText(wxString(GAMEDIRECTORY.version().toStdString()), 1);
+  SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
 
-  langName = GAMEDIRECTORY.locale().toStdString();
+  langName = GAMEDIRECTORY.locale().toStdWString();
 
-  SetStatusText(wxString(GAMEDIRECTORY.locale().toStdString()), 2);
+  SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
 
   // init file list
   QStringList ver = GAMEDIRECTORY.version().split('.');
@@ -1779,7 +1779,7 @@ void ModelViewer::LoadWoW()
   GAMEDIRECTORY.initFromListfile("listfile.txt");
   
   if (!customDirectoryPath.IsEmpty())
-    core::Game::instance().addCustomFiles(QString(customDirectoryPath.c_str()), customFilesConflictPolicy);
+    core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
   InitDatabase();
@@ -1988,7 +1988,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
       {
         for (unsigned int i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
         {
-          skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdString());
+          skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdWString());
         }
       }
 
@@ -1998,7 +1998,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
       wxSingleChoiceDialog skyDialog(this, wxT("Choose"), wxT("Select a Sky Box"), skyboxes);
       if (skyDialog.ShowModal() == wxID_OK && skyDialog.GetStringSelection() != wxEmptyString) {
-        canvas->skyModel = new WoWModel(GAMEDIRECTORY.getFile(skyDialog.GetStringSelection().c_str()), false);
+        canvas->skyModel = new WoWModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(skyDialog.GetStringSelection().c_str())), false);
         canvas->sky->setModel(canvas->skyModel);
       }
     }
@@ -2251,7 +2251,7 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
   wxString l_version = L"\n" + GLOBALSETTINGS.appVersion() + L" (" + GLOBALSETTINGS.buildName() + L")\n";
 
   if (GLOBALSETTINGS.isBeta())
-    l_version += "BETA VERSION";
+    l_version += L"BETA VERSION";
 
   info.SetVersion(l_version);
 
@@ -2276,7 +2276,7 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
 
   info.SetDescription(wxT("WoW Model Viewer is a 3D model viewer for World of Warcraft.\nIt uses the data files included with the game to display\nthe 3D models from the game: creatures, characters, spell\neffects, objects and so forth.\n\nCredits To: Linghuye,  nSzAbolcs,  Sailesh, Terran and Cryect\nfor their contributions either directly or indirectly."));
 
-  wxBitmap * bitmap = createBitmapFromResource("ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128);
+  wxBitmap * bitmap = createBitmapFromResource(L"ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128);
   wxIcon icon;
   icon.CopyFromBitmap(*bitmap);
 
@@ -2294,7 +2294,7 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
 
 void ModelViewer::OnCheckForUpdate(wxCommandEvent &event)
 {
-  wxExecute("UpdateManager.exe", wxEXEC_SYNC);
+  wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
 }
 
 void ModelViewer::OnCanvasSize(wxCommandEvent &event)
@@ -2361,7 +2361,7 @@ void ModelViewer::ModelInfo()
   ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
 
   if (!xml.is_open()) {
-    LOG_ERROR << "Unable to open file '" << fn.c_str() << "'. Could not export model.";
+    LOG_ERROR << "Unable to open file '" << QString::fromWCharArray(fn.c_str()) << "'. Could not export model.";
     return;
   }
 
@@ -2403,7 +2403,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 {
   CharInfos * result = NULL;
 
-  std::string url = strURL.ToAscii();
+  std::wstring url = strURL;
 
   for (PluginManager::iterator it = PLUGINMANAGER.begin();
        it != PLUGINMANAGER.end();
@@ -2512,7 +2512,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
     return;
   }
 
-  std::string exporterLabel = fileMenu->GetLabel(event.GetId()).mb_str();
+  std::wstring exporterLabel = fileMenu->GetLabel(event.GetId());
 
   PluginManager::iterator it = PLUGINMANAGER.begin();
   for (; it != PLUGINMANAGER.end(); ++it)
@@ -2521,7 +2521,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
     if (plugin && plugin->menuLabel() == exporterLabel)
     {
-      wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), "", "",
+      wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), L"", L"",
                                   plugin->fileSaveFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
       if (saveFileDialog.ShowModal() == wxID_CANCEL)
@@ -2536,7 +2536,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
       if (plugin->canExportAnimation())
       {
         WoWModel * m = const_cast<WoWModel *>(canvas->model());
-        std::map<int, std::string> animsMap = m->getAnimsMap();
+        std::map<int, std::wstring> animsMap = m->getAnimsMap();
         wxArrayString values;
         wxArrayInt selection;
         std::vector<int> ids;
@@ -2546,14 +2546,14 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         for (size_t i = 0; i < canvas->model()->anims.size(); i++)
         {
           wxString animName = animsMap[canvas->model()->anims[i].animID];
-          animName << " [";
+          animName << L" [";
           animName << i;
-          animName << "]";
+          animName << L"]";
           values.Add(animName);
           selection.Add(i);
         }
 
-        AnimationExportChoiceDialog animChoiceDlg(this, "", wxT("Animation Choice"), values);
+        AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("Animation Choice"), values);
         animChoiceDlg.SetSelections(selection);
         if (animChoiceDlg.ShowModal() == wxID_CANCEL)
           return;
@@ -2570,7 +2570,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
       // END OF HACK
       WoWModel * m = const_cast<WoWModel *>(canvas->model());
-      if (!plugin->exportModel(m, saveFileDialog.GetPath().mb_str()))
+      if (!plugin->exportModel(m, std::wstring(saveFileDialog.GetPath().c_str())))
       {
         wxMessageBox(wxT("An error occurred during export."), wxT("Export Error"), wxOK | wxICON_ERROR);
       }

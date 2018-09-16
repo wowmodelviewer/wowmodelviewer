@@ -12,10 +12,10 @@ static bool initedShaders = false;
 ShaderPair *terrainShaders[4]={0,0,0,0}, *wmoShader=0, *waterShaders[1]={0};
 
 // TODO
-bool isExtensionSupported(wxString s)
+bool isExtensionSupported(char * s)
 {
 	bool ret = false;
-	ret = glewIsSupported((char *)s.c_str()) == GL_TRUE ? true : false;
+	ret = glewIsSupported(s) == GL_TRUE ? true : false;
 
 	return ret;
 }
@@ -24,7 +24,7 @@ void OldinitShaders()
 {
 	if (initedShaders)
 		return;
-	supportShaders = isExtensionSupported(wxT("ARB_vertex_program")) && isExtensionSupported(wxT("ARB_fragment_program"));
+	supportShaders = isExtensionSupported("ARB_vertex_program") && isExtensionSupported("ARB_fragment_program");
 	if (supportShaders) {
 		// init extension stuff
 #if defined (_WINDOWS)

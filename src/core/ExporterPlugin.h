@@ -71,11 +71,11 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // Destructors
 
     // Methods
-    virtual std::string menuLabel() const = 0;
-    virtual std::string fileSaveTitle() const = 0;
-    virtual std::string fileSaveFilter() const = 0;
+    virtual std::wstring menuLabel() const = 0;
+    virtual std::wstring fileSaveTitle() const = 0;
+    virtual std::wstring fileSaveFilter() const = 0;
 
-    virtual bool exportModel(Model *, std::string file) = 0;
+    virtual bool exportModel(Model *, std::wstring file) = 0;
 
     bool canExportAnimation() const { return m_canExportAnimation; }
 
@@ -91,7 +91,7 @@ class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
     // Destructors
 
     // Methods
-    void exportGLTexture(GLuint id, std::string filename) const;
+    void exportGLTexture(GLuint id, std::wstring filename) const;
 
     // Members
     bool m_canExportAnimation;

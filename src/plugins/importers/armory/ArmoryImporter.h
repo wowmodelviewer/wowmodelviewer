@@ -66,11 +66,11 @@ class ArmoryImporter : public ImporterPlugin
     ~ArmoryImporter() {}
 
     // Methods
-    bool acceptURL(std::string url) const;
+    bool acceptURL(std::wstring url) const;
 
-    NPCInfos * importNPC(std::string url) const {return NULL;};
-    CharInfos * importChar(std::string url) const;
-    ItemRecord * importItem(std::string url) const;
+    NPCInfos * importNPC(std::wstring url) const {return NULL;};
+    CharInfos * importChar(std::wstring url) const;
+    ItemRecord * importItem(std::wstring url) const;
 
     // Members
 
@@ -98,7 +98,7 @@ class ArmoryImporter : public ImporterPlugin
     // Destructors
 
     // Methods
-    int readJSONValues(ImportType type, std::string url, wxJSONValue & result) const;
+    int readJSONValues(ImportType type, std::wstring url, wxJSONValue & result) const;
 
     // Members
 

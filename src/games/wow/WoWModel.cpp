@@ -1735,9 +1735,9 @@ void WoWModel::updateTextureList(GameFile * tex, int special)
   }
 }
 
-std::map<int, std::string> WoWModel::getAnimsMap()
+std::map<int, std::wstring> WoWModel::getAnimsMap()
 {
-  std::map<int, std::string> result;
+  std::map<int, std::wstring> result;
   if (animated && anims.size() > 0)
   {
     QString query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
@@ -1759,7 +1759,7 @@ std::map<int, std::string> WoWModel::getAnimsMap()
       // remap database results on model header indexes
       for (int i = 0, imax = animsResult.values.size(); i < imax; i++)
       {
-        result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdString();
+        result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdWString();
       }
     }
   }

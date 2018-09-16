@@ -392,7 +392,7 @@ void ModelCanvas::LoadADT(wxString fn)
 void ModelCanvas::LoadWMO(wxString fn)
 {
 	if (!wmo) {
-		wmo = new WMO(fn.c_str());
+		wmo = new WMO(QString::fromWCharArray(fn.c_str()));
 		root->setModel(wmo);
     if (m_useNewCamera)
       arcCamera.autofit(wmo->minCoord, wmo->maxCoord, video.fov);
@@ -1614,9 +1614,9 @@ void ModelCanvas::ResetView()
 	m->rot = Vec3D(0,-90.0f,0);
 	m->pos = Vec3D(0, 0, 5.0f);
 
-	bool isSkyBox = (wxString(m->name().toStdString()).substr(0,3)==wxT("Env"));
+	bool isSkyBox = (wxString(m->name().toStdWString()).substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {
-	  if (m->name().indexOf(wxT("SkyBox")) != -1)
+	  if (m->name().indexOf("SkyBox") != -1)
 	    isSkyBox = true;
 	}
 
@@ -1636,7 +1636,7 @@ void ModelCanvas::ResetView()
 
 	modelsize = m->rad * 2.0f;
 	
-	if (wxString(m->name().toStdString()).substr(0,4)==wxT("Item"))
+	if (wxString(m->name().toStdWString()).substr(0,4)==wxT("Item"))
 		m->rot.y = 0; // items look better facing right by default
 }
 
@@ -1705,9 +1705,9 @@ void ModelCanvas::LoadBackground(wxString filename)
 	{
 	  QImage texture;
 
-	  if(!texture.load(filename.c_str()))
+	  if(!texture.load(QString::fromWCharArray(filename.c_str())))
 	  {
-	    LOG_ERROR << "Failed to load texture" << filename.c_str();
+      LOG_ERROR << "Failed to load texture" << QString::fromWCharArray(filename.c_str());
 	    LOG_INFO << "Supported formats:" << QImageReader::supportedImageFormats();
 	  }
 
@@ -1889,7 +1889,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
       RenderToBuffer();
 	}
 
-	LOG_INFO << "Saving screenshot in : " << fn.c_str();
+  LOG_INFO << "Saving screenshot in : " << QString::fromWCharArray(fn.c_str());
 
 	if(temp.GetExt() == wxT("tga")) // QT does not support tga writing
 	{
@@ -1913,7 +1913,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	{
 	  QImage image(screenSize[2],  screenSize[3], QImage::Format_RGB32);
 	  glReadPixels(0, 0, screenSize[2], screenSize[3], GL_BGRA_EXT, GL_UNSIGNED_BYTE, image.bits());
-	  image.mirrored().save(fn.c_str());
+    image.mirrored().save(QString::fromWCharArray(fn.c_str()));
 	}
 	
 	if (rt)

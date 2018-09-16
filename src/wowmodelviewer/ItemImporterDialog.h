@@ -20,7 +20,7 @@ class wxTextCtrl;
 class ItemImporterDialog : public wxDialog
 {
   public:
-	ItemImporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = "Import Item from URL",
+	ItemImporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = _T("Import Item from URL"),
 			 const wxPoint & position = wxDefaultPosition, const wxSize & size = wxSize(300, 300));
 
 	ItemRecord & getImportedItem();

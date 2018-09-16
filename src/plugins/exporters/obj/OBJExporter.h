@@ -68,12 +68,12 @@ class OBJExporter : public ExporterPlugin
     ~OBJExporter() {}
 
     // Methods
-   std::string menuLabel() const;
+   std::wstring menuLabel() const;
 
-   std::string fileSaveTitle() const;
-   std::string fileSaveFilter() const;
+   std::wstring fileSaveTitle() const;
+   std::wstring fileSaveFilter() const;
 
-   bool exportModel(Model *, std::string file);
+   bool exportModel(Model *, std::wstring file);
 
     // Members
 

@@ -68,7 +68,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
       HANDLE dummy;
       LOG_INFO << "Loading Game Folder:" << m_folder;
       // locale found => try to open it
-      if (!CascOpenStorage(m_folder.toStdString().c_str(), it->second, &hStorage))
+      if (!CascOpenStorage(m_folder.toStdWString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
         LOG_ERROR << "Opening" << m_folder << "failed." << "Error" << m_openError;

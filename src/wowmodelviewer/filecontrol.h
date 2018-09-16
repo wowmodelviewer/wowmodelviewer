@@ -78,7 +78,7 @@ private:
 	          ++it)
 	      {
 	        TreeStackItem * child = it->second;
-	        child->id = tree->AppendItem(id, it->second->name().toStdString(), -1, -1, ((it->second->file)?new FileTreeData(it->second->file):0));
+	        child->id = tree->AppendItem(id, it->second->name().toStdWString(), -1, -1, ((it->second->file)?new FileTreeData(it->second->file):0));
 	        child->createTreeItems(tree);
 
 	      }

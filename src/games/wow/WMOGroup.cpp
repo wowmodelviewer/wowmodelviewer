@@ -86,8 +86,8 @@ void WMOGroup::initDisplayList()
   else
     fog = gh.fogs[0];
 
-  name = QString::fromLatin1(wmo->groupnames + gh.nameStart).toStdString();
-  desc = QString::fromLatin1(wmo->groupnames + gh.nameStart2).toStdString();
+  name = QString::fromLatin1(wmo->groupnames + gh.nameStart).toStdWString();
+  desc = QString::fromLatin1(wmo->groupnames + gh.nameStart2).toStdWString();
 
   b1 = Vec3D(gh.box1[0], gh.box1[2], -gh.box1[1]);
   b2 = Vec3D(gh.box2[0], gh.box2[2], -gh.box2[1]);

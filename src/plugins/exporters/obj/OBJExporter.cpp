@@ -77,23 +77,23 @@ void MakeModelFaceForwards(Vec3D &vect)
   vect = Temp;
 }
 
-std::string OBJExporter::menuLabel() const
+std::wstring OBJExporter::menuLabel() const
 {
-  return "OBJ...";
+  return L"OBJ...";
 }
 
-std::string OBJExporter::fileSaveTitle() const
+std::wstring OBJExporter::fileSaveTitle() const
 {
-  return "Save OBJ file";
+  return L"Save OBJ file";
 }
 
-std::string OBJExporter::fileSaveFilter() const
+std::wstring OBJExporter::fileSaveFilter() const
 {
-  return "OBJ files (*.obj)|*.obj";
+  return L"OBJ files (*.obj)|*.obj";
 }
 
 
-bool OBJExporter::exportModel(Model * m, std::string target)
+bool OBJExporter::exportModel(Model * m, std::wstring target)
 {
   WoWModel * model = dynamic_cast<WoWModel *>(m);
 
@@ -101,7 +101,7 @@ bool OBJExporter::exportModel(Model * m, std::string target)
     return false;
 
   // prepare obj file
-  QString targetFile = QString::fromStdString(target);
+  QString targetFile = QString::fromStdWString(target);
 
   QFile file(targetFile);
   if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
@@ -113,9 +113,9 @@ bool OBJExporter::exportModel(Model * m, std::string target)
   LOG_INFO << "Exporting" << model->modelname.c_str() << "in" << targetFile;
 
   // prepare mtl file
-  QString matFilename = QFileInfo(target.c_str()).completeBaseName();
+  QString matFilename = QFileInfo(targetFile).completeBaseName();
   matFilename += ".mtl";
-  matFilename = QFileInfo(target.c_str()).absolutePath () + "/" + matFilename;
+  matFilename = QFileInfo(targetFile).absolutePath () + "/" + matFilename;
 
   LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << matFilename;
 
@@ -129,7 +129,7 @@ bool OBJExporter::exportModel(Model * m, std::string target)
   QTextStream obj(&file);
   QTextStream mtl(&matFile);
 
-  obj << "# Wavefront OBJ exported by " << QString::fromStdString(GLOBALSETTINGS.appName()) << " " << QString::fromStdString(GLOBALSETTINGS.appVersion()) << "\n";
+  obj << "# Wavefront OBJ exported by " << QString::fromStdWString(GLOBALSETTINGS.appName()) << " " << QString::fromStdWString(GLOBALSETTINGS.appVersion()) << "\n";
   obj << "\n";
   obj << "mtllib " <<  QFileInfo(matFile).fileName() << "\n";
   obj << "\n";
@@ -364,7 +364,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
 bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const
 {
-  std::map<std::string, GLuint> texToExport;
+  std::map<std::wstring, GLuint> texToExport;
 
   for (size_t i=0; i<model->passes.size(); i++)
   {
@@ -411,7 +411,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-      texToExport[tex.toStdString()] = model->getGLTexture(p->tex);
+      texToExport[tex.toStdWString()] = model->getGLTexture(p->tex);
     }
   }
 

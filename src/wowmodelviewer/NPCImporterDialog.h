@@ -18,7 +18,7 @@ class wxTextCtrl;
 class NPCimporterDialog : public wxDialog
 {
   public:
-	NPCimporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = "Import from URL",
+	NPCimporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = _("Import from URL"),
 			 const wxPoint & position = wxDefaultPosition, const wxSize & size = wxSize(300, 300));
 
 	int getImportedId();

@@ -70,13 +70,13 @@
 
 // Public methods
 //--------------------------------------------------------------------
-bool ArmoryImporter::acceptURL(std::string url) const
+bool ArmoryImporter::acceptURL(std::wstring url) const
 {
-  return ((url.find("battle.net") != std::string::npos) || (url.find("worldofwarcraft.com") != std::string::npos));
+  return ((url.find(L"battle.net") != std::string::npos) || (url.find(L"worldofwarcraft.com") != std::string::npos));
 }
 
 
-CharInfos * ArmoryImporter::importChar(std::string url) const
+CharInfos * ArmoryImporter::importChar(std::wstring url) const
 {
   wxInitialize();
 
@@ -92,7 +92,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
 
     // Gather Race & Gender
     result->raceId = root[wxT("race")].AsInt();
-    result->gender = (root[wxT("gender")].AsInt() == 0) ? wxT("Male") : wxT("Female");
+    result->gender = (root[wxT("gender")].AsInt() == 0) ? "Male" : "Female";
 
     wxJSONValue app = root[wxT("appearance")];
     result->skinColor = app[wxT("skinColor")].AsInt();
@@ -276,7 +276,7 @@ CharInfos * ArmoryImporter::importChar(std::string url) const
   return result;
 }
 
-ItemRecord * ArmoryImporter::importItem(std::string url) const
+ItemRecord * ArmoryImporter::importItem(std::wstring url) const
 {
   wxInitialize();
 
@@ -310,7 +310,7 @@ ItemRecord * ArmoryImporter::importItem(std::string url) const
 
 // Private methods
 //--------------------------------------------------------------------
-int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue & result) const
+int ArmoryImporter::readJSONValues(ImportType type, std::wstring url, wxJSONValue & result) const
 {
   wxString apiPage;
   switch(type)
@@ -384,9 +384,9 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
        */
       wxString strURL(url);
 
-      wxString region = "";
-      wxString realm = "";
-      wxString charName = "";
+      wxString region = _T("");
+      wxString realm = _T("");
+      wxString charName = _T("");
 
       if (strURL.Find(wxT("battle.net")) != wxNOT_FOUND)
       {
@@ -414,14 +414,14 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
         realm = strURL.BeforeLast('/').AfterLast('/');
         charName = strURL.AfterLast('/');
 
-        if ((region.IsSameAs("fr-fr", false)) || (region.IsSameAs("en-gb", false)))
-          region = "eu";
-        else if ((region.IsSameAs("en-us", false)))
-          region = "us";
-        else if ((region.IsSameAs("zh-tw", false)))
-          region = "tw";
-        else if ((region.IsSameAs("ko-kr", false)))
-          region = "kr";
+        if ((region.IsSameAs(_T("fr-fr"), false)) || (region.IsSameAs(_T("en-gb"), false)))
+          region = _T("eu");
+        else if ((region.IsSameAs(_T("en-us"), false)))
+          region = _T("us");
+        else if ((region.IsSameAs(_T("zh-tw"), false)))
+          region = _T("tw");
+        else if ((region.IsSameAs(_T("ko-kr"), false)))
+          region = _T("kr");
       }
       else
       {
@@ -429,10 +429,12 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
         return 2;
       }
 
-      LOG_INFO << "Loading Battle.Net Armory. Region:" << region << ", Realm:" << realm << ", Character:" << charName;
+      LOG_INFO << "Loading Battle.Net Armory. Region:" << QString::fromWCharArray(region.c_str()) 
+               << ", Realm:" << QString::fromWCharArray(realm.c_str()) 
+               << ", Character:" << QString::fromWCharArray(charName.c_str());
 
-      apiPage = "https://wowmodelviewer.net/armory.php?region=";
-      apiPage << region << "&realm=" << realm << "&char=" << charName;
+      apiPage = _T("https://wowmodelviewer.net/armory.php?region=");
+      apiPage << region << _T("&realm=") << realm << _T("&char=") << charName;
       break;
     }
     case ITEM:
@@ -448,19 +450,19 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
       wxString strURL(url);
       wxString itemNumber = strURL.Mid(7).AfterLast('/');
 
-      LOG_INFO << "Loading Battle.Net Armory. Item: " << itemNumber.c_str();
+      LOG_INFO << "Loading Battle.Net Armory. Item: " << QString::fromWCharArray(itemNumber.c_str());
 
-      apiPage = "https://wowmodelviewer.net/armory.php?item=";
+      apiPage = _T("https://wowmodelviewer.net/armory.php?item=");
       apiPage << itemNumber;
 
       break;
     }
   }
 
-  LOG_INFO << "Final API Page: " << apiPage.c_str();
+  LOG_INFO << "Final API Page: " << QString::fromWCharArray(apiPage.c_str());
 
   QNetworkAccessManager networkManager;
-  QUrl apiUrl(apiPage.c_str());
+  QUrl apiUrl = QString::fromWCharArray(apiPage.c_str());
   QNetworkRequest request(apiUrl);
   request.setRawHeader("User-Agent", "WoWModelViewer");
   QNetworkReply *reply = networkManager.get(request);
@@ -473,5 +475,6 @@ int ArmoryImporter::readJSONValues(ImportType type, std::string url, wxJSONValue
   QByteArray bts = reply->readAll();
 
   wxJSONReader reader;
-  return reader.Parse(bts.data(),&result);
+  wxString data = wxString::FromUTF8(bts.data());
+  return reader.Parse(data, &result);
 }

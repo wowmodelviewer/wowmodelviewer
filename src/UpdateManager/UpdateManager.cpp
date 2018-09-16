@@ -122,7 +122,7 @@ void UpdateManager::updateTable()
 
   for( ; versionsIt != versionsItEnd ; versionsIt++)
   {
-    if((*versionsIt).first == QString(GLOBALSETTINGS.appName().c_str()))
+    if((*versionsIt).first == QString::fromStdWString(GLOBALSETTINGS.appName()))
       break;
   }
 
@@ -145,7 +145,7 @@ void UpdateManager::updateTable()
   {
     column = 0;
     // core version already inserted, skip it
-    if((*versionsIt).first == QString(GLOBALSETTINGS.appName().c_str()))
+    if ((*versionsIt).first == QString::fromStdWString(GLOBALSETTINGS.appName()))
       continue;
 
     m_table->insertRow(row);

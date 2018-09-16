@@ -50,11 +50,13 @@ int main(int argc, char ** argv)
 
   std::cout << "Input File : " << inputFile.toStdString() << std::endl;
   std::cout << "Data Folder : " << dataFoler.toStdString() << std::endl;
+  std::wcout << "Data Folder (w) : " << dataFoler.toStdWString() << std::endl;
   std::cout << "Output File : " << outputFile.toStdString() << std::endl;
 
   HANDLE CascStorage;
   
-  if (!CascOpenStorage(dataFoler.toStdString().c_str(), CASC_LOCALE_ENUS, &CascStorage))
+
+  if (!CascOpenStorage(dataFoler.toStdWString().c_str(), CASC_LOCALE_ENUS, &CascStorage))
   {
     std::cout << "Impossible to open CASC storage : " << dataFoler.toStdString() << std::endl;
     return 2;

@@ -484,10 +484,10 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
     for (int i = 0, imax = itemClasses.values.size(); i < imax; i++)
     {
       // first set verbose name
-      wxString name = itemClasses.values[i][3].toStdString().c_str();
+      wxString name = itemClasses.values[i][3].toStdWString();
       // if empty, fall back to normal one
       if (name.IsEmpty())
-        name = itemClasses.values[i][2].toStdString().c_str();
+        name = itemClasses.values[i][2].toStdWString();
 
       catnames.Add(CSConv(name));
       subclasslookup[std::pair<int, int>(itemClasses.values[i][0].toInt(), itemClasses.values[i][1].toInt())] = (int)catnames.size() - 1;
@@ -502,7 +502,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
           it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
           it->type == IT_DAGGER)
       {
-        choices.Add(getItemName(*it).toStdString());
+        choices.Add(getItemName(*it).toStdWString());
         numbers.push_back(it->id);
         quality.push_back(it->quality);
 
@@ -512,7 +512,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
     }
     else if (correctType((ssize_t)it->type, slot))
     {
-      choices.Add(getItemName(*it).toStdString());
+      choices.Add(getItemName(*it).toStdWString());
       numbers.push_back(it->id);
       quality.push_back(it->quality);
 
@@ -561,7 +561,7 @@ void CharControl::selectSet()
     {
       NumStringPair p;
       p.id = itemSet.values[i][0].toInt();
-      p.name = itemSet.values[i][1].toStdString();
+      p.name = itemSet.values[i][1].toStdWString();
       items.push_back(p);
     }
   }
@@ -601,7 +601,7 @@ void CharControl::selectStart()
   {
     for (int i = 0, imax = startOutfit.values.size(); i < imax; i++)
     {
-      choices.Add(startOutfit.values[i][0].toStdString());
+      choices.Add(startOutfit.values[i][0].toStdWString());
       numbers.push_back(startOutfit.values[i][1].toInt());
     }
   }
@@ -642,7 +642,7 @@ void CharControl::selectMount()
     {
       NumStringPair p;
       p.id = mountQuery.values[i][0].toInt();
-      p.name = mountQuery.values[i][1].toStdString();
+      p.name = mountQuery.values[i][1].toStdWString();
       mounts.push_back(p);
     }
   }
@@ -665,7 +665,7 @@ void CharControl::selectMount()
       for (it = files.begin(); it != files.end(); ++it)
       {
         QString fn = (*it)->fullname();
-        creaturemodels.push_back(wxString(fn.toUtf8().constData()));
+        creaturemodels.push_back(wxString(fn.toStdWString()));
       }
       creaturemodels.Sort();
     }
@@ -728,7 +728,7 @@ void CharControl::selectNPC(ssize_t type)
       if (displayItemAndNPCId != 0)
         NPCName += QString(" [%1]").arg(it->id);
 
-      choices.Add(NPCName.toStdString());
+      choices.Add(NPCName.toStdWString());
       numbers.push_back(it->id);
       quality.push_back(0);
 
@@ -903,7 +903,7 @@ void CharControl::OnUpdateItem(int type, int id)
       }
       else if (cats[id] == 1) // create mount from any old creature model file name
       {
-        modelFile = GAMEDIRECTORY.getFile(creaturemodels[numbers[id]].c_str());
+        modelFile = GAMEDIRECTORY.getFile(QString::fromWCharArray(creaturemodels[numbers[id]].c_str()));
         // that's it. No special textures or anything.
       }
       else

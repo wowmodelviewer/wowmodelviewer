@@ -67,12 +67,12 @@
 
 // Public methods
 //--------------------------------------------------------------------
-bool WowheadImporter::acceptURL(std::string url) const
+bool WowheadImporter::acceptURL(std::wstring url) const
 {
-  return (url.find("wowhead") != std::string::npos);
+  return (url.find(_T("wowhead")) != std::string::npos);
 }
 
-NPCInfos * WowheadImporter::importNPC(std::string urlToGrab) const
+NPCInfos * WowheadImporter::importNPC(std::wstring urlToGrab) const
 {
   wxInitialize();
   NPCInfos * result = NULL;
@@ -104,7 +104,7 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab) const
         infos = infos.substr(0, endIndex);
 
         // finding name
-        std::string NPCName = extractSubString(infos, "name\":\"", "\",");
+        std::wstring NPCName = QString::fromStdString(extractSubString(infos, "name\":\"", "\",")).toStdWString();
 
         // finding type
         std::string NPCType = extractSubString(infos, "type\":", "}");
@@ -134,7 +134,7 @@ NPCInfos * WowheadImporter::importNPC(std::string urlToGrab) const
   return result;
 }
 
-ItemRecord * WowheadImporter::importItem(std::string urlToGrab) const
+ItemRecord * WowheadImporter::importItem(std::wstring urlToGrab) const
 {
   wxInitialize();
   ItemRecord * result = NULL;

@@ -71,12 +71,12 @@ class FBXExporter : public ExporterPlugin
     ~FBXExporter() {}
 
     // Methods
-   std::string menuLabel() const;
+   std::wstring menuLabel() const;
 
-   std::string fileSaveTitle() const;
-   std::string fileSaveFilter() const;
+   std::wstring fileSaveTitle() const;
+   std::wstring fileSaveFilter() const;
 
-   bool exportModel(Model *, std::string file);
+   bool exportModel(Model *, std::wstring file);
 
     // Members
 
@@ -115,11 +115,11 @@ class FBXExporter : public ExporterPlugin
     FbxNode    * m_p_meshNode;
     FbxNode    * m_p_skeletonNode;
 
-    std::string m_filename;
+    std::wstring m_filename;
     std::map<int,FbxNode*> m_boneNodes;
     std::vector<FbxCluster*> m_boneClusters;
 
-    std::map<std::string, GLuint> m_texturesToExport;
+    std::map<std::wstring, GLuint> m_texturesToExport;
 
     // friend class declarations
 

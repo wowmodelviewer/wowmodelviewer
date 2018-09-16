@@ -54,7 +54,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   gamePathDisplay =  new wxTextCtrl(this, wxID_ANY, gamePath, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
   wxString customMsg = customDirectoryPath;
   if (customMsg.IsEmpty())
-    customMsg = wxString("Select a folder...");
+    customMsg = wxString(_("Select a folder..."));
   customDirectoryPathDisplay =  new wxTextCtrl(this, wxID_ANY, customMsg, wxDefaultPosition, wxSize(300,-1), wxTE_READONLY);
   top->AddSpacer(2);
   top->Add(new wxStaticText(this, wxID_ANY, _("Game Folder"),  wxDefaultPosition, wxDefaultSize, 0), 0, wxALL, 5);
@@ -71,7 +71,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
   top->Add(gbox, 0, wxALL, 5);
   wxStaticText *customFileMsg = new wxStaticText(this, wxID_ANY,
                                                  _("Custom files should be placed in a folder hierarchy that mirrors "
-                                                   "the game database (e.g. <Custom Folder>/Creature/Dragon/Dragon.m2)"),
+                                                   L"the game database (e.g. <Custom Folder>/Creature/Dragon/Dragon.m2)"),
                                                  wxDefaultPosition, wxDefaultSize, 0);
   customFileMsg->Wrap(350);
 
@@ -115,7 +115,7 @@ void GeneralSettings::Update()
   chkbox[CHECK_DISPLAYIDINLIST]->SetValue(displayItemAndNPCId);
   gamePathDisplay->SetValue(gamePath);
   if (customDirectoryPath.IsEmpty())
-    customDirectoryPathDisplay->SetValue("Select a folder...");
+    customDirectoryPathDisplay->SetValue(_("Select a folder..."));
   else
     customDirectoryPathDisplay->SetValue(customDirectoryPath);
   keepPolicyRadioBox->SetSelection(customFilesConflictPolicy);
@@ -135,7 +135,7 @@ void GeneralSettings::OnButton(wxCommandEvent &event)
       gamePath = newGamePath;
       settingsChanged = true;
     }
-    if (newCustomFolder == wxString("ERASE"))
+    if (newCustomFolder == wxString(_T("ERASE")))
     {
       if (customDirectoryPath != wxEmptyString)
         settingsChanged = true;
@@ -183,8 +183,8 @@ void GeneralSettings::OnButton(wxCommandEvent &event)
 
   else if (id == ID_ERASE_CUSTOM_FOLDER)
   {
-    newCustomFolder = wxString("ERASE");
-    customDirectoryPathDisplay->SetValue(wxString("Select a folder.."));
+    newCustomFolder = wxString(_T("ERASE"));
+    customDirectoryPathDisplay->SetValue(wxString(_("Select a folder..")));
   }
 }
 

@@ -245,7 +245,7 @@ public:
   void displayHeader(ModelHeader & a_header);
   bool canSetTextureFromFile(int texnum);
 
-  std::map<int, std::string> getAnimsMap();
+  std::map<int, std::wstring> getAnimsMap();
 
   void save(QXmlStreamWriter &);
   void load(QString &);

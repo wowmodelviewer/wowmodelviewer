@@ -66,7 +66,7 @@
 
 // Protected methods
 //--------------------------------------------------------------------
-void ExporterPlugin::exportGLTexture(GLuint id, std::string filename) const
+void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 {
   LOG_INFO << "Exporting GL texture with id " << id << "in" << filename.c_str();
   glEnable(GL_TEXTURE_2D);
@@ -82,7 +82,7 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::string filename) const
   glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 
   // unfortunatelly, QImage cannot handle tga for writing, use CxImage for now
-  if(filename.find(".tga") != std::string::npos)
+  if(filename.find(L".tga") != std::wstring::npos)
   {
     CxImage *newImage = new CxImage(0);
     newImage->CreateFromArray(pixels, width, height, 32, (width*4), true);
@@ -91,7 +91,7 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::string filename) const
   else
   {
     QImage texture(pixels, width, height, QImage::Format_ARGB32);
-    texture.save(filename.c_str());
+    texture.save(QString::fromStdWString(filename));
   }
   glBindTexture(GL_TEXTURE_2D, 0);
   glDisable(GL_TEXTURE_2D);

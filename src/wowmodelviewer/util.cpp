@@ -55,7 +55,7 @@ wxString CSConv(QString str)
 {
   return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.toStdString().c_str()));
 }
-
+/*
 void fixname(wxString &name)
 {
 	for (size_t i=0; i<name.length(); i++) {
@@ -76,6 +76,7 @@ void fixnamen(char *name, size_t len)
 		}
 	}
 }
+*/
 
 // Byteswap for 2 Bytes
 unsigned short _SwapTwoBytes (unsigned short w)
@@ -128,7 +129,7 @@ wxString getGamePath(bool noSet)
   HKEY key;
   unsigned long t, s;
   long l;
-  unsigned char path[1024];
+  char path[1024];
   memset(path, 0, sizeof(path));
 
   wxArrayString sNames;
@@ -155,8 +156,8 @@ wxString getGamePath(bool noSet)
     {
       s = sizeof(path);
       l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t,(LPBYTE)path, &s);
-      wxString spath(path);
-      if (l == ERROR_SUCCESS && wxDir::Exists(path) && sNames.Index(spath) == wxNOT_FOUND)
+      wxString spath = QString::fromLatin1(path).toStdWString();
+      if (l == ERROR_SUCCESS && wxDir::Exists(spath) && sNames.Index(spath) == wxNOT_FOUND)
         sNames.Add(spath);
       RegCloseKey(key);
     }
@@ -164,12 +165,12 @@ wxString getGamePath(bool noSet)
 
   if (sNames.size())
   {
-    sNames.Add("Other");
+    sNames.Add(L"Other");
     folder = wxGetSingleChoice(wxT("Please select a Path:"), wxT("Path"), sNames);
   }
   // If we found an install then set the game path, otherwise just set to C:\ for now
   
-  if (folder == wxEmptyString || folder == wxString("Other"))
+  if (folder == wxEmptyString || folder == wxString(L"Other"))
   {
     folder = gamePath;
     if (folder == wxEmptyString)
@@ -182,8 +183,8 @@ wxString getGamePath(bool noSet)
     newPath = folder;
   if (!newPath.IsEmpty() && newPath.Last() != SLASH)
     newPath.Append(SLASH);
-  if(!newPath.EndsWith(wxString("Data\\")))
-    newPath.Append(wxString("Data\\"));
+  if(!newPath.EndsWith(wxString(L"Data\\")))
+    newPath.Append(wxString(L"Data\\"));
 #elif _MAC // Mac OS X
   newPath = wxT("/Applications/World of Warcraft/");
   if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) )
@@ -228,7 +229,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
   HGLOBAL  a_resHandle = 0;
   HRSRC    a_resource;
   
-  a_resource = FindResource(0, t_name.mb_str(), RT_RCDATA);
+  a_resource = FindResource(0, t_name.c_str(), RT_RCDATA);
   
   if(0 != a_resource)
   {

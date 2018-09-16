@@ -4,7 +4,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 include_directories(.)
 
 # search for required package (wxwidgets)
-set(wxWidgets_CONFIGURATION msw)
+set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets REQUIRED net gl aui xml adv core base)
 
 # add wx widgets inclusions

@@ -79,10 +79,10 @@ namespace core
         return *m_instance;
       }
 
-      std::string appVersion(std::string a_prefix = std::string(""));
-      std::string appName();
-      std::string buildName();
-      std::string appTitle();
+      std::wstring appVersion(std::wstring a_prefix = std::wstring(L""));
+      std::wstring appName();
+      std::wstring buildName();
+      std::wstring appTitle();
 
       bool isBeta() { return m_isBetaVersion; }
 
@@ -119,11 +119,11 @@ namespace core
       int m_versionMajorNumber;
       int m_versionMinorNumber;
       int m_versionRevNumber;
-      std::string m_versionSpecialExtend;
+      std::wstring m_versionSpecialExtend;
 
-      std::string	m_appName;
-      std::string	m_buildName;
-      std::string m_platform;
+      std::wstring	m_appName;
+      std::wstring	m_buildName;
+      std::wstring m_platform;
 
       bool m_isBetaVersion;
       bool m_isAlphaVersion;

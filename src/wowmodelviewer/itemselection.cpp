@@ -248,7 +248,7 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 				if (rec.model > 0) {
 					npcs.push_back(rec);
 					id = npcs.size()-1;
-					QString query = QString("INSERT INTO Creature(ID,CreatureTypeID,DisplayID1,Name) VALUES (%1,%2,%3,\"%4\")").arg(modelid).arg(rec.type).arg(rec.model).arg(CSConv(rec.name).mb_str());
+					QString query = QString("INSERT INTO Creature(ID,CreatureTypeID,DisplayID1,Name) VALUES (%1,%2,%3,\"%4\")").arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
 					GAMEDATABASE.sqlQuery(query);
 				}
 			}
@@ -316,7 +316,7 @@ bool FilteredChoiceDialog::FilterFunc(int index)
 	if (index==0 && keepFirst) 
 		return true;
 
-	return m_choices->Item(index).Lower().Matches("*" + m_pattern->GetValue().Lower() + "*");
+	return m_choices->Item(index).Lower().Matches(_T("*") + m_pattern->GetValue().Lower() + _T("*"));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -69,22 +69,22 @@ FBXExporter::FBXExporter():
 // Public methods
 //--------------------------------------------------------------------
 
-std::string FBXExporter::menuLabel() const
+std::wstring FBXExporter::menuLabel() const
 {
-  return "FBX...";
+  return L"FBX...";
 }
 
-std::string FBXExporter::fileSaveTitle() const
+std::wstring FBXExporter::fileSaveTitle() const
 {
-  return "Save FBX file";
+  return L"Save FBX file";
 }
 
-std::string FBXExporter::fileSaveFilter() const
+std::wstring FBXExporter::fileSaveFilter() const
 {
-  return "FBX files (*.fbx)|*.fbx";
+  return L"FBX files (*.fbx)|*.fbx";
 }
 
-bool FBXExporter::exportModel(Model * model, std::string target)
+bool FBXExporter::exportModel(Model * model, std::wstring target)
 {
   reset();
 
@@ -115,7 +115,7 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   FbxExporter* exporter = FbxExporter::Create(m_p_manager, "");
 
   // Initialize the exporter.
-  if(!exporter->Initialize(target.c_str(), -1, m_p_manager->GetIOSettings()))
+  if(!exporter->Initialize(QString::fromStdWString(target.c_str()).toStdString().c_str(), -1, m_p_manager->GetIOSettings()))
   {
     LOG_ERROR << "Unable to create the FBX SDK exporter";
     return false;
@@ -136,8 +136,8 @@ bool FBXExporter::exportModel(Model * model, std::string target)
   // add some info to exported scene
   FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager,"SceneInfo");
   sceneInfo->mTitle = m_p_model->name().toStdString().c_str();
-  sceneInfo->mAuthor = GLOBALSETTINGS.appName().c_str();
-  sceneInfo->mRevision = GLOBALSETTINGS.appVersion().c_str();
+  sceneInfo->mAuthor = QString::fromStdWString(GLOBALSETTINGS.appName()).toStdString().c_str();
+  sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
   m_p_scene->SetSceneInfo(sceneInfo);
 
 
@@ -197,7 +197,7 @@ bool FBXExporter::exportModel(Model * model, std::string target)
 
   // delete texture files created during export
   for(auto it : m_texturesToExport)
-   remove((it.first).c_str());
+   _wremove((it.first).c_str());
 
   LOG_INFO << "FBX scene successfully exported";
   return true;
@@ -435,7 +435,7 @@ void FBXExporter::createAnimations()
     return;
   }
 
-  std::map<int, std::string> animsMap = m_p_model->getAnimsMap();
+  std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
   for (unsigned int anim=0; anim<m_p_model->anims.size(); anim++)
   {
     ModelAnimation cur_anim = m_p_model->anims[anim];
@@ -443,17 +443,17 @@ void FBXExporter::createAnimations()
     if(std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.Index) == m_animsToExport.end())
       continue;
 
-    std::stringstream ss;
+    std::wstringstream ss;
     ss << animsMap[cur_anim.animID];
     ss << " [";
     ss << cur_anim.Index;
     ss << "]";
 
-    std::string anim_name =  ss.str();
+    std::wstring anim_name =  ss.str();
 
     // Animation stack and layer.
-    FbxAnimStack* anim_stack = FbxAnimStack::Create(m_p_scene, anim_name.c_str());
-    FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, anim_name.c_str());
+    FbxAnimStack* anim_stack = FbxAnimStack::Create(m_p_scene, QString::fromStdWString(anim_name).toStdString().c_str());
+    FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, QString::fromStdWString(anim_name).toStdString().c_str());
     anim_stack->AddMember(anim_layer);
 
     uint32 timeInc = cur_anim.length/60;
@@ -602,10 +602,10 @@ void FBXExporter::createMaterials()
       QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
       tex_name = tex_name.replace(".blp", ".png");
 
-      QString tex_fullpath_filename = m_filename.c_str();
+      QString tex_fullpath_filename = QString::fromStdWString(m_filename);
       tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
 
-      m_texturesToExport[tex_fullpath_filename.toStdString().c_str()] = m_p_model->getGLTexture(pass->tex);
+      m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getGLTexture(pass->tex);
 
       FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
       texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
@@ -660,7 +660,7 @@ void FBXExporter::reset()
   m_p_meshNode = 0;
   m_p_skeletonNode = 0;
 
-  m_filename = "";
+  m_filename = L"";
 
   m_boneNodes.clear();
   m_texturesToExport.clear();

@@ -90,7 +90,7 @@ public:
 private:
 	//! name of output file
 	//_bstr_t m_sFile;
-	LPCSTR m_sFile;
+  LPCTSTR m_sFile;
 
 	//! Frame rate 
 	DWORD m_dwRate;	

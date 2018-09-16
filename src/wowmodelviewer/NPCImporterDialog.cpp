@@ -27,7 +27,7 @@ END_EVENT_TABLE()
 
 NPCimporterDialog::NPCimporterDialog(wxWindow * parent /* = NULL */, wxWindowID id /* = 1 */, const wxString & title /* = "Import from URL" */,
         							 const wxPoint & position /* = wxDefaultPosition */, const wxSize & size /*= wxSize(300, 300) */)
-: wxDialog( parent, id, title, position, size, wxRAISED_BORDER|wxDEFAULT_DIALOG_STYLE|wxCAPTION|wxTHICK_FRAME|wxSYSTEM_MENU )
+: wxDialog( parent, id, title, position, size, wxRAISED_BORDER|wxDEFAULT_DIALOG_STYLE|wxCAPTION|wxSYSTEM_MENU )
 {
 	wxBoxSizer *mainsizer = new wxBoxSizer(wxVERTICAL);
 
@@ -105,7 +105,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-	  std::string url = m_URLname->GetValue().ToAscii();
+	  std::wstring url = m_URLname->GetValue();
 
 	  NPCInfos * result = NULL;
 	  for(PluginManager::iterator it = PLUGINMANAGER.begin();
@@ -121,7 +121,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 
 		if(result)
 		{
-			m_nameResult->SetLabel(wxString(result->name.c_str()));
+			m_nameResult->SetLabel(result->name);
 			m_typeResult->SetLabel(wxString::Format(wxT("%i"),result->type));
 			m_idResult->SetLabel(wxString::Format(wxT("%i"),result->id));
 			m_displayIdResult->SetLabel(wxString::Format(wxT("%i"),result->displayId));
@@ -141,7 +141,7 @@ int NPCimporterDialog::getImportedId()
 {
 	int result = -1;
 
-	if(m_idResult->GetLabel() != "No URL") // successful import
+	if(m_idResult->GetLabel() != L"No URL") // successful import
 		result = wxAtoi(m_idResult->GetLabel());
 
 	return result;
@@ -150,15 +150,15 @@ int NPCimporterDialog::getImportedId()
 QString NPCimporterDialog::getNPCLine()
 {
 	QString result = "";
-	if(m_idResult->GetLabel() != "No URL") // successful import
+	if(m_idResult->GetLabel() != L"No URL") // successful import
 	{
-		result = m_idResult->GetLabel().c_str();
+		result = QString::fromWCharArray(m_idResult->GetLabel().c_str());
 		result += ",";
-		result += m_displayIdResult->GetLabel().c_str();
+    result += QString::fromWCharArray(m_displayIdResult->GetLabel().c_str());
 		result += ",";
-		result += m_typeResult->GetLabel().c_str();
+    result += QString::fromWCharArray(m_typeResult->GetLabel().c_str());
 		result += ",";
-		result += m_nameResult->GetLabel().c_str();
+    result += QString::fromWCharArray(m_nameResult->GetLabel().c_str());
 	}
 
 	return result;

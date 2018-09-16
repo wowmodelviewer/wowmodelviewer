@@ -19,7 +19,7 @@ CAVIGenerator::CAVIGenerator()
 	memset(&m_bih,0,sizeof(BITMAPINFOHEADER));
 
 	// Default file name.
-	m_sFile = "untitled.avi";
+	m_sFile = L"untitled.avi";
 
 	// Default frame rate, only matters if writing to AVI
 	 m_dwRate = 30;
@@ -67,7 +67,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 
 	// Step 2 : Open the movie file for writing....
 	hr = AVIFileOpen(&m_pAVIFile,			// Address to contain the new file interface pointer
-					(LPCSTR)m_sFile,		// Null-terminated string containing the name of the file to open
+					m_sFile,		// Null-terminated string containing the name of the file to open
 					OF_WRITE | OF_CREATE,	// Access mode to use when opening the file. 
 					NULL);					// use handler determined from file extension.
 											// Name your file .avi -> very important

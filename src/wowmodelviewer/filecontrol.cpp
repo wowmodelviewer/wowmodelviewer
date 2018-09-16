@@ -126,7 +126,7 @@ void FileControl::Init(ModelViewer* mv)
 
 	// Gets the list of files that meet the filter criteria
 	// and puts them into an array to be processed into our file tree
-	content = QString(txtContent->GetValue().c_str()).toLower().trimmed();
+	content = QString(QString::fromWCharArray(txtContent->GetValue().c_str()).toLower().trimmed());
 	filterString = "^.*"+ content +".*\\." + filterStrings[filterMode];
 	std::set<GameFile *> files;
 	GAMEDIRECTORY.getFilteredFiles(files, filterString);
@@ -163,7 +163,7 @@ void FileControl::Init(ModelViewer* mv)
 
 	LOG_INFO << "Initializing File Controls - END";
 
-	if (content != wxEmptyString)
+	if (content != "")
 		fileTree->ExpandAll();
 }
 
@@ -185,10 +185,10 @@ void FileControl::Export(wxString val, int select)
 	if (val.IsEmpty())
 		return;
 
-	GameFile * f = GAMEDIRECTORY.getFile(val.c_str());
+  GameFile * f = GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str()));
 	if(!f)
 	{
-	  LOG_ERROR << "Could not extract" << val.c_str();
+    LOG_ERROR << "Could not extract" << QString::fromWCharArray(val.c_str());
 	  return;
 	}
 
@@ -196,12 +196,12 @@ void FileControl::Export(wxString val, int select)
 
 	if (f->isEof())
 	{
-		LOG_ERROR << "Could not extract" << val.c_str();
+    LOG_ERROR << "Could not extract" << QString::fromWCharArray(val.c_str());
 		f->close();
 		return;
 	}
 
-	LOG_INFO << "Saving" << val.c_str();
+  LOG_INFO << "Saving" << QString::fromWCharArray(val.c_str());
 
 	wxFileName fn = fixMPQPath(val);
 
@@ -216,7 +216,7 @@ void FileControl::Export(wxString val, int select)
 		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetFullName();
 	}
 
-	LOG_INFO << "Saving to" << filename.c_str();
+  LOG_INFO << "Saving to" << QString::fromWCharArray(filename.c_str());
 
 	if ( !filename.empty() )
 	{
@@ -230,7 +230,7 @@ void FileControl::Export(wxString val, int select)
 	}
 	else
 	{
-	  LOG_ERROR << "Saving to" << filename.c_str() << "failed";
+    LOG_ERROR << "Saving to" << QString::fromWCharArray(filename.c_str()) << "failed";
 	}
 
 	f->close();
@@ -239,19 +239,19 @@ void FileControl::Export(wxString val, int select)
 wxString FileControl::ExportPNG(wxString val)
 {
 	if (val.IsEmpty())
-		return "";
+		return _T("");
 
 	wxFileName fn(val);
 	if (fn.GetExt().Lower() != wxT("blp"))
-		return "";
+		return _T("");
 
-	TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(val.c_str()));
+  TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
 	Texture &tex = *((Texture*)TEXTUREMANAGER.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
-		return "";
+		return _T("");
 
 	wxString filename;
-	filename = wxFileSelector(wxT("Save PNG ..."), wxGetCwd(), fn.GetName(), "png",wxT("PNG Files (.png)|*.png"));
+	filename = wxFileSelector(wxT("Save PNG ..."), wxGetCwd(), fn.GetName(), _T("png"),wxT("PNG Files (.png)|*.png"));
 
 	if ( filename.empty() ){
 		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
@@ -261,7 +261,7 @@ wxString FileControl::ExportPNG(wxString val)
 	tex.getPixels(tempbuf, GL_BGRA_EXT);
 
 	QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
-	PNGFile.save(filename.mb_str());
+  PNGFile.save(QString::fromWCharArray(filename.c_str()));
 
 	free(tempbuf);
 	return filename;
@@ -270,7 +270,7 @@ wxString FileControl::ExportPNG(wxString val)
 void FileControl::OnPopupClick(wxCommandEvent &evt)
 {
 	FileTreeData *data = (FileTreeData*)(static_cast<wxMenu *>(evt.GetEventObject())->GetClientData());
-	wxString val(data->file->fullname().toStdString());
+	wxString val(data->file->fullname().toStdWString());
 
 	int id = evt.GetId();
 	if (id == ID_FILELIST_SAVE) { 
@@ -310,7 +310,7 @@ void FileControl::OnTreeMenu(wxTreeEvent &event)
 	infoMenu.SetClientData( data );
 	infoMenu.Append(ID_FILELIST_SAVE, wxT("&Save..."), wxT("Save this object"));
 	// TODO: if is music, a Play option
-	wxString temp(tdata->file->fullname().toStdString());
+	wxString temp(tdata->file->fullname().toStdWString());
 	temp.MakeLower();
 
 	// if is graphic, a View option
@@ -481,13 +481,13 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 	CurrentItem = item;
 
 	if (filterMode == FILE_FILTER_MODEL) {
-	  wxString rootfn(data->file->fullname().toStdString());
+	  wxString rootfn(data->file->fullname().toStdWString());
 		// Exit, if its the same model thats currently loaded
-		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdString() == std::string(rootfn.c_str()))
+		if (modelviewer->canvas->model() && !modelviewer->canvas->model()->name().isEmpty() && modelviewer->canvas->model()->name().toStdWString() == std::wstring(rootfn.c_str()))
 			return; // clicked on the same model thats currently loaded, no need to load it again - exit
 
 		ClearCanvas();
-		LOG_INFO << "Selecting model in tree selector:" << rootfn.c_str();
+    LOG_INFO << "Selecting model in tree selector:" << QString::fromWCharArray(rootfn.c_str());
 
 		// Check to make sure the selected item is a model (an *.m2 file).
 		modelviewer->isModel = (rootfn.Last() == '2');
@@ -496,14 +496,14 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		//if (wxGetKeyState(WXK_SHIFT)) 
 		//	canvas->AddModel(rootfn);
 		//else
-			modelviewer->LoadModel(GAMEDIRECTORY.getFile(rootfn.c_str()));	// Load the model.
+    modelviewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(rootfn.c_str())));	// Load the model.
 
 		UpdateInterface();
 	} else if (filterMode == FILE_FILTER_WMO) {
 		ClearCanvas();
 
 		modelviewer->isWMO = true;
-		wxString rootfn(data->file->fullname().toStdString());
+		wxString rootfn(data->file->fullname().toStdWString());
 
     //modelviewer->canvas->model->modelType = MT_WMO;
 
@@ -520,11 +520,11 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 
 		int id = -1;
 		if (!isroot) {
-			char idnum[4];
-			strncpy(idnum, (char *)rootfn.c_str() + strlen((char *)rootfn.c_str())-7,3);
+			wchar_t idnum[4];
+      _tcsncpy(idnum, rootfn.c_str() + wcslen(rootfn.c_str()) - 7, 3);
 			//wxString(data->fn.Substr((data->fn.Length() - 7), 3)).ToLong(&id);
 			idnum[3]=0;
-			sscanf(idnum,"%d",&id);
+			swscanf(idnum,L"%d",&id);
 		}
 
     LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo;
@@ -541,7 +541,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		// For Graphics
-		wxString val(data->file->fullname().toStdString());
+		wxString val(data->file->fullname().toStdWString());
 		ExportPNG(val);
 		wxFileName fn(val);
 		wxString temp(wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png"));
@@ -553,7 +553,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		ClearCanvas();
 
 		modelviewer->isADT = true;
-		wxString rootfn(data->file->fullname().toStdString());
+		wxString rootfn(data->file->fullname().toStdWString());
 		modelviewer->canvas->LoadADT(rootfn);
 
 		UpdateInterface();

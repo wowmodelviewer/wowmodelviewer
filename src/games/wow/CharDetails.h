@@ -65,7 +65,7 @@ public:
   class CustomizationParam
   {
   public:
-    std::string name;
+    QString name;
     std::vector<int> possibleValues;
   };
 

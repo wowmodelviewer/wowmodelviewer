@@ -447,7 +447,7 @@ void CharDetails::fillCustomizationMap()
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
   CustomizationParam facialCustomizationStyle;
-  facialCustomizationStyle.name = QString(facialCustomizationBaseName + " Style").toStdString();
+  facialCustomizationStyle.name = QString(facialCustomizationBaseName + " Style");
 
   if (styles.valid && !styles.values.empty())
   {
@@ -475,7 +475,7 @@ void CharDetails::fillCustomizationMap()
     sqlResult colors = GAMEDATABASE.sqlQuery(query);
 
     CustomizationParam facialColor;
-    facialColor.name = QString(facialCustomizationBaseName + " Color").toStdString();
+    facialColor.name = QString(facialCustomizationBaseName + " Color");
 
     if (colors.valid && !colors.values.empty())
     {
@@ -500,7 +500,7 @@ void CharDetails::fillCustomizationMap()
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
   CustomizationParam additionalCustomization;
-  additionalCustomization.name = additionalCustomizationName.toStdString();
+  additionalCustomization.name = additionalCustomizationName;
 
   if (additional.valid && !additional.values.empty())
   {

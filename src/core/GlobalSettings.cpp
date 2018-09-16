@@ -63,8 +63,8 @@ core::GlobalSettings::GlobalSettings()
   m_versionMinorNumber = 9;
   m_versionRevNumber = 0;
 
-  m_appName = "WoW Model Viewer";
-  m_buildName = "In memory of Cenarius";
+  m_appName = L"WoW Model Viewer";
+  m_buildName = L"In memory of Cenarius";
 
  
   /*
@@ -105,7 +105,7 @@ core::GlobalSettings::GlobalSettings()
    */
 
   // platform 
-  m_platform = "Windows 32 bits";
+  m_platform = L"Windows 32 bits";
 
 #if _BETAVERSION > 0
   m_isBetaVersion = true;
@@ -121,7 +121,7 @@ core::GlobalSettings::GlobalSettings()
 
 
   // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = ".beta9";
+  m_versionSpecialExtend = L".beta9";
 
   bShowParticle = false;
   bZeroParticle = false;
@@ -137,10 +137,10 @@ core::GlobalSettings::~GlobalSettings()
 
 // Public methods
 //--------------------------------------------------------------------
-std::string core::GlobalSettings::appVersion(std::string a_prefix)
+std::wstring core::GlobalSettings::appVersion(std::wstring a_prefix)
 {
-  std::string l_result = a_prefix;
-  std::ostringstream l_oss;
+  std::wstring l_result = a_prefix;
+  std::wstringstream l_oss;
   l_oss.precision(0);
 
   l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
@@ -152,23 +152,23 @@ std::string core::GlobalSettings::appVersion(std::string a_prefix)
   return l_result;
 }
 
-std::string core::GlobalSettings::appName()
+std::wstring core::GlobalSettings::appName()
 {
   return m_appName;
 }
 
-std::string core::GlobalSettings::buildName()
+std::wstring core::GlobalSettings::buildName()
 {
   return m_buildName;
 }
 
-std::string core::GlobalSettings::appTitle()
+std::wstring core::GlobalSettings::appTitle()
 {
-  std::string title = appName() + appVersion(std::string(" v")) + " " + m_platform;
+  std::wstring title = appName() + appVersion(std::wstring(L" v")) + L" " + m_platform;
   if(m_isBetaVersion)
-    title += " - BETA VERSION";
+    title += L" - BETA VERSION";
   if(m_isAlphaVersion)
-    title += " - ALPHA VERSION";
+    title += L" - ALPHA VERSION";
   return title;
 }
 

@@ -33,9 +33,9 @@ void EnchantsDialog::OnClick(wxCommandEvent &event)
 {
 	if (event.GetId() == ID_ENCHANTSOK)
 	{
-		std::string sel = effectsListbox->GetStringSelection().c_str();
+		std::wstring sel = effectsListbox->GetStringSelection().c_str();
 
-		if (sel == "")
+		if (sel == L"")
 		{
 			Show(false);
 			return;

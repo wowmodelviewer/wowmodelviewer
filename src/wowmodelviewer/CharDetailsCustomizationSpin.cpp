@@ -27,7 +27,7 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
   m_params = m_details.getParams(m_type);
   m_details.attach(this);
 
-  top->Add(new wxStaticText(this, wxID_ANY, m_params.name.c_str()),
+  top->Add(new wxStaticText(this, wxID_ANY, m_params.name.toStdWString()),
            wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
   m_spin = new wxSpinButton(this, wxID_ANY, wxDefaultPosition, wxSize(30, 16), wxSP_HORIZONTAL | wxSP_WRAP);

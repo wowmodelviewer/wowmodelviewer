@@ -73,7 +73,7 @@ class _NPCINFOS_API_ NPCInfos
     int id;
     int displayId;
     int type;
-    std::string name;
+    std::wstring name;
 
   protected :
     // Constants / Enums

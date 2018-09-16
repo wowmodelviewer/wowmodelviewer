@@ -28,7 +28,7 @@ public:
 		if (m_fp) return false;	// Can't re-open without closing first
 
 #if defined(_WINDOWS) && !defined(_MINGW)
-		fopen_s(&m_fp, filename, mode);
+		_wfopen_s(&m_fp, filename, mode);
 #else
 		m_fp = _tfopen(filename, mode);
 #endif

@@ -71,9 +71,9 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 
   LOG_INFO << "Creating Model Control...";
 
-  wxFlexGridSizer *padding = new wxFlexGridSizer(1,1);
+  wxFlexGridSizer *padding = new wxFlexGridSizer(1,1,0);
 
-  wxFlexGridSizer *top = new wxFlexGridSizer(1,5);
+  wxFlexGridSizer *top = new wxFlexGridSizer(1,5,0);
   modelname = new wxComboBox(this, ID_MODEL_NAME);
   top->Add(modelname, 1, wxEXPAND);
 
@@ -308,7 +308,7 @@ void ModelControl::RefreshModel(Attachment *root)
 		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
 			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m) {
-				tmp = m->name().toStdString();
+				tmp = m->name().toStdWString();
 				modelname->Append(tmp.AfterLast(MPQ_SLASH));
 			}
 		}
@@ -340,7 +340,7 @@ void ModelControl::UpdateModel(Attachment *a)
 		model = m;
 		att = a;
 
-		modelname->SetLabel(m->name().toStdString());
+		modelname->SetLabel(m->name().toStdWString());
 
 		Update();
 	}
@@ -382,14 +382,14 @@ void ModelControl::Update()
   GeosetTreeItemIds.clear();
   clbGeosets->DeleteAllItems();
   clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
-  wxTreeItemId root = clbGeosets->AddRoot("Model Geosets");
+  wxTreeItemId root = clbGeosets->AddRoot(_("Model Geosets"));
   for (size_t i = 0; i < model->geosets.size(); i++)
   {
     size_t mesh = model->geosets[i]->id / 100;
     if (geosetGroupsMap.find(mesh) == geosetGroupsMap.end())
     {
-      wxString name = WoWModel::getCGGroupName((CharGeosets)mesh).toStdString().c_str();
-      if (name != "")
+      wxString name = WoWModel::getCGGroupName((CharGeosets)mesh).toStdWString().c_str();
+      if (name != _T(""))
         geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, name);
       else
         geosetGroupsMap[mesh] = clbGeosets->AppendItem(root, wxString::Format(wxT("%i"), mesh));

@@ -99,7 +99,7 @@ bool WowModelViewApp::OnInit()
   wxImage::AddHandler(new wxPNGHandler);
   wxImage::AddHandler(new wxXPMHandler);
 
-  wxBitmap * bitmap = createBitmapFromResource("SPLASH");
+  wxBitmap * bitmap = createBitmapFromResource(L"SPLASH");
   if (!bitmap)
     wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
   else
@@ -115,8 +115,7 @@ bool WowModelViewApp::OnInit()
   wxHandleFatalExceptions(true);
 
 
-  wxStandardPaths sp;
-  wxString execPath = sp.GetExecutablePath();
+  wxString execPath = wxStandardPaths::Get().GetExecutablePath();
   wxFileName fname(execPath);
   wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings");
   wxFileName::Mkdir(userPath, 0777, wxPATH_MKDIR_FULL);
@@ -196,53 +195,51 @@ bool WowModelViewApp::OnInit()
 
   // TODO: Improve this feature and expand on it.
   // Command arguments
-  wxString cmd;
+  QString cmd;
   for (int i = 0; i<argc; i++) {
-    cmd = argv[i];
+    cmd = QString::fromWCharArray(argv[i]);
 
-    if (cmd == wxT("-m")) {
+    if (cmd == "-m") {
       if (i + 1 < argc) {
         i++;
-        wxString fn(argv[i]);
+        QString fn = QString::fromWCharArray(argv[i]);
 
         // Error check
-        if (fn.Last() != '2') // Its not an M2 file, exit
+        if (!fn.endsWith("2")) // Its not an M2 file, exit
           break;
 
         // Load the model
-        frame->LoadModel(GAMEDIRECTORY.getFile(fn.c_str()));
+        frame->LoadModel(GAMEDIRECTORY.getFile(fn));
       }
     }
-    else if (cmd == wxT("-mo")) {
-      if (i + 1 < argc) {
+    else if (cmd == "-mo") {
+      if (i + 1 < argc) {                                                       
         i++;
-        wxString fn(argv[i]);
+        QString fn = QString::fromWCharArray(argv[i]);
 
-        if (fn.Last() != '2') // Its not an M2 file, exit
+        if (!fn.endsWith("2")) // Its not an M2 file, exit
           break;
 
         // If its a character model, give it some skin.
         // Load the model
-        frame->LoadModel(GAMEDIRECTORY.getFile(fn.c_str()));
+        frame->LoadModel(GAMEDIRECTORY.getFile(fn));
 
         // Output the screenshot
-        fn = wxT("ss_") + fn.AfterLast('\\').BeforeLast('.') + wxT(".png");
-        frame->canvas->Screenshot(fn);
+        fn = "ss_" + fn.replace('\\', '_') + ".png";
+        frame->canvas->Screenshot(fn.toStdWString());
       }
     }
-    else if (cmd == wxT("-dbfromfile")) {
+    else if (cmd == "-dbfromfile") {
       LOG_INFO << "Read database from file";
-      core::Game::instance().init(new wow::WoWFolder(QString(gamePath.c_str())), new wow::WoWDatabase());
+      core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
       GAMEDATABASE.setFastMode();
     }
-    else if (cmd == wxT("-console")) {
+    else if (cmd == "-console") {
       LOG_INFO << "Displaying console requested";
       displayConsole = true;
     }
-    else {
-      wxString tmp = cmd.AfterLast('.');
-      if (!tmp.IsNull() && !tmp.IsEmpty() && tmp.IsSameAs(wxT("chr"), false))
-        frame->LoadChar(cmd.c_str());
+    else if (cmd.endsWith(".chr")) {
+        frame->LoadChar(cmd);
     }
   }
 
@@ -251,7 +248,7 @@ bool WowModelViewApp::OnInit()
     if (AllocConsole()) {
       freopen("CONOUT$", "w", stdout);
       freopen("CONOUT$", "w", stderr);
-      SetConsoleTitle("WoWModelViewer Debug Console");
+      SetConsoleTitle(L"WoWModelViewer Debug Console");
       SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
 
       HWND console = GetConsoleWindow();
@@ -279,9 +276,9 @@ bool WowModelViewApp::OnInit()
   LOG_INFO << "WoW Model Viewer successfully loaded!";
 
   // check for last version
-  if (wxExecute("UpdateManager.exe --no-ui", wxEXEC_SYNC) < 0)
+  if (wxExecute(L"UpdateManager.exe --no-ui", wxEXEC_SYNC) < 0)
     if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES) {
-      wxExecute("UpdateManager.exe", wxEXEC_SYNC);
+      wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
     }
 
 
@@ -342,7 +339,7 @@ void WowModelViewApp::OnUnhandledException()
 
 void WowModelViewApp::LoadSettings()
 {
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   // graphic settings
   video.curCap.aaSamples = config.value("Graphics/FSAA", 0).toInt();
@@ -359,12 +356,12 @@ void WowModelViewApp::LoadSettings()
 
   // Application locale info
   langID = config.value("Locale/LanguageID", 1).toInt();
-  langName = config.value("Locale/LanguageName", "").toString().toStdString().c_str();
+  langName = config.value("Locale/LanguageName", "").toString().toStdWString();
 
   // Application settings
-  gamePath = config.value("Settings/Path", "").toString().toStdString().c_str();
-  armoryPath = config.value("Settings/ArmoryPath", "").toString().toStdString().c_str();
-  customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdString().c_str();
+  gamePath = config.value("Settings/Path", "").toString().toStdWString();
+  armoryPath = config.value("Settings/ArmoryPath", "").toString().toStdWString();
+  customDirectoryPath = config.value("Settings/CustomDirPath", "").toString().toStdWString();
   customFilesConflictPolicy = config.value("Settings/CustomFilesConflictPolicy", 0).toInt();
   displayItemAndNPCId = config.value("Settings/displayItemAndNPCId", 0).toInt();
   ssCounter = config.value("Settings/SSCounter", 100).toInt();
@@ -378,14 +375,14 @@ void WowModelViewApp::LoadSettings()
 void WowModelViewApp::SaveSettings()
 {
   // Application Config Settings
-  QSettings config(cfgPath.c_str(), QSettings::IniFormat);
+  QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
   config.setValue("Locale/LanguageID", langID);
-  config.setValue("Locale/LanguageName", langName.c_str());
+  config.setValue("Locale/LanguageName", QString::fromWCharArray(langName.c_str()));
 
-  config.setValue("Settings/Path", gamePath.c_str());
-  config.setValue("Settings/ArmoryPath", armoryPath.c_str());
-  config.setValue("Settings/CustomDirPath", customDirectoryPath.c_str());
+  config.setValue("Settings/Path", QString::fromWCharArray(gamePath.c_str()));
+  config.setValue("Settings/ArmoryPath", QString::fromWCharArray(armoryPath.c_str()));
+  config.setValue("Settings/CustomDirPath", QString::fromWCharArray(customDirectoryPath.c_str()));
   config.setValue("Settings/CustomFilesConflictPolicy", customFilesConflictPolicy);
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
   config.setValue("Settings/SSCounter", ssCounter);

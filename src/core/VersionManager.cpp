@@ -76,8 +76,8 @@ VersionManager::VersionManager(QObject * parent)
 void VersionManager::updateCurrentVersionInfo()
 {
   // core version
-  QString appName(GLOBALSETTINGS.appName().c_str());
-  QString appVersion(GLOBALSETTINGS.appVersion().c_str());
+  QString appName = QString::fromStdWString(GLOBALSETTINGS.appName());
+  QString appVersion = QString::fromStdWString(GLOBALSETTINGS.appVersion().c_str());
   m_currentVersionsMap.insert(std::make_pair(appName,appVersion));
 
   // init plugins infos
@@ -112,7 +112,7 @@ QString VersionManager::getLastVersionFor(QString & name)
 void VersionManager::checkForNewVersionAndExit()
 {
   // only check core version for now
-  QString appName = GLOBALSETTINGS.appName().c_str();
+  QString appName = QString::fromStdWString(GLOBALSETTINGS.appName());
   QString currentVersion = m_currentVersionsMap[appName];
   QString lastVersion = getLastVersionFor(appName);
   int result = compareVersion(currentVersion,lastVersion);

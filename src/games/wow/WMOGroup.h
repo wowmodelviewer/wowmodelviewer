@@ -49,7 +49,7 @@ class WMOGroup
   bool indoor, hascv, visible, ok;
 
   bool outdoorLights;
-  std::string name, desc;
+  std::wstring name, desc;
 
   WMOGroup();
   ~WMOGroup();

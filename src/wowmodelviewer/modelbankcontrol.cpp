@@ -80,7 +80,7 @@ void ModelBankControl::LoadModel()
 
 	ModelBank cd = bankList[val];
 
-	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(cd.fileName.c_str()));
+	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(cd.fileName.c_str())));
 
 	if (g_canvas->model()) {
     WoWModel * m = const_cast<WoWModel *>(g_canvas->model());
@@ -130,7 +130,7 @@ void ModelBankControl::AddModel()
 
 	ModelBank cd;
 
-	cd.fileName = wxString(g_canvas->model()->name().toStdString());
+	cd.fileName = wxString(g_canvas->model()->name().toStdWString());
 	cd.name = txtName->GetValue();
 
 	cd.pos = g_canvas->model()->pos;
