@@ -385,7 +385,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 			QString charName = QString();
 
 			// Seems to redirect to worldofwarcraft.com as of Sept 2018.
-			if (strURL.indexOf(tr("battle.net")) != -1)
+			if (strURL.indexOf("battle.net") != -1)
 			{
 				// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
 
@@ -406,16 +406,18 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
 			}
-			else if (strURL.indexOf(tr("worldofwarcraft.com")) != -1)
+			else if (strURL.indexOf("worldofwarcraft.com") != -1)
 			{
 				// Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
 
+				LOG_INFO << qPrintable(strURL);
 				QStringList strList = strURL.mid(8).split("/");
 
+
 				region = strList.at(1);
-				realm = strList.at(4);
-				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
-				LOG_INFO << "WoW.com, CharName: " << charName << " Realm: " << realm << " Region: " << region;
+				realm = strList.at(3);
+				charName = strList.at(4).mid(0, strURL.lastIndexOf("?") - 1);
+				LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
 				
 				// I don't believe these should be translated, as websites tend not to translate URLs...
 				// If so, change to region == tr("fr-fr")
@@ -430,7 +432,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 			}
 			else
 			{
-				LOG_ERROR << "Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com";
+				LOG_ERROR << "Improperly Formatted URL. Should be on domain worldofwarcraft.com";
 				return 2;
 			}
 
