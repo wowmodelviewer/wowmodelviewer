@@ -7,8 +7,6 @@ message(STATUS "Building wowhead importer")
 
 set(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net core base REQUIRED)
-include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS})
 
 # Qt5 stuff
 find_package(Qt5Core)
@@ -35,7 +33,7 @@ use_wow()
 add_library(wowhead SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET wowhead PROPERTY FOLDER "plugins")
 
-target_link_libraries(wowhead ${wxWidgets_LIBRARIES} Qt5::Core core wow)
+target_link_libraries(wowhead Qt5::Core core wow)
 
 if(WIN32)
   install(TARGETS wowhead RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")

@@ -61,11 +61,11 @@ class ImporterPlugin : public Plugin
     // Destructors
 
     // Methods
-    virtual bool acceptURL(std::wstring url) const = 0;
+	virtual bool acceptURL(QString url) const = 0;
 
-    virtual NPCInfos * importNPC(std::wstring url) const = 0;
-    virtual ItemRecord * importItem(std::wstring url) const = 0;
-    virtual CharInfos * importChar(std::wstring url) const = 0;
+    virtual NPCInfos * importNPC(QString url) const = 0;
+	virtual ItemRecord * importItem(QString url) const = 0;
+	virtual CharInfos * importChar(QString url) const = 0;
 
     // Members
 

@@ -109,7 +109,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-	  std::wstring url = m_URLname->GetValue();
+	  QString url = m_URLname->GetValue().utf8_str();
 
 	  for(PluginManager::iterator it = PLUGINMANAGER.begin();
 	      it != PLUGINMANAGER.end() ;

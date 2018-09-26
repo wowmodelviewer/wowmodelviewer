@@ -40,9 +40,7 @@
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
 
-
 // Current library
-#include "wx/jsonreader.h"
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -66,11 +64,11 @@ class ArmoryImporter : public ImporterPlugin
     ~ArmoryImporter() {}
 
     // Methods
-    bool acceptURL(std::wstring url) const;
+	bool acceptURL(QString url) const;
 
-    NPCInfos * importNPC(std::wstring url) const {return NULL;};
-    CharInfos * importChar(std::wstring url) const;
-    ItemRecord * importItem(std::wstring url) const;
+	NPCInfos * importNPC(QString url) const { return NULL; };
+	CharInfos * importChar(QString url) const;
+	ItemRecord * importItem(QString url) const;
 
     // Members
 
@@ -98,7 +96,10 @@ class ArmoryImporter : public ImporterPlugin
     // Destructors
 
     // Methods
-    int readJSONValues(ImportType type, std::wstring url, wxJSONValue & result) const;
+	int readJSONValues(ImportType type, QString url, QJsonObject & result) const;
+	QByteArray getURLData(QString inputUrl) const;
+	bool hasMember(QJsonValueRef check, QString lookfor) const;
+	bool hasTransmog(QJsonValueRef check) const;
 
     // Members
 

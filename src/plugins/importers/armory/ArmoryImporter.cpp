@@ -32,15 +32,17 @@
 // STL
 
 // Qt
+#include <QUrl>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
+#include <QJsonArray>
+#include <qjsondocument.h>
 
 // Irrlicht
 
 // Externals
-#include <wx/url.h>
 
 // Other libraries
 //#include "charcontrol.h"
@@ -70,238 +72,231 @@
 
 // Public methods
 //--------------------------------------------------------------------
-bool ArmoryImporter::acceptURL(std::wstring url) const
+bool ArmoryImporter::acceptURL(QString url) const
 {
-  return ((url.find(L"battle.net") != std::string::npos) || (url.find(L"worldofwarcraft.com") != std::string::npos));
+  return ((url.indexOf("battle.net") != -1) || (url.indexOf("worldofwarcraft.com") != -1));
 }
 
 
-CharInfos * ArmoryImporter::importChar(std::wstring url) const
+CharInfos * ArmoryImporter::importChar(QString url) const
 {
-  wxInitialize();
+	CharInfos * result = new CharInfos();
+	QJsonObject root;
 
-  CharInfos * result = new CharInfos();
-  wxJSONValue root;
+	int readStatus = readJSONValues(CHARACTER, url, root);
 
-  int readStatus = readJSONValues(CHARACTER,url,root);
+	if (readStatus == 0 && root.size() > 0)
+	{
+		// No Gathering Errors Detected.
+		result->equipment.resize(NUM_CHAR_SLOTS);
 
-  if (readStatus == 0 && root.Size() != 0)
-  {
-    // No Gathering Errors Detected.
-    result->equipment.resize(NUM_CHAR_SLOTS);
+		// Gather Race & Gender
+		result->raceId = root["race"].toInt();
+		result->gender = (root["gender"].toInt() == 0) ? "Male" : "Female";
 
-    // Gather Race & Gender
-    result->raceId = root[wxT("race")].AsInt();
-    result->gender = (root[wxT("gender")].AsInt() == 0) ? "Male" : "Female";
+		QJsonObject app = root["appearance"].toObject();
+		result->skinColor = app["skinColor"].toInt();
+		result->faceType = app["faceVariation"].toInt();
+		result->hairColor = app["hairColor"].toInt();
+		result->hairStyle = app["hairVariation"].toInt();
+		result->facialHair = app["featureVariation"].toInt();
 
-    wxJSONValue app = root[wxT("appearance")];
-    result->skinColor = app[wxT("skinColor")].AsInt();
-    result->faceType = app[wxT("faceVariation")].AsInt();
-    result->hairColor = app[wxT("hairColor")].AsInt();
-    result->hairStyle = app[wxT("hairVariation")].AsInt();
-    result->facialHair = app[wxT("featureVariation")].AsInt();
+		// Gather Demon Hunter options if present
+		if (!app["customDisplayOptions"].isUndefined() && !app["customDisplayOptions"].isNull())
+		{
+			QJsonArray custom = app["customDisplayOptions"].toArray();
+			result->isDemonHunter = true;
+			result->DHHorns = custom.at(1).toInt();
+			result->DHBlindfolds = custom.at(2).toInt();
 
-    // Gather Demon Hunter options if present
-    if (app[wxT("customDisplayOptions")].Size() > 0)
-    {
-      result->isDemonHunter = true;
-      result->DHHorns = app[wxT("customDisplayOptions")][1].AsInt();
-      result->DHBlindfolds = app[wxT("customDisplayOptions")][2].AsInt();
+			int tatoo = custom.at(0).toInt();
 
-      int tatoo = app[wxT("customDisplayOptions")][0].AsInt();
+			if (tatoo != 0)
+			{
+				int tatooStyle = tatoo % 6;
+				int tatooColor = tatoo / 6;
 
-      if (tatoo != 0)
-      {
-        int tatooStyle = tatoo % 6;
-        int tatooColor = tatoo / 6;
+				if (tatooStyle == 0)
+				{
+					tatooStyle = 6;
+					tatooColor--;
+				}
 
-        if (tatooStyle == 0)
-        {
-          tatooStyle = 6;
-          tatooColor--;
-        }
+				result->DHTatooStyle = tatooStyle;
+				result->DHTatooColor = tatooColor;
+			}
+		}
 
-        result->DHTatooStyle = tatooStyle;
-        result->DHTatooColor = tatooColor;
-      }    
-    }
-
-    // Gather Items
-    result->hasTransmogGear = false;
-    wxJSONValue items = root[wxT("items")];
-
-    if (items[wxT("back")].Size()>0)
-    {
-      result->equipment[CS_CAPE] = items[wxT("back")][wxT("id")].AsInt();
-      if (items[wxT("back")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_CAPE] = items[wxT("back")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("chest")].Size()>0)
-    {
-      result->equipment[CS_CHEST] = items[wxT("chest")][wxT("id")].AsInt();
-      if (items[wxT("chest")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_CHEST] = items[wxT("chest")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("feet")].Size()>0)
-    {
-      result->equipment[CS_BOOTS] = items[wxT("feet")][wxT("id")].AsInt();
-      if (items[wxT("feet")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_BOOTS] = items[wxT("feet")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("hands")].Size()>0)
-    {
-      result->equipment[CS_GLOVES] = items[wxT("hands")][wxT("id")].AsInt();
-      if (items[wxT("hands")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_GLOVES] = items[wxT("hands")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("head")].Size()>0)
-    {
-      result->equipment[CS_HEAD] = items[wxT("head")][wxT("id")].AsInt();
-      if (items[wxT("head")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_HEAD] = items[wxT("head")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("legs")].Size()>0)
-    {
-      result->equipment[CS_PANTS] = items[wxT("legs")][wxT("id")].AsInt();
-      if (items[wxT("legs")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_PANTS] = items[wxT("legs")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("mainHand")].Size()>0)
-    {
-      result->equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("id")].AsInt();
-      if (items[wxT("mainHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_HAND_RIGHT] = items[wxT("mainHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("offHand")].Size()>0)
-    {
-      result->equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("id")].AsInt();
-      if (items[wxT("offHand")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_HAND_LEFT] = items[wxT("offHand")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("shirt")].Size()>0)
-    {
-      result->equipment[CS_SHIRT] = items[wxT("shirt")][wxT("id")].AsInt();
-      if (items[wxT("shirt")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_SHIRT] = items[wxT("shirt")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("shoulder")].Size()>0)
-    {
-      result->equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("id")].AsInt();
-      if (items[wxT("shoulder")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_SHOULDER] = items[wxT("shoulder")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("tabard")].Size()>0)
-    {
-      result->equipment[CS_TABARD] = items[wxT("tabard")][wxT("id")].AsInt();
-      if (items[wxT("tabard")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_TABARD] = items[wxT("tabard")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("waist")].Size()>0)
-    {
-      result->equipment[CS_BELT] = items[wxT("waist")][wxT("id")].AsInt();
-      if (items[wxT("waist")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_BELT] = items[wxT("waist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-    if (items[wxT("wrist")].Size()>0)
-    {
-      result->equipment[CS_BRACERS] = items[wxT("wrist")][wxT("id")].AsInt();
-      if (items[wxT("wrist")][wxT("tooltipParams")].HasMember(wxT("transmogItem")))
-      {
-        result->equipment[CS_BRACERS] = items[wxT("wrist")][wxT("tooltipParams")][wxT("transmogItem")].AsInt();
-        result->hasTransmogGear = true;
-      }
-    }
-
-    // Set proper eyeglow
-    if (root[wxT("class")].AsInt() == 6) // 6 = DEATH KNIGHT
-      result->eyeGlowType = EGT_DEATHKNIGHT;
-    else
-      result->eyeGlowType = EGT_DEFAULT;
-
-    // tabard (useful if guild tabard)
-    wxJSONValue guild = root[wxT("guild")];
-    if(guild.Size() > 0)
-    {
-      wxJSONValue tabard = guild[wxT("emblem")];
-      if(tabard.Size() > 0)
-      {
-        result->tabardIcon = tabard[wxT("icon")].AsInt();
-        result->tabardBorder = tabard[wxT("border")].AsInt();
-        result->BorderColor = tabard[wxT("borderColorId")].AsInt();
-        result->Background = tabard[wxT("backgroundColorId")].AsInt();
-        result->IconColor = tabard[wxT("iconColorId")].AsInt();
-        result->customTabard = true;
-      }
-    }
-    wxUninitialize();
-    result->valid = true;
-  }
-
-  return result;
+		// Gather Items
+		result->hasTransmogGear = false;
+		QJsonObject items = root["items"].toObject();
+		
+		if (!items["back"].isUndefined() && !items["back"].isNull())
+		{
+			result->equipment[CS_CAPE] = items["back"].toObject()["id"].toInt();
+			if (hasTransmog(items["back"]))
+			{
+				result->equipment[CS_CAPE] = items["back"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["chest"].isUndefined() && !items["chest"].isNull())
+		{
+			result->equipment[CS_CHEST] = items["chest"].toObject()["id"].toInt();
+			if (hasTransmog(items["chest"]))
+			{
+				result->equipment[CS_CHEST] = items["chest"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["feet"].isUndefined() && !items["feet"].isNull())
+		{
+			result->equipment[CS_BOOTS] = items["feet"].toObject()["id"].toInt();
+			if (hasTransmog(items["feet"]))
+			{
+				result->equipment[CS_BOOTS] = items["feet"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["hands"].isUndefined() && !items["hands"].isNull())
+		{
+			result->equipment[CS_GLOVES] = items["hands"].toObject()["id"].toInt();
+			if (hasTransmog(items["hands"]))
+			{
+				result->equipment[CS_GLOVES] = items["hands"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["head"].isUndefined() && !items["head"].isNull())
+		{
+			result->equipment[CS_HEAD] = items["head"].toObject()["id"].toInt();
+			if (hasTransmog(items["head"]))
+			{
+				result->equipment[CS_HEAD] = items["head"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["legs"].isUndefined() && !items["legs"].isNull())
+		{
+			result->equipment[CS_PANTS] = items["legs"].toObject()["id"].toInt();
+			if (hasTransmog(items["legs"]))
+			{
+				result->equipment[CS_PANTS] = items["legs"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["mainHand"].isUndefined() && !items["mainHand"].isNull())
+		{
+			result->equipment[CS_HAND_RIGHT] = items["mainHand"].toObject()["id"].toInt();
+			if (hasTransmog(items["mainHand"]))
+			{
+				result->equipment[CS_HAND_RIGHT] = items["mainHand"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["offHand"].isUndefined() && !items["offHand"].isNull())
+		{
+			result->equipment[CS_HAND_LEFT] = items["offHand"].toObject()["id"].toInt();
+			if (hasTransmog(items["offHand"]))
+			{
+				result->equipment[CS_HAND_LEFT] = items["offHand"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["shirt"].isUndefined() && !items["shirt"].isNull())
+		{
+			result->equipment[CS_SHIRT] = items["shirt"].toObject()["id"].toInt();
+			if (hasTransmog(items["shirt"]))
+			{
+				result->equipment[CS_SHIRT] = items["shirt"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["shoulder"].isUndefined() && !items["shoulder"].isNull())
+		{
+			result->equipment[CS_SHOULDER] = items["shoulder"].toObject()["id"].toInt();
+			if (hasTransmog(items["shoulder"]))
+			{
+				result->equipment[CS_SHOULDER] = items["shoulder"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["tabard"].isUndefined() && !items["tabard"].isNull())
+		{
+			result->equipment[CS_TABARD] = items["tabard"].toObject()["id"].toInt();
+			if (hasTransmog(items["tabard"]))
+			{
+				result->equipment[CS_TABARD] = items["tabard"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["waist"].isUndefined() && !items["waist"].isNull())
+		{
+			result->equipment[CS_BELT] = items["waist"].toObject()["id"].toInt();
+			if (hasTransmog(items["waist"]))
+			{
+				result->equipment[CS_BELT] = items["waist"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		if (!items["wrist"].isUndefined() && !items["wrist"].isNull())
+		{
+			result->equipment[CS_BRACERS] = items["wrist"].toObject()["id"].toInt();
+			if (hasTransmog(items["wrist"]))
+			{
+				result->equipment[CS_BRACERS] = items["wrist"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
+				result->hasTransmogGear = true;
+			}
+		}
+		
+		// Set proper eyeglow
+		if (root["class"].toInt() == 6) // 6 = DEATH KNIGHT
+			result->eyeGlowType = EGT_DEATHKNIGHT;
+		else
+			result->eyeGlowType = EGT_DEFAULT;
+		
+		// tabard (useful if guild tabard)
+		QJsonObject guild = root["guild"].toObject();
+		if(guild.size() > 0)
+		{
+			QJsonObject tabard = guild["emblem"].toObject();
+			if(tabard.size() > 0)
+			{
+				result->tabardIcon = tabard["icon"].toInt();
+				result->tabardBorder = tabard["border"].toInt();
+				result->BorderColor = tabard["borderColorId"].toInt();
+				result->Background = tabard["backgroundColorId"].toInt();
+				result->IconColor = tabard["iconColorId"].toInt();
+				result->customTabard = true;
+			}
+		}
+		result->valid = true;
+	}
+	
+	return result;
 }
 
-ItemRecord * ArmoryImporter::importItem(std::wstring url) const
+ItemRecord * ArmoryImporter::importItem(QString url) const
 {
-  wxInitialize();
+	QJsonObject root;
+	ItemRecord * result = NULL;
 
-  wxJSONValue root;
-  ItemRecord * result = NULL;
+	if (readJSONValues(ITEM, url, root) == 0 && root.size() != 0)
+	{
+		// No Gathering Errors Detected.
+		result = new ItemRecord();
 
-  if (readJSONValues(ITEM,url,root) == 0 && root.Size() != 0)
-  {
-    // No Gathering Errors Detected.
-    result = new ItemRecord();
+		// Gather Race & Gender
+		result->id = root["id"].toInt();
+		result->model = root["displayInfoId"].toInt();
+		result->name = root["name"].toString().toUtf8();
+		result->itemclass = root["itemClass"].toInt();
+		result->subclass = root["itemSubClass"].toInt();
+		result->quality = root["quality"].toInt();
+		result->type = root["inventoryType"].toInt();
+	}
 
-    // Gather Race & Gender
-    result->id = root[wxT("id")].AsInt();
-    result->model = root[wxT("displayInfoId")].AsInt();
-    wxString name;
-    root[wxT("name")].AsString(name);
-    result->name = name.mb_str();
-    result->itemclass = root[wxT("itemClass")].AsInt();
-    result->subclass = root[wxT("itemSubClass")].AsInt();
-    result->quality = root[wxT("quality")].AsInt();
-    result->type = root[wxT("inventoryType")].AsInt();
-  }
-
-  wxUninitialize();
-  return result;
+	return result;
 }
 
 
@@ -310,14 +305,14 @@ ItemRecord * ArmoryImporter::importItem(std::wstring url) const
 
 // Private methods
 //--------------------------------------------------------------------
-int ArmoryImporter::readJSONValues(ImportType type, std::wstring url, wxJSONValue & result) const
+int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & result) const
 {
-  wxString apiPage;
-  switch(type)
-  {
-    case CHARACTER:
-    {
-      /*
+	QString apiPage;
+	switch (type)
+	{
+		case CHARACTER:
+		{
+			/*
 				Blizzard's API is mostly RESTful, with data being returned as JSON arrays.
 				Full documentation available here: http://blizzard.github.com/api-wow-docs/
 
@@ -371,110 +366,146 @@ int ArmoryImporter::readJSONValues(ImportType type, std::wstring url, wxJSONValu
 						"featureVariation":1,
 						"showHelm":true,
 						"showCloak":true,
-            "customDisplayOptions":[
-            33,
-            0,
-            1
-            ]
+
+					"customDisplayOptions":[
+							33,
+							0,
+							1
+						]
 					}
 				}
 
 				As you can see, this will give us almost all the data we need to properly rebuild the character.
 
-       */
-      wxString strURL(url);
+			*/
+			QString strURL(url);
 
-      wxString region = _T("");
-      wxString realm = _T("");
-      wxString charName = _T("");
+			QString region = QString();
+			QString realm = QString();
+			QString charName = QString();
 
-      if (strURL.Find(wxT("battle.net")) != wxNOT_FOUND)
-      {
-        // Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
+			// Seems to redirect to worldofwarcraft.com as of Sept 2018.
+			if (strURL.indexOf(tr("battle.net")) != -1)
+			{
+				// Import from http://us.battle.net/wow/en/character/steamwheedle-cartel/Kjasi/simple
 
-        if ((strURL.Find(wxT("simple")) == wxNOT_FOUND) &&
-            (strURL.Find(wxT("advanced")) == wxNOT_FOUND))
-        {
-          // due to Qt plugin, this cause application crash
-          // temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
-          //wxMessageBox(wxT("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),wxT("Bad Armory Link"));
-          LOG_ERROR << "Improperly Formatted URL. Lacks /simple and /advanced";
-          return 2;
-        }
+				if ((strURL.indexOf("simple") == -1) &&
+					(strURL.indexOf("advanced") == -1))
+				{
+					// due to Qt plugin, this cause application crash
+					// temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
+					//wxMessageBox(tr("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),tr("Bad Armory Link"));
+					LOG_ERROR << "Improperly Formatted URL. Lacks /simple and /advanced";
+					return 2;
+				}
 
-        region = strURL.Mid(7).BeforeFirst('/').BeforeFirst('.');
-        realm = strURL.BeforeLast('/').BeforeLast('/').AfterLast('/');
-        charName = strURL.BeforeLast('/').AfterLast('/');
-      }
-      else if (strURL.Find(wxT("worldofwarcraft.com")) != wxNOT_FOUND)
-      {
-        // Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
+				QStringList strList = strURL.mid(7).split("/");
 
-        region = strURL.Mid(9).AfterFirst('/').BeforeFirst('/');
-        realm = strURL.BeforeLast('/').AfterLast('/');
-        charName = strURL.AfterLast('/');
+				region = strList.at(0).mid(0, strURL.indexOf("."));
+				realm = strList.at(4);
+				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
+				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
+			}
+			else if (strURL.indexOf(tr("worldofwarcraft.com")) != -1)
+			{
+				// Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
 
-        if ((region.IsSameAs(_T("fr-fr"), false)) || (region.IsSameAs(_T("en-gb"), false)))
-          region = _T("eu");
-        else if ((region.IsSameAs(_T("en-us"), false)))
-          region = _T("us");
-        else if ((region.IsSameAs(_T("zh-tw"), false)))
-          region = _T("tw");
-        else if ((region.IsSameAs(_T("ko-kr"), false)))
-          region = _T("kr");
-      }
-      else
-      {
-        LOG_ERROR << "Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com";
-        return 2;
-      }
+				QStringList strList = strURL.mid(8).split("/");
 
-      LOG_INFO << "Loading Battle.Net Armory. Region:" << QString::fromWCharArray(region.c_str()) 
-               << ", Realm:" << QString::fromWCharArray(realm.c_str()) 
-               << ", Character:" << QString::fromWCharArray(charName.c_str());
+				region = strList.at(1);
+				realm = strList.at(4);
+				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
+				LOG_INFO << "WoW.com, CharName: " << charName << " Realm: " << realm << " Region: " << region;
+				
+				// I don't believe these should be translated, as websites tend not to translate URLs...
+				// If so, change to region == tr("fr-fr")
+				if ((region == "fr-fr") || (region == "en-gb"))
+					region = "eu";
+				else if (region == "en-us")
+					region = "us";
+				else if (region == "zh-tw")
+					region = "tw";
+				else if (region == "ko-kr")
+					region = "kr";
+			}
+			else
+			{
+				LOG_ERROR << "Improperly Formatted URL. Should be on domain battle.net or worldofwarcraft.com";
+				return 2;
+			}
 
-      apiPage = _T("https://wowmodelviewer.net/armory.php?region=");
-      apiPage << region << _T("&realm=") << realm << _T("&char=") << charName;
-      break;
-    }
-    case ITEM:
-    {
-      // url given is something like http://eu.battle.net/wow/fr/item/104673
-      // we need :
-      // 1. base battle.net address
-      // 2. locale (fr in above example) - Later
-      // 3. item number
+			LOG_INFO << "Loading Battle.Net Armory. Region:" << qPrintable(region)
+				<< ", Realm:" << qPrintable(realm)
+				<< ", Character:" << qPrintable(charName);
 
-      // for the sake of simplicity, only handle english name for now
+			apiPage = QString("https://wowmodelviewer.net/armory.php?region=%1&realm=%2&char=%3").arg(region).arg(realm).arg(charName);
+			break;
+		}
+		case ITEM:
+		{
+			// url given is something like http://eu.battle.net/wow/fr/item/104673
+			// we need :
+			// 1. base battle.net address
+			// 2. locale (fr in above example) - Later
+			// 3. item number
 
-      wxString strURL(url);
-      wxString itemNumber = strURL.Mid(7).AfterLast('/');
+			// for the sake of simplicity, only handle english name for now
 
-      LOG_INFO << "Loading Battle.Net Armory. Item: " << QString::fromWCharArray(itemNumber.c_str());
+			QString strURL(url);
+			QString itemNumber = strURL.mid(strURL.lastIndexOf("/"));
 
-      apiPage = _T("https://wowmodelviewer.net/armory.php?item=");
-      apiPage << itemNumber;
+			LOG_INFO << "Loading Battle.Net Armory. Item: " << qPrintable(itemNumber);
 
-      break;
-    }
-  }
+			apiPage = QString("https://wowmodelviewer.net/armory.php?item=%1").arg(itemNumber);
 
-  LOG_INFO << "Final API Page: " << QString::fromWCharArray(apiPage.c_str());
+			break;
+		}
+		default:
+			LOG_ERROR << "Invalid Import Type: " << type;
+			return 3;
+			break;
+	}
 
-  QNetworkAccessManager networkManager;
-  QUrl apiUrl = QString::fromWCharArray(apiPage.c_str());
-  QNetworkRequest request(apiUrl);
-  request.setRawHeader("User-Agent", "WoWModelViewer");
-  QNetworkReply *reply = networkManager.get(request);
+	LOG_INFO << "Final API Page: " << qPrintable(apiPage);
 
-  QEventLoop loop;
-  connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-  connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
-  loop.exec();
+	QByteArray bts = getURLData(apiPage);
 
-  QByteArray bts = reply->readAll();
+	QJsonDocument doc = QJsonDocument::fromBinaryData(bts);
+	result = doc.object();
+	return 0;
+}
 
-  wxJSONReader reader;
-  wxString data = wxString::FromUTF8(bts.data());
-  return reader.Parse(data, &result);
+QByteArray ArmoryImporter::getURLData(QString inputUrl) const
+{
+	QUrl url = QString(inputUrl);
+
+	if (!url.errorString().isEmpty())
+	{
+		return QByteArray();
+	}
+
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setRawHeader("User-Agent", "WoWModelViewer");
+	QNetworkReply *response = manager.get(request);
+	QEventLoop eventLoop;
+	connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+	connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
+	eventLoop.exec();
+
+	QByteArray htmldata = response->readAll(); // Source should be stored here
+
+	return htmldata;
+}
+
+bool ArmoryImporter::hasMember(QJsonValueRef check, QString lookfor) const
+{
+	if (check.toObject().find(lookfor) != check.toObject().end())
+		return true;
+	return false;
+}
+
+bool ArmoryImporter::hasTransmog(QJsonValueRef check) const
+{
+	return hasMember(check.toObject()["tooltipParams"], "transmogItem");
 }

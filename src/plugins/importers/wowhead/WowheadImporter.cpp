@@ -32,16 +32,15 @@
 // STL
 
 // Qt
+#include <QUrl>
+#include <QEventLoop>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 
 // Irrlicht
 
 // Externals
-#ifndef WX_PRECOMP
-  #include <wx/wx.h>
-#endif
-#include <wx/sstream.h>
-#include <wx/url.h>
-#include <wx/html/htmlpars.h>
 
 // Other libraries
 #include "database.h" // ItemRecord
@@ -67,140 +66,94 @@
 
 // Public methods
 //--------------------------------------------------------------------
-bool WowheadImporter::acceptURL(std::wstring url) const
+bool WowheadImporter::acceptURL(QString url) const
 {
-  return (url.find(_T("wowhead")) != std::string::npos);
+  return (url.indexOf("wowhead") != -1);
 }
 
-NPCInfos * WowheadImporter::importNPC(std::wstring urlToGrab) const
+NPCInfos * WowheadImporter::importNPC(QString urlToGrab) const
 {
-  wxInitialize();
-  NPCInfos * result = NULL;
+	NPCInfos * result = NULL;
 
-  // TODO: rewrite this part with Qt to handle UTF8 correctly
-  wxURL url(urlToGrab);
-  if(url.GetError()==wxURL_NOERR)
-  {
-    wxString htmldata;
+	// Get the HTML...
+	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+	if (htmldata.isNull() || htmldata.isEmpty())
+		return NULL;
 
-    wxInputStream *in = url.GetInputStream();
+	// let's go : finding name
+	// extract global infos
+	QString infos = extractSubString(htmldata, "(g_npcs[", ";");
 
-    if(in && in->IsOk())
-    {
-      wxStringOutputStream html_stream(&htmldata);
-      in->Read(html_stream);
+	// finding name
+	QString NPCName = extractSubString(infos, "name\":\"", "\",");
 
-      std::string content(html_stream.GetString().ToAscii());
+	// finding type
+	int NPCType = extractSubString(infos, "type\":", "}").toInt();
 
-      if (content.size() != 0)
-      {
-        // let's go : finding name
-        // extract global infos
-        std::string pattern("(g_npcs[");
-        std::string patternEnd(";");
-        std::size_t beginIndex = content.find(pattern);
-        std::string infos = content.substr(beginIndex);
-        std::size_t endIndex = infos.find(patternEnd);
-        infos = infos.substr(0, endIndex);
+	// finding id
+	int NPCId = extractSubString(infos, "id\":", ",").toInt();
 
-        // finding name
-        std::wstring NPCName = QString::fromStdString(extractSubString(infos, "name\":\"", "\",")).toStdWString();
+	// display id
+	QString NPCDispIdstr = extractSubString(infos, "ModelViewer.show({");
+	NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", " ");
 
-        // finding type
-        std::string NPCType = extractSubString(infos, "type\":", "}");
+	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
+		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
 
-        // finding id
-        std::string NPCId = extractSubString(infos, "id\":", ",");
+	int NPCDispId = NPCDispIdstr.toInt();
 
-        // display id
-        pattern = "ModelViewer.show({";
-        std::string NPCDispId = content.substr(content.find(pattern) + pattern.length());
-        NPCDispId = extractSubString(NPCDispId, "displayId: ", " ");
+	result = new NPCInfos();
 
-        if (NPCDispId.find(",") != std::string::npos) // comma at end of id
-          NPCDispId = NPCDispId.substr(0, NPCDispId.find(","));
+	result->name = NPCName.toStdWString();
+	result->type = NPCType;
+	result->id = NPCId;
+	result->displayId = NPCDispId;
 
-        result = new NPCInfos();
-
-        result->name = NPCName;
-        result->type = atoi(NPCType.c_str());
-        result->id = atoi(NPCId.c_str());
-        result->displayId = atoi(NPCDispId.c_str());
-      }
-    }
-    delete in;
-  }
-  wxUninitialize();
-  return result;
+	return result;
 }
 
-ItemRecord * WowheadImporter::importItem(std::wstring urlToGrab) const
+ItemRecord * WowheadImporter::importItem(QString urlToGrab) const
 {
-  wxInitialize();
-  ItemRecord * result = NULL;
+	ItemRecord * result = NULL;
 
-  wxURL url(urlToGrab);
-  if(url.GetError()==wxURL_NOERR)
-  {
-    wxString htmldata;
-    wxInputStream *in = url.GetInputStream();
+	// Get the HTML...
+	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+	if (htmldata.isNull() || htmldata.isEmpty())
+		return NULL;
 
-    if(in && in->IsOk())
-    {
-      wxStringOutputStream html_stream(&htmldata);
-      in->Read(html_stream);
+	// let's go : finding name
+	// extract global infos
+	QString infos = extractSubString(htmldata, "(g_items[", ";");
 
-      std::string content(html_stream.GetString().ToAscii());
+	// finding name
+	QString itemName = extractSubString(infos, "name\":\"", "\",");
 
-      if (content.size() != 0)
-      {
-        // let's go : finding name
-        // extract global infos
-        std::string pattern("(g_items[");
-        std::string patternEnd(";");
-        std::size_t beginIndex = content.find(pattern);
-        std::string infos = content.substr(beginIndex);
-        std::size_t endIndex = infos.find(patternEnd);
-        infos = infos.substr(0, endIndex);
+	// finding type
+	int itemType = extractSubString(infos, "slot\":", "}").toInt();
 
-        // finding name
-        // due to specific stuff on index, name is treated here, not with method like others
-        pattern = "name\":\"";
-        patternEnd = "\",";
-        std::string itemName = infos.substr(infos.find(pattern) + pattern.length());
-        itemName = itemName.substr(1, itemName.find(patternEnd) - 1); // first char is a number in name
+	// finding id
+	int itemId = extractSubString(infos, "[", "]").toInt();
 
-        // finding type
-        std::string itemType = extractSubString(infos, "slot\":", "}");
+	// display id
+	int itemDisplayId = extractSubString(infos, "displayid\":", "\",").toInt();
 
-        // finding id
-        std::string itemId = extractSubString(infos, "[", "]");
+	// class
+	// 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
+	int itemClass = extractSubString(infos, "classs\":", "\",").toInt();
 
-        // display id
-        std::string itemDisplayId = extractSubString(infos, "displayid\":", "\",");
+	// subclass
+	int idemSubClass = extractSubString(infos, "subclass\":", "\",").toInt();
 
-        // class
-        // 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
-        std::string itemClass = extractSubString(infos, "classs\":", "\",");
+	result = new ItemRecord();
 
-        // subclass
-        std::string idemSubClass = extractSubString(infos, "subclass\":", "\",");
+	result->name = itemName;
+	result->type = itemType;
+	result->id = itemId;
+	result->model = itemDisplayId;
+	result->itemclass = itemClass;
+	result->subclass = idemSubClass;
 
-        result = new ItemRecord();
-
-        result->name = QString::fromStdString(itemName);
-        result->type = atoi(itemType.c_str());
-        result->id = atoi(itemId.c_str());
-        result->model = atoi(itemDisplayId.c_str());
-        result->itemclass = atoi(itemClass.c_str());
-        result->subclass = atoi(idemSubClass.c_str());
-      }
-    }
-    delete in;
-  }
-
-  wxUninitialize();
-  return result;
+	return result;
 }
 
 
@@ -209,16 +162,44 @@ ItemRecord * WowheadImporter::importItem(std::wstring urlToGrab) const
 
 // Private methods
 //--------------------------------------------------------------------
-std::string WowheadImporter::extractSubString(std::string & datas, std::string beginPattern, std::string endPattern) const
+QString WowheadImporter::extractSubString(QString & datas, QString beginPattern, QString endPattern) const
 {
-  std::string result;
-  try
-  {
-    result = datas.substr(datas.find(beginPattern)+beginPattern.length());
-    result = result.substr(0,result.find(endPattern));
-  }
-  catch(...)
-  {
-  }
-  return result;
+	QString result;
+	try
+	{
+		std::size_t beginIndex = datas.indexOf(beginPattern, 0, Qt::CaseInsensitive);
+		std::size_t sublen = -1;
+		if (!endPattern.isEmpty()) {
+			std::size_t endIndex = datas.indexOf(endPattern, beginIndex);
+			sublen = endIndex - beginIndex;
+		}
+		result = datas.mid(beginIndex, sublen);
+	}
+	catch (...)
+	{
+	}
+	return result;
+}
+
+QByteArray WowheadImporter::getURLData(QString inputUrl) const
+{
+	QUrl url = QString(inputUrl);
+
+	if (!url.errorString().isEmpty())
+	{
+		return QByteArray();
+	}
+
+	QNetworkAccessManager manager;
+	QNetworkRequest request(url);
+	request.setRawHeader("User-Agent", "WoWModelViewer");
+	QNetworkReply *response = manager.get(request);
+	QEventLoop eventLoop;
+	connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+	connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
+	eventLoop.exec();
+
+	QByteArray htmldata = response->readAll(); // Source should be stored here
+
+	return htmldata;
 }

@@ -5,11 +5,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building armory importer")
 
-set(wxWidgets_USE_UNICODE ON)
-find_package(wxWidgets REQUIRED net core)
-include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS})
-
 # Qt5 stuff
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -18,16 +13,9 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-set(src ArmoryImporter.cpp 
-        jsonreader.cpp
-        jsonval.cpp
-        jsonwriter.cpp)
+set(src ArmoryImporter.cpp)
 
-set(headers ArmoryImporter.h
-			wx/json_defs.h
-			wx/jsonreader.h
-			wx/jsonval.h
-			wx/jsonwriter.h)
+set(headers ArmoryImporter.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -36,12 +24,11 @@ set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 use_core()
 use_wow()
-use_wxwidgets()
 
 add_library(armory SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET armory PROPERTY FOLDER "plugins")
 
-target_link_libraries(armory ${wxWidgets_LIBRARIES} core wow Qt5::Core)
+target_link_libraries(armory core wow Qt5::Core)
 
 if(WIN32)
   install(TARGETS armory RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")

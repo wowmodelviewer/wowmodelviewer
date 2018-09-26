@@ -2403,7 +2403,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 {
   CharInfos * result = NULL;
 
-  std::wstring url = strURL;
+  QString url = strURL.utf8_str();
 
   for (PluginManager::iterator it = PLUGINMANAGER.begin();
        it != PLUGINMANAGER.end();
