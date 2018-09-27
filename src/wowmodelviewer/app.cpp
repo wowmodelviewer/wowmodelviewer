@@ -85,30 +85,46 @@ void WowModelViewApp::setInterfaceLocale()
 
 bool WowModelViewApp::OnInit()
 {
-  bool displayConsole = false;
+	bool displayConsole = false;
 
-  // init next-gen stuff
-  GLOBALSETTINGS.bShowParticle = true;
-  GLOBALSETTINGS.bZeroParticle = true;
+	// init next-gen stuff
+	GLOBALSETTINGS.bShowParticle = true;
+	GLOBALSETTINGS.bZeroParticle = true;
 
-  QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
+	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
+	frame = NULL;
+	wxSplashScreen* splash = NULL;
+	{
+		wxLogNull logNo;
 
-  frame = NULL;
-  wxSplashScreen* splash = NULL;
+		wxImage::AddHandler(new wxPNGHandler);
+		wxImage::AddHandler(new wxXPMHandler);
 
-  wxImage::AddHandler(new wxPNGHandler);
-  wxImage::AddHandler(new wxXPMHandler);
+		// Enable Randomly choosing between SPLASH and SPLASH2
+		bool randomSplash2 = true;
 
-  wxBitmap * bitmap = createBitmapFromResource(L"SPLASH");
-  if (!bitmap)
-    wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
-  else
-    splash = new wxSplashScreen(*bitmap,
-    wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-    2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-    wxBORDER_NONE);
-  wxYield();
-  Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+		wxString splashname = L"SPLASH";
+		if (randomSplash2 == true)
+		{
+			srand(time(NULL));
+			int randomchoice = rand() % 10;		// Random number between 0-9
+			if (randomchoice >= 5)
+			{
+				splashname = L"SPLASH2";
+			}
+		}
+
+		wxBitmap * bitmap = createBitmapFromResource(splashname);
+		if (!bitmap)
+			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
+		else
+			splash = new wxSplashScreen(*bitmap,
+				wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+				2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+				wxBORDER_NONE);
+		wxYield();
+		Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+	}
 
 
   // Error & Logging settings
@@ -129,7 +145,6 @@ bool WowModelViewApp::OnInit()
   LoadSettings();
 
   setInterfaceLocale();
-
   LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
   // Just a little header to start off the log file.
