@@ -3,7 +3,7 @@ include(ExternalProject)
 # GIT_TAG is used to control update, and avoid pulling a casclib version that would break WoW Model Viewer
 ExternalProject_Add(casclib
     GIT_REPOSITORY https://github.com/ladislav-zezula/CascLib.git
-	GIT_TAG c8ceae8
+	GIT_TAG f3fa48c
 	CMAKE_ARGS -DCASC_BUILD_STATIC_LIB=ON -DCASC_BUILD_SHARED_LIB=OFF -DCASC_BUILD_TESTS=OFF -DCASC_UNICODE=ON -DCMAKE_INSTALL_PREFIX=${CASCLIB_INSTALL_LOCATION}
 )
 
