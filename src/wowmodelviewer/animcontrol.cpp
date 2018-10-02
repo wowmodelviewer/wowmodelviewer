@@ -488,16 +488,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
   QString query;
 
-  if (GAMEDIRECTORY.version().contains("8.0"))
-  {
-    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
-                    "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
-                    "LEFT JOIN CreatureModelData "
-                    "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-                    "WHERE CreatureModelData.FileID = %1")
-                    .arg( m->gamefile->fileDataId());
-  }
-  else
+  if (GAMEDIRECTORY.version().contains("7.3"))
   { 
     query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
                     "CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
@@ -506,7 +497,15 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                     "WHERE CreatureModelData.FileID = %1")
                     .arg( m->gamefile->fileDataId());
   } 
-
+  else // BfA:
+  {
+    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
+                    "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                    "LEFT JOIN CreatureModelData "
+                    "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                    "WHERE CreatureModelData.FileID = %1")
+                    .arg( m->gamefile->fileDataId());
+  }
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   PCRList.clear();
@@ -534,7 +533,23 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       // Configure geosets that are switched on only for certain displayIDs.
       // This is handled differently in BfA (has its own table) compared
       // to Legion (compressed into a single integer in CreatureDisplayInfo) :
-      if (GAMEDIRECTORY.version().contains("8.0"))
+      if (GAMEDIRECTORY.version().contains("7.3"))
+      {
+        // Geoset data is compressed into a single integer.
+        // The position of the hex digit (from right) represents
+        // the group number, and the value of the four bits at
+        // that position represents the geoset. So 0x00200000
+        // means geoset 2 of group 600, therefore 602.
+        int cgd = r.values[i][5].toInt();
+        for (int i = 0; i < 8; i++)
+        {
+          int geotype = 100 * (i + 1);
+          int geoid = (cgd >> (i * 4)) & 0x0F;
+          if (geoid > 0)
+            grp.creatureGeosetData.insert(geotype + geoid);
+        }
+      }
+      else // BfA:
       {
         QString query2 = QString("SELECT GeosetType, GeosetID "
                                  "FROM CreatureDisplayInfoGeosetData "
@@ -550,22 +565,6 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
             if (geoid > 0)
               grp.creatureGeosetData.insert(geotype + geoid);
           }
-        }
-      }
-      else  // Legion:
-      {
-        // Geoset data is compressed into a single integer.
-        // The position of the hex digit (from right) represents
-        // the group number, and the value of the four bits at
-        // that position represents the geoset. So 0x00200000
-        // means geoset 2 of group 600, therefore 602.
-        int cgd = r.values[i][5].toInt();
-        for (int i = 0; i < 8; i++)
-        {
-          int geotype = 100 * (i + 1);
-          int geoid = (cgd >> (i * 4)) & 0x0F;
-          if (geoid > 0)
-            grp.creatureGeosetData.insert(geotype + geoid);
         }
       }
 
