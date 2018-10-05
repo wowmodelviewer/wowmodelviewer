@@ -39,6 +39,7 @@
 #include <QNetworkRequest>
 #include <QJsonArray>
 #include <qjsondocument.h>
+#include <QtWidgets/qmessagebox.h>
 
 // Irrlicht
 
@@ -81,30 +82,33 @@ bool ArmoryImporter::acceptURL(QString url) const
 CharInfos * ArmoryImporter::importChar(QString url) const
 {
 	CharInfos * result = new CharInfos();
-	QJsonObject root;
+	QJsonObject *root = new QJsonObject;
 
 	int readStatus = readJSONValues(CHARACTER, url, root);
+	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root->count();
 
-	if (readStatus == 0 && root.size() > 0)
+	if (readStatus == 0 && root->count() > 0)
 	{
+		LOG_INFO << "Processing JSON Values...";
+
 		// No Gathering Errors Detected.
 		result->equipment.resize(NUM_CHAR_SLOTS);
 
 		// Gather Race & Gender
-		result->raceId = root["race"].toInt();
-		result->gender = (root["gender"].toInt() == 0) ? "Male" : "Female";
+		result->raceId = root->value("race").toInt();
+		result->gender = (root->value("gender").toInt() == 0) ? "Male" : "Female";
 
-		QJsonObject app = root["appearance"].toObject();
-		result->skinColor = app["skinColor"].toInt();
-		result->faceType = app["faceVariation"].toInt();
-		result->hairColor = app["hairColor"].toInt();
-		result->hairStyle = app["hairVariation"].toInt();
-		result->facialHair = app["featureVariation"].toInt();
+		QJsonObject *app = &root->value("appearance").toObject();
+		result->skinColor = app->value("skinColor").toInt();
+		result->faceType = app->value("faceVariation").toInt();
+		result->hairColor = app->value("hairColor").toInt();
+		result->hairStyle = app->value("hairVariation").toInt();
+		result->facialHair = app->value("featureVariation").toInt();
 
 		// Gather Demon Hunter options if present
-		if (!app["customDisplayOptions"].isUndefined() && !app["customDisplayOptions"].isNull())
+		if (!app->value("customDisplayOptions").isUndefined() && !app->value("customDisplayOptions").isNull())
 		{
-			QJsonArray custom = app["customDisplayOptions"].toArray();
+			QJsonArray custom = app->value("customDisplayOptions").toArray();
 			result->isDemonHunter = true;
 			result->DHHorns = custom.at(1).toInt();
 			result->DHBlindfolds = custom.at(2).toInt();
@@ -129,7 +133,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 		// Gather Items
 		result->hasTransmogGear = false;
-		QJsonObject items = root["items"].toObject();
+		QJsonObject items = root->value("items").toObject();
 		
 		if (!items["back"].isUndefined() && !items["back"].isNull())
 		{
@@ -250,13 +254,13 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		}
 		
 		// Set proper eyeglow
-		if (root["class"].toInt() == 6) // 6 = DEATH KNIGHT
+		if (root->value("class").toInt() == 6) // 6 = DEATH KNIGHT
 			result->eyeGlowType = EGT_DEATHKNIGHT;
 		else
 			result->eyeGlowType = EGT_DEFAULT;
 		
 		// tabard (useful if guild tabard)
-		QJsonObject guild = root["guild"].toObject();
+		QJsonObject guild = root->value("guild").toObject();
 		if(guild.size() > 0)
 		{
 			QJsonObject tabard = guild["emblem"].toObject();
@@ -270,7 +274,11 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 				result->customTabard = true;
 			}
 		}
+
 		result->valid = true;
+	}
+	else {
+		LOG_ERROR << "Bad JSON Results:" << readStatus << "Root Size:" << root->count();
 	}
 	
 	return result;
@@ -278,22 +286,22 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 ItemRecord * ArmoryImporter::importItem(QString url) const
 {
-	QJsonObject root;
+	QJsonObject *root = new QJsonObject;
 	ItemRecord * result = NULL;
 
-	if (readJSONValues(ITEM, url, root) == 0 && root.size() != 0)
+	if (readJSONValues(ITEM, url, root) == 0 && root->count() != 0)
 	{
 		// No Gathering Errors Detected.
 		result = new ItemRecord();
 
 		// Gather Race & Gender
-		result->id = root["id"].toInt();
-		result->model = root["displayInfoId"].toInt();
-		result->name = root["name"].toString().toUtf8();
-		result->itemclass = root["itemClass"].toInt();
-		result->subclass = root["itemSubClass"].toInt();
-		result->quality = root["quality"].toInt();
-		result->type = root["inventoryType"].toInt();
+		result->id = root->value("id").toInt();
+		result->model = root->value("displayInfoId").toInt();
+		result->name = root->value("name").toString().toUtf8();
+		result->itemclass = root->value("itemClass").toInt();
+		result->subclass = root->value("itemSubClass").toInt();
+		result->quality = root->value("quality").toInt();
+		result->type = root->value("inventoryType").toInt();
 	}
 
 	return result;
@@ -305,7 +313,7 @@ ItemRecord * ArmoryImporter::importItem(QString url) const
 
 // Private methods
 //--------------------------------------------------------------------
-int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & result) const
+int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject * result) const
 {
 	QString apiPage;
 	switch (type)
@@ -378,6 +386,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 				As you can see, this will give us almost all the data we need to properly rebuild the character.
 
 			*/
+
 			QString strURL(url);
 
 			QString region = QString();
@@ -395,6 +404,10 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 					// due to Qt plugin, this cause application crash
 					// temporary solution : cascade return value to main app to display the pop up (see modelviewer.cpp)
 					//wxMessageBox(tr("Improperly Formatted URL.\nMake sure your link ends in /simple or /advanced."),tr("Bad Armory Link"));
+
+					// Using a QMessageBox can easily fix this:
+					// QMessageBox msg(QMessageBox::Icon::Critical, tr("Bad Armory Link"), tr("Improperly Formatted URL.\n\nMake sure your link ends in /simple or /advanced."), QMessageBox::StandardButton::Ok);
+					// msg.exec();
 					LOG_ERROR << "Improperly Formatted URL. Lacks /simple and /advanced";
 					return 2;
 				}
@@ -432,7 +445,9 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 			}
 			else
 			{
-				LOG_ERROR << "Improperly Formatted URL. Should be on domain worldofwarcraft.com";
+				// QMessageBox msg(QMessageBox::Icon::Critical, tr("Bad Armory Link"), tr("Improperly Formatted URL.\n\nThe domain should be worldofwarcraft.com"), QMessageBox::StandardButton::Ok);
+				// msg.exec();
+				LOG_ERROR << "Improperly Formatted URL. The domain should be worldofwarcraft.com";
 				return 2;
 			}
 
@@ -468,18 +483,20 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 			break;
 	}
 
-	LOG_INFO << "Final API Page: " << qPrintable(apiPage);
+	LOG_INFO << "Final API Page:" << qPrintable(apiPage);
 
 	QByteArray bts = getURLData(apiPage);
 
-	QJsonDocument doc = QJsonDocument::fromBinaryData(bts);
-	result = doc.object();
+	QJsonDocument doc = QJsonDocument::fromJson(bts);
+	//LOG_INFO << "Document:" << qPrintable(doc.toJson());
+	*result = doc.object();
 	return 0;
 }
 
 QByteArray ArmoryImporter::getURLData(QString inputUrl) const
 {
 	QUrl url = QString(inputUrl);
+	// LOG_INFO << "Getting info from:" << qPrintable(url.toString());
 
 	if (!url.errorString().isEmpty())
 	{
@@ -496,6 +513,8 @@ QByteArray ArmoryImporter::getURLData(QString inputUrl) const
 	eventLoop.exec();
 
 	QByteArray htmldata = response->readAll(); // Source should be stored here
+
+	//LOG_INFO << "Returning Response:" << qPrintable(htmldata);
 
 	return htmldata;
 }
