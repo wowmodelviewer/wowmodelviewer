@@ -52,6 +52,8 @@ SetOutPath $INSTDIR\games\wow\7.3
 File "${wmvroot}\bin_support\wow\7.3\*"
 SetOutPath $INSTDIR\games\wow\8.0
 File "${wmvroot}\bin_support\wow\8.0\*"
+SetOutPath $INSTDIR\games\wow\8.1
+File "${wmvroot}\bin_support\wow\8.1\*"
 
 CreateDirectory $INSTDIR\mo
 SetOutPath $INSTDIR\mo
