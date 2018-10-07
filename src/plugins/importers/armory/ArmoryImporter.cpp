@@ -82,12 +82,12 @@ bool ArmoryImporter::acceptURL(QString url) const
 CharInfos * ArmoryImporter::importChar(QString url) const
 {
 	CharInfos * result = new CharInfos();
-	QJsonObject *root = new QJsonObject;
+  QJsonObject root;
 
 	int readStatus = readJSONValues(CHARACTER, url, root);
-	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root->count();
+	// LOG_INFO << "JSON Read Status:" << readStatus << "Root Count:" << root.count();
 
-	if (readStatus == 0 && root->count() > 0)
+	if (readStatus == 0 && root.count() > 0)
 	{
 		LOG_INFO << "Processing JSON Values...";
 
@@ -95,10 +95,10 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		result->equipment.resize(NUM_CHAR_SLOTS);
 
 		// Gather Race & Gender
-		result->raceId = root->value("race").toInt();
-		result->gender = (root->value("gender").toInt() == 0) ? "Male" : "Female";
+		result->raceId = root.value("race").toInt();
+		result->gender = (root.value("gender").toInt() == 0) ? "Male" : "Female";
 
-		QJsonObject *app = &root->value("appearance").toObject();
+		QJsonObject *app = &root.value("appearance").toObject();
 		result->skinColor = app->value("skinColor").toInt();
 		result->faceType = app->value("faceVariation").toInt();
 		result->hairColor = app->value("hairColor").toInt();
@@ -133,7 +133,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 		// Gather Items
 		result->hasTransmogGear = false;
-		QJsonObject items = root->value("items").toObject();
+		QJsonObject items = root.value("items").toObject();
 		
 		if (!items["back"].isUndefined() && !items["back"].isNull())
 		{
@@ -254,13 +254,13 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		}
 		
 		// Set proper eyeglow
-		if (root->value("class").toInt() == 6) // 6 = DEATH KNIGHT
+		if (root.value("class").toInt() == 6) // 6 = DEATH KNIGHT
 			result->eyeGlowType = EGT_DEATHKNIGHT;
 		else
 			result->eyeGlowType = EGT_DEFAULT;
 		
 		// tabard (useful if guild tabard)
-		QJsonObject guild = root->value("guild").toObject();
+		QJsonObject guild = root.value("guild").toObject();
 		if(guild.size() > 0)
 		{
 			QJsonObject tabard = guild["emblem"].toObject();
@@ -278,7 +278,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		result->valid = true;
 	}
 	else {
-		LOG_ERROR << "Bad JSON Results:" << readStatus << "Root Size:" << root->count();
+		LOG_ERROR << "Bad JSON Results:" << readStatus << "Root Size:" << root.count();
 	}
 	
 	return result;
@@ -286,22 +286,22 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 ItemRecord * ArmoryImporter::importItem(QString url) const
 {
-	QJsonObject *root = new QJsonObject;
+	QJsonObject root;
 	ItemRecord * result = NULL;
 
-	if (readJSONValues(ITEM, url, root) == 0 && root->count() != 0)
+	if (readJSONValues(ITEM, url, root) == 0 && root.count() != 0)
 	{
 		// No Gathering Errors Detected.
 		result = new ItemRecord();
 
 		// Gather Race & Gender
-		result->id = root->value("id").toInt();
-		result->model = root->value("displayInfoId").toInt();
-		result->name = root->value("name").toString().toUtf8();
-		result->itemclass = root->value("itemClass").toInt();
-		result->subclass = root->value("itemSubClass").toInt();
-		result->quality = root->value("quality").toInt();
-		result->type = root->value("inventoryType").toInt();
+		result->id = root.value("id").toInt();
+		result->model = root.value("displayInfoId").toInt();
+		result->name = root.value("name").toString().toUtf8();
+		result->itemclass = root.value("itemClass").toInt();
+		result->subclass = root.value("itemSubClass").toInt();
+		result->quality = root.value("quality").toInt();
+		result->type = root.value("inventoryType").toInt();
 	}
 
 	return result;
@@ -313,7 +313,7 @@ ItemRecord * ArmoryImporter::importItem(QString url) const
 
 // Private methods
 //--------------------------------------------------------------------
-int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject * result) const
+int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & result) const
 {
 	QString apiPage;
 	switch (type)
@@ -487,9 +487,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject * r
 
 	QByteArray bts = getURLData(apiPage);
 
-	QJsonDocument doc = QJsonDocument::fromJson(bts);
-	//LOG_INFO << "Document:" << qPrintable(doc.toJson());
-	*result = doc.object();
+	result = QJsonDocument::fromJson(bts).object();
 	return 0;
 }
 

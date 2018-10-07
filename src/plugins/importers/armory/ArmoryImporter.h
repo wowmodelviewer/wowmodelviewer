@@ -96,7 +96,7 @@ class ArmoryImporter : public ImporterPlugin
     // Destructors
 
     // Methods
-	int readJSONValues(ImportType type, QString url, QJsonObject * result) const;
+	int readJSONValues(ImportType type, QString url, QJsonObject & result) const;
 	QByteArray getURLData(QString inputUrl) const;
 	bool hasMember(QJsonValueRef check, QString lookfor) const;
 	bool hasTransmog(QJsonValueRef check) const;
