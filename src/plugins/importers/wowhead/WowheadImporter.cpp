@@ -167,13 +167,8 @@ QString WowheadImporter::extractSubString(QString & datas, QString beginPattern,
 	QString result;
 	try
 	{
-		std::size_t beginIndex = datas.indexOf(beginPattern, 0, Qt::CaseInsensitive);
-		std::size_t sublen = -1;
-		if (!endPattern.isEmpty()) {
-			std::size_t endIndex = datas.indexOf(endPattern, beginIndex);
-			sublen = endIndex - beginIndex;
-		}
-		result = datas.mid(beginIndex, sublen);
+    result = datas.mid(datas.indexOf(beginPattern, 0, Qt::CaseInsensitive)+beginPattern.length());
+    result = result.mid(0, result.indexOf(endPattern, 0, Qt::CaseInsensitive));
 	}
 	catch (...)
 	{
