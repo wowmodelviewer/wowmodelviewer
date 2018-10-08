@@ -5,7 +5,7 @@ build_script:
 - cmd: >-
     hg clone https://bitbucket.org/wowmodelviewer/wow-model-viewer-sdk -r 8179dd8
 
-    cd wmv_sdk
+    cd wow-model-viewer-sdk
 
     .\wmv_set_env.bat
 
