@@ -76,11 +76,22 @@ use_sqlite()
 
 add_definitions(-DBUILDING_CORE_DLL)
 
-add_library(core SHARED ${src} ${headers})
-set_property(TARGET core PROPERTY FOLDER "libraries")
+set(NAME core)
+add_library(${NAME} SHARED ${src} ${headers})
+set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(core Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
+target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
+
+if (MSVC_IDE)
+	# Enable Qt in Visual Studio
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set(OUTPUT_DIR "../bin/$(Configuration)/$(PlatformName)/")
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${OUTPUT_DIR})
+endif()
 
 if(WIN32)
-  install(TARGETS core RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
+  install(TARGETS ${NAME} RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
 endif(WIN32)

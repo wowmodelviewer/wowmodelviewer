@@ -30,11 +30,22 @@ set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 use_core()
 use_wow()
 
-add_library(wowhead SHARED ${src} ${headers} ${useful_files})
-set_property(TARGET wowhead PROPERTY FOLDER "plugins")
+set(NAME wowhead)
+add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
+set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
-target_link_libraries(wowhead Qt5::Core core wow)
+target_link_libraries(${NAME} Qt5::Core core wow)
+
+if (MSVC_IDE)
+	# Enable Qt in Visual Studio
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set(OUTPUT_DIR "../../../bin/$(Configuration)/$(PlatformName)/plugins")
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${OUTPUT_DIR})
+endif()
 
 if(WIN32)
-  install(TARGETS wowhead RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")
+  install(TARGETS ${NAME} RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/plugins")
 endif(WIN32)

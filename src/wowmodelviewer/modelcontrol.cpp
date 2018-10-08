@@ -632,7 +632,7 @@ void ModelControl::OnSlider(wxScrollEvent &event)
 
 Vec4D ModelControl::fromColWidget(wxColour col)
 {
-  return Vec4D((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
+	return Vec4D((double)col.Red() / 255.0, (double)col.Green() / 255.0, (double)col.Blue() / 255.0, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent &event)

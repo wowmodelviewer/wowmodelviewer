@@ -20,13 +20,13 @@ class Matrix;
 class _QUATERNION_API_ Vec4D
 {
   public:
-    float x,y,z,w;
+	  double x, y, z, w;
 
-    Vec4D(float x0=0.0f, float y0=0.0f, float z0=0.0f, float w0=0.0f) : x(x0), y(y0), z(z0), w(w0) {}
+	Vec4D(double x0 = 0.0f, double y0 = 0.0f, double z0 = 0.0f, double w0 = 0.0f) : x(x0), y(y0), z(z0), w(w0) {}
 
     Vec4D(const Vec4D& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
-    Vec4D(const Vec3D& v, const float w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
+    Vec4D(const Vec3D& v, const double w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
 
     Vec4D& operator= (const Vec4D &v) 
     {
@@ -49,13 +49,13 @@ class _QUATERNION_API_ Vec4D
       return r;
     }
 
-    const Vec4D operator* (float d) const
+	const Vec4D operator* (double d) const
 	  {
       Vec4D r(x*d,y*d,z*d,w*d);
       return r;
 	  }
 
-    friend Vec4D operator* (float d, const Vec4D& v)
+	friend Vec4D operator* (double d, const Vec4D& v)
 	  {
       return v * d;
 	  }
@@ -78,7 +78,7 @@ class _QUATERNION_API_ Vec4D
       return *this;
 	  }
 
-    Vec4D& operator*= (float d)
+	Vec4D& operator*= (double d)
 	  {
       x *= d;
       y *= d;
@@ -87,7 +87,7 @@ class _QUATERNION_API_ Vec4D
       return *this;
 	  }
 
-    float operator* (const Vec4D &v) const
+    double operator* (const Vec4D &v) const
 	  {
       return x*v.x + y*v.y + z*v.z + w*v.w;
 	  }
@@ -98,14 +98,14 @@ class _QUATERNION_API_ Vec4D
       return out;
     }
 
-    float lengthSquared() const
+	double lengthSquared() const
     {
       return x*x+y*y+z*z+w*w;
     }
 
-    float length() const
+	double length() const
     {
-      return sqrtf(x*x+y*y+z*z+w*w);
+      return sqrt(x*x+y*y+z*z+w*w);
     }
 
     Vec4D& normalize()
@@ -128,21 +128,21 @@ class _QUATERNION_API_ Vec4D
 class _QUATERNION_API_ Quaternion: public Vec4D
 {
   public:
-    Quaternion(float x0=0.0f, float y0=0.0f, float z0=0.0f, float w0=1.0f): Vec4D(x0,y0,z0,w0) {}
+	Quaternion(double x0 = 0.0f, double y0 = 0.0f, double z0 = 0.0f, double w0 = 1.0f) : Vec4D(x0, y0, z0, w0) {}
 
-    Quaternion(const Vec4D& v) : Vec4D(v) {}
+	Quaternion(const Vec4D& v) : Vec4D(v) {}
 
-    Quaternion(const Vec3D& v, const float w0) : Vec4D(v, w0) {}
+	Quaternion(const Vec3D& v, const double w0) : Vec4D(v, w0) {}
 
-    static const Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2);
+	static const Quaternion slerp(const double r, const Quaternion &v1, const Quaternion &v2);
 
-    static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2);
+	static const Quaternion lerp(const double r, const Quaternion &v1, const Quaternion &v2);
 
-    Vec3D GetHPB();
+	Vec3D GetHPB();
 
-    Matrix toMat();
+	Matrix toMat();
 
-    Vec3D toEulerXYZ();
+	Vec3D toEulerXYZ();
 };
 
 

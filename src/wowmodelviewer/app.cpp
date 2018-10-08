@@ -45,9 +45,6 @@ I hope this gives some insight into the "program flow".
 #endif
 */
 
-// tell wxwidgets which class is our app
-IMPLEMENT_APP(WowModelViewApp)
-
 void dumpStackInLogs()
 {
   LOG_ERROR << "---- WALK FROM EXCEPTION -----";
@@ -72,7 +69,7 @@ void WowModelViewApp::setInterfaceLocale()
 
   if (wxFileExists(fn))
   {
-    locale.Init(langIds[interfaceID], wxLOCALE_CONV_ENCODING);
+    locale.Init(langIds[interfaceID]);
 
     wxLocale::AddCatalogLookupPathPrefix(wxT("mo"));
     //wxLocale::AddCatalogLookupPathPrefix(wxT(".."));

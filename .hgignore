@@ -8,3 +8,6 @@ syntax: glob
 .settings/*
 ./Installers/Windows/NSIS/*.exe
 ./VisualStudio2013/*
+.vs
+build
+GeneratedFiles
