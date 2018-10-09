@@ -56,8 +56,9 @@
     <field type="uint" name="HighResMaleDisplayId" pos="10" />
     <field type="uint" name="HighResFemaleDisplayId" pos="11" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
-    <!-- not working for now, not the right index in BfA-->
+    <!-- not working for now, not the right index in BfA
     <field type="byte" name="ItemDisplayRaceID" pos="36" />
+    -->
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
