@@ -248,7 +248,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
                         
-set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x64.exe
+set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vc_redist.x64.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
