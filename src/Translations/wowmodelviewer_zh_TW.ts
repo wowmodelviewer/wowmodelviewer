@@ -2,73 +2,209 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_TW" sourcelanguage="en_US">
 <context>
-    <name>wmvMainWindow</name>
+    <name>dockWidgetLighting</name>
     <message>
-        <source>WoW Model Viewer</source>
+        <source>Target XYZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File</source>
+        <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Export Model</source>
+        <source>Ambient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>View</source>
+        <source>Diffuse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Camera</source>
+        <source>Specular</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Set Canvas Size</source>
+        <source>Position XYZ</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ratio 1:1</source>
+        <source>Point Light</source>
+        <extracomment>A point light is a single point of light, similar to a lightbulb in a lamp.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ratio 4:3</source>
+        <source>Spot Light</source>
+        <extracomment>A spot light is a light with a limited area of affect, pointed at a specific direction.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Ratio 16:9</source>
+        <source>Directional</source>
+        <extracomment>A directional light. All light comes from a single source, hitting everything evenly.</extracomment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Misc Ratios</source>
+        <source>Light 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Character</source>
+        <source>Light 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Eye Glow</source>
+        <source>Light 3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Lighting</source>
+        <source>Light 4</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Options</source>
+        <source>Enable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Effects</source>
+        <source>Relative</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>About</source>
+        <source>Intensity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>File List</source>
+        <source>Ambient Intensity</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>dockWidgetModelControls</name>
+    <message>
+        <source>LOD</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>0 (Best)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>3 (Worst)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Alpha</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wireframe</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bounds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Texture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bones</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Render</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Particles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Double-Click to toggle on/off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Geosets</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Position</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>X</source>
+        <extracomment>X-Axis</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Y</source>
+        <extracomment>Y-Axis</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Z</source>
+        <extracomment>Z-Axis</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Rotation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yaw</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Pitch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Bank</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Replace Particle Colors</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>dockWidget_AnimationControls</name>
+    <message>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Autoplay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Frame:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Speed:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&gt;&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Play</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -76,9 +212,20 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Character Designer</source>
+        <source>Pause</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Auto Animate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lock Animations</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>dockWidget_CharacterDesigner</name>
     <message>
         <source>Model Customization</source>
         <translation type="unfinished"></translation>
@@ -184,230 +331,22 @@
         <source>Mount / Dismount</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>dockWidget_FileList</name>
     <message>
-        <source>Animation</source>
+        <source>Clear</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>dockWidget_ModelBank</name>
+    <message>
+        <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Add</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Autoplay</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Frame:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Speed:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>1.0x</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Auto Animate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Lock Animations</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&gt;&gt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Play</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>&lt;&lt;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Pause</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Light 1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Light 2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Light 3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Light 4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Enable</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Relative</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Point Light</source>
-        <extracomment>A point light is a single point of light, similar to a lightbulb in a lamp.</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Spot Light</source>
-        <extracomment>A spot light is a light with a limited area of affect, pointed at a specific direction.</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Directional</source>
-        <extracomment>A directional light. All light comes from a single source, hitting everything evenly.</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Intensity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Color</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Ambient</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Diffuse</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Specular</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Position XYZ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Target XYZ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Model Controls</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Rotation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Yaw</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Pitch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Bank</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Position</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>X</source>
-        <extracomment>X-Axis</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Y</source>
-        <extracomment>Y-Axis</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Z</source>
-        <extracomment>Z-Axis</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wireframe</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Bounds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Texture</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Bones</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Render</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Particles</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>LOD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>0 (Best)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>3 (Worst)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Double-Click to toggle on/off</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Geosets</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Alpha</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Replace Particle Colors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Model Bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -418,8 +357,95 @@
         <source>Display</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>wmvMainWindow</name>
     <message>
-        <source>Name:</source>
+        <source>WoW Model Viewer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export Model</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Set Canvas Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ratio 1:1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ratio 4:3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Ratio 16:9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Misc Ratios</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Character</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Eye Glow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Lighting</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Effects</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Character Designer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Mount / Dismount</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Animation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Model Controls</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Model Bank</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -551,10 +577,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use mode camera</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Perspective</source>
         <translation type="unfinished"></translation>
     </message>
@@ -576,14 +598,6 @@
     </message>
     <message>
         <source>Top</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(1:1) 120x120</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>(16:9) 1920 x 1080</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -647,23 +661,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>h</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>120 x 120</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>256 x 256</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>128 x 128</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>2048 x 2018</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -824,6 +826,14 @@
     </message>
     <message>
         <source>Model Lights only</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use model camera</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>2048 x 2048</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -471,7 +471,7 @@ void ModelControl::TogglePCRFields()
 
   if (model)
   {
-    std::vector<uint> pcrIDs = model->replacableParticleColorIDs;
+    std::vector<size_t> pcrIDs = model->replacableParticleColorIDs;
     show11 = (std::find(pcrIDs.begin(), pcrIDs.end(), 11) != pcrIDs.end());
     show12 = (std::find(pcrIDs.begin(), pcrIDs.end(), 12) != pcrIDs.end());
     show13 = (std::find(pcrIDs.begin(), pcrIDs.end(), 13) != pcrIDs.end());

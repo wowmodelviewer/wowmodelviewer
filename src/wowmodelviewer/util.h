@@ -83,6 +83,8 @@ float round(float input, int limit);
 void MakeDirs(wxString PathBase, wxString ExtPaths);
 unsigned short _SwapTwoBytes (unsigned short w);
 
+double getCurrentTime();
+
 wxString getGamePath(bool noSet = false);
 
 // Byte Swapping

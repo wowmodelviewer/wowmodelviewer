@@ -118,10 +118,10 @@ public:
 
   GameFile * gamefile;
 
-  std::vector<uint> replacableParticleColorIDs;
+  std::vector<size_t> replacableParticleColorIDs;
   bool replaceParticleColors;
 
-  uint nbLights() const
+  size_t nbLights() const
   {
     return lights.size();
   }
@@ -178,8 +178,8 @@ public:
   bool animated;
 
   // Misc values
-  float rad;
-  float trans;
+  double rad;
+  double trans;
 
   // -------------------------------
 

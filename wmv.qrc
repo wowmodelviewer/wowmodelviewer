@@ -1,6 +1,6 @@
 <RCC>
     <qresource prefix="/Translations">
-        <file alias="en.qm">src/Translations/wowmodelviewer_en.qm</file>
+        <file alias="enUS.qm">src/Translations/wowmodelviewer_en_US.qm</file>
     </qresource>
     <qresource prefix="/Splashes">
         <file alias="Splash_001.png">bin_support/Splash/Splash_001.png</file>

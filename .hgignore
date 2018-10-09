@@ -11,3 +11,4 @@ syntax: glob
 .vs
 build
 GeneratedFiles
+*.aps

@@ -87,6 +87,16 @@ unsigned short _SwapTwoBytes (unsigned short w)
 	return tmp;
 }
 
+double getCurrentTime()
+{
+	SYSTEMTIME st;
+	memset(&st, 0, sizeof(SYSTEMTIME));
+	double ourTime = 0;
+	GetLocalTime(&st);
+	ourTime += (st.wDay * 86400) + (st.wHour * 3600) + (st.wMinute * 60) + st.wSecond + (double)(st.wMilliseconds / 1000.0f);
+	return ourTime;
+}
+
 // Round a float, down to the specified decimal
 float round(float input, int limit = 2){
 	if (limit > 0){

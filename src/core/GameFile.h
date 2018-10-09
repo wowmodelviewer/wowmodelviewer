@@ -50,7 +50,7 @@ class _GAMEFILE_API_ GameFile : public Component
     QString fullname() const { return filepath; }
     int fileDataId() { return m_fileDataId; }
 
-    void allocate(unsigned int size);
+    void allocate(size_t size);
     bool setChunk(std::string chunkName, bool resetToStart = true);
     bool isChunked() { return chunks.size() > 0; }
 
@@ -60,14 +60,14 @@ class _GAMEFILE_API_ GameFile : public Component
 
     virtual bool openFile() = 0;
     virtual bool isAlreadyOpened() = 0;
-    virtual bool getFileSize(unsigned int & s) = 0;
+    virtual bool getFileSize(size_t & s) = 0;
     virtual unsigned long readFile() = 0;
     virtual void doPostOpenOperation() = 0;
     virtual bool doPostCloseOperation() = 0;
 
     bool eof;
     unsigned char *buffer;
-    unsigned int pointer, size;
+    size_t pointer, size;
     QString filepath;
 
     struct chunkHeader
@@ -88,8 +88,8 @@ class _GAMEFILE_API_ GameFile : public Component
 
   private:
     // disable copying
-    GameFile(const GameFile &);
-    void operator=(const GameFile &);
+	GameFile(const GameFile &) {};
+	void operator=(const GameFile &) {};
 
     int m_fileDataId;
     unsigned char * originalBuffer;
