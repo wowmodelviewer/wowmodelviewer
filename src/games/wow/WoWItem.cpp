@@ -1325,11 +1325,12 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
   {
   case MODEL:
     filter += QString::fromStdString(infos.prefix);
+    filter += "(_?)";
     filter += (infos.sexid == 0) ? "m" : "f";
     break;
   case MERGED_MODEL:
     filter += QString::fromStdString(infos.prefix);
-    filter += "_";
+    filter += "(_?)";
     filter += (infos.sexid == 0) ? "m" : "f";
     break;
   case TEXTURE:
