@@ -643,6 +643,16 @@
         <translation>Character Designer</translation>
     </message>
     <message>
+        <location filename="../forms/wmvMainWindow.ui" line="605"/>
+        <source>1920 x 1080, the High Definition Standard</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/wmvMainWindow.ui" line="616"/>
+        <source>1280 x 720, a smaller High Definition format.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../forms/wmvMainWindow.ui" line="913"/>
         <source>Mount / Dismount</source>
         <translation>Mount / Dismount</translation>
@@ -900,19 +910,9 @@
         <translation>1080p (HD)</translation>
     </message>
     <message>
-        <location filename="../forms/wmvMainWindow.ui" line="605"/>
-        <source>1920 x 1080 HD</source>
-        <translation>1920 x 1080, the HD Standard</translation>
-    </message>
-    <message>
         <location filename="../forms/wmvMainWindow.ui" line="613"/>
         <source>720p (HD)</source>
         <translation>720p (HD)</translation>
-    </message>
-    <message>
-        <location filename="../forms/wmvMainWindow.ui" line="616"/>
-        <source>1280 x 720, a smaller HD format.</source>
-        <translation>1280 x 720, a smaller HD format.</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="624"/>

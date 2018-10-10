@@ -10,5 +10,5 @@ set "wmvfiles="
 set "umfiles="
 for /r %%F in (wowmodelviewer*.ts) do call set wmvfiles=%%wmvfiles%% "%%F"
 for /r %%F in (updatemanager*.ts) do call set umfiles=%%umfiles%% "%%F"
-%WMVSDK%\Qt\Bin\lupdate.exe -no-obsolete -locations absolute ..\forms ..\wowmodelviewer -ts %wmvfiles%
+%WMVSDK%\Qt\Bin\lupdate.exe -locations absolute ..\forms ..\wowmodelviewer -ts %wmvfiles%
 %WMVSDK%\Qt\Bin\lupdate.exe -no-obsolete -locations absolute ..\UpdateManager -ts %umfiles%

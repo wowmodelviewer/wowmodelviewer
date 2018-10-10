@@ -602,7 +602,7 @@
     <string>1080p (HD)</string>
    </property>
    <property name="toolTip">
-    <string>1920 x 1080 HD</string>
+    <string>1920 x 1080, the High Definition Standard</string>
    </property>
   </action>
   <action name="action720p">
@@ -613,7 +613,7 @@
     <string>720p (HD)</string>
    </property>
    <property name="toolTip">
-    <string>1280 x 720, a smaller HD format.</string>
+    <string>1280 x 720, a smaller High Definition format.</string>
    </property>
   </action>
   <action name="action2160p">

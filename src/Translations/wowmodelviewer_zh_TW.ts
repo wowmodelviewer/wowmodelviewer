@@ -2,6 +2,449 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_TW" sourcelanguage="en_US">
 <context>
+    <name>PO File</name>
+    <message>
+        <source>Secondary</source>
+        <translation type="vanished">副手</translation>
+    </message>
+    <message>
+        <source>Mouth</source>
+        <translation type="vanished">嘴</translation>
+    </message>
+    <message>
+        <source>Speed: 1.0x</source>
+        <translation type="vanished">速度: 1.0x</translation>
+    </message>
+    <message>
+        <source>Item set</source>
+        <translation type="vanished">套裝</translation>
+    </message>
+    <message>
+        <source>Frame: 0</source>
+        <translation type="vanished">幀數: 0</translation>
+    </message>
+    <message>
+        <source>This group has been removed from the WMO</source>
+        <translation type="vanished">該組已從WMO中移除</translation>
+    </message>
+    <message>
+        <source>Attach</source>
+        <translation type="vanished">附著</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation type="vanished">全部清除</translation>
+    </message>
+    <message>
+        <source>Skin color</source>
+        <translation type="vanished">膚色</translation>
+    </message>
+    <message>
+        <source>Face type</source>
+        <translation type="vanished">臉型</translation>
+    </message>
+    <message>
+        <source>Facial feature</source>
+        <translation type="vanished">面部特徵</translation>
+    </message>
+    <message>
+        <source>Facial color</source>
+        <translation type="vanished">特徵顏色</translation>
+    </message>
+    <message>
+        <source>Background Color</source>
+        <translation type="vanished">背景顏色</translation>
+    </message>
+    <message>
+        <source>Choose mount</source>
+        <translation type="vanished">選擇坐騎</translation>
+    </message>
+    <message>
+        <source>Choose an item</source>
+        <translation type="vanished">選擇套裝</translation>
+    </message>
+    <message>
+        <source>Choose an item set</source>
+        <translation type="vanished">選擇套裝</translation>
+    </message>
+    <message>
+        <source>Item sets</source>
+        <translation type="vanished">套裝</translation>
+    </message>
+    <message>
+        <source>Known ridable models</source>
+        <translation type="vanished">已知可騎模型</translation>
+    </message>
+    <message>
+        <source>Other models</source>
+        <translation type="vanished">其他模型</translation>
+    </message>
+    <message>
+        <source>Choose a mount</source>
+        <translation type="vanished">選擇坐騎</translation>
+    </message>
+    <message>
+        <source>Creatures</source>
+        <translation type="vanished">貼圖</translation>
+    </message>
+    <message>
+        <source>Select a Weapon</source>
+        <translation type="vanished">選擇武器</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="vanished">確定</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="vanished">取消</translation>
+    </message>
+    <message>
+        <source>Max Size: </source>
+        <translation type="vanished">最大大小：</translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation type="vanished">保存</translation>
+    </message>
+    <message>
+        <source>Filter   </source>
+        <translation type="vanished">過濾項   </translation>
+    </message>
+    <message>
+        <source>Double-click to select only one category</source>
+        <translation type="vanished">雙擊只選擇一個類別</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation type="vanished">啟用</translation>
+    </message>
+    <message>
+        <source>Pos</source>
+        <translation type="vanished">座標</translation>
+    </message>
+    <message>
+        <source>Spot</source>
+        <translation type="vanished">點</translation>
+    </message>
+    <message>
+        <source>Dir</source>
+        <translation type="vanished">方向</translation>
+    </message>
+    <message>
+        <source>Ambience</source>
+        <translation type="vanished">環境</translation>
+    </message>
+    <message>
+        <source>Arc:</source>
+        <translation type="vanished">弧光：</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="vanished">重置</translation>
+    </message>
+    <message>
+        <source>Scale</source>
+        <translation type="vanished">縮放</translation>
+    </message>
+    <message>
+        <source>Show Geosets</source>
+        <translation type="vanished">顯示Geosets</translation>
+    </message>
+    <message>
+        <source>Opened</source>
+        <translation type="vanished">已打開</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="vanished">導出</translation>
+    </message>
+    <message>
+        <source>Export All</source>
+        <translation type="vanished">全部導出</translation>
+    </message>
+    <message>
+        <source>View In PNG</source>
+        <translation type="vanished">以PNG格式查看</translation>
+    </message>
+    <message>
+        <source>Export All To PNG</source>
+        <translation type="vanished">全部導出至PNG</translation>
+    </message>
+    <message>
+        <source>Export All To TGA</source>
+        <translation type="vanished">全部導出至TGA</translation>
+    </message>
+    <message>
+        <source>Path Preserved</source>
+        <translation type="vanished">保留路徑</translation>
+    </message>
+    <message>
+        <source>Export Lights</source>
+        <translation type="vanished">導出</translation>
+    </message>
+    <message>
+        <source>Export Doodads</source>
+        <translation type="vanished">導出模型</translation>
+    </message>
+    <message>
+        <source>DBC Error</source>
+        <translation type="vanished">DBC錯誤</translation>
+    </message>
+    <message>
+        <source>Mount a character...</source>
+        <translation type="vanished">把角色當坐騎...</translation>
+    </message>
+    <message>
+        <source>Save Screenshot\tF12</source>
+        <translation type="vanished">保存截圖\tF12</translation>
+    </message>
+    <message>
+        <source>Save Sized Screenshot\tCTRL+S</source>
+        <translation type="vanished">保存裁剪的截圖\tCTRL+S</translation>
+    </message>
+    <message>
+        <source>Animated Gif</source>
+        <translation type="vanished">動畫Gif</translation>
+    </message>
+    <message>
+        <source>Export Textures...</source>
+        <translation type="vanished">導出貼圖</translation>
+    </message>
+    <message>
+        <source>Discovery Item</source>
+        <translation type="vanished">物品探索</translation>
+    </message>
+    <message>
+        <source>Discovery NPC</source>
+        <translation type="vanished">NPC探索</translation>
+    </message>
+    <message>
+        <source>E&amp;xit\tCTRL+X</source>
+        <translation type="vanished">退出(&amp;X)\tCTRL+X</translation>
+    </message>
+    <message>
+        <source>Show animaton control</source>
+        <translation type="vanished">顯示動畫控制</translation>
+    </message>
+    <message>
+        <source>Show character control</source>
+        <translation type="vanished">顯示人物控制</translation>
+    </message>
+    <message>
+        <source>Show light control</source>
+        <translation type="vanished">顯示光源控制</translation>
+    </message>
+    <message>
+        <source>Show model control</source>
+        <translation type="vanished">顯示模型控制</translation>
+    </message>
+    <message>
+        <source>Load Background\tCTRL+L</source>
+        <translation type="vanished">載入背景\tCTRL+L</translation>
+    </message>
+    <message>
+        <source>Side</source>
+        <translation type="vanished">側面</translation>
+    </message>
+    <message>
+        <source>Use dynamic light</source>
+        <translation type="vanished">使用動態光源</translation>
+    </message>
+    <message>
+        <source>Use ambient light</source>
+        <translation type="vanished">使用環境光源</translation>
+    </message>
+    <message>
+        <source>Show Ears\tCTRL+E</source>
+        <translation type="vanished">顯示耳朵\tCTRL+E</translation>
+    </message>
+    <message>
+        <source>Show Hair\tCTRL+H</source>
+        <translation type="vanished">顯示頭髮\tCTRL+H</translation>
+    </message>
+    <message>
+        <source>Show Facial Hair\tCTRL+F</source>
+        <translation type="vanished">顯示鬍子\tCTRL+F</translation>
+    </message>
+    <message>
+        <source>Sheathe Weapons\tCTRL+Z</source>
+        <translation type="vanished">武器入鞘\tCTRL+Z</translation>
+    </message>
+    <message>
+        <source>Save Equipment\tF5</source>
+        <translation type="vanished">保存裝備\tF5</translation>
+    </message>
+    <message>
+        <source>Load Equipment\tF6</source>
+        <translation type="vanished">載入裝備\tF6</translation>
+    </message>
+    <message>
+        <source>Clear Equipment\tF9</source>
+        <translation type="vanished">清除裝備\tF9</translation>
+    </message>
+    <message>
+        <source>Load Start Outfit</source>
+        <translation type="vanished">載入新手裝</translation>
+    </message>
+    <message>
+        <source>Load NPC Outfit</source>
+        <translation type="vanished">載入NPC服裝</translation>
+    </message>
+    <message>
+        <source>Randomise Character\tF10</source>
+        <translation type="vanished">隨機化角色</translation>
+    </message>
+    <message>
+        <source>Creature Right-Hand</source>
+        <translation type="vanished">生物右手</translation>
+    </message>
+    <message>
+        <source>Creature Left-Hand</source>
+        <translation type="vanished">生物左手</translation>
+    </message>
+    <message>
+        <source>Spell Effects</source>
+        <translation type="vanished">法術效果</translation>
+    </message>
+    <message>
+        <source>Death Effect</source>
+        <translation type="vanished">死亡效果</translation>
+    </message>
+    <message>
+        <source>Save Character\tF7</source>
+        <translation type="vanished">保存角色\tF7</translation>
+    </message>
+    <message>
+        <source>Load Character\tF8</source>
+        <translation type="vanished">載入角色\tF8</translation>
+    </message>
+    <message>
+        <source>Use npc character skins</source>
+        <translation type="vanished">使用NPC人物皮膚</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="vanished">設置</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation type="vanished">文件(&amp;F)</translation>
+    </message>
+    <message>
+        <source>&amp;View</source>
+        <translation type="vanished">查看(&amp;V)</translation>
+    </message>
+    <message>
+        <source>&amp;Character</source>
+        <translation type="vanished">角色(&amp;C)</translation>
+    </message>
+    <message>
+        <source>&amp;Lighting</source>
+        <translation type="vanished">光源(&amp;L)</translation>
+    </message>
+    <message>
+        <source>&amp;Options</source>
+        <translation type="vanished">選項(&amp;O)</translation>
+    </message>
+    <message>
+        <source>&amp;Effects</source>
+        <translation type="vanished">特效(&amp;E)</translation>
+    </message>
+    <message>
+        <source>&amp;About</source>
+        <translation type="vanished">關於(&amp;A)</translation>
+    </message>
+    <message>
+        <source>OpenGL Canvas</source>
+        <translation type="vanished">OpenGL畫布</translation>
+    </message>
+    <message>
+        <source>Models</source>
+        <translation type="vanished">模型</translation>
+    </message>
+    <message>
+        <source>ModelBank</source>
+        <translation type="vanished">ModelBank</translation>
+    </message>
+    <message>
+        <source>ModelOpened</source>
+        <translation type="vanished">ModelOpened</translation>
+    </message>
+    <message>
+        <source>Screenshot</source>
+        <translation type="vanished">截圖</translation>
+    </message>
+    <message>
+        <source>Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi</source>
+        <translation type="vanished">點陣圖圖片 (*.bmp)|*.bmp|TGA 圖片 (*.tga)|*.tga|Jpeg 圖片 (*.jpg)|*.jpg|PNG 圖片 (*.png)|*.png|AVI 視頻檔 (*.avi)|*.avi</translation>
+    </message>
+    <message>
+        <source>Choose</source>
+        <translation type="vanished">選擇坐騎</translation>
+    </message>
+    <message>
+        <source>Select a Sky Box</source>
+        <translation type="vanished">選擇武器</translation>
+    </message>
+    <message>
+        <source>You have the most upto date version.</source>
+        <translation type="vanished">你的版本是最新的。</translation>
+    </message>
+    <message>
+        <source>Update Check</source>
+        <translation type="vanished">檢查更新</translation>
+    </message>
+    <message>
+        <source>Export Model...</source>
+        <translation type="vanished">導出模型</translation>
+    </message>
+    <message>
+        <source>Export World Model Object...</source>
+        <translation type="vanished">導出模型</translation>
+    </message>
+    <message>
+        <source>Arrows</source>
+        <translation type="vanished">箭矢</translation>
+    </message>
+    <message>
+        <source>Settings_Page1</source>
+        <translation type="vanished">設置</translation>
+    </message>
+    <message>
+        <source>Show Particle</source>
+        <translation type="vanished">粒子</translation>
+    </message>
+    <message>
+        <source>Use Local Files</source>
+        <translation type="vanished">使用本地檔</translation>
+    </message>
+    <message>
+        <source>Random Skins</source>
+        <translation type="vanished">隨機皮膚</translation>
+    </message>
+    <message>
+        <source>Hide Helmet</source>
+        <translation type="vanished">隱藏頭盔</translation>
+    </message>
+    <message>
+        <source>MPQ Archives order and files to load</source>
+        <translation type="vanished">MPQ歸檔順序及要載入的檔</translation>
+    </message>
+    <message>
+        <source>Move Up</source>
+        <translation type="vanished">上移</translation>
+    </message>
+    <message>
+        <source>Move Down</source>
+        <translation type="vanished">下移</translation>
+    </message>
+    <message>
+        <source>Apply Settings</source>
+        <translation type="vanished">應用設置</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../wowmodelviewer/util.cpp" line="185"/>
@@ -57,7 +500,7 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="32"/>
         <source>Target XYZ</source>
-        <translation type="unfinished"></translation>
+        <translation>XYZ目標</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="62"/>
@@ -72,17 +515,17 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="175"/>
         <source>Diffuse</source>
-        <translation type="unfinished"></translation>
+        <translation>漫射</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="182"/>
         <source>Specular</source>
-        <translation type="unfinished"></translation>
+        <translation>反射</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="192"/>
         <source>Position XYZ</source>
-        <translation type="unfinished"></translation>
+        <translation>XYZ位置</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="226"/>
@@ -130,7 +573,7 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="277"/>
         <source>Relative</source>
-        <translation type="unfinished"></translation>
+        <translation>相對</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="294"/>
@@ -173,37 +616,37 @@
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="84"/>
         <source>Alpha</source>
-        <translation type="unfinished"></translation>
+        <translation>半透明</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="108"/>
         <source>Wireframe</source>
-        <translation type="unfinished"></translation>
+        <translation>格線</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="115"/>
         <source>Bounds</source>
-        <translation type="unfinished"></translation>
+        <translation>邊界</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="122"/>
         <source>Texture</source>
-        <translation type="unfinished"></translation>
+        <translation>貼圖</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="132"/>
         <source>Bones</source>
-        <translation type="unfinished"></translation>
+        <translation>骨骼</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="139"/>
         <source>Render</source>
-        <translation type="unfinished"></translation>
+        <translation>渲染</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="149"/>
         <source>Particles</source>
-        <translation type="unfinished"></translation>
+        <translation>粒子</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="165"/>
@@ -269,7 +712,7 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="53"/>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>添加</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="60"/>
@@ -294,12 +737,12 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="162"/>
         <source>Play</source>
-        <translation type="unfinished"></translation>
+        <translation>播放</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="169"/>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>停止</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="176"/>
@@ -309,22 +752,22 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="183"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>清除</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="190"/>
         <source>Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>暫停</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="201"/>
         <source>Auto Animate</source>
-        <translation type="unfinished"></translation>
+        <translation>自動播放</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="211"/>
         <source>Lock Animations</source>
-        <translation type="unfinished"></translation>
+        <translation>鎖定動畫</translation>
     </message>
 </context>
 <context>
@@ -372,17 +815,17 @@
     <message>
         <location filename="../forms/dockWidget_CharacterDesigner.ui" line="300"/>
         <source>Skin</source>
-        <translation type="unfinished"></translation>
+        <translation>皮膚</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_CharacterDesigner.ui" line="314"/>
         <source>Hair Style</source>
-        <translation type="unfinished"></translation>
+        <translation>髮型</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_CharacterDesigner.ui" line="342"/>
         <source>Hair Color</source>
-        <translation type="unfinished"></translation>
+        <translation>發色</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_CharacterDesigner.ui" line="349"/>
@@ -430,12 +873,12 @@
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="37"/>
         <source>Equipment</source>
-        <translation type="unfinished"></translation>
+        <translation>裝備</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="55"/>
         <source>Head</source>
-        <translation type="unfinished"></translation>
+        <translation>頭盔</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="75"/>
@@ -454,77 +897,77 @@
         <location filename="../forms/dockWidget_Equipment.ui" line="556"/>
         <source>---- None ----</source>
         <extracomment>Meant to indicate nothing has been selected</extracomment>
-        <translation type="unfinished"></translation>
+        <translation>---- 無 ----</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="92"/>
         <source>Shoulder</source>
-        <translation type="unfinished"></translation>
+        <translation>肩甲</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="129"/>
         <source>Shirt</source>
-        <translation type="unfinished"></translation>
+        <translation>襯衫</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="166"/>
         <source>Chest</source>
-        <translation type="unfinished"></translation>
+        <translation>胸甲</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="203"/>
         <source>Belt</source>
-        <translation type="unfinished"></translation>
+        <translation>腰帶</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="240"/>
         <source>Legs</source>
-        <translation type="unfinished"></translation>
+        <translation>護腿</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="277"/>
         <source>Boots</source>
-        <translation type="unfinished"></translation>
+        <translation>靴子</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="314"/>
         <source>Bracers</source>
-        <translation type="unfinished"></translation>
+        <translation>護腕</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="351"/>
         <source>Gloves</source>
-        <translation type="unfinished"></translation>
+        <translation>護手</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="388"/>
         <source>Cape</source>
-        <translation type="unfinished"></translation>
+        <translation>斗篷</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="425"/>
         <source>Right Hand</source>
-        <translation type="unfinished"></translation>
+        <translation>右手</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="462"/>
         <source>Left Hand</source>
-        <translation type="unfinished"></translation>
+        <translation>左手</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="499"/>
         <source>Quiver</source>
-        <translation type="unfinished"></translation>
+        <translation>箭袋</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="536"/>
         <source>Tabard</source>
-        <translation type="unfinished"></translation>
+        <translation>公會徽章</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="607"/>
         <source>Border Color</source>
-        <translation type="unfinished"></translation>
+        <translation>邊框顏色</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="617"/>
@@ -534,22 +977,22 @@
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="665"/>
         <source>Tabard Details</source>
-        <translation type="unfinished"></translation>
+        <translation>徽章細節</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="694"/>
         <source>Icon</source>
-        <translation type="unfinished"></translation>
+        <translation>圖示</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="704"/>
         <source>Icon Color</source>
-        <translation type="unfinished"></translation>
+        <translation>圖示顏色</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="714"/>
         <source>Border</source>
-        <translation type="unfinished"></translation>
+        <translation>邊框</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="752"/>
@@ -562,7 +1005,7 @@
     <message>
         <location filename="../forms/dockWidget_FileList.ui" line="37"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>清除</translation>
     </message>
 </context>
 <context>
@@ -570,22 +1013,22 @@
     <message>
         <location filename="../forms/dockWidget_ModelBank.ui" line="34"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>名稱：</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelBank.ui" line="55"/>
         <source>Add</source>
-        <translation type="unfinished"></translation>
+        <translation>添加</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelBank.ui" line="62"/>
         <source>Remove</source>
-        <translation type="unfinished"></translation>
+        <translation>移除</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelBank.ui" line="69"/>
         <source>Display</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示</translation>
     </message>
 </context>
 <context>
@@ -603,22 +1046,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="71"/>
         <source>Export Model</source>
-        <translation type="unfinished"></translation>
+        <translation>導出模型</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="91"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>視角</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="95"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>攝像機</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="108"/>
         <source>Set Canvas Size</source>
-        <translation type="unfinished"></translation>
+        <translation>設置畫布大小</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="112"/>
@@ -643,18 +1086,18 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="179"/>
         <source>Character</source>
-        <translation type="unfinished"></translation>
+        <translation>角色</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="183"/>
         <source>Eye Glow</source>
-        <translation type="unfinished"></translation>
+        <translation>眼睛發光</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="215"/>
         <location filename="../forms/wmvMainWindow.ui" line="270"/>
         <source>Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>光源</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="229"/>
@@ -670,17 +1113,27 @@
         <location filename="../forms/wmvMainWindow.ui" line="243"/>
         <location filename="../forms/wmvMainWindow.ui" line="352"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>關於</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="292"/>
         <source>File List</source>
-        <translation type="unfinished"></translation>
+        <translation>文件列表</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="303"/>
         <source>Character Designer</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/wmvMainWindow.ui" line="605"/>
+        <source>1920 x 1080, the High Definition Standard</source>
+        <translation>1920 x 1080，高清標準</translation>
+    </message>
+    <message>
+        <location filename="../forms/wmvMainWindow.ui" line="616"/>
+        <source>1280 x 720, a smaller High Definition format.</source>
+        <translation>1280 x 720，較小的高清格式。</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="913"/>
@@ -690,7 +1143,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="311"/>
         <source>Animation</source>
-        <translation type="unfinished"></translation>
+        <translation>動畫</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="281"/>
@@ -712,22 +1165,22 @@
         <location filename="../forms/wmvMainWindow.ui" line="344"/>
         <location filename="../forms/wmvMainWindow.ui" line="347"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>説明</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="357"/>
         <source>Check for Update</source>
-        <translation type="unfinished"></translation>
+        <translation>檢查更新</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="362"/>
         <source>Apply Enchants</source>
-        <translation type="unfinished"></translation>
+        <translation>附加附魔效果</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="373"/>
         <source>Always show Default doodads in WMOs</source>
-        <translation type="unfinished"></translation>
+        <translation>一直在WMO裏顯示默認物件</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="378"/>
@@ -752,7 +1205,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="398"/>
         <source>Save Screenshot</source>
-        <translation type="unfinished"></translation>
+        <translation>保存截圖</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="401"/>
@@ -777,12 +1230,12 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="419"/>
         <source>Export AVI</source>
-        <translation type="unfinished"></translation>
+        <translation>導出AVI</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="424"/>
         <source>Export ModelInfo.xml</source>
-        <translation type="unfinished"></translation>
+        <translation>導出ModelInfo.xml</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="429"/>
@@ -792,22 +1245,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="434"/>
         <source>Reset Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>重置佈局</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="439"/>
         <source>View NPC</source>
-        <translation type="unfinished"></translation>
+        <translation>查看NPC</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="444"/>
         <source>View Item</source>
-        <translation type="unfinished"></translation>
+        <translation>視角</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="455"/>
         <source>Show File List</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示檔列表</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="463"/>
@@ -832,17 +1285,17 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="498"/>
         <source>Show Model Bank</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示模型組</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="503"/>
         <source>Background Color...</source>
-        <translation type="unfinished"></translation>
+        <translation>背景顏色...</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="508"/>
         <source>Load Background</source>
-        <translation type="unfinished"></translation>
+        <translation>載入背景</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="511"/>
@@ -852,32 +1305,32 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="519"/>
         <source>Skybox</source>
-        <translation type="unfinished"></translation>
+        <translation>天空盒</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="527"/>
         <source>Show Grid</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示網格</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="535"/>
         <source>Show Mask</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示遮罩</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="554"/>
         <source>Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>透視圖</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="562"/>
         <source>Front</source>
-        <translation type="unfinished"></translation>
+        <translation>前面</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="570"/>
         <source>Back</source>
-        <translation type="unfinished"></translation>
+        <translation>後面</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="578"/>
@@ -900,9 +1353,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/wmvMainWindow.ui" line="605"/>
         <source>1920 x 1080 HD</source>
-        <translation type="unfinished"></translation>
+        <translation type="vanished">1920 x 1080高清晰度</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="613"/>
@@ -910,19 +1362,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/wmvMainWindow.ui" line="616"/>
-        <source>1280 x 720, a smaller HD format.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../forms/wmvMainWindow.ui" line="624"/>
         <source>2160p (UHD)</source>
-        <translation type="unfinished"></translation>
+        <translation>2160p（UHD）</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="627"/>
         <source>3840 x 2160, also known has UHD 4K.</source>
-        <translation type="unfinished"></translation>
+        <translation>3840 x 2160，也知道有UHD 4K。</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="635"/>
@@ -1002,7 +1449,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="760"/>
         <source>Load Character</source>
-        <translation type="unfinished"></translation>
+        <translation>載入角色</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="763"/>
@@ -1012,7 +1459,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="768"/>
         <source>Save Character</source>
-        <translation type="unfinished"></translation>
+        <translation>保存角色</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="771"/>
@@ -1022,7 +1469,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="776"/>
         <source>Import Armory Character</source>
-        <translation type="unfinished"></translation>
+        <translation>導入英雄榜角色</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="784"/>
@@ -1042,7 +1489,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="811"/>
         <source>Show Underwear</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示內衣</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="819"/>
@@ -1077,7 +1524,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="852"/>
         <source>Show Feet</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示雙足</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="863"/>
@@ -1097,7 +1544,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="879"/>
         <source>Save Equipment</source>
-        <translation type="unfinished"></translation>
+        <translation>保存裝備</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="882"/>
@@ -1107,7 +1554,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="887"/>
         <source>Load Equipment</source>
-        <translation type="unfinished"></translation>
+        <translation>載入裝備</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="890"/>
@@ -1127,7 +1574,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="903"/>
         <source>Load Item Set</source>
-        <translation type="unfinished"></translation>
+        <translation>載入套裝</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="908"/>
@@ -1147,22 +1594,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="926"/>
         <source>Load Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>載入光源</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="931"/>
         <source>Save Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>保存光源</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="939"/>
         <source>Render Light Objects</source>
-        <translation type="unfinished"></translation>
+        <translation>渲染光源物件</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="947"/>
         <source>Use True lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>使用真實光源</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="958"/>
@@ -1177,12 +1624,12 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="974"/>
         <source>Model Lights only</source>
-        <translation type="unfinished"></translation>
+        <translation>只使用模型光</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="543"/>
         <source>Use model camera</source>
-        <translation type="unfinished"></translation>
+        <translation>使用模型攝影機</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="723"/>
@@ -1192,7 +1639,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="333"/>
         <source>Equipment</source>
-        <translation type="unfinished"></translation>
+        <translation>裝備</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="985"/>

@@ -2,6 +2,449 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="fr_FR" sourcelanguage="en_US">
 <context>
+    <name>PO File</name>
+    <message>
+        <source>Secondary</source>
+        <translation type="vanished">Secondaire</translation>
+    </message>
+    <message>
+        <source>Mouth</source>
+        <translation type="vanished">Bouche</translation>
+    </message>
+    <message>
+        <source>Speed: 1.0x</source>
+        <translation type="vanished">Vitesse: 1.0x</translation>
+    </message>
+    <message>
+        <source>Item set</source>
+        <translation type="vanished">Sets d&apos;objets</translation>
+    </message>
+    <message>
+        <source>Frame: 0</source>
+        <translation type="vanished">Image: 0</translation>
+    </message>
+    <message>
+        <source>This group has been removed from the WMO</source>
+        <translation type="vanished">Ce groupe a été supprimé du WMO</translation>
+    </message>
+    <message>
+        <source>Attach</source>
+        <translation type="vanished">Attacher</translation>
+    </message>
+    <message>
+        <source>Clear All</source>
+        <translation type="vanished">Effacer tout</translation>
+    </message>
+    <message>
+        <source>Skin color</source>
+        <translation type="vanished">Peau</translation>
+    </message>
+    <message>
+        <source>Face type</source>
+        <translation type="vanished">Visage</translation>
+    </message>
+    <message>
+        <source>Facial feature</source>
+        <translation type="vanished">Pilosité faciale</translation>
+    </message>
+    <message>
+        <source>Facial color</source>
+        <translation type="vanished">Couleur visage</translation>
+    </message>
+    <message>
+        <source>Background Color</source>
+        <translation type="vanished">Couleur fond</translation>
+    </message>
+    <message>
+        <source>Choose mount</source>
+        <translation type="vanished">Monture</translation>
+    </message>
+    <message>
+        <source>Choose an item</source>
+        <translation type="vanished">Choisir un objets</translation>
+    </message>
+    <message>
+        <source>Choose an item set</source>
+        <translation type="vanished">Choisir un set d&apos;objets</translation>
+    </message>
+    <message>
+        <source>Item sets</source>
+        <translation type="vanished">Sets d&apos;objets</translation>
+    </message>
+    <message>
+        <source>Known ridable models</source>
+        <translation type="vanished">Montures connues</translation>
+    </message>
+    <message>
+        <source>Other models</source>
+        <translation type="vanished">Autres modèles</translation>
+    </message>
+    <message>
+        <source>Choose a mount</source>
+        <translation type="vanished">Choisir une monture</translation>
+    </message>
+    <message>
+        <source>Creatures</source>
+        <translation type="vanished">Créatures</translation>
+    </message>
+    <message>
+        <source>Select a Weapon</source>
+        <translation type="vanished">Choisir une arme</translation>
+    </message>
+    <message>
+        <source>OK</source>
+        <translation type="vanished">OK</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="vanished">Annuler</translation>
+    </message>
+    <message>
+        <source>Max Size: </source>
+        <translation type="vanished">Taille Max: </translation>
+    </message>
+    <message>
+        <source>Save</source>
+        <translation type="vanished">Enregistrer</translation>
+    </message>
+    <message>
+        <source>Filter   </source>
+        <translation type="vanished">Filtre   </translation>
+    </message>
+    <message>
+        <source>Double-click to select only one category</source>
+        <translation type="vanished">Double-clic sélectionne une seule catégorie</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <translation type="vanished">Activer</translation>
+    </message>
+    <message>
+        <source>Pos</source>
+        <translation type="vanished">Pos</translation>
+    </message>
+    <message>
+        <source>Spot</source>
+        <translation type="vanished">Spot</translation>
+    </message>
+    <message>
+        <source>Dir</source>
+        <translation type="vanished">Dir</translation>
+    </message>
+    <message>
+        <source>Ambience</source>
+        <translation type="vanished">Ambiance</translation>
+    </message>
+    <message>
+        <source>Arc:</source>
+        <translation type="vanished">Arc:</translation>
+    </message>
+    <message>
+        <source>Reset</source>
+        <translation type="vanished">Restaurer</translation>
+    </message>
+    <message>
+        <source>Scale</source>
+        <translation type="vanished">Echelle</translation>
+    </message>
+    <message>
+        <source>Show Geosets</source>
+        <translation type="vanished">Geosets</translation>
+    </message>
+    <message>
+        <source>Opened</source>
+        <translation type="vanished">Ouvert</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="vanished">Exporter</translation>
+    </message>
+    <message>
+        <source>Export All</source>
+        <translation type="vanished">Tout exporter</translation>
+    </message>
+    <message>
+        <source>View In PNG</source>
+        <translation type="vanished">Voir PNG</translation>
+    </message>
+    <message>
+        <source>Export All To PNG</source>
+        <translation type="vanished">Tout exporter en PNG</translation>
+    </message>
+    <message>
+        <source>Export All To TGA</source>
+        <translation type="vanished">Tout exporter en TGA</translation>
+    </message>
+    <message>
+        <source>Path Preserved</source>
+        <translation type="vanished">Garder arborescence</translation>
+    </message>
+    <message>
+        <source>Export Lights</source>
+        <translation type="vanished">Exporter</translation>
+    </message>
+    <message>
+        <source>Export Doodads</source>
+        <translation type="vanished">Exporter modèle</translation>
+    </message>
+    <message>
+        <source>DBC Error</source>
+        <translation type="vanished">DBC Erreur</translation>
+    </message>
+    <message>
+        <source>Mount a character...</source>
+        <translation type="vanished">Choix monture...</translation>
+    </message>
+    <message>
+        <source>Save Screenshot\tF12</source>
+        <translation type="vanished">Capture d&apos;écran\tF12</translation>
+    </message>
+    <message>
+        <source>Save Sized Screenshot\tCTRL+S</source>
+        <translation type="vanished">Save Sized Screenshot\tCTRL+S</translation>
+    </message>
+    <message>
+        <source>Animated Gif</source>
+        <translation type="vanished">GIF animé</translation>
+    </message>
+    <message>
+        <source>Export Textures...</source>
+        <translation type="vanished">Exporter texture</translation>
+    </message>
+    <message>
+        <source>Discovery Item</source>
+        <translation type="vanished">Recherche d&apos;objets</translation>
+    </message>
+    <message>
+        <source>Discovery NPC</source>
+        <translation type="vanished">Recherche de PNJ</translation>
+    </message>
+    <message>
+        <source>E&amp;xit\tCTRL+X</source>
+        <translation type="vanished">Quitter\tCTRL+X</translation>
+    </message>
+    <message>
+        <source>Show animaton control</source>
+        <translation type="vanished">Contrôles animation</translation>
+    </message>
+    <message>
+        <source>Show character control</source>
+        <translation type="vanished">Customisation personnage</translation>
+    </message>
+    <message>
+        <source>Show light control</source>
+        <translation type="vanished">Contrôles lumières</translation>
+    </message>
+    <message>
+        <source>Show model control</source>
+        <translation type="vanished">Contrôles modèle</translation>
+    </message>
+    <message>
+        <source>Load Background\tCTRL+L</source>
+        <translation type="vanished">Charger fond d&apos;écran\tCTRL+L</translation>
+    </message>
+    <message>
+        <source>Side</source>
+        <translation type="vanished">Côté</translation>
+    </message>
+    <message>
+        <source>Use dynamic light</source>
+        <translation type="vanished">Lumière dynamique</translation>
+    </message>
+    <message>
+        <source>Use ambient light</source>
+        <translation type="vanished">Lumière ambiante</translation>
+    </message>
+    <message>
+        <source>Show Ears\tCTRL+E</source>
+        <translation type="vanished">Oreilles\tCTRL+E</translation>
+    </message>
+    <message>
+        <source>Show Hair\tCTRL+H</source>
+        <translation type="vanished">Cheveux\tCTRL+H</translation>
+    </message>
+    <message>
+        <source>Show Facial Hair\tCTRL+F</source>
+        <translation type="vanished">Pilosité faciale\tCTRL+F</translation>
+    </message>
+    <message>
+        <source>Sheathe Weapons\tCTRL+Z</source>
+        <translation type="vanished">Rengainer armes\tCTRL+Z</translation>
+    </message>
+    <message>
+        <source>Save Equipment\tF5</source>
+        <translation type="vanished">Enregistrer équipement\tF5</translation>
+    </message>
+    <message>
+        <source>Load Equipment\tF6</source>
+        <translation type="vanished">Charger équipment\tF6</translation>
+    </message>
+    <message>
+        <source>Clear Equipment\tF9</source>
+        <translation type="vanished">Effacer équipment\tF9</translation>
+    </message>
+    <message>
+        <source>Load Start Outfit</source>
+        <translation type="vanished">Charger equipement de départ</translation>
+    </message>
+    <message>
+        <source>Load NPC Outfit</source>
+        <translation type="vanished">Charger équipement de PNJ</translation>
+    </message>
+    <message>
+        <source>Randomise Character\tF10</source>
+        <translation type="vanished">Personnage au hasard\tF10</translation>
+    </message>
+    <message>
+        <source>Creature Right-Hand</source>
+        <translation type="vanished">Main droite créature</translation>
+    </message>
+    <message>
+        <source>Creature Left-Hand</source>
+        <translation type="vanished">Main gauche créature</translation>
+    </message>
+    <message>
+        <source>Spell Effects</source>
+        <translation type="vanished">Effets magiques</translation>
+    </message>
+    <message>
+        <source>Death Effect</source>
+        <translation type="vanished">Mort</translation>
+    </message>
+    <message>
+        <source>Save Character\tF7</source>
+        <translation type="vanished">Enregistrer personnage\tF7</translation>
+    </message>
+    <message>
+        <source>Load Character\tF8</source>
+        <translation type="vanished">Charger personnage\tF8</translation>
+    </message>
+    <message>
+        <source>Use npc character skins</source>
+        <translation type="vanished">Texture de PNJ</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="vanished">Options</translation>
+    </message>
+    <message>
+        <source>&amp;File</source>
+        <translation type="vanished">&amp;Fichier</translation>
+    </message>
+    <message>
+        <source>&amp;View</source>
+        <translation type="vanished">&amp;Voir</translation>
+    </message>
+    <message>
+        <source>&amp;Character</source>
+        <translation type="vanished">Personnage</translation>
+    </message>
+    <message>
+        <source>&amp;Lighting</source>
+        <translation type="vanished">&amp;Lumières</translation>
+    </message>
+    <message>
+        <source>&amp;Options</source>
+        <translation type="vanished">&amp;Options</translation>
+    </message>
+    <message>
+        <source>&amp;Effects</source>
+        <translation type="vanished">&amp;Effets</translation>
+    </message>
+    <message>
+        <source>&amp;About</source>
+        <translation type="vanished">&amp;A propos</translation>
+    </message>
+    <message>
+        <source>OpenGL Canvas</source>
+        <translation type="vanished">OpenGL</translation>
+    </message>
+    <message>
+        <source>Models</source>
+        <translation type="vanished">Modèles</translation>
+    </message>
+    <message>
+        <source>ModelBank</source>
+        <translation type="vanished">Banque de modèles</translation>
+    </message>
+    <message>
+        <source>ModelOpened</source>
+        <translation type="vanished">Modèle en cours</translation>
+    </message>
+    <message>
+        <source>Screenshot</source>
+        <translation type="vanished">Capture d&apos;écran</translation>
+    </message>
+    <message>
+        <source>Bitmap Images (*.bmp)|*.bmp|TGA Images (*.tga)|*.tga|Jpeg Images (*.jpg)|*.jpg|PNG Images (*.png)|*.png|AVI Video file(*.avi)|*.avi</source>
+        <translation type="vanished">Images Bitmap  (*.bmp)|*.bmp|Images TGA (*.tga)|*.tga|Images Jpeg (*.jpg)|*.jpg|Images PNG (*.png)|*.png|Vidéo AVI(*.avi)|*.avi</translation>
+    </message>
+    <message>
+        <source>Choose</source>
+        <translation type="vanished">Monture</translation>
+    </message>
+    <message>
+        <source>Select a Sky Box</source>
+        <translation type="vanished">Choisir une arme</translation>
+    </message>
+    <message>
+        <source>You have the most upto date version.</source>
+        <translation type="vanished">Vous avez la version la plus récente</translation>
+    </message>
+    <message>
+        <source>Update Check</source>
+        <translation type="vanished">Recherche de mise à jour</translation>
+    </message>
+    <message>
+        <source>Export Model...</source>
+        <translation type="vanished">Exporter modèle</translation>
+    </message>
+    <message>
+        <source>Export World Model Object...</source>
+        <translation type="vanished">Exporter modèle</translation>
+    </message>
+    <message>
+        <source>Arrows</source>
+        <translation type="vanished">Flèches</translation>
+    </message>
+    <message>
+        <source>Settings_Page1</source>
+        <translation type="vanished">Options</translation>
+    </message>
+    <message>
+        <source>Show Particle</source>
+        <translation type="vanished">Particules</translation>
+    </message>
+    <message>
+        <source>Use Local Files</source>
+        <translation type="vanished">Fichiers locaux</translation>
+    </message>
+    <message>
+        <source>Random Skins</source>
+        <translation type="vanished">Caractéristiques aléatoires</translation>
+    </message>
+    <message>
+        <source>Hide Helmet</source>
+        <translation type="vanished">Cacher casque</translation>
+    </message>
+    <message>
+        <source>MPQ Archives order and files to load</source>
+        <translation type="vanished">Ordre de chargement des fichiers MPQ</translation>
+    </message>
+    <message>
+        <source>Move Up</source>
+        <translation type="vanished">Haut</translation>
+    </message>
+    <message>
+        <source>Move Down</source>
+        <translation type="vanished">Bas</translation>
+    </message>
+    <message>
+        <source>Apply Settings</source>
+        <translation type="vanished">Appliquer les modifications</translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../wowmodelviewer/util.cpp" line="185"/>
@@ -57,7 +500,7 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="32"/>
         <source>Target XYZ</source>
-        <translation type="unfinished"></translation>
+        <translation>Cible XYZ</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="62"/>
@@ -72,17 +515,17 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="175"/>
         <source>Diffuse</source>
-        <translation type="unfinished"></translation>
+        <translation>Diffuse</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="182"/>
         <source>Specular</source>
-        <translation type="unfinished"></translation>
+        <translation>Specular</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="192"/>
         <source>Position XYZ</source>
-        <translation type="unfinished"></translation>
+        <translation>Position XYZ</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="226"/>
@@ -130,7 +573,7 @@
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="277"/>
         <source>Relative</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatif</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="294"/>
@@ -173,37 +616,37 @@
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="84"/>
         <source>Alpha</source>
-        <translation type="unfinished"></translation>
+        <translation>Alpha</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="108"/>
         <source>Wireframe</source>
-        <translation type="unfinished"></translation>
+        <translation>Fil de fer</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="115"/>
         <source>Bounds</source>
-        <translation type="unfinished"></translation>
+        <translation>Limites</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="122"/>
         <source>Texture</source>
-        <translation type="unfinished"></translation>
+        <translation>Texture</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="132"/>
         <source>Bones</source>
-        <translation type="unfinished"></translation>
+        <translation>Armature</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="139"/>
         <source>Render</source>
-        <translation type="unfinished"></translation>
+        <translation>Rendu</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="149"/>
         <source>Particles</source>
-        <translation type="unfinished"></translation>
+        <translation>Particules</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_ModelControls.ui" line="165"/>
@@ -294,12 +737,12 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="162"/>
         <source>Play</source>
-        <translation type="unfinished"></translation>
+        <translation>Play</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="169"/>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>Stop</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="176"/>
@@ -314,17 +757,17 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="190"/>
         <source>Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>Pause</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="201"/>
         <source>Auto Animate</source>
-        <translation>Animation auto</translation>
+        <translation>Animation auto.</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="211"/>
         <source>Lock Animations</source>
-        <translation>Vérouiller anim</translation>
+        <translation>Vérouiller anim.</translation>
     </message>
 </context>
 <context>
@@ -534,7 +977,7 @@
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="665"/>
         <source>Tabard Details</source>
-        <translation type="unfinished"></translation>
+        <translation>Détails tabard</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Equipment.ui" line="694"/>
@@ -603,22 +1046,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="71"/>
         <source>Export Model</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter modèle</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="91"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="95"/>
         <source>Camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Caméra</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="108"/>
         <source>Set Canvas Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Taille du canevas</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="112"/>
@@ -643,18 +1086,18 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="179"/>
         <source>Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Personnage</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="183"/>
         <source>Eye Glow</source>
-        <translation type="unfinished"></translation>
+        <translation>Yeux luisant</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="215"/>
         <location filename="../forms/wmvMainWindow.ui" line="270"/>
         <source>Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Lumière</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="229"/>
@@ -670,17 +1113,27 @@
         <location filename="../forms/wmvMainWindow.ui" line="243"/>
         <location filename="../forms/wmvMainWindow.ui" line="352"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>A propos</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="292"/>
         <source>File List</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste de fichiers</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="303"/>
         <source>Character Designer</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/wmvMainWindow.ui" line="605"/>
+        <source>1920 x 1080, the High Definition Standard</source>
+        <translation>1920 x 1080, le standard haute définition</translation>
+    </message>
+    <message>
+        <location filename="../forms/wmvMainWindow.ui" line="616"/>
+        <source>1280 x 720, a smaller High Definition format.</source>
+        <translation>1280 x 720, un format haute définition plus petit.</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="913"/>
@@ -712,22 +1165,22 @@
         <location filename="../forms/wmvMainWindow.ui" line="344"/>
         <location filename="../forms/wmvMainWindow.ui" line="347"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Aide</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="357"/>
         <source>Check for Update</source>
-        <translation type="unfinished"></translation>
+        <translation>Mises à jour</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="362"/>
         <source>Apply Enchants</source>
-        <translation type="unfinished"></translation>
+        <translation>Enchantements</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="373"/>
         <source>Always show Default doodads in WMOs</source>
-        <translation type="unfinished"></translation>
+        <translation>Equipement par defaut dans les WMOs</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="378"/>
@@ -752,7 +1205,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="398"/>
         <source>Save Screenshot</source>
-        <translation type="unfinished"></translation>
+        <translation>Capture d&apos;écran</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="401"/>
@@ -777,12 +1230,12 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="419"/>
         <source>Export AVI</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter AVI</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="424"/>
         <source>Export ModelInfo.xml</source>
-        <translation type="unfinished"></translation>
+        <translation>Exporter ModelInfo.xml</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="429"/>
@@ -792,22 +1245,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="434"/>
         <source>Reset Layout</source>
-        <translation type="unfinished"></translation>
+        <translation>Restaurer mise en page</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="439"/>
         <source>View NPC</source>
-        <translation type="unfinished"></translation>
+        <translation>Voir PNJ</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="444"/>
         <source>View Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Vue</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="455"/>
         <source>Show File List</source>
-        <translation type="unfinished"></translation>
+        <translation>Liste de modèles</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="463"/>
@@ -832,17 +1285,17 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="498"/>
         <source>Show Model Bank</source>
-        <translation type="unfinished"></translation>
+        <translation>Banque de modèles</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="503"/>
         <source>Background Color...</source>
-        <translation type="unfinished"></translation>
+        <translation>Couleur de fond...</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="508"/>
         <source>Load Background</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger image de fond</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="511"/>
@@ -852,32 +1305,32 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="519"/>
         <source>Skybox</source>
-        <translation type="unfinished"></translation>
+        <translation>Texture ciel</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="527"/>
         <source>Show Grid</source>
-        <translation type="unfinished"></translation>
+        <translation>Grille</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="535"/>
         <source>Show Mask</source>
-        <translation type="unfinished"></translation>
+        <translation>Masque</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="554"/>
         <source>Perspective</source>
-        <translation type="unfinished"></translation>
+        <translation>Perspective</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="562"/>
         <source>Front</source>
-        <translation type="unfinished"></translation>
+        <translation>Face</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="570"/>
         <source>Back</source>
-        <translation type="unfinished"></translation>
+        <translation>Dos</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="578"/>
@@ -900,18 +1353,8 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/wmvMainWindow.ui" line="605"/>
-        <source>1920 x 1080 HD</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../forms/wmvMainWindow.ui" line="613"/>
         <source>720p (HD)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/wmvMainWindow.ui" line="616"/>
-        <source>1280 x 720, a smaller HD format.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1002,7 +1445,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="760"/>
         <source>Load Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger personnage</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="763"/>
@@ -1012,7 +1455,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="768"/>
         <source>Save Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Enregistrer personnage</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="771"/>
@@ -1022,7 +1465,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="776"/>
         <source>Import Armory Character</source>
-        <translation type="unfinished"></translation>
+        <translation>Importer depuis l&apos;armurerie</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="784"/>
@@ -1042,7 +1485,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="811"/>
         <source>Show Underwear</source>
-        <translation type="unfinished"></translation>
+        <translation>Sous-vêtements</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="819"/>
@@ -1077,7 +1520,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="852"/>
         <source>Show Feet</source>
-        <translation type="unfinished"></translation>
+        <translation>Pieds</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="863"/>
@@ -1127,7 +1570,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="903"/>
         <source>Load Item Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger set d&apos;objet</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="908"/>
@@ -1147,22 +1590,22 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="926"/>
         <source>Load Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Charger lumières</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="931"/>
         <source>Save Lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Enreg. lumières</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="939"/>
         <source>Render Light Objects</source>
-        <translation type="unfinished"></translation>
+        <translation>Rendu des lumières</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="947"/>
         <source>Use True lighting</source>
-        <translation type="unfinished"></translation>
+        <translation>Lumière réelle</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="958"/>
@@ -1177,12 +1620,12 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="974"/>
         <source>Model Lights only</source>
-        <translation type="unfinished"></translation>
+        <translation>Lumières du modèle uniquement</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="543"/>
         <source>Use model camera</source>
-        <translation type="unfinished"></translation>
+        <translation>Caméra modèle</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="723"/>
