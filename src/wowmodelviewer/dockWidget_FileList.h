@@ -8,6 +8,8 @@ public:
 	dockWidgetFileList(QWidget *parent = 0);
 	~dockWidgetFileList() {};
 
+	void retranslate() { ui.retranslateUi(this); };
+
 private:
 	Ui::dockWidget_FileList ui;
 };

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
-project(wowmodelviewer)
+set(PROJECTNAME wowmodelviewer)
+
+project(${PROJECTNAME})
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
@@ -103,6 +105,8 @@ set (windowFiles WoWModelViewer.h
 				dockWidget_Animation.cpp
 				dockWidget_CharacterDesigner.h
 				dockWidget_CharacterDesigner.cpp
+				dockWidget_Equipment.h
+				dockWidget_Equipment.cpp
 				dockWidget_FileList.h
 				dockWidget_FileList.cpp
 				dockWidget_Lighting.h
@@ -166,6 +170,7 @@ source_group("Translation Files" FILES ${translationfiles})
 set(uifiles ../Forms/wmvMainWindow.ui
 			../Forms/dockWidget_Animation.ui
 			../Forms/dockWidget_CharacterDesigner.ui
+			../Forms/dockWidget_Equipment.ui
 			../Forms/dockWidget_FileList.ui
 			../Forms/dockWidget_Lighting.ui
 			../Forms/dockWidget_ModelBank.ui
@@ -177,6 +182,7 @@ source_group("Forms" FILES ${uifiles})
 set (MOC_HEADERS WoWModelViewer.h
 				dockWidget_Animation.h
 				dockWidget_CharacterDesigner.h
+				dockWidget_Equipment.h
 				dockWidget_FileList.h
 				dockWidget_Lighting.h
 				dockWidget_ModelBank.h
@@ -189,38 +195,45 @@ source_group("Resources" FILES ${resources} )
 
 QT5_ADD_RESOURCES(QTRESOURCES ../../wmv.qrc)
 
+find_package(Qt5LinguistTools REQUIRED)
+set(LUPDATE_OPTIONS "-ts ${translationfiles}" CACHE STRING "specifies options passed to lupdate")
+# adds the translations and a target for it
+qt5_create_translation(QM_FILES
+	${windowFiles} ${uifiles}
+	OPTIONS ${LUPDATE_OPTIONS}
+)
+
 source_group("GeneratedFiles" FILES ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
 
 set(useful_files ${common_files} ${wow7_3_files} ${wow8_0_files} ${wow8_1_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
-set(NAME wowmodelviewer)
-add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${windowFiles} ${uifiles} ${useful_files} ${resources} ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
+add_executable(${PROJECTNAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${windowFiles} ${uifiles} ${useful_files} ${resources} ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
 
-set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+set_property(TARGET ${PROJECTNAME} PROPERTY FOLDER "executables")
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio
-	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+	set_property(TARGET ${PROJECTNAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(${PROJECTNAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
+	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
 
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 file(MAKE_DIRECTORY ${WoWModelViewer_BINARY_DIR}/GeneratedFiles)
-set_property(TARGET ${NAME} PROPERTY AUTOGEN_TARGETS_FOLDER ${WoWModelViewer_BINARY_DIR}/GeneratedFiles/)
+set_property(TARGET ${PROJECTNAME} PROPERTY AUTOGEN_TARGETS_FOLDER ${WoWModelViewer_BINARY_DIR}/GeneratedFiles/)
 include_directories(${WoWModelViewer_BINARY_DIR}/GeneratedFiles)
 
-target_link_libraries(${NAME}
+target_link_libraries(${PROJECTNAME}
   ${wxWidgets_LIBRARIES}
   wow
   cximage
@@ -230,8 +243,8 @@ target_link_libraries(${NAME}
   Qt5::Widgets
 )
 
-install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-  
+install(TARGETS ${PROJECTNAME} RUNTIME DESTINATION ${BIN_DIR})
+
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 

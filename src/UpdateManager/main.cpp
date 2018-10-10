@@ -29,6 +29,7 @@
 #include <QJsonObject>
 #include <QTableWidget>
 #include <QVboxLayout>
+#include <qtranslator.h>
 
 // Externals
 
@@ -53,7 +54,33 @@ int main(int argc, char ** argv)
   if(uiversion)
   {
     QApplication app(argc, argv);
-    UpdateManager mainWindow;
+
+
+	// Everything defaults to English
+	qInfo("Installing base localization...");
+	QTranslator *translator = new QTranslator();
+	if (translator->load(":/Translations/en_US.qm") == true)
+	{
+		app.installTranslator(translator);
+	}
+	else {
+		qCritical("Unable to load default en_US locale for WoW Model Viewer.");
+	}
+
+	// Install default, System-Specific localization
+	QString localeName = QLocale::system().name();
+	qDebug() << "Looking for locale:" << localeName;
+	if (localeName != "en_US")
+	{
+		if (translator->load(":/Translations/" + localeName + ".qm") == true)
+		{
+			qInfo("Installing system localization...");
+			app.installTranslator(translator);
+		}
+	}
+
+
+	UpdateManager mainWindow;
     mainWindow.show();
     return app.exec();
   }

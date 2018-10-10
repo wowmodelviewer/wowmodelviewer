@@ -8,6 +8,8 @@ public:
 	dockWidgetModelBank(QWidget *parent = 0);
 	~dockWidgetModelBank() {};
 
+	void retranslate() { ui.retranslateUi(this); };
+
 private:
 	Ui::dockWidget_ModelBank ui;
 };

@@ -8,6 +8,8 @@ public:
 	dockWidgetModelControls(QWidget *parent = 0);
 	~dockWidgetModelControls() {};
 
+	void retranslate() { ui.retranslateUi(this); };
+
 private:
 	Ui::dockWidgetModelControls ui;
 };

@@ -1,10 +1,5 @@
-#include "WoWModelViewer.h"
-#include "dockWidget_Animation.h"
-#include "dockWidget_CharacterDesigner.h"
-#include "dockWidget_FileList.h"
-#include "dockWidget_Lighting.h"
-#include "dockWidget_ModelBank.h"
-#include "dockWidget_ModelControls.h"
+﻿#include "WoWModelViewer.h"
+#include <qtranslator.h>
 
 WoWModelViewer::WoWModelViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -14,17 +9,30 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 
 	// Hide what we don't want at the start.
 	ui.widgetAnimation->hide();
+	ui.widgetCharacterControl->hide();
+	ui.widgetEquipment->hide();
 	ui.widgetLighting->hide();
 	ui.widgetModelBank->hide();
 	ui.widgetModelControls->hide();
 
 	// Create & initalize our docked widgets
-	ui.widgetAnimation->setWidget(new dockWidgetAnimation(this));
-	ui.widgetCharacterControl->setWidget(new dockWidgetCharacterDesigner(this));
-	ui.widgetFileList->setWidget(new dockWidgetFileList(this));
-	ui.widgetLighting->setWidget(new dockWidgetLighting(this));
-	ui.widgetModelBank->setWidget(new dockWidgetModelBank(this));
-	ui.widgetModelControls->setWidget(new dockWidgetModelControls(this));
+	animationWidget = new dockWidgetAnimation(this);
+	characterDesignerWidget = new dockWidgetCharacterDesigner(this);
+	equipmentWidget = new dockWidgetEquipment(this);
+	fileListWidget = new dockWidgetFileList(this);
+	lightingWidget = new dockWidgetLighting(this);
+	modelBankWidget = new dockWidgetModelBank(this);
+	modelControls = new dockWidgetModelControls(this);
+
+	// Assign our widgets to the UI
+	ui.widgetAnimation->setWidget(animationWidget);
+	ui.widgetCharacterControl->setWidget(characterDesignerWidget);
+	ui.widgetEquipment->setWidget(equipmentWidget);
+	ui.widgetFileList->setWidget(fileListWidget);
+	ui.widgetLighting->setWidget(lightingWidget);
+	ui.widgetModelBank->setWidget(modelBankWidget);
+	ui.widgetModelControls->setWidget(modelControls);
+	tabifyDockWidget(ui.widgetCharacterControl, ui.widgetEquipment);	// Docks these two widgets together into a tabbed widget
 
 	// UI Selection Groups
 	lightingGroup = new QActionGroup(this);
@@ -69,6 +77,35 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 	cameraGroup->addAction(ui.actionCameraLeft);
 	cameraGroup->addAction(ui.actionCameraRight);
 	cameraGroup->addAction(ui.actionCameraTop);
+
+	// Languages
+	// Note: We are specifically NOT translating these names.
+	QAction *actionLang_enUS = new QAction("English");
+	actionLang_enUS->setCheckable(true);
+	actionLang_enUS->setChecked(true);
+	actionLang_enUS->setData("en_US");
+	QAction *actionLang_deDE = new QAction("Deutsch");
+	actionLang_deDE->setCheckable(true);
+	actionLang_deDE->setData("de_DE");
+	QAction *actionLang_frFR = new QAction(QString::fromWCharArray(L"Français"));
+	actionLang_frFR->setCheckable(true);
+	actionLang_frFR->setData("fr_FR");
+	QAction *actionLang_zhCN = new QAction(QString::fromWCharArray(L"普通话"));
+	actionLang_zhCN->setCheckable(true);
+	actionLang_zhCN->setData("zh_CN");
+	QAction *actionLang_zhTW = new QAction(QString::fromWCharArray(L"繁體中文"));
+	actionLang_zhTW->setCheckable(true);
+	actionLang_zhTW->setData("zh_TW");
+	
+	ui.menuLanguage->addAction(actionLang_enUS);
+	ui.menuLanguage->addAction(actionLang_deDE);
+	ui.menuLanguage->addAction(actionLang_frFR);
+	ui.menuLanguage->addAction(actionLang_zhCN);
+	ui.menuLanguage->addAction(actionLang_zhTW);
+
+	// Make Connections
+	connect(ui.menuLanguage, SIGNAL(triggered(QAction *)), this, SLOT(setLanguage(QAction *)));
+	connect(ui.actionRandomize_Character, &QAction::triggered, characterDesignerWidget, &dockWidgetCharacterDesigner::randomizeAppearance);
 }
 
 WoWModelViewer::~WoWModelViewer()
@@ -76,6 +113,14 @@ WoWModelViewer::~WoWModelViewer()
 	lightingGroup->deleteLater();
 	canvasSizeGroup->deleteLater();
 	cameraGroup->deleteLater();
+
+	animationWidget->deleteLater();
+	characterDesignerWidget->deleteLater();
+	equipmentWidget->deleteLater();
+	fileListWidget->deleteLater();
+	lightingWidget->deleteLater();
+	modelBankWidget->deleteLater();
+	modelControls->deleteLater();
 }
 
 void WoWModelViewer::resizeDisplay(FrameResolutions resolution)
@@ -156,35 +201,6 @@ void WoWModelViewer::resizeDisplay(FrameResolutions resolution)
 		return;
 	}
 
-	// Character Designer
-	if (height < 675 && ui.widgetCharacterControl->isFloating() == false)
-	{
-		ui.widgetCharacterControl->setFloating(true);
-	}
-	if (ui.widgetCharacterControl->isVisible() == true && ui.widgetCharacterControl->isFloating() == false)
-	{
-		width += ui.widgetCharacterControl->width();
-	}
-
-	// File Control
-	if (ui.widgetFileList->isVisible() == true && ui.widgetFileList->isFloating() == false)
-	{
-		if (height < 140)
-			ui.widgetFileList->setFloating(true);
-	}
-	if (ui.widgetFileList->isVisible() == true && ui.widgetFileList->isFloating() == false)
-	{
-		Qt::DockWidgetArea area = dockWidgetArea(ui.widgetFileList);
-		if (area == Qt::LeftDockWidgetArea || area == Qt::RightDockWidgetArea)
-		{
-			width += ui.widgetFileList->width();
-		}
-		if (area == Qt::TopDockWidgetArea || area == Qt::BottomDockWidgetArea)
-		{
-			height += ui.widgetFileList->height();
-		}
-	}
-
 	resize(width, height);
 }
 
@@ -194,7 +210,8 @@ void WoWModelViewer::on_actionReset_Layout_triggered()
 
 	// Hide
 	ui.widgetAnimation->hide();
-	ui.widgetCharacterControl->show();
+	ui.widgetCharacterControl->hide();
+	ui.widgetEquipment->hide();
 	ui.widgetFileList->show();
 	ui.widgetLighting->hide();
 	ui.widgetModelBank->hide();
@@ -202,16 +219,73 @@ void WoWModelViewer::on_actionReset_Layout_triggered()
 
 	// Reset Actions
 	ui.actionShow_Animation_Controls->setChecked(false);
-	ui.actionShow_Character_Designer->setChecked(true);
+	ui.actionShow_Character_Designer->setChecked(false);
+	ui.actionShow_Equipment_Selector->setChecked(false);
 	ui.actionShow_File_List->setChecked(true);
 	ui.actionShow_Light_Controls->setChecked(false);
 	ui.actionShow_Model_Bank->setChecked(false);
 	ui.actionShow_Model_Controls->setChecked(false);
 
+	tabifyDockWidget(ui.widgetCharacterControl, ui.widgetEquipment);
+
 	// Reposition
 
 	// Set sizes
 	resize(1024, 768);
+}
+
+void WoWModelViewer::updateTranslations(QString locale)
+{
+	if (installedTranslation != NULL)
+	{
+		QApplication::removeTranslator(installedTranslation);
+	}
+	if (locale != "en_US")
+	{
+		QTranslator *translator = new QTranslator();
+		if (translator->load(":/Translations/" + locale + ".qm") == true)
+		{
+			QApplication::installTranslator(translator);
+			installedTranslation = translator;
+		}
+		else {
+			qWarning("Error installing locale: %s", qPrintable(locale));
+			installedTranslation = NULL;
+		}
+	}
+	ui.retranslateUi(this);
+	animationWidget->retranslate();
+	characterDesignerWidget->retranslate();
+	equipmentWidget->retranslate();
+	fileListWidget->retranslate();
+	lightingWidget->retranslate();
+	modelBankWidget->retranslate();
+	modelControls->retranslate();
+}
+
+void WoWModelViewer::setTranslation(QString locale)
+{
+	auto a = ui.menuLanguage->actions();
+	for (size_t i = 0; i < a.count(); i++)
+	{
+		if (a.at(i)->data().toString() == locale)
+		{
+			setLanguage(a.at(i));
+			return;
+		}
+	}
+}
+
+void WoWModelViewer::setLanguage(QAction *action)
+{
+	QString locale = action->data().toString();
+	auto a = ui.menuLanguage->actions();
+	for (size_t i = 0; i < a.count(); i++)
+	{
+		a.at(i)->setChecked(false);
+	}
+	action->setChecked(true);
+	updateTranslations(locale);
 }
 
 void WoWModelViewer::on_actionShow_File_List_triggered()
@@ -227,6 +301,11 @@ void WoWModelViewer::on_actionShow_Animation_Controls_triggered()
 void WoWModelViewer::on_actionShow_Character_Designer_triggered()
 {
 	ui.widgetCharacterControl->setVisible(ui.actionShow_Character_Designer->isChecked());
+}
+
+void WoWModelViewer::on_actionShow_Equipment_Selector_triggered()
+{
+	ui.widgetEquipment->setVisible(ui.actionShow_Equipment_Selector->isChecked());
 }
 
 void WoWModelViewer::on_actionShow_Light_Controls_triggered()

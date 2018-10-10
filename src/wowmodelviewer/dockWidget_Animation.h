@@ -8,6 +8,8 @@ public:
 	dockWidgetAnimation(QWidget *parent = 0);
 	~dockWidgetAnimation() {};
 
+	void retranslate() { ui.retranslateUi(this); };
+
 private:
 	Ui::dockWidget_AnimationControls ui;
 };

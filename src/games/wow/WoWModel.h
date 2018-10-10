@@ -193,7 +193,7 @@ public:
 
   size_t currentAnim;
   bool animcalc;
-  size_t anim, animtime;
+  ssize_t anim, animtime;
 
   void reset()
   {

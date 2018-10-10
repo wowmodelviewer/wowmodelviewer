@@ -159,6 +159,7 @@
     <addaction name="actionShow_File_List"/>
     <addaction name="actionShow_Animation_Controls"/>
     <addaction name="actionShow_Character_Designer"/>
+    <addaction name="actionShow_Equipment_Selector"/>
     <addaction name="actionShow_Light_Controls"/>
     <addaction name="actionShow_Model_Controls"/>
     <addaction name="actionShow_Model_Bank"/>
@@ -241,7 +242,12 @@
     <property name="title">
      <string>About</string>
     </property>
-    <addaction name="actionLanguage"/>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+    </widget>
+    <addaction name="menuLanguage"/>
     <addaction name="actionHelp"/>
     <addaction name="actionAbout"/>
     <addaction name="separator"/>
@@ -319,11 +325,17 @@
     <number>8</number>
    </attribute>
   </widget>
-  <action name="actionLanguage">
-   <property name="text">
-    <string>Language</string>
+  <widget class="QDockWidget" name="widgetEquipment">
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
    </property>
-  </action>
+   <property name="windowTitle">
+    <string>Equipment</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+  </widget>
   <action name="actionHelp">
    <property name="text">
     <string>Help</string>
@@ -456,7 +468,7 @@
     <bool>true</bool>
    </property>
    <property name="checked">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Show Character Designer</string>
@@ -960,6 +972,17 @@
    </property>
    <property name="text">
     <string>Model Lights only</string>
+   </property>
+  </action>
+  <action name="actionShow_Equipment_Selector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Equipment Selector</string>
    </property>
   </action>
  </widget>

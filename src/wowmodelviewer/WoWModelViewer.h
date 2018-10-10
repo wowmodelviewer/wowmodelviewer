@@ -1,5 +1,12 @@
 #pragma once
 #include <qmainwindow.h>
+#include "dockWidget_Animation.h"
+#include "dockWidget_CharacterDesigner.h"
+#include "dockWidget_Equipment.h"
+#include "dockWidget_FileList.h"
+#include "dockWidget_Lighting.h"
+#include "dockWidget_ModelBank.h"
+#include "dockWidget_ModelControls.h"
 #include "ui_wmvMainWindow.h"
 
 class WoWModelViewer : public QMainWindow
@@ -32,21 +39,37 @@ public:
 	WoWModelViewer(QWidget *parent = 0);
 	~WoWModelViewer();
 
+	void updateTranslations(QString locale);
+	void setTranslation(QString locale);
+
 private:
 	Ui::wmvMainWindow ui;
+	QTranslator* installedTranslation = NULL;
 
 	QActionGroup *lightingGroup, *canvasSizeGroup, *cameraGroup;
 
 	void resizeDisplay(FrameResolutions resolution = FRAMERES_4x3_768);
 
+	dockWidgetAnimation* animationWidget;
+	dockWidgetCharacterDesigner* characterDesignerWidget;
+	dockWidgetEquipment* equipmentWidget;
+	dockWidgetFileList* fileListWidget;
+	dockWidgetLighting* lightingWidget;
+	dockWidgetModelBank* modelBankWidget;
+	dockWidgetModelControls* modelControls;
+
 private slots:
 	// File Menu
 	void on_actionReset_Layout_triggered();
+
+	// About Menu
+	void setLanguage(QAction *action);
 
 	// Docked Widgets
 	void on_actionShow_File_List_triggered();
 	void on_actionShow_Animation_Controls_triggered();
 	void on_actionShow_Character_Designer_triggered();
+	void on_actionShow_Equipment_Selector_triggered();
 	void on_actionShow_Light_Controls_triggered();
 	void on_actionShow_Model_Controls_triggered();
 	void on_actionShow_Model_Bank_triggered();

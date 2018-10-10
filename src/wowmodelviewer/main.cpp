@@ -1,5 +1,6 @@
 #include <QtWidgets/QApplication>
 #include <qsplashscreen.h>
+#include <qtranslator.h>
 #include "WoWModelViewer.h"
 #include "app.h"
 
@@ -31,12 +32,30 @@ int main(int argc, char *argv[])
 	// Keep going!
 	a.processEvents();
 
-	// Example of initial locate installation
+	WoWModelViewer w;
 
-	QStringList locales;
-	locales << "en_US";
-	
-	//qInfo("Installing localizations...");
+	// Everything defaults to English
+	qInfo("Installing base localization...");
+	QTranslator *translator = new QTranslator();
+	if (translator->load(":/Translations/en_US.qm") == true)
+	{
+		a.installTranslator(translator);
+		w.setTranslation("en_US");
+	}
+	else {
+		qCritical("Unable to load default enUS locale for WoW Model Viewer.");
+	}
+
+	// Install default, System-Specific localization
+	QString localeName = QLocale::system().name();
+	qDebug() << "Looking for locale:" << localeName;
+	if (localeName != "en_US")
+	{
+		qInfo("Installing system localization...");
+		w.setTranslation(localeName);
+	}
+
+
 	//
 	//for (int l = 0; l < locales.count(); l++)
 	//{
@@ -68,8 +87,6 @@ int main(int argc, char *argv[])
 	//		a.installTranslator(t);
 	//	}
 	//}
-
-	WoWModelViewer w;
 
 	// If it's been less than 5 seconds to load, wait for our splash to be appreciated
 	double timerEnd = getCurrentTime();
