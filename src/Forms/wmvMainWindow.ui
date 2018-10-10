@@ -182,9 +182,9 @@
      <property name="title">
       <string>Eye Glow</string>
      </property>
-     <addaction name="actionNone"/>
-     <addaction name="actionDefault"/>
-     <addaction name="actionDeath_Knight"/>
+     <addaction name="actionEyeGlowNone"/>
+     <addaction name="actionEyeGlowDefault"/>
+     <addaction name="actionEyeGlowDeathKnight"/>
     </widget>
     <addaction name="actionLoad_Character"/>
     <addaction name="actionSave_Character"/>
@@ -192,23 +192,23 @@
     <addaction name="actionImport_Armory_Character"/>
     <addaction name="separator"/>
     <addaction name="menuEye_Glow"/>
-    <addaction name="actionShow_Underwear"/>
-    <addaction name="actionShow_Ears"/>
-    <addaction name="actionShow_Hair"/>
-    <addaction name="actionShow_Facial_Hair"/>
-    <addaction name="actionShow_Feet"/>
-    <addaction name="actionAuto_Hide_Geosets_for_head_items"/>
-    <addaction name="actionSheathe_Weapons"/>
+    <addaction name="actionCharacterShowUnderwear"/>
+    <addaction name="actionCharacterShowEars"/>
+    <addaction name="actionCharacterShowHair"/>
+    <addaction name="actionCharacterShowFacialHair"/>
+    <addaction name="actionCharacterShowFeet"/>
+    <addaction name="actionCharacterAutoHideGeosets"/>
+    <addaction name="actionCharacterSheatheWeapons"/>
     <addaction name="separator"/>
-    <addaction name="actionLoad_Equipment"/>
-    <addaction name="actionSave_Equipment"/>
-    <addaction name="actionClear_Equipment"/>
+    <addaction name="actionLoadEquipment"/>
+    <addaction name="actionSaveEquipment"/>
+    <addaction name="actionClearEquipment"/>
     <addaction name="separator"/>
-    <addaction name="actionLoad_Item_Set"/>
-    <addaction name="actionLoad_Starting_Outfit"/>
+    <addaction name="actionLoadItemSet"/>
+    <addaction name="actionLoadStartingOutfit"/>
     <addaction name="separator"/>
     <addaction name="actionMount_Dismount"/>
-    <addaction name="actionRandomize_Character"/>
+    <addaction name="actionRandomizeCharacter"/>
    </widget>
    <widget class="QMenu" name="menuLighting">
     <property name="title">
@@ -228,7 +228,7 @@
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionAlways_show_Default_doodads_in_WMOs"/>
+    <addaction name="actionAlwaysShowDefaultDoodadsInWMOs"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
@@ -362,7 +362,7 @@
     <string>Apply Enchants</string>
    </property>
   </action>
-  <action name="actionAlways_show_Default_doodads_in_WMOs">
+  <action name="actionAlwaysShowDefaultDoodadsInWMOs">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -776,7 +776,7 @@
     <string>Import Armory Character</string>
    </property>
   </action>
-  <action name="actionNone">
+  <action name="actionEyeGlowNone">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -784,7 +784,7 @@
     <string>None</string>
    </property>
   </action>
-  <action name="actionDefault">
+  <action name="actionEyeGlowDefault">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -795,7 +795,7 @@
     <string>Default</string>
    </property>
   </action>
-  <action name="actionDeath_Knight">
+  <action name="actionEyeGlowDeathKnight">
    <property name="checkable">
     <bool>false</bool>
    </property>
@@ -803,7 +803,7 @@
     <string>Death Knight</string>
    </property>
   </action>
-  <action name="actionShow_Underwear">
+  <action name="actionCharacterShowUnderwear">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -811,7 +811,7 @@
     <string>Show Underwear</string>
    </property>
   </action>
-  <action name="actionShow_Ears">
+  <action name="actionCharacterShowEars">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -822,7 +822,7 @@
     <string>Ctrl+E</string>
    </property>
   </action>
-  <action name="actionShow_Hair">
+  <action name="actionCharacterShowHair">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -833,7 +833,7 @@
     <string>Ctrl+H</string>
    </property>
   </action>
-  <action name="actionShow_Facial_Hair">
+  <action name="actionCharacterShowFacialHair">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -844,7 +844,7 @@
     <string>Ctrl+F</string>
    </property>
   </action>
-  <action name="actionShow_Feet">
+  <action name="actionCharacterShowFeet">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -852,7 +852,7 @@
     <string>Show Feet</string>
    </property>
   </action>
-  <action name="actionAuto_Hide_Geosets_for_head_items">
+  <action name="actionCharacterAutoHideGeosets">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -863,7 +863,7 @@
     <string>Auto Hide Geosets for head items</string>
    </property>
   </action>
-  <action name="actionSheathe_Weapons">
+  <action name="actionCharacterSheatheWeapons">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -874,7 +874,7 @@
     <string>Ctrl+Z</string>
    </property>
   </action>
-  <action name="actionSave_Equipment">
+  <action name="actionSaveEquipment">
    <property name="text">
     <string>Save Equipment</string>
    </property>
@@ -882,7 +882,7 @@
     <string>F8</string>
    </property>
   </action>
-  <action name="actionLoad_Equipment">
+  <action name="actionLoadEquipment">
    <property name="text">
     <string>Load Equipment</string>
    </property>
@@ -890,7 +890,7 @@
     <string>F7</string>
    </property>
   </action>
-  <action name="actionClear_Equipment">
+  <action name="actionClearEquipment">
    <property name="text">
     <string>Clear Equipment</string>
    </property>
@@ -898,12 +898,12 @@
     <string>F9</string>
    </property>
   </action>
-  <action name="actionLoad_Item_Set">
+  <action name="actionLoadItemSet">
    <property name="text">
     <string>Load Item Set</string>
    </property>
   </action>
-  <action name="actionLoad_Starting_Outfit">
+  <action name="actionLoadStartingOutfit">
    <property name="text">
     <string>Load Starting Outfit</string>
    </property>
@@ -913,7 +913,7 @@
     <string>Mount / Dismount</string>
    </property>
   </action>
-  <action name="actionRandomize_Character">
+  <action name="actionRandomizeCharacter">
    <property name="text">
     <string>Randomize Character</string>
    </property>

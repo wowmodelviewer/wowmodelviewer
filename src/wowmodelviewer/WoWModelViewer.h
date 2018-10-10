@@ -46,9 +46,7 @@ private:
 	Ui::wmvMainWindow ui;
 	QTranslator* installedTranslation = NULL;
 
-	QActionGroup *lightingGroup, *canvasSizeGroup, *cameraGroup;
-
-	void resizeDisplay(FrameResolutions resolution = FRAMERES_4x3_768);
+	QActionGroup *lightingGroup, *canvasSizeGroup, *cameraGroup, *eyeGlowGroup;
 
 	dockWidgetAnimation* animationWidget;
 	dockWidgetCharacterDesigner* characterDesignerWidget;
@@ -58,14 +56,23 @@ private:
 	dockWidgetModelBank* modelBankWidget;
 	dockWidgetModelControls* modelControls;
 
+	void resizeDisplay(FrameResolutions resolution = FRAMERES_4x3_768);
+	void LoadWoW();
+
 private slots:
 	// File Menu
+	void on_actionLoad_World_of_Warcraft_triggered();
+	void on_actionView_Log_triggered();
+	void on_actionSave_Screenshot_triggered();
+	void on_actionSave_Sized_Screenshot_triggered() {};
+	void on_actionGIF_Sequence_Export_triggered() {};
+	void on_actionExport_AVI_triggered() {};
+	void on_actionExport_ModelInfo_xml_triggered() {};
 	void on_actionReset_Layout_triggered();
 
-	// About Menu
-	void setLanguage(QAction *action);
-
-	// Docked Widgets
+	// View
+	void on_actionView_NPC_triggered() {};
+	void on_actionView_Item_triggered() {};
 	void on_actionShow_File_List_triggered();
 	void on_actionShow_Animation_Controls_triggered();
 	void on_actionShow_Character_Designer_triggered();
@@ -73,6 +80,20 @@ private slots:
 	void on_actionShow_Light_Controls_triggered();
 	void on_actionShow_Model_Controls_triggered();
 	void on_actionShow_Model_Bank_triggered();
+	void on_actionBackground_Color_triggered() {};
+	void on_actionLoad_Background_triggered() {};
+	void on_actionSkybox_triggered() {};
+	void on_actionShow_Grid_triggered() {};
+	void on_actionShow_Mask_triggered() {};
+
+	// Camera
+	void on_actionCamera_UseModel_triggered() {};
+	void on_actionCameraPerspective_triggered() {};
+	void on_actionCameraFront_triggered() {};
+	void on_actionCameraBack_triggered() {};
+	void on_actionCameraLeft_triggered() {};
+	void on_actionCameraRight_triggered() {};
+	void on_actionCameraTop_triggered() {};
 
 	// Resolutions
 	void on_action2160p_triggered()			{ resizeDisplay(FRAMERES_2160p); };
@@ -94,4 +115,46 @@ private slots:
 	void on_action3840_x_2160_triggered()	{ resizeDisplay(FRAMERES_16x9_2160); };
 	void on_action1280_x_768_triggered()	{ resizeDisplay(FRAMERES_MISC_768); };
 	void on_action1920_x_1200_triggered()	{ resizeDisplay(FRAMERES_MISC_1200); };
+
+	// Character
+	void on_actionLoad_Character_triggered() {};
+	void on_actionSave_Character_triggered() {};
+	void on_actionImport_Armory_Character_triggered() {};
+	void on_actionEyeGlowNone_triggered() {};
+	void on_actionEyeGlowDefault_triggered() {};
+	void on_actionEyeGlowDeathKnight_triggered() {};
+	void on_actionCharacterShowUnderwear_triggered() {};
+	void on_actionCharacterShowEars_triggered() {};
+	void on_actionCharacterShowHair_triggered() {};
+	void on_actionCharacterShowFacialHair_triggered() {};
+	void on_actionCharacterShowFeet_triggered() {};
+	void on_actionCharacterAutoHideGeosets_triggered() {};
+	void on_actionCharacterSheatheWeapons_triggered() {};
+	void on_actionLoadEquipment_triggered() {};
+	void on_actionSaveEquipment_triggered() {};
+	void on_actionClearEquipment_triggered() {};
+	void on_actionLoadItemSet_triggered() {};
+	void on_actionLoadStartingOutfit_triggered() {};
+	void on_actionMount_Dismount_triggered() {};
+
+	// Lighting
+	void on_actionLoad_Lighting_triggered() {};
+	void on_actionSave_Lighting_triggered() {};
+	void on_actionRender_Light_Objects_triggered() {};
+	void on_actionUse_True_lighting_triggered() {};
+	void on_actionUse_Dynamic_lighting_triggered() {};
+	void on_actionUse_Ambient_Lighting_triggered() {};
+	void on_actionModel_Lights_only_triggered() {};
+
+	// Options
+	void on_actionAlwaysShowDefaultDoodadsInWMOs_triggered() {};
+	void on_actionSettings_triggered() {};
+
+	// Effects
+	void on_actionApply_Enchants_triggered() {};
+
+	// About Menu
+	void setLanguage(QAction *action);
+	void on_actionHelp_triggered() {};
+	void on_actionAbout_triggered() {};
 };

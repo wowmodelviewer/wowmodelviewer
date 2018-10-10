@@ -1,5 +1,15 @@
 ﻿#include "WoWModelViewer.h"
+
+#include "Game.h"
+#include "util.h"
+#include "WoWDatabase.h"
+#include "WoWFolder.h"
+
+// Qt
 #include <qtranslator.h>
+#include <qmessagebox.h>
+#include <qinputdialog.h>
+#include <qdebug.h>
 
 WoWModelViewer::WoWModelViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -78,6 +88,12 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 	cameraGroup->addAction(ui.actionCameraRight);
 	cameraGroup->addAction(ui.actionCameraTop);
 
+	eyeGlowGroup = new QActionGroup(this);
+	eyeGlowGroup->setExclusive(true);
+	eyeGlowGroup->addAction(ui.actionEyeGlowNone);
+	eyeGlowGroup->addAction(ui.actionEyeGlowDefault);
+	eyeGlowGroup->addAction(ui.actionEyeGlowDeathKnight);
+
 	// Languages
 	// Note: We are specifically NOT translating these names.
 	QAction *actionLang_enUS = new QAction("English");
@@ -103,9 +119,14 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 	ui.menuLanguage->addAction(actionLang_zhCN);
 	ui.menuLanguage->addAction(actionLang_zhTW);
 
+	// Setup Status bar
+
+	// Insert Widgets and permanaent widgets
+	// http://doc.qt.io/qt-5/qstatusbar.html
+
 	// Make Connections
 	connect(ui.menuLanguage, SIGNAL(triggered(QAction *)), this, SLOT(setLanguage(QAction *)));
-	connect(ui.actionRandomize_Character, &QAction::triggered, characterDesignerWidget, &dockWidgetCharacterDesigner::randomizeAppearance);
+	connect(ui.actionRandomizeCharacter, &QAction::triggered, characterDesignerWidget, &dockWidgetCharacterDesigner::randomizeAppearance);
 }
 
 WoWModelViewer::~WoWModelViewer()
@@ -202,6 +223,130 @@ void WoWModelViewer::resizeDisplay(FrameResolutions resolution)
 	}
 
 	resize(width, height);
+}
+
+void WoWModelViewer::LoadWoW()
+{
+	fileListWidget->setEnabled(false);
+	if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
+		getGamePath();
+		qDebug() << "Game Path:" << qPrintable(gamePath.c_str().AsChar());
+	}
+	qDebug() << "Initializing Game...";
+	if (!core::Game::instance().initDone())
+		core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
+
+	// init game config
+	qDebug() << "Initializing Game Config...";
+	std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
+
+	if (configsFound.empty())
+	{
+		QString message = tr("Fatal Error: Could not find any locale from your World of Warcraft folder");
+		QString title = tr("World of Warcraft No locale found");
+		QMessageBox *dial = new QMessageBox(QMessageBox::Icon::Critical, title, message, QMessageBox::Button::Ok);
+		dial->exec();
+		return;
+	}
+
+	qDebug() << "Setting Game Config...";
+	core::GameConfig config = configsFound[0];
+
+	unsigned int nbConfigs = configsFound.size();
+
+	qDebug() << "Game Configs found:" << nbConfigs;
+	if (nbConfigs > 1)
+	{
+		QStringList availableConfigs;
+		for (size_t i = 0; i < nbConfigs; i++)
+		{
+			QString label = configsFound[i].locale + " (" + configsFound[i].version + ")";
+			availableConfigs.push_back(label);
+		}
+
+		bool ok;
+		QString item = QInputDialog::getItem(this, tr("Please select a locale:"), tr("Locale"), availableConfigs, 0, false, &ok);
+
+		long id = -1;
+		if (ok && !item.isEmpty())
+		{
+			for (size_t i = 0; i < availableConfigs.count(); i++)
+			{
+				if (availableConfigs.at(i) == item)
+				{
+					id = i;
+					break;
+				}
+			}
+		}
+		if (id != -1)
+			config = configsFound[id];
+		else
+			return;
+	}
+
+	qDebug() << "Setting Game Config...";
+	if (!GAMEDIRECTORY.setConfig(config))
+	{
+		QString message = tr("Fatal Error: Could not load your World of Warcraft Data folder (error %1)").arg(GAMEDIRECTORY.lastError());
+		QString title = tr("World of Warcraft Not Found");
+		QMessageBox *dial = new QMessageBox(QMessageBox::Icon::Critical, title, message, QMessageBox::Button::Ok);
+		dial->exec();
+		return;
+	}
+
+	// init game version
+	qDebug() << "Game Version:" << GAMEDIRECTORY.version();
+	//SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
+
+	langName = GAMEDIRECTORY.locale().toStdWString();
+
+	qDebug() << "Game Locale:" << GAMEDIRECTORY.locale();
+	//SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
+
+	// init file list
+	QStringList ver = GAMEDIRECTORY.version().split('.');
+
+	QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+
+	qInfo() << "Using following folder to read game info" << baseConfigFolder;
+	core::Game::instance().setConfigFolder(baseConfigFolder);
+
+	GAMEDIRECTORY.initFromListfile("listfile.txt");
+
+	if (!customDirectoryPath.IsEmpty())
+		core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
+
+	// init database
+	//InitDatabase();
+
+	/*
+	// Error check
+	if (!initDB)
+	{
+		wxMessageBox(wxT("Some DBC files could not be loaded.  These files are vital to being able to render models correctly.\nFile list has been disabled until you are able to correct this problem."), wxT("DBC Error"));
+		fileControl->Disable();
+		SetStatusText(wxT("Some DBC files could not be loaded."));
+	}
+	else
+	{
+		isWoWLoaded = true;
+		SetStatusText(wxT("Initializing WoW Done."));
+		fileMenu->Enable(ID_LOAD_WOW, false);
+	}
+	*/
+	//wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
+
+
+	//SetStatusText(tr("Initializing File Control..."));
+	//fileControl->Init(this);
+
+	/*if (charControl->Init() == false)
+	{
+		SetStatusText(tr("Error Initializing the Character Controls."));
+	};
+	*/
+	fileListWidget->setEnabled(true);
 }
 
 void WoWModelViewer::on_actionReset_Layout_triggered()
@@ -321,4 +466,17 @@ void WoWModelViewer::on_actionShow_Model_Controls_triggered()
 void WoWModelViewer::on_actionShow_Model_Bank_triggered()
 {
 	ui.widgetModelBank->setVisible(ui.actionShow_Model_Bank->isChecked());
+}
+
+void WoWModelViewer::on_actionLoad_World_of_Warcraft_triggered()
+{
+	LoadWoW();
+}
+
+void WoWModelViewer::on_actionView_Log_triggered()
+{
+}
+
+void WoWModelViewer::on_actionSave_Screenshot_triggered()
+{
 }

@@ -2,6 +2,57 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_TW" sourcelanguage="en_US">
 <context>
+    <name>QObject</name>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="185"/>
+        <source>Please select a Path:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="185"/>
+        <source>Path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="195"/>
+        <source>Select Your World of Warcraft Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WoWModelViewer</name>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="245"/>
+        <source>Fatal Error: Could not find any locale from your World of Warcraft folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="246"/>
+        <source>World of Warcraft No locale found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <source>Please select a locale:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <source>Locale</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="291"/>
+        <source>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="292"/>
+        <source>World of Warcraft Not Found</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>dockWidgetLighting</name>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="32"/>

@@ -2,6 +2,57 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US" sourcelanguage="en_US">
 <context>
+    <name>QObject</name>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="185"/>
+        <source>Please select a Path:</source>
+        <translation>Please select a Path:</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="185"/>
+        <source>Path</source>
+        <translation>Path</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/util.cpp" line="195"/>
+        <source>Select Your World of Warcraft Directory</source>
+        <translation>Select Your World of Warcraft Directory</translation>
+    </message>
+</context>
+<context>
+    <name>WoWModelViewer</name>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="245"/>
+        <source>Fatal Error: Could not find any locale from your World of Warcraft folder</source>
+        <translation>Fatal Error: Could not find any locale from your World of Warcraft folder</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="246"/>
+        <source>World of Warcraft No locale found</source>
+        <translation>World of Warcraft No locale found</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <source>Please select a locale:</source>
+        <translation>Please select a locale:</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <source>Locale</source>
+        <translation>Locale</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="291"/>
+        <source>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</source>
+        <translation>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="292"/>
+        <source>World of Warcraft Not Found</source>
+        <translation>World of Warcraft Not Found</translation>
+    </message>
+</context>
+<context>
     <name>dockWidgetLighting</name>
     <message>
         <location filename="../forms/dockWidget_Lighting.ui" line="32"/>
@@ -701,7 +752,7 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="398"/>
         <source>Save Screenshot</source>
-        <translation>View Log</translation>
+        <translation>Save Screenshot</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="401"/>
