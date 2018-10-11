@@ -465,33 +465,66 @@
 <context>
     <name>WoWModelViewer</name>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="245"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="135"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="136"/>
+        <source>None</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="142"/>
+        <source>Initialized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="250"/>
+        <source>Loading WoW data from directory: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="260"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="261"/>
         <source>Fatal Error: Could not find any locale from your World of Warcraft folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="246"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="262"/>
         <source>World of Warcraft No locale found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="284"/>
         <source>Please select a locale:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="284"/>
         <source>Locale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="291"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="307"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="308"/>
         <source>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="292"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="309"/>
         <source>World of Warcraft Not Found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="370"/>
+        <source>Load completed in %1 seconds!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="447"/>
+        <source>Version: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="452"/>
+        <source>Locale: %1</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -762,12 +795,12 @@
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="201"/>
         <source>Auto Animate</source>
-        <translation>Animation auto.</translation>
+        <translation>Animation auto</translation>
     </message>
     <message>
         <location filename="../forms/dockWidget_Animation.ui" line="211"/>
         <source>Lock Animations</source>
-        <translation>Vérouiller anim.</translation>
+        <translation>Vérouiller anim</translation>
     </message>
 </context>
 <context>

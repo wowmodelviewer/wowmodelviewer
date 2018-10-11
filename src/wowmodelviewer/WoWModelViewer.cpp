@@ -10,6 +10,7 @@
 #include <qmessagebox.h>
 #include <qinputdialog.h>
 #include <qdebug.h>
+#include <qfile.h>
 
 WoWModelViewer::WoWModelViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -119,14 +120,26 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 	ui.menuLanguage->addAction(actionLang_zhCN);
 	ui.menuLanguage->addAction(actionLang_zhTW);
 
-	// Setup Status bar
+	// Initialize Status Bar & Install Widgets
+	statusBarVersion = new QLabel;
+	statusBarLocale = new QWidget(this);
+	QHBoxLayout *layoutLocale = new QHBoxLayout(statusBarLocale);
+	statusBarLocaleText = new QLabel(statusBarLocale);
+	statusBarLocaleFlag = new QLabel(statusBarLocale);
+	layoutLocale->addWidget(statusBarLocaleFlag);
+	layoutLocale->addWidget(statusBarLocaleText);
+	layoutLocale->setMargin(0);
 
-	// Insert Widgets and permanaent widgets
-	// http://doc.qt.io/qt-5/qstatusbar.html
+	ui.statusbar->addPermanentWidget(statusBarVersion);
+	ui.statusbar->addPermanentWidget(statusBarLocale);
+	setStatusVersion(tr("None"));
+	setStatusLocale(tr("None"));
 
 	// Make Connections
 	connect(ui.menuLanguage, SIGNAL(triggered(QAction *)), this, SLOT(setLanguage(QAction *)));
 	connect(ui.actionRandomizeCharacter, &QAction::triggered, characterDesignerWidget, &dockWidgetCharacterDesigner::randomizeAppearance);
+
+	setStatusMessage(tr("Initialized"));
 }
 
 WoWModelViewer::~WoWModelViewer()
@@ -227,12 +240,14 @@ void WoWModelViewer::resizeDisplay(FrameResolutions resolution)
 
 void WoWModelViewer::LoadWoW()
 {
+	double timeStart = getCurrentTime();
 	fileListWidget->setEnabled(false);
 	if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
 		getGamePath();
 		qDebug() << "Game Path:" << qPrintable(gamePath.c_str().AsChar());
 	}
 	qDebug() << "Initializing Game...";
+	setStatusMessage(tr("Loading WoW data from directory: %1").arg(QString::fromWCharArray(gamePath.c_str())));
 	if (!core::Game::instance().initDone())
 		core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
 
@@ -242,6 +257,7 @@ void WoWModelViewer::LoadWoW()
 
 	if (configsFound.empty())
 	{
+		setStatusMessage(tr("Fatal Error: Could not find any locale from your World of Warcraft folder"));
 		QString message = tr("Fatal Error: Could not find any locale from your World of Warcraft folder");
 		QString title = tr("World of Warcraft No locale found");
 		QMessageBox *dial = new QMessageBox(QMessageBox::Icon::Critical, title, message, QMessageBox::Button::Ok);
@@ -288,6 +304,7 @@ void WoWModelViewer::LoadWoW()
 	qDebug() << "Setting Game Config...";
 	if (!GAMEDIRECTORY.setConfig(config))
 	{
+		setStatusMessage(tr("Fatal Error: Could not load your World of Warcraft Data folder (error %1)").arg(GAMEDIRECTORY.lastError()));
 		QString message = tr("Fatal Error: Could not load your World of Warcraft Data folder (error %1)").arg(GAMEDIRECTORY.lastError());
 		QString title = tr("World of Warcraft Not Found");
 		QMessageBox *dial = new QMessageBox(QMessageBox::Icon::Critical, title, message, QMessageBox::Button::Ok);
@@ -297,12 +314,12 @@ void WoWModelViewer::LoadWoW()
 
 	// init game version
 	qDebug() << "Game Version:" << GAMEDIRECTORY.version();
-	//SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
+	setStatusVersion(GAMEDIRECTORY.version());
 
 	langName = GAMEDIRECTORY.locale().toStdWString();
 
 	qDebug() << "Game Locale:" << GAMEDIRECTORY.locale();
-	//SetStatusText(wxString(GAMEDIRECTORY.locale().toStdWString()), 2);
+	setStatusLocale(GAMEDIRECTORY.locale());
 
 	// init file list
 	QStringList ver = GAMEDIRECTORY.version().split('.');
@@ -347,6 +364,10 @@ void WoWModelViewer::LoadWoW()
 	};
 	*/
 	fileListWidget->setEnabled(true);
+	double timeEnd = getCurrentTime();
+	double loadTime = timeEnd - timeStart;
+
+	setStatusMessage(tr("Load completed in %1 seconds!").arg(loadTime));
 }
 
 void WoWModelViewer::on_actionReset_Layout_triggered()
@@ -419,6 +440,28 @@ void WoWModelViewer::setTranslation(QString locale)
 			return;
 		}
 	}
+}
+
+void WoWModelViewer::setStatusVersion(QString value)
+{
+	statusBarVersion->setText(tr("Version: %1").arg(value));
+}
+
+void WoWModelViewer::setStatusLocale(QString value)
+{
+	statusBarLocaleText->setText(tr("Locale: %1").arg(value));
+	QString flag = ":/Locales/unknown";
+	if (QFile::exists(QString(":/Locales/%1").arg(value)))
+	{
+		flag = QString(":/Locales/%1").arg(value);
+	}
+	QPixmap flagIcon(flag);
+	statusBarLocaleFlag->setPixmap(flagIcon);
+}
+
+void WoWModelViewer::setStatusMessage(QString message, int timeout)
+{
+	ui.statusbar->showMessage(message, timeout);
 }
 
 void WoWModelViewer::setLanguage(QAction *action)

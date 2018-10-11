@@ -22,34 +22,67 @@
 <context>
     <name>WoWModelViewer</name>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="245"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="135"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="136"/>
+        <source>None</source>
+        <translation>None</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="142"/>
+        <source>Initialized</source>
+        <translation>Initialized</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="250"/>
+        <source>Loading WoW data from directory: %1</source>
+        <translation>Loading WoW data from directory: %1</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="260"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="261"/>
         <source>Fatal Error: Could not find any locale from your World of Warcraft folder</source>
         <translation>Fatal Error: Could not find any locale from your World of Warcraft folder</translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="246"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="262"/>
         <source>World of Warcraft No locale found</source>
         <translation>World of Warcraft No locale found</translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="284"/>
         <source>Please select a locale:</source>
         <translation>Please select a locale:</translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="268"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="284"/>
         <source>Locale</source>
         <translation>Locale</translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="291"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="307"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="308"/>
         <source>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</source>
         <translation>Fatal Error: Could not load your World of Warcraft Data folder (error %1)</translation>
     </message>
     <message>
-        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="292"/>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="309"/>
         <source>World of Warcraft Not Found</source>
         <translation>World of Warcraft Not Found</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="370"/>
+        <source>Load completed in %1 seconds!</source>
+        <translation>Load completed in %1 seconds!</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="447"/>
+        <source>Version: %1</source>
+        <translation>Version: %1</translation>
+    </message>
+    <message>
+        <location filename="../wowmodelviewer/WoWModelViewer.cpp" line="452"/>
+        <source>Locale: %1</source>
+        <translation>Locale: %1</translation>
     </message>
 </context>
 <context>
@@ -645,12 +678,12 @@
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="605"/>
         <source>1920 x 1080, the High Definition Standard</source>
-        <translation type="unfinished"></translation>
+        <translation>1920 x 1080, the High Definition Standard</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="616"/>
         <source>1280 x 720, a smaller High Definition format.</source>
-        <translation type="unfinished"></translation>
+        <translation>1280 x 720, a smaller High Definition format.</translation>
     </message>
     <message>
         <location filename="../forms/wmvMainWindow.ui" line="913"/>

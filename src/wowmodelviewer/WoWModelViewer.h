@@ -42,6 +42,12 @@ public:
 	void updateTranslations(QString locale);
 	void setTranslation(QString locale);
 
+	void setStatusVersion(QString value);
+	void setStatusLocale(QString value);
+
+public slots:
+	void setStatusMessage(QString message, int timeout = 0);		// Timeout is in Milliseconds.
+
 private:
 	Ui::wmvMainWindow ui;
 	QTranslator* installedTranslation = NULL;
@@ -55,6 +61,12 @@ private:
 	dockWidgetLighting* lightingWidget;
 	dockWidgetModelBank* modelBankWidget;
 	dockWidgetModelControls* modelControls;
+
+
+	QLabel* statusBarVersion;
+	QWidget *statusBarLocale;
+	QLabel* statusBarLocaleText;
+	QLabel* statusBarLocaleFlag;
 
 	void resizeDisplay(FrameResolutions resolution = FRAMERES_4x3_768);
 	void LoadWoW();
