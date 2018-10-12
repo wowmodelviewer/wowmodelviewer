@@ -17,6 +17,7 @@
 #include "wdb6file.h"
 #include "wdc1file.h"
 #include "wdc2file.h"
+#include "wdc3file.h"
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
@@ -111,6 +112,8 @@ DBFile * wow::TableStructure::createDBFile()
         result = new WDC1File(fileToOpen->fullname());
       else if (strncmp(header, "WDC2", 4) == 0)
         result = new WDC2File(fileToOpen->fullname());
+      else if (strncmp(header, "WDC3", 4) == 0)
+        result = new WDC3File(fileToOpen->fullname());
       else
         LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
 

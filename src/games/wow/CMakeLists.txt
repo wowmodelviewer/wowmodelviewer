@@ -49,6 +49,7 @@ set(src animated.cpp
 		wdb6file.cpp
 		wdc1file.cpp
 		wdc2file.cpp
+		wdc3file.cpp
         wmo.cpp
 		WMOFog.cpp
 		WMOGroup.cpp
@@ -102,6 +103,7 @@ set(headers animated.h
 			wdb6file.h
 			wdc1file.h
 			wdc2file.h
+			wdc3file.h
 			wmo.h
 			WMOFog.h
 			WMOGroup.h
