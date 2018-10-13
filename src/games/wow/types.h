@@ -26,6 +26,8 @@
 	typedef __int16 int16;
 	typedef unsigned __int32 uint32;
 	typedef __int32 int32;
+  typedef unsigned __int64 uint64;
+  typedef __int64 int64;
 	typedef int ssize_t;
 #else
 	#include <stdint.h>

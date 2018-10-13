@@ -46,7 +46,7 @@ public:
 
   struct section_header
   {
-    unsigned long long tact_key_hash;   // TactKeyLookup hash
+    uint64 tact_key_hash;          // TactKeyLookup hash
     uint32 file_offset;            // Absolute position to the beginning of the section
     uint32 record_count;           // 'record_count' for the section
     uint32 string_table_size;      // 'string_table_size' for the section

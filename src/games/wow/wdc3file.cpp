@@ -65,14 +65,15 @@ bool WDC3File::open()
 #if WDC3_READ_DEBUG > 1
   for (uint i = 0; i < m_header.section_count; i++)
   {
-    LOG_INFO << "wdc3_unk_header1" << sectionHeader[i].wdc3_unk_header1;
-    LOG_INFO << "wdc3_unk_header2" << sectionHeader[i].wdc3_unk_header2;
+    LOG_INFO << "tact_key_hash" << sectionHeader[i].tact_key_hash;
     LOG_INFO << "file_offset" << sectionHeader[i].file_offset;
+    LOG_INFO << "record_count" << sectionHeader[i].record_count;
     LOG_INFO << "string_table_size" << sectionHeader[i].string_table_size;
-    LOG_INFO << "copy_table_count" << sectionHeader[i].copy_table_count;
     LOG_INFO << "offset_records_end" << sectionHeader[i].offset_records_end;
     LOG_INFO << "id_list_size" << sectionHeader[i].id_list_size;
     LOG_INFO << "relationship_data_size" << sectionHeader[i].relationship_data_size;
+    LOG_INFO << "offset_map_id_count" << sectionHeader[i].offset_map_id_count;
+    LOG_INFO << "copy_table_count" << sectionHeader[i].copy_table_count;
   }
 #endif
 
@@ -124,7 +125,7 @@ bool WDC3File::open()
   uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
  
   // this only supports one section. We need to be able to loop and support multiple sections.
-  seek(sectionHeader[0].offset_records_end - sectionHeader[0].file_offset);
+  seek(sectionHeader[0].file_offset);
 
   data = getPointer();
 
