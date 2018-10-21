@@ -221,60 +221,43 @@ void WoWItem::load()
   if (!m_charModel) // no parent => give up
     return;
 
-  if (m_id == 0) // no equipment, just return
+  if (m_id == 0 || m_displayId == 0) // no equipment, just return
     return;
 
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
+  sqlResult iteminfos;
 
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      QString query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                              "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                              "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                              "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                              "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
-                              "AND ComponentModelFileData.GenderIndex = %3").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid);
-
-      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
-      {
-        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
-        LOG_ERROR << query;
-        return;
-      }
-
-      updateItemModel(ATT_HELMET, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                 "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                 "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
+                                 "AND ComponentModelFileData.GenderIndex = %3").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid), 
+                         iteminfos))
+        updateItemModel(ATT_HELMET, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
     case CS_SHOULDER:
     {
-      QString query = QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2 FROM ItemDisplayInfo "
-                              "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-
-      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
-      {
-        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      if (!queryItemInfo(QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2 FROM ItemDisplayInfo "
+                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
+                          iteminfos))
         return;
-      }
 
       if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
       {
-        sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
-        sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT ID, TextureID FROM TextureFileData WHERE ID IN( %1, %2)").arg(iteminfos.values[0][1]).arg(iteminfos.values[0][3]));
+        sqlResult modelinfos;
+        sqlResult texinfos;
 
-        if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
-        {
-          LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-          return;
-        }
+        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
+            !queryItemInfo(QString("SELECT ID, TextureID FROM TextureFileData WHERE ID IN( %1, %2)").arg(iteminfos.values[0][1]).arg(iteminfos.values[0][3]), texinfos))
+            return;
 
         // associate left / right model infos
         GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
@@ -294,14 +277,12 @@ void WoWItem::load()
       }
       else if (iteminfos.values[0][2].toInt() == 0) // only left shoulder
       {
-        sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]));
-        sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]));
+        sqlResult modelinfos;
+        sqlResult texinfos;
 
-        if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
-        {
-          LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-          return;
-        }
+        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
+            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]), texinfos))
+            return;
 
         int leftmodelindex = -1;
 
@@ -319,14 +300,12 @@ void WoWItem::load()
       }
       else if (iteminfos.values[0][0].toInt() == 0) // only right shoulder 
       {
-        sqlResult modelinfos = GAMEDATABASE.sqlQuery(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][2]));
-        sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][3]));
+        sqlResult modelinfos;
+        sqlResult texinfos;
 
-        if (!modelinfos.valid || modelinfos.values.empty() || !texinfos.valid || texinfos.values.empty())
-        {
-          LOG_ERROR << "Impossible to query model & texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-          return;
-        }
+        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][2]), modelinfos) ||
+            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][3]), texinfos))
+            return;
 
         int rightmodelindex = -1;
 
@@ -352,11 +331,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -371,18 +351,12 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      query = QString("SELECT ModelID, TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
-                      "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                      "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                      "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-      iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
-      {
-        LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
+                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                          iteminfos))
         return;
-      }
 
       // geoset
       m_itemGeosets[CG_BOOTS] = 1 + iteminfos.values[0][2].toInt();
@@ -401,11 +375,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid /* || iteminfos.values.empty() */) // some belts have no texture, only model
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -420,20 +395,14 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      query = QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID FROM ItemDisplayInfo "
-                      "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
-                      "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
-                      "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
-                      "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
-                      "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-      iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
-      {
-        LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+      if (!queryItemInfo(QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID FROM ItemDisplayInfo "
+                                  "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
+                                  "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
+                                  "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
+                                  "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
+                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                          iteminfos))
         return;
-      }
 
       // models
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for belt
@@ -455,11 +424,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -484,6 +454,7 @@ void WoWItem::load()
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -503,11 +474,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -527,13 +499,12 @@ void WoWItem::load()
                       "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                       "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
 
-      LOG_INFO << query;
-
       iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MERGED_MODEL, 3);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -552,11 +523,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -578,11 +550,12 @@ void WoWItem::load()
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -607,6 +580,7 @@ void WoWItem::load()
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+        LOG_ERROR << query;
         return;
       }
 
@@ -620,46 +594,31 @@ void WoWItem::load()
     case CS_HAND_RIGHT:
     case CS_HAND_LEFT:
     {
-      QString query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                              "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                              "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                              "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
-      {
-        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-        return;
-      }
-
-      updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      if(queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                               "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                               "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                               "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                       iteminfos))
+        updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
     case CS_CAPE:
     {
-      QString query = QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
-                              "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                              "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-
-      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
-
-      if (!iteminfos.valid || iteminfos.values.empty())
+      if (queryItemInfo(QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
+                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                        iteminfos))
       {
-        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-        return;
-      }
+        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
+        if (texture)
+        {
+          TEXTUREMANAGER.add(texture);
+          m_itemTextures[getRegionForTexture(texture)] = texture;
+        }
 
-      GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-      if (texture)
-      {
-        TEXTUREMANAGER.add(texture);
-        m_itemTextures[getRegionForTexture(texture)] = texture;
+        m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][1].toInt();
       }
-
-      m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][1].toInt();
 
       break;
     }
@@ -721,11 +680,12 @@ void WoWItem::load()
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
 
-        sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
+        iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
 
         if (!iteminfos.valid || iteminfos.values.empty())
         {
           LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
+          LOG_ERROR << query;
           return;
         }
 
@@ -740,18 +700,10 @@ void WoWItem::load()
         }
 
         // geosets
-        query = QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
-                        "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
-
-        iteminfos = GAMEDATABASE.sqlQuery(query);
-
-        if (!iteminfos.valid || iteminfos.values.empty())
-        {
-          LOG_ERROR << "Impossible to query geoset/model information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-          return;
-        }
-
-        m_itemGeosets[CG_TARBARD] = 1 + iteminfos.values[0][0].toInt();
+        if(queryItemInfo(QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
+                                 "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                         iteminfos))
+          m_itemGeosets[CG_TARBARD] = 1 + iteminfos.values[0][0].toInt();
       }
 
       break;
@@ -1386,4 +1338,18 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
 #endif
 
   return result;
+}
+
+bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
+{
+  result = GAMEDATABASE.sqlQuery(query);
+
+  if (!result.valid || result.values.empty())
+  {
+    LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
+    LOG_ERROR << query;
+    return false;
+  }
+
+  return true;
 }

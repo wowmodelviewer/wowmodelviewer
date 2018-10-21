@@ -119,6 +119,8 @@ class _WOWITEM_API_ WoWItem : public Component
 
     sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
 
+    bool queryItemInfo(QString & query, sqlResult & result) const;
+
 };
 
 
