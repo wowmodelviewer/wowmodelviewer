@@ -56,9 +56,7 @@
     <field type="uint" name="HighResMaleDisplayId" pos="10" />
     <field type="uint" name="HighResFemaleDisplayId" pos="11" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
-    <!-- not working for now, not the right index in BfA
-    <field type="byte" name="ItemDisplayRaceID" pos="36" />
-    -->
+    <field type="int"  name="BaseRaceID" pos="24" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
@@ -75,7 +73,20 @@
     <field type="text" name="FacialHairCustomization2" />
     <field type="text" name="HairCustomization" />
   </table>
-  
+  <table name="ComponentModelFileData">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="int" name="GenderIndex" pos="0"/>
+    <field type="int" name="ClassID" pos="1"/>
+    <field type="int" name="RaceID" pos="2"/>
+    <field type="int" name="PositionIndex" pos="3"/>
+  </table>
+  <table name="ComponentTextureFileData">
+    <field primary="yes" type="uint" name="ID" />
+    <field type="int" name="GenderIndex" pos="0"/>
+    <field type="int" name="ClassID" pos="1"/>
+    <field type="int" name="RaceID" pos="2"/>
+  </table>
+
   <!-- Character tables - END -->
   
   <!-- Creature tables - BEGIN -->

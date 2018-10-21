@@ -37,7 +37,7 @@ void RaceInfos::init()
                           "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
                           "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
-                          "ChrRaces.ID FROM ChrRaces "
+                          "ChrRaces.ID, BaseRaceID FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
@@ -52,15 +52,6 @@ void RaceInfos::init()
   for(int i=0, imax = races.values.size() ; i < imax ; i++)
   {
     std::string displayPrefix = "";
-/*
-// old ItemDisplayRaceID code
-    if (races.values[i][13].toInt() != 0)
-    {
-      QString query = QString("SELECT lower(ClientPrefix) FROM ChrRaces WHERE ID = %1").arg(races.values[i][13].toInt());
-      sqlResult display = GAMEDATABASE.sqlQuery(query);
-      displayPrefix = display.values[0][0].toStdString();
-    }
-*/
 
     for(int r = 0; r <12 ; r+=3)
     {
@@ -71,7 +62,28 @@ void RaceInfos::init()
         infos.textureLayoutID = races.values[i][r+2].toInt();
         infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-      
+        infos.displayRaceid = (races.values[i][13].toInt() != 0) ? races.values[i][13].toInt() : infos.raceid;
+        
+        // workaround - manually associate display race id with related race - info not in db ?
+        switch (infos.raceid)
+        {
+          case 25: // padaren 2
+          case 26: // padaren 3
+            infos.displayRaceid = 24; // padaren 1
+            break;
+          case 28: // High Roc Tauren
+            infos.displayRaceid = 6; // Tauren
+            break;
+          case 29: // Void Elf
+            infos.displayRaceid = 10; // Blood elf
+            break;
+          case 30: // Sancteforge Draenei
+            infos.displayRaceid = 11; // Draenei
+            break;
+          default:
+            break;
+        }
+
         int modelfileid = races.values[i][r].toInt();
         
         if ((r == 6) || (r == 9)) // if we are dealing with a HD model

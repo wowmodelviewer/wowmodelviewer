@@ -25,6 +25,7 @@ class _RACEINFOS_API_ RaceInfos
     bool isHD;
     std::string prefix;
     std::string customization[3];
+    int displayRaceid;
 
     static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();

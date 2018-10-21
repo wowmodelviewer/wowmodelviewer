@@ -224,20 +224,26 @@ void WoWItem::load()
   if (m_id == 0) // no equipment, just return
     return;
 
+  RaceInfos charInfos;
+  RaceInfos::getCurrent(m_charModel, charInfos);
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
       QString query = QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
                               "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                              "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                               "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                              "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId);
+                              "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
+                              "AND ComponentModelFileData.GenderIndex = %3").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid);
 
-      sqlResult iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), MODEL, 0);
+      sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
 
       if (!iteminfos.valid || iteminfos.values.empty())
       {
         LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
+        LOG_ERROR << query;
         return;
       }
 
