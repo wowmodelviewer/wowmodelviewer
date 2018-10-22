@@ -20,7 +20,7 @@
 struct AnimInfo
 {
   short Loops;
-  size_t AnimID;
+  ssize_t AnimID;
 };
 
 #ifdef _WIN32

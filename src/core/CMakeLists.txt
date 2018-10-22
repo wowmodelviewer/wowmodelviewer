@@ -82,16 +82,17 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
 
+set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio
 	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set(OUTPUT_DIR "../bin/$(Configuration)/$(PlatformName)/")
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 if(WIN32)
-  install(TARGETS ${NAME} RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
+  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 endif(WIN32)

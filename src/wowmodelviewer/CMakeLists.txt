@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 project(wowmodelviewer)
 
@@ -20,12 +20,6 @@ find_package(Qt5 COMPONENTS Xml Gui)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-# Instruct CMake to run moc automatically when needed
-set(CMAKE_AUTOMOC ON)
-
-# Create code from a list of Qt designer ui files
-set(CMAKE_AUTOUIC ON)
 
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
@@ -139,56 +133,30 @@ set(wow8_1_files ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.txt
 
 source_group("wowData\\wow8.1" FILES ${wow8_1_files})
 
-# Translation files for the various languages
-set(translationfiles ../Translations/wowmodelviewer_en_US.ts
-					 ../Translations/wowmodelviewer_fr_FR.ts
-					 ../Translations/wowmodelviewer_de_DE.ts
-					 ../Translations/wowmodelviewer_zh_CN.ts
-					 ../Translations/wowmodelviewer_zh_TW.ts)
-
-source_group("Translation Files" FILES ${translationfiles})
-
-set(uifiles ../Forms/wmvMainWindow.ui)
-QT5_WRAP_UI(UI_HEADERS ${uifiles})
-
-source_group("Forms" FILES ${uifiles})
-
-#set (MOC_HEADERS WoWModelViewer.h)
-#QT5_WRAP_CPP(MOC_SRCS ${MOC_HEADERS})
-
-source_group("GeneratedFiles" FILES ${UI_HEADERS} ${MOC_SRCS})
-
 set(useful_files ${common_files} ${wow7_3_files} ${wow8_0_files} ${wow8_1_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(NAME wowmodelviewer)
-add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${uifiles} ${useful_files} ${UI_HEADERS} ${MOC_SRCS} )
+add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-set(BIN_DIR ../bin/)
+set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio
 	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
 	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
+	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
 	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
 	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
 
-	set(OUTPUT_DIR "${BIN_DIR}$(Configuration)/$(PlatformName)/")
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${OUTPUT_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${OUTPUT_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
-
-file(MAKE_DIRECTORY ${WMV_BASE_PATH}/GeneratedFiles)
-set_property(TARGET ${NAME} PROPERTY AUTOGEN_BUILD_DIR ${WMV_BASE_PATH}/GeneratedFiles)
-include_directories(${WMV_BASE_PATH}/GeneratedFiles)
 
 target_link_libraries(${NAME}
   ${wxWidgets_LIBRARIES}
@@ -200,8 +168,7 @@ target_link_libraries(${NAME}
   Qt5::Widgets
 )
 
-install(TARGETS ${NAME} 
-        RUNTIME DESTINATION ${BIN_DIR})
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
@@ -219,7 +186,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
                         
-set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x64.exe
+set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vc_redist.x64.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
@@ -238,13 +205,12 @@ set(GAMEFILES_WOW8_1 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.txt
 					 ${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
 					 ${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
 
-
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
-install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}/platforms)
-install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}/plugins/imageformats)
+install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
+install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 
-install(FILES ${GAMEFILES_WOW7_3} DESTINATION ${BIN_DIR}/games/wow/7.3)
-install(FILES ${GAMEFILES_WOW8_0} DESTINATION ${BIN_DIR}/games/wow/8.0)
-install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${BIN_DIR}/games/wow/8.1)
+install(FILES ${GAMEFILES_WOW7_3} DESTINATION ${BIN_DIR}games/wow/7.3)
+install(FILES ${GAMEFILES_WOW8_0} DESTINATION ${BIN_DIR}games/wow/8.0)
+install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${BIN_DIR}games/wow/8.1)
