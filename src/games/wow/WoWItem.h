@@ -114,12 +114,13 @@ class _WOWITEM_API_ WoWItem : public Component
     {
       MODEL,
       MERGED_MODEL,
-      TEXTURE
+      TEXTURE,
+      NONE
     };
 
     sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
 
-    bool queryItemInfo(QString & query, sqlResult & result) const;
+    bool queryItemInfo(QString & query, sqlResult & result, FilteringType type = FilteringType::NONE, uint itemToFilter = 0) const;
 
 };
 
