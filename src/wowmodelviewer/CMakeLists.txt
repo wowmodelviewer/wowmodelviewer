@@ -101,20 +101,22 @@ source_group("Header Files" FILES ${headers})
 
 set (windowFiles WoWModelViewer.h
 				WoWModelViewer.cpp
-				dockWidget_Animation.h
-				dockWidget_Animation.cpp
-				dockWidget_CharacterDesigner.h
-				dockWidget_CharacterDesigner.cpp
-				dockWidget_Equipment.h
-				dockWidget_Equipment.cpp
-				dockWidget_FileList.h
-				dockWidget_FileList.cpp
-				dockWidget_Lighting.h
-				dockWidget_Lighting.cpp
-				dockWidget_ModelBank.h
-				dockWidget_ModelBank.cpp
-				dockWidget_ModelControls.h
-				dockWidget_ModelControls.cpp)
+				Windows/dialog_Settings.h
+				Windows/dialog_Settings.cpp
+				Windows/dockWidget_Animation.h
+				Windows/dockWidget_Animation.cpp
+				Windows/dockWidget_CharacterDesigner.h
+				Windows/dockWidget_CharacterDesigner.cpp
+				Windows/dockWidget_Equipment.h
+				Windows/dockWidget_Equipment.cpp
+				Windows/dockWidget_FileList.h
+				Windows/dockWidget_FileList.cpp
+				Windows/dockWidget_Lighting.h
+				Windows/dockWidget_Lighting.cpp
+				Windows/dockWidget_ModelBank.h
+				Windows/dockWidget_ModelBank.cpp
+				Windows/dockWidget_ModelControls.h
+				Windows/dockWidget_ModelControls.cpp)
 				
 source_group("Windows" FILES ${windowFiles})
 
@@ -168,6 +170,7 @@ set(translationfiles ${TRANSLATION_PATH}wowmodelviewer_en_US.ts
 source_group("Translation Files" FILES ${translationfiles})
 
 set(uifiles ../Forms/wmvMainWindow.ui
+			../Forms/dialog_Settings.ui
 			../Forms/dockWidget_Animation.ui
 			../Forms/dockWidget_CharacterDesigner.ui
 			../Forms/dockWidget_Equipment.ui
@@ -180,13 +183,14 @@ QT5_WRAP_UI(UI_HEADERS ${uifiles})
 source_group("Forms" FILES ${uifiles})
 
 set (MOC_HEADERS WoWModelViewer.h
-				dockWidget_Animation.h
-				dockWidget_CharacterDesigner.h
-				dockWidget_Equipment.h
-				dockWidget_FileList.h
-				dockWidget_Lighting.h
-				dockWidget_ModelBank.h
-				dockWidget_ModelControls.h)
+				Windows/dialog_Settings.h
+				Windows/dockWidget_Animation.h
+				Windows/dockWidget_CharacterDesigner.h
+				Windows/dockWidget_Equipment.h
+				Windows/dockWidget_FileList.h
+				Windows/dockWidget_Lighting.h
+				Windows/dockWidget_ModelBank.h
+				Windows/dockWidget_ModelControls.h)
 QT5_WRAP_CPP(MOC_SRCS ${MOC_HEADERS})
 
 set (resources ../../wmv.qrc

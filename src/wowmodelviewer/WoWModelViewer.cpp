@@ -4,6 +4,7 @@
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
+#include "Windows/dialog_Settings.h"
 
 // Qt
 #include <qtranslator.h>
@@ -462,6 +463,21 @@ void WoWModelViewer::setStatusLocale(QString value)
 void WoWModelViewer::setStatusMessage(QString message, int timeout)
 {
 	ui.statusbar->showMessage(message, timeout);
+}
+
+void WoWModelViewer::on_actionSettings_triggered()
+{
+	dialogSettings *settingsDialog = new dialogSettings(this);
+	int result = settingsDialog->exec();
+
+	if (result == dialogSettings::Accepted)
+	{
+		qDebug() << "Settings Result Successful!";
+		// Save settings and then update the window!
+	}
+	else {
+		qDebug() << "Settings were Rejected!";
+	}
 }
 
 void WoWModelViewer::setLanguage(QAction *action)

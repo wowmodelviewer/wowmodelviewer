@@ -1,12 +1,12 @@
 #pragma once
 #include <qmainwindow.h>
-#include "dockWidget_Animation.h"
-#include "dockWidget_CharacterDesigner.h"
-#include "dockWidget_Equipment.h"
-#include "dockWidget_FileList.h"
-#include "dockWidget_Lighting.h"
-#include "dockWidget_ModelBank.h"
-#include "dockWidget_ModelControls.h"
+#include "Windows/dockWidget_Animation.h"
+#include "Windows/dockWidget_CharacterDesigner.h"
+#include "Windows/dockWidget_Equipment.h"
+#include "Windows/dockWidget_FileList.h"
+#include "Windows/dockWidget_Lighting.h"
+#include "Windows/dockWidget_ModelBank.h"
+#include "Windows/dockWidget_ModelControls.h"
 #include "ui_wmvMainWindow.h"
 
 class WoWModelViewer : public QMainWindow
@@ -160,7 +160,7 @@ private slots:
 
 	// Options
 	void on_actionAlwaysShowDefaultDoodadsInWMOs_triggered() {};
-	void on_actionSettings_triggered() {};
+	void on_actionSettings_triggered();
 
 	// Effects
 	void on_actionApply_Enchants_triggered() {};
