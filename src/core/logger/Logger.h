@@ -74,73 +74,73 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-	class _LOGGER_API_ Logger : public Container<LogOutput>
-	{
-	public:
-		// Constants / Enums
-		enum LogType
-		{
-			INFO_LOG = 0,
-			DEBUG_LOG,
-			WARNING_LOG,
-			ERROR_LOG,
-			FATAL_LOG
-		};
+  class _LOGGER_API_ Logger : public Container<LogOutput>
+  {
+  public:
+    // Constants / Enums
+    enum LogType
+    {
+      INFO_LOG = 0,
+      DEBUG_LOG,
+      WARNING_LOG,
+      ERROR_LOG,
+      FATAL_LOG
+    };
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
-		static Logger & instance()
-		{
-			if (Logger::m_instance == 0)
-				Logger::m_instance = new Logger();
+    // Methods
+    static Logger & instance()
+    {
+      if (Logger::m_instance == 0)
+        Logger::m_instance = new Logger();
 
-			return *m_instance;
-		}
+      return *m_instance;
+    }
 
-		static void init();
+    static void init();
 
-		static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-		static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+    static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-		QDebug operator()(Logger::LogType type);
+    QDebug operator()(Logger::LogType type);
 
-		// Members
+    // Members
 
-	protected:
-		// Constants / Enums
+  protected:
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
+    // Members
 
-	private:
-		// Constants / Enums
+  private:
+    // Constants / Enums
 
-		// Constructors
-	// prevent unwanted constructions
-		Logger();
-		Logger(Logger &);
+    // Constructors
+// prevent unwanted constructions
+    Logger();
+    Logger(Logger &);
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
-		static Logger * m_instance;
+    // Members
+    static Logger * m_instance;
 
-		// friend class declarations
+    // friend class declarations
 
-	};
+  };
 
-	// static members definition
+  // static members definition
 #ifdef _LOGGER_CPP_
 
 #endif

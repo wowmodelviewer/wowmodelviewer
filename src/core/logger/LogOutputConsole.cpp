@@ -61,7 +61,7 @@ using namespace WMVLog;
 //--------------------------------------------------------------------
 void LogOutputConsole::write(const QString & message)
 {
-	std::cout << message.toStdString() << std::endl;
+  std::cout << message.toStdString() << std::endl;
 }
 
 // Protected methods

@@ -62,51 +62,51 @@
 
 namespace WMVLog
 {
-	class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
-	{
-	public:
-		// Constants / Enums
+  class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
+  {
+  public:
+    // Constants / Enums
 
-		// Constructors
-		LogOutputFile(std::string fileName);
+    // Constructors
+    LogOutputFile(std::string fileName);
 
-		// Destructors
+    // Destructors
 
-		// Methods
-		void write(const QString & message);
+    // Methods
+    void write(const QString & message);
 
-		// Members
+    // Members
 
-	protected:
-		// Constants / Enums
+  protected:
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
+    // Members
 
-	private:
-		// Constants / Enums
+  private:
+    // Constants / Enums
 
-		// Constructors
-		LogOutputFile();
-		LogOutputFile(const LogOutputFile&);
+    // Constructors
+    LogOutputFile();
+    LogOutputFile(const LogOutputFile&);
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
-		QFile m_logFile;
+    // Members
+    QFile m_logFile;
 
-		// friend class declarations
+    // friend class declarations
 
-	};
+  };
 
-	// static members definition
+  // static members definition
 #ifdef _LOGOUTPUTFILE_CPP_
 
 #endif
