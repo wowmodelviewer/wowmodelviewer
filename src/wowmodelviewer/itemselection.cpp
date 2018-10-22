@@ -71,7 +71,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
 
 	wxListItem item;
 	for (size_t i = 0; i < chs.GetCount(); i++) {
-		item.SetText(CSConv(choices[i]));
+		item.SetText(choices[i]);
 		item.SetId((long)i);
 /*
 		if (item.GetText() == "Death Knight")
@@ -207,7 +207,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
 		//item.m_mask=wxLIST_MASK_TEXT; 
 		item.SetId(i); 
 		//item.m_col=col; 
-		item.SetText(CSConv(choices[i]));
+		item.SetText(choices[i]);
 		/*
 		if (quality) {
 			item.SetTextColour(ItemQualityColour(quality->at(i)));
@@ -299,7 +299,7 @@ void FilteredChoiceDialog::DoFilter()
 		if (FilterFunc(i))
 		{
 			item.SetId(i); 
-			item.SetText(CSConv(m_choices->Item(i)));
+			item.SetText(m_choices->Item(i));
 			m_indices.push_back((int)i);
 			if ((i%2)==0)
 				item.SetBackgroundColour(*wxWHITE);

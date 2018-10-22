@@ -45,39 +45,6 @@ wxString fixMPQPath(wxString path)
 #endif
 }
 
-// Convert UTF8 string to local string
-wxString CSConv(wxString str)
-{
-  return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
-}
-
-wxString CSConv(QString str)
-{
-  return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.toStdString().c_str()));
-}
-/*
-void fixname(wxString &name)
-{
-	for (size_t i=0; i<name.length(); i++) {
-		if (i>0 && name[i]>='A' && name[i]<='Z' && isalpha(name[i-1])) {
-			name[i] |= 0x20;
-		} else if ((i==0 || !isalpha(name[i-1])) && name[i]>='a' && name[i]<='z') {
-			name[i] &= ~0x20;
-		}
-	}
-}
-void fixnamen(char *name, size_t len)
-{
-	for (size_t i=0; i<len; i++) {
-		if (i>0 && name[i]>='A' && name[i]<='Z' && isalpha(name[i-1])) {
-			name[i] |= 0x20;
-		} else if ((i==0 || !isalpha(name[i-1])) && name[i]>='a' && name[i]<='z') {
-			name[i] &= ~0x20;
-		}
-	}
-}
-*/
-
 // Byteswap for 2 Bytes
 unsigned short _SwapTwoBytes (unsigned short w)
 {

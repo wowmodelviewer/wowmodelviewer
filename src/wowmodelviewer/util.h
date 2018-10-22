@@ -72,10 +72,6 @@ bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
   return !(iss >> f >> t).fail();
 }
 
-wxString CSConv(wxString str);
-wxString CSConv(QString str);
-// void fixname(wxString &name);
-// void fixnamen(char *name, size_t len);
 wxString Vec3DToString(Vec3D vec);
 int wxStringToInt(const wxString& str);
 float round(float input, int limit);

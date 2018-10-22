@@ -125,7 +125,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 
 	if(m_importedItem)
 	{
-		m_nameResult->SetLabel(CSConv(m_importedItem->name));
+		m_nameResult->SetLabel(m_importedItem->name.toStdWString());
 		m_idResult->SetLabel(wxString::Format(wxT("%i"),m_importedItem->id));
 		m_displayIdResult->SetLabel(wxString::Format(wxT("%i"),m_importedItem->model));
 		m_typeResult->SetLabel(wxString::Format(wxT("%i"),m_importedItem->type));
