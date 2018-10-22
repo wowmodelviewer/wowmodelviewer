@@ -94,18 +94,18 @@ core::GlobalSettings::GlobalSettings()
 		Pickled Herring
 		Windrunner's Lament
 		Lost Lich King
-    Skeer the Bloodseeker
-    Thrall's revenge
-    Trip in Draenor
-    Christmas Edition ;)
-    Archimonde will survive
-    Wain's edition
-    Bilgewhizzle
+		Skeer the Bloodseeker
+		Thrall's revenge
+		Trip in Draenor
+		Christmas Edition ;)
+		Archimonde will survive
+		Wain's edition
+		Bilgewhizzle
 
    */
 
   // platform 
-  m_platform = L"Windows 32 bits";
+  m_platform = L"Windows 64 bits";
 
 #if _BETAVERSION > 0
   m_isBetaVersion = true;

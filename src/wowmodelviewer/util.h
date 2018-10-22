@@ -1,3 +1,4 @@
+
 #ifndef UTIL_H
 #define UTIL_H
 
@@ -55,11 +56,11 @@ extern wxString locales[];
 
 // Slashes for Pathing
 #ifdef _WINDOWS
-	#define SLASH wxT('\\')
+	#define SLASH '\\'
 #else
-	#define SLASH wxT('/')
+	#define SLASH '/'
 #endif
-#define	MPQ_SLASH   wxT('\\')
+#define	MPQ_SLASH   '\\'
 
 wxString fixMPQPath(wxString path);
 float frand();
@@ -81,6 +82,8 @@ int wxStringToInt(const wxString& str);
 float round(float input, int limit);
 void MakeDirs(wxString PathBase, wxString ExtPaths);
 unsigned short _SwapTwoBytes (unsigned short w);
+
+double getCurrentTime();
 
 wxString getGamePath(bool noSet = false);
 
@@ -113,11 +116,11 @@ inline T _SwapFourBytes (T w)
 }
 
 #if defined _WINDOWS
-wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
+wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
 bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
 #endif
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapType type, int width, int height);
 
 bool correctType(ssize_t type, ssize_t slot);
 

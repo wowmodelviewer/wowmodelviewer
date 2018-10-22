@@ -3,7 +3,7 @@
 ###################
 
 # set build type you want
-# availabke values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
+# available values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # define base repo path to use it cross folder
@@ -67,6 +67,7 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${WMV_BASE_PATH}/src/games/wow)
+  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
   find_package(Qt5Core)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
@@ -75,6 +76,7 @@ endmacro()
 
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
+  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)

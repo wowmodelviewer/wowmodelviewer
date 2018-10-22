@@ -19,8 +19,8 @@ public:
 	Vec3D tval, rval, sval;
 
 	void calc(ssize_t anim, size_t time);
-  void init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global);
-	void setup(ssize_t anim);
+	void init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global);
+	void setup(int anim);
 };
 
 

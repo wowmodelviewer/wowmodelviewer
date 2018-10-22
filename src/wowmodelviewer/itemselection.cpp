@@ -109,7 +109,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
 	wxBoxSizer *frameSizer = (wxBoxSizer*)this->GetSizer();
 	if (frameSizer) {
 		frameSizer->Detach(m_listbox);
-		frameSizer->Insert(1, m_listctrl, wxEXPAND|wxADJUST_MINSIZE|wxLEFT|wxRIGHT);
+		frameSizer->Insert(1, m_listctrl, wxEXPAND|wxLEFT|wxRIGHT);
 		frameSizer->SetSizeHints( m_listctrl );
 		frameSizer->Fit( m_listctrl );
 

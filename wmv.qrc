@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/Translations">
+        <file alias="en_US.qm">src/Translations/wowmodelviewer_en_US.qm</file>
+        <file alias="de_DE.qm">src/Translations/wowmodelviewer_de_DE.qm</file>
+        <file alias="fr_FR.qm">src/Translations/wowmodelviewer_fr_FR.qm</file>
+        <file alias="zh_CN.qm">src/Translations/wowmodelviewer_zh_CN.qm</file>
+        <file alias="zh_TW.qm">src/Translations/wowmodelviewer_zh_TW.qm</file>
+    </qresource>
+    <qresource prefix="/Splashes">
+        <file alias="Splash_001.png">bin_support/Splash/Splash_001.png</file>
+        <file alias="Splash_002.png">bin_support/Splash/Splash_002.png</file>
+        <file alias="Splash_003.png">bin_support/Splash/Splash_003.png</file>
+        <file alias="Splash_004.png">bin_support/Splash/Splash_004.png</file>
+        <file alias="Splash_005_Alliance.png">bin_support/Splash/Splash_005_Alliance.png</file>
+        <file alias="Splash_005_Horde.png">bin_support/Splash/Splash_005_Horde.png</file>
+    </qresource>
+    <qresource prefix="/Locales">
+        <file alias="deDE">bin_support/LocaleFlags/deDE.png</file>
+        <file alias="enGB">bin_support/LocaleFlags/enGB.png</file>
+        <file alias="enUS">bin_support/LocaleFlags/enUS.png</file>
+        <file alias="esES">bin_support/LocaleFlags/esES.png</file>
+        <file alias="esMX">bin_support/LocaleFlags/esMX.png</file>
+        <file alias="frFR">bin_support/LocaleFlags/frFR.png</file>
+        <file alias="itIT">bin_support/LocaleFlags/itIT.png</file>
+        <file alias="koKR">bin_support/LocaleFlags/koKR.png</file>
+        <file alias="ptBR">bin_support/LocaleFlags/ptBR.png</file>
+        <file alias="ruRU">bin_support/LocaleFlags/ruRU.png</file>
+        <file alias="unknown">bin_support/LocaleFlags/unknown.png</file>
+        <file alias="zhCN">bin_support/LocaleFlags/zhCN.png</file>
+        <file alias="zhTW">bin_support/LocaleFlags/zhTW.png</file>
+    </qresource>
+</RCC>
