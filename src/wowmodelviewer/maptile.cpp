@@ -12,8 +12,6 @@
 #include "shaders.h"
 #include "vec3d.h"
 
-using namespace std;
-
 struct WaterTile
 {
 	/*
@@ -172,24 +170,24 @@ void fprintbu8( FILE* file, uint8 value )
 
 bool getBitH2L( unsigned char* data, unsigned bit )
 {
-	unsigned char byte = data[bit / 8];
+	unsigned char Byte = data[bit / 8];
 	unsigned char pos = bit % 8;
 
 	unsigned char mask = 0x80;
 	mask >>= pos;
 
-	return (byte & mask) == mask;
+	return (Byte & mask) == mask;
 }
 
 bool getBitL2H( unsigned char* data, unsigned bit )
 {
-	unsigned char byte = data[bit / 8];
+	unsigned char Byte = data[bit / 8];
 	unsigned char pos = bit % 8;
 
 	unsigned char mask = 0x1;
 	mask <<= pos;
 
-	return (byte & mask) == mask;
+	return (Byte & mask) == mask;
 }
 
 struct MapTileHeader {

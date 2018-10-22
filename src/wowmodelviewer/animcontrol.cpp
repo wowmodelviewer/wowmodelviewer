@@ -301,7 +301,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     wxString strStand;
     int selectAnim = 0;
 
-    map<int, wstring> animsVal = m->getAnimsMap();
+	std::map<int, std::wstring> animsVal = m->getAnimsMap();
 
     for (size_t i=0; i<m->anims.size(); i++)
     {

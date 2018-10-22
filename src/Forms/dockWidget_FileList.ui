@@ -10,10 +10,7 @@
     <height>342</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string notr="true"/>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>6</number>
    </property>
@@ -26,7 +23,7 @@
    <property name="bottomMargin">
     <number>6</number>
    </property>
-   <item>
+   <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLineEdit" name="searchBar"/>
@@ -40,15 +37,20 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="QTreeView" name="treeView">
+   <item row="2" column="0">
+    <widget class="QComboBox" name="fileTypeFilter"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="QTreeWidget" name="treeWidget">
      <property name="headerHidden">
       <bool>true</bool>
      </property>
+     <column>
+      <property name="text">
+       <string notr="true">1</string>
+      </property>
+     </column>
     </widget>
-   </item>
-   <item>
-    <widget class="QComboBox" name="fileTypeFilter"/>
    </item>
   </layout>
  </widget>

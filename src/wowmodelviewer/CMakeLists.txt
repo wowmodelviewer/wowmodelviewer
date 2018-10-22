@@ -212,6 +212,7 @@ set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 add_executable(${PROJECTNAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${windowFiles} ${uifiles} ${useful_files} ${resources} ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
 
 set_property(TARGET ${PROJECTNAME} PROPERTY FOLDER "executables")
+set_property(TARGET ${PROJECTNAME} PROPERTY CXX_STANDARD 17)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 

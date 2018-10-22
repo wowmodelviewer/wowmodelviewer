@@ -13,6 +13,7 @@
 
 #include <QString>
 #include <QStringList>
+#include <QVector>
 
 #include "CASCFolder.h"
 #include "GameFile.h"
@@ -58,7 +59,7 @@ namespace wow
 
     private:
       CASCFolder m_CASCFolder;
-      std::map<int, GameFile *> m_idMap;
+      QVector<GameFile *> m_idMap;
   };
 }
 

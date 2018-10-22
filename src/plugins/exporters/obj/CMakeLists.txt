@@ -31,6 +31,7 @@ use_wow()
 set(NAME objexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} Qt5::Core core wow)
 

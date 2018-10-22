@@ -8,7 +8,6 @@
 
 #include <cstdlib>
 #include <limits>
-using namespace std;
 
 class Matrix {
 public:

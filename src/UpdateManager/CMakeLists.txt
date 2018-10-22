@@ -55,6 +55,7 @@ use_wow()
 set(NAME UpdateManager)
 add_executable(${NAME} WIN32 ${src} ${headers} ${translationfiles} ${resources} ${QTRESOURCES})
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 

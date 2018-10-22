@@ -26,6 +26,12 @@
 	typedef __int16 int16;
 	typedef unsigned __int32 uint32;
 	typedef __int32 int32;
+	#if !defined(uint64)
+		typedef unsigned __int64 uint64;
+	#endif
+	#if !defined(int64)
+		typedef __int64 int64;
+	#endif
 	#if !defined(ssize_t) && defined(Q_OS_WIN64)
 		typedef __int64 ssize_t;
 	#elif !defined(ssize_t)
@@ -39,6 +45,8 @@
 	typedef int16_t int16;
 	typedef uint32_t uint32;
 	typedef int32_t int32;
+	typedef uint64_t uint64;
+	typedef int64_t int64;
 #endif
 
 

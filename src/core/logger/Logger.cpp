@@ -35,7 +35,7 @@
 
 // Qt
 #ifdef min
-  #undef min
+	#undef min
 #endif
 #include <QDateTime>
 
@@ -58,7 +58,7 @@ Logger * Logger::m_instance = 0;
 //--------------------------------------------------------------------
 Logger::Logger()
 {
-  Logger::init();
+	Logger::init();
 }
 
 // Destructor
@@ -69,58 +69,59 @@ Logger::Logger()
 //--------------------------------------------------------------------
 void Logger::init()
 {
-  qInstallMessageHandler(Logger::writeLog);
+	qInstallMessageHandler(Logger::writeLog);
 }
 
 
 void Logger::writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-  QString message = Logger::formatLog(type, context, msg);
-  for(Logger::iterator it = LOGGER.begin();
-      it != LOGGER.end();
-      ++it)
-    (*it)->write(message);
+	QString message = Logger::formatLog(type, context, msg);
+	for (Logger::iterator it = LOGGER.begin();
+		it != LOGGER.end();
+		++it)
+		(*it)->write(message);
 }
 
 
 QString Logger::formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-  QString msgType;
-  switch(type)
-  {
-    case QtDebugMsg:
-      msgType = "INFO";
-      break;
-    case QtWarningMsg:
-      msgType = "WARN";
-      break;
-    case QtCriticalMsg:
-      msgType = "ERROR";
-      break;
-    case QtFatalMsg:
-      msgType = "FATAL";
-      break;
-  }
+	QString msgType;
+	switch (type)
+	{
+	case QtDebugMsg:
+		msgType = "DEBUG";
+		break;
+	case QtInfoMsg:
+		msgType = "INFO ";
+		break;
+	case QtWarningMsg:
+		msgType = "WARN ";
+		break;
+	case QtCriticalMsg:
+		msgType = "ERROR";
+		break;
+	case QtFatalMsg:
+		msgType = "FATAL";
+		break;
+	}
 
-  return msgType + "\t| " +
-         QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") + "\t| " +
-         msg;
+	return msgType + " | " + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") + " | " + msg;
 }
 
 QDebug Logger::operator()(Logger::LogType type)
 {
-  switch(type)
-  {
-    case INFO_LOG:
-      return QDebug(QtDebugMsg);
-    case WARNING_LOG:
-      return QDebug(QtWarningMsg);
-    case ERROR_LOG:
-      return QDebug(QtCriticalMsg);
-    case FATAL_LOG:
-      return QDebug(QtFatalMsg);
-  }
-  return QDebug(QtDebugMsg);
+	switch (type)
+	{
+	case INFO_LOG:
+		return QDebug(QtInfoMsg);
+	case WARNING_LOG:
+		return QDebug(QtWarningMsg);
+	case ERROR_LOG:
+		return QDebug(QtCriticalMsg);
+	case FATAL_LOG:
+		return QDebug(QtFatalMsg);
+	}
+	return QDebug(QtDebugMsg);
 }
 
 // Protected methods

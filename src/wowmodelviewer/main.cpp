@@ -1,8 +1,15 @@
+#include "logger/Logger.h"
+#include "logger/LogOutputFile.h"
+#include "logger/LogOutputConsole.h"
+
+#include "WoWModelViewer.h"
+#include "util.h"
+
 #include <QtWidgets/QApplication>
 #include <qsplashscreen.h>
 #include <qtranslator.h>
-#include "WoWModelViewer.h"
-#include "app.h"
+#include <Qdir>
+
 
 // tell wxwidgets which class is our app
 //IMPLEMENT_APP_NO_MAIN(WowModelViewApp)
@@ -24,7 +31,7 @@ int main(int argc, char *argv[])
 
 	// Create & show the splash screen
 	QPixmap pixmap(splashImage);
-	QSplashScreen *splash = new QSplashScreen(pixmap, Qt::SplashScreen | Qt::WindowStaysOnTopHint);
+	QSplashScreen *splash = new QSplashScreen(pixmap, Qt::SplashScreen);
 	splash->setAttribute(Qt::WA_TranslucentBackground);
 	splash->show();
 	double timerStart = getCurrentTime();
@@ -32,10 +39,20 @@ int main(int argc, char *argv[])
 	// Keep going!
 	a.processEvents();
 
+	// Get our logfile working!
+	if (QDir("./userSettings").exists() == false)
+		QDir().mkpath("userSettings");
+	LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
+#if defined _DEBUG
+	SetConsoleTitle(L"WoWModelViewer Debug Console");
+	LOGGER.addChild(new WMVLog::LogOutputConsole());
+#endif
+	LOG_INFO << "Starting WoW Model Viewer...";
+
 	WoWModelViewer w;
 
 	// Everything defaults to English
-	qInfo("Installing base localization...");
+	LOG_INFO << "Installing base localization...";
 	QTranslator *translator = new QTranslator();
 	if (translator->load(":/Translations/en_US.qm") == true)
 	{
@@ -51,7 +68,7 @@ int main(int argc, char *argv[])
 	qDebug() << "Looking for locale:" << localeName;
 	if (localeName != "en_US")
 	{
-		qInfo("Installing system localization...");
+		LOG_INFO << "Installing system localization...";
 		w.setTranslation(localeName);
 	}
 

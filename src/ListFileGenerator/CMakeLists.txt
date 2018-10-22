@@ -18,6 +18,7 @@ use_wow()
 set(NAME ListFileGenerator)
 add_executable(${NAME} ${src})
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} wow Qt5::Core)
 

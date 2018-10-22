@@ -126,8 +126,8 @@ WoWModelViewer::WoWModelViewer(QWidget *parent)
 	QHBoxLayout *layoutLocale = new QHBoxLayout(statusBarLocale);
 	statusBarLocaleText = new QLabel(statusBarLocale);
 	statusBarLocaleFlag = new QLabel(statusBarLocale);
-	layoutLocale->addWidget(statusBarLocaleFlag);
 	layoutLocale->addWidget(statusBarLocaleText);
+	layoutLocale->addWidget(statusBarLocaleFlag);
 	layoutLocale->setMargin(0);
 
 	ui.statusbar->addPermanentWidget(statusBarVersion);
@@ -354,9 +354,8 @@ void WoWModelViewer::LoadWoW()
 	*/
 	//wxMessageBox(wxT("Database loading is not yet supported. Available functionalities are quite restricted in this alpha release."), wxT("No database support yet"));
 
-
-	//SetStatusText(tr("Initializing File Control..."));
-	//fileControl->Init(this);
+	setStatusMessage(tr("Initializing File Control..."));
+	fileListWidget->loadFiles();
 
 	/*if (charControl->Init() == false)
 	{
@@ -367,6 +366,7 @@ void WoWModelViewer::LoadWoW()
 	double timeEnd = getCurrentTime();
 	double loadTime = timeEnd - timeStart;
 
+	qInfo() << tr("Load completed in %1 seconds!").arg(loadTime);
 	setStatusMessage(tr("Load completed in %1 seconds!").arg(loadTime));
 }
 

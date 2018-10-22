@@ -121,7 +121,7 @@ bool WDC3File::open()
 #endif
   }
 
-  uint32 palletBlockOffset = getPos();
+  size_t palletBlockOffset = getPos();
   uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
  
   // this only supports one section. We need to be able to loop and support multiple sections.
@@ -130,7 +130,7 @@ bool WDC3File::open()
   data = getPointer();
 
   // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = getPos() + recordSize * recordCount;
+  size_t stringTableOffset = getPos() + recordSize * recordCount;
 
   // embedded strings in fields instead of stringTable
   if ((m_header.flags & 0x01) != 0)
@@ -142,7 +142,7 @@ bool WDC3File::open()
   seek(stringTableOffset);
   stringTable = getPointer();
 
-  uint32 IdBlockOffset = stringTableOffset + stringSize;
+  size_t IdBlockOffset = stringTableOffset + stringSize;
 
   uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
 

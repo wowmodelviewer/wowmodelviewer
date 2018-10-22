@@ -65,12 +65,11 @@ extern wxString locales[];
 wxString fixMPQPath(wxString path);
 float frand();
 
-
 template <class T>
-bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
+bool from_string(T& t, const std::string& s, ios_base& (*f)(ios_base&))
 {
-  istringstream iss(s);
-  return !(iss >> f >> t).fail();
+	std::istringstream iss(s);
+	return !(iss >> f >> t).fail();
 }
 
 wxString CSConv(wxString str);
