@@ -203,7 +203,7 @@ void FileControl::Export(wxString val, int select)
 
   LOG_INFO << "Saving" << QString::fromWCharArray(val.c_str());
 
-	wxFileName fn = fixMPQPath(val);
+	wxFileName fn(val);
 
 	FILE *hFile = NULL;
 	wxString filename;

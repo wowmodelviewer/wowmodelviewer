@@ -33,27 +33,6 @@ int imgFormat = 0;
 
 wxString locales[] = {wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU")};
 
-// Slash correction, just in case.
-wxString fixMPQPath(wxString path)
-{
-#ifdef	_WINDOWS
-    return path;
-#else
-    wxString str = path;
-    str.Replace(wxString(MPQ_SLASH), wxString(SLASH));
-    return str;
-#endif
-}
-
-// Byteswap for 2 Bytes
-unsigned short _SwapTwoBytes (unsigned short w)
-{
-	unsigned short tmp;
-	tmp =  (w & 0x00ff);
-	tmp = ((w & 0xff00) >> 0x08) | (tmp << 0x08);
-	return tmp;
-}
-
 // Round a float, down to the specified decimal
 float round(float input, int limit = 2){
 	if (limit > 0){
@@ -64,30 +43,6 @@ float round(float input, int limit = 2){
 		input /= (10^limit);
 	}
 	return input;
-}
-
-void MakeDirs(wxString PathBase, wxString ExtPaths){
-	wxString NewBase = PathBase;
-	//LOG_INFO << "MKDIR Paths BasePath:" << PathBase << "Others Paths:" << ExtPaths;
-	wxString Paths[128];
-	size_t PathNum = 0;
-	while (ExtPaths.Find(SLASH)>0){
-		Paths[PathNum] = ExtPaths.BeforeFirst(SLASH);
-		wxString rep = Paths[PathNum]+SLASH;
-		ExtPaths.Replace(rep, wxEmptyString, true);
-		//LOG_INFO << "Building Paths:" << Paths[PathNum] << "paths:" << ExtPaths;
-		PathNum++;
-	}
-	Paths[PathNum] = ExtPaths;
-	PathNum++;
-
-	for (size_t x=0;x<PathNum;x++){
-		NewBase = wxString(NewBase << SLASH << Paths[x]);
-		if (wxDirExists(NewBase) == false){
-			//LOG_INFO << "Attempting to create the following directory:" << NewBase;
-			wxMkdir(NewBase);
-		}
-	}
 }
 
 wxString getGamePath(bool noSet)

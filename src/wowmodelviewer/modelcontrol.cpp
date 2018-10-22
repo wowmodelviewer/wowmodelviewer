@@ -309,7 +309,7 @@ void ModelControl::RefreshModel(Attachment *root)
 			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m) {
 				tmp = m->name().toStdWString();
-				modelname->Append(tmp.AfterLast(MPQ_SLASH));
+				modelname->Append(tmp.AfterLast('\\'));
 			}
 		}
 

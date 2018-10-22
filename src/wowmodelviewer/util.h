@@ -59,9 +59,7 @@ extern wxString locales[];
 #else
 	#define SLASH wxT('/')
 #endif
-#define	MPQ_SLASH   wxT('\\')
 
-wxString fixMPQPath(wxString path);
 float frand();
 
 
@@ -72,41 +70,10 @@ bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
   return !(iss >> f >> t).fail();
 }
 
-wxString Vec3DToString(Vec3D vec);
-int wxStringToInt(const wxString& str);
 float round(float input, int limit);
-void MakeDirs(wxString PathBase, wxString ExtPaths);
-unsigned short _SwapTwoBytes (unsigned short w);
 
 wxString getGamePath(bool noSet = false);
 
-// Byte Swapping
-#if defined _WINDOWS || defined _MSWIN
-	#define MSB2			_SwapTwoBytes
-	#define MSB4			_SwapFourBytes
-	#define LSB2(w)			(w)
-	#define LSB4(w)			(w)
-#else
-	#define MSB2(w)			(w)
-	#define MSB4			static_cast
-	#define LSB2			_SwapTwoBytes
-	#define LSB4			_SwapFourBytes 
-#endif
-
-template <typename T>
-inline T _SwapFourBytes (T w)
-{
-	T a;
-	unsigned char *src = (unsigned char*)&w;
-	unsigned char *dst = (unsigned char*)&a;
-
-	dst[0] = src[3];
-	dst[1] = src[2];
-	dst[2] = src[1];
-	dst[3] = src[0];
-
-	return a;
-}
 
 #if defined _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
