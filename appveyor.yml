@@ -1,10 +1,11 @@
 version: 1.0.{build}
-image: Visual Studio 2013
+image: Visual Studio 2017
+platform: x64
 build_script:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 3911b29
+    hg clone https://bitbucket.org/wowmodelviewer/wow-model-viewer-sdk -r 58248a2
 
-    cd wmv_sdk
+    cd wow-model-viewer-sdk
 
     .\wmv_set_env.bat
 
@@ -12,7 +13,7 @@ build_script:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "Visual Studio 12 2013" ..\src
+    cmake -G "Visual Studio 15 2017 Win64" ..\src
 
     cmake --build . --target release --config Release
 test: off

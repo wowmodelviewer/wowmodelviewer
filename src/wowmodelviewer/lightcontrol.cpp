@@ -64,7 +64,7 @@ LightControl::LightControl(wxWindow* parent, wxWindowID id)
 	wxArrayString choices;
 	for (size_t i=1; i<=MAX_LIGHTS; i++) {
 		wxString s = wxT("Light ");
-		s += wxString::Format(wxT("%i"), i);
+		s += wxString::Format(wxT("%Iu"), i);
 
 		choices.Add(s);
 	}
@@ -300,17 +300,17 @@ void LightControl::OnText(wxCommandEvent &event)
 	Vec4D t = lights[activeLight].target;
 
 	if (id==ID_LIGHTPOSX)
-		from_string<float>(p.x, std::string(txtPosX->GetValue().mb_str()), dec);
+		from_string<double>(p.x, std::string(txtPosX->GetValue().mb_str()), dec);
 	else if (id==ID_LIGHTPOSY)
-		from_string<float>(p.y, std::string(txtPosY->GetValue().mb_str()), dec);
+		from_string<double>(p.y, std::string(txtPosY->GetValue().mb_str()), dec);
 	else if (id==ID_LIGHTPOSZ)
-		from_string<float>(p.z, std::string(txtPosZ->GetValue().mb_str()), dec);
+		from_string<double>(p.z, std::string(txtPosZ->GetValue().mb_str()), dec);
 	else if (id==ID_LIGHTTARX)
-		from_string<float>(t.x, std::string(txtTarX->GetValue().mb_str()), dec);
+		from_string<double>(t.x, std::string(txtTarX->GetValue().mb_str()), dec);
 	else if (id==ID_LIGHTTARY)
-		from_string<float>(t.y, std::string(txtTarY->GetValue().mb_str()), dec);
+		from_string<double>(t.y, std::string(txtTarY->GetValue().mb_str()), dec);
 	else if (id==ID_LIGHTTARZ)
-		from_string<float>(t.z, std::string(txtTarZ->GetValue().mb_str()), dec);
+		from_string<double>(t.z, std::string(txtTarZ->GetValue().mb_str()), dec);
 
 	SetPos(p);
 	SetTarget(t);

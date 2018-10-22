@@ -1,3 +1,4 @@
+
 #ifndef UTIL_H
 #define UTIL_H
 
@@ -76,11 +77,11 @@ wxString getGamePath(bool noSet = false);
 
 
 #if defined _WINDOWS
-wxBitmap* createBitmapFromResource(const wxString& t_name, long type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
+wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);
 bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name);
 #endif
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height);
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapType type, int width, int height);
 
 bool correctType(ssize_t type, ssize_t slot);
 

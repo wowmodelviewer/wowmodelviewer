@@ -84,7 +84,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 	try {
 		txtContent = new wxTextCtrl(this, ID_FILELIST_CONTENT, wxEmptyString, wxPoint(10, 10), wxSize(110, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
 		btnSearch = new wxButton(this, ID_FILELIST_SEARCH, _("Clear"), wxPoint(120, 10), wxSize(46,20));
-		fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(250,580), wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
+		fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(250,580), wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_TWIST_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
 		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
 		choFilter->SetSelection(filterMode);
 	} catch(...) {};
@@ -161,10 +161,10 @@ void FileControl::Init(ModelViewer* mv)
 	root.id = fileTree->AddRoot(wxT("Root"));
 	root.createTreeItems(fileTree);
 
-	LOG_INFO << "Initializing File Controls - END";
-
-	if (content != "")
+	if (content.isEmpty() == false)
 		fileTree->ExpandAll();
+
+	LOG_INFO << "Initializing File Controls - END";
 }
 
 void FileControl::OnChoice(wxCommandEvent &event)
@@ -573,7 +573,7 @@ void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent &)
 		if (!fileTree->IsVisible(h))
 			break;
 		if (i++%2==1)
-			fileTree->SetItemBackgroundColour(h, wxColour(237,243,254));
+			fileTree->SetItemBackgroundColour(h, wxColour(237,243,254,255));
 		else
 			fileTree->SetItemBackgroundColour(h, *wxWHITE);
 	}
