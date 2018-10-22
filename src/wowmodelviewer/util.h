@@ -29,8 +29,6 @@
 #include <wx/bitmap.h>
 #include <wx/string.h>
 
-using namespace std;
-
 extern wxString gamePath;
 extern wxString cfgPath;
 extern wxString bgImagePath;
@@ -66,7 +64,7 @@ wxString fixMPQPath(wxString path);
 float frand();
 
 template <class T>
-bool from_string(T& t, const std::string& s, ios_base& (*f)(ios_base&))
+bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
 {
 	std::istringstream iss(s);
 	return !(iss >> f >> t).fail();
