@@ -44,7 +44,7 @@ bool HardDriveFile::isAlreadyOpened()
     return false;
 }
 
-bool HardDriveFile::getFileSize(size_t & s)
+bool HardDriveFile::getFileSize(unsigned int & s)
 {
   if (!file && !file->isOpen())
     return false;

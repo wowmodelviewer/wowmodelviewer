@@ -20,11 +20,11 @@ struct ModelLight
 	ssize_t type;		// Light Type. MODELLIGHT_DIRECTIONAL = 0 or MODELLIGHT_POINT = 1
 	ssize_t parent;		// Bone Parent. -1 if there isn't one.
 	Vec3D pos, tpos, dir, tdir;
-	Animated<Vec3D> diffColor, ambColor;
+	Animated<Vec3F> diffColor, ambColor;
 	Animated<float> diffIntensity, ambIntensity, AttenStart, AttenEnd;
 	Animated<int> UseAttenuation;
 
-  void init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global);
+  void init(GameFile * f, ModelLightDef &mld, QVector<uint32> & global);
 	void setup(size_t time, GLuint l);
 };
 

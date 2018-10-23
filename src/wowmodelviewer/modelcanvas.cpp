@@ -1611,8 +1611,8 @@ void ModelCanvas::TogglePause()
 void ModelCanvas::ResetView()
 {
   WoWModel * m = const_cast<WoWModel *>(model());
-	m->rot = Vec3D(0,-90.0f,0);
-	m->pos = Vec3D(0, 0, 5.0f);
+	m->rot = Vec3D(0.0f,-90.0f,0.0f);
+	m->pos = Vec3D(0.0f, 0.0f, 5.0f);
 
 	bool isSkyBox = (wxString(m->name().toStdWString()).substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {

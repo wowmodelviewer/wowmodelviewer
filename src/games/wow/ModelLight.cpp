@@ -11,10 +11,10 @@
 #include "logger/Logger.h"
 
 
-void ModelLight::init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global)
+void ModelLight::init(GameFile * f, ModelLightDef &mld, QVector<uint32> & global)
 {
 	tpos = pos = fixCoordSystem(mld.pos);
-	tdir = dir = Vec3D(0,1,0); // no idea
+  tdir = dir = Vec3D(0.0, 1.0, 0.0);   // Target Direction
 	type = mld.type;
 	parent = mld.bone;
 	ambColor.init(mld.ambientColor, f, global);

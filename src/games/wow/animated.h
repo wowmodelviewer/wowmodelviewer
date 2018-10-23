@@ -12,6 +12,8 @@
 #include "types.h"
 #include "vec3d.h"
 
+#include <QVector>
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _ANIMATED_API_ __declspec(dllexport)
@@ -27,7 +29,7 @@ class modelAnimData
 public:
   std::map<uint, int16> animIndexToAnimId;
   std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
-  std::vector<uint32> globalSequences;
+  QVector<uint32> globalSequences;
 };
 
 // interpolation functions
@@ -141,11 +143,11 @@ class Animated {
 public:
 
   ssize_t type, seq;
-  std::vector<uint32> globals;
-  std::vector<size_t> times[MAX_ANIMATED];
-  std::vector<T> data[MAX_ANIMATED];
+  QVector<uint32> globals;
+  QVector<size_t> times[MAX_ANIMATED];
+  QVector<T> data[MAX_ANIMATED];
   // for nonlinear interpolations:
-  std::vector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
+  QVector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
   size_t sizes; // for fix function
 
   bool uses(ssize_t anim) const
@@ -180,45 +182,45 @@ public:
         r = 1.0f;
 
         if (type == INTERPOLATION_NONE)
-          return data[anim][pos];
+          return data[anim][(int)pos];
         else if (type == INTERPOLATION_LINEAR)
-          return interpolate<T>(r, data[anim][pos], data[anim][pos]);
+          return interpolate<T>(r, data[anim][(int)pos], data[anim][(int)pos]);
         else if (type == INTERPOLATION_HERMITE) {
           // INTERPOLATION_HERMITE is only used in cameras afaik?
-          return interpolateHermite<T>(r, data[anim][pos], data[anim][pos], in[anim][pos], out[anim][pos]);
+          return interpolateHermite<T>(r, data[anim][(int)pos], data[anim][(int)pos], in[anim][(int)pos], out[anim][(int)pos]);
         }
         else if (type == INTERPOLATION_BEZIER) {
           //Is this used ingame or only by custom models?
-          return interpolateBezier<T>(r, data[anim][pos], data[anim][pos], in[anim][pos], out[anim][pos]);
+          return interpolateBezier<T>(r, data[anim][(int)pos], data[anim][(int)pos], in[anim][(int)pos], out[anim][(int)pos]);
         }
         else //this shouldn't appear!
-          return data[anim][pos];
+          return data[anim][(int)pos];
       }
       else {
         for (size_t i = 0; i < times[anim].size() - 1; i++) {
-          if (time >= times[anim][i] && time < times[anim][i + 1]) {
+          if (time >= times[anim][(int)i] && time < times[anim][(int)i + 1]) {
             pos = i;
             break;
           }
         }
-        t1 = times[anim][pos];
-        t2 = times[anim][pos + 1];
+        t1 = times[anim][(int)pos];
+        t2 = times[anim][(int)pos + 1];
         r = (time - t1) / (float)(t2 - t1);
 
         if (type == INTERPOLATION_NONE)
-          return data[anim][pos];
+          return data[anim][(int)pos];
         else if (type == INTERPOLATION_LINEAR)
-          return interpolate<T>(r, data[anim][pos], data[anim][pos + 1]);
+          return interpolate<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1]);
         else if (type == INTERPOLATION_HERMITE) {
           // INTERPOLATION_HERMITE is only used in cameras afaik?
-          return interpolateHermite<T>(r, data[anim][pos], data[anim][pos + 1], in[anim][pos], out[anim][pos]);
+          return interpolateHermite<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1], in[anim][(int)pos], out[anim][(int)pos]);
         }
         else if (type == INTERPOLATION_BEZIER) {
           //Is this used ingame or only by custom models?
-          return interpolateBezier<T>(r, data[anim][pos], data[anim][pos + 1], in[anim][pos], out[anim][pos]);
+          return interpolateBezier<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1], in[anim][(int)pos], out[anim][(int)pos]);
         }
         else //this shouldn't appear!
-          return data[anim][pos];
+          return data[anim][(int)pos];
       }
     }
     else {
@@ -231,11 +233,15 @@ public:
 
   }
 
-  void init(AnimationBlock &b, GameFile * f, std::vector<uint32> & gs)
+  void init(AnimationBlock &b, GameFile * f, QVector<uint32> gs)
   {
     globals = gs;
     type = b.type;
     seq = b.seq;
+    times->fill(0);
+    data->fill(T());
+    in->fill(T());
+    out->fill(T());
 
     // times
     if (b.nTimes != b.nKeys)
@@ -249,8 +255,11 @@ public:
       AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.ofsTimes + j * sizeof(AnimationBlockHeader));
 
       unsigned int *ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
-      for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
-        times[j].push_back(ptimes[i]);
+      if (sizeof(ptimes) == (sizeof(unsigned int) * pHeadTimes->nEntrys))
+      {
+        for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
+          times[j].push_back(ptimes[i]);
+      }
     }
 
     // keyframes
@@ -288,6 +297,10 @@ public:
     globals = modelData.globalSequences;
     type = b.type;
     seq = b.seq;
+    times->fill(0);
+    data->fill(T());
+    in->fill(T());
+    out->fill(T());
 
     // times
     if (b.nTimes != b.nKeys)
@@ -301,7 +314,7 @@ public:
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint32)j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
@@ -329,7 +342,7 @@ public:
     {
       D *keys;
       AnimationBlockHeader* pHeadKeys;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint32)j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
@@ -382,25 +395,25 @@ public:
     case INTERPOLATION_LINEAR:
       for (size_t i = 0; i < sizes; i++) {
         for (size_t j = 0; j < data[i].size(); j++) {
-          data[i][j] = fixfunc(data[i][j]);
+          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
         }
       }
       break;
     case INTERPOLATION_HERMITE:
       for (size_t i = 0; i < sizes; i++) {
         for (size_t j = 0; j < data[i].size(); j++) {
-          data[i][j] = fixfunc(data[i][j]);
-          in[i][j] = fixfunc(in[i][j]);
-          out[i][j] = fixfunc(out[i][j]);
+          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
+          in[(int)i][(int)j] = fixfunc(in[(int)i][(int)j]);
+          out[(int)i][(int)j] = fixfunc(out[(int)i][(int)j]);
         }
       }
       break;
     case INTERPOLATION_BEZIER:
       for (size_t i = 0; i < sizes; i++) {
         for (size_t j = 0; j < data[i].size(); j++) {
-          data[i][j] = fixfunc(data[i][j]);
-          in[i][j] = fixfunc(in[i][j]);
-          out[i][j] = fixfunc(out[i][j]);
+          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
+          in[(int)i][(int)j] = fixfunc(in[(int)i][(int)j]);
+          out[(int)i][(int)j] = fixfunc(out[(int)i][(int)j]);
         }
       }
       break;
@@ -418,7 +431,7 @@ public:
       if (v.uses((unsigned int)j)) {
         out << "    <anim id=\"" << j << "\" size=\"" << v.data[j].size() << "\">" << endl;
         for (size_t k = 0; k < v.data[j].size(); k++) {
-          out << "      <data time=\"" << v.times[j][k] << "\">" << v.data[j][k] << "</data>" << endl;
+          out << "      <data time=\"" << v.times[j][(int)k] << "\">" << v.data[j][(int)k] << "</data>" << endl;
         }
         out << "    </anim>" << endl;
       }
@@ -433,8 +446,8 @@ public:
 typedef Animated<float, short, ShortToFloat> AnimatedShort;
 
 float frand();
-Vec3D fixCoordSystem(Vec3D v);
-Vec3D fixCoordSystem2(Vec3D v);
+Vec3F fixCoordSystem(Vec3F v);
+Vec3F fixCoordSystem2(Vec3F v);
 Quaternion fixCoordSystemQuat(Quaternion v);
 
 float randfloat(float lower, float upper);

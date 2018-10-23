@@ -20,7 +20,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
       return interpolate<T>((life-mid) / (1.0f-mid),b,c);
 }
 
-void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> & globals)
+void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & globals)
 {
   flags = mta.flags;
   multitexture = flags & MODELPARTICLE_FLAGS_MULTITEXTURE;
@@ -380,8 +380,8 @@ void ParticleSystem::draw()
 
   // position stuff
   const double f = 1;//0.707106781f; // sqrt(2)/2
-  Vec3D bv0 = Vec3D(-f,+f,0);
-  Vec3D bv1 = Vec3D(+f,+f,0);
+  Vec3D bv0 = Vec3D(-f,+f,0.0);
+  Vec3D bv1 = Vec3D(+f,+f,0.0);
 
   if (billboard)
   {
@@ -550,9 +550,9 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = (sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w)));
+    p.pos = (sys->pos + Vec3D(randfloat(-l, l), 0.0f, randfloat(-w, w)));
     const float t = randfloat(0.0f, float(2*PI));
-    p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
+    p.pos = Vec3D(0.0, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
@@ -562,7 +562,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
     p.speed = dir.normalize() * spd * randfloat(0, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
+    p.pos = Vec3D(sys->parent->pivot * (sys->pos + Vec3F(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w))));
     Vec3D dir = mrot * Vec3D(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
     //Vec3D dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * Vec3D(0.0f, 1.0f, 0.0f);
@@ -574,18 +574,18 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
     p.speed = dir.normalize() * spd * randfloat(0, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
+    p.pos = Vec3D(sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w))));
     Vec3D dir = mrot * Vec3D(0,1,0);
     p.dir = dir.normalize();
 
   } else {
-    p.pos = sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w));
+    p.pos = sys->pos + Vec3D(randfloat(-l,l), 0.0f, randfloat(-w,w));
 
     //Vec3D dir = mrot * Vec3D(0,1,0);
-    Vec3D dir = sys->parent->mrot * Vec3D(0,1,0);
+    Vec3D dir = sys->parent->mrot * Vec3D(0, 1, 0);
 
     p.dir = dir;//.normalize();
-    p.down = Vec3D(0,-1.0f,0); // dir * -1.0f;
+    p.down = Vec3D(0.0, -1.0, 0.0); // dir * -1.0f;
     p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));
   }
 
@@ -664,7 +664,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 */
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    Vec3D bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
+    Vec3D bdir(w*cosf(t)*1.6, 0.0, l*sinf(t)*1.6);
 
     p.pos = sys->pos + bdir;
     p.tpos = sys->parent->mat * p.pos;
@@ -705,7 +705,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   }
 
   p.dir =  dir.normalize();//mrot * Vec3D(0, 1.0f,0);
-  p.down = Vec3D(0,-1.0f,0);
+  p.down = Vec3D(0.0, -1.0, 0.0);
 
   p.life = 0;
   size_t l_anim = anim;
@@ -723,10 +723,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   return p;
 }
 
-
-
-
-void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<uint32> & globals)
+void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint32> & globals)
 {
   color.init(mta.color, f, globals);
   opacity.init(mta.opacity, f, globals);

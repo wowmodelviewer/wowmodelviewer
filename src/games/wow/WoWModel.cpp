@@ -107,10 +107,8 @@ void glInitAll()
   glDepthFunc(GL_NEVER);
 }
 
-WoWModel::WoWModel(GameFile * file, bool forceAnim):
-ManagedItem(""),
-forceAnim(forceAnim),
-gamefile(file)
+WoWModel::WoWModel(GameFile * file, bool forceAnim)
+  :ManagedItem(""), forceAnim(forceAnim), gamefile(file)
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -428,7 +426,7 @@ void WoWModel::initCommon(GameFile * f)
 
   // displayHeader(header);
 
-  if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
+  if (header.id[0] != 'M' || header.id[1] != 'D' || header.id[2] != '2' || header.id[3] != '0')
   {
     LOG_ERROR << "Invalid model!  May be corrupted. Header id:" << header.id[0] << header.id[1] << header.id[2] << header.id[3];
 
@@ -473,7 +471,7 @@ void WoWModel::initCommon(GameFile * f)
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
 
         if (sks1.nGlobalSequences > 0)
-          globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
+          std::copy(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences, globalSequences.begin());
 
         // let's try to read parent skel file if needed
         if (skelFile->setChunk("SKPD"))
@@ -505,9 +503,9 @@ void WoWModel::initCommon(GameFile * f)
     }
     f->setChunk("MD21");
   }
-  else if (header.nGlobalSequences)
+  else if (header.nGlobalSequences > 0)
   {
-    globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
+    std::copy(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences, globalSequences.begin());
   }
 
   if (forceAnim)
@@ -518,7 +516,7 @@ void WoWModel::initCommon(GameFile * f)
   alpha = 1.0f;
 
   ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
-  rawVertices.assign(mv, mv + header.nVertices);
+  std::copy(mv, mv + header.nVertices, rawVertices.begin());
 
   // Correct the data from the model, so that its using the Y-Up axis mode.
   for (auto & it : rawVertices)
@@ -553,7 +551,7 @@ void WoWModel::initCommon(GameFile * f)
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
+    Vec3F *b = (Vec3F*)(f->getBuffer() + header.ofsBoundingVertices);
     bounds.assign(b, b + header.nBoundingVertices);
     
     for (uint i = 0; i < bounds.size(); i++)
@@ -2024,7 +2022,7 @@ void WoWModel::refreshMerging()
     delete[] boneConvertTable;
 
     origVertices.reserve(origVertices.size() + modelsIt->origVertices.size());
-    origVertices.insert(origVertices.end(), modelsIt->origVertices.begin(), modelsIt->origVertices.end());
+    origVertices.append(modelsIt->origVertices);
 
     indices.reserve(indices.size() + modelsIt->indices.size());
 

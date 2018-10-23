@@ -663,7 +663,7 @@ uint CharDetails::get(CustomizationType type) const
 
 void CharDetails::setRandomValue(CustomizationType type)
 {
-  int maxVal = (int)m_customizationParamsMap[type].possibleValues.size() - 1;
+  uint maxVal = (uint)m_customizationParamsMap[type].possibleValues.size() - 1;
   set(type, randint(0, maxVal));
 }
 

@@ -38,22 +38,22 @@ class ParticleEmitter
 protected:
   ParticleSystem *sys;
 public:
-  ParticleEmitter(ParticleSystem *sys): sys(sys) {}
+  ParticleEmitter(ParticleSystem *sys) : sys(sys) {}
   virtual Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2) = 0;
   virtual ~ParticleEmitter() {}
 };
 
-class PlaneParticleEmitter: public ParticleEmitter
+class PlaneParticleEmitter : public ParticleEmitter
 {
 public:
-  PlaneParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  PlaneParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
   Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
-class SphereParticleEmitter: public ParticleEmitter
+class SphereParticleEmitter : public ParticleEmitter
 {
 public:
-  SphereParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  SphereParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
   Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
@@ -101,7 +101,7 @@ public:
   // whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
 
-  ParticleSystem(): mid(0), emitter(0), rem(0)
+  ParticleSystem() : mid(0), emitter(0), rem(0)
   {
     multitexture = 0;
     particleColID = 0;
@@ -125,7 +125,7 @@ public:
   }
   ~ParticleSystem() { delete emitter; }
 
-  void init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> & globals);
+  void init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & globals);
   void update(float dt);
 
   void setup(size_t anim, size_t time);
@@ -170,16 +170,15 @@ public:
   static bool useDoNotTrail;
 };
 
-
 struct RibbonSegment
 {
   Vec3D pos, up, back;
-  float len,len0;
+  float len, len0;
 };
 
 class RibbonEmitter
 {
-  Animated<Vec3D> color;
+  Animated<Vec3F> color;
   AnimatedShort opacity;
   Animated<float> above, below;
 
@@ -203,11 +202,9 @@ class RibbonEmitter
 public:
   WoWModel *model;
 
-  void init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<uint32> & globals);
+  void init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint32> & globals);
   void setup(size_t anim, size_t time);
   void draw();
 };
-
-
 
 #endif

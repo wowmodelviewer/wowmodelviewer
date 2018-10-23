@@ -163,7 +163,7 @@ Vec3D ArcBallCamera::mapToSphere(const int x, const int y)
 {
   Vec3D v = Vec3D(1.0*x / m_sceneWidth * 2 - 1.0,
                           1.0*y / m_sceneHeight * 2 - 1.0,
-                          0);
+                          0.0);
 
   float length = v.lengthSquared();
 

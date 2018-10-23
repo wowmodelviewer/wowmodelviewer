@@ -88,8 +88,8 @@ class _GAMEFILE_API_ GameFile : public Component
 
   private:
     // disable copying
-	GameFile(const GameFile &) {};
-	void operator=(const GameFile &) {};
+    GameFile(const GameFile &);
+    void operator=(const GameFile &);
 
     int m_fileDataId;
     unsigned char * originalBuffer;

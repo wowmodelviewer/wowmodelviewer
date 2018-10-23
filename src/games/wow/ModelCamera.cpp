@@ -13,7 +13,7 @@
 #include "GL/glew.h"
 
 
-void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)
+void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, QVector<uint32> & global, std::string modelname)
 {
 	LOG_INFO << "Using original Camera Model Definitions.";
 	ok = true;
@@ -29,7 +29,7 @@ void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & 
 	tTarget.fix(fixCoordSystem);
 }
 
-void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname)
+void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, QVector<uint32> & global, std::string modelname)
 {
 	LOG_INFO << "Using version 10 Camera Model Definitions.";
 	ok = true;
@@ -56,7 +56,7 @@ void ModelCamera::setup(size_t time)
 	Vec3D p = pos + tPos.getValue(0, time);
 	Vec3D t = target + tTarget.getValue(0, time);
 
-	Vec3D u(0,1,0);
+  Vec3D u(0.0, 1.0, 0.0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

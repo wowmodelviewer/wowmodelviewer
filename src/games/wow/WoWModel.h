@@ -8,6 +8,7 @@
 //#include <crtdbg.h>
 
 #include <QString>
+#include <QVector>
 
 // Our files
 
@@ -91,14 +92,14 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
-  std::vector<ModelVertex> rawVertices;
+  QVector<ModelVertex> rawVertices;
   std::vector<uint32> rawIndices;
   std::vector<ModelRenderPass *> rawPasses;
   std::vector<ModelGeosetHD *> rawGeosets;
 
   void restoreRawGeosets();
 
-  std::vector<uint32> globalSequences;
+  QVector<uint32> globalSequences;
   std::vector<ParticleSystem> particleSystems;
   std::vector<RibbonEmitter> ribbons;
   std::vector<TextureAnim> texAnims;
@@ -134,7 +135,7 @@ public:
   // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
   // Raw Data
-  std::vector<ModelVertex> origVertices;
+  QVector<ModelVertex> origVertices;
 
   typedef int GeosetNum;
 

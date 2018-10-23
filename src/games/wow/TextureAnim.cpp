@@ -36,7 +36,7 @@ void TextureAnim::setup(int anim)
 	}
 }
 
-void TextureAnim::init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global)
+void TextureAnim::init(GameFile * f, ModelTexAnimDef &mta, QVector<uint32> & global)
 {
 	trans.init(mta.trans, f, global);
 	rot.init(mta.rot, f, global);

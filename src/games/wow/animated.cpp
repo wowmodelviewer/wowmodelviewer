@@ -10,14 +10,14 @@
 
 _ANIMATED_API_ size_t globalTime = 0;
 
-Vec3D fixCoordSystem(Vec3D v)
+Vec3F fixCoordSystem(Vec3F v)
 {
-  return Vec3D(v.x, v.z, -v.y);
+  return Vec3F(v.x, v.z, -v.y);
 }
 
-Vec3D fixCoordSystem2(Vec3D v)
+Vec3F fixCoordSystem2(Vec3F v)
 {
-  return Vec3D(v.x, v.z, v.y);
+  return Vec3F(v.x, v.z, v.y);
 }
 
 Quaternion fixCoordSystemQuat(Quaternion v)

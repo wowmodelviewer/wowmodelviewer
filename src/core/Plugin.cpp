@@ -74,42 +74,42 @@ Plugin::Plugin()
 // Private Qt application
 Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::Game & game)
 {
-	QString pluginToLoad = QString::fromStdString(path);
-	Plugin * newPlugin = NULL;
+  QString pluginToLoad = QString::fromStdString(path);
+  Plugin * newPlugin = NULL;
 
-	QPluginLoader loader(pluginToLoad);
+  QPluginLoader loader(pluginToLoad);
 
-	if(QObject * plugin = loader.instance())
-	{
-		newPlugin = dynamic_cast<Plugin *>(plugin);
-		QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
-		newPlugin->setName(metaInfos.value("name").toString());
-		newPlugin->m_version = metaInfos.value("version").toString().toStdString();
-		newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
-		newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
-		newPlugin->m_category = metaInfos.value("category").toString().toStdString();
+  if(QObject * plugin = loader.instance())
+  {
+    newPlugin = dynamic_cast<Plugin *>(plugin);
+    QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
+    newPlugin->setName(metaInfos.value("name").toString());
+    newPlugin->m_version = metaInfos.value("version").toString().toStdString();
+    newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
+    newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
+    newPlugin->m_category = metaInfos.value("category").toString().toStdString();
 
-		newPlugin->transmitSingletonsFromCore(settings, game);
+    newPlugin->transmitSingletonsFromCore(settings, game);
 
-		// waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
-		// thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
-		// starts the app)
-		Plugin::thread = new QThread();
-		connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
-		Plugin::thread->start();
+    // waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
+    // thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
+    // starts the app)
+    Plugin::thread = new QThread();
+    connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
+    Plugin::thread->start();
 
-		return newPlugin;
-	}
-	else
-	{
-		std::cout << "Unable to load plugin file " << path << ":" << loader.errorString().toStdString() << std::endl;
-	}
-	return newPlugin;
+    return newPlugin;
+  }
+  else
+  {
+    std::cout << "Unable to load plugin file " << path << ":" << loader.errorString().toStdString() << std::endl;
+  }
+  return newPlugin;
 }
 
 void Plugin::doPrint()
 {
-	std::cout << id() << ": " << name().toStdString() << " (version: " << m_version << " - core needed: " << m_coreVersionNeeded << ")" << std::endl;
+  std::cout << id() << ": " << name().toStdString() << " (version: " << m_version << " - core needed: " << m_coreVersionNeeded << ")" << std::endl;
 }
 
 // Protected methods
