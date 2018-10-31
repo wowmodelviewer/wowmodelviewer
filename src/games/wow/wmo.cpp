@@ -8,9 +8,6 @@
 
 #include <algorithm>
 
-
-using namespace std;
-
 void WMO::flipcc(QString & cc)
 {
   QByteArray ba = cc.toLatin1();

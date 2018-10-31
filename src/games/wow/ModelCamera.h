@@ -27,16 +27,15 @@ struct _MODELCAMERA_API_ ModelCamera
 
 	Vec3D pos, target;
 	float nearclip, farclip, fov;
-	Animated<Vec3F> tPos, tTarget;
+	Animated<Vec3D> tPos, tTarget;
 	Animated<float> rot;
 
   void init(GameFile * f, ModelCameraDef &mcd, QVector<uint32> & global, std::string modelname);
   void initv10(GameFile * f, ModelCameraDefV10 &mcd, QVector<uint32> & global, std::string modelname);
-	void setup(size_t time=0);
+	void setup(uint32 time=0);
 
 	ModelCamera():ok(false), pos(Vec3D()), target(Vec3D()),
 			nearclip(0), farclip(0), fov(0) {}
 };
-
 
 #endif /* _MODELCAMERA_H_ */

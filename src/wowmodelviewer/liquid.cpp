@@ -118,7 +118,7 @@ void Liquid::initGeometry(GameFile &f)
 	for (int j=0; j<ytiles+1; j++) {
 		for (int i=0; i<xtiles+1; i++) {
 			int p = j*(xtiles+1)+i;
-			double h = map[p].h;
+			float h = map[p].h;
 			if (h > 100000) h = pos.y;
             verts[p] = Vec3D(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
 			col[p] = (map[p].w1 / 255.0f)*0.5f + 0.5f;

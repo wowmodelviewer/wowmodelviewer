@@ -78,12 +78,6 @@ void FileDownloader::get(QUrl url)
                    this, SLOT(downloadError(QNetworkReply::NetworkError)));
 }
 
-void FileDownloader::downloadError(QNetworkReply::NetworkError error)
-{
-  // We've errored out here...
-  // Not sure how to report this...
-}
-
 // Protected methods
 //--------------------------------------------------------------------
 

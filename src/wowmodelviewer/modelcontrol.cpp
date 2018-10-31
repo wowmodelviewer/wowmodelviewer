@@ -397,7 +397,8 @@ void ModelControl::Update()
 
     GeosetTreeItemData * data = new GeosetTreeItemData();
     data->geosetId = i;
-    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString::Format(wxT("%i [%i, %i, %i]"), i, mesh, (model->geosets[i]->id % 100), model->geosets[i]->id), -1, -1, data);
+    QString geosetData = QString("%1 [%2, %3, %4]").arg(i).arg(mesh).arg(model->geosets[i]->id % 100).arg(model->geosets[i]->id);
+    wxTreeItemId item = clbGeosets->AppendItem(geosetGroupsMap[mesh], wxString(geosetData.toStdString()), -1, -1, data);
     if (model->isGeosetDisplayed(i) == true)
       clbGeosets->SetItemBackgroundColour(item, *wxGREEN);
     GeosetTreeItemIds.push_back(item);
@@ -471,7 +472,7 @@ void ModelControl::TogglePCRFields()
 
   if (model)
   {
-    std::vector<size_t> pcrIDs = model->replacableParticleColorIDs;
+    std::vector<uint> pcrIDs = model->replacableParticleColorIDs;
     show11 = (std::find(pcrIDs.begin(), pcrIDs.end(), 11) != pcrIDs.end());
     show12 = (std::find(pcrIDs.begin(), pcrIDs.end(), 12) != pcrIDs.end());
     show13 = (std::find(pcrIDs.begin(), pcrIDs.end(), 13) != pcrIDs.end());
@@ -632,7 +633,7 @@ void ModelControl::OnSlider(wxScrollEvent &event)
 
 Vec4D ModelControl::fromColWidget(wxColour col)
 {
-	return Vec4D((double)col.Red() / 255.0, (double)col.Green() / 255.0, (double)col.Blue() / 255.0, 1.0);
+  return Vec4D((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent &event)

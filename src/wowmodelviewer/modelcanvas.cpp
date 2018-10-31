@@ -327,9 +327,11 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
 	root->setModel(0);
 	delete wmo;
 	wmo = NULL;
+
+  LOG_INFO << "Loading model onto canvas...";
+
   WoWModel * m = new WoWModel(file, true);
   setModel(m);
-
 	if (!model()->ok)
 	{
     setModel(NULL);
@@ -350,6 +352,8 @@ Attachment* ModelCanvas::LoadCharModel(GameFile * file)
 	root->setModel(0);
 	delete wmo;
 	wmo = NULL;
+
+  LOG_INFO << "Loading character model onto canvas...";
 
 	// Create new one
 	WoWModel * m = new WoWModel(file, true);
@@ -1611,8 +1615,8 @@ void ModelCanvas::TogglePause()
 void ModelCanvas::ResetView()
 {
   WoWModel * m = const_cast<WoWModel *>(model());
-	m->rot = Vec3D(0.0f,-90.0f,0.0f);
-	m->pos = Vec3D(0.0f, 0.0f, 5.0f);
+	m->rot = Vec3D(0,-90.0f,0);
+	m->pos = Vec3D(0, 0, 5.0f);
 
 	bool isSkyBox = (wxString(m->name().toStdWString()).substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {

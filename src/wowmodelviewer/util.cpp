@@ -138,7 +138,7 @@ wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type /* 
   
   if(loadDataFromResource(a_data, a_dataSize, t_name))
   {
-    r_bitmapPtr = getBitmapFromMemory(a_data, a_dataSize,type,width,height);
+    r_bitmapPtr = getBitmapFromMemory(a_data, a_dataSize, type, width, height);
   }
   
   return r_bitmapPtr;

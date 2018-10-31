@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "logger/Logger.h"
+
 #include "Attachment.h"
 #include "GlobalSettings.h"
 #include "CASCFile.h"
@@ -17,7 +19,6 @@
 #include "ModelTransparency.h"
 #include "WoWDatabase.h"
 
-#include "logger/Logger.h"
 
 #include <QFile>
 #include <QXmlStreamReader>
@@ -107,8 +108,10 @@ void glInitAll()
   glDepthFunc(GL_NEVER);
 }
 
-WoWModel::WoWModel(GameFile * file, bool forceAnim)
-  :ManagedItem(""), forceAnim(forceAnim), gamefile(file)
+WoWModel::WoWModel(GameFile * file, bool forceAnim) :
+  ManagedItem(""),
+  forceAnim(forceAnim),
+  gamefile(file)
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -118,14 +121,16 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim)
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
-  
-  for (size_t i = 0; i < ATT_MAX; i++)
+
+  for (uint32 i = 0; i < ATT_MAX; i++)
     attLookup[i] = -1;
 
-  for (size_t i = 0; i < BONE_MAX; i++)
+  for (uint32 i = 0; i < BONE_MAX; i++)
     keyBoneLookup[i] = -1;
 
   dlist = 0;
+
+  globalSequences = QVector<uint32>();
 
   hasCamera = false;
   hasParticles = false;
@@ -146,7 +151,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim)
 
   vbuf = nbuf = tbuf = 0;
 
-  origVertices.clear();
+  origVertices = QVector<ModelVertex>();
   vertices = 0;
   normals = 0;
   texCoords = 0;
@@ -159,7 +164,7 @@ WoWModel::WoWModel(GameFile * file, bool forceAnim)
   modelType = MT_NORMAL;
   attachment = 0;
 
-  rawVertices.clear();
+  rawVertices = QVector<ModelVertex>();
   rawIndices.clear();
   rawPasses.clear();
   rawGeosets.clear();
@@ -310,12 +315,12 @@ bool WoWModel::isAnimated(GameFile * f)
   animGeometry = false;
   animBones = false;
   ind = false;
-  
+
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); (ov_it != ov_end) && !animGeometry; ++ov_it)
   {
-    for (size_t b = 0; b < 4; b++)
+    for (uint32 b = 0; b < 4; b++)
     {
-      if (ov_it->weights[b]>0)
+      if (ov_it->weights[b] > 0)
       {
         ModelBoneDef &bb = bo[ov_it->bones[b]];
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
@@ -338,7 +343,7 @@ bool WoWModel::isAnimated(GameFile * f)
   }
   else
   {
-    for (uint i = 0; i < bones.size() ; i++)
+    for (uint i = 0; i < bones.size(); i++)
     {
       ModelBoneDef &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type)
@@ -362,7 +367,7 @@ bool WoWModel::isAnimated(GameFile * f)
   if (header.nColors)
   {
     ModelColorDef *cols = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
-    for (size_t i = 0; i < header.nColors; i++)
+    for (uint32 i = 0; i < header.nColors; i++)
     {
       if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
       {
@@ -376,7 +381,7 @@ bool WoWModel::isAnimated(GameFile * f)
   if (header.nTransparency && !animMisc)
   {
     ModelTransDef *trs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i < header.nTransparency; i++)
+    for (uint32 i = 0; i < header.nTransparency; i++)
     {
       if (trs[i].trans.type != 0)
       {
@@ -425,6 +430,11 @@ void WoWModel::initCommon(GameFile * f)
   LOG_INFO << "Loading model:" << tempname << "size:" << f->getSize();
 
   // displayHeader(header);
+
+  LOG_INFO << "Header ID[0]:" << header.id[0] << "= 'M':" << ((header.id[0] == 'M') ? "true" : "false");
+  LOG_INFO << "Header ID[1]:" << header.id[1] << "= 'D':" << ((header.id[1] == 'D') ? "true" : "false");
+  LOG_INFO << "Header ID[2]:" << header.id[2] << "= '2':" << ((header.id[2] == '2') ? "true" : "false");
+  LOG_INFO << "Header ID[3]:" << header.id[3] << "= '0':" << ((header.id[3] == '0') ? "true" : "false");
 
   if (header.id[0] != 'M' || header.id[1] != 'D' || header.id[2] != '2' || header.id[3] != '0')
   {
@@ -503,7 +513,7 @@ void WoWModel::initCommon(GameFile * f)
     }
     f->setChunk("MD21");
   }
-  else if (header.nGlobalSequences > 0)
+  else if (header.nGlobalSequences)
   {
     std::copy(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences, globalSequences.begin());
   }
@@ -515,23 +525,30 @@ void WoWModel::initCommon(GameFile * f)
   showModel = true;
   alpha = 1.0f;
 
+  LOG_INFO << "Initializing Vertices...";
   ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
-  std::copy(mv, mv + header.nVertices, rawVertices.begin());
+  std::vector<ModelVertex> verts;
+  verts.assign(mv, mv + header.nVertices);
+  rawVertices = QVector<ModelVertex>::fromStdVector(verts);
 
   // Correct the data from the model, so that its using the Y-Up axis mode.
+  LOG_INFO << "Altering Verticies Coordinates...";
   for (auto & it : rawVertices)
   {
-     it.pos = fixCoordSystem(it.pos);
-     it.normal = fixCoordSystem(it.normal);
+    it.pos = fixCoordSystem(it.pos);
+    it.normal = fixCoordSystem(it.normal);
   }
 
+  LOG_INFO << "Setting Original Vertices...";
   origVertices = rawVertices;
 
   // This data is needed for both VBO and non-VBO cards.
+  LOG_INFO << "Setting Vertices and normals...";
   vertices = new Vec3D[origVertices.size()];
   normals = new Vec3D[origVertices.size()];
 
   uint i = 0;
+  LOG_INFO << "Processing Vertices...";
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
   {
     // Set the data for our vertices, normals from the model data
@@ -546,14 +563,16 @@ void WoWModel::initCommon(GameFile * f)
   }
 
   // model vertex radius
+  LOG_INFO << "Setting Radius...";
   rad = sqrtf(rad);
 
   // bounds
+  LOG_INFO << "Updating Bounding Boxes...";
   if (header.nBoundingVertices > 0)
   {
-    Vec3F *b = (Vec3F*)(f->getBuffer() + header.ofsBoundingVertices);
+    Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
     bounds.assign(b, b + header.nBoundingVertices);
-    
+
     for (uint i = 0; i < bounds.size(); i++)
       bounds[i] = fixCoordSystem(bounds[i]);
   }
@@ -562,12 +581,13 @@ void WoWModel::initCommon(GameFile * f)
     boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles);
 
   // textures
+  LOG_INFO << "Initializing Textures...";
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
-    vector<TXID> txids;
+    std::vector<TXID> txids;
 
     if (f->isChunked() && f->setChunk("TXID"))
     {
@@ -575,7 +595,7 @@ void WoWModel::initCommon(GameFile * f)
       f->setChunk("MD21", false);
     }
 
-    for (size_t i = 0; i < header.nTextures; i++)
+    for (uint32 i = 0; i < header.nTextures; i++)
     {
       /*
       Texture Types
@@ -636,13 +656,14 @@ void WoWModel::initCommon(GameFile * f)
   /*
   // replacable textures - it seems to be better to get this info from the texture types
   if (header.nTexReplace) {
-  size_t m = header.nTexReplace;
+  uint32 m = header.nTexReplace;
   if (m>16) m = 16;
   int16 *texrep = (int16*)(f->getBuffer() + header.ofsTexReplace);
-  for (size_t i=0; i<m; i++) specialTextures[i] = texrep[i];
+  for (uint32 i=0; i<m; i++) specialTextures[i] = texrep[i];
   }
   */
 
+  LOG_INFO << "Oh wow! Attachments!";
   if (f->isChunked() && f->setChunk("SKID"))
   {
     uint32 skelFileID;
@@ -657,7 +678,7 @@ void WoWModel::initCommon(GameFile * f)
         memcpy(&ska1, skelFile->getBuffer(), sizeof(SKA1));
         header.nAttachments = ska1.nAttachments;
         ModelAttachmentDef *attachments = (ModelAttachmentDef*)(skelFile->getBuffer() + ska1.ofsAttachments);
-        for (size_t i = 0; i < ska1.nAttachments; i++)
+        for (uint32 i = 0; i < ska1.nAttachments; i++)
         {
           ModelAttachment att;
           att.model = this;
@@ -671,7 +692,7 @@ void WoWModel::initCommon(GameFile * f)
           int16 *p = (int16*)(skelFile->getBuffer() + ska1.ofsAttachLookup);
           if (ska1.nAttachLookup > ATT_MAX)
             LOG_ERROR << "Model AttachLookup" << ska1.nAttachLookup << "over" << ATT_MAX;
-          for (size_t i = 0; i < ska1.nAttachLookup; i++)
+          for (uint32 i = 0; i < ska1.nAttachLookup; i++)
           {
             if (i > ATT_MAX - 1)
               break;
@@ -689,7 +710,7 @@ void WoWModel::initCommon(GameFile * f)
     if (header.nAttachments)
     {
       ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f->getBuffer() + header.ofsAttachments);
-      for (size_t i = 0; i < header.nAttachments; i++)
+      for (uint32 i = 0; i < header.nAttachments; i++)
       {
         ModelAttachment att;
         att.model = this;
@@ -703,7 +724,7 @@ void WoWModel::initCommon(GameFile * f)
       int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
       if (header.nAttachLookup > ATT_MAX)
         LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
-      for (size_t i = 0; i < header.nAttachLookup; i++)
+      for (uint32 i = 0; i < header.nAttachLookup; i++)
       {
         if (i > ATT_MAX - 1)
           break;
@@ -712,10 +733,10 @@ void WoWModel::initCommon(GameFile * f)
     }
   }
 
-
   // init colors
   if (header.nColors)
   {
+    LOG_INFO << "Initializing Colors...";
     colors.resize(header.nColors);
     ModelColorDef *colorDefs = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
     for (uint i = 0; i < colors.size(); i++)
@@ -745,6 +766,8 @@ void WoWModel::initCommon(GameFile * f)
 
   animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry
 
+  LOG_INFO << "Checking if animated file:" << (animated ? "true" : "false");
+
   if (animated)
     initAnimated(f);
   else
@@ -768,9 +791,9 @@ void WoWModel::initStatic(GameFile * f)
   indices.clear();
 }
 
-vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
+std::vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {
-  vector<TXID> txids;
+  std::vector<TXID> txids;
 
   if (f->setChunk("TXID"))
   {
@@ -784,9 +807,9 @@ vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
   return txids;
 }
 
-vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+std::vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
-  vector<AFID> afids;
+  std::vector<AFID> afids;
 
   if (f->setChunk("AFID"))
   {
@@ -802,16 +825,16 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
     ModelAnimation a;
-    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+    memcpy(&a, f->getBuffer() + ofsAnimation + i * sizeof(ModelAnimation), sizeof(ModelAnimation));
 
     anims.push_back(a);
 
-    GameFile * anim = 0;
+    GameFile * gfanim = 0;
 
     // if we have animation file ids from AFID chunk, use them
     if (afids.size() > 0)
@@ -820,7 +843,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
       {
         if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
         {
-          anim = GAMEDIRECTORY.getFile(it.fileId);
+          gfanim = GAMEDIRECTORY.getFile(it.fileId);
           break;
         }
       }
@@ -829,19 +852,19 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
     {
       QString tempname = QString::fromStdString(modelname).replace(".m2", "");
       tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
-      anim = GAMEDIRECTORY.getFile(tempname);
+      gfanim = GAMEDIRECTORY.getFile(tempname);
     }
 
-    if (anim && anim->open())
+    if (gfanim && gfanim->open())
     {
-      anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
-      {     
+      gfanim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
+      {
         auto animIt = data.animfiles.find(anims[i].animID);
         if (animIt != data.animfiles.end())
-          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
+          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << gfanim->fullname();
       }
-      
-      data.animfiles[anims[i].animID] = std::make_pair(anim, f);
+
+      data.animfiles[anims[i].animID] = std::make_pair(gfanim, f);
     }
   }
 
@@ -864,6 +887,7 @@ void WoWModel::initAnimated(GameFile * f)
 {
   modelAnimData data;
   data.globalSequences = globalSequences;
+  LOG_INFO << "Initializing Animated file...";
 
   if (f->isChunked() && f->setChunk("SKID"))
   {
@@ -874,7 +898,7 @@ void WoWModel::initAnimated(GameFile * f)
     if (skelFile->open())
     {
       // skelFile->dumpStructure();
-      vector<AFID> afids = readAFIDSFromFile(skelFile);
+      std::vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
@@ -912,7 +936,7 @@ void WoWModel::initAnimated(GameFile * f)
         }
 
         animManager = new AnimManager(*this);
-        
+
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
@@ -934,7 +958,7 @@ void WoWModel::initAnimated(GameFile * f)
           for (uint i = 0; i < anims.size(); i++)
             data.animIndexToAnimId[i] = anims[i].animID;
 
-          for (size_t i = 0; i < skb1.nBones; i++)
+          for (uint32 i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*fileToUse, mb[i], data);
 
           // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
@@ -956,7 +980,7 @@ void WoWModel::initAnimated(GameFile * f)
   }
   else if (header.nAnimations > 0)
   {
-    vector<AFID> afids;
+    std::vector<AFID> afids;
 
     if (f->isChunked() && f->setChunk("AFID"))
     {
@@ -997,12 +1021,12 @@ void WoWModel::initAnimated(GameFile * f)
       it.second.first->close();
   }
 
-  const size_t size = (origVertices.size() * sizeof(float));
+  const uint32 size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
   texCoords = new Vec2D[origVertices.size()];
   auto ov_it = origVertices.begin();
-  for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
+  for (int32 i = 0; i < origVertices.size(); i++, ++ov_it)
     texCoords[i] = ov_it->texcoords;
 
   if (video.supportVBO)
@@ -1033,7 +1057,7 @@ void WoWModel::initAnimated(GameFile * f)
   {
     texAnims.resize(header.nTexAnims);
     ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
-                                                                 
+
     for (uint i = 0; i < texAnims.size(); i++)
       texAnims[i].init(f, ta[i], globalSequences);
   }
@@ -1047,6 +1071,7 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // particle systems
+  LOG_INFO << "Setting up Particles...";
   if (header.nParticleEmitters)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(f->getBuffer() + header.ofsParticleEmitters);
@@ -1067,6 +1092,7 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // ribbons
+  LOG_INFO << "Setting up Ribbons...";
   if (header.nRibbonEmitters)
   {
     ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f->getBuffer() + header.ofsRibbonEmitters);
@@ -1079,12 +1105,13 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // Cameras
+  LOG_INFO << "Setting up Cameras...";
   if (header.nCameras > 0)
   {
     if (header.version[0] <= 9)
     {
       ModelCameraDef *camDefs = (ModelCameraDef*)(f->getBuffer() + header.ofsCameras);
-      for (size_t i = 0; i < header.nCameras; i++)
+      for (uint32 i = 0; i < header.nCameras; i++)
       {
         ModelCamera a;
         a.init(f, camDefs[i], globalSequences, modelname);
@@ -1094,7 +1121,7 @@ void WoWModel::initAnimated(GameFile * f)
     else if (header.version[0] <= 16)
     {
       ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(f->getBuffer() + header.ofsCameras);
-      for (size_t i = 0; i < header.nCameras; i++)
+      for (uint32 i = 0; i < header.nCameras; i++)
       {
         ModelCamera a;
         a.initv10(f, camDefs[i], globalSequences, modelname);
@@ -1108,6 +1135,7 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // init lights
+  LOG_INFO << "Setting up Lights...";
   if (header.nLights)
   {
     lights.resize(header.nLights);
@@ -1164,7 +1192,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   rawIndices.clear();
   rawIndices.resize(view->nTris);
 
-  for (size_t i = 0; i < view->nTris; i++)
+  for (uint32 i = 0; i < view->nTris; i++)
   {
     rawIndices[i] = indexLookup[triangles[i]];
   }
@@ -1180,7 +1208,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
 
   uint32 istart = 0;
-  for (size_t i = 0; i < view->nSub; i++)
+  for (uint32 i = 0; i < view->nSub; i++)
   {
     ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
     hdgeo->istart = istart;
@@ -1192,13 +1220,13 @@ void WoWModel::setLOD(GameFile * f, int index)
   restoreRawGeosets();
 
   rawPasses.clear();
- 
-  for (size_t j = 0; j < view->nTex; j++)
+
+  for (uint32 j = 0; j < view->nTex; j++)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
-     
+
     pass->tex = texlookup[tex[j].textureid];
- 
+
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
@@ -1246,7 +1274,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   passes = rawPasses;
 }
 
-void WoWModel::calcBones(ssize_t anim, size_t time)
+void WoWModel::calcBones(int32 inc_anim, uint32 time)
 {
   // Reset all bones to 'false' which means they haven't been animated yet.
   for (auto & it : bones)
@@ -1263,14 +1291,14 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     {
       for (int i = 0; i <= keyBoneLookup[BONE_ROOT]; i++)
       {
-        bones[i].calcMatrix(bones, anim, time);
+        bones[i].calcMatrix(bones, inc_anim, time);
       }
     }
 
     // Find the close hands animation id
     int closeFistID = 0;
     /*
-    for (size_t i=0; i<header.nAnimations; i++) {
+    for (uint32 i=0; i<header.nAnimations; i++) {
     if (anims[i].animID==15) {  // closed fist
     closeFistID = i;
     break;
@@ -1283,7 +1311,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
 
     // Animate key skeletal bones except the fingers which we do later.
     // -----
-    size_t a, t;
+    uint32 a, t;
 
     // if we have a "secondary animation" selected,  animate upper body using that.
     if (animManager->GetSecondaryID() > -1)
@@ -1293,11 +1321,11 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = inc_anim;
       t = time;
     }
 
-    for (size_t i = 0; i < animManager->GetSecondaryCount(); i++)
+    for (uint32 i = 0; i < animManager->GetSecondaryCount(); i++)
     { // only goto 5, otherwise it affects the hip/waist rotation for the lower-body.
       if (keyBoneLookup[i] > -1)
         bones[keyBoneLookup[i]].calcMatrix(bones, a, t);
@@ -1321,7 +1349,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
 
     // still not sure what 18-26 bone lookups are but I think its more for things like wrist, etc which are not as visually obvious.
-    for (size_t i = BONE_BTH; i < BONE_MAX; i++)
+    for (uint32 i = BONE_BTH; i < BONE_MAX; i++)
     {
       if (keyBoneLookup[i] > -1)
         bones[keyBoneLookup[i]].calcMatrix(bones, a, t);
@@ -1335,11 +1363,11 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = inc_anim;
       t = time;
     }
 
-    for (size_t i = 0; i < 5; i++)
+    for (uint32 i = 0; i < 5; i++)
     {
       if (keyBoneLookup[BONE_RFINGER1 + i] > -1)
         bones[keyBoneLookup[BONE_RFINGER1 + i]].calcMatrix(bones, a, t);
@@ -1352,11 +1380,11 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = inc_anim;
       t = time;
     }
 
-    for (size_t i = 0; i < 5; i++)
+    for (uint32 i = 0; i < 5; i++)
     {
       if (keyBoneLookup[BONE_LFINGER1 + i] > -1)
         bones[keyBoneLookup[BONE_LFINGER1 + i]].calcMatrix(bones, a, t);
@@ -1364,17 +1392,17 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
   }
   else
   {
-    for (ssize_t i = 0; i < keyBoneLookup[BONE_ROOT]; i++)
+    for (int32 i = 0; i < keyBoneLookup[BONE_ROOT]; i++)
     {
-      bones[i].calcMatrix(bones, anim, time);
+      bones[i].calcMatrix(bones, inc_anim, time);
     }
 
     // The following line fixes 'mounts' in that the character doesn't get rotated, but it also screws up the rotation for the entire model :(
-    //bones[18].calcMatrix(bones, anim, time, false);
+    //bones[18].calcMatrix(bones, inc_anim, time, false);
 
     // Animate key skeletal bones except the fingers which we do later.
     // -----
-    size_t a, t;
+    uint32 a, t;
 
     // if we have a "secondary animation" selected,  animate upper body using that.
     if (animManager->GetSecondaryID() > -1)
@@ -1384,11 +1412,11 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = inc_anim;
       t = time;
     }
 
-    for (size_t i = 0; i < animManager->GetSecondaryCount(); i++)
+    for (uint32 i = 0; i < animManager->GetSecondaryCount(); i++)
     { // only goto 5, otherwise it affects the hip/waist rotation for the lower-body.
       if (keyBoneLookup[i] > -1)
         bones[keyBoneLookup[i]].calcMatrix(bones, a, t);
@@ -1412,7 +1440,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
 
     // still not sure what 18-26 bone lookups are but I think its more for things like wrist, etc which are not as visually obvious.
-    for (size_t i = BONE_ROOT; i < BONE_MAX; i++)
+    for (uint32 i = BONE_ROOT; i < BONE_MAX; i++)
     {
       if (keyBoneLookup[i] > -1)
         bones[keyBoneLookup[i]].calcMatrix(bones, a, t);
@@ -1422,15 +1450,15 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
   // Animate everything thats left with the 'default' animation
   for (auto & it : bones)
   {
-    it.calcMatrix(bones, anim, time);
+    it.calcMatrix(bones, inc_anim, time);
   }
 }
 
-void WoWModel::animate(ssize_t anim)
+void WoWModel::animate(int32 inc_anim)
 {
-  size_t t = 0;
+  uint32 t = 0;
 
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = anims[inc_anim];
   int tmax = a.length;
   if (tmax == 0)
     tmax = 1;
@@ -1444,15 +1472,15 @@ void WoWModel::animate(ssize_t anim)
     t = animManager->GetFrame();
 
   this->animtime = t;
-  this->anim = anim;
+  this->anim = inc_anim;
 
   if (animBones) // && (!animManager->IsPaused() || !animManager->IsParticlePaused()))
   {
-    calcBones(anim, t);
+    calcBones(inc_anim, t);
   }
 
   if (animGeometry)
-  { 
+  {
     if (video.supportVBO)
     {
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
@@ -1464,11 +1492,11 @@ void WoWModel::animate(ssize_t anim)
 
     // transform vertices
     auto ov_it = origVertices.begin();
-    for (size_t i = 0; ov_it != origVertices.end(); ++i, ++ov_it)
+    for (uint32 i = 0; ov_it != origVertices.end(); ++i, ++ov_it)
     { //,k=0
       Vec3D v(0, 0, 0), n(0, 0, 0);
 
-      for (size_t b = 0; b < 4; b++)
+      for (uint32 b = 0; b < 4; b++)
       {
         if (ov_it->weights[b] > 0)
         {
@@ -1506,14 +1534,14 @@ void WoWModel::animate(ssize_t anim)
   {
     // random time distribution for teh win ..?
     //int pt = a.timeStart + (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
-    it.setup(anim, t);
+    it.setup(inc_anim, t);
   }
 
   for (auto & it : ribbons)
-    it.setup(anim, t);
+    it.setup(inc_anim, t);
 
   for (auto & it : texAnims)
-    it.calc(anim, t);
+    it.calc(inc_anim, t);
 }
 
 inline void WoWModel::drawModel()
@@ -1560,7 +1588,7 @@ inline void WoWModel::drawModel()
       it->deinit();
     }
   }
-  
+
   if (showWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -1641,7 +1669,7 @@ void WoWModel::drawBones()
   glBegin(GL_LINES);
   for (auto it : bones)
   {
-    //for (size_t i=30; i<40; i++) {
+    //for (uint32 i=30; i<40; i++) {
     if (it.parent != -1)
     {
       glVertex3fv(it.transPivot);
@@ -1675,7 +1703,7 @@ void WoWModel::drawBoundingVolume()
   glBegin(GL_TRIANGLES);
   for (uint i = 0; i < boundTris.size(); i++)
   {
-    size_t v = boundTris[i];
+    uint32 v = boundTris[i];
     if (v < bounds.size())
       glVertex3fv(bounds[v]);
     else
@@ -1701,8 +1729,8 @@ WoWItem * WoWModel::getItem(CharSlots slot)
 {
 
   for (WoWModel::iterator it = this->begin();
-       it != this->end();
-       ++it)
+    it != this->end();
+    ++it)
   {
     if ((*it)->slot() == slot)
       return *it;
@@ -1715,12 +1743,12 @@ void WoWModel::update(int dt) // (float dt)
 {
   if (animated)
     animManager->Tick(dt);
-  updateEmitters((dt/1000.0f));
+  updateEmitters((dt / 1000.0f));
 }
 
 void WoWModel::updateTextureList(GameFile * tex, int special)
 {
-  for (size_t i = 0; i < specialTextures.size(); i++)
+  for (uint32 i = 0; i < specialTextures.size(); i++)
   {
     if (specialTextures[i] == special)
     {
@@ -1781,7 +1809,7 @@ void WoWModel::load(QString &file)
 
 bool WoWModel::canSetTextureFromFile(int texnum)
 {
-  for (size_t i = 0; i < TEXTURE_MAX; i++)
+  for (uint32 i = 0; i < TEXTURE_MAX; i++)
   {
     if (specialTextures[i] == texnum)
       return 1;
@@ -1804,7 +1832,7 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
     if (!geoset->display)
       continue;
 
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+    for (uint32 k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1905,8 +1933,8 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
   if (geomax > 900)
   {
     LOG_ERROR << "setCreatureGeosetData value of " << geomax <<
-                 " detected. We were assuming the maximum was 899.";
-    geomax = ((geomax/100)+1)*100;  // round the max up to the next 100 (next geoset group)
+      " detected. We were assuming the maximum was 899.";
+    geomax = ((geomax / 100) + 1) * 100;  // round the max up to the next 100 (next geoset group)
   }
   else
     geomax = 900;
@@ -1924,9 +1952,9 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 void WoWModel::mergeModel(QString & name)
 {
   LOG_INFO << __FUNCTION__ << name;
-  if(mergedModels.end() != std::find_if(std::begin(mergedModels),
-                                        std::end(mergedModels),
-                                        [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); }))
+  if (mergedModels.end() != std::find_if(std::begin(mergedModels),
+    std::end(mergedModels),
+    [&](const WoWModel * m) { return m->gamefile->fullname() == name.replace("\\", "/"); }))
     return;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
@@ -1944,7 +1972,7 @@ void WoWModel::mergeModel(WoWModel * m)
   if (it.second == true) // new element inserted
     refreshMerging();
 }
-  
+
 void WoWModel::refreshMerging()
 {
   LOG_INFO << __FUNCTION__;
@@ -1995,8 +2023,8 @@ void WoWModel::refreshMerging()
       for (uint b = 0; b < bones.size(); ++b)
       {
         Vec3D p = bones[b].pivot;
-        if ((p == pivot) && 
-            (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
+        if ((p == pivot) &&
+          (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
           boneConvertTable[i] = b;
           break;
@@ -2095,7 +2123,7 @@ void WoWModel::refreshMerging()
     ++i;
   }
 
-  const size_t size = (origVertices.size() * sizeof(float));
+  const uint32 size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
   if (video.supportVBO)
@@ -2126,8 +2154,8 @@ void WoWModel::unmergeModel(QString & name)
 {
   LOG_INFO << __FUNCTION__ << name;
   auto it = std::find_if(std::begin(mergedModels),
-                         std::end(mergedModels),
-                         [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); });
+    std::end(mergedModels),
+    [&](const WoWModel * m) { return m->gamefile->fullname() == name.replace("\\", "/"); });
 
   if (it != mergedModels.end())
   {
@@ -2151,7 +2179,7 @@ void WoWModel::refresh()
   bool showScalp = true;
 
   // Reset geosets
-  for (size_t i = 0; i < NUM_GEOSETS; i++)
+  for (uint32 i = 0; i < NUM_GEOSETS; i++)
     cd.geosets[i] = 1;
 
   RaceInfos infos;
@@ -2163,7 +2191,7 @@ void WoWModel::refresh()
 
     return;
   }
-   
+
   cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
 
   // show ears, if toggled
@@ -2235,7 +2263,7 @@ void WoWModel::refresh()
       geosetId = 1;
     cd.geosets[CG_HAIRSTYLE] = geosetId;
     /*
-    for (size_t j = 0; j < rawGeosets.size(); j++)
+    for (uint32 j = 0; j < rawGeosets.size(); j++)
     {
       int id = geosets[j]->id;
       if (!id) // 0 is for skin, not hairstyle
@@ -2339,8 +2367,8 @@ void WoWModel::refresh()
     cd.geosets[CG_WRISTBANDS] = 0;
 
   // pandaren female -> hide tabard geoset if TROUSERS geosets are displayed
-  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE) 
-      && (cd.geosets[CG_TROUSERS] > 1))
+  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)
+    && (cd.geosets[CG_TROUSERS] > 1))
     cd.geosets[CG_TARBARD2] = 0;
 
   // reset geosets
@@ -2358,17 +2386,17 @@ void WoWModel::refresh()
     }
   }
 
-  
+
 
   WoWItem * headItem = getItem(CS_HEAD);
 
   if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
   {
     QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
-                            "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
-                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
-                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                            .arg(headItem->id());
+      "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
+      "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
+      .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg(headItem->id());
 
     sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
 
@@ -2377,7 +2405,7 @@ void WoWModel::refresh()
       // hair styles
       if (helmetInfos.values[0][0].toInt() != 0)
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
+        for (uint32 i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 0 && id < 100)
@@ -2388,7 +2416,7 @@ void WoWModel::refresh()
       // facial 1
       if (helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
+        for (uint32 i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 100 && id < 200)
@@ -2399,7 +2427,7 @@ void WoWModel::refresh()
       // facial 2
       if (helmetInfos.values[0][2].toInt() != 0 && infos.customization[1] != "FEATURES")
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
+        for (uint32 i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 200 && id < 300)
@@ -2410,7 +2438,7 @@ void WoWModel::refresh()
       // facial 3
       if (helmetInfos.values[0][3].toInt() != 0)
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
+        for (uint32 i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 300 && id < 400)
@@ -2421,7 +2449,7 @@ void WoWModel::refresh()
       // ears
       if (helmetInfos.values[0][4].toInt() != 0)
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
+        for (uint32 i = 0; i < rawGeosets.size(); i++)
         {
           int id = geosets[i]->id;
           if (id > 700 && id < 800)
@@ -2439,19 +2467,19 @@ void WoWModel::refresh()
 
   // If model is one of these races, show the feet (don't wear boots)
   if (infos.raceid == RACE_TAUREN ||
-      infos.raceid == RACE_TROLL ||
-      infos.raceid == RACE_DRAENEI ||
-      infos.raceid == RACE_NAGA ||
-      infos.raceid == RACE_BROKEN ||
-      infos.raceid == RACE_WORGEN)
+    infos.raceid == RACE_TROLL ||
+    infos.raceid == RACE_DRAENEI ||
+    infos.raceid == RACE_NAGA ||
+    infos.raceid == RACE_BROKEN ||
+    infos.raceid == RACE_WORGEN)
   {
     cd.showFeet = true;
   }
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = cd.eyeGlowType;
+  uint32 egt = cd.eyeGlowType;
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
-  for (size_t i = 0; i < rawGeosets.size(); i++)
+  for (uint32 i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
@@ -2498,7 +2526,7 @@ GLuint WoWModel::getGLTexture(uint16 tex) const
     else
       return replaceTextures[specialTextures[tex]];
   }
-    
+
 }
 
 void WoWModel::restoreRawGeosets()
@@ -2512,7 +2540,7 @@ void WoWModel::restoreRawGeosets()
   }
 
   geosets.clear();
- 
+
   for (auto it : rawGeosets)
   {
     ModelGeosetHD * geo = new ModelGeosetHD(*it);
@@ -2613,20 +2641,20 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "  <SkeletonAndAnimation>" << endl;
 
   out << "  <GlobalSequences size=\"" << m.globalSequences.size() << "\">" << endl;
-  for (size_t i = 0; i < m.globalSequences.size(); i++)
+  for (int32 i = 0; i < m.globalSequences.size(); i++)
     out << "<Sequence>" << m.globalSequences[i] << "</Sequence>" << endl;
   out << "  </GlobalSequences>" << endl;
 
   out << "  <Animations size=\"" << m.anims.size() << "\">" << endl;
-  for (size_t i = 0; i < m.anims.size(); i++)
+  for (uint32 i = 0; i < m.anims.size(); i++)
   {
     out << "    <Animation id=\"" << i << "\">" << endl;
     out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
-    string strName;
+    std::string strName;
     QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
-    sqlResult anim = GAMEDATABASE.sqlQuery(query);
-    if (anim.valid && !anim.empty())
-      strName = anim.values[0][0].toStdString();
+    sqlResult sqlanim = GAMEDATABASE.sqlQuery(query);
+    if (sqlanim.valid && !sqlanim.empty())
+      strName = sqlanim.values[0][0].toStdString();
     else
       strName = "???";
     out << "      <animName>" << strName << "</animName>" << endl;
@@ -2647,12 +2675,12 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "  </Animations>" << endl;
 
   out << "  <AnimationLookups size=\"" << m.animLookups.size() << "\">" << endl;
-  for (size_t i = 0; i < m.animLookups.size(); i++)
+  for (uint32 i = 0; i < m.animLookups.size(); i++)
     out << "    <AnimationLookup id=\"" << i << "\">" << m.animLookups[i] << "</AnimationLookup>" << endl;
   out << "  </AnimationLookups>" << endl;
 
   out << "  <Bones size=\"" << m.bones.size() << "\">" << endl;
-  for (size_t i = 0; i < m.bones.size(); i++)
+  for (uint32 i = 0; i < m.bones.size(); i++)
   {
     out << "    <Bone id=\"" << i << "\">" << endl;
     out << "      <keyboneid>" << m.bones[i].boneDef.keyboneid << "</keyboneid>" << endl;
@@ -2681,13 +2709,13 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   //	out << "  <BoneLookups size=\"" << m.header.nBoneLookup << "\">" << endl;
   //	uint16 *boneLookup = (uint16 *)(f.getBuffer() + m.header.ofsBoneLookup);
-  //	for(size_t i=0; i<m.header.nBoneLookup; i++) {
+  //	for(uint32 i=0; i<m.header.nBoneLookup; i++) {
   //		out << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
   //	}
   //	out << "  </BoneLookups>" << endl;
 
   out << "  <KeyBoneLookups size=\"" << m.header.nKeyBoneLookup << "\">" << endl;
-  for (size_t i = 0; i < m.header.nKeyBoneLookup; i++)
+  for (uint32 i = 0; i < m.header.nKeyBoneLookup; i++)
     out << "    <KeyBoneLookup id=\"" << i << "\">" << m.keyBoneLookup[i] << "</KeyBoneLookup>" << endl;
   out << "  </KeyBoneLookups>" << endl;
 
@@ -2715,7 +2743,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   //	out << "  </Subs>" << endl; // TODO
 
   out << "	<RenderPasses size=\"" << m.passes.size() << "\">" << endl;
-  for (size_t i = 0; i < m.passes.size(); i++)
+  for (uint32 i = 0; i < m.passes.size(); i++)
   {
     out << "	  <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass * p = m.passes[i];
@@ -2748,7 +2776,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "	</RenderPasses>" << endl;
 
   out << "	<Geosets size=\"" << m.geosets.size() << "\">" << endl;
-  for (size_t i = 0; i < m.geosets.size(); i++)
+  for (uint32 i = 0; i < m.geosets.size(); i++)
   {
     out << "	  <Geoset id=\"" << i << "\">" << endl;
     out << "      <id>" << m.geosets[i]->id << "</id>" << endl;
@@ -2769,7 +2797,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   //	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
   //	out << "	<TexUnits size=\"" << view->nTex << "\">" << endl;
-  //	for (size_t i=0; i<view->nTex; i++) {
+  //	for (uint32 i=0; i<view->nTex; i++) {
   //		out << "	  <TexUnit id=\"" << i << "\">" << endl;
   //		out << "      <flags>" << tex[i].flags << "</flags>" << endl;
   //		out << "      <shading>" << tex[i].shading << "</shading>" << endl;
@@ -2823,7 +2851,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   //	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m.header.ofsTextures);
   //	out << "	<Textures size=\"" << m.header.nTextures << "\">" << endl;
-  //	for(size_t i=0; i<m.header.nTextures; i++) {
+  //	for(uint32 i=0; i<m.header.nTextures; i++) {
   //		out << "	  <Texture id=\"" << i << "\">" << endl;
   //		out << "      <type>" << texdef[i].type << "</type>" << endl;
   //		out << "      <flags>" << texdef[i].flags << "</flags>" << endl;
@@ -2837,7 +2865,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   //	out << "  <TexLookups size=\"" << m.header.nTexLookup << "\">" << endl;
   //	uint16 *texLookup = (uint16 *)(f.getBuffer() + m.header.ofsTexLookup);
-  //	for(size_t i=0; i<m.header.nTexLookup; i++) {
+  //	for(uint32 i=0; i<m.header.nTexLookup; i++) {
   //		out << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
   //	}
   //	out << "  </TexLookups>" << endl;
@@ -2871,7 +2899,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "	<RibbonEmitters></RibbonEmitters>" << endl; // TODO
 
   out << "	<Particles size=\"" << m.header.nParticleEmitters << "\">" << endl;
-  for (size_t i = 0; i < m.particleSystems.size(); i++)
+  for (uint32 i = 0; i < m.particleSystems.size(); i++)
   {
     out << "	  <Particle id=\"" << i << "\">" << endl;
     out << m.particleSystems[i];
@@ -2888,7 +2916,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "	<Cameras></Cameras>" << endl;
 
   out << "	<Attachments size=\"" << m.header.nAttachments << "\">" << endl;
-  for (size_t i = 0; i < m.header.nAttachments; i++)
+  for (uint32 i = 0; i < m.header.nAttachments; i++)
   {
     out << "	  <Attachment id=\"" << i << "\">" << endl;
     out << "      <id>" << m.atts[i].id << "</id>" << endl;
@@ -2900,13 +2928,13 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   out << "  <AttachLookups size=\"" << m.header.nAttachLookup << "\">" << endl;
   //	int16 *attachLookup = (int16 *)(f.getBuffer() + m.header.ofsAttachLookup);
-  //	for(size_t i=0; i<m.header.nAttachLookup; i++) {
+  //	for(uint32 i=0; i<m.header.nAttachLookup; i++) {
   //		out << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
   //	}
   //	out << "  </AttachLookups>" << endl;
 
   out << "	<Events size=\"" << m.events.size() << "\">" << endl;
-  for (size_t i = 0; i < m.events.size(); i++)
+  for (uint32 i = 0; i < m.events.size(); i++)
   {
     out << "	  <Event id=\"" << i << "\">" << endl;
     out << m.events[i];

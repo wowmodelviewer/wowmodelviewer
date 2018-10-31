@@ -105,7 +105,6 @@ class _FILEDOWNLOADER_API_ FileDownloader : public QObject
 		// Methods
   private slots:
        void fileDownloaded();
-       void downloadError(QNetworkReply::NetworkError);
 
 
   private:

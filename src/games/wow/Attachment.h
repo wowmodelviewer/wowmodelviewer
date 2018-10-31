@@ -8,6 +8,7 @@
 #ifndef _ATTACHMENT_H_
 #define _ATTACHMENT_H_
 
+#include <map>
 #include <string>
 #include <vector>
 #include "vec3d.h"

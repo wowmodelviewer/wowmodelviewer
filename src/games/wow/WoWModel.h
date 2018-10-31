@@ -8,7 +8,6 @@
 //#include <crtdbg.h>
 
 #include <QString>
-#include <QVector>
 
 // Our files
 
@@ -60,7 +59,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 {
   // VBO Data
   GLuint vbuf, nbuf, tbuf;
-  size_t vbufsize;
+  uint32 vbufsize;
 
   // Non VBO Data
   GLuint dlist;
@@ -79,8 +78,8 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void initAnimated(GameFile * f);
   void initStatic(GameFile * f);
 
-  void animate(ssize_t anim);
-  void calcBones(ssize_t anim, size_t time);
+  void animate(int32 anim);
+  void calcBones(int32 anim, uint32 time);
 
   void lightsOn(GLuint lbase);
   void lightsOff(GLuint lbase);
@@ -110,16 +109,16 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   bool animGeometry, animBones;
 
-  vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
-  vector<TXID> readTXIDSFromFile(GameFile * f);
+  std::vector<AFID> readAFIDSFromFile(GameFile * f);
+  void readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
+  std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
   GameFile * gamefile;
 
-  std::vector<size_t> replacableParticleColorIDs;
+  std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;
 
   size_t nbLights() const
@@ -179,8 +178,8 @@ public:
   bool animated;
 
   // Misc values
-  double rad;
-  double trans;
+  float rad;
+  float trans;
 
   // -------------------------------
 
@@ -192,9 +191,9 @@ public:
   AnimManager *animManager;
   std::vector<Bone> bones;
 
-  size_t currentAnim;
+  ssize_t currentAnim;
   bool animcalc;
-  ssize_t anim, animtime;
+  int32 anim, animtime;
 
   void reset()
   {
@@ -275,6 +274,5 @@ public:
 
   friend class ModelRenderPass; // to allow access to rendering elements (texAnims, etc.)
 };
-
 
 #endif

@@ -44,9 +44,9 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & gl
   Vec3D colors2[3];
   memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
 
-  for (size_t i=0; i<3; i++)
+  for (uint32 i=0; i<3; i++)
   {
-    double opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
+    float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
     colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f,
         colors2[i].z/255.0f, opacity/32767.0f);
     sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
@@ -134,7 +134,7 @@ void ParticleSystem::initTile(Vec2D *tc, int num)
   otc[3].x = a.x;
   otc[3].y = b.y;
 
-  for (size_t i=0; i<4; i++) {
+  for (uint32 i=0; i<4; i++) {
     tc[(i+4-order) & 3] = otc[i];
   }
 }
@@ -176,7 +176,7 @@ void ParticleSystem::update(float dt)
 
   dt = abs(dt);  // dt can be negative if animation slider is used, but that would break particle anims
 
-  size_t l_manim = manim;
+  uint32 l_manim = manim;
   if (GLOBALSETTINGS.bZeroParticle)
     l_manim = 0;
   float grav = gravity.getValue(l_manim, mtime);
@@ -221,7 +221,7 @@ void ParticleSystem::update(float dt)
       //rem = 0;
       if (en)
       {
-        for (size_t i=0; i<tospawn; i++)
+        for (uint32 i=0; i<tospawn; i++)
         {
           Particle p = emitter->newParticle(manim, mtime, w, l, spd, var, spr, spr2);
           // sanity check:
@@ -260,7 +260,7 @@ void ParticleSystem::update(float dt)
   }
 }
 
-void ParticleSystem::setup(size_t anim, size_t time)
+void ParticleSystem::setup(uint32 anim, uint32 time)
 {
   manim = anim;
   mtime = time;
@@ -379,9 +379,9 @@ void ParticleSystem::draw()
   Vec3D vUp(0,1,0);
 
   // position stuff
-  const double f = 1;//0.707106781f; // sqrt(2)/2
-  Vec3D bv0 = Vec3D(-f,+f,0.0);
-  Vec3D bv1 = Vec3D(+f,+f,0.0);
+  const float f = 1;//0.707106781f; // sqrt(2)/2
+  Vec3D bv0 = Vec3D(-f,+f,0);
+  Vec3D bv1 = Vec3D(+f,+f,0);
 
   if (billboard)
   {
@@ -539,7 +539,7 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
       SpreadMat.m[i][j]*=Size;
 }
 
-Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2)
+Particle PlaneParticleEmitter::newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
 
@@ -550,9 +550,9 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = (sys->pos + Vec3D(randfloat(-l, l), 0.0f, randfloat(-w, w)));
+    p.pos = (sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w)));
     const float t = randfloat(0.0f, float(2*PI));
-    p.pos = Vec3D(0.0, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
+    p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
@@ -562,7 +562,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
     p.speed = dir.normalize() * spd * randfloat(0, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = Vec3D(sys->parent->pivot * (sys->pos + Vec3F(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w))));
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
     Vec3D dir = mrot * Vec3D(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
     //Vec3D dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * Vec3D(0.0f, 1.0f, 0.0f);
@@ -574,18 +574,18 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
     p.speed = dir.normalize() * spd * randfloat(0, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = Vec3D(sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w))));
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
     Vec3D dir = mrot * Vec3D(0,1,0);
     p.dir = dir.normalize();
 
   } else {
-    p.pos = sys->pos + Vec3D(randfloat(-l,l), 0.0f, randfloat(-w,w));
+    p.pos = sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w));
 
     //Vec3D dir = mrot * Vec3D(0,1,0);
-    Vec3D dir = sys->parent->mrot * Vec3D(0, 1, 0);
+    Vec3D dir = sys->parent->mrot * Vec3D(0,1,0);
 
     p.dir = dir;//.normalize();
-    p.down = Vec3D(0.0, -1.0, 0.0); // dir * -1.0f;
+    p.down = Vec3D(0,-1.0f,0); // dir * -1.0f;
     p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));
   }
 
@@ -598,7 +598,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   }
   p.tpos = sys->parent->mat * p.pos;
   p.life = 0;
-  size_t l_anim = anim;
+  uint32 l_anim = anim;
   if (GLOBALSETTINGS.bZeroParticle)
     l_anim = 0;
   p.maxlife = sys->lifespan.getValue(l_anim, time);
@@ -613,7 +613,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   return p;
 }
 
-Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2)
+Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
   Vec3D dir;
@@ -664,7 +664,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 */
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    Vec3D bdir(w*cosf(t)*1.6, 0.0, l*sinf(t)*1.6);
+    Vec3D bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
 
     p.pos = sys->pos + bdir;
     p.tpos = sys->parent->mat * p.pos;
@@ -705,10 +705,10 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   }
 
   p.dir =  dir.normalize();//mrot * Vec3D(0, 1.0f,0);
-  p.down = Vec3D(0.0, -1.0, 0.0);
+  p.down = Vec3D(0,-1.0f,0);
 
   p.life = 0;
-  size_t l_anim = anim;
+  uint32 l_anim = anim;
   if (GLOBALSETTINGS.bZeroParticle)
     l_anim = 0;
   p.maxlife = sys->lifespan.getValue(l_anim, time);
@@ -722,6 +722,9 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   p.tile = randint(0, sys->rows*sys->cols-1);
   return p;
 }
+
+
+
 
 void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint32> & globals)
 {
@@ -751,7 +754,7 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint3
   segs.push_back(rs);
 }
 
-void RibbonEmitter::setup(size_t anim, size_t time)
+void RibbonEmitter::setup(uint32 anim, uint32 time)
 {
   Vec3D ntpos = parent->mat * pos;
   Vec3D ntup = parent->mat * (pos + Vec3D(0,0,1));

@@ -6,10 +6,10 @@
  */
 
 #include "ModelCamera.h"
-
-#include "database.h"
-#include "video.h" // video global var
 #include "logger/Logger.h"
+
+//#include "database.h"
+#include "video.h" // video global var
 #include "GL/glew.h"
 
 
@@ -45,7 +45,7 @@ void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, QVector<uint32> 
 	fov = 0.95f;
 }
 
-void ModelCamera::setup(size_t time)
+void ModelCamera::setup(uint32 time)
 {
 	if (!ok) return;
 
@@ -56,7 +56,7 @@ void ModelCamera::setup(size_t time)
 	Vec3D p = pos + tPos.getValue(0, time);
 	Vec3D t = target + tTarget.getValue(0, time);
 
-  Vec3D u(0.0, 1.0, 0.0);
+	Vec3D u(0,1,0);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -64,5 +64,3 @@ void ModelCamera::setup(size_t time)
 	//float roll = rot.getValue(0, time) / PI * 180.0f;
 	//glRotatef(roll, 0, 0, 1);
 }
-
-

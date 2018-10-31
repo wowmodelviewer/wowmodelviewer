@@ -12,8 +12,6 @@
 #include "shaders.h"
 #include "vec3d.h"
 
-using namespace std;
-
 struct WaterTile
 {
 	/*

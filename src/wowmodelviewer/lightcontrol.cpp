@@ -299,18 +299,18 @@ void LightControl::OnText(wxCommandEvent &event)
 	Vec4D p = lights[activeLight].pos;
 	Vec4D t = lights[activeLight].target;
 
-	if (id==ID_LIGHTPOSX)
-		from_string<double>(p.x, std::string(txtPosX->GetValue().mb_str()), dec);
+  if (id == ID_LIGHTPOSX)
+    p.x = QString(txtPosX->GetValue().mb_str()).toFloat();
 	else if (id==ID_LIGHTPOSY)
-		from_string<double>(p.y, std::string(txtPosY->GetValue().mb_str()), dec);
+    p.y = QString(txtPosY->GetValue().mb_str()).toFloat();
 	else if (id==ID_LIGHTPOSZ)
-		from_string<double>(p.z, std::string(txtPosZ->GetValue().mb_str()), dec);
+    p.z = QString(txtPosZ->GetValue().mb_str()).toFloat();
 	else if (id==ID_LIGHTTARX)
-		from_string<double>(t.x, std::string(txtTarX->GetValue().mb_str()), dec);
+    t.x = QString(txtTarX->GetValue().mb_str()).toFloat();
 	else if (id==ID_LIGHTTARY)
-		from_string<double>(t.y, std::string(txtTarY->GetValue().mb_str()), dec);
+    t.y = QString(txtTarY->GetValue().mb_str()).toFloat();
 	else if (id==ID_LIGHTTARZ)
-		from_string<double>(t.z, std::string(txtTarZ->GetValue().mb_str()), dec);
+    t.z = QString(txtTarZ->GetValue().mb_str()).toFloat();
 
 	SetPos(p);
 	SetTarget(t);

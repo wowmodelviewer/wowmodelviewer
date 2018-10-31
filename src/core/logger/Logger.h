@@ -74,31 +74,32 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-class _LOGGER_API_ Logger : public Container<LogOutput>
-{
-	public :
-		// Constants / Enums
+  class _LOGGER_API_ Logger : public Container<LogOutput>
+  {
+  public:
+    // Constants / Enums
     enum LogType
     {
       INFO_LOG = 0,
+      DEBUG_LOG,
       WARNING_LOG,
       ERROR_LOG,
       FATAL_LOG
     };
 
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+    // Constructors
+
+    // Destructors
+
+    // Methods
     static Logger & instance()
     {
-      if(Logger::m_instance == 0)
+      if (Logger::m_instance == 0)
         Logger::m_instance = new Logger();
 
       return *m_instance;
     }
-		
+
     static void init();
 
     static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
@@ -107,39 +108,39 @@ class _LOGGER_API_ Logger : public Container<LogOutput>
 
     QDebug operator()(Logger::LogType type);
 
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-    // prevent unwanted constructions
+    // Members
+
+  protected:
+    // Constants / Enums
+
+    // Constructors
+
+    // Destructors
+
+    // Methods
+
+    // Members
+
+  private:
+    // Constants / Enums
+
+    // Constructors
+// prevent unwanted constructions
     Logger();
     Logger(Logger &);
 
-		// Destructors
-	
-		// Methods
-		
-		// Members
+    // Destructors
+
+    // Methods
+
+    // Members
     static Logger * m_instance;
 
-		// friend class declarations
-	
-};
+    // friend class declarations
 
-// static members definition
+  };
+
+  // static members definition
 #ifdef _LOGGER_CPP_
 
 #endif

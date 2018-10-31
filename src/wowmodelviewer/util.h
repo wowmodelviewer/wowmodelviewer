@@ -28,8 +28,6 @@
 #include <wx/bitmap.h>
 #include <wx/string.h>
 
-using namespace std;
-
 extern wxString gamePath;
 extern wxString cfgPath;
 extern wxString bgImagePath;
@@ -61,14 +59,6 @@ extern wxString locales[];
 #endif
 
 float frand();
-
-
-template <class T>
-bool from_string(T& t, const string& s, ios_base& (*f)(ios_base&))
-{
-  istringstream iss(s);
-  return !(iss >> f >> t).fail();
-}
 
 float round(float input, int limit);
 

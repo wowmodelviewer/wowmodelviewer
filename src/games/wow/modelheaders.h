@@ -13,8 +13,8 @@ struct Vertex {
 
 struct Sphere
 {
-  /*0x00*/ Vec3F min;
-  /*0x0C*/ Vec3F max;
+  /*0x00*/ Vec3D min;
+  /*0x0C*/ Vec3D max;
   /*0x18*/ float radius;
 };
 
@@ -172,24 +172,24 @@ struct ModelBoneDef {
   int16 parent; // parent bone index
   int16 geoid; // A geoset for this bone.
   int32 unknown; // new int added to the bone definitions.  Added in WoW 2.0
-  AnimationBlock translation; // (Vec3F)
+  AnimationBlock translation; // (Vec3D)
   AnimationBlock rotation; // (QuatS)
-  AnimationBlock scaling; // (Vec3F)
-  Vec3F pivot;
+  AnimationBlock scaling; // (Vec3D)
+  Vec3D pivot;
 };
 
 struct ModelTexAnimDef {
-  AnimationBlock trans; // (Vec3F)
+  AnimationBlock trans; // (Vec3D)
   AnimationBlock rot; // (QuatS)
-  AnimationBlock scale; // (Vec3F)
+  AnimationBlock scale; // (Vec3D)
 };
 
 struct ModelVertex {
-  Vec3F pos;
+  Vec3D pos;
   uint8 weights[4];
   uint8 bones[4];
-  Vec3F normal;
-  Vec2F texcoords;
+  Vec3D normal;
+  Vec2D texcoords;
   int unk1, unk2; // always 0,0 so this is probably unused
 };
 
@@ -221,7 +221,7 @@ struct ModelGeoset {
   uint16 StartBones;		// ? always 1 to 4, Starting index in the bone lookup table.
   uint16 rootBone;		// root bone?
   uint16 nBones;		//
-  Vec3F BoundingBox[2];
+  Vec3D BoundingBox[2];
   float radius;
 };
 
@@ -233,8 +233,8 @@ public:
     istart(0), icount(0), nSkinnedBones(0),
     StartBones(0), rootBone(0), nBones(0), radius(0), display(false)
   {
-    BoundingBox[0] = Vec3F(0, 0, 0);
-    BoundingBox[1] = Vec3F(0, 0, 0);
+    BoundingBox[0] = Vec3D(0, 0, 0);
+    BoundingBox[1] = Vec3D(0, 0, 0);
   }
 
   ModelGeosetHD(ModelGeoset & geo) :
@@ -266,7 +266,7 @@ public:
   uint16 StartBones;    // ? always 1 to 4, Starting index in the bone lookup table.
   uint16 rootBone;    // root bone?
   uint16 nBones;    //
-  Vec3F BoundingBox[2];
+  Vec3D BoundingBox[2];
   float radius;
   bool display;
 };
@@ -350,7 +350,7 @@ struct ModelRenderFlags {
 // Referenced from the Texture Unit blocks in the LOD part. Contains a separate timeline for transparency values. 
 // If no animation is used, the given value is constant.
 struct ModelColorDef {
-  AnimationBlock color; // (Vec3F) Three floats. One for each color.
+  AnimationBlock color; // (Vec3D) Three floats. One for each color.
   AnimationBlock opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
 };
 
@@ -369,10 +369,10 @@ struct ModelTextureDef {
 struct ModelLightDef {
   int16 type; // 0: Directional, 1: Point light
   int16 bone; // If its attached to a bone, this is the bone. Else here is a nice -1.
-  Vec3F pos; // Position, Where is this light?
-  AnimationBlock ambientColor; // (Vec3F) The ambient color. Three floats for RGB.
+  Vec3D pos; // Position, Where is this light?
+  AnimationBlock ambientColor; // (Vec3D) The ambient color. Three floats for RGB.
   AnimationBlock ambientIntensity; // (Float) A float for the intensity.
-  AnimationBlock diffuseColor; // (Vec3F) The diffuse color. Three floats for RGB.
+  AnimationBlock diffuseColor; // (Vec3D) The diffuse color. Three floats for RGB.
   AnimationBlock diffuseIntensity; // (Float) A float for the intensity again.
   AnimationBlock attenuationStart; // (Float) This defines, where the light starts to be.
   AnimationBlock attenuationEnd; // (Float) And where it stops.
@@ -384,10 +384,10 @@ struct ModelCameraDef {
   float fov; // No radians, no degrees. Multiply by 35 to get degrees.
   float farclip; // Where it stops to be drawn.
   float nearclip; // Far and near. Both of them.
-  AnimationBlock transPos; // (Vec3F) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
-  Vec3F pos; // float, Where the camera is located.
-  AnimationBlock transTarget; // (Vec3F) How the target moves. Should be 3*3 floats. (?)
-  Vec3F target; // float, Where the camera points to.
+  AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  Vec3D pos; // float, Where the camera is located.
+  AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+  Vec3D target; // float, Where the camera points to.
   AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
 };
 
@@ -395,30 +395,30 @@ struct ModelCameraDefV10 {
   int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
   float farclip; // Where it stops to be drawn.
   float nearclip; // Far and near. Both of them.
-  AnimationBlock transPos; // (Vec3F) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
-  Vec3F pos; // float, Where the camera is located.
-  AnimationBlock transTarget; // (Vec3F) How the target moves. Should be 3*3 floats. (?)
-  Vec3F target; // float, Where the camera points to.
+  AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  Vec3D pos; // float, Where the camera is located.
+  AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+  Vec3D target; // float, Where the camera points to.
   AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
   AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
 };
 
 struct ModelParticleParams {
-  FakeAnimationBlock colors; 	// (Vec3F)	This one points to 3 floats defining red, green and blue.
+  FakeAnimationBlock colors; 	// (Vec3D)	This one points to 3 floats defining red, green and blue.
   FakeAnimationBlock opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
-  FakeAnimationBlock sizes; 		// (Vec2F)	It carries two floats per key. (x and y scale)
+  FakeAnimationBlock sizes; 		// (Vec2D)	It carries two floats per key. (x and y scale)
   int32 d[2];
   FakeAnimationBlock Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
   FakeAnimationBlock unk2; 		// (UInt16)
   float unk[3];
-  Vec3F scales;
+  Vec3D scales;
   float slowdown;
   float unknown1[2];
   float rotation;				//Sprite Rotation
   float unknown2[2];
-  Vec3F Rot1;					//Model Rotation 1
-  Vec3F Rot2;					//Model Rotation 2
-  Vec3F Trans;				//Model Translation
+  Vec3D Rot1;					//Model Rotation 1
+  Vec3D Rot2;					//Model Rotation 2
+  Vec3D Trans;				//Model Translation
   float f2[4];
   int32 nUnknownReference;
   int32 ofsUnknownReferenc;
@@ -445,7 +445,7 @@ struct ModelParticleParams {
 #define MODELPARTICLE_EMITTER_SPHERE 2
 #define MODELPARTICLE_EMITTER_SPLINE 3
 
-template<typename Base, size_t integer_bits, size_t decimal_bits> struct fixed_point
+template<typename Base, uint32 integer_bits, uint32 decimal_bits> struct fixed_point
 {
   Base decimal : decimal_bits;
   Base integer : integer_bits;
@@ -460,7 +460,7 @@ struct M2ParticleDef
 {
   int32 id;  // so far it's always -1
   int32 flags; // MODELPARTICLE_FLAGS_*
-  Vec3F pos; // The position. Relative to the following bone.
+  Vec3D pos; // The position. Relative to the following bone.
   int16 bone; // The bone it's attached to.
   int16 texture; // And the texture that is used. In multitextured particles this is actually composed of
                   // three 5-bit texture ints, plus 1 bit left over.
@@ -497,12 +497,12 @@ struct M2ParticleDef
 struct ModelRibbonEmitterDef {
   int32 id;
   int32 bone;
-  Vec3F pos;
+  Vec3D pos;
   int32 nTextures;
   int32 ofsTextures;
   int32 nUnknown;
   int32 ofsUnknown;
-  AnimationBlock color; // (Vec3F)
+  AnimationBlock color; // (Vec3D)
   AnimationBlock opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
   AnimationBlock above; // (Float) The height above.
   AnimationBlock below; // (Float) The height below. Do not set these to the same!
@@ -524,7 +524,7 @@ struct ModelEventDef {
   char id[4]; // This is a (actually 3 character) name for the event with a $ in front.
   int32 dbid; // This data is passed when the event is fired.
   int32 bone; // Somewhere it has to be attached.
-  Vec3F pos; // Relative to that bone of course.
+  Vec3D pos; // Relative to that bone of course.
   int16 type; // This is some fake-AnimationBlock.
   int16 seq; // Built up like a real one but without timestamps(?). What the fuck?
   uint32 nTimes; // See the documentation on AnimationBlocks at this topic.
@@ -593,7 +593,7 @@ $CST
 struct ModelAttachmentDef {
   uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.
   uint32 bone; // Somewhere it has to be attached.
-  Vec3F pos; // Relative to that bone of course.
+  Vec3D pos; // Relative to that bone of course.
   AnimationBlock unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
 };
 

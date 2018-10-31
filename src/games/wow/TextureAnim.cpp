@@ -9,7 +9,7 @@
 
 #include "GL/glew.h"
 
-void TextureAnim::calc(ssize_t anim, size_t time)
+void TextureAnim::calc(int32 anim, uint32 time)
 {
 	if (trans.uses(anim)) {
 		tval = trans.getValue(anim, time);

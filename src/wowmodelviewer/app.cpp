@@ -399,6 +399,7 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
   config.setValue("Settings/SSCounter", ssCounter);
   config.setValue("Settings/DefaultFormat", imgFormat);
+  config.sync();
 }
 
 

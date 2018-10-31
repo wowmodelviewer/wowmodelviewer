@@ -27,7 +27,7 @@ struct Particle
   Vec3D	corners[4];
   Vec3D tpos;
   float size, life, maxlife;
-  size_t tile;
+  uint32 tile;
   Vec4D color;
 };
 
@@ -38,23 +38,23 @@ class ParticleEmitter
 protected:
   ParticleSystem *sys;
 public:
-  ParticleEmitter(ParticleSystem *sys) : sys(sys) {}
-  virtual Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2) = 0;
+  ParticleEmitter(ParticleSystem *sys): sys(sys) {}
+  virtual Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2) = 0;
   virtual ~ParticleEmitter() {}
 };
 
-class PlaneParticleEmitter : public ParticleEmitter
+class PlaneParticleEmitter: public ParticleEmitter
 {
 public:
-  PlaneParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
-  Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
+  PlaneParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
-class SphereParticleEmitter : public ParticleEmitter
+class SphereParticleEmitter: public ParticleEmitter
 {
 public:
-  SphereParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
-  Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2);
+  SphereParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
 struct TexCoordSet
@@ -70,7 +70,7 @@ class _PARTICLE_API_ ParticleSystem
   ParticleEmitter *emitter;
   ParticleList particles;
   int order, ParticleType;
-  size_t manim, mtime;
+  uint32 manim, mtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
   void initTile(Vec2D *tc, int num);
@@ -101,7 +101,7 @@ public:
   // whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
 
-  ParticleSystem() : mid(0), emitter(0), rem(0)
+  ParticleSystem(): mid(0), emitter(0), rem(0)
   {
     multitexture = 0;
     particleColID = 0;
@@ -128,7 +128,7 @@ public:
   void init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & globals);
   void update(float dt);
 
-  void setup(size_t anim, size_t time);
+  void setup(uint32 anim, uint32 time);
   void draw();
 
   friend class PlaneParticleEmitter;
@@ -170,15 +170,16 @@ public:
   static bool useDoNotTrail;
 };
 
+
 struct RibbonSegment
 {
   Vec3D pos, up, back;
-  float len, len0;
+  float len,len0;
 };
 
 class RibbonEmitter
 {
-  Animated<Vec3F> color;
+  Animated<Vec3D> color;
   AnimatedShort opacity;
   Animated<float> above, below;
 
@@ -187,7 +188,7 @@ class RibbonEmitter
 
   Vec3D pos;
 
-  size_t manim, mtime;
+  uint32 manim, mtime;
   float length, seglen;
   int numsegs;
 
@@ -203,8 +204,10 @@ public:
   WoWModel *model;
 
   void init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint32> & globals);
-  void setup(size_t anim, size_t time);
+  void setup(uint32 anim, uint32 time);
   void draw();
 };
+
+
 
 #endif

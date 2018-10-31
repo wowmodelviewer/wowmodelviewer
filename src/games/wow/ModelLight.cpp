@@ -14,7 +14,7 @@
 void ModelLight::init(GameFile * f, ModelLightDef &mld, QVector<uint32> & global)
 {
 	tpos = pos = fixCoordSystem(mld.pos);
-  tdir = dir = Vec3D(0.0, 1.0, 0.0);   // Target Direction
+	tdir = dir = Vec3D(0,1,0); // no idea
 	type = mld.type;
 	parent = mld.bone;
 	ambColor.init(mld.ambientColor, f, global);
@@ -26,7 +26,7 @@ void ModelLight::init(GameFile * f, ModelLightDef &mld, QVector<uint32> & global
 	UseAttenuation.init(mld.useAttenuation, f, global);
 }
 
-void ModelLight::setup(size_t time, GLuint l)
+void ModelLight::setup(uint32 time, GLuint l)
 {
 	Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
 	Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);

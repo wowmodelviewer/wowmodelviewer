@@ -8,11 +8,10 @@
 
 #include <cstdlib>
 #include <limits>
-using namespace std;
 
 class Matrix {
 public:
-	double m[4][4];
+	float m[4][4];
 
 	Matrix()
 	{
@@ -125,10 +124,10 @@ public:
 	}
 
 	void QRotate(const Quaternion& q){
-		double x = q.x;
-		double y = q.y;
-		double z = q.z;
-		double angle = q.w;
+		float x = q.x;
+		float y = q.y;
+		float z = q.z;
+		float angle = q.w;
 		/*
 			R = u u^T + cos theta (I - u u^T) + sin theta S
 			  = u u^T + I cos(theta) - u u^T cos(theta) + S sin(theta)
@@ -144,7 +143,7 @@ public:
 		*/
 		unit();
 
-		double l = sqrt(x*x + y*y + z*z);
+		float l = sqrt(x*x + y*y + z*z);
 		if(l == 0)
 			return;
 
@@ -152,8 +151,8 @@ public:
 		y /= l;
 		z /= l;
 
-		double sina = sin(angle);
-		double cosa = cos(angle);
+		float sina = sin(angle);
+		float cosa = cos(angle);
 
 		m[0][0] = x*x * (1 - cosa) + cosa;
 		m[0][1] = x*y * (1 - cosa)         - z * sina;
@@ -213,33 +212,33 @@ public:
 	Quaternion GetQuaternion(){
 		Quaternion q(Vec4D(0,0,0,0));
 
-		double trace = m[0][0] + m[1][1] + m[2][2];
+		float trace = m[0][0] + m[1][1] + m[2][2];
 
 		if (trace > 0){
-			double s = 0.5 / sqrt(trace + 1.0);
+			float s = 0.5f / sqrt(trace+1.0f);
 			q.w = 0.25f / s;
 			q.x = (m[2][1] - m[1][2]) * s;
 			q.y = (m[0][2] - m[2][0]) * s;
 			q.z = (m[1][0] - m[0][1]) * s;
 		}else{
 			if ((m[0][0] > m[1][1]) && (m[0][0] > m[2][2])){
-				double s = 2.0 * sqrt(1.0 + m[0][0] - m[1][1] - m[2][2]);
+				float s = 2.0f * sqrtf( 1.0f + m[0][0] - m[1][1] - m[2][2]);
 				q.w = (m[2][1] - m[1][2] ) / s;
 				q.x = 0.25f * s;
 				q.y = (m[0][1] + m[1][0] ) / s;
 				q.z = (m[0][2] + m[2][0] ) / s;
 			} else if (m[1][1] > m[2][2]) {
-				double s = 2.0f * sqrt(1.0f + m[1][1] - m[0][0] - m[2][2]);
+				float s = 2.0f * sqrtf( 1.0f + m[1][1] - m[0][0] - m[2][2]);
 				q.w = (m[0][2] - m[2][0] ) / s;
 				q.x = (m[0][1] + m[1][0] ) / s;
-				q.y = 0.25 * s;
+				q.y = 0.25f * s;
 				q.z = (m[1][2] + m[2][1] ) / s;
 			} else {
-				double s = 2.0 * sqrt(1.0 + m[2][2] - m[0][0] - m[1][1]);
+				float s = 2.0f * sqrtf( 1.0f + m[2][2] - m[0][0] - m[1][1] );
 				q.w = (m[1][0] - m[0][1] ) / s;
 				q.x = (m[0][2] + m[2][0] ) / s;
 				q.y = (m[1][2] + m[2][1] ) / s;
-				q.z = 0.25 * s;
+				q.z = 0.25f * s;
 			}
 		}
 
@@ -255,7 +254,7 @@ public:
 	}
 
 
-	double determinant() const
+	float determinant() const
 	{
 		#define SUB(a,b) (m[2][a]*m[3][b] - m[3][a]*m[2][b])
 		return
@@ -266,9 +265,9 @@ public:
 		#undef SUB
 	}
 
-	double minor(size_t x, size_t y) const
+	float minor(size_t x, size_t y) const
 	{
-		double s[3][3];
+		float s[3][3];
 		for (size_t j=0, v=0; j<4; j++) {
 			if (j==y) continue;
 			for (size_t i=0, u=0; i<4; i++) {
@@ -297,7 +296,7 @@ public:
 	void invert()
 	{
 		Matrix adj = this->adjoint();
-		double invdet = 1.0f / this->determinant();
+		float invdet = 1.0f / this->determinant();
         for (size_t j=0; j<4; j++) {
         	for (size_t i=0; i<4; i++) {
 				m[j][i] = adj.m[j][i] * invdet;
@@ -309,7 +308,7 @@ public:
 	{
         for (size_t j=1; j<4; j++) {
         	for (size_t i=0; i<j; i++) {
-				double f = m[j][i];
+				float f = m[j][i];
 				m[j][i] = m[i][j];
 				m[i][j] = f;
 			}
@@ -360,47 +359,47 @@ public:
 
 		// First get RX and RY
 		bool zzero[3] = {
-			(abs(z.x) <= std::numeric_limits<double>::epsilon()),
-			(abs(z.y) <= std::numeric_limits<double>::epsilon()),
-			(abs(z.z) <= std::numeric_limits<double>::epsilon())
+			(fabs(z[0]) <= std::numeric_limits<float>::epsilon()),
+			(fabs(z[1]) <= std::numeric_limits<float>::epsilon()),
+			(fabs(z[2]) <= std::numeric_limits<float>::epsilon())
 		};
 
 		if (zzero[0] && zzero[2])
 		{
-			hpb.x = 0;
+			hpb[0] = 0;
 			if (!zzero[1])
-				hpb.y = (z.y < 0.0) ? HALFPI : -HALFPI;
+				hpb[1] = (z[1] < 0) ? HALFPI : -HALFPI;
 			else
-				hpb.y = 0;
+				hpb[1] = 0;
 		}
 		else
 		{
 			if (zzero[2])
-				hpb.x = (z.x < 0.0) ? -HALFPI : HALFPI;
+				hpb[0] = (z[0] < 0) ? -HALFPI : HALFPI;
 			else
-				hpb.x = atan2(z.x, z.z);
-			double hyp = sqrt(z.x * z.x + z.z * z.z);
-			if (hyp <= std::numeric_limits<double>::epsilon())
-				hpb.y = (z.y < 0.0) ? HALFPI : -HALFPI;
+				hpb[0] = atan2(z[0], z[2]);
+			float hyp = sqrt(z[0] * z[0] + z[2] * z[2]);
+			if (hyp <= std::numeric_limits<float>::epsilon())
+				hpb[1] = (z[1] < 0.0) ? HALFPI : -HALFPI;
 			else
-				hpb.y = -atan2(z.y, hyp);
+				hpb[1] = -atan2(z[1], hyp);
 		}
 
 		// Find RZ
-		Matrix rot_hp(newRotate_HPB(hpb.x, hpb.y, 0));
+		Matrix rot_hp(newRotate_HPB(hpb[0], hpb[1], 0));
 		rot_hp.invert();
 		Vec3D rot_y(rot_hp * y);
 		bool rot_yzero[3] = {
-			(abs(rot_y.x) <= std::numeric_limits<double>::epsilon()),
-			(abs(rot_y.y) <= std::numeric_limits<double>::epsilon()),
-			(abs(rot_y.z) <= std::numeric_limits<double>::epsilon())
+			(fabs(rot_y[0]) <= std::numeric_limits<float>::epsilon()),
+			(fabs(rot_y[1]) <= std::numeric_limits<float>::epsilon()),
+			(fabs(rot_y[2]) <= std::numeric_limits<float>::epsilon())
 		};
 		if(rot_yzero[0] && rot_yzero[1])
-			hpb.z = 0;
+			hpb[2] = 0;
 		else if(rot_yzero[1])
-			hpb.z = (rot_y.x < 0.0) ? HALFPI : -HALFPI;
+			hpb[2] = (rot_y[0] < 0) ? HALFPI : -HALFPI;
 		else
-			hpb.z = atan2(-rot_y.x, rot_y.y);
+			hpb[2] = atan2(-rot_y[0], rot_y[1]);
 
 		return hpb;
 	}

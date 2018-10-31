@@ -77,10 +77,10 @@ inline Quaternion interpolate<Quaternion>(const float r, const Quaternion &v1, c
 }
 
 
-typedef std::pair<size_t, size_t> AnimRange;
+typedef std::pair<uint32, uint32> AnimRange;
 
 // global time for global sequences
-_ANIMATED_API_ extern size_t globalTime;
+_ANIMATED_API_ extern uint32 globalTime;
 
 enum Interpolations {
   INTERPOLATION_NONE,
@@ -142,22 +142,25 @@ template <class T, class D = T, class Conv = Identity<T> >
 class Animated {
 public:
 
-  ssize_t type, seq;
+  int32 type, seq;
   QVector<uint32> globals;
-  QVector<size_t> times[MAX_ANIMATED];
-  QVector<T> data[MAX_ANIMATED];
+  QVector<QVector<uint32>> times;
+  QVector<QVector<T>> data;
   // for nonlinear interpolations:
-  QVector<T> in[MAX_ANIMATED], out[MAX_ANIMATED];
-  size_t sizes; // for fix function
+  QVector<QVector<T>> in;
+  QVector<QVector<T>> out;
+  uint32 sizes; // for fix function
 
-  bool uses(ssize_t anim) const
+  bool uses(int32 anim) const
   {
     if (seq > -1)
       anim = 0;
-    return ((data[anim].size()) > 0);
+    if (data.size() > 0 && anim > -1)
+      return ((data[anim].size()) > 0);
+    return false;
   }
 
-  T getValue(ssize_t anim, size_t time)
+  T getValue(int32 anim, uint32 time)
   {
     // obtain a time value and a data range
     if (seq >= 0 && seq < (int)globals.size()) {
@@ -170,11 +173,13 @@ public:
         time = globalTime % globals[seq];
       anim = 0;
     }
+    if (data.size() <= anim)
+      return T();
     if (data[anim].size() > 1 && times[anim].size() > 1) {
-      size_t t1, t2;
-      size_t pos = 0;
+      uint32 t1, t2;
+      uint32 pos = 0;
       float r;
-      size_t max_time = times[anim][times[anim].size() - 1];
+      uint32 max_time = times[anim][times[anim].size() - 1];
       //if (max_time > 0)
       //	time %= max_time; // I think this might not be necessary?
       if (time > max_time) {
@@ -182,45 +187,45 @@ public:
         r = 1.0f;
 
         if (type == INTERPOLATION_NONE)
-          return data[anim][(int)pos];
+          return data[(int)anim][(int)pos];
         else if (type == INTERPOLATION_LINEAR)
-          return interpolate<T>(r, data[anim][(int)pos], data[anim][(int)pos]);
+          return interpolate<T>(r, data[anim][pos], data[anim][pos]);
         else if (type == INTERPOLATION_HERMITE) {
           // INTERPOLATION_HERMITE is only used in cameras afaik?
-          return interpolateHermite<T>(r, data[anim][(int)pos], data[anim][(int)pos], in[anim][(int)pos], out[anim][(int)pos]);
+          return interpolateHermite<T>(r, data[anim][pos], data[anim][pos], in[anim][pos], out[anim][pos]);
         }
         else if (type == INTERPOLATION_BEZIER) {
           //Is this used ingame or only by custom models?
-          return interpolateBezier<T>(r, data[anim][(int)pos], data[anim][(int)pos], in[anim][(int)pos], out[anim][(int)pos]);
+          return interpolateBezier<T>(r, data[anim][pos], data[anim][pos], in[anim][pos], out[anim][pos]);
         }
         else //this shouldn't appear!
-          return data[anim][(int)pos];
+          return data[anim][pos];
       }
       else {
-        for (size_t i = 0; i < times[anim].size() - 1; i++) {
-          if (time >= times[anim][(int)i] && time < times[anim][(int)i + 1]) {
+        for (int32 i = 0; i < times[anim].size() - 1; i++) {
+          if (time >= times[anim][i] && time < times[anim][i + 1]) {
             pos = i;
             break;
           }
         }
-        t1 = times[anim][(int)pos];
-        t2 = times[anim][(int)pos + 1];
+        t1 = times[anim][pos];
+        t2 = times[anim][pos + 1];
         r = (time - t1) / (float)(t2 - t1);
 
         if (type == INTERPOLATION_NONE)
-          return data[anim][(int)pos];
+          return data[anim][pos];
         else if (type == INTERPOLATION_LINEAR)
-          return interpolate<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1]);
+          return interpolate<T>(r, data[anim][pos], data[anim][pos + 1]);
         else if (type == INTERPOLATION_HERMITE) {
           // INTERPOLATION_HERMITE is only used in cameras afaik?
-          return interpolateHermite<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1], in[anim][(int)pos], out[anim][(int)pos]);
+          return interpolateHermite<T>(r, data[anim][pos], data[anim][pos + 1], in[anim][pos], out[anim][pos]);
         }
         else if (type == INTERPOLATION_BEZIER) {
           //Is this used ingame or only by custom models?
-          return interpolateBezier<T>(r, data[anim][(int)pos], data[anim][(int)pos + 1], in[anim][(int)pos], out[anim][(int)pos]);
+          return interpolateBezier<T>(r, data[anim][pos], data[anim][pos + 1], in[anim][pos], out[anim][pos]);
         }
         else //this shouldn't appear!
-          return data[anim][(int)pos];
+          return data[anim][pos];
       }
     }
     else {
@@ -230,18 +235,13 @@ public:
       else
         return data[anim][0];
     }
-
   }
 
-  void init(AnimationBlock &b, GameFile * f, QVector<uint32> gs)
+  void init(AnimationBlock &b, GameFile * f, QVector<uint32> & gs)
   {
     globals = gs;
     type = b.type;
     seq = b.seq;
-    times->fill(0);
-    data->fill(T());
-    in->fill(T());
-    out->fill(T());
 
     // times
     if (b.nTimes != b.nKeys)
@@ -251,42 +251,61 @@ public:
     if (b.nTimes == 0)
       return;
 
-    for (size_t j = 0; j < b.nTimes; j++) {
+    for (uint32 j = 0; j < b.nTimes; j++) {
       AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.ofsTimes + j * sizeof(AnimationBlockHeader));
 
       unsigned int *ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
-      if (sizeof(ptimes) == (sizeof(unsigned int) * pHeadTimes->nEntrys))
-      {
-        for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
-          times[j].push_back(ptimes[i]);
-      }
+      QVector<uint32> entries;
+      for (uint32 i = 0; i < pHeadTimes->nEntrys; i++)
+        entries.push_back(ptimes[i]);
+
+      times.push_back(entries);
     }
 
     // keyframes
-    for (size_t j = 0; j < b.nKeys; j++) {
+    for (uint32 j = 0; j < b.nKeys; j++) {
       AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f->getBuffer() + b.ofsKeys + j * sizeof(AnimationBlockHeader));
 
       D *keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
+
+      QVector<T> entries;
+      QVector<T> entriesIn;
+      QVector<T> entriesOut;
+
       switch (type) {
       case INTERPOLATION_NONE:
       case INTERPOLATION_LINEAR:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-          data[j].push_back(Conv::conv(keys[i]));
+        entries.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++)
+          entries.push_back(Conv::conv(keys[i]));
+        data.push_back(entries);
         break;
       case INTERPOLATION_HERMITE:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
-          data[j].push_back(Conv::conv(keys[i * 3]));
-          in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-          out[j].push_back(Conv::conv(keys[i * 3 + 2]));
+        entries.clear();
+        entriesIn.clear();
+        entriesOut.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++) {
+          entries.push_back(Conv::conv(keys[i * 3]));
+          entriesIn.push_back(Conv::conv(keys[i * 3 + 1]));
+          entriesOut.push_back(Conv::conv(keys[i * 3 + 2]));
         }
+        data.push_back(entries);
+        in.push_back(entriesIn);
+        out.push_back(entriesOut);
         break;
         //let's use same values like hermite?!?
       case INTERPOLATION_BEZIER:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++) {
-          data[j].push_back(Conv::conv(keys[i * 3]));
-          in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-          out[j].push_back(Conv::conv(keys[i * 3 + 2]));
+        entries.clear();
+        entriesIn.clear();
+        entriesOut.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++) {
+          entries.push_back(Conv::conv(keys[i * 3]));
+          entriesIn.push_back(Conv::conv(keys[i * 3 + 1]));
+          entriesOut.push_back(Conv::conv(keys[i * 3 + 2]));
         }
+        data.push_back(entries);
+        in.push_back(entriesIn);
+        out.push_back(entriesOut);
         break;
       }
     }
@@ -297,10 +316,6 @@ public:
     globals = modelData.globalSequences;
     type = b.type;
     seq = b.seq;
-    times->fill(0);
-    data->fill(T());
-    in->fill(T());
-    out->fill(T());
 
     // times
     if (b.nTimes != b.nKeys)
@@ -310,11 +325,11 @@ public:
     if (b.nTimes == 0)
       return;
 
-    for (size_t j = 0; j < b.nTimes; j++)
+    for (uint32 j = 0; j < b.nTimes; j++)
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint32)j));
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint)j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
@@ -333,16 +348,18 @@ public:
           continue;
       }
 
-      for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
-        times[j].push_back(ptimes[i]);
+      QVector<uint32> entries;
+      for (uint32 i = 0; i < pHeadTimes->nEntrys; i++)
+        entries.push_back(ptimes[i]);
+      times.push_back(entries);
     }
 
     // keyframes
-    for (size_t j = 0; j < b.nKeys; j++)
+    for (uint32 j = 0; j < b.nKeys; j++)
     {
       D *keys;
       AnimationBlockHeader* pHeadKeys;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint32)j));
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint)j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
@@ -361,28 +378,44 @@ public:
           continue;
       }
 
+      QVector<T> entries;
+      QVector<T> entriesIn;
+      QVector<T> entriesOut;
+
       switch (type)
       {
       case INTERPOLATION_NONE:
       case INTERPOLATION_LINEAR:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-          data[j].push_back(Conv::conv(keys[i]));
+        entries.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++)
+          entries.push_back(Conv::conv(keys[i]));
+        data.push_back(entries);
         break;
       case INTERPOLATION_HERMITE:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-        {
-          data[j].push_back(Conv::conv(keys[i * 3]));
-          in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-          out[j].push_back(Conv::conv(keys[i * 3 + 2]));
+        entries.clear();
+        entriesIn.clear();
+        entriesOut.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++) {
+          entries.push_back(Conv::conv(keys[i * 3]));
+          entriesIn.push_back(Conv::conv(keys[i * 3 + 1]));
+          entriesOut.push_back(Conv::conv(keys[i * 3 + 2]));
         }
+        data.push_back(entries);
+        in.push_back(entriesIn);
+        out.push_back(entriesOut);
         break;
       case INTERPOLATION_BEZIER:
-        for (size_t i = 0; i < pHeadKeys->nEntrys; i++)
-        {
-          data[j].push_back(Conv::conv(keys[i * 3]));
-          in[j].push_back(Conv::conv(keys[i * 3 + 1]));
-          out[j].push_back(Conv::conv(keys[i * 3 + 2]));
+        entries.clear();
+        entriesIn.clear();
+        entriesOut.clear();
+        for (uint32 i = 0; i < pHeadKeys->nEntrys; i++) {
+          entries.push_back(Conv::conv(keys[i * 3]));
+          entriesIn.push_back(Conv::conv(keys[i * 3 + 1]));
+          entriesOut.push_back(Conv::conv(keys[i * 3 + 2]));
         }
+        data.push_back(entries);
+        in.push_back(entriesIn);
+        out.push_back(entriesOut);
         break;
       }
     }
@@ -393,27 +426,27 @@ public:
     switch (type) {
     case INTERPOLATION_NONE:
     case INTERPOLATION_LINEAR:
-      for (size_t i = 0; i < sizes; i++) {
-        for (size_t j = 0; j < data[i].size(); j++) {
-          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
+      for (uint32 i = 0; i < sizes; i++) {
+        for (int32 j = 0; j < data[i].size(); j++) {
+          data[i][j] = fixfunc(data[i][j]);
         }
       }
       break;
     case INTERPOLATION_HERMITE:
-      for (size_t i = 0; i < sizes; i++) {
-        for (size_t j = 0; j < data[i].size(); j++) {
-          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
-          in[(int)i][(int)j] = fixfunc(in[(int)i][(int)j]);
-          out[(int)i][(int)j] = fixfunc(out[(int)i][(int)j]);
+      for (uint32 i = 0; i < sizes; i++) {
+        for (int32 j = 0; j < data[i].size(); j++) {
+          data[i][j] = fixfunc(data[i][j]);
+          in[i][j] = fixfunc(in[i][j]);
+          out[i][j] = fixfunc(out[i][j]);
         }
       }
       break;
     case INTERPOLATION_BEZIER:
-      for (size_t i = 0; i < sizes; i++) {
-        for (size_t j = 0; j < data[i].size(); j++) {
-          data[(int)i][(int)j] = fixfunc(data[(int)i][(int)j]);
-          in[(int)i][(int)j] = fixfunc(in[(int)i][(int)j]);
-          out[(int)i][(int)j] = fixfunc(out[(int)i][(int)j]);
+      for (uint32 i = 0; i < sizes; i++) {
+        for (int32 j = 0; j < data[i].size(); j++) {
+          data[i][j] = fixfunc(data[i][j]);
+          in[i][j] = fixfunc(in[i][j]);
+          out[i][j] = fixfunc(out[i][j]);
         }
       }
       break;
@@ -426,12 +459,12 @@ public:
     out << "      <type>" << v.type << "</type>" << endl;
     out << "      <seq>" << v.seq << "</seq>" << endl;
     out << "      <anims>" << endl;
-    for (size_t j = 0; j < v.sizes; j++) {
+    for (uint32 j = 0; j < v.sizes; j++) {
       if (j != 0) continue; // only output walk animation
       if (v.uses((unsigned int)j)) {
         out << "    <anim id=\"" << j << "\" size=\"" << v.data[j].size() << "\">" << endl;
-        for (size_t k = 0; k < v.data[j].size(); k++) {
-          out << "      <data time=\"" << v.times[j][(int)k] << "\">" << v.data[j][(int)k] << "</data>" << endl;
+        for (int32 k = 0; k < v.data[j].size(); k++) {
+          out << "      <data time=\"" << v.times[j][k] << "\">" << v.data[j][k] << "</data>" << endl;
         }
         out << "    </anim>" << endl;
       }
@@ -446,8 +479,8 @@ public:
 typedef Animated<float, short, ShortToFloat> AnimatedShort;
 
 float frand();
-Vec3F fixCoordSystem(Vec3F v);
-Vec3F fixCoordSystem2(Vec3F v);
+Vec3D fixCoordSystem(Vec3D v);
+Vec3D fixCoordSystem2(Vec3D v);
 Quaternion fixCoordSystemQuat(Quaternion v);
 
 float randfloat(float lower, float upper);

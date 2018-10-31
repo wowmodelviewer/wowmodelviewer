@@ -79,7 +79,7 @@ bool GameFile::close()
   return doPostCloseOperation();
 }
 
-void GameFile::allocate(size_t s)
+void GameFile::allocate(unsigned int s)
 {
   if (originalBuffer)
     delete[] originalBuffer;
@@ -104,7 +104,7 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
   {
     if (it.magic == curChunk)
     {
-      it.pointer = (unsigned int)pointer;
+      it.pointer = pointer;
       break;
     }
   }

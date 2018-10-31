@@ -35,7 +35,7 @@ public:
 	class Iterator
 	{
 	  public:
-    Iterator(DBFile &f, size_t index) :
+    Iterator(DBFile &f, unsigned int index) :
       file(f), recordIndex(index) {}
 		  
       /// Advance (prefix only)
@@ -47,7 +47,7 @@ public:
 		
       std::vector<std::string> get(const core::TableStructure * structure) const
       {
-        return file.get((unsigned int)recordIndex, structure);
+        return file.get(recordIndex, structure);
       }
 	
 		  /// Comparison
@@ -63,7 +63,7 @@ public:
 	  
     private:
       DBFile &file;
-      size_t recordIndex;
+      unsigned int recordIndex;
 	};
 
 	/// Get begin iterator over records
@@ -78,10 +78,10 @@ public:
   virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const = 0;
 
 protected:
-	size_t recordSize;
-	size_t recordCount;
-	size_t fieldCount;
-	size_t stringSize;
+  uint32_t recordSize;
+  uint32_t recordCount;
+  uint32_t fieldCount;
+  uint32_t stringSize;
 	unsigned char *data;
 	unsigned char *stringTable;
 

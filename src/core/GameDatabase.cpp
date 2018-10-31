@@ -303,8 +303,8 @@ bool core::TableStructure::fill()
   QString query = "INSERT INTO ";
   query += name;
   query += "(";
-  size_t nbFields = fields.size();
-  size_t curfield = 0;
+  int nbFields = fields.size();
+  int curfield = 0;
   for (auto it = fields.begin(), itEnd = fields.end();
     it != itEnd;
     ++it, curfield++)
@@ -330,14 +330,14 @@ bool core::TableStructure::fill()
   query += ") VALUES";
 
   QString queryBase = query;
-  size_t record = 0;
-  size_t nbRecord = dbc->getRecordCount();
+  int record = 0;
+  int nbRecord = dbc->getRecordCount();
 
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
     std::vector<std::string> fields = it.get(this);
 
-    for (size_t field = 0, nbfield = fields.size(); field < nbfield; field++)
+    for (int field = 0, nbfield = fields.size(); field < nbfield; field++)
     {
       if (field == 0)
         query += " (";

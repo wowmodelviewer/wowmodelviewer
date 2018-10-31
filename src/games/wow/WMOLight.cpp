@@ -9,7 +9,7 @@ void WMOLight::setup(GLint light)
   // not used right now -_-
 
   GLfloat LightAmbient[] = { 0, 0, 0, 1.0f };
-  GLfloat LightPosition[] = { (float)pos.x, (float)pos.y, (float)pos.z, 0.0f };
+  GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
 
   glLightfv(light, GL_AMBIENT, LightAmbient);
   glLightfv(light, GL_DIFFUSE, fcolor);

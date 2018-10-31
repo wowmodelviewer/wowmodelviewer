@@ -347,11 +347,11 @@ void WMOGroup::initDisplayList()
     WMOMaterial *mat = &wmo->mat[batch->texture];
 
     // build indice to vert array.
-    for (size_t i = 0; i <= batch->indexCount; i++){
-      size_t a = indices[batch->indexStart + i];
-      for (size_t j = batch->vertexStart; j <= batch->vertexEnd; j++){
+    for (uint32 i = 0; i <= batch->indexCount; i++){
+      uint32 a = indices[batch->indexStart + i];
+      for (uint32 j = batch->vertexStart; j <= batch->vertexEnd; j++){
         if (vertices[a] == vertices[j]){
-          IndiceToVerts[batch->indexStart + (uint)i] = (uint)j;
+          IndiceToVerts[batch->indexStart + i] = j;
           break;
         }
       }
@@ -431,7 +431,7 @@ void WMOGroup::initLighting(int nLR, short *useLights)
   // "real" lighting?
   if ((flags & 0x2000) && hascv) {
 
-    Vec3D dirmin(1.0, 1.0, 1.0);
+    Vec3D dirmin(1, 1, 1);
     float lenmin;
     int lmin;
 

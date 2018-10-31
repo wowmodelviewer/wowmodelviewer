@@ -672,7 +672,7 @@ void CharControl::selectMount()
   }
   for (size_t i = 0; i < creaturemodels.size(); i++)
   {
-    choices.Add(creaturemodels[i].substr(9, string::npos)); // remove "creature/" bit for readability
+    choices.Add(creaturemodels[i].substr(9, std::string::npos)); // remove "creature/" bit for readability
     numbers.push_back(i);
     cats.push_back(1);
   }

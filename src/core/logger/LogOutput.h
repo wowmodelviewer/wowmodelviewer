@@ -49,47 +49,47 @@
 //--------------------------------------------------------------------
 namespace WMVLog
 {
-class LogOutput : public Component
-{
-	public :
-		// Constants / Enums
-		
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-    virtual void write(const QString & message) = 0;
-		
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-		// friend class declarations
-	
-};
+  class LogOutput : public Component
+  {
+  public:
+    // Constants / Enums
 
-// static members definition
+    // Constructors
+
+    // Destructors
+
+    // Methods
+    virtual void write(const QString & message) = 0;
+
+    // Members
+
+  protected:
+    // Constants / Enums
+
+    // Constructors
+
+    // Destructors
+
+    // Methods
+
+    // Members
+
+  private:
+    // Constants / Enums
+
+    // Constructors
+
+    // Destructors
+
+    // Methods
+
+    // Members
+
+    // friend class declarations
+
+  };
+
+  // static members definition
 #ifdef _LOGOUTPUT_CPP_
 
 #endif

@@ -92,7 +92,7 @@ void CharTexture::initRegions()
   }
 
   // Iterate on layout to initialize our members (sections informations)
-  for(size_t i=0, imax=layouts.values.size() ; i < imax ; i++)
+  for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
   {
     LayoutSize texLayout;
     int curLayout = layouts.values[i][0].toInt();
@@ -117,7 +117,7 @@ void CharTexture::initRegions()
     base.height = texLayout.height;
     regionCoords[LAYOUT_BASE_REGION] = base;
 
-    for(size_t r=0, rmax=regions.values.size() ; r < rmax ; r++)
+    for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
     {
       CharRegionCoords coords;
       coords.xpos = regions.values[r][1].toInt();

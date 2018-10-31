@@ -952,6 +952,7 @@ void ModelViewer::LoadModel(GameFile * file)
 
   if (isChar)
   {
+    LOG_INFO << "Loading character model...";
     modelAtt = canvas->LoadCharModel(file);
     // error check
     if (!modelAtt)
@@ -981,7 +982,8 @@ void ModelViewer::LoadModel(GameFile * file)
   }
   else
   {
-    modelAtt = canvas->LoadCharModel(file); //  change it from LoadModel, don't sure it's right or not.
+    LOG_INFO << "Loading non-character model...";
+    modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
 
     // error check
     if (!modelAtt)
@@ -1132,7 +1134,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
       if (r.valid && !r.empty())
       {
-        static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
+        static std::map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
         { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
         for (uint i = 0; i < r.values.size(); i++)
         {
@@ -1501,7 +1503,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
         wxString fn = dialog.GetPath();
 
         // FIXME: ofstream is not compitable with multibyte path name
-        ofstream f(fn.fn_str(), ios_base::out | ios_base::trunc);
+        std::ofstream f(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
 
         f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
         for (size_t i = 0; i < MAX_LIGHTS; i++) {
@@ -1520,7 +1522,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
       if (dialog.ShowModal() == wxID_OK) {
         wxString fn = dialog.GetFilename();
         // FIXME: ifstream is not compitable with multibyte path name
-        ifstream f(fn.fn_str());
+        std::ifstream f(fn.fn_str());
 
         bool lightObj, lightTrue, lightDir, lightAmb, lightModel;
 
@@ -2358,7 +2360,7 @@ void ModelViewer::ModelInfo()
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   wxString fn = wxT("ModelInfo.xml");
   // FIXME: ofstream is not compatible with multibyte path name
-  ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
+  std::ofstream xml(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
 
   if (!xml.is_open()) {
     LOG_ERROR << "Unable to open file '" << QString::fromWCharArray(fn.c_str()) << "'. Could not export model.";
@@ -2559,7 +2561,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           return;
 
         selection = animChoiceDlg.GetSelections();
-        vector<int> animsToExport;
+        std::vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for (unsigned int i = 0; i < selection.GetCount(); i++)
           animsToExport.push_back(canvas->model()->anims[selection[i]].Index);
