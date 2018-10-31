@@ -8,10 +8,10 @@
 #ifndef _DISPLAYSETTINGS_H_
 #define _DISPLAYSETTINGS_H_
 
-// WX Headers
+ // WX Headers
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 enum
@@ -36,10 +36,10 @@ enum {
   NUM_SETTINGS2_CHECK
 };
 
-class DisplaySettings: public wxWindow
+class DisplaySettings : public wxWindow
 {
   DECLARE_CLASS(DisplaySettings)
-    DECLARE_EVENT_TABLE()
+  DECLARE_EVENT_TABLE()
 
   wxComboBox *oglMode;
   wxCheckBox *chkBox[NUM_SETTINGS2_CHECK];
@@ -54,7 +54,5 @@ public:
   void OnButton(wxCommandEvent &event);
   void OnCheck(wxCommandEvent &event);
 };
-
-
 
 #endif /* _DISPLAYSETTINGS_H_ */

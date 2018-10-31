@@ -1,4 +1,3 @@
-
 #include "globalvars.h"
 
 _GLOBALVARS_API_ ModelViewer *g_modelViewer = 0;

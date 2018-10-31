@@ -119,6 +119,4 @@ private:
   QString m_dhModel;
 };
 
-
-
 #endif /* _CHARDETAILS_H_ */

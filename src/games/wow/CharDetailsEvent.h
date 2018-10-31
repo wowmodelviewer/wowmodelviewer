@@ -27,15 +27,15 @@
 #ifndef _CHARDETAILSEVENT_H_
 #define _CHARDETAILSEVENT_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 
-// Externals
+ // Externals
 
-// Other libraries
+ // Other libraries
 #include "metaclasses/Event.h"
 
 // Current library
@@ -48,52 +48,52 @@
 //--------------------------------------------------------------------
 class CharDetailsEvent : public Event
 {
-  public :
-    // Constants / Enums
-    enum EventType
-    {
-      SKIN_COLOR_CHANGED = 0xFFFFF000,
-      FACE_CHANGED = 0xFFFFF001,
-      FACIAL_CUSTOMIZATION_STYLE_CHANGED = 0xFFFFF002,
-      FACIAL_CUSTOMIZATION_COLOR_CHANGED = 0xFFFFF003,
-      ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED = 0xFFFFF004,
-      DH_TATTOO_STYLE_CHANGED = 0xFFFFF005,
-      DH_TATTOO_COLOR_CHANGED = 0xFFFFF006,
-      DH_HORN_STYLE_CHANGED = 0xFFFFF007,
-      DH_BLINDFOLDS_CHANGED = 0xFFFFF008,
-      DH_MODE_CHANGED = 0xFFFFF009
-    };
+public:
+  // Constants / Enums
+  enum EventType
+  {
+    SKIN_COLOR_CHANGED = 0xFFFFF000,
+    FACE_CHANGED = 0xFFFFF001,
+    FACIAL_CUSTOMIZATION_STYLE_CHANGED = 0xFFFFF002,
+    FACIAL_CUSTOMIZATION_COLOR_CHANGED = 0xFFFFF003,
+    ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED = 0xFFFFF004,
+    DH_TATTOO_STYLE_CHANGED = 0xFFFFF005,
+    DH_TATTOO_COLOR_CHANGED = 0xFFFFF006,
+    DH_HORN_STYLE_CHANGED = 0xFFFFF007,
+    DH_BLINDFOLDS_CHANGED = 0xFFFFF008,
+    DH_MODE_CHANGED = 0xFFFFF009
+  };
 
-	// Constructors
-	CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
+  // Constructors
+  CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
 
-  protected :
-	// Constants / Enums
+protected:
+  // Constants / Enums
 
-	// Constructors
+  // Constructors
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
 
-	// Members
+  // Members
 
-  private :
-	// Constants / Enums
+private:
+  // Constants / Enums
 
-	// Constructors
+  // Constructors
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
 
-	// Members
+  // Members
 
-	// friend class declarations
+  // friend class declarations
 };
 
 // static members definition

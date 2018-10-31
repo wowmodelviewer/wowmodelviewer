@@ -23,7 +23,7 @@
 //Note: All angles in degrees
 
 class CCamera {
-  private:
+private:
 
   Vec3D m_vViewDir;
   Vec3D m_vRightVector;
@@ -32,7 +32,7 @@ class CCamera {
 
   Vec3D m_vRotation;
 
-  public:
+public:
   CCamera();
   void Reset();	//inits the default values)
   void Setup();	// Puts the camera into place.
@@ -46,7 +46,5 @@ class CCamera {
   void MoveUpward(float Distance);
   void Strafe(float Distance);
 };
-
-
 
 #endif

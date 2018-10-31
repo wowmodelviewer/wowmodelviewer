@@ -271,4 +271,3 @@ void Attachment::setModel(Displayable * newmodel)
   if (m_model)
     m_model->attachment = this;
 }
-

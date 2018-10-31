@@ -36,43 +36,41 @@
 
 class _CASCFOLDER_API_ CASCFolder
 {
-  public:
-    CASCFolder();
+public:
+  CASCFolder();
 
-    void init(const QString & path);
+  void init(const QString & path);
 
-    QString locale() { return m_currentConfig.locale; }
-    QString version() { return m_currentConfig.version; }
+  QString locale() { return m_currentConfig.locale; }
+  QString version() { return m_currentConfig.version; }
 
-    std::vector<core::GameConfig> configsFound() { return m_configs; }
-    bool setConfig(core::GameConfig config);
-    
-    int lastError() { return m_openError; }
+  std::vector<core::GameConfig> configsFound() { return m_configs; }
+  bool setConfig(core::GameConfig config);
 
-    bool fileExists(std::string file);
+  int lastError() { return m_openError; }
 
-    bool openFile(std::string file, HANDLE * result);
-    bool closeFile(HANDLE file);
+  bool fileExists(std::string file);
 
-    int fileDataId(std::string & filename);
+  bool openFile(std::string file, HANDLE * result);
+  bool closeFile(HANDLE file);
 
-  private:
-    CASCFolder(const CASCFolder &);
+  int fileDataId(std::string & filename);
 
-    void initLocales();
-    void initVersion();
-    void initBuildInfo();
-    
-    int m_currentCascLocale;
-    core::GameConfig m_currentConfig;
+private:
+  CASCFolder(const CASCFolder &);
 
-    QString m_folder;
-    int m_openError;
-    HANDLE hStorage;
+  void initLocales();
+  void initVersion();
+  void initBuildInfo();
 
-    std::vector<core::GameConfig> m_configs;
+  int m_currentCascLocale;
+  core::GameConfig m_currentConfig;
+
+  QString m_folder;
+  int m_openError;
+  HANDLE hStorage;
+
+  std::vector<core::GameConfig> m_configs;
 };
-
-
 
 #endif /* _CASCFOLDER_H_ */

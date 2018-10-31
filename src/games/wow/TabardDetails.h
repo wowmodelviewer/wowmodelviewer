@@ -27,38 +27,37 @@ class QXmlStreamWriter;
 
 struct _TABARDDETAILS_API_ TabardDetails
 {
-    int Icon;
-    int IconColor;
-    int Border;
-    int BorderColor;
-    int Background;
+  int Icon;
+  int IconColor;
+  int Border;
+  int BorderColor;
+  int Background;
 
-    int maxIcon;
-    int maxIconColor;
-    int maxBorder;
-    int maxBorderColor;
-    int maxBackground;
+  int maxIcon;
+  int maxIconColor;
+  int maxBorder;
+  int maxBorderColor;
+  int maxBackground;
 
-    bool showCustom;
+  bool showCustom;
 
-    QString GetIconTex(int slot);
-    QString GetBorderTex(int slot);
-    QString GetBackgroundTex(int slot);
+  QString GetIconTex(int slot);
+  QString GetBorderTex(int slot);
+  QString GetBackgroundTex(int slot);
 
-    int GetMaxIcon();
-    int GetMaxIconColor(int icon);
-    int GetMaxBorder();
-    int GetMaxBorderColor(int border);
-    int GetMaxBackground();
+  int GetMaxIcon();
+  int GetMaxIconColor(int icon);
+  int GetMaxBorder();
+  int GetMaxBorderColor(int border);
+  int GetMaxBackground();
 
-    void save(QXmlStreamWriter &);
-    void load(QXmlStreamReader &);
+  void save(QXmlStreamWriter &);
+  void load(QXmlStreamReader &);
 
-  private:
-	  static const std::vector<QString> ICON_COLOR_VECTOR;
-	  static const std::vector<QString> BORDER_COLOR_VECTOR;
-	  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
+private:
+  static const std::vector<QString> ICON_COLOR_VECTOR;
+  static const std::vector<QString> BORDER_COLOR_VECTOR;
+  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
 };
-
 
 #endif /* _TABARDDETAILS_H_ */

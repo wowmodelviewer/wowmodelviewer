@@ -16,14 +16,12 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
-
 /*
  * main.cpp
  *
  *  Created on: 29 jan. 2017
  *   Copyright: 2017 , WoW Model Viewer (http://wowmodelviewer.net)
  */
-
 
 #pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 
@@ -54,7 +52,6 @@ int main(int argc, char ** argv)
   std::cout << "Output File : " << outputFile.toStdString() << std::endl;
 
   HANDLE CascStorage;
-  
 
   if (!CascOpenStorage(dataFoler.toStdWString().c_str(), CASC_LOCALE_ENUS, &CascStorage))
   {

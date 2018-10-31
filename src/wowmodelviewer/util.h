@@ -2,7 +2,7 @@
 #define UTIL_H
 
 #ifdef _WINDOWS
-#include <windows.h>
+  #include <windows.h>
 #endif
 
 #include <algorithm>
@@ -53,9 +53,9 @@ extern wxString locales[];
 
 // Slashes for Pathing
 #ifdef _WINDOWS
-	#define SLASH wxT('\\')
+  #define SLASH wxT('\\')
 #else
-	#define SLASH wxT('/')
+  #define SLASH wxT('/')
 #endif
 
 float frand();
@@ -75,4 +75,3 @@ wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapTy
 bool correctType(ssize_t type, ssize_t slot);
 
 #endif
-

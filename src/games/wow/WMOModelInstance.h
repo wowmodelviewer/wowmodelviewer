@@ -10,7 +10,7 @@ class ModelManager;
 class WoWModel;
 
 class WMOModelInstance {
-  public:
+public:
   // header
   Vec3D pos;		// Position
   float w;		// W for Quat Rotation

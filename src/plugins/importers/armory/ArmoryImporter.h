@@ -26,11 +26,11 @@
 #ifndef _ARMORYIMPORTER_H_
 #define _ARMORYIMPORTER_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QtPlugin>
 
 // Externals
@@ -50,60 +50,60 @@
 //--------------------------------------------------------------------
 class ArmoryImporter : public ImporterPlugin
 {
-    Q_INTERFACES(ImporterPlugin)
+  Q_INTERFACES(ImporterPlugin)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "armoryimporter.json")
 
-  public :
-    // Constants / Enums
+public:
+  // Constants / Enums
 
-    // Constructors
-    ArmoryImporter() {}
+  // Constructors
+  ArmoryImporter() {}
 
-    // Destructors
-    ~ArmoryImporter() {}
+  // Destructors
+  ~ArmoryImporter() {}
 
-    // Methods
-	bool acceptURL(QString url) const;
+  // Methods
+  bool acceptURL(QString url) const;
 
-	NPCInfos * importNPC(QString url) const { return NULL; };
-	CharInfos * importChar(QString url) const;
-	ItemRecord * importItem(QString url) const;
+  NPCInfos * importNPC(QString url) const { return NULL; };
+  CharInfos * importChar(QString url) const;
+  ItemRecord * importItem(QString url) const;
 
-    // Members
+  // Members
 
-  protected :
-    // Constants / Enums
+protected:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
+  // Methods
 
-    // Members
+  // Members
 
-  private :
-    // Constants / Enums
-    enum ImportType
-    {
-      CHARACTER,
-      ITEM
-    };
+private:
+  // Constants / Enums
+  enum ImportType
+  {
+    CHARACTER,
+    ITEM
+  };
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
-	int readJSONValues(ImportType type, QString url, QJsonObject & result) const;
-	QByteArray getURLData(QString inputUrl) const;
-	bool hasMember(QJsonValueRef check, QString lookfor) const;
-	bool hasTransmog(QJsonValueRef check) const;
+  // Methods
+  int readJSONValues(ImportType type, QString url, QJsonObject & result) const;
+  QByteArray getURLData(QString inputUrl) const;
+  bool hasMember(QJsonValueRef check, QString lookfor) const;
+  bool hasTransmog(QJsonValueRef check) const;
 
-    // Members
+  // Members
 
-    // friend class declarations
+  // friend class declarations
 
 };
 

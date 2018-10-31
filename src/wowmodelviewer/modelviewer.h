@@ -5,11 +5,11 @@
 // wx
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 #if defined(__WIN32__) && !defined(__WIN__)
-	#include <winsock.h>
+#include <winsock.h>
 #endif
 
 
@@ -38,115 +38,114 @@ namespace WMVLog
   class Logger;
 }
 
-class ModelViewer: public wxFrame
-{    
-    DECLARE_CLASS(ModelViewer)
-    DECLARE_EVENT_TABLE()
+class ModelViewer : public wxFrame
+{
+  DECLARE_CLASS(ModelViewer)
+  DECLARE_EVENT_TABLE()
 
-    void OnStatusBarRefreshTimer(wxTimerEvent& event);
-    wxTimer timer;
+  void OnStatusBarRefreshTimer(wxTimerEvent& event);
+  wxTimer timer;
 
 public:
-	// Constructor + Deconstructor
-	ModelViewer();
-	virtual ~ModelViewer();
+  // Constructor + Deconstructor
+  ModelViewer();
+  virtual ~ModelViewer();
 
-	// our class objects
-	AnimControl *animControl;
-	ModelCanvas *canvas;
-	CharControl *charControl;
-	EnchantsDialog *enchants;
-	LightControl *lightControl;
-	ModelControl *modelControl;
-	ImageControl *imageControl;
-	//SoundControl *soundControl;
-	SettingsControl *settingsControl;
-	ModelBankControl *modelbankControl;
+  // our class objects
+  AnimControl *animControl;
+  ModelCanvas *canvas;
+  CharControl *charControl;
+  EnchantsDialog *enchants;
+  LightControl *lightControl;
+  ModelControl *modelControl;
+  ImageControl *imageControl;
+  //SoundControl *soundControl;
+  SettingsControl *settingsControl;
+  ModelBankControl *modelbankControl;
 
-	CAnimationExporter *animExporter;
+  CAnimationExporter *animExporter;
 
-	FileControl *fileControl;
+  FileControl *fileControl;
 
-	//wxWidget objects
-	wxMenuBar *menuBar;
-	wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
-	wxColourData bgDialogData;
+  //wxWidget objects
+  wxMenuBar *menuBar;
+  wxMenu *fileMenu, *exportMenu, *camMenu, *charMenu, *charGlowMenu, *viewMenu, *optMenu, *lightMenu;
+  wxColourData bgDialogData;
 
-	// wxAUI - new docking lib (now part of wxWidgets 2.8.0)
-	wxAuiManager interfaceManager;
+  // wxAUI - new docking lib (now part of wxWidgets 2.8.0)
+  wxAuiManager interfaceManager;
 
-	// Boolean flags
-	bool isWoWLoaded;
-	bool isModel;
-	bool isChar;
-	bool isWMO;
-	bool isADT;
-	bool initDB;
+  // Boolean flags
+  bool isWoWLoaded;
+  bool isModel;
+  bool isChar;
+  bool isWMO;
+  bool isADT;
+  bool initDB;
 
-	// Initialising related functions
-	void InitMenu();
-	void InitObjects();
-	void InitDocking();
-	void InitDatabase();
+  // Initialising related functions
+  void InitMenu();
+  void InitObjects();
+  void InitDocking();
+  void InitDatabase();
 
-	// Save and load various settings between sessions
-	void LoadSession();
-	void SaveSession();
-	// Save and load the GUI layout
-	void LoadLayout();
-	void SaveLayout();
-	void ResetLayout();
-	// save + load character *.CHR files
-	void LoadChar(QString fn, bool equipmentOnly = false);
-	void SaveChar(QString fn, bool equipmentOnly = false);
+  // Save and load various settings between sessions
+  void LoadSession();
+  void SaveSession();
+  // Save and load the GUI layout
+  void LoadLayout();
+  void SaveLayout();
+  void ResetLayout();
+  // save + load character *.CHR files
+  void LoadChar(QString fn, bool equipmentOnly = false);
+  void SaveChar(QString fn, bool equipmentOnly = false);
 
-	void LoadModel(GameFile * f);
-	void LoadItem(unsigned int displayID);
-	void LoadNPC(unsigned int modelid);
+  void LoadModel(GameFile * f);
+  void LoadItem(unsigned int displayID);
+  void LoadNPC(unsigned int modelid);
 
-	// Window GUI event related functions
-	//void OnIdle();
-	void OnClose(wxCloseEvent &event);
-	void OnSize(wxSizeEvent &event);
-	void OnExit(wxCommandEvent &event);
-	void UpdateCanvasStatus();
-	void SetCanvasSize(uint32 sizex, uint32 sizey);
+  // Window GUI event related functions
+  //void OnIdle();
+  void OnClose(wxCloseEvent &event);
+  void OnSize(wxSizeEvent &event);
+  void OnExit(wxCommandEvent &event);
+  void UpdateCanvasStatus();
+  void SetCanvasSize(uint32 sizex, uint32 sizey);
 
-	// menu commands
-	void OnToggleDock(wxCommandEvent &event);
-	void OnToggleCommand(wxCommandEvent &event);
-	void OnSetColor(wxCommandEvent &event);
-	void OnEffects(wxCommandEvent &event);
-	void OnLightMenu(wxCommandEvent &event);
-	void OnCamMenu(wxCommandEvent &event);
+  // menu commands
+  void OnToggleDock(wxCommandEvent &event);
+  void OnToggleCommand(wxCommandEvent &event);
+  void OnSetColor(wxCommandEvent &event);
+  void OnEffects(wxCommandEvent &event);
+  void OnLightMenu(wxCommandEvent &event);
+  void OnCamMenu(wxCommandEvent &event);
 
-	// Wrapper function for character stuff (forwards events to charcontrol)
-	void OnSetEquipment(wxCommandEvent &event);
-	void OnCharToggle(wxCommandEvent &event);
+  // Wrapper function for character stuff (forwards events to charcontrol)
+  void OnSetEquipment(wxCommandEvent &event);
+  void OnCharToggle(wxCommandEvent &event);
 
-	void OnMount(wxCommandEvent &event);
-	void OnSave(wxCommandEvent &event);
-	void OnBackground(wxCommandEvent &event);
-	void OnLanguage(wxCommandEvent &event);
-	void OnAbout(wxCommandEvent &event);
-	void OnCheckForUpdate(wxCommandEvent &event);
-	void OnCanvasSize(wxCommandEvent &event);
-	void OnTest(wxCommandEvent &event);
-	void OnExport(wxCommandEvent &event);
-	void OnExportOther(wxCommandEvent &event);
-	
-	void UpdateControls();
-   
-	void ImportArmoury(wxString strURL);
-	void ModelInfo();
+  void OnMount(wxCommandEvent &event);
+  void OnSave(wxCommandEvent &event);
+  void OnBackground(wxCommandEvent &event);
+  void OnLanguage(wxCommandEvent &event);
+  void OnAbout(wxCommandEvent &event);
+  void OnCheckForUpdate(wxCommandEvent &event);
+  void OnCanvasSize(wxCommandEvent &event);
+  void OnTest(wxCommandEvent &event);
+  void OnExport(wxCommandEvent &event);
+  void OnExportOther(wxCommandEvent &event);
 
-	Vec3D DoSetColor(const Vec3D &defColor);
+  void UpdateControls();
 
-	void OnGameToggle(wxCommandEvent &event);
-	void OnViewLog(wxCommandEvent &event);
-	void LoadWoW();
+  void ImportArmoury(wxString strURL);
+  void ModelInfo();
+
+  Vec3D DoSetColor(const Vec3D &defColor);
+
+  void OnGameToggle(wxCommandEvent &event);
+  void OnViewLog(wxCommandEvent &event);
+  void LoadWoW();
 
 };
 
 #endif
-

@@ -16,11 +16,11 @@ struct WMOBatch {
   unsigned char flags, texture;
 };
 
-struct WMOVertColor{
+struct WMOVertColor {
   uint8 b, g, r, a;
 };
 
-class WMOGroup 
+class WMOGroup
 {
   WMO *wmo;
   int flags;
@@ -32,7 +32,7 @@ class WMOGroup
   size_t nDoodads;
   short *ddr;
   //Liquid *lq;
-  public:
+public:
   Vec3D *vertices, *normals;
   Vec2D *texcoords;
   uint16 *indices;
@@ -64,6 +64,5 @@ class WMOGroup
 
   void updateModels(bool load);
 };
-
 
 #endif

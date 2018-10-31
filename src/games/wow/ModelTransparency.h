@@ -13,13 +13,11 @@
 
 class GameFile;
 
-struct ModelTransparency 
+struct ModelTransparency
 {
-	AnimatedShort trans;
+  AnimatedShort trans;
 
   void init(GameFile * f, ModelTransDef &mtd, QVector<uint32> & global);
 };
-
-
 
 #endif /* _MODELTRANSPARENCY_H_ */

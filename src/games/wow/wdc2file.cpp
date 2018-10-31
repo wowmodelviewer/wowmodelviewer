@@ -1,20 +1,17 @@
 #include "wdc2file.h"
 
 #include "logger/Logger.h"
-
 #include "Game.h" // GAMEDIRECTORY Singleton
+#include "WoWDatabase.h"
 
 #include <sstream>
-
 #include <bitset>
-
-#include "WoWDatabase.h"
 
 #define WDC2_READ_DEBUG 0
 #define WDC2_READ_DEBUG_FIRST_RECORDS 0
 
-WDC2File::WDC2File(const QString & file):
-WDB5File(file)
+WDC2File::WDC2File(const QString & file) :
+  WDB5File(file)
 {
 }
 
@@ -122,7 +119,7 @@ bool WDC2File::open()
 
   uint32 palletBlockOffset = getPos();
   uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
- 
+
   // only one secion used in dbc files so far, so no loop for now
   seek(sectionHeader[0].file_offset);
 
@@ -135,9 +132,9 @@ bool WDC2File::open()
   if ((m_header.flags & 0x01) != 0)
   {
     stringSize = 0;
-//    stringTableOffset = m_header.offset_map_offset + 6 * (m_header.max_id - m_header.min_id + 1);
+    //    stringTableOffset = m_header.offset_map_offset + 6 * (m_header.max_id - m_header.min_id + 1);
   }
-  
+
   seek(stringTableOffset);
   stringTable = getPointer();
 
@@ -146,7 +143,7 @@ bool WDC2File::open()
   uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
 
   uint32 relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_size;
- 
+
 #if WDC2_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
@@ -224,44 +221,44 @@ bool WDC2File::open()
         unsigned char * recordOffset = data + (i*recordSize);
         switch (info.storage_type)
         {
-          case FIELD_COMPRESSION::NONE:
-          {
-            unsigned char * val = new unsigned char[info.field_size_bits/8];
-            memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
-            m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
-            break;
-          }
-          case FIELD_COMPRESSION::BITPACKED:
-          {
-            unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-            unsigned int offset = info.field_offset_bits / 8;
-            unsigned char * val = new unsigned char[size];
+        case FIELD_COMPRESSION::NONE:
+        {
+          unsigned char * val = new unsigned char[info.field_size_bits / 8];
+          memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
+          m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
+          break;
+        }
+        case FIELD_COMPRESSION::BITPACKED:
+        {
+          unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+          unsigned int offset = info.field_offset_bits / 8;
+          unsigned char * val = new unsigned char[size];
 
-            memcpy(val, recordOffset + offset, size);
+          memcpy(val, recordOffset + offset, size);
 
-            unsigned int id = (*reinterpret_cast<unsigned int*>(val));
-            id = id & ((1ull << info.field_size_bits) - 1);
+          unsigned int id = (*reinterpret_cast<unsigned int*>(val));
+          id = id & ((1ull << info.field_size_bits) - 1);
 
-            m_IDs.push_back(id);
+          m_IDs.push_back(id);
 
-            break;
-          }
-          case FIELD_COMPRESSION::COMMON_DATA:
-            LOG_ERROR << "Reading ID from Common Data is not implemented";
-            return false;
-          case FIELD_COMPRESSION::BITPACKED_INDEXED:
-          case FIELD_COMPRESSION::BITPACKED_SIGNED:
-          {
-            uint id = readBitpackedValue(info, recordOffset);
-            m_IDs.push_back(id);
-            break;
-          }
-          case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
-            LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
-            return false;
-          default:
-            LOG_ERROR << "Reading ID from type" << info.storage_type << "is not implemented";
-            return false;
+          break;
+        }
+        case FIELD_COMPRESSION::COMMON_DATA:
+          LOG_ERROR << "Reading ID from Common Data is not implemented";
+          return false;
+        case FIELD_COMPRESSION::BITPACKED_INDEXED:
+        case FIELD_COMPRESSION::BITPACKED_SIGNED:
+        {
+          uint id = readBitpackedValue(info, recordOffset);
+          m_IDs.push_back(id);
+          break;
+        }
+        case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
+          LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
+          return false;
+        default:
+          LOG_ERROR << "Reading ID from type" << info.storage_type << "is not implemented";
+          return false;
         }
       }
     }
@@ -463,7 +460,7 @@ bool WDC2File::open()
         continue;
       }
       if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
-          (it.val3 != 1))
+        (it.val3 != 1))
       {
         for (uint i = 0; i < it.val3; i++)
         {
@@ -620,79 +617,79 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
   switch (info.storage_type)
   {
-    case FIELD_COMPRESSION::NONE:
-    {
-      uint fieldSize = info.field_size_bits / 8;
-      unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
+  case FIELD_COMPRESSION::NONE:
+  {
+    uint fieldSize = info.field_size_bits / 8;
+    unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
 
-      if (arraySize != 1)
+    if (arraySize != 1)
+    {
+      fieldSize /= arraySize;
+      fieldOffset += ((info.field_size_bits / 8 / arraySize) * arrayIndex);
+    }
+
+    unsigned char * val = new unsigned char[fieldSize];
+    memcpy(val, fieldOffset, fieldSize);
+
+    // handle special case => when value is supposed to be 0, values read are all 0xFF
+    // Don't understand why, so I use this ugly stuff...
+    if (arraySize != 1)
+    {
+      uint nbFF = 0;
+      for (uint i = 0; i < fieldSize; i++)
       {
-        fieldSize /= arraySize;
-        fieldOffset += ((info.field_size_bits / 8 / arraySize) * arrayIndex);
+        if (val[i] == 0xFF)
+          nbFF++;
       }
 
-      unsigned char * val = new unsigned char[fieldSize];
-      memcpy(val, fieldOffset, fieldSize);
-
-      // handle special case => when value is supposed to be 0, values read are all 0xFF
-      // Don't understand why, so I use this ugly stuff...
-      if (arraySize != 1)
+      if (nbFF == fieldSize)
       {
-        uint nbFF = 0;
         for (uint i = 0; i < fieldSize; i++)
-        {
-          if (val[i] == 0xFF)
-            nbFF++;
-        }
-
-        if (nbFF == fieldSize)
-        {
-          for (uint i = 0; i < fieldSize; i++)
-            val[i] = 0;
-        }
+          val[i] = 0;
       }
-      result = (*reinterpret_cast<unsigned int*>(val));
-      result = result & ((1ull << (info.field_size_bits / arraySize)) - 1);
-      break;
     }
-    case FIELD_COMPRESSION::BITPACKED:
-    case FIELD_COMPRESSION::BITPACKED_SIGNED:
+    result = (*reinterpret_cast<unsigned int*>(val));
+    result = result & ((1ull << (info.field_size_bits / arraySize)) - 1);
+    break;
+  }
+  case FIELD_COMPRESSION::BITPACKED:
+  case FIELD_COMPRESSION::BITPACKED_SIGNED:
+  {
+    result = readBitpackedValue(info, recordOffset);
+    break;
+  }
+  case FIELD_COMPRESSION::COMMON_DATA:
+  {
+    result = info.val1;
+    auto mapIt = m_commonData.find(fieldIndex);
+    if (mapIt != m_commonData.end())
     {
-      result = readBitpackedValue(info, recordOffset);
-      break;
+      auto valIt = mapIt->second.find(m_IDs[recordIndex]);
+      if (valIt != mapIt->second.end())
+        result = valIt->second;
     }
-    case FIELD_COMPRESSION::COMMON_DATA:
-    { 
-      result = info.val1;
-      auto mapIt = m_commonData.find(fieldIndex);
-      if (mapIt != m_commonData.end())
-      {
-        auto valIt = mapIt->second.find(m_IDs[recordIndex]);
-        if (valIt != mapIt->second.end())
-          result = valIt->second;
-      }
-      break;
-    }
-    case FIELD_COMPRESSION::BITPACKED_INDEXED:
-    {                                          
-      uint32 index = readBitpackedValue(info, recordOffset);
-      auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * 4;
-      memcpy(&result, getBuffer() + offset, 4);
-      break;
-    }
-    case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
-    {
-      uint32 index = readBitpackedValue(info, recordOffset);
-      auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
-      memcpy(&result, getBuffer() + offset, 4);
-      break;
-    }
+    break;
+  }
+  case FIELD_COMPRESSION::BITPACKED_INDEXED:
+  {
+    uint32 index = readBitpackedValue(info, recordOffset);
+    auto it = m_palletBlockOffsets.find(fieldIndex);
+    uint32 offset = it->second + index * 4;
+    memcpy(&result, getBuffer() + offset, 4);
+    break;
+  }
+  case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
+  {
+    uint32 index = readBitpackedValue(info, recordOffset);
+    auto it = m_palletBlockOffsets.find(fieldIndex);
+    uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
+    memcpy(&result, getBuffer() + offset, 4);
+    break;
+  }
 
-    default:
-      LOG_ERROR << "Reading data from type" << info.storage_type << "is not implemented";
-      return false;
+  default:
+    LOG_ERROR << "Reading data from type" << info.storage_type << "is not implemented";
+    return false;
   }
   return true;
 }
@@ -710,7 +707,3 @@ uint32 WDC2File::readBitpackedValue(field_storage_info info, unsigned char * rec
   result = result & ((1ull << info.field_size_bits) - 1);
   return result;
 }
-
-
-
-

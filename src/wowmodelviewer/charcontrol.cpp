@@ -365,44 +365,44 @@ void CharControl::OnButton(wxCommandEvent &event)
   //	dir.Append('\\');
   switch (event.GetId())
   {
-    case ID_CLEAR_EQUIPMENT:
+  case ID_CLEAR_EQUIPMENT:
+  {
+    for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
     {
-      for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
+      WoWItem * item = model->getItem((CharSlots)i);
+      if (item)
+        item->setId(0);
+    }
+    RefreshEquipment();
+    break;
+  }
+  case ID_LOAD_SET:
+  {
+    selectSet();
+    break;
+  }
+  case ID_LOAD_START:
+  {
+    selectStart();
+    break;
+  }
+  case ID_MOUNT:
+  {
+    selectMount();
+    break;
+  }
+  default:
+  {
+    for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
+    {
+      if (buttons[i] && (wxButton*)event.GetEventObject() == buttons[i])
       {
-        WoWItem * item = model->getItem((CharSlots)i);
-        if (item)
-          item->setId(0);
+        selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
+        break;
       }
-      RefreshEquipment();
-      break;
     }
-    case ID_LOAD_SET:
-    {
-      selectSet();
-      break;
-    }
-    case ID_LOAD_START:
-    {
-      selectStart();
-      break;
-    }
-    case ID_MOUNT:
-    {
-      selectMount();
-      break;
-    }
-    default:
-    {
-      for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
-      {
-        if (buttons[i] && (wxButton*)event.GetEventObject() == buttons[i])
-        {
-          selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
-          break;
-        }
-      }
-      break;
-    }
+    break;
+  }
   }
 
   RefreshModel();
@@ -435,7 +435,7 @@ void CharControl::RefreshModel()
   // Eye Glow Geosets are ID 1701, 1702, etc.
   size_t egt = model->cd.eyeGlowType;
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
- 
+
   // Update Eye Glow Menu
   if (egt == EGT_NONE)
     g_modelViewer->charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
@@ -498,9 +498,9 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
     if (type == UPDATE_SINGLE_ITEM)
     {
       if (it->type == IT_SHOULDER || it->type == IT_SHIELD ||
-          it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
-          it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
-          it->type == IT_DAGGER)
+        it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
+        it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
+        it->type == IT_DAGGER)
       {
         choices.Add(getItemName(*it).toStdWString());
         numbers.push_back(it->id);
@@ -592,8 +592,8 @@ void CharControl::selectStart()
   LOG_INFO << "race =" << infos.raceid << "sex = " << infos.sexid;
 
   QString query = QString("SELECT ChrClasses.name, CSO.ID "
-                          "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
-                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid);
+    "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
+    "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid);
 
   sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
 
@@ -678,7 +678,7 @@ void CharControl::selectMount()
   }
 
   itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
-                                        wxT("Mounts"), choices, cats, catnames, 0, true);
+    wxT("Mounts"), choices, cats, catnames, 0, true);
   itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
   itemDialog->Check(1, false);
   itemDialog->DoFilter();
@@ -767,203 +767,203 @@ void CharControl::OnUpdateItem(int type, int id)
 {
   switch (type)
   {
-    case UPDATE_ITEM:
+  case UPDATE_ITEM:
+  {
+    WoWItem * item = model->getItem((CharSlots)choosingSlot);
+    if (item)
     {
-      WoWItem * item = model->getItem((CharSlots)choosingSlot);
-      if (item)
+      item->setId(numbers[id]);
+
+      labels[choosingSlot]->SetLabel(item->name().toStdWString());
+      labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
+
+      // refresh level combo box
+      levelboxes[choosingSlot]->Clear();
+      if (item->nbLevels() > 1)
       {
-        item->setId(numbers[id]);
-
-        labels[choosingSlot]->SetLabel(item->name().toStdWString());
-        labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
-
-        // refresh level combo box
-        levelboxes[choosingSlot]->Clear();
-        if (item->nbLevels() > 1)
-        {
-          levelboxes[choosingSlot]->Enable(true);
-          for (unsigned int i = 0; i < item->nbLevels(); i++)
-            levelboxes[choosingSlot]->Append(wxString::Format(wxT("%i"), i));
-        }
-        else
-        {
-          levelboxes[choosingSlot]->Enable(false);
-        }
-      }
-      break;
-    }
-    case UPDATE_SET:
-    {
-      id = numbers[id];
-
-      if (id && model)
-      {
-        QString query = QString("SELECT item1, item2, item3, item4, item5, "
-                                "item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id);
-
-        sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
-
-        if (itemSet.valid && !itemSet.empty())
-        {
-          // reset previously equipped items
-
-          for (WoWModel::iterator it = model->begin();
-               it != model->end();
-               ++it)
-               (*it)->setId(0);
-
-          for (unsigned i = 0; i < 8; i++)
-            tryToEquipItem(itemSet.values[0][i].toInt());
-
-          RefreshEquipment();
-          RefreshModel();
-        }
-      }
-      break;
-    }
-    case UPDATE_START:
-      id = numbers[id];
-
-      if (id && model)
-      {
-        QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
-                                "CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
-                                "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
-                                "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
-                                "FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id);
-
-        sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
-
-        if (startOutfit.valid && !startOutfit.empty())
-        {
-          // reset previously equipped items
-          for (WoWModel::iterator it = model->begin();
-               it != model->end();
-               ++it)
-               (*it)->setId(0);
-
-          for (unsigned i = 0; i < 24; i++)
-          {
-            tryToEquipItem(startOutfit.values[0][i].toInt());
-          }
-
-          RefreshEquipment();
-          RefreshModel();
-        }
-      }
-      break;
-
-    case UPDATE_MOUNT:
-    {
-      TextureGroup grp;
-      GameFile * modelFile;
-      WoWModel *m;
-      int morphID = 0;
-
-      if (!model)
-        return;
-      if (g_canvas->root->model())
-      {
-        g_canvas->root->setModel(0);
-        g_canvas->setModel(0);
-      }
-      if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
-      {
-        // clearing the mount
-        g_canvas->setModel(model);
-        g_canvas->ResetView();
-        if (charAtt)
-        {
-          charAtt->scale = g_canvas->root->scale;
-          charAtt->id = 0;
-        }
-        g_animControl->UpdateModel(model);
-        break;
-      }
-
-      // Sheathe weapons:
-      model->bSheathe = true;
-      RefreshEquipment();
-      RefreshModel();
-      g_modelViewer->charMenu->Check(ID_SHEATHE, 1);
-
-      if (cats[id] == 0) // create proper mount from model ID
-      {
-        morphID = numbers[id];
-        // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-        QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                                "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
-                                "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                                "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
-
-        sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
-        if (!mountQuery.valid || mountQuery.empty())
-          break;
-        modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
-      }
-      else if (cats[id] == 1) // create mount from any old creature model file name
-      {
-        modelFile = GAMEDIRECTORY.getFile(QString::fromWCharArray(creaturemodels[numbers[id]].c_str()));
-        // that's it. No special textures or anything.
+        levelboxes[choosingSlot]->Enable(true);
+        for (unsigned int i = 0; i < item->nbLevels(); i++)
+          levelboxes[choosingSlot]->Append(wxString::Format(wxT("%i"), i));
       }
       else
-        break; // shouldn't happen
-      m = new WoWModel(modelFile, false);
-      m->isMount = true;
-      g_canvas->root->setModel(m);
-      g_canvas->setModel(m, true);
-      g_animControl->UpdateModel(m);
-
-      // for official mounts with display IDs:
-      if (morphID > 0)
-        g_animControl->SetSkinByDisplayID(morphID);
-
-      model->bSheathe = true;
-      RefreshEquipment();
-
-      // Alfred 2009.7.23 use animLookups to speed up
-      if (model->animLookups.size() >= ANIMATION_MOUNT &&
-          model->animLookups[ANIMATION_MOUNT] >= 0)
       {
-        model->animManager->Stop();
-        model->currentAnim = model->animLookups[ANIMATION_MOUNT];
-        model->animManager->SetAnim(0, (short)model->currentAnim, 0);
+        levelboxes[choosingSlot]->Enable(false);
       }
-      g_canvas->curAtt = g_canvas->root;
+    }
+    break;
+  }
+  case UPDATE_SET:
+  {
+    id = numbers[id];
 
+    if (id && model)
+    {
+      QString query = QString("SELECT item1, item2, item3, item4, item5, "
+        "item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id);
+
+      sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
+
+      if (itemSet.valid && !itemSet.empty())
+      {
+        // reset previously equipped items
+
+        for (WoWModel::iterator it = model->begin();
+          it != model->end();
+          ++it)
+          (*it)->setId(0);
+
+        for (unsigned i = 0; i < 8; i++)
+          tryToEquipItem(itemSet.values[0][i].toInt());
+
+        RefreshEquipment();
+        RefreshModel();
+      }
+    }
+    break;
+  }
+  case UPDATE_START:
+    id = numbers[id];
+
+    if (id && model)
+    {
+      QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
+        "CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
+        "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
+        "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
+        "FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id);
+
+      sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
+
+      if (startOutfit.valid && !startOutfit.empty())
+      {
+        // reset previously equipped items
+        for (WoWModel::iterator it = model->begin();
+          it != model->end();
+          ++it)
+          (*it)->setId(0);
+
+        for (unsigned i = 0; i < 24; i++)
+        {
+          tryToEquipItem(startOutfit.values[0][i].toInt());
+        }
+
+        RefreshEquipment();
+        RefreshModel();
+      }
+    }
+    break;
+
+  case UPDATE_MOUNT:
+  {
+    TextureGroup grp;
+    GameFile * modelFile;
+    WoWModel *m;
+    int morphID = 0;
+
+    if (!model)
+      return;
+    if (g_canvas->root->model())
+    {
+      g_canvas->root->setModel(0);
+      g_canvas->setModel(0);
+    }
+    if (numbers[id] < 0)  // The user selected "None". Remove existing mount.
+    {
+      // clearing the mount
+      g_canvas->setModel(model);
+      g_canvas->ResetView();
       if (charAtt)
       {
-        charAtt->parent = g_canvas->root;
-        // Need to set this - but from what
-        // Model data doesn't contain sizes for different race/gender
-        // Character data doesn't contain sizes for different mounts
-        // possibly some formula that from both models that needs to be calculated.
-        // For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
-        // I really have no idea!  
-        if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
-          charAtt->scale = 2.25f;
-        else
-          charAtt->scale = 1.0f;
+        charAtt->scale = g_canvas->root->scale;
+        charAtt->id = 0;
       }
-      g_canvas->ResetView();
-      model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
-      m->rot.x = 0.0f; // mounted characters look better from the side
+      g_animControl->UpdateModel(model);
       break;
     }
-    case UPDATE_CREATURE_ITEM:
-      //model->cd.equipment[choosingSlot] = numbers[id];
-      //RefreshCreatureItem(choosingSlot);
-      //RefreshItem(choosingSlot);
-      return;
 
-    case UPDATE_NPC:
-      g_modelViewer->LoadNPC(npcs[id].id);
+    // Sheathe weapons:
+    model->bSheathe = true;
+    RefreshEquipment();
+    RefreshModel();
+    g_modelViewer->charMenu->Check(ID_SHEATHE, 1);
 
-      break;
+    if (cats[id] == 0) // create proper mount from model ID
+    {
+      morphID = numbers[id];
+      // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
+      QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
+        "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
+        "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+        "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
 
-    case UPDATE_SINGLE_ITEM:
-      g_modelViewer->LoadItem(numbers[id]);
-      break;
+      sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
+      if (!mountQuery.valid || mountQuery.empty())
+        break;
+      modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
+    }
+    else if (cats[id] == 1) // create mount from any old creature model file name
+    {
+      modelFile = GAMEDIRECTORY.getFile(QString::fromWCharArray(creaturemodels[numbers[id]].c_str()));
+      // that's it. No special textures or anything.
+    }
+    else
+      break; // shouldn't happen
+    m = new WoWModel(modelFile, false);
+    m->isMount = true;
+    g_canvas->root->setModel(m);
+    g_canvas->setModel(m, true);
+    g_animControl->UpdateModel(m);
+
+    // for official mounts with display IDs:
+    if (morphID > 0)
+      g_animControl->SetSkinByDisplayID(morphID);
+
+    model->bSheathe = true;
+    RefreshEquipment();
+
+    // Alfred 2009.7.23 use animLookups to speed up
+    if (model->animLookups.size() >= ANIMATION_MOUNT &&
+      model->animLookups[ANIMATION_MOUNT] >= 0)
+    {
+      model->animManager->Stop();
+      model->currentAnim = model->animLookups[ANIMATION_MOUNT];
+      model->animManager->SetAnim(0, (short)model->currentAnim, 0);
+    }
+    g_canvas->curAtt = g_canvas->root;
+
+    if (charAtt)
+    {
+      charAtt->parent = g_canvas->root;
+      // Need to set this - but from what
+      // Model data doesn't contain sizes for different race/gender
+      // Character data doesn't contain sizes for different mounts
+      // possibly some formula that from both models that needs to be calculated.
+      // For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
+      // I really have no idea!  
+      if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
+        charAtt->scale = 2.25f;
+      else
+        charAtt->scale = 1.0f;
+    }
+    g_canvas->ResetView();
+    model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
+    m->rot.x = 0.0f; // mounted characters look better from the side
+    break;
+  }
+  case UPDATE_CREATURE_ITEM:
+    //model->cd.equipment[choosingSlot] = numbers[id];
+    //RefreshCreatureItem(choosingSlot);
+    //RefreshItem(choosingSlot);
+    return;
+
+  case UPDATE_NPC:
+    g_modelViewer->LoadNPC(npcs[id].id);
+
+    break;
+
+  case UPDATE_SINGLE_ITEM:
+    g_modelViewer->LoadItem(numbers[id]);
+    break;
 
   }
 
@@ -981,35 +981,35 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
 
   switch (event.GetId())
   {
-    case ID_TABARD_ICON:
-      LOG_INFO << "Tabard Notice: Icon Change.";
-      model->td.Icon = event.GetPosition();
-      break;
-    case ID_TABARD_ICONCOLOR:
-      LOG_INFO << "Tabard Notice: Icon Color Change.";
-      model->td.IconColor = event.GetPosition();
-      break;
-    case ID_TABARD_BORDER:
-    {
-      LOG_INFO << "Tabard Notice: Border Change.";
-      model->td.Border = event.GetPosition();
-      int maxColor = model->td.GetMaxBorderColor(model->td.Border);
-      if (maxColor < model->td.BorderColor)
-      {
-        model->td.BorderColor = 0;
-        tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
-      }
-      tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
-    }
+  case ID_TABARD_ICON:
+    LOG_INFO << "Tabard Notice: Icon Change.";
+    model->td.Icon = event.GetPosition();
     break;
-    case ID_TABARD_BORDERCOLOR:
-      LOG_INFO << "Tabard Notice: Border Color Change.";
-      model->td.BorderColor = event.GetPosition();
-      break;
-    case ID_TABARD_BACKGROUND:
-      LOG_INFO << "Tabard Notice: Background Color Change.";
-      model->td.Background = event.GetPosition();
-      break;
+  case ID_TABARD_ICONCOLOR:
+    LOG_INFO << "Tabard Notice: Icon Color Change.";
+    model->td.IconColor = event.GetPosition();
+    break;
+  case ID_TABARD_BORDER:
+  {
+    LOG_INFO << "Tabard Notice: Border Change.";
+    model->td.Border = event.GetPosition();
+    int maxColor = model->td.GetMaxBorderColor(model->td.Border);
+    if (maxColor < model->td.BorderColor)
+    {
+      model->td.BorderColor = 0;
+      tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
+    }
+    tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
+  }
+  break;
+  case ID_TABARD_BORDERCOLOR:
+    LOG_INFO << "Tabard Notice: Border Color Change.";
+    model->td.BorderColor = event.GetPosition();
+    break;
+  case ID_TABARD_BACKGROUND:
+    LOG_INFO << "Tabard Notice: Background Color Change.";
+    model->td.Background = event.GetPosition();
+    break;
   }
 
   for (size_t i = 0; i < NUM_TABARD_BTNS; i++)

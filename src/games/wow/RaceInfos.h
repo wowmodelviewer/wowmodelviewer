@@ -18,24 +18,21 @@ class WoWModel;
 
 class _RACEINFOS_API_ RaceInfos
 {
-  public:
-    int raceid;
-    int sexid; // 0 male / 1 female
-    int textureLayoutID;
-    bool isHD;
-    std::string prefix;
-    std::string customization[3];
-    int displayRaceid;
+public:
+  int raceid;
+  int sexid; // 0 male / 1 female
+  int textureLayoutID;
+  bool isHD;
+  std::string prefix;
+  std::string customization[3];
+  int displayRaceid;
 
-    static bool getCurrent(WoWModel * model, RaceInfos & result);
-    static void init();
-    static int getHDModelForFileID(int);
+  static bool getCurrent(WoWModel * model, RaceInfos & result);
+  static void init();
+  static int getHDModelForFileID(int);
 
-  private:
-    static std::map< int, RaceInfos> RACES;
+private:
+  static std::map< int, RaceInfos> RACES;
 };
-
-
-
 
 #endif /* _RACEINFOS_H_ */

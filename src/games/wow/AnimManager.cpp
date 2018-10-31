@@ -74,8 +74,8 @@ void AnimManager::SetAnim(short index, unsigned int id, short loops)
     TotalFrames = model.anims[id].length;
   }
 
-  if (index+1 > Count)
-    Count = index+1;
+  if (index + 1 > Count)
+    Count = index + 1;
 }
 
 void AnimManager::Play()
@@ -106,7 +106,7 @@ void AnimManager::Pause(bool force)
 
 void AnimManager::Next()
 {
-  if(CurLoop == 1)
+  if (CurLoop == 1)
   {
     PlayIndex++;
     if (PlayIndex >= Count)
@@ -116,11 +116,11 @@ void AnimManager::Next()
     }
     CurLoop = animList[PlayIndex].Loops;
   }
-  else if(CurLoop > 1)
+  else if (CurLoop > 1)
   {
     CurLoop--;
   }
-  else if(CurLoop == 0)
+  else if (CurLoop == 0)
   {
     PlayIndex++;
     if (PlayIndex >= Count)
@@ -133,7 +133,7 @@ void AnimManager::Next()
 
 void AnimManager::Prev()
 {
-  if(CurLoop >= animList[PlayIndex].Loops)
+  if (CurLoop >= animList[PlayIndex].Loops)
   {
     PlayIndex--;
 
@@ -144,7 +144,7 @@ void AnimManager::Prev()
     }
     CurLoop = animList[PlayIndex].Loops;
   }
-  else if(CurLoop < animList[PlayIndex].Loops)
+  else if (CurLoop < animList[PlayIndex].Loops)
   {
     CurLoop++;
   }
@@ -155,7 +155,7 @@ void AnimManager::Prev()
 
 int AnimManager::Tick(int time)
 {
-  if((Count < PlayIndex) )
+  if ((Count < PlayIndex))
     return -1;
 
   Frame += int(time*Speed);
@@ -191,7 +191,6 @@ size_t AnimManager::GetFrameCount()
 {
   return model.anims[animList[PlayIndex].AnimID].length;
 }
-
 
 void AnimManager::NextFrame()  // Only called by the animation controls
 {
@@ -257,4 +256,3 @@ void AnimManager::ForceModelUpdate(float dt)
   model.drawParticles();
   model.draw();
 }
-

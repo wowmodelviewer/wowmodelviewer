@@ -10,13 +10,13 @@
 
 #include "modelheaders.h" // ModelAnimation
 
-// This will be our animation manager
-// instead of using a STL vector or list or table, etc.
-// Decided to just limit it up to 4 animations to loop through - for experimental testing.
-// The second id and loop count will later be used for being able to have a primary and secondary animation.
+ // This will be our animation manager
+ // instead of using a STL vector or list or table, etc.
+ // Decided to just limit it up to 4 animations to loop through - for experimental testing.
+ // The second id and loop count will later be used for being able to have a primary and secondary animation.
 
-// Currently, this is more of a "Wrapper" over the existing code
-// but hopefully over time I can remove and re-write it so this is the core.
+ // Currently, this is more of a "Wrapper" over the existing code
+ // but hopefully over time I can remove and re-write it so this is the core.
 struct AnimInfo
 {
   short Loops;
@@ -67,7 +67,7 @@ public:
   void SetCount(int count);
   void AddAnim(unsigned int id, short loop); // Adds an animation to our array.
   void SetAnim(short index, unsigned int id, short loop);
-       // sets one of the 4 existing animations and changes it (not really used currently)
+  // sets one of the 4 existing animations and changes it (not really used currently)
 
   void SetSecondary(int id)
   {
@@ -104,10 +104,10 @@ public:
   int Tick(int time);
 
   size_t GetFrameCount();
-  size_t GetFrame() {return Frame;}
+  size_t GetFrame() { return Frame; }
   void SetFrame(size_t f);
-  void SetSpeed(float speed) {Speed = speed;}
-  float GetSpeed() {return Speed;}
+  void SetSpeed(float speed) { Speed = speed; }
+  float GetSpeed() { return Speed; }
 
   void PrevFrame();
   void NextFrame();
@@ -121,7 +121,5 @@ public:
 
   void ForceModelUpdate(float dt);
 };
-
-
 
 #endif /* _ANIMNMANAGER_H_ */

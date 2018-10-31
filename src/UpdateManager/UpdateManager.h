@@ -26,9 +26,9 @@
 #ifndef _UPDATEMANAGER_H_
 #define _UPDATEMANAGER_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 #include <map>
 
 // Qt
@@ -53,56 +53,56 @@ class FileDownloader;
 //--------------------------------------------------------------------
 class UpdateManager : public QMainWindow
 {
-    Q_OBJECT
-	public :
-		// Constants / Enums
-		
-		// Constructors
-    UpdateManager();
-	
-		// Destructors
-    ~UpdateManager();
-	
-		// Methods
+  Q_OBJECT
+public:
+  // Constants / Enums
 
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-    void updateTable();
-    void resizeTable();
-		
-  private slots:
-    void fileDownloaded(QString &);
-    void updateLastVersionInfo();
-    void cellClicked(int,int);
+  // Constructors
+  UpdateManager();
+
+  // Destructors
+  ~UpdateManager();
+
+  // Methods
+
+  // Members
+
+protected:
+  // Constants / Enums
+
+  // Constructors
+
+  // Destructors
+
+  // Methods
+
+  // Members
+
+private:
+  // Constants / Enums
+
+  // Constructors
+
+  // Destructors
+
+  // Methods
+  void updateTable();
+  void resizeTable();
+
+private slots:
+  void fileDownloaded(QString &);
+  void updateLastVersionInfo();
+  void cellClicked(int, int);
 
 
-  private:
-    // Members
-    QTableWidget * m_table;
-    FileDownloader * m_fileDownloader;
-    VersionManager * m_versionManager;
-		
-		// friend class declarations
-	
+private:
+  // Members
+  QTableWidget * m_table;
+  FileDownloader * m_fileDownloader;
+  VersionManager * m_versionManager;
+
+  // friend class declarations
+
 };
 
 // static members definition

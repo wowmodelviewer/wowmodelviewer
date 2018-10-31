@@ -5,7 +5,7 @@
 #include <wx/clrpicker.h>
 #include <wx/treectrl.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 #include "WoWModel.h"
@@ -28,16 +28,16 @@
 //		- Scale
 //		- Attach model
 
-class ModelControl: public wxWindow
+class ModelControl : public wxWindow
 {
   DECLARE_CLASS(ModelControl)
   DECLARE_EVENT_TABLE()
   class GeosetTreeItemData : public wxTreeItemData
   {
-    public:
-      size_t geosetId;
+  public:
+    size_t geosetId;
   };
-	
+
   wxComboBox *cbLod, *modelname;
   wxSlider *alpha, *scale;
   wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles, *particlecolreplace;
@@ -57,7 +57,7 @@ class ModelControl: public wxWindow
   //std::vector<Model*> models;
   std::vector<Attachment*> attachments;
   bool init;
-	
+
 public:
   WoWModel *model;	// Currently 'active' model.
   Attachment *att; // Currently 'active' attachment.
@@ -94,4 +94,3 @@ public:
 };
 
 #endif
-

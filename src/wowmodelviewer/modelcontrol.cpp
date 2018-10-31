@@ -15,38 +15,38 @@
 IMPLEMENT_CLASS(ModelControl, wxWindow)
 
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)
-  EVT_TREE_ITEM_ACTIVATED(ID_MODEL_GEOSETS, ModelControl::OnList)
+EVT_TREE_ITEM_ACTIVATED(ID_MODEL_GEOSETS, ModelControl::OnList)
 
-	EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
-	EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
+EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
+EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
 
-	EVT_CHECKBOX(ID_MODEL_BONES, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_BOUNDS, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_RENDER, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_PC_REPLACE, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_BONES, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_BOUNDS, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_RENDER, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
+EVT_CHECKBOX(ID_MODEL_PC_REPLACE, ModelControl::OnCheck)
 
-	EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
-	EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
-	EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
+EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
+EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
+EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
 
-	EVT_TEXT_ENTER(ID_MODEL_X, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_Y, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_Z, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_X, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_Y, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_Z, ModelControl::OnEnter)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_13, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_13, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_13, ModelControl::OnColourChange)
+EVT_TEXT_ENTER(ID_MODEL_X, ModelControl::OnEnter)
+EVT_TEXT_ENTER(ID_MODEL_Y, ModelControl::OnEnter)
+EVT_TEXT_ENTER(ID_MODEL_Z, ModelControl::OnEnter)
+EVT_TEXT_ENTER(ID_MODEL_ROT_X, ModelControl::OnEnter)
+EVT_TEXT_ENTER(ID_MODEL_ROT_Y, ModelControl::OnEnter)
+EVT_TEXT_ENTER(ID_MODEL_ROT_Z, ModelControl::OnEnter)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_11, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_11, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_11, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_12, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_12, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_12, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_13, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_13, ModelControl::OnColourChange)
+EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_13, ModelControl::OnColourChange)
 END_EVENT_TABLE()
 
 
@@ -64,16 +64,16 @@ END_EVENT_TABLE()
 //		- Attach model
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
- : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0,  wxT("ModelControlFrame"))
+  : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0, wxT("ModelControlFrame"))
 {
   model = NULL;
   att = NULL;
 
   LOG_INFO << "Creating Model Control...";
 
-  wxFlexGridSizer *padding = new wxFlexGridSizer(1,1,0);
+  wxFlexGridSizer *padding = new wxFlexGridSizer(1, 1, 0);
 
-  wxFlexGridSizer *top = new wxFlexGridSizer(1,5,0);
+  wxFlexGridSizer *top = new wxFlexGridSizer(1, 5, 0);
   modelname = new wxComboBox(this, ID_MODEL_NAME);
   top->Add(modelname, 1, wxEXPAND);
 
@@ -117,7 +117,7 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 
   top->Add(new wxStaticText(this, wxID_ANY, wxT("Geosets")), 1, wxEXPAND);
   top->Add(new wxStaticText(this, wxID_ANY, wxT("Double click to toggle on/off")), 1, wxEXPAND);
-  clbGeosets = new wxTreeCtrl(this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150,150));
+  clbGeosets = new wxTreeCtrl(this, ID_MODEL_GEOSETS, wxDefaultPosition, wxSize(150, 150));
   top->Add(clbGeosets, 1, wxEXPAND);
 
   top->AddSpacer(5);
@@ -127,22 +127,22 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   // POSITION CONTROLS
   top->Add(new wxStaticText(this, wxID_ANY, wxT("Position")), 1, wxEXPAND);
   gbox = new wxFlexGridSizer(2, 5, 5);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("X")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("X")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   txtX = new wxTextCtrl(this, ID_MODEL_X, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(txtX);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Y")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Y")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   txtY = new wxTextCtrl(this, ID_MODEL_Y, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(txtY);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Z")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("Z")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   txtZ = new wxTextCtrl(this, ID_MODEL_Z, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(txtZ);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rX")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rX")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   rotX = new wxTextCtrl(this, ID_MODEL_ROT_X, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(rotX);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rY")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rY")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   rotY = new wxTextCtrl(this, ID_MODEL_ROT_Y, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(rotY);
-  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rZ")), 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
+  gbox->Add(new wxStaticText(this, wxID_ANY, wxT("rZ")), 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
   rotZ = new wxTextCtrl(this, ID_MODEL_ROT_Z, wxT("0.0"), wxDefaultPosition, wxSize(75, -1));
   gbox->Add(rotZ);
   top->Add(gbox, 1, wxEXPAND);
@@ -159,56 +159,56 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   top->Add(NoPC, 1, wxEXPAND);
   gbox = new wxFlexGridSizer(2, 5, 5);
   PC11SLabel = new wxStaticText(this, wxID_ANY, wxT("ID11 Start"));
-  gbox->Add(PC11SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, 10), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC11SLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC11S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_11, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, 10), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC11S);
   PC11MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC11MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC11MLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC11M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_11, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC11M);
   PC11ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC11ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC11E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_11, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC11ELabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC11E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_11, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC11E);
   PC12SLabel = new wxStaticText(this, wxID_ANY, wxT("ID12 Start"));
-  gbox->Add(PC12SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC12SLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC12S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_12, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC12S);
   PC12MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC12MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC12MLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC12M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_12, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC12M);
   PC12ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC12ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC12E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_12, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC12ELabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC12E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_12, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC12E);
   PC13SLabel = new wxStaticText(this, wxID_ANY, wxT("ID13 Start"));
-  gbox->Add(PC13SLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC13SLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC13S = new wxColourPickerCtrl(this, ID_MODEL_PC_START_13, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC13S);
   PC13MLabel = new wxStaticText(this, wxID_ANY, wxT("Mid"));
-  gbox->Add(PC13MLabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC13MLabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC13M = new wxColourPickerCtrl(this, ID_MODEL_PC_MID_13, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC13M);
   PC13ELabel = new wxStaticText(this, wxID_ANY, wxT("End"));
-  gbox->Add(PC13ELabel, 1, wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT);
-  PC13E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_13, wxColour(0,0,0), wxDefaultPosition,
-                                  wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
+  gbox->Add(PC13ELabel, 1, wxALIGN_CENTER_VERTICAL | wxALIGN_RIGHT);
+  PC13E = new wxColourPickerCtrl(this, ID_MODEL_PC_END_13, wxColour(0, 0, 0), wxDefaultPosition,
+    wxSize(55, -1), wxCLRP_USE_TEXTCTRL);
   gbox->Add(PC13E);
   top->Add(gbox, 1);
   top->SetSizeHints(this);
   TogglePCRFields();
   Show(true);
   SetAutoLayout(true);
-  padding->Add(top, 1, wxEXPAND|wxLEFT|wxTOP, 10);
+  padding->Add(top, 1, wxEXPAND | wxLEFT | wxTOP, 10);
   SetSizer(padding);
   Layout();
 }
@@ -257,93 +257,94 @@ ModelControl::~ModelControl()
 // Iterates through all the models counting and creating a list
 void ModelControl::RefreshModel(Attachment *root)
 {
-	try {
-		attachments.clear();
+  try {
+    attachments.clear();
 
-		WoWModel *m = static_cast<WoWModel*>(root->model());
-		if (m) {
-		//	wxASSERT(m);
-			attachments.push_back(root);
-			if (!init)
-				UpdateModel(root);
-			LOG_INFO << "ModelControl Refresh: Adding Model...";
-		}
-		
-		for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
-			//m = NULL;
-			m = static_cast<WoWModel*>((*it)->model());
-			if (m) {
-				attachments.push_back((*it));
-				if (!init)
-					UpdateModel((*it));
-				LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 1...";
-			}
+    WoWModel *m = static_cast<WoWModel*>(root->model());
+    if (m) {
+      //	wxASSERT(m);
+      attachments.push_back(root);
+      if (!init)
+        UpdateModel(root);
+      LOG_INFO << "ModelControl Refresh: Adding Model...";
+    }
 
-			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
-				m = static_cast<WoWModel*>((*it2)->model());
-				if (m) {
-					//models.push_back(m);
-					attachments.push_back((*it2));
-					if (!init)
-						UpdateModel((*it2));
-					LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 2...";
-				}
+    for (std::vector<Attachment *>::iterator it = root->children.begin(); it != root->children.end(); ++it) {
+      //m = NULL;
+      m = static_cast<WoWModel*>((*it)->model());
+      if (m) {
+        attachments.push_back((*it));
+        if (!init)
+          UpdateModel((*it));
+        LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 1...";
+      }
 
-				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
-					m = static_cast<WoWModel*>((*it3)->model());
-					if (m) {
-						//models.push_back(m);
-						attachments.push_back((*it3));
-						if (!init)
-							UpdateModel((*it3));
-						LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 3...";
-					}
-				}
-			}
-		}
+      for (std::vector<Attachment *>::iterator it2 = (*it)->children.begin(); it2 != (*it)->children.end(); ++it2) {
+        m = static_cast<WoWModel*>((*it2)->model());
+        if (m) {
+          //models.push_back(m);
+          attachments.push_back((*it2));
+          if (!init)
+            UpdateModel((*it2));
+          LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 2...";
+        }
 
-		// update combo box with the list of models?
-		wxString tmp;
-		modelname->Clear();
-		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
-			m = dynamic_cast<WoWModel*>((*it)->model());
-			if (m) {
-				tmp = m->name().toStdWString();
-				modelname->Append(tmp.AfterLast('\\'));
-			}
-		}
+        for (std::vector<Attachment *>::iterator it3 = (*it2)->children.begin(); it3 != (*it2)->children.end(); ++it3) {
+          m = static_cast<WoWModel*>((*it3)->model());
+          if (m) {
+            //models.push_back(m);
+            attachments.push_back((*it3));
+            if (!init)
+              UpdateModel((*it3));
+            LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 3...";
+          }
+        }
+      }
+    }
 
-		LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
+    // update combo box with the list of models?
+    wxString tmp;
+    modelname->Clear();
+    for (std::vector<Attachment*>::iterator it = attachments.begin(); it != attachments.end(); ++it) {
+      m = dynamic_cast<WoWModel*>((*it)->model());
+      if (m) {
+        tmp = m->name().toStdWString();
+        modelname->Append(tmp.AfterLast('\\'));
+      }
+    }
 
-		if (modelname->GetCount() > 0)
-			modelname->SetSelection(0);
+    LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
 
-	} catch( ... ) {
-		LOG_ERROR << "Problem occured in ModelControl::RefreshModel(Attachment *)";
-	}
+    if (modelname->GetCount() > 0)
+      modelname->SetSelection(0);
+
+  }
+  catch (...) {
+    LOG_ERROR << "Problem occured in ModelControl::RefreshModel(Attachment *)";
+  }
 
 }
 
 void ModelControl::UpdateModel(Attachment *a)
 {
-	if (!a)
-		return;
+  if (!a)
+    return;
 
-	init = false;
+  init = false;
 
-	WoWModel *m = NULL;
-	if (a->model())
-		m = static_cast<WoWModel*>(a->model());
+  WoWModel *m = NULL;
+  if (a->model())
+    m = static_cast<WoWModel*>(a->model());
 
-	if (m) {
-		init = true;
-		model = m;
-		att = a;
+  if (m) {
+    init = true;
+    model = m;
+    att = a;
 
-		modelname->SetLabel(m->name().toStdWString());
+    modelname->SetLabel(m->name().toStdWString());
 
-		Update();
-	}
+    Update();
+  }
 }
 
 void ModelControl::Update()
@@ -359,15 +360,15 @@ void ModelControl::Update()
   }
   else if (model->header.nViews == 2)
   {
-		cbLod->Append(wxT("1 (Worst)"));
-		cbLod->Append(wxT("2 (Best)"));
+    cbLod->Append(wxT("1 (Worst)"));
+    cbLod->Append(wxT("2 (Best)"));
   }
   else
   {
     cbLod->Append(wxT("1 (Worst)"));
-    for (size_t i=1; i<(model->header.nViews-1); i++)
+    for (size_t i = 1; i < (model->header.nViews - 1); i++)
     {
-      cbLod->Append(wxString::Format(wxT("%i"), i+1));
+      cbLod->Append(wxString::Format(wxT("%i"), i + 1));
     }
     cbLod->Append(wxString::Format(wxT("%i (Best)"), model->header.nViews));
   }
@@ -378,7 +379,7 @@ void ModelControl::Update()
   //geosets->Clear();
   // enum CharGeosets
 
-  std::map <size_t,wxTreeItemId> geosetGroupsMap;
+  std::map <size_t, wxTreeItemId> geosetGroupsMap;
   GeosetTreeItemIds.clear();
   clbGeosets->DeleteAllItems();
   clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
@@ -415,7 +416,7 @@ void ModelControl::Update()
   texture->SetValue(model->showTexture);
 
   alpha->SetValue(int(model->alpha * 100));
-  scale->SetValue(att->scale*100);
+  scale->SetValue(att->scale * 100);
 
   txtX->SetValue(wxString::Format(wxT("%f"), model->pos.x));
   txtY->SetValue(wxString::Format(wxT("%f"), model->pos.y));
@@ -439,15 +440,15 @@ void ModelControl::Update()
     pcr = { cols11, cols12, cols13 };
   }
   particlecolreplace->SetValue(false);
-  PC11S->SetColour(wxColour(pcr[0][0][0]*255, pcr[0][0][1]*255, pcr[0][0][2]*255));
-  PC11M->SetColour(wxColour(pcr[0][1][0]*255, pcr[0][1][1]*255, pcr[0][1][2]*255));
-  PC11E->SetColour(wxColour(pcr[0][2][0]*255, pcr[0][2][1]*255, pcr[0][2][2]*255));
-  PC12S->SetColour(wxColour(pcr[1][0][0]*255, pcr[1][0][1]*255, pcr[1][0][2]*255));
-  PC12M->SetColour(wxColour(pcr[1][1][0]*255, pcr[1][1][1]*255, pcr[1][1][2]*255));
-  PC12E->SetColour(wxColour(pcr[1][2][0]*255, pcr[1][2][1]*255, pcr[1][2][2]*255));
-  PC13S->SetColour(wxColour(pcr[2][0][0]*255, pcr[2][0][1]*255, pcr[2][0][2]*255));
-  PC13M->SetColour(wxColour(pcr[2][1][0]*255, pcr[2][1][1]*255, pcr[2][1][2]*255));
-  PC13E->SetColour(wxColour(pcr[2][2][0]*255, pcr[2][2][1]*255, pcr[2][2][2]*255));
+  PC11S->SetColour(wxColour(pcr[0][0][0] * 255, pcr[0][0][1] * 255, pcr[0][0][2] * 255));
+  PC11M->SetColour(wxColour(pcr[0][1][0] * 255, pcr[0][1][1] * 255, pcr[0][1][2] * 255));
+  PC11E->SetColour(wxColour(pcr[0][2][0] * 255, pcr[0][2][1] * 255, pcr[0][2][2] * 255));
+  PC12S->SetColour(wxColour(pcr[1][0][0] * 255, pcr[1][0][1] * 255, pcr[1][0][2] * 255));
+  PC12M->SetColour(wxColour(pcr[1][1][0] * 255, pcr[1][1][1] * 255, pcr[1][1][2] * 255));
+  PC12E->SetColour(wxColour(pcr[1][2][0] * 255, pcr[1][2][1] * 255, pcr[1][2][2] * 255));
+  PC13S->SetColour(wxColour(pcr[2][0][0] * 255, pcr[2][0][1] * 255, pcr[2][0][2] * 255));
+  PC13M->SetColour(wxColour(pcr[2][1][0] * 255, pcr[2][1][1] * 255, pcr[2][1][2] * 255));
+  PC13E->SetColour(wxColour(pcr[2][2][0] * 255, pcr[2][2][1] * 255, pcr[2][2][2] * 255));
   UpdatePCRTexts();
   TogglePCRFields();
 }
@@ -457,12 +458,12 @@ void ModelControl::UpdateGeosetSelection()
   // Sets background colour on geoset tree based on whether geoset is currently displayed on model
   if (!GeosetTreeItemIds.size())
     return;
-  for (auto it = begin (GeosetTreeItemIds); it != end (GeosetTreeItemIds); ++it)
+  for (auto it = begin(GeosetTreeItemIds); it != end(GeosetTreeItemIds); ++it)
   {
     GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(*it);
     size_t id = data->geosetId;
     clbGeosets->SetItemBackgroundColour(*it,
-                                        (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
+      (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
   }
 }
 
@@ -515,79 +516,80 @@ void ModelControl::OnCheck(wxCommandEvent &event)
   bool check = event.IsChecked();
   switch (id)
   {
-    case ID_MODEL_BONES :
-          model->showBones = check;
-          break;
-    case ID_MODEL_BOUNDS :
-          model->showBounds = check;
-          break;
-    case ID_MODEL_RENDER :
-          model->showModel = check;
-          break;
-    case ID_MODEL_WIREFRAME :
-          model->showWireframe = check;
-          break;
-    case ID_MODEL_PARTICLES :
-          model->showParticles = check;
-          break;
-    case ID_MODEL_TEXTURE :
-          model->showTexture = check;
-          break;
-    case ID_MODEL_PC_REPLACE :
-          if (check)
-          {
-            model->particleColorReplacements = pcr;
-            model->replaceParticleColors = true;
-          }
-          else
-            animControl->SetSkin(-1);  // reset to the current skin to use default particles
-          break;
+  case ID_MODEL_BONES:
+    model->showBones = check;
+    break;
+  case ID_MODEL_BOUNDS:
+    model->showBounds = check;
+    break;
+  case ID_MODEL_RENDER:
+    model->showModel = check;
+    break;
+  case ID_MODEL_WIREFRAME:
+    model->showWireframe = check;
+    break;
+  case ID_MODEL_PARTICLES:
+    model->showParticles = check;
+    break;
+  case ID_MODEL_TEXTURE:
+    model->showTexture = check;
+    break;
+  case ID_MODEL_PC_REPLACE:
+    if (check)
+    {
+      model->particleColorReplacements = pcr;
+      model->replaceParticleColors = true;
+    }
+    else
+      animControl->SetSkin(-1);  // reset to the current skin to use default particles
+    break;
   }
 }
 
 void ModelControl::OnCombo(wxCommandEvent &event)
 {
-	if (!init)
-		return;
+  if (!init)
+    return;
 
-	int id = event.GetId();
+  int id = event.GetId();
 
-	if (id == ID_MODEL_LOD) {
-//		int value = event.GetInt();
-//
-//		MPQFile f(model->name);
-//		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
-//			LOG_ERROR << "Unable to open MPQFile:" << model->name.c_str();
-//			f.close();
-//			return;
-//		}
-//
-//		model->showModel = false;
-//		model->setLOD(&f, value);
-//		model->showModel = true;
-//
-//		/*
-//		for (size_t i=0; i<model->geosets.size(); i++) {
-//			int id = model->geosets[i].id;
-//			model->showGeosets[i] = (id==0);
-//		}
-//
-//		cc->RefreshModel();
-//		*/
-//
-//		f.close();
-	} else if (id == ID_MODEL_NAME) {
-		/* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
-		int CurrentSelection = modelname->GetCurrentSelection();
-		if (CurrentSelection < (int)attachments.size()) {
-			UpdateModel(attachments[CurrentSelection]);
-			att = attachments[CurrentSelection];
-			model = static_cast<WoWModel*>(attachments[CurrentSelection]->model());
-			
-			animControl->UpdateModel(model);
-			modelname->SetSelection(CurrentSelection);
-		}
-	}
+  if (id == ID_MODEL_LOD) {
+    //		int value = event.GetInt();
+    //
+    //		MPQFile f(model->name);
+    //		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
+    //			LOG_ERROR << "Unable to open MPQFile:" << model->name.c_str();
+    //			f.close();
+    //			return;
+    //		}
+    //
+    //		model->showModel = false;
+    //		model->setLOD(&f, value);
+    //		model->showModel = true;
+    //
+    //		/*
+    //		for (size_t i=0; i<model->geosets.size(); i++) {
+    //			int id = model->geosets[i].id;
+    //			model->showGeosets[i] = (id==0);
+    //		}
+    //
+    //		cc->RefreshModel();
+    //		*/
+    //
+    //		f.close();
+  }
+  else if (id == ID_MODEL_NAME) {
+    /* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
+    int CurrentSelection = modelname->GetCurrentSelection();
+    if (CurrentSelection < (int)attachments.size()) {
+      UpdateModel(attachments[CurrentSelection]);
+      att = attachments[CurrentSelection];
+      model = static_cast<WoWModel*>(attachments[CurrentSelection]->model());
+
+      animControl->UpdateModel(model);
+      modelname->SetSelection(CurrentSelection);
+    }
+  }
 }
 
 void ModelControl::OnList(wxTreeEvent &event)
@@ -601,12 +603,12 @@ void ModelControl::OnList(wxTreeEvent &event)
   {
     wxTreeItemId curItem = clbGeosets->GetSelection();
     GeosetTreeItemData * data = (GeosetTreeItemData *)clbGeosets->GetItemData(curItem);
-    if(data)
+    if (data)
     {
       size_t geosetIndex = data->geosetId;
       model->showGeoset(geosetIndex, !model->isGeosetDisplayed(geosetIndex));
       clbGeosets->SetItemBackgroundColour(curItem,
-                                          (model->isGeosetDisplayed(geosetIndex)) ? *wxGREEN : *wxWHITE);
+        (model->isGeosetDisplayed(geosetIndex)) ? *wxGREEN : *wxWHITE);
     }
     else
       std::cout << "data is null !!!" << std::endl;
@@ -619,21 +621,22 @@ void ModelControl::OnList(wxTreeEvent &event)
 
 void ModelControl::OnSlider(wxScrollEvent &event)
 {
-	if (!init || !model)
-		return;
+  if (!init || !model)
+    return;
 
-	int id = event.GetId();
-	if (id == ID_MODEL_ALPHA) {
-		model->alpha = event.GetInt() / 100.0f;
-	} else if (id == ID_MODEL_SCALE) {
-		att->scale = event.GetInt() / 100.0f;
-		txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
-	}
+  int id = event.GetId();
+  if (id == ID_MODEL_ALPHA) {
+    model->alpha = event.GetInt() / 100.0f;
+  }
+  else if (id == ID_MODEL_SCALE) {
+    att->scale = event.GetInt() / 100.0f;
+    txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
+  }
 }
 
 Vec4D ModelControl::fromColWidget(wxColour col)
 {
-  return Vec4D((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
+  return Vec4D((float)col.Red() / 255.0f, (float)col.Green() / 255.0f, (float)col.Blue() / 255.0f, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent &event)
@@ -644,7 +647,7 @@ void ModelControl::OnEnter(wxCommandEvent &event)
   int eventID = event.GetId();
 
   if (eventID == ID_MODEL_X || eventID == ID_MODEL_Y || eventID == ID_MODEL_Z ||
-      eventID == ID_MODEL_ROT_X || eventID == ID_MODEL_ROT_Y || eventID == ID_MODEL_ROT_Z)
+    eventID == ID_MODEL_ROT_X || eventID == ID_MODEL_ROT_Y || eventID == ID_MODEL_ROT_Z)
   {
     model->pos.x = wxAtof(txtX->GetValue());
     model->pos.y = wxAtof(txtY->GetValue());
@@ -657,7 +660,7 @@ void ModelControl::OnEnter(wxCommandEvent &event)
   if (eventID == ID_MODEL_SIZE)
   {
     att->scale = wxAtof(txtsize->GetValue());
-    scale->SetValue(wxAtoi(txtsize->GetValue())*100);
+    scale->SetValue(wxAtoi(txtsize->GetValue()) * 100);
   }
 }
 
@@ -697,42 +700,42 @@ void ModelControl::OnColourChange(wxColourPickerEvent &event)
 
   switch (event.GetId())
   {
-    case ID_MODEL_PC_START_11 :
-          pcr[0][0] = col;
-          cpc = PC11S;
-          break;
-    case ID_MODEL_PC_MID_11 :
-          pcr[0][1] = col;
-          cpc = PC11M;
-          break;
-    case ID_MODEL_PC_END_11 :
-          pcr[0][2] = col;
-          cpc = PC11E;
-          break;
-    case ID_MODEL_PC_START_12 :
-          pcr[1][0] = col;
-          cpc = PC12S;
-          break;
-    case ID_MODEL_PC_MID_12 :
-          pcr[1][1] = col;
-          cpc = PC12M;
-          break;
-    case ID_MODEL_PC_END_12 :
-          pcr[1][2] = col;
-          cpc = PC12E;
-          break;
-    case ID_MODEL_PC_START_13 :
-          pcr[2][0] = col;
-          cpc = PC13S;
-          break;
-    case ID_MODEL_PC_MID_13 :
-          pcr[2][1] = col;
-          cpc = PC13M;
-          break;
-    case ID_MODEL_PC_END_13 :
-          pcr[2][2] = col;
-          cpc = PC13E;
-          break;
+  case ID_MODEL_PC_START_11:
+    pcr[0][0] = col;
+    cpc = PC11S;
+    break;
+  case ID_MODEL_PC_MID_11:
+    pcr[0][1] = col;
+    cpc = PC11M;
+    break;
+  case ID_MODEL_PC_END_11:
+    pcr[0][2] = col;
+    cpc = PC11E;
+    break;
+  case ID_MODEL_PC_START_12:
+    pcr[1][0] = col;
+    cpc = PC12S;
+    break;
+  case ID_MODEL_PC_MID_12:
+    pcr[1][1] = col;
+    cpc = PC12M;
+    break;
+  case ID_MODEL_PC_END_12:
+    pcr[1][2] = col;
+    cpc = PC12E;
+    break;
+  case ID_MODEL_PC_START_13:
+    pcr[2][0] = col;
+    cpc = PC13S;
+    break;
+  case ID_MODEL_PC_MID_13:
+    pcr[2][1] = col;
+    cpc = PC13M;
+    break;
+  case ID_MODEL_PC_END_13:
+    pcr[2][2] = col;
+    cpc = PC13E;
+    break;
   }
 
   if (cpc)
@@ -757,30 +760,30 @@ bool ModelControl::IsReplacingParticleColors()
   *************************************************************************/
 
 ScrWindow::ScrWindow(const wxString& title)
-       : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(512, 512))
+  : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(512, 512))
 {
-	wxImage::AddHandler(new wxPNGHandler);
-	sw = new wxScrolledWindow(this);
+  wxImage::AddHandler(new wxPNGHandler);
+  sw = new wxScrolledWindow(this);
 
-	wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
-	sb = new wxStaticBitmap(sw, -1, bmp);
+  wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
+  sb = new wxStaticBitmap(sw, -1, bmp);
 
-	int width = bmp.GetWidth();
-	int height = bmp.GetHeight();
+  int width = bmp.GetWidth();
+  int height = bmp.GetHeight();
 
-	CreateStatusBar();
-	wxString sbarText;
-	sbarText.Printf(wxT("%ix%i"), width, height);
-	SetStatusText(sbarText);
+  CreateStatusBar();
+  wxString sbarText;
+  sbarText.Printf(wxT("%ix%i"), width, height);
+  SetStatusText(sbarText);
 
-	sw->SetScrollbars(10, 10, width/10, height/10);
-//	sw->Scroll(50,10);
+  sw->SetScrollbars(10, 10, width / 10, height / 10);
+  //	sw->Scroll(50,10);
 
-	Center();
+  Center();
 }
 
 ScrWindow::~ScrWindow()
 {
-	sb->Destroy();
-	sw->Destroy();
+  sb->Destroy();
+  sw->Destroy();
 }

@@ -10,13 +10,12 @@
 
 // STL headers
 #ifdef min
-#undef min
+  #undef min
 #endif
 
 #ifdef max
-#undef max
+  #undef max
 #endif
-
 
 #if defined(_WINDOWS)
   #include <windows.h>
@@ -48,6 +47,5 @@
 	typedef uint64_t uint64;
 	typedef int64_t int64;
 #endif
-
 
 #endif /* _TYPES_H_ */

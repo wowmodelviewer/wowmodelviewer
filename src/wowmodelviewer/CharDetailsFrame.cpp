@@ -30,7 +30,7 @@ END_EVENT_TABLE()
 
 
 CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
-: wxWindow(parent, wxID_ANY), m_model(0)
+  : wxWindow(parent, wxID_ANY), m_model(0)
 {
   LOG_INFO << "Creating CharDetailsFrame...";
 
@@ -40,7 +40,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   charCustomizationGS = new wxFlexGridSizer(1);
   charCustomizationGS->AddGrowableCol(0);
   top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1, 20), wxALIGN_CENTER),
-           wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
+    wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
 
   top->Add(charCustomizationGS, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
   top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
@@ -71,8 +71,8 @@ void CharDetailsFrame::setModel(WoWModel * model)
   if (RaceInfos::getCurrent(model, infos))
   {
     if ((infos.raceid == RACE_NIGHTELF) ||
-        (infos.raceid == RACE_BLOODELF))
-        dhMode->Enable(true);
+      (infos.raceid == RACE_BLOODELF))
+      dhMode->Enable(true);
     else
       dhMode->Enable(false);
   }
@@ -112,7 +112,6 @@ void CharDetailsFrame::onEvent(Event * event)
     setModel(m_model);
   }
 }
-
 
 void CharDetailsFrame::randomiseChar()
 {

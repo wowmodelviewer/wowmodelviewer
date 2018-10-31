@@ -61,19 +61,18 @@ namespace wow
 
   class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
   {
-    public:
-      WoWDatabase();
-      WoWDatabase(WoWDatabase &);
+  public:
+    WoWDatabase();
+    WoWDatabase(WoWDatabase &);
 
-      ~WoWDatabase() {}
+    ~WoWDatabase() {}
 
-      core::TableStructure * createTableStructure();
-      core::FieldStructure * createFieldStructure();
+    core::TableStructure * createTableStructure();
+    core::FieldStructure * createFieldStructure();
 
-      void readSpecificTableAttributes(QDomElement &, core::TableStructure *);
-      void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *);
+    void readSpecificTableAttributes(QDomElement &, core::TableStructure *);
+    void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *);
   };
-
 }
 
 #endif /* _WOWDATABASE_H_ */

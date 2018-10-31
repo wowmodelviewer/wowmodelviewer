@@ -82,46 +82,46 @@ void WowModelViewApp::setInterfaceLocale()
 
 bool WowModelViewApp::OnInit()
 {
-	bool displayConsole = false;
+  bool displayConsole = false;
 
-	// init next-gen stuff
-	GLOBALSETTINGS.bShowParticle = true;
-	GLOBALSETTINGS.bZeroParticle = true;
+  // init next-gen stuff
+  GLOBALSETTINGS.bShowParticle = true;
+  GLOBALSETTINGS.bZeroParticle = true;
 
-	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
-	frame = NULL;
-	wxSplashScreen* splash = NULL;
-	{
-		wxLogNull logNo;
+  QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
+  frame = NULL;
+  wxSplashScreen* splash = NULL;
+  {
+    wxLogNull logNo;
 
-		wxImage::AddHandler(new wxPNGHandler);
-		wxImage::AddHandler(new wxXPMHandler);
+    wxImage::AddHandler(new wxPNGHandler);
+    wxImage::AddHandler(new wxXPMHandler);
 
-		// Enable Randomly choosing between SPLASH and SPLASH2
-		bool randomSplash2 = true;
+    // Enable Randomly choosing between SPLASH and SPLASH2
+    bool randomSplash2 = true;
 
-		wxString splashname = L"SPLASH";
-		if (randomSplash2 == true)
-		{
-			srand(time(NULL));
-			int randomchoice = rand() % 10;		// Random number between 0-9
-			if (randomchoice >= 5)
-			{
-				splashname = L"SPLASH2";
-			}
-		}
+    wxString splashname = L"SPLASH";
+    if (randomSplash2 == true)
+    {
+      srand(time(NULL));
+      int randomchoice = rand() % 10;		// Random number between 0-9
+      if (randomchoice >= 5)
+      {
+        splashname = L"SPLASH2";
+      }
+    }
 
-		wxBitmap * bitmap = createBitmapFromResource(splashname);
-		if (!bitmap)
-			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
-		else
-			splash = new wxSplashScreen(*bitmap,
-				wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-				2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-				wxBORDER_NONE);
-		wxYield();
-		Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
-	}
+    wxBitmap * bitmap = createBitmapFromResource(splashname);
+    if (!bitmap)
+      wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
+    else
+      splash = new wxSplashScreen(*bitmap,
+        wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+        2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+        wxBORDER_NONE);
+    wxYield();
+    Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+  }
 
 
   // Error & Logging settings
@@ -208,7 +208,7 @@ bool WowModelViewApp::OnInit()
   // TODO: Improve this feature and expand on it.
   // Command arguments
   QString cmd;
-  for (int i = 0; i<argc; i++) {
+  for (int i = 0; i < argc; i++) {
     cmd = QString::fromWCharArray(argv[i]);
 
     if (cmd == "-m") {
@@ -225,7 +225,7 @@ bool WowModelViewApp::OnInit()
       }
     }
     else if (cmd == "-mo") {
-      if (i + 1 < argc) {                                                       
+      if (i + 1 < argc) {
         i++;
         QString fn = QString::fromWCharArray(argv[i]);
 
@@ -251,7 +251,7 @@ bool WowModelViewApp::OnInit()
       displayConsole = true;
     }
     else if (cmd.endsWith(".chr")) {
-        frame->LoadChar(cmd);
+      frame->LoadChar(cmd);
     }
   }
 
@@ -401,5 +401,3 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/DefaultFormat", imgFormat);
   config.sync();
 }
-
-

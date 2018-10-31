@@ -15,17 +15,17 @@ class wxMouseEvent;
 
 class ArcBallCameraControl
 {
-  public:
-    ArcBallCameraControl(ArcBallCamera &);
+public:
+  ArcBallCameraControl(ArcBallCamera &);
 
-    void onMouse(wxMouseEvent& event);
-    void onKey(wxKeyEvent &event);
+  void onMouse(wxMouseEvent& event);
+  void onKey(wxKeyEvent &event);
 
-  private:
-    ArcBallCamera & m_camera;
+private:
+  ArcBallCamera & m_camera;
 
-    int m_xStart;
-    int m_yStart;
+  int m_xStart;
+  int m_yStart;
 };
 
 #endif

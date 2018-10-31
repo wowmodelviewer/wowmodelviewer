@@ -21,17 +21,16 @@
 #include "logger/Logger.h"
 
 CASCFolder::CASCFolder()
- : hStorage(NULL), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
+  : hStorage(NULL), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
 {
-
 }
 
 void CASCFolder::init(const QString &folder)
 {
   m_folder = folder;
 
-  if(m_folder.endsWith("\\"))
-    m_folder.remove(m_folder.size()-1,1);
+  if (m_folder.endsWith("\\"))
+    m_folder.remove(m_folder.size() - 1, 1);
 
   initBuildInfo();
 }
@@ -88,7 +87,6 @@ bool CASCFolder::setConfig(core::GameConfig config)
       }
     }
   }
-
   return true;
 }
 
@@ -163,26 +161,25 @@ void CASCFolder::initBuildInfo()
 bool CASCFolder::fileExists(std::string file)
 {
   //LOG_INFO << __FUNCTION__ << " " << file.c_str();
-  if(!hStorage)
+  if (!hStorage)
     return false;
 
   HANDLE dummy;
 
-  if(CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, &dummy))
+  if (CascOpenFile(hStorage, file.c_str(), m_currentCascLocale, 0, &dummy))
   {
-   // LOG_INFO << "OK";
+    // LOG_INFO << "OK";
     CascCloseFile(dummy);
     return true;
   }
 
- // LOG_ERROR << "Opening" << file.c_str() << "failed." << "Error" << GetLastError();
+  // LOG_ERROR << "Opening" << file.c_str() << "failed." << "Error" << GetLastError();
   return false;
 }
 
 bool CASCFolder::openFile(std::string file, HANDLE * result)
 {
- 
-  return CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, result);
+  return CascOpenFile(hStorage, file.c_str(), m_currentCascLocale, 0, result);
 }
 
 bool CASCFolder::closeFile(HANDLE file)
@@ -194,4 +191,3 @@ int CASCFolder::fileDataId(std::string & filename)
 {
   return CascGetFileId(hStorage, filename.c_str());
 }
-

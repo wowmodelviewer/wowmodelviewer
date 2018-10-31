@@ -28,4 +28,3 @@ _GLOBALVARS_API_ extern ModelViewer *g_modelViewer;
 _GLOBALVARS_API_ extern WMO *g_selWMO;
 
 #endif
-

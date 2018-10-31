@@ -8,10 +8,10 @@
 #ifndef _EXPORTSETTINGS_H_
 #define _EXPORTSETTINGS_H_
 
-// WX Headers
+ // WX Headers
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 enum
@@ -25,10 +25,10 @@ enum {
   NUM_SETTINGS3_CHECK
 };
 
-class ExportSettings: public wxWindow
+class ExportSettings : public wxWindow
 {
   DECLARE_CLASS(ExportSettings)
-    DECLARE_EVENT_TABLE()
+  DECLARE_EVENT_TABLE()
 
   wxCheckBox *chkbox[NUM_SETTINGS3_CHECK];
 
@@ -42,7 +42,5 @@ public:
   void OnButton(wxCommandEvent &event);
   void OnCheck(wxCommandEvent &event);
 };
-
-
 
 #endif /* _EXPORTSETTINGS_H_ */

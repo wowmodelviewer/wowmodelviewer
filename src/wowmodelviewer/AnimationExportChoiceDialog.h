@@ -26,17 +26,17 @@
 #ifndef _ANIMATIONEXPORTCHOICEDIALOG_H_
 #define _ANIMATIONEXPORTCHOICEDIALOG_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 
-// Externals
+ // Externals
 
-// Other libraries
+ // Other libraries
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 #include <wx/choicdlg.h>
 
@@ -51,58 +51,56 @@ class wxButton;
 //--------------------------------------------------------------------
 class AnimationExportChoiceDialog : public wxMultiChoiceDialog
 {
-  public :
-    // Constants / Enums
+public:
+  // Constants / Enums
 
-    // Constructors
-    AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption, const wxArrayString &choices);
+  // Constructors
+  AnimationExportChoiceDialog(wxWindow *parent, const wxString &message, const wxString &caption, const wxArrayString &choices);
 
-    // Destructors
-    ~AnimationExportChoiceDialog() {}
+  // Destructors
+  ~AnimationExportChoiceDialog() {}
 
-    // Methods
+  // Methods
 
-    // Members
+  // Members
 
-  protected :
-    // Constants / Enums
+protected:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
+  // Methods
 
-    // Members
-
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    void updateButtons(wxCommandEvent& event);
-    void OnSelectAll(wxCommandEvent &event);
-    void OnUnselectAll(wxCommandEvent &event);
+  // Members
 
 
-    // Members
-    wxButton * m_selectall;
-    wxButton * m_unselectall;
+private:
+  // Constants / Enums
 
-    DECLARE_EVENT_TABLE();
+  // Constructors
 
-    // friend class declarations
+  // Destructors
+
+  // Methods
+  void updateButtons(wxCommandEvent& event);
+  void OnSelectAll(wxCommandEvent &event);
+  void OnUnselectAll(wxCommandEvent &event);
+
+
+  // Members
+  wxButton * m_selectall;
+  wxButton * m_unselectall;
+
+  DECLARE_EVENT_TABLE();
+
+  // friend class declarations
 };
 
 // static members definition
 #ifdef _ANIMATIONEXPORTCHOICEDIALOG_CPP_
 
 #endif
-
-
 
 #endif /* _ANIMATIONEXPORTCHOICEDIALOG_H_ */

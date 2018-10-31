@@ -15,7 +15,7 @@
 #include "logger/Logger.h"
 
 ArcBallCameraControl::ArcBallCameraControl(ArcBallCamera & cam) :
-m_camera(cam)
+  m_camera(cam)
 {
 
 }

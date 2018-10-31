@@ -38,22 +38,22 @@ class ParticleEmitter
 protected:
   ParticleSystem *sys;
 public:
-  ParticleEmitter(ParticleSystem *sys): sys(sys) {}
+  ParticleEmitter(ParticleSystem *sys) : sys(sys) {}
   virtual Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2) = 0;
   virtual ~ParticleEmitter() {}
 };
 
-class PlaneParticleEmitter: public ParticleEmitter
+class PlaneParticleEmitter : public ParticleEmitter
 {
 public:
-  PlaneParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  PlaneParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
   Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
-class SphereParticleEmitter: public ParticleEmitter
+class SphereParticleEmitter : public ParticleEmitter
 {
 public:
-  SphereParticleEmitter(ParticleSystem *sys): ParticleEmitter(sys) {}
+  SphereParticleEmitter(ParticleSystem *sys) : ParticleEmitter(sys) {}
   Particle newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2);
 };
 
@@ -101,7 +101,7 @@ public:
   // whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
 
-  ParticleSystem(): mid(0), emitter(0), rem(0)
+  ParticleSystem() : mid(0), emitter(0), rem(0)
   {
     multitexture = 0;
     particleColID = 0;
@@ -174,7 +174,7 @@ public:
 struct RibbonSegment
 {
   Vec3D pos, up, back;
-  float len,len0;
+  float len, len0;
 };
 
 class RibbonEmitter
@@ -207,7 +207,5 @@ public:
   void setup(uint32 anim, uint32 time);
   void draw();
 };
-
-
 
 #endif

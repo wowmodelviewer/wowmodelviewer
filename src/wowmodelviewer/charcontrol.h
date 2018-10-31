@@ -43,7 +43,7 @@ class CharControl : public wxWindow, public Observer
   void onEvent(Event *);
   void tryToEquipItem(int id);
 
-  public:
+public:
   // Item selection stuff
   ChoiceDialog *itemDialog;
   ssize_t choosingSlot;
@@ -84,6 +84,4 @@ class CharControl : public wxWindow, public Observer
   static QString getItemName(ItemRecord &);
 };
 
-
 #endif
-

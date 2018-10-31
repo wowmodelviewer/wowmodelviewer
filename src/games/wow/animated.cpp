@@ -5,7 +5,6 @@
  *      Author: Jeromnimo
  */
 
-
 #include "animated.h"
 
 _ANIMATED_API_ uint32 globalTime = 0;
@@ -27,15 +26,15 @@ Quaternion fixCoordSystemQuat(Quaternion v)
 
 float frand()
 {
-    return rand()/(float)RAND_MAX;
+  return rand() / (float)RAND_MAX;
 }
 
 float randfloat(float lower, float upper)
 {
-  return lower + (upper-lower)*(rand()/(float)RAND_MAX);
+  return lower + (upper - lower)*(rand() / (float)RAND_MAX);
 }
 
 _ANIMATED_API_ int randint(int lower, int upper)
 {
-    return lower + (int)((upper+1-lower)*frand());
+  return lower + (int)((upper + 1 - lower)*frand());
 }

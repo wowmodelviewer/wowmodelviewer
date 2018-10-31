@@ -9,6 +9,5 @@
 
 void ModelTransparency::init(GameFile * f, ModelTransDef &mcd, QVector<uint32> & global)
 {
-	trans.init(mcd.trans, f, global);
+  trans.init(mcd.trans, f, global);
 }
-

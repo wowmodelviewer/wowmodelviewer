@@ -12,22 +12,21 @@
 
 class FileTreeItem
 {
-	public:
-    QString displayName;
+public:
+  QString displayName;
 
-    int color;
+  int color;
 
-    /// Comparison
-    bool operator<(const FileTreeItem &i) const
-    {
-      return displayName < i.displayName;
-    }
+  /// Comparison
+  bool operator<(const FileTreeItem &i) const
+  {
+    return displayName < i.displayName;
+  }
 
-    bool operator>(const FileTreeItem &i) const
-    {
-      return displayName < i.displayName;
-    }
+  bool operator>(const FileTreeItem &i) const
+  {
+    return displayName < i.displayName;
+  }
 };
-
 
 #endif /* _FILETREEITEM_H_ */

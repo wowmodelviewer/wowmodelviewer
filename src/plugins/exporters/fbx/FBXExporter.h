@@ -26,9 +26,9 @@
 #ifndef _FBXEXPORTER_H_
 #define _FBXEXPORTER_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 #include <map>
 #include <string>
 
@@ -40,7 +40,6 @@
 
 // Other libraries
 class WoWModel;
-
 
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "ExporterPlugin.h"
@@ -57,71 +56,69 @@ class WoWModel;
 //--------------------------------------------------------------------
 class FBXExporter : public ExporterPlugin
 {
-    Q_INTERFACES(ExporterPlugin)
+  Q_INTERFACES(ExporterPlugin)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.FBXExporter" FILE "fbxexporter.json")
 
-  public :
-    // Constants / Enums
+public:
+  // Constants / Enums
 
-    // Constructors
-    FBXExporter();
+  // Constructors
+  FBXExporter();
 
-    // Destructors
-    ~FBXExporter() {}
+  // Destructors
+  ~FBXExporter() {}
 
-    // Methods
-   std::wstring menuLabel() const;
+  // Methods
+  std::wstring menuLabel() const;
+  std::wstring fileSaveTitle() const;
+  std::wstring fileSaveFilter() const;
 
-   std::wstring fileSaveTitle() const;
-   std::wstring fileSaveFilter() const;
+  bool exportModel(Model *, std::wstring file);
 
-   bool exportModel(Model *, std::wstring file);
+  // Members
 
-    // Members
+protected:
+  // Constants / Enums
 
-  protected :
-    // Constants / Enums
+  // Constructors
 
-    // Constructors
+  // Destructors
 
-    // Destructors
+  // Methods
 
-    // Methods
+  // Members
 
-    // Members
+private:
+  // Constants / Enums
 
-  private :
-    // Constants / Enums
+  // Constructors
 
-    // Constructors
+  // Destructors
 
-    // Destructors
+  // Methods
+  void createMaterials();
+  void createMesh();
+  void createSkeleton();
+  void createAnimations();
+  void linkMeshAndSkeleton();
+  void storeBindPose();
+  void reset();
 
-    // Methods
-    void createMaterials();
-    void createMesh();
-    void createSkeleton();
-    void createAnimations();
-    void linkMeshAndSkeleton();
-    void storeBindPose();
-    void reset();
+  // Members
+  FbxManager * m_p_manager;
+  FbxScene   * m_p_scene;
+  WoWModel   * m_p_model;
+  FbxNode    * m_p_meshNode;
+  FbxNode    * m_p_skeletonNode;
 
+  std::wstring m_filename;
+  std::map<int, FbxNode*> m_boneNodes;
+  std::vector<FbxCluster*> m_boneClusters;
 
-    // Members
-    FbxManager * m_p_manager;
-    FbxScene   * m_p_scene;
-    WoWModel   * m_p_model;
-    FbxNode    * m_p_meshNode;
-    FbxNode    * m_p_skeletonNode;
+  std::map<std::wstring, GLuint> m_texturesToExport;
 
-    std::wstring m_filename;
-    std::map<int,FbxNode*> m_boneNodes;
-    std::vector<FbxCluster*> m_boneClusters;
-
-    std::map<std::wstring, GLuint> m_texturesToExport;
-
-    // friend class declarations
+  // friend class declarations
 
 };
 

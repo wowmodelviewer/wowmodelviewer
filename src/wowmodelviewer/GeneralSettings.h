@@ -8,11 +8,11 @@
 #ifndef _GENERALSETTINGS_H_
 #define _GENERALSETTINGS_H_
 
-// WX Headers
+ // WX Headers
 #include <wx/wxprec.h>
 #include <wx/filepicker.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 enum
@@ -36,10 +36,10 @@ enum {
   NUM_SETTINGS1_CHECK
 };
 
-class GeneralSettings: public wxWindow
+class GeneralSettings : public wxWindow
 {
   DECLARE_CLASS(GeneralSettings)
-    DECLARE_EVENT_TABLE()
+  DECLARE_EVENT_TABLE()
 
   wxCheckBox *chkbox[NUM_SETTINGS1_CHECK];
   wxTextCtrl *gamePathDisplay;
@@ -48,14 +48,12 @@ class GeneralSettings: public wxWindow
   wxString newGamePath, newCustomFolder;
 public:
   GeneralSettings(wxWindow* parent, wxWindowID id);
-  ~GeneralSettings(){};
+  ~GeneralSettings() {};
 
   void Update();
 
   void OnButton(wxCommandEvent &event);
   void OnCheck(wxCommandEvent &event);
 };
-
-
 
 #endif /* _GENERALSETTINGS_H_ */

@@ -4,8 +4,6 @@
 #include "types.h"
 #include "WMO.h"
 
-
-
 #include <QString>
 
 /*
@@ -342,15 +340,15 @@ void WMOGroup::initDisplayList()
 
   IndiceToVerts = new uint32[nIndices];
 
-  for (size_t b = 0; b<nBatches; b++) {
+  for (size_t b = 0; b < nBatches; b++) {
     WMOBatch *batch = &batches[b];
     WMOMaterial *mat = &wmo->mat[batch->texture];
 
     // build indice to vert array.
-    for (uint32 i = 0; i <= batch->indexCount; i++){
+    for (uint32 i = 0; i <= batch->indexCount; i++) {
       uint32 a = indices[batch->indexStart + i];
-      for (uint32 j = batch->vertexStart; j <= batch->vertexEnd; j++){
-        if (vertices[a] == vertices[j]){
+      for (uint32 j = batch->vertexStart; j <= batch->vertexEnd; j++) {
+        if (vertices[a] == vertices[j]) {
           IndiceToVerts[batch->indexStart + i] = j;
           break;
         }
@@ -390,7 +388,7 @@ void WMOGroup::initDisplayList()
 
     // render
     glBegin(GL_TRIANGLES);
-    for (size_t t = 0, i = batch->indexStart; t<batch->indexCount; t++, i++) {
+    for (size_t t = 0, i = batch->indexStart; t < batch->indexCount; t++, i++) {
       int a = indices[i];
       if (indoor && hascv) {
         setGLColor(cv[a]);
@@ -435,11 +433,11 @@ void WMOGroup::initLighting(int nLR, short *useLights)
     float lenmin;
     int lmin;
 
-    for (size_t i = 0; i<nDoodads; i++) {
+    for (size_t i = 0; i < nDoodads; i++) {
       lenmin = 999999.0f*999999.0f;
       lmin = 0;
       WMOModelInstance &mi = wmo->modelis[ddr[i]];
-      for (size_t j = 0; j<wmo->nLights; j++) {
+      for (size_t j = 0; j < wmo->nLights; j++) {
         WMOLight &l = wmo->lights[j];
         Vec3D dir = l.pos - mi.pos;
         float ll = dir.lengthSquared();
@@ -485,7 +483,7 @@ void WMOGroup::drawDoodads(int doodadset)
 {
   if (!visible) return;
   if (nDoodads == 0) return;
-  if (doodadset<0) return;
+  if (doodadset < 0) return;
 
   //setupFog();
 
@@ -499,7 +497,7 @@ void WMOGroup::drawDoodads(int doodadset)
 
   // draw doodads
   glColor4f(1, 1, 1, 1);
-  for (size_t i = 0; i<nDoodads; i++) {
+  for (size_t i = 0; i < nDoodads; i++) {
     short dd = ddr[i];
 
     bool inSet;
@@ -508,7 +506,7 @@ void WMOGroup::drawDoodads(int doodadset)
     }
     else {
       inSet = (((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + (int)wmo->doodadsets[doodadset].size)))
-               || (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start + (int)wmo->doodadsets[0].size)))));
+        || (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start + (int)wmo->doodadsets[0].size)))));
     }
 
     if (inSet) {
@@ -542,23 +540,23 @@ void WMOGroup::drawLiquid()
   // draw liquid
   // TODO: culling for liquid boundingbox or something
   if (lq) {
-  setupFog();
-  if (outdoorLights) {
-  //gWorld->outdoorLights(true);
-  } else {
-  // TODO: setup some kind of indoor lighting... ?
-  //gWorld->outdoorLights(false);
-  glEnable(GL_LIGHT2);
-  glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
-  glLightfv(GL_LIGHT2, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
-  glLightfv(GL_LIGHT2, GL_POSITION, Vec4D(0,1,0,0));
-  }
-  glDisable(GL_BLEND);
-  glDisable(GL_ALPHA_TEST);
-  glDepthMask(GL_TRUE);
-  glColor4f(1,1,1,1);
-  lq->draw();
-  glDisable(GL_LIGHT2);
+    setupFog();
+    if (outdoorLights) {
+      //gWorld->outdoorLights(true);
+    } else {
+      // TODO: setup some kind of indoor lighting... ?
+      //gWorld->outdoorLights(false);
+      glEnable(GL_LIGHT2);
+      glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
+      glLightfv(GL_LIGHT2, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
+      glLightfv(GL_LIGHT2, GL_POSITION, Vec4D(0,1,0,0));
+    }
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glDepthMask(GL_TRUE);
+    glColor4f(1,1,1,1);
+    lq->draw();
+    glDisable(GL_LIGHT2);
   }
   */
 }
@@ -575,9 +573,9 @@ void WMOGroup::setupFog()
 }
 
 WMOGroup::WMOGroup() :
-dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
-indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
-nIndices(0), nBatches(0)
+  dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
+  indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
+  nIndices(0), nBatches(0)
 {
 }
 
@@ -614,7 +612,7 @@ void WMOGroup::updateModels(bool load)
   if (!ddr || !ok || nDoodads == 0)
     return;
 
-  for (size_t i = 0; i<nDoodads; i++) {
+  for (size_t i = 0; i < nDoodads; i++) {
     short dd = ddr[i];
 
     bool inSet;
@@ -624,7 +622,7 @@ void WMOGroup::updateModels(bool load)
     }
     else {
       inSet = (((dd >= wmo->doodadsets[wmo->doodadset].start) && (dd < (wmo->doodadsets[wmo->doodadset].start + (int)wmo->doodadsets[wmo->doodadset].size)))
-               || (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start + (int)wmo->doodadsets[0].size)))));
+        || (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start + (int)wmo->doodadsets[0].size)))));
     }
 
     if (inSet) {

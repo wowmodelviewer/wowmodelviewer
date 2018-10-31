@@ -194,7 +194,7 @@ END_EVENT_TABLE()
 ModelViewer::ModelViewer()
 #ifdef _LINUX
 // Transparency in interfaceManager crashes with Linux compositing
-: interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
+  : interfaceManager(0, wxAUI_MGR_ALLOW_FLOATING | wxAUI_MGR_VENETIAN_BLINDS_HINT)
 #endif
 {
   PLUGINMANAGER.init("./plugins");
@@ -231,7 +231,7 @@ ModelViewer::ModelViewer()
 
   //wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
   // create our main frame
-  if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame"))) 
+  if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768), wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame")))
   {
     SetIcon(wxICON(IDI_ICON1));
     SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
@@ -285,7 +285,7 @@ ModelViewer::ModelViewer()
     timer.SetOwner(this, ID_STATUS_REFRESH_TIMER);
     timer.Start(2000);
   }
-  else 
+  else
   {
     LOG_FATAL << "Unable to create the main window for the application.";
     Close(true);
@@ -296,7 +296,7 @@ void ModelViewer::InitMenu()
 {
   LOG_INFO << "Initializing File Menu...";
 
-  if (GetStatusBar() == NULL){
+  if (GetStatusBar() == NULL) {
     CreateStatusBar(5);
     int widths[] = { -1, 100, 50, 125, 125 };
     SetStatusWidths(5, widths);
@@ -336,8 +336,8 @@ void ModelViewer::InitMenu()
     {
       exportMenu->Append(subMenuId, plugin->menuLabel());
       Connect(subMenuId,
-              wxEVT_COMMAND_MENU_SELECTED,
-              wxCommandEventHandler(ModelViewer::OnExport));
+        wxEVT_COMMAND_MENU_SELECTED,
+        wxCommandEventHandler(ModelViewer::OnExport));
     }
   }
   fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), exportMenu);
@@ -436,7 +436,7 @@ void ModelViewer::InitMenu()
     charGlowMenu->AppendRadioItem(ID_CHAREYEGLOW_DEATHKNIGHT, _("Death Knight"));
     if (charControl->model)
     {
-      if (charControl->model->cd.eyeGlowType){
+      if (charControl->model->cd.eyeGlowType) {
         size_t egt = charControl->model->cd.eyeGlowType;
         if (egt == EGT_NONE)
           charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
@@ -445,7 +445,7 @@ void ModelViewer::InitMenu()
         else
           charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
       }
-      else{
+      else {
         charControl->model->cd.eyeGlowType = EGT_DEFAULT;
         charGlowMenu->Check(ID_CHAREYEGLOW_DEFAULT, true);
       }
@@ -623,10 +623,10 @@ void ModelViewer::InitDatabase()
 
   // init texture regions
   CharTexture::initRegions();
-  
+
   // init Race informations
   RaceInfos::init();
-  
+
   LOG_INFO << "Initializing Databases...";
   SetStatusText(wxT("Initializing Databases..."));
   initDB = true;
@@ -652,7 +652,7 @@ void ModelViewer::InitDatabase()
     }
 
   }
-  
+
   {
     sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
 
@@ -687,47 +687,47 @@ void ModelViewer::InitDocking()
 
   // OpenGL Canvas
   interfaceManager.AddPane(canvas, wxAuiPaneInfo().
-                           Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
-                           CenterPane());
+    Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
+    CenterPane());
 
   // Tree list control
   interfaceManager.AddPane(fileControl, wxAuiPaneInfo().
-                           Name(wxT("fileControl")).Caption(wxT("File List")).
-                           BestSize(wxSize(170, 700)).Left().Layer(2));
+    Name(wxT("fileControl")).Caption(wxT("File List")).
+    BestSize(wxSize(170, 700)).Left().Layer(2));
 
   // Animation frame
   interfaceManager.AddPane(animControl, wxAuiPaneInfo().
-                           Name(wxT("animControl")).Caption(wxT("Animation")).
-                           Bottom().Layer(1));
+    Name(wxT("animControl")).Caption(wxT("Animation")).
+    Bottom().Layer(1));
 
   // Character frame
   interfaceManager.AddPane(charControl, wxAuiPaneInfo().
-                           Name(wxT("charControl")).Caption(wxT("Character")).
-                           BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
+    Name(wxT("charControl")).Caption(wxT("Character")).
+    BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
 
   // Lighting control
   interfaceManager.AddPane(lightControl, wxAuiPaneInfo().
-                           Name(wxT("Lighting")).Caption(wxT("Lighting")).
-                           FloatingSize(wxSize(170, 430)).Float().Fixed().Show(false).
-                           DestroyOnClose(false)); //.FloatingPosition(GetStartPosition())
+    Name(wxT("Lighting")).Caption(wxT("Lighting")).
+    FloatingSize(wxSize(170, 430)).Float().Fixed().Show(false).
+    DestroyOnClose(false)); //.FloatingPosition(GetStartPosition())
 
-  // model control
+// model control
   interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
-                           Name(wxT("Models")).Caption(wxT("Models")).
-                           FloatingSize(wxSize(160, 460)).TopDockable(false).BottomDockable(false).Float().Show(false).
-                           DestroyOnClose(false));
+    Name(wxT("Models")).Caption(wxT("Models")).
+    FloatingSize(wxSize(160, 460)).TopDockable(false).BottomDockable(false).Float().Show(false).
+    DestroyOnClose(false));
 
   // model bank control
   interfaceManager.AddPane(modelbankControl, wxAuiPaneInfo().
-                           Name(wxT("ModelBank")).Caption(wxT("ModelBank")).
-                           FloatingSize(wxSize(300, 320)).Float().Fixed().Show(false).
-                           DestroyOnClose(false));
+    Name(wxT("ModelBank")).Caption(wxT("ModelBank")).
+    FloatingSize(wxSize(300, 320)).Float().Fixed().Show(false).
+    DestroyOnClose(false));
 
   // settings frame
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
-                           Name(wxT("Settings")).Caption(wxT("Settings")).
-                           FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Fixed().Show(false));
+    Name(wxT("Settings")).Caption(wxT("Settings")).
+    FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
+    RightDockable(false).BottomDockable(false).Fixed().Show(false));
 
   // tell the manager to "commit" all the changes just made
   //interfaceManager.Update();
@@ -745,39 +745,39 @@ void ModelViewer::ResetLayout()
 
   // OpenGL Canvas
   interfaceManager.AddPane(canvas, wxAuiPaneInfo().
-                           Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
-                           CenterPane());
+    Name(wxT("canvas")).Caption(wxT("OpenGL Canvas")).
+    CenterPane());
 
   // Tree list control
   interfaceManager.AddPane(fileControl, wxAuiPaneInfo().
-                           Name(wxT("fileControl")).Caption(wxT("File List")).
-                           BestSize(wxSize(170, 700)).Left().Layer(2));
+    Name(wxT("fileControl")).Caption(wxT("File List")).
+    BestSize(wxSize(170, 700)).Left().Layer(2));
 
   // Animation frame
   interfaceManager.AddPane(animControl, wxAuiPaneInfo().
-                           Name(wxT("animControl")).Caption(wxT("Animation")).
-                           Bottom().Layer(1));
+    Name(wxT("animControl")).Caption(wxT("Animation")).
+    Bottom().Layer(1));
 
   // Character frame
   interfaceManager.AddPane(charControl, wxAuiPaneInfo().
-                           Name(wxT("charControl")).Caption(wxT("Character")).
-                           BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
+    Name(wxT("charControl")).Caption(wxT("Character")).
+    BestSize(wxSize(170, 700)).Right().Layer(2).Show(isChar));
 
   interfaceManager.AddPane(lightControl, wxAuiPaneInfo().
-                           Name(wxT("Lighting")).Caption(wxT("Lighting")).
-                           FloatingSize(wxSize(170, 430)).Float().Fixed().Show(false).
-                           DestroyOnClose(false)); //.FloatingPosition(GetStartPosition())
+    Name(wxT("Lighting")).Caption(wxT("Lighting")).
+    FloatingSize(wxSize(170, 430)).Float().Fixed().Show(false).
+    DestroyOnClose(false)); //.FloatingPosition(GetStartPosition())
 
   interfaceManager.AddPane(modelControl, wxAuiPaneInfo().
-                           Name(wxT("Models")).Caption(wxT("Models")).
-                           FloatingSize(wxSize(160, 460)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).TopDockable(false).BottomDockable(false).Show(false).
-                           DestroyOnClose(false));
+    Name(wxT("Models")).Caption(wxT("Models")).
+    FloatingSize(wxSize(160, 460)).Float().TopDockable(false).LeftDockable(false).
+    RightDockable(false).TopDockable(false).BottomDockable(false).Show(false).
+    DestroyOnClose(false));
 
   interfaceManager.AddPane(settingsControl, wxAuiPaneInfo().
-                           Name(wxT("Settings")).Caption(wxT("Settings")).
-                           FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
-                           RightDockable(false).BottomDockable(false).Show(false));
+    Name(wxT("Settings")).Caption(wxT("Settings")).
+    FloatingSize(wxSize(400, 550)).Float().TopDockable(false).LeftDockable(false).
+    RightDockable(false).BottomDockable(false).Show(false));
 
   // tell the manager to "commit" all the changes just made
   interfaceManager.Update();
@@ -894,8 +894,8 @@ void ModelViewer::LoadLayout()
 
   // if the layout data exists,  load it.
   if (!layout.IsNull() // something goes wrong
-      && !layout.IsEmpty() // empty value
-      && !layout.EndsWith(L"canvas")) // old saving badly read by Qt, ignore
+    && !layout.IsEmpty() // empty value
+    && !layout.EndsWith(L"canvas")) // old saving badly read by Qt, ignore
   {
     if (!interfaceManager.LoadPerspective(layout, false))
     {
@@ -1092,11 +1092,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 
   QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
-                          "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
-                          "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
-                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                          "WHERE Creature.ID = %1;").arg(modelid);
+    "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
+    "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
+    "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+    "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+    "WHERE Creature.ID = %1;").arg(modelid);
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -1171,10 +1171,10 @@ void ModelViewer::LoadItem(unsigned int id)
   try
   {
     QString query = QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-                            "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
-                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
-                            "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
+      "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+      "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
+      "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
+      "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 
     sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
     // LOG_INFO << query;
@@ -1354,140 +1354,140 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
 
   //switch 
   switch (id) {
-    case ID_FILE_RESETLAYOUT:
-      ResetLayout();
-      break;
+  case ID_FILE_RESETLAYOUT:
+    ResetLayout();
+    break;
 
-    case ID_SHOW_MASK:
-      video.useMasking = !video.useMasking;
-      break;
+  case ID_SHOW_MASK:
+    video.useMasking = !video.useMasking;
+    break;
 
-    case ID_SHOW_BOUNDS:
-      if (canvas->model())
-      {
-        WoWModel * m = const_cast<WoWModel *>(canvas->model());
-        m->showBounds = !m->showBounds;
-      }
-      break;
-
-    case ID_SHOW_GRID:
-      canvas->drawGrid = event.IsChecked();
-      break;
-
-    case ID_USE_CAMERA:
-      canvas->useCamera = event.IsChecked();
-      break;
-
-    case ID_DEFAULT_DOODADS:
-      // if we have a model...
-      if (canvas->wmo) {
-        canvas->wmo->includeDefaultDoodads = event.IsChecked();
-        canvas->wmo->updateModels();
-      }
-      animControl->defaultDoodads = event.IsChecked();
-      break;
-
-    case ID_SAVE_CHAR:
+  case ID_SHOW_BOUNDS:
+    if (canvas->model())
     {
-      wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-      if (saveDialog.ShowModal() == wxID_OK)
-        SaveChar(QString::fromWCharArray(saveDialog.GetPath().c_str()));
+      WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      m->showBounds = !m->showBounds;
     }
     break;
-    case ID_LOAD_CHAR:
+
+  case ID_SHOW_GRID:
+    canvas->drawGrid = event.IsChecked();
+    break;
+
+  case ID_USE_CAMERA:
+    canvas->useCamera = event.IsChecked();
+    break;
+
+  case ID_DEFAULT_DOODADS:
+    // if we have a model...
+    if (canvas->wmo) {
+      canvas->wmo->includeDefaultDoodads = event.IsChecked();
+      canvas->wmo->updateModels();
+    }
+    animControl->defaultDoodads = event.IsChecked();
+    break;
+
+  case ID_SAVE_CHAR:
+  {
+    wxFileDialog saveDialog(this, wxT("Save character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    if (saveDialog.ShowModal() == wxID_OK)
+      SaveChar(QString::fromWCharArray(saveDialog.GetPath().c_str()));
+  }
+  break;
+  case ID_LOAD_CHAR:
+  {
+    wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (loadDialog.ShowModal() == wxID_OK)
     {
-      wxFileDialog loadDialog(this, wxT("Load character"), wxEmptyString, wxEmptyString, wxT("Character files (*.chr)|*.chr"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-      if (loadDialog.ShowModal() == wxID_OK)
+      LOG_INFO << "Loading character from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
+      if (charControl->model) // if a model is already present, unload equipment
       {
-        LOG_INFO << "Loading character from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
-        if (charControl->model) // if a model is already present, unload equipment
+        for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
         {
-          for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
-          {
-            WoWItem * item = charControl->model->getItem((CharSlots)i);
-            if (item)
-              item->setId(0);
-          }
+          WoWItem * item = charControl->model->getItem((CharSlots)i);
+          if (item)
+            item->setId(0);
         }
-        LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()));
       }
+      LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()));
     }
-    fileControl->UpdateInterface();
-    break;
-
-    case ID_SAVE_EQUIPMENT:
-    {
-      wxFileDialog dialog(this, wxT("Save equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
-      if (dialog.ShowModal() == wxID_OK)
-        SaveChar(QString::fromWCharArray(dialog.GetPath().c_str()), true);
-      break;
-    }
-
-    case ID_LOAD_EQUIPMENT:
-    {
-      wxFileDialog loadDialog(this, wxT("Load equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-      if (loadDialog.ShowModal() == wxID_OK)
-      {
-        LOG_INFO << "Loading equipment from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
-        if (charControl->model) // if a model is already present, unload equipment
-        {
-          for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
-          {
-            WoWItem * item = charControl->model->getItem((CharSlots)i);
-            if (item)
-              item->setId(0);
-          }
-        }
-        LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()), true);
-      }
-      break;
-    }
-
-    case ID_IMPORT_CHAR:
-    {
-      wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
-      if (dialog.ShowModal() == wxID_OK){
-        armoryPath = dialog.GetValue();
-        LOG_INFO << "Importing character from the Armory:" << QString::fromWCharArray(armoryPath.c_str());
-        ImportArmoury(armoryPath);
-      }
-    }
-    break;
-
-    /*
-  case ID_ZOOM_IN:
-  canvas->Zoom(0.5f, false);
+  }
+  fileControl->UpdateInterface();
   break;
 
-  case ID_ZOOM_OUT:
-  canvas->Zoom(-0.5f, false);
-  break;
-  */
+  case ID_SAVE_EQUIPMENT:
+  {
+    wxFileDialog dialog(this, wxT("Save equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT, wxDefaultPosition);
+    if (dialog.ShowModal() == wxID_OK)
+      SaveChar(QString::fromWCharArray(dialog.GetPath().c_str()), true);
+    break;
+  }
 
-    case ID_SAVE_TEMP1:
-      canvas->SaveSceneState(1);
-      break;
-    case ID_SAVE_TEMP2:
-      canvas->SaveSceneState(2);
-      break;
-    case ID_SAVE_TEMP3:
-      canvas->SaveSceneState(3);
-      break;
-    case ID_SAVE_TEMP4:
-      canvas->SaveSceneState(4);
-      break;
-    case ID_LOAD_TEMP1:
-      canvas->LoadSceneState(1);
-      break;
-    case ID_LOAD_TEMP2:
-      canvas->LoadSceneState(2);
-      break;
-    case ID_LOAD_TEMP3:
-      canvas->LoadSceneState(3);
-      break;
-    case ID_LOAD_TEMP4:
-      canvas->LoadSceneState(4);
-      break;
+  case ID_LOAD_EQUIPMENT:
+  {
+    wxFileDialog loadDialog(this, wxT("Load equipment"), wxEmptyString, wxEmptyString, wxT("Equipment files (*.eq)|*.eq"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    if (loadDialog.ShowModal() == wxID_OK)
+    {
+      LOG_INFO << "Loading equipment from a save file:" << QString::fromWCharArray(loadDialog.GetPath().c_str());
+      if (charControl->model) // if a model is already present, unload equipment
+      {
+        for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
+        {
+          WoWItem * item = charControl->model->getItem((CharSlots)i);
+          if (item)
+            item->setId(0);
+        }
+      }
+      LoadChar(QString::fromWCharArray(loadDialog.GetPath().c_str()), true);
+    }
+    break;
+  }
+
+  case ID_IMPORT_CHAR:
+  {
+    wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
+    if (dialog.ShowModal() == wxID_OK) {
+      armoryPath = dialog.GetValue();
+      LOG_INFO << "Importing character from the Armory:" << QString::fromWCharArray(armoryPath.c_str());
+      ImportArmoury(armoryPath);
+    }
+  }
+  break;
+
+  /*
+case ID_ZOOM_IN:
+canvas->Zoom(0.5f, false);
+break;
+
+case ID_ZOOM_OUT:
+canvas->Zoom(-0.5f, false);
+break;
+*/
+
+  case ID_SAVE_TEMP1:
+    canvas->SaveSceneState(1);
+    break;
+  case ID_SAVE_TEMP2:
+    canvas->SaveSceneState(2);
+    break;
+  case ID_SAVE_TEMP3:
+    canvas->SaveSceneState(3);
+    break;
+  case ID_SAVE_TEMP4:
+    canvas->SaveSceneState(4);
+    break;
+  case ID_LOAD_TEMP1:
+    canvas->LoadSceneState(1);
+    break;
+  case ID_LOAD_TEMP2:
+    canvas->LoadSceneState(2);
+    break;
+  case ID_LOAD_TEMP3:
+    canvas->LoadSceneState(3);
+    break;
+  case ID_LOAD_TEMP4:
+    canvas->LoadSceneState(4);
+    break;
   }
 }
 
@@ -1496,137 +1496,137 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
   int id = event.GetId();
 
   switch (id) {
-    case ID_LT_SAVE:
-    {
-      wxFileDialog dialog(this, wxT("Save Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-      if (dialog.ShowModal() == wxID_OK) {
-        wxString fn = dialog.GetPath();
+  case ID_LT_SAVE:
+  {
+    wxFileDialog dialog(this, wxT("Save Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    if (dialog.ShowModal() == wxID_OK) {
+      wxString fn = dialog.GetPath();
 
-        // FIXME: ofstream is not compitable with multibyte path name
-        std::ofstream f(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
+      // FIXME: ofstream is not compitable with multibyte path name
+      std::ofstream f(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
 
-        f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
-        for (size_t i = 0; i < MAX_LIGHTS; i++) {
-          f << lightControl->lights[i].ambience.x << " " << lightControl->lights[i].ambience.y << " " << lightControl->lights[i].ambience.z << " " << lightControl->lights[i].arc << " " << lightControl->lights[i].constant_int << " " << lightControl->lights[i].diffuse.x << " " << lightControl->lights[i].diffuse.y << " " << lightControl->lights[i].diffuse.z << " " << lightControl->lights[i].enabled << " " << lightControl->lights[i].linear_int << " " << lightControl->lights[i].pos.x << " " << lightControl->lights[i].pos.y << " " << lightControl->lights[i].pos.z << " " << lightControl->lights[i].quadradic_int << " " << lightControl->lights[i].relative << " " << lightControl->lights[i].specular.x << " " << lightControl->lights[i].specular.y << " " << lightControl->lights[i].specular.z << " " << lightControl->lights[i].target.x << " " << lightControl->lights[i].target.y << " " << lightControl->lights[i].target.z << " " << lightControl->lights[i].type << endl;
-        }
-        f.close();
+      f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
+      for (size_t i = 0; i < MAX_LIGHTS; i++) {
+        f << lightControl->lights[i].ambience.x << " " << lightControl->lights[i].ambience.y << " " << lightControl->lights[i].ambience.z << " " << lightControl->lights[i].arc << " " << lightControl->lights[i].constant_int << " " << lightControl->lights[i].diffuse.x << " " << lightControl->lights[i].diffuse.y << " " << lightControl->lights[i].diffuse.z << " " << lightControl->lights[i].enabled << " " << lightControl->lights[i].linear_int << " " << lightControl->lights[i].pos.x << " " << lightControl->lights[i].pos.y << " " << lightControl->lights[i].pos.z << " " << lightControl->lights[i].quadradic_int << " " << lightControl->lights[i].relative << " " << lightControl->lights[i].specular.x << " " << lightControl->lights[i].specular.y << " " << lightControl->lights[i].specular.z << " " << lightControl->lights[i].target.x << " " << lightControl->lights[i].target.y << " " << lightControl->lights[i].target.z << " " << lightControl->lights[i].type << endl;
       }
-
-      return;
-
+      f.close();
     }
-    case ID_LT_LOAD:
-    {
-      wxFileDialog dialog(this, wxT("Load Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-      if (dialog.ShowModal() == wxID_OK) {
-        wxString fn = dialog.GetFilename();
-        // FIXME: ifstream is not compitable with multibyte path name
-        std::ifstream f(fn.fn_str());
+    return;
 
-        bool lightObj, lightTrue, lightDir, lightAmb, lightModel;
+  }
+  case ID_LT_LOAD:
+  {
+    wxFileDialog dialog(this, wxT("Load Lighting"), wxEmptyString, wxEmptyString, wxT("Scene Lighting (*.lit)|*.lit"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 
-        //lightMenu->IsChecked(ID_LT_AMBIENT)
-        f >> lightObj >> lightTrue >> lightDir >> lightAmb >> lightModel;
+    if (dialog.ShowModal() == wxID_OK) {
+      wxString fn = dialog.GetFilename();
+      // FIXME: ifstream is not compitable with multibyte path name
+      std::ifstream f(fn.fn_str());
 
-        lightMenu->Check(ID_LT_DIRECTION, lightObj);
-        lightMenu->Check(ID_LT_TRUE, lightTrue);
-        lightMenu->Check(ID_LT_DIRECTIONAL, lightDir);
-        lightMenu->Check(ID_LT_AMBIENT, lightAmb);
-        lightMenu->Check(ID_LT_MODEL, lightModel);
+      bool lightObj, lightTrue, lightDir, lightAmb, lightModel;
 
-        for (size_t i = 0; i < MAX_LIGHTS; i++) {
-          f >> lightControl->lights[i].ambience.x >> lightControl->lights[i].ambience.y >> lightControl->lights[i].ambience.z >> lightControl->lights[i].arc >> lightControl->lights[i].constant_int >> lightControl->lights[i].diffuse.x >> lightControl->lights[i].diffuse.y >> lightControl->lights[i].diffuse.z >> lightControl->lights[i].enabled >> lightControl->lights[i].linear_int >> lightControl->lights[i].pos.x >> lightControl->lights[i].pos.y >> lightControl->lights[i].pos.z >> lightControl->lights[i].quadradic_int >> lightControl->lights[i].relative >> lightControl->lights[i].specular.x >> lightControl->lights[i].specular.y >> lightControl->lights[i].specular.z >> lightControl->lights[i].target.x >> lightControl->lights[i].target.y >> lightControl->lights[i].target.z >> lightControl->lights[i].type;
-        }
-        f.close();
+      //lightMenu->IsChecked(ID_LT_AMBIENT)
+      f >> lightObj >> lightTrue >> lightDir >> lightAmb >> lightModel;
 
-        if (lightObj)
-          canvas->drawLightDir = true;
+      lightMenu->Check(ID_LT_DIRECTION, lightObj);
+      lightMenu->Check(ID_LT_TRUE, lightTrue);
+      lightMenu->Check(ID_LT_DIRECTIONAL, lightDir);
+      lightMenu->Check(ID_LT_AMBIENT, lightAmb);
+      lightMenu->Check(ID_LT_MODEL, lightModel);
 
-        if (lightDir) {
-          canvas->lightType = LIGHT_DYNAMIC; //LT_DIRECTIONAL;
-
-          /*
-          if (lightTrue) {
-          if (event.IsChecked()){
-          // Need to reset all our colour, lighting, material back to 'default'
-          //GLfloat b[] = {0.5f, 0.4f, 0.4f, 1.0f};
-          //glColor4fv(b);
-          glDisable(GL_COLOR_MATERIAL);
-
-          glMaterialfv(GL_FRONT, GL_EMISSION, def_emission);
-
-          glMaterialfv(GL_FRONT, GL_AMBIENT, def_ambience);
-          //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
-
-          glMaterialfv(GL_FRONT, GL_DIFFUSE, def_diffuse);
-          glMaterialfv(GL_FRONT, GL_SPECULAR, def_specular);
-          } else {
-          glEnable(GL_COLOR_MATERIAL);
-          }
-          }
-          */
-        }
-        else if (lightAmb) {
-          //glEnable(GL_COLOR_MATERIAL);
-          canvas->lightType = LIGHT_AMBIENT;
-        }
-        else if (lightModel) {
-          canvas->lightType = LIGHT_MODEL_ONLY;
-        }
-
-        lightControl->UpdateGL();
-        lightControl->Update();
+      for (size_t i = 0; i < MAX_LIGHTS; i++) {
+        f >> lightControl->lights[i].ambience.x >> lightControl->lights[i].ambience.y >> lightControl->lights[i].ambience.z >> lightControl->lights[i].arc >> lightControl->lights[i].constant_int >> lightControl->lights[i].diffuse.x >> lightControl->lights[i].diffuse.y >> lightControl->lights[i].diffuse.z >> lightControl->lights[i].enabled >> lightControl->lights[i].linear_int >> lightControl->lights[i].pos.x >> lightControl->lights[i].pos.y >> lightControl->lights[i].pos.z >> lightControl->lights[i].quadradic_int >> lightControl->lights[i].relative >> lightControl->lights[i].specular.x >> lightControl->lights[i].specular.y >> lightControl->lights[i].specular.z >> lightControl->lights[i].target.x >> lightControl->lights[i].target.y >> lightControl->lights[i].target.z >> lightControl->lights[i].type;
       }
+      f.close();
 
-      return;
-    }
-    /* case ID_USE_LIGHTS:
-      canvas->useLights = event.IsChecked();
-      return;
-      */
-    case ID_LT_DIRECTION:
-      canvas->drawLightDir = event.IsChecked();
-      return;
-    case ID_LT_TRUE:
-      if (event.IsChecked()){
+      if (lightObj)
+        canvas->drawLightDir = true;
+
+      if (lightDir) {
+        canvas->lightType = LIGHT_DYNAMIC; //LT_DIRECTIONAL;
+
+        /*
+        if (lightTrue) {
+        if (event.IsChecked()){
         // Need to reset all our colour, lighting, material back to 'default'
         //GLfloat b[] = {0.5f, 0.4f, 0.4f, 1.0f};
         //glColor4fv(b);
         glDisable(GL_COLOR_MATERIAL);
 
         glMaterialfv(GL_FRONT, GL_EMISSION, def_emission);
+
         glMaterialfv(GL_FRONT, GL_AMBIENT, def_ambience);
         //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
 
         glMaterialfv(GL_FRONT, GL_DIFFUSE, def_diffuse);
         glMaterialfv(GL_FRONT, GL_SPECULAR, def_specular);
-      }
-      else {
+        } else {
         glEnable(GL_COLOR_MATERIAL);
-        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, Vec4D(0.4f,0.4f,0.4f,1.0f));
+        }
+        }
+        */
+      }
+      else if (lightAmb) {
+        //glEnable(GL_COLOR_MATERIAL);
+        canvas->lightType = LIGHT_AMBIENT;
+      }
+      else if (lightModel) {
+        canvas->lightType = LIGHT_MODEL_ONLY;
       }
 
+      lightControl->UpdateGL();
       lightControl->Update();
+    }
 
-      return;
+    return;
+  }
+  /* case ID_USE_LIGHTS:
+    canvas->useLights = event.IsChecked();
+    return;
+    */
+  case ID_LT_DIRECTION:
+    canvas->drawLightDir = event.IsChecked();
+    return;
+  case ID_LT_TRUE:
+    if (event.IsChecked()) {
+      // Need to reset all our colour, lighting, material back to 'default'
+      //GLfloat b[] = {0.5f, 0.4f, 0.4f, 1.0f};
+      //glColor4fv(b);
+      glDisable(GL_COLOR_MATERIAL);
 
-      // Ambient lighting
-    case ID_LT_AMBIENT:
-      //glEnable(GL_COLOR_MATERIAL);
-      canvas->lightType = LIGHT_AMBIENT;
-      return;
-
-      // Dynamic lighting
-    case ID_LT_DIRECTIONAL:
+      glMaterialfv(GL_FRONT, GL_EMISSION, def_emission);
+      glMaterialfv(GL_FRONT, GL_AMBIENT, def_ambience);
       //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
-      canvas->lightType = LIGHT_DYNAMIC;
-      return;
 
-      // Model's ambient lighting
-    case ID_LT_MODEL:
-      canvas->lightType = LIGHT_MODEL_ONLY;
-      return;
+      glMaterialfv(GL_FRONT, GL_DIFFUSE, def_diffuse);
+      glMaterialfv(GL_FRONT, GL_SPECULAR, def_specular);
+    }
+    else {
+      glEnable(GL_COLOR_MATERIAL);
+      //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, Vec4D(0.4f,0.4f,0.4f,1.0f));
+    }
+
+    lightControl->Update();
+
+    return;
+
+    // Ambient lighting
+  case ID_LT_AMBIENT:
+    //glEnable(GL_COLOR_MATERIAL);
+    canvas->lightType = LIGHT_AMBIENT;
+    return;
+
+    // Dynamic lighting
+  case ID_LT_DIRECTIONAL:
+    //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, def_ambience);
+    canvas->lightType = LIGHT_DYNAMIC;
+    return;
+
+    // Model's ambient lighting
+  case ID_LT_MODEL:
+    canvas->lightType = LIGHT_MODEL_ONLY;
+    return;
   }
 }
 
@@ -1702,7 +1702,7 @@ void ModelViewer::OnViewLog(wxCommandEvent &event)
 #ifdef	_WINDOWS
     wxExecute(wxT("notepad.exe ") + logPath);
 #elif	_MAC
-    wxExecute(wxT("/Applications/TextEdit.app/Contents/MacOS/TextEdit ")+logPath);
+    wxExecute(wxT("/Applications/TextEdit.app/Contents/MacOS/TextEdit ") + logPath);
 #endif
   }
 }
@@ -1720,13 +1720,13 @@ void ModelViewer::LoadWoW()
   if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
     getGamePath();
   }
-  
+
   if (!core::Game::instance().initDone())
     core::Game::instance().init(new wow::WoWFolder(QString::fromWCharArray(gamePath.c_str())), new wow::WoWDatabase());
 
   // init game config
   std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
-  
+
   if (configsFound.empty())
   {
     wxString message = wxString::Format(wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
@@ -1734,7 +1734,7 @@ void ModelViewer::LoadWoW()
     dial->ShowModal();
     return;
   }
- 
+
   core::GameConfig config = configsFound[0];
 
   unsigned int nbConfigs = configsFound.size();
@@ -1779,13 +1779,13 @@ void ModelViewer::LoadWoW()
   core::Game::instance().setConfigFolder(baseConfigFolder);
 
   GAMEDIRECTORY.initFromListfile("listfile.txt");
-  
+
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
   InitDatabase();
-  
+
   /*
   // Error check
   if (!initDB)
@@ -1806,7 +1806,7 @@ void ModelViewer::LoadWoW()
 
   SetStatusText(wxT("Initializing File Control..."));
   fileControl->Init(this);
-  
+
   if (charControl->Init() == false)
   {
     SetStatusText(wxT("Error Initializing the Character Controls."));
@@ -1943,9 +1943,9 @@ void ModelViewer::OnSave(wxCommandEvent &event)
       imageControl = new ImageControl(this, ID_IMAGE_FRAME, canvas);
 
       interfaceManager.AddPane(imageControl, wxAuiPaneInfo().
-                               Name(wxT("Screenshot")).Caption(wxT("Screenshot")).
-                               FloatingSize(wxSize(295, 145)).Float().Fixed().
-                               Dockable(false)); //.FloatingPosition(GetStartPosition())
+        Name(wxT("Screenshot")).Caption(wxT("Screenshot")).
+        FloatingSize(wxSize(295, 145)).Float().Fixed().
+        Dockable(false)); //.FloatingPosition(GetStartPosition())
     }
 
     imageControl->OnShow(&interfaceManager);
@@ -2032,9 +2032,9 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
   stream.writeStartElement("equipment");
 
   for (WoWModel::iterator it = m->begin();
-       it != m->end();
-       ++it)
-       (*it)->save(stream);
+    it != m->end();
+    ++it)
+    (*it)->save(stream);
 
   stream.writeEndElement(); // equipment
 
@@ -2200,9 +2200,9 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
       {
         WoWModel * m = const_cast<WoWModel *>(canvas->model());
         for (WoWModel::iterator it = m->begin();
-             it != m->end();
-             ++it)
-             (*it)->load(fn);
+          it != m->end();
+          ++it)
+          (*it)->load(fn);
       }
     }
   }
@@ -2303,32 +2303,32 @@ void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 {
   switch (event.GetId())
   {
-    case ID_CANVASS120:	SetCanvasSize(120, 120);
-      break;
-    case ID_CANVASS512:	SetCanvasSize(512, 512);
-      break;
-    case ID_CANVASS1024:	SetCanvasSize(1024, 1024);
-      break;
-    case ID_CANVASF480:	SetCanvasSize(640, 480);
-      break;
-    case ID_CANVASF600:	SetCanvasSize(800, 600);
-      break;
-    case ID_CANVASF768:	SetCanvasSize(1024, 768);
-      break;
-    case ID_CANVASF864:	SetCanvasSize(1152, 864);
-      break;
-    case ID_CANVASF1200:	SetCanvasSize(1600, 1200);
-      break;
-    case ID_CANVASW480:	SetCanvasSize(864, 480);
-      break;
-    case ID_CANVASW720:	SetCanvasSize(1280, 720);
-      break;
-    case ID_CANVASW1080:	SetCanvasSize(1920, 1080);
-      break;
-    case ID_CANVASM768:	SetCanvasSize(1280, 768);
-      break;
-    case ID_CANVASM1200:	SetCanvasSize(1900, 1200);
-      break;
+  case ID_CANVASS120:	SetCanvasSize(120, 120);
+    break;
+  case ID_CANVASS512:	SetCanvasSize(512, 512);
+    break;
+  case ID_CANVASS1024:	SetCanvasSize(1024, 1024);
+    break;
+  case ID_CANVASF480:	SetCanvasSize(640, 480);
+    break;
+  case ID_CANVASF600:	SetCanvasSize(800, 600);
+    break;
+  case ID_CANVASF768:	SetCanvasSize(1024, 768);
+    break;
+  case ID_CANVASF864:	SetCanvasSize(1152, 864);
+    break;
+  case ID_CANVASF1200:	SetCanvasSize(1600, 1200);
+    break;
+  case ID_CANVASW480:	SetCanvasSize(864, 480);
+    break;
+  case ID_CANVASW720:	SetCanvasSize(1280, 720);
+    break;
+  case ID_CANVASW1080:	SetCanvasSize(1920, 1080);
+    break;
+  case ID_CANVASM768:	SetCanvasSize(1280, 768);
+    break;
+  case ID_CANVASM1200:	SetCanvasSize(1900, 1200);
+    break;
   }
 }
 
@@ -2368,7 +2368,7 @@ void ModelViewer::ModelInfo()
   }
 
   xml << *m;
- 
+
   xml.close();
 }
 
@@ -2394,9 +2394,9 @@ void ModelViewer::UpdateControls()
   {
     //refresh equipment
     for (WoWModel::iterator it = m->begin();
-         it != m->end();
-         ++it)
-         (*it)->refresh();
+      it != m->end();
+      ++it)
+      (*it)->refresh();
   }
   modelControl->RefreshModel(canvas->root);
 }
@@ -2408,8 +2408,8 @@ void ModelViewer::ImportArmoury(wxString strURL)
   QString url = strURL.utf8_str();
 
   for (PluginManager::iterator it = PLUGINMANAGER.begin();
-       it != PLUGINMANAGER.end();
-       ++it)
+    it != PLUGINMANAGER.end();
+    ++it)
   {
     ImporterPlugin * plugin = dynamic_cast<ImporterPlugin *>(*it);
     if (plugin && plugin->acceptURL(url))
@@ -2428,11 +2428,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     // retrieve model files id from DB
     QString query = QString("SELECT CMDM.FileID as malemodel, CMDF.FileID AS femalemodel, CMDMHD.FileID as malemodelHD, CMDFHD.FileID AS femalemodelHD FROM ChrRaces "
-                            "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
-                            "WHERE ChrRaces.ID = %1").arg(result->raceId);
+      "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
+      "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
+      "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
+      "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
+      "WHERE ChrRaces.ID = %1").arg(result->raceId);
 
     sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -2524,7 +2524,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
     if (plugin && plugin->menuLabel() == exporterLabel)
     {
       wxFileDialog saveFileDialog(this, plugin->fileSaveTitle(), L"", L"",
-                                  plugin->fileSaveFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+        plugin->fileSaveFilter(), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
       if (saveFileDialog.ShowModal() == wxID_CANCEL)
         return;
@@ -2590,4 +2590,3 @@ void ModelViewer::OnStatusBarRefreshTimer(wxTimerEvent& event)
 {
   SetStatusText(wxString::Format(wxT("Memory: %i Mo"), core::getMemoryUsed()), 4);
 }
-

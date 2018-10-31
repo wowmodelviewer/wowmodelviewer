@@ -9,18 +9,15 @@
 #define _LOGSTACKWALKER_H_
 
 #ifndef WX_PRECOMP
-  #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 #include <wx/stackwalk.h>
 
 class LogStackWalker : public wxStackWalker
 {
-  protected:
-    void OnStackFrame(const wxStackFrame& frame);
+protected:
+  void OnStackFrame(const wxStackFrame& frame);
 };
-
-
-
 
 #endif /* _LOGSTACKWALKER_H_ */

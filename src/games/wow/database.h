@@ -16,7 +16,7 @@
 #include <map>
 #include <set>
 
-
+// Qt
 #include <QString>
 
 // wmv database
@@ -45,42 +45,39 @@ _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 // -----------------------------------
 
 struct _DATABASE_API_ ItemRecord {
-	QString name;
-	int id, itemclass, subclass, type, model, sheath, quality;
+  QString name;
+  int id, itemclass, subclass, type, model, sheath, quality;
 
-	ItemRecord(const std::vector<QString> &);
-	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
-	{}
+  ItemRecord(const std::vector<QString> &);
+  ItemRecord() :id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
+  {}
 
-	int slot();
+  int slot();
 };
 
 class _DATABASE_API_ ItemDatabase {
 public:
-	ItemDatabase();
+  ItemDatabase();
 
-	std::vector<ItemRecord> items;
-	std::map<int, int> itemLookup;
+  std::vector<ItemRecord> items;
+  std::map<int, int> itemLookup;
 
-	const ItemRecord& getById(int id);
+  const ItemRecord& getById(int id);
 };
 
 // ============/////////////////=================/////////////////
-
 
 // ------------------------------
 // NPC Stuff
 // -------------------------------
 struct _DATABASE_API_ NPCRecord
 {
-	QString name;
-	int id, model, type;
+  QString name;
+  int id, model, type;
 
-	NPCRecord(QString line);
-	NPCRecord(const std::vector<QString> &);
-	NPCRecord(): id(0), model(0), type(0) {}
-	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
-
+  NPCRecord(QString line);
+  NPCRecord(const std::vector<QString> &);
+  NPCRecord() : id(0), model(0), type(0) {}
+  NPCRecord(const NPCRecord &r) : name(r.name), id(r.id), model(r.model), type(r.type) {}
 };
 #endif
-

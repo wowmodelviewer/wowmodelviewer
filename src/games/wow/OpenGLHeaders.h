@@ -25,8 +25,6 @@
 	#include <GL/glu.h>
 #endif
 
-
 #define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
 #endif
-

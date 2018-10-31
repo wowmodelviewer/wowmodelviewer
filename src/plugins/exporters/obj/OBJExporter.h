@@ -26,11 +26,11 @@
 #ifndef _OBJEXPORTER_H_
 #define _OBJEXPORTER_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QtPlugin>
 
 // Externals
@@ -45,7 +45,6 @@ class WoWModel;
 
 // Current library
 
-
 // Namespaces used
 //--------------------------------------------------------------------
 
@@ -54,56 +53,55 @@ class WoWModel;
 //--------------------------------------------------------------------
 class OBJExporter : public ExporterPlugin
 {
-    Q_INTERFACES(ExporterPlugin)
+  Q_INTERFACES(ExporterPlugin)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.OBJExporter" FILE "objexporter.json")
 
-  public :
-    // Constants / Enums
+public:
+  // Constants / Enums
 
-    // Constructors
-    OBJExporter() {}
+  // Constructors
+  OBJExporter() {}
 
-    // Destructors
-    ~OBJExporter() {}
+  // Destructors
+  ~OBJExporter() {}
 
-    // Methods
-   std::wstring menuLabel() const;
+  // Methods
+  std::wstring menuLabel() const;
 
-   std::wstring fileSaveTitle() const;
-   std::wstring fileSaveFilter() const;
+  std::wstring fileSaveTitle() const;
+  std::wstring fileSaveFilter() const;
 
-   bool exportModel(Model *, std::wstring file);
+  bool exportModel(Model *, std::wstring file);
 
-    // Members
+  // Members
 
-  protected :
-    // Constants / Enums
+protected:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
+  // Methods
 
-    // Members
+  // Members
 
-  private :
-    // Constants / Enums
+private:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
+  // Methods
 
-     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), Vec3D pos = Vec3D::nullVec()) const;
-     bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
+  bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), Vec3D pos = Vec3D::nullVec()) const;
+  bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
 
+  // Members
 
-    // Members
-
-    // friend class declarations
+  // friend class declarations
 
 };
 

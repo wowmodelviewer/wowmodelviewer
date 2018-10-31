@@ -6,7 +6,7 @@
 
 class GameFile;
 
-struct WMOFog 
+struct WMOFog
 {
   unsigned int flags;
   Vec3D pos;

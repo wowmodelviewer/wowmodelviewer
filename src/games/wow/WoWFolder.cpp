@@ -61,12 +61,12 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
   LOG_INFO << "Add customFiles from folder" << path;
   QDirIterator dirIt(path, QDirIterator::Subdirectories);
 
-  while(dirIt.hasNext())
+  while (dirIt.hasNext())
   {
     dirIt.next();
     QString filePath = dirIt.filePath().toLower();
 
-    if(QFileInfo(filePath).isFile())
+    if (QFileInfo(filePath).isFile())
     {
       QString toRemove = path;
       toRemove += "\\";
@@ -75,9 +75,9 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
       GameFile * originalFile = GameFolder::getFile(filePath);
       bool addnewfile = true;
       int originalId = -1;
-      if(originalFile)
+      if (originalFile)
       {
-        if(bypassOriginalFiles)
+        if (bypassOriginalFiles)
         {
           originalId = originalFile->fileDataId();
           removeChild(originalFile);
@@ -91,11 +91,11 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
         }
       }
 
-      if(addnewfile)
+      if (addnewfile)
       {
         LOG_INFO << "Add custom file" << filePath << "from hard drive location" << dirIt.filePath();
         HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalId);
-        file->setName(filePath.mid(filePath.lastIndexOf("/")+1));
+        file->setName(filePath.mid(filePath.lastIndexOf("/") + 1));
         addChild(file);
       }
     }
@@ -121,7 +121,7 @@ GameFile * wow::WoWFolder::getFile(int id)
     LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
     HANDLE newfile;
-    if(m_CASCFolder.openFile(filename.toStdString(), &newfile))
+    if (m_CASCFolder.openFile(filename.toStdString(), &newfile))
     {
       LOG_INFO << "Succesfully opened";
       m_CASCFolder.closeFile(newfile);
@@ -148,7 +148,7 @@ QString wow::WoWFolder::version()
 
 QString wow::WoWFolder::locale()
 {
-   return m_CASCFolder.locale();
+  return m_CASCFolder.locale();
 }
 
 bool wow::WoWFolder::setConfig(core::GameConfig config)
@@ -177,4 +177,3 @@ void wow::WoWFolder::onChildRemoved(GameFile * child)
   GameFolder::onChildRemoved(child);
   m_idMap.erase(child->fileDataId());
 }
-

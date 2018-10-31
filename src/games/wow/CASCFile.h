@@ -30,26 +30,23 @@ class CASCFolder;
 
 class _CASCFILE_API_ CASCFile : public GameFile
 {
-  public:
-    CASCFile(QString path, int id = -1);
-    ~CASCFile();
+public:
+  CASCFile(QString path, int id = -1);
+  ~CASCFile();
 
-    // re implemented from GameFile
-    void dumpStructure();
+  // re implemented from GameFile
+  void dumpStructure();
 
-  protected:
-    virtual bool openFile();
-    virtual bool isAlreadyOpened();
-    virtual bool getFileSize(unsigned int & s);
-    virtual unsigned long readFile();
-    virtual void doPostOpenOperation();
-    virtual bool doPostCloseOperation();
+protected:
+  virtual bool openFile();
+  virtual bool isAlreadyOpened();
+  virtual bool getFileSize(unsigned int & s);
+  virtual unsigned long readFile();
+  virtual void doPostOpenOperation();
+  virtual bool doPostCloseOperation();
 
-  private:
-    HANDLE m_handle;
+private:
+  HANDLE m_handle;
 };
-
-
-
 
 #endif /* _CASCFILE_H_ */

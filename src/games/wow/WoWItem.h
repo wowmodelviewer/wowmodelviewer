@@ -54,75 +54,73 @@ class QXmlStreamReader;
 
 class _WOWITEM_API_ WoWItem : public Component
 {
-  public:
-    WoWItem(CharSlots slot);
+public:
+  WoWItem(CharSlots slot);
 
-    void setId(int id);
-    int id() { return m_id; }
+  void setId(int id);
+  int id() { return m_id; }
 
-    void setDisplayId(int id);
-    void setLevel(unsigned int level);
+  void setDisplayId(int id);
+  void setLevel(unsigned int level);
 
-    CharSlots slot() { return m_slot; }
+  CharSlots slot() { return m_slot; }
 
-    int quality() { return m_quality; }
+  int quality() { return m_quality; }
 
-    void refresh();
+  void refresh();
 
-    void onParentSet(Component *);
+  void onParentSet(Component *);
 
-    void load();
+  void load();
 
-    unsigned int nbLevels() { return m_nbLevels; }
+  unsigned int nbLevels() { return m_nbLevels; }
 
-    std::map<POSITION_SLOTS, WoWModel *> models() { return m_itemModels; }
+  std::map<POSITION_SLOTS, WoWModel *> models() { return m_itemModels; }
 
-    void save(QXmlStreamWriter &);
-    void load(QString &);
+  void save(QXmlStreamWriter &);
+  void load(QString &);
 
-  private:
-    void unload();
+private:
+  void unload();
 
-    bool isCustomizableTabard() const;
+  bool isCustomizableTabard() const;
 
-    WoWModel * m_charModel;
+  WoWModel * m_charModel;
 
-    int m_id;
-    int m_displayId;
-    int m_quality;
-    int m_level;
-    int m_type;
-    unsigned int m_nbLevels;
+  int m_id;
+  int m_displayId;
+  int m_quality;
+  int m_level;
+  int m_type;
+  unsigned int m_nbLevels;
 
-    CharSlots m_slot;
+  CharSlots m_slot;
 
-    static std::map<CharSlots,int> SLOT_LAYERS;
-    static std::map<std::string, int> MODELID_OFFSETS;
+  static std::map<CharSlots, int> SLOT_LAYERS;
+  static std::map<std::string, int> MODELID_OFFSETS;
 
-    std::map<CharRegions, GameFile *> m_itemTextures;
-    std::map<CharGeosets, int> m_itemGeosets;
-    std::map<int, int> m_levelDisplayMap;
-    std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
-    WoWModel * m_mergedModel;
+  std::map<CharRegions, GameFile *> m_itemTextures;
+  std::map<CharGeosets, int> m_itemGeosets;
+  std::map<int, int> m_levelDisplayMap;
+  std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
+  WoWModel * m_mergedModel;
 
-    void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
-    void mergeModel(CharSlots slot, int modelId, int textureId);
+  void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
+  void mergeModel(CharSlots slot, int modelId, int textureId);
 
-    CharRegions getRegionForTexture(GameFile * file) const;
+  CharRegions getRegionForTexture(GameFile * file) const;
 
-    enum FilteringType
-    {
-      MODEL,
-      MERGED_MODEL,
-      TEXTURE,
-      NONE
-    };
+  enum FilteringType
+  {
+    MODEL,
+    MERGED_MODEL,
+    TEXTURE,
+    NONE
+  };
 
-    sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
+  sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
 
-    bool queryItemInfo(QString & query, sqlResult & result, FilteringType type = FilteringType::NONE, uint itemToFilter = 0) const;
-
+  bool queryItemInfo(QString & query, sqlResult & result, FilteringType type = FilteringType::NONE, uint itemToFilter = 0) const;
 };
-
 
 #endif /* _WOWITEM_H_ */

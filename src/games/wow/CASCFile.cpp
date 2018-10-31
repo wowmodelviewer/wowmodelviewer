@@ -11,7 +11,7 @@
 #include "Game.h"
 #include "globalvars.h"
 #include "logger/Logger.h"
-// #define DEBUG_READ
+ // #define DEBUG_READ
 
 std::vector<std::string> KNOWN_CHUNKS =
 {
@@ -115,11 +115,11 @@ bool CASCFile::isAlreadyOpened()
 bool CASCFile::getFileSize(unsigned int & s)
 {
   bool result = false;
-  
+
   if (m_handle)
   {
     s = CascGetFileSize(m_handle, 0);
-  
+
     if (s == CASC_INVALID_SIZE)
       LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
     else
@@ -132,10 +132,10 @@ bool CASCFile::getFileSize(unsigned int & s)
 unsigned long CASCFile::readFile()
 {
   unsigned long result = 0;
-  
+
   if (!CascReadFile(m_handle, buffer, size, &result))
     LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
-  
+
   return result;
 }
 
@@ -146,8 +146,8 @@ void CASCFile::doPostOpenOperation()
     chunkHeader chunkHead;
     memcpy(&chunkHead, buffer, sizeof(chunkHeader));
     std::string magic = std::string(chunkHead.magic, 4);
-    if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end() 
-        && chunkHead.size <= size)
+    if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end()
+      && chunkHead.size <= size)
     {
       unsigned int offset = 0;
 
@@ -182,7 +182,7 @@ bool CASCFile::doPostCloseOperation()
 #ifdef DEBUG_READ
   LOG_INFO << this << __FUNCTION__ << "Closing" << filepath << "handle" << m_handle;
 #endif
-  if(m_handle)
+  if (m_handle)
   {
     HANDLE savedHandle = m_handle;
     m_handle = 0;

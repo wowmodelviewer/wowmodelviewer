@@ -26,11 +26,11 @@
 #ifndef _WOWHEADIMPORTER_H_
 #define _WOWHEADIMPORTER_H_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QtPlugin>
 
 // Externals
@@ -50,53 +50,53 @@
 //--------------------------------------------------------------------
 class WowheadImporter : public ImporterPlugin
 {
-    Q_INTERFACES(ImporterPlugin)
+  Q_INTERFACES(ImporterPlugin)
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
 
-  public :
-    // Constants / Enums
+public:
+  // Constants / Enums
 
-    // Constructors
-    WowheadImporter() {}
+  // Constructors
+  WowheadImporter() {}
 
-    // Destructors
-    ~WowheadImporter() {}
+  // Destructors
+  ~WowheadImporter() {}
 
-    // Methods
-	bool acceptURL(QString url) const;
+  // Methods
+  bool acceptURL(QString url) const;
 
-    NPCInfos * importNPC(QString url) const;
-	CharInfos * importChar(QString url) const { return NULL; }
-	ItemRecord * importItem(QString url) const;
+  NPCInfos * importNPC(QString url) const;
+  CharInfos * importChar(QString url) const { return NULL; }
+  ItemRecord * importItem(QString url) const;
 
-    // Members
+  // Members
 
-  protected :
-    // Constants / Enums
+protected:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
+  // Methods
 
-    // Members
+  // Members
 
-  private :
-    // Constants / Enums
+private:
+  // Constants / Enums
 
-    // Constructors
+  // Constructors
 
-    // Destructors
+  // Destructors
 
-    // Methods
-	QString extractSubString(QString & datas, QString beginPattern, QString endPattern = QString()) const;
-	QByteArray getURLData(QString inputUrl) const;
+  // Methods
+  QString extractSubString(QString & datas, QString beginPattern, QString endPattern = QString()) const;
+  QByteArray getURLData(QString inputUrl) const;
 
-    // Members
+  // Members
 
-    // friend class declarations
+  // friend class declarations
 
 };
 

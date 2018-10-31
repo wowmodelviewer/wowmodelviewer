@@ -16,7 +16,7 @@
 class GameFile;
 
 struct CharRegionCoords {
-	int xpos, ypos, width, height;
+  int xpos, ypos, width, height;
 };
 
 struct LayoutSize {
@@ -31,7 +31,7 @@ struct CharTextureComponent
 
   bool operator<(const CharTextureComponent& c) const
   {
-	return layer < c.layer;
+    return layer < c.layer;
   }
 };
 
@@ -47,28 +47,27 @@ struct CharTextureComponent
 
 class _CHARTEXTURE_API_ CharTexture
 {
-  public:
-    CharTexture(unsigned int _layoutSizeId = 0)
-      : layoutSizeId(_layoutSizeId), baseImage(0)
+public:
+  CharTexture(unsigned int _layoutSizeId = 0)
+    : layoutSizeId(_layoutSizeId), baseImage(0)
   {}
 
-    void setBaseImage(GameFile * img) { baseImage = img; }
-    void addLayer(GameFile *, int region, int layer);
+  void setBaseImage(GameFile * img) { baseImage = img; }
+  void addLayer(GameFile *, int region, int layer);
 
-    void compose(TextureID texID);
+  void compose(TextureID texID);
 
-    void reset(unsigned int _layoutSizeId);
+  void reset(unsigned int _layoutSizeId);
 
-    static void initRegions();
+  static void initRegions();
 
-  private:
-    void burnComponent(QImage & destImage, CharTextureComponent &);
-    static QImage * gameFileToQImage(GameFile * file);
-    unsigned int layoutSizeId;
-    GameFile * baseImage;
-    std::vector<CharTextureComponent> m_components;
-    static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
+private:
+  void burnComponent(QImage & destImage, CharTextureComponent &);
+  static QImage * gameFileToQImage(GameFile * file);
+  unsigned int layoutSizeId;
+  GameFile * baseImage;
+  std::vector<CharTextureComponent> m_components;
+  static std::map<int, std::pair<LayoutSize, std::map<int, CharRegionCoords> > > LAYOUTS;
 };
-
 
 #endif /* _CHARTEXTURE_H_ */

@@ -1,11 +1,7 @@
 #include "Bone.h"
-
 #include "particle.h"
-
 #include "GlobalSettings.h"
 #include "logger/Logger.h"
-
-
 
 #define MAX_PARTICLES 10000
 
@@ -14,10 +10,10 @@ bool ParticleSystem::useDoNotTrail = false;
 template<class T>
 T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 {
-    if (life<=mid)
-      return interpolate<T>(life / mid,a,b);
-    else
-      return interpolate<T>((life-mid) / (1.0f-mid),b,c);
+  if (life <= mid)
+    return interpolate<T>(life / mid, a, b);
+  else
+    return interpolate<T>((life - mid) / (1.0f - mid), b, c);
 }
 
 void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & globals)
@@ -28,28 +24,28 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & gl
     doNotTrail = flags & MODELPARTICLE_FLAGS_DONOTTRAIL;
   else
     doNotTrail = false;
-  speed.init (mta.EmissionSpeed, f, globals);
-  variation.init (mta.SpeedVariation, f, globals);
-  spread.init (mta.VerticalRange, f, globals);
-  lat.init (mta.HorizontalRange, f, globals);
-  gravity.init (mta.Gravity, f, globals);
-  lifespan.init (mta.Lifespan, f, globals);
-  rate.init (mta.EmissionRate, f, globals);
-  areal.init (mta.EmissionAreaLength, f, globals);
-  areaw.init (mta.EmissionAreaWidth, f, globals);
+  speed.init(mta.EmissionSpeed, f, globals);
+  variation.init(mta.SpeedVariation, f, globals);
+  spread.init(mta.VerticalRange, f, globals);
+  lat.init(mta.HorizontalRange, f, globals);
+  gravity.init(mta.Gravity, f, globals);
+  lifespan.init(mta.Lifespan, f, globals);
+  rate.init(mta.EmissionRate, f, globals);
+  areal.init(mta.EmissionAreaLength, f, globals);
+  areaw.init(mta.EmissionAreaWidth, f, globals);
   // deacceleration.init (mta.Gravity2, f, globals);
-  enabled.init (mta.EnabledIn, f, globals);
+  enabled.init(mta.EnabledIn, f, globals);
   particleColID = mta.ParticleColorIndex;
 
   Vec3D colors2[3];
-  memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(Vec3D)*3);
+  memcpy(colors2, f->getBuffer() + mta.p.colors.ofsKeys, sizeof(Vec3D) * 3);
 
-  for (uint32 i=0; i<3; i++)
+  for (uint32 i = 0; i < 3; i++)
   {
-    float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
-    colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f,
-        colors2[i].z/255.0f, opacity/32767.0f);
-    sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
+    float opacity = *(short*)(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
+    colors[i] = Vec4D(colors2[i].x / 255.0f, colors2[i].y / 255.0f,
+      colors2[i].z / 255.0f, opacity / 32767.0f);
+    sizes[i] = (*(float*)(f->getBuffer() + mta.p.sizes.ofsKeys + i * sizeof(Vec2D)))*mta.p.scales[i];
   }
   mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
 
@@ -77,7 +73,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & gl
   {
     //  when multitexture is flagged, three textures are packed into the one uint16
     //  (5 bits each, plus one bit left over):
-    texture  = model->getGLTexture(mta.texture & 0x1f);
+    texture = model->getGLTexture(mta.texture & 0x1f);
     texture2 = model->getGLTexture((mta.texture >> 5) & 0x1f);
     texture3 = model->getGLTexture((mta.texture >> 10) & 0x1f);
   }
@@ -93,22 +89,22 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & gl
   emitter = 0;
   switch (EmitterType)
   {
-    case MODELPARTICLE_EMITTER_PLANE:
-            emitter = new PlaneParticleEmitter(this);
-            break;
-    case MODELPARTICLE_EMITTER_SPHERE:
-            emitter = new SphereParticleEmitter(this);
-            break;
-    case MODELPARTICLE_EMITTER_SPLINE: // Spline?
-    default:
-            LOG_ERROR << "Unknown Emitter:" << EmitterType;
-            break;
+  case MODELPARTICLE_EMITTER_PLANE:
+    emitter = new PlaneParticleEmitter(this);
+    break;
+  case MODELPARTICLE_EMITTER_SPHERE:
+    emitter = new SphereParticleEmitter(this);
+    break;
+  case MODELPARTICLE_EMITTER_SPLINE: // Spline?
+  default:
+    LOG_ERROR << "Unknown Emitter:" << EmitterType;
+    break;
   }
 
   tofs = frand();
 
   // init tiles, slice the texture
-  for (int i=0; i<rows*cols; i++)
+  for (int i = 0; i < rows*cols; i++)
   {
     TexCoordSet tc;
     initTile(tc.tc, i);
@@ -119,13 +115,13 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, QVector<uint32> & gl
 void ParticleSystem::initTile(Vec2D *tc, int num)
 {
   Vec2D otc[4];
-  Vec2D a,b;
+  Vec2D a, b;
   int x = num % cols;
   int y = num / cols;
   a.x = x * (1.0f / cols);
-  b.x = (x+1) * (1.0f / cols);
+  b.x = (x + 1) * (1.0f / cols);
   a.y = y * (1.0f / rows);
-  b.y = (y+1) * (1.0f / rows);
+  b.y = (y + 1) * (1.0f / rows);
 
   otc[0] = a;
   otc[2] = b;
@@ -134,11 +130,10 @@ void ParticleSystem::initTile(Vec2D *tc, int num)
   otc[3].x = a.x;
   otc[3].y = b.y;
 
-  for (uint32 i=0; i<4; i++) {
-    tc[(i+4-order) & 3] = otc[i];
+  for (uint32 i = 0; i < 4; i++) {
+    tc[(i + 4 - order) & 3] = otc[i];
   }
 }
-
 
 void ParticleSystem::update(float dt)
 {
@@ -216,12 +211,12 @@ void ParticleSystem::update(float dt)
       float spr2 = lat.getValue(l_manim, mtime);
       bool en = true;
       if (enabled.uses(manim))
-        en = enabled.getValue(manim, mtime)!=0;
+        en = enabled.getValue(manim, mtime) != 0;
 
       //rem = 0;
       if (en)
       {
-        for (uint32 i=0; i<tospawn; i++)
+        for (uint32 i = 0; i < tospawn; i++)
         {
           Particle p = emitter->newParticle(manim, mtime, w, l, spd, var, spr, spr2);
           // sanity check:
@@ -242,7 +237,7 @@ void ParticleSystem::update(float dt)
     // p.speed += p.down * grav * dt - p.dir * deaccel * dt;
     p.speed += p.down * grav * dt;
 
-    if (slowdown>0)
+    if (slowdown > 0)
       mspeed = expf(-1.0f * slowdown * p.life);
     p.pos += p.speed * mspeed * dt;
     p.tpos = m * p.pos;
@@ -266,17 +261,17 @@ void ParticleSystem::setup(uint32 anim, uint32 time)
   mtime = time;
 
   /*
-	if (transform) {
-		// transform every particle by the parent trans matrix   - apparently this isn't needed
-		Matrix m = parent->mat;
-		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-			it->tpos = m * it->pos;
-		}
-	} else {
-		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-			it->tpos = it->pos;
-		}
-	}
+  if (transform) {
+    // transform every particle by the parent trans matrix   - apparently this isn't needed
+    Matrix m = parent->mat;
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+      it->tpos = m * it->pos;
+    }
+  } else {
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+      it->tpos = it->pos;
+    }
+  }
    */
 }
 
@@ -290,51 +285,51 @@ void ParticleSystem::draw()
     blend = 2;
   switch (blend)
   {
-    case BM_OPAQUE:	          // 0
-      glDisable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_TRANSPARENT:      // 1
-      glDisable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
-      glBlendFunc(GL_ONE, GL_ZERO);
-      break;
-    case BM_ALPHA_BLEND:      // 2
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    case BM_ADDITIVE:         // 3
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_COLOR, GL_ONE);
-      break;
-    case BM_ADDITIVE_ALPHA:   // 4
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-      break;
-    case BM_MODULATE:	      // 5
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_ZERO);
-      break;
-    case BM_MODULATEX2:	      // 6
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-      break;
-    case BM_7:	              // 7, new in WoD
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-      break;
-    default:
-      LOG_ERROR << "Unknown blendmode:" << blend;
-      glEnable(GL_BLEND);
-      glDisable(GL_ALPHA_TEST);
-      glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+  case BM_OPAQUE:	          // 0
+    glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    break;
+  case BM_TRANSPARENT:      // 1
+    glDisable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    break;
+  case BM_ALPHA_BLEND:      // 2
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    break;
+  case BM_ADDITIVE:         // 3
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_COLOR, GL_ONE);
+    break;
+  case BM_ADDITIVE_ALPHA:   // 4
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+    break;
+  case BM_MODULATE:	      // 5
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_DST_COLOR, GL_ZERO);
+    break;
+  case BM_MODULATEX2:	      // 6
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+    break;
+  case BM_7:	              // 7, new in WoD
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    break;
+  default:
+    LOG_ERROR << "Unknown blendmode:" << blend;
+    glEnable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
+    glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
   }
 
   if (!multitexture)
@@ -375,13 +370,13 @@ void ParticleSystem::draw()
       glActiveTextureARB(GL_TEXTURE0_ARB);
     }
   }
-  Vec3D vRight(1,0,0);
-  Vec3D vUp(0,1,0);
+  Vec3D vRight(1, 0, 0);
+  Vec3D vUp(0, 1, 0);
 
   // position stuff
   const float f = 1;//0.707106781f; // sqrt(2)/2
-  Vec3D bv0 = Vec3D(-f,+f,0);
-  Vec3D bv1 = Vec3D(+f,+f,0);
+  Vec3D bv0 = Vec3D(-f, +f, 0);
+  Vec3D bv1 = Vec3D(+f, +f, 0);
 
   if (billboard)
   {
@@ -495,48 +490,48 @@ void ParticleSystem::draw()
 //Generates the rotation matrix based on spread
 static Matrix SpreadMat;
 
-void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
+void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 {
-  int i,j;
-  float a[2],c[2],s[2];
+  int i, j;
+  float a[2], c[2], s[2];
   Matrix Temp;
 
   SpreadMat.unit();
 
-  a[0]=randfloat(-Spread1,Spread1)/2.0f;
-  a[1]=randfloat(-Spread2,Spread2)/2.0f;
+  a[0] = randfloat(-Spread1, Spread1) / 2.0f;
+  a[1] = randfloat(-Spread2, Spread2) / 2.0f;
 
-/*
-    SpreadMat.m[0][0]*=l;
-	SpreadMat.m[1][1]*=l;
-	SpreadMat.m[2][2]*=w;
-*/
+  /*
+  SpreadMat.m[0][0]*=l;
+  SpreadMat.m[1][1]*=l;
+  SpreadMat.m[2][2]*=w;
+  */
 
-  for(i=0;i<2;i++)
+  for (i = 0; i < 2; i++)
   {
-    c[i]=cos(a[i]);
-    s[i]=sin(a[i]);
+    c[i] = cos(a[i]);
+    s[i] = sin(a[i]);
   }
   Temp.unit();
-  Temp.m[1][1]=c[0];
-  Temp.m[2][1]=s[0];
-  Temp.m[2][2]=c[0];
-  Temp.m[1][2]=-s[0];
+  Temp.m[1][1] = c[0];
+  Temp.m[2][1] = s[0];
+  Temp.m[2][2] = c[0];
+  Temp.m[1][2] = -s[0];
 
-  SpreadMat=SpreadMat*Temp;
+  SpreadMat = SpreadMat * Temp;
 
   Temp.unit();
-  Temp.m[0][0]=c[1];
-  Temp.m[1][0]=s[1];
-  Temp.m[1][1]=c[1];
-  Temp.m[0][1]=-s[1];
+  Temp.m[0][0] = c[1];
+  Temp.m[1][0] = s[1];
+  Temp.m[1][1] = c[1];
+  Temp.m[0][1] = -s[1];
 
-  SpreadMat=SpreadMat*Temp;
+  SpreadMat = SpreadMat * Temp;
 
-  float Size=abs(c[0])*l+abs(s[0])*w;
-  for(i=0;i<3;i++)
-    for(j=0;j<3;j++)
-      SpreadMat.m[i][j]*=Size;
+  float Size = abs(c[0])*l + abs(s[0])*w;
+  for (i = 0; i < 3; i++)
+    for (j = 0; j < 3; j++)
+      SpreadMat.m[i][j] *= Size;
 }
 
 Particle PlaneParticleEmitter::newParticle(uint32 anim, uint32 time, float w, float l, float spd, float var, float spr, float spr2)
@@ -546,13 +541,13 @@ Particle PlaneParticleEmitter::newParticle(uint32 anim, uint32 time, float w, fl
   //Spread Calculation
   Matrix mrot;
 
-  CalcSpreadMatrix(spr,spr,1.0f,1.0f);
-  mrot=sys->parent->mrot*SpreadMat;
+  CalcSpreadMatrix(spr, spr, 1.0f, 1.0f);
+  mrot = sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = (sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w)));
-    const float t = randfloat(0.0f, float(2*PI));
-    p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
+    p.pos = (sys->pos + Vec3D(randfloat(-l, l), 0, randfloat(-w, w)));
+    const float t = randfloat(0.0f, float(2 * PI));
+    p.pos = Vec3D(0.0f, sys->pos.y + 0.15f, sys->pos.z) + Vec3D(cos(t) / 8, 0.0f, sin(t) / 8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
@@ -561,40 +556,44 @@ Particle PlaneParticleEmitter::newParticle(uint32 anim, uint32 time, float w, fl
     p.dir = dir;
 
     p.speed = dir.normalize() * spd * randfloat(0, var);
-  } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
+  }
+  else if (sys->flags == 25 && sys->parent->parent < 1) { // Weapon Flame
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l, l), randfloat(-l, l), randfloat(-w, w)));
     Vec3D dir = mrot * Vec3D(0.0f, 1.0f, 0.0f);
     p.dir = dir.normalize();
     //Vec3D dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * Vec3D(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
-  } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    Vec3D dir = Vec3D(sys->parent->mat.m[1][0],sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
-    p.speed = dir.normalize() * spd * randfloat(0, var*2);
+  }
+  else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
+    p.pos = (sys->pos + Vec3D(randfloat(-l, l), randfloat(-l, l), randfloat(-w, w)));
+    Vec3D dir = Vec3D(sys->parent->mat.m[1][0], sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * Vec3D(0.0f, 1.0f, 0.0f);
+    p.speed = dir.normalize() * spd * randfloat(0, var * 2);
 
-  } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    Vec3D dir = mrot * Vec3D(0,1,0);
+  }
+  else if (sys->flags == 17 && sys->parent->parent < 1) { // Weapon Glow
+    p.pos = sys->parent->pivot * (sys->pos + Vec3D(randfloat(-l, l), randfloat(-l, l), randfloat(-w, w)));
+    Vec3D dir = mrot * Vec3D(0, 1, 0);
     p.dir = dir.normalize();
 
-  } else {
-    p.pos = sys->pos + Vec3D(randfloat(-l,l), 0, randfloat(-w,w));
+  }
+  else {
+    p.pos = sys->pos + Vec3D(randfloat(-l, l), 0, randfloat(-w, w));
 
     //Vec3D dir = mrot * Vec3D(0,1,0);
-    Vec3D dir = sys->parent->mrot * Vec3D(0,1,0);
+    Vec3D dir = sys->parent->mrot * Vec3D(0, 1, 0);
 
     p.dir = dir;//.normalize();
-    p.down = Vec3D(0,-1.0f,0); // dir * -1.0f;
-    p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));
+    p.down = Vec3D(0, -1.0f, 0); // dir * -1.0f;
+    p.speed = dir.normalize() * spd * (1.0f + randfloat(-var, var));
   }
 
-  if(!sys->billboard)
+  if (!sys->billboard)
   {
-    p.corners[0] = mrot * Vec3D(-1,0,+1);
-    p.corners[1] = mrot * Vec3D(+1,0,+1);
-    p.corners[2] = mrot * Vec3D(+1,0,-1);
-    p.corners[3] = mrot * Vec3D(-1,0,-1);
+    p.corners[0] = mrot * Vec3D(-1, 0, +1);
+    p.corners[1] = mrot * Vec3D(+1, 0, +1);
+    p.corners[2] = mrot * Vec3D(+1, 0, -1);
+    p.corners[3] = mrot * Vec3D(-1, 0, -1);
   }
   p.tpos = sys->parent->mat * p.pos;
   p.life = 0;
@@ -609,7 +608,7 @@ Particle PlaneParticleEmitter::newParticle(uint32 anim, uint32 time, float w, fl
   if (!sys->doNotTrail)
     p.pos = p.tpos;
 
-  p.tile = randint(0, sys->rows*sys->cols-1);
+  p.tile = randint(0, sys->rows*sys->cols - 1);
   return p;
 }
 
@@ -619,7 +618,7 @@ Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, f
   Vec3D dir;
   float radius;
 
-  radius = randfloat(0,1);
+  radius = randfloat(0, 1);
 
   // Old method
   //float t = randfloat(0,2*PI);
@@ -628,15 +627,15 @@ Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, f
   // Spread should never be zero for sphere particles ?
   float t = 0;
   if (spr == 0)
-    t = randfloat((float)-PI,(float)PI);
+    t = randfloat((float)-PI, (float)PI);
   else
-    t = randfloat(-spr,spr);
+    t = randfloat(-spr, spr);
 
   //Spread Calculation
   Matrix mrot;
 
-  CalcSpreadMatrix(spr*2,spr2*2,w,l);
-  mrot=sys->parent->mrot*SpreadMat;
+  CalcSpreadMatrix(spr * 2, spr2 * 2, w, l);
+  mrot = sys->parent->mrot*SpreadMat;
 
   // New
   // Length should never technically be zero ?
@@ -669,18 +668,19 @@ Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, f
     p.pos = sys->pos + bdir;
     p.tpos = sys->parent->mat * p.pos;
 
-    if (bdir.lengthSquared()==0)
-      p.speed = Vec3D(0,0,0);
+    if (bdir.lengthSquared() == 0)
+      p.speed = Vec3D(0, 0, 0);
     else {
       dir = sys->parent->mrot * (bdir.normalize());//mrot * Vec3D(0, 1.0f,0);
-      p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));   // ?
+      p.speed = dir.normalize() * spd * (1.0f + randfloat(-var, var));   // ?
     }
 
-  } else {
+  }
+  else {
     Vec3D bdir;
     float temp;
 
-    bdir = mrot * Vec3D(0,1,0) * radius;
+    bdir = mrot * Vec3D(0, 1, 0) * radius;
     temp = bdir.z;
     bdir.z = bdir.y;
     bdir.y = temp;
@@ -689,23 +689,23 @@ Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, f
     p.tpos = sys->parent->mat * p.pos;
 
 
-    if ((bdir.lengthSquared()==0) && ((sys->flags&0x100)!=0x100))
+    if ((bdir.lengthSquared() == 0) && ((sys->flags & 0x100) != 0x100))
     {
-      p.speed = Vec3D(0,0,0);
-      dir = sys->parent->mrot * Vec3D(0,1,0);
+      p.speed = Vec3D(0, 0, 0);
+      dir = sys->parent->mrot * Vec3D(0, 1, 0);
     }
     else {
-      if(sys->flags&0x100)
-        dir = sys->parent->mrot * Vec3D(0,1,0);
+      if (sys->flags & 0x100)
+        dir = sys->parent->mrot * Vec3D(0, 1, 0);
       else
         dir = bdir.normalize();
 
-      p.speed = dir.normalize() * spd * (1.0f+randfloat(-var,var));   // ?
+      p.speed = dir.normalize() * spd * (1.0f + randfloat(-var, var));   // ?
     }
   }
 
-  p.dir =  dir.normalize();//mrot * Vec3D(0, 1.0f,0);
-  p.down = Vec3D(0,-1.0f,0);
+  p.dir = dir.normalize();//mrot * Vec3D(0, 1.0f,0);
+  p.down = Vec3D(0, -1.0f, 0);
 
   p.life = 0;
   uint32 l_anim = anim;
@@ -719,12 +719,9 @@ Particle SphereParticleEmitter::newParticle(uint32 anim, uint32 time, float w, f
   if (!sys->doNotTrail)
     p.pos = p.tpos;
 
-  p.tile = randint(0, sys->rows*sys->cols-1);
+  p.tile = randint(0, sys->rows*sys->cols - 1);
   return p;
 }
-
-
-
 
 void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint32> & globals)
 {
@@ -757,10 +754,10 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, QVector<uint3
 void RibbonEmitter::setup(uint32 anim, uint32 time)
 {
   Vec3D ntpos = parent->mat * pos;
-  Vec3D ntup = parent->mat * (pos + Vec3D(0,0,1));
+  Vec3D ntup = parent->mat * (pos + Vec3D(0, 0, 1));
   ntup -= ntpos;
   ntup.normalize();
-  float dlen = (ntpos-tpos).length();
+  float dlen = (ntpos - tpos).length();
 
   manim = anim;
   mtime = time;
@@ -769,14 +766,15 @@ void RibbonEmitter::setup(uint32 anim, uint32 time)
   RibbonSegment &first = *segs.begin();
   if (first.len > seglen) {
     // add new segment
-    first.back = (tpos-ntpos).normalize();
+    first.back = (tpos - ntpos).normalize();
     first.len0 = first.len;
     RibbonSegment newseg;
     newseg.pos = ntpos;
     newseg.up = ntup;
     newseg.len = dlen;
     segs.push_front(newseg);
-  } else {
+  }
+  else {
     first.up = ntup;
     first.pos = ntpos;
     first.len += dlen;
@@ -793,7 +791,8 @@ void RibbonEmitter::setup(uint32 anim, uint32 time)
         erasemode = true;
       }
       ++it;
-    } else {
+    }
+    else {
       segs.erase(it++);
     }
   }
@@ -808,17 +807,17 @@ void RibbonEmitter::setup(uint32 anim, uint32 time)
 void RibbonEmitter::draw()
 {
   /*
-	// placeholders
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glColor4f(1,1,1,1);
-	glBegin(GL_TRIANGLES);
-	glVertex3fv(tpos);
-	glVertex3fv(tpos + Vec3D(1,1,0));
-	glVertex3fv(tpos + Vec3D(-1,1,0));
-	glEnd();
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
+  // placeholders
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
+  glColor4f(1,1,1,1);
+  glBegin(GL_TRIANGLES);
+  glVertex3fv(tpos);
+  glVertex3fv(tpos + Vec3D(1,1,0));
+  glVertex3fv(tpos + Vec3D(-1,1,0));
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_LIGHTING);
    */
 
   glEnable(GL_TEXTURE_2D);
@@ -835,11 +834,11 @@ void RibbonEmitter::draw()
   std::list<RibbonSegment>::iterator it = segs.begin();
   float l = 0;
   for (; it != segs.end(); ++it) {
-    float u = l/length;
+    float u = l / length;
 
-    glTexCoord2f(u,0);
+    glTexCoord2f(u, 0);
     glVertex3fv(it->pos + tabove * it->up);
-    glTexCoord2f(u,1);
+    glTexCoord2f(u, 1);
     glVertex3fv(it->pos - tbelow * it->up);
 
     l += it->len;
@@ -848,20 +847,15 @@ void RibbonEmitter::draw()
   if (segs.size() > 1) {
     // last segment...?
     --it;
-    glTexCoord2f(1,0);
-    glVertex3fv(it->pos + tabove * it->up + (it->len/it->len0) * it->back);
-    glTexCoord2f(1,1);
-    glVertex3fv(it->pos - tbelow * it->up + (it->len/it->len0) * it->back);
+    glTexCoord2f(1, 0);
+    glVertex3fv(it->pos + tabove * it->up + (it->len / it->len0) * it->back);
+    glTexCoord2f(1, 1);
+    glVertex3fv(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
   }
   glEnd();
 
-  glColor4f(1,1,1,1);
+  glColor4f(1, 1, 1, 1);
   glEnable(GL_LIGHTING);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthMask(GL_TRUE);
 }
-
-
-
-
-

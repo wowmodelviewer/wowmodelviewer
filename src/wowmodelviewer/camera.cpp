@@ -25,8 +25,8 @@ void CCamera::Setup()
   Vec3D viewPoint = m_vPosition + m_vViewDir;
 
   gluLookAt(m_vPosition.x, m_vPosition.y, m_vPosition.z,			// Specifies the position of the eye point.
-            viewPoint.x, viewPoint.y, viewPoint.z,				// Specifies the position of the reference point.
-            m_vUpVector.x, m_vUpVector.y, m_vUpVector.z);		// Specifies the direction of the up vector.
+    viewPoint.x, viewPoint.y, viewPoint.z,				// Specifies the position of the reference point.
+    m_vUpVector.x, m_vUpVector.y, m_vUpVector.z);		// Specifies the direction of the up vector.
 }
 
 void CCamera::Reset()
@@ -75,7 +75,7 @@ void CCamera::RotateZ(float Angle)
   m_vRotation.z += Angle;
 
   //Rotate viewdir around the right vector:
-  m_vRightVector = (m_vRightVector*cosf(Angle*PIOVER180f) + m_vUpVector*sinf(Angle*PIOVER180f)).normalize();
+  m_vRightVector = (m_vRightVector*cosf(Angle*PIOVER180f) + m_vUpVector * sinf(Angle*PIOVER180f)).normalize();
 
   //now compute the new UpVector (by cross product)
   m_vUpVector = (m_vViewDir % m_vRightVector) * -1;

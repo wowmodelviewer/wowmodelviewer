@@ -27,11 +27,11 @@
 #include "WowheadImporter.h"
 #undef _WOWHEADIMPORTER_CPP_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QUrl>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
@@ -73,87 +73,87 @@ bool WowheadImporter::acceptURL(QString url) const
 
 NPCInfos * WowheadImporter::importNPC(QString urlToGrab) const
 {
-	NPCInfos * result = NULL;
+  NPCInfos * result = NULL;
 
-	// Get the HTML...
-	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
-	if (htmldata.isNull() || htmldata.isEmpty())
-		return NULL;
+  // Get the HTML...
+  QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+  if (htmldata.isNull() || htmldata.isEmpty())
+    return NULL;
 
-	// let's go : finding name
-	// extract global infos
-	QString infos = extractSubString(htmldata, "(g_npcs[", ";");
+  // let's go : finding name
+  // extract global infos
+  QString infos = extractSubString(htmldata, "(g_npcs[", ";");
 
-	// finding name
-	QString NPCName = extractSubString(infos, "name\":\"", "\",");
+  // finding name
+  QString NPCName = extractSubString(infos, "name\":\"", "\",");
 
-	// finding type
-	int NPCType = extractSubString(infos, "type\":", "}").toInt();
+  // finding type
+  int NPCType = extractSubString(infos, "type\":", "}").toInt();
 
-	// finding id
-	int NPCId = extractSubString(infos, "id\":", ",").toInt();
+  // finding id
+  int NPCId = extractSubString(infos, "id\":", ",").toInt();
 
-	// display id
-	QString NPCDispIdstr = extractSubString(infos, "ModelViewer.show({");
-	NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", " ");
+  // display id
+  QString NPCDispIdstr = extractSubString(infos, "ModelViewer.show({");
+  NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", " ");
 
-	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
-		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
+  if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
+    NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
 
-	int NPCDispId = NPCDispIdstr.toInt();
+  int NPCDispId = NPCDispIdstr.toInt();
 
-	result = new NPCInfos();
+  result = new NPCInfos();
 
-	result->name = NPCName.toStdWString();
-	result->type = NPCType;
-	result->id = NPCId;
-	result->displayId = NPCDispId;
+  result->name = NPCName.toStdWString();
+  result->type = NPCType;
+  result->id = NPCId;
+  result->displayId = NPCDispId;
 
-	return result;
+  return result;
 }
 
 ItemRecord * WowheadImporter::importItem(QString urlToGrab) const
 {
-	ItemRecord * result = NULL;
+  ItemRecord * result = NULL;
 
-	// Get the HTML...
-	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
-	if (htmldata.isNull() || htmldata.isEmpty())
-		return NULL;
+  // Get the HTML...
+  QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
+  if (htmldata.isNull() || htmldata.isEmpty())
+    return NULL;
 
-	// let's go : finding name
-	// extract global infos
-	QString infos = extractSubString(htmldata, "(g_items[", ";");
+  // let's go : finding name
+  // extract global infos
+  QString infos = extractSubString(htmldata, "(g_items[", ";");
 
-	// finding name
-	QString itemName = extractSubString(infos, "name\":\"", "\",");
+  // finding name
+  QString itemName = extractSubString(infos, "name\":\"", "\",");
 
-	// finding type
-	int itemType = extractSubString(infos, "slot\":", "}").toInt();
+  // finding type
+  int itemType = extractSubString(infos, "slot\":", "}").toInt();
 
-	// finding id
-	int itemId = extractSubString(infos, "[", "]").toInt();
+  // finding id
+  int itemId = extractSubString(infos, "[", "]").toInt();
 
-	// display id
-	int itemDisplayId = extractSubString(infos, "displayid\":", "\",").toInt();
+  // display id
+  int itemDisplayId = extractSubString(infos, "displayid\":", "\",").toInt();
 
-	// class
-	// 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
-	int itemClass = extractSubString(infos, "classs\":", "\",").toInt();
+  // class
+  // 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
+  int itemClass = extractSubString(infos, "classs\":", "\",").toInt();
 
-	// subclass
-	int idemSubClass = extractSubString(infos, "subclass\":", "\",").toInt();
+  // subclass
+  int idemSubClass = extractSubString(infos, "subclass\":", "\",").toInt();
 
-	result = new ItemRecord();
+  result = new ItemRecord();
 
-	result->name = itemName;
-	result->type = itemType;
-	result->id = itemId;
-	result->model = itemDisplayId;
-	result->itemclass = itemClass;
-	result->subclass = idemSubClass;
+  result->name = itemName;
+  result->type = itemType;
+  result->id = itemId;
+  result->model = itemDisplayId;
+  result->itemclass = itemClass;
+  result->subclass = idemSubClass;
 
-	return result;
+  return result;
 }
 
 
@@ -164,37 +164,37 @@ ItemRecord * WowheadImporter::importItem(QString urlToGrab) const
 //--------------------------------------------------------------------
 QString WowheadImporter::extractSubString(QString & datas, QString beginPattern, QString endPattern) const
 {
-	QString result;
-	try
-	{
-    result = datas.mid(datas.indexOf(beginPattern, 0, Qt::CaseInsensitive)+beginPattern.length());
+  QString result;
+  try
+  {
+    result = datas.mid(datas.indexOf(beginPattern, 0, Qt::CaseInsensitive) + beginPattern.length());
     result = result.mid(0, result.indexOf(endPattern, 0, Qt::CaseInsensitive));
-	}
-	catch (...)
-	{
-	}
-	return result;
+  }
+  catch (...)
+  {
+  }
+  return result;
 }
 
 QByteArray WowheadImporter::getURLData(QString inputUrl) const
 {
-	QUrl url = QString(inputUrl);
+  QUrl url = QString(inputUrl);
 
-	if (!url.errorString().isEmpty())
-	{
-		return QByteArray();
-	}
+  if (!url.errorString().isEmpty())
+  {
+    return QByteArray();
+  }
 
-	QNetworkAccessManager manager;
-	QNetworkRequest request(url);
-	request.setRawHeader("User-Agent", "WoWModelViewer");
-	QNetworkReply *response = manager.get(request);
-	QEventLoop eventLoop;
-	connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
-	eventLoop.exec();
+  QNetworkAccessManager manager;
+  QNetworkRequest request(url);
+  request.setRawHeader("User-Agent", "WoWModelViewer");
+  QNetworkReply *response = manager.get(request);
+  QEventLoop eventLoop;
+  connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+  connect(response, SIGNAL(error(QNetworkReply::NetworkError)), &eventLoop, SLOT(quit()));
+  eventLoop.exec();
 
-	QByteArray htmldata = response->readAll(); // Source should be stored here
+  QByteArray htmldata = response->readAll(); // Source should be stored here
 
-	return htmldata;
+  return htmldata;
 }

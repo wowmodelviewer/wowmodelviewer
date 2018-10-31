@@ -11,7 +11,6 @@
 
 #include "logger/Logger.h"
 
-
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
   : CASCFile(path, id), opened(false), realpath(real), file(0)
 {
@@ -25,7 +24,7 @@ HardDriveFile::~HardDriveFile()
 bool HardDriveFile::openFile()
 {
   file = new QFile(realpath);
-  
+
   if (!file->open(QIODevice::ReadOnly))
   {
     LOG_ERROR << "Opening" << filepath << "failed.";
@@ -70,7 +69,7 @@ bool HardDriveFile::doPostCloseOperation()
 #ifdef DEBUG_READ
   LOG_INFO << __FUNCTION__ << "Closing" << filepath;
 #endif
-  if(opened)
+  if (opened)
     opened = false;
 
   return true;

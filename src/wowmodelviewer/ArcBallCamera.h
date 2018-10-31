@@ -15,49 +15,47 @@
 
 class ArcBallCamera
 {
-  public:
-    ArcBallCamera();
+public:
+  ArcBallCamera();
 
-    void setup();
-    void reset();
+  void setup();
+  void reset();
 
-    void refreshSceneSize(const int width, const int height);
+  void refreshSceneSize(const int width, const int height);
 
-    void zoomIn(const float speedfactor = 1.);
-    void zoomOut(const float speedfactor = 1.);
+  void zoomIn(const float speedfactor = 1.);
+  void zoomOut(const float speedfactor = 1.);
 
-    void pan(const float a_xVal, const float a_yVal);
+  void pan(const float a_xVal, const float a_yVal);
 
-    void setStartPos(const int x, const int y);
-    void updatePos(const int x, const int y);
+  void setStartPos(const int x, const int y);
+  void updatePos(const int x, const int y);
 
-    void autofit(const Vec3D & min, const Vec3D & max, const float fov);
-    
-  protected:
+  void autofit(const Vec3D & min, const Vec3D & max, const float fov);
 
+protected:
 
-  private:
-    void updatePosition();
-    Vec3D mapToSphere(const int x, const int y);
+private:
+  void updatePosition();
+  Vec3D mapToSphere(const int x, const int y);
 
-    // zoom
-    float m_distance;
-    float m_minZoomDistance;
-    float m_maxZoomDistance;
+  // zoom
+  float m_distance;
+  float m_minZoomDistance;
+  float m_maxZoomDistance;
 
-    // camera definition
-    Vec3D m_lookAt;
-	Vec3D m_modelCenter;
+  // camera definition
+  Vec3D m_lookAt;
+  Vec3D m_modelCenter;
 
-    // scene size
-    int m_sceneWidth;
-    int m_sceneHeight;
+  // scene size
+  int m_sceneWidth;
+  int m_sceneHeight;
 
-    Vec3D m_startVec;
-    Quaternion m_rotation;
-    Matrix m_lastRot;
-    Matrix m_transform;
-
+  Vec3D m_startVec;
+  Quaternion m_rotation;
+  Matrix m_lastRot;
+  Matrix m_transform;
 };
 
 #endif

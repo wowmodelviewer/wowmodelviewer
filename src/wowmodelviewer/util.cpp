@@ -31,18 +31,18 @@ long interfaceID = 0;
 int ssCounter = 100; // ScreenShot Counter
 int imgFormat = 0;
 
-wxString locales[] = {wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU")};
+wxString locales[] = { wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU") };
 
 // Round a float, down to the specified decimal
-float round(float input, int limit = 2){
-	if (limit > 0){
-		input *= (10^limit);
-	}
-	input = int(input+0.5);
-	if (limit > 0){
-		input /= (10^limit);
-	}
-	return input;
+float round(float input, int limit = 2) {
+  if (limit > 0) {
+    input *= (10 ^ limit);
+  }
+  input = int(input + 0.5);
+  if (limit > 0) {
+    input /= (10 ^ limit);
+  }
+  return input;
 }
 
 wxString getGamePath(bool noSet)
@@ -70,14 +70,14 @@ wxString getGamePath(bool noSet)
     wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta"),
   };
 
-  for (size_t i=0; i<WXSIZEOF(regpaths); i++)
+  for (size_t i = 0; i < WXSIZEOF(regpaths); i++)
   {
     l = RegOpenKeyEx((HKEY)HKEY_LOCAL_MACHINE, regpaths[i], 0, KEY_QUERY_VALUE, &key);
 
     if (l == ERROR_SUCCESS)
     {
       s = sizeof(path);
-      l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t,(LPBYTE)path, &s);
+      l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t, (LPBYTE)path, &s);
       wxString spath = QString::fromLatin1(path).toStdWString();
       if (l == ERROR_SUCCESS && wxDir::Exists(spath) && sNames.Index(spath) == wxNOT_FOUND)
         sNames.Add(spath);
@@ -91,7 +91,7 @@ wxString getGamePath(bool noSet)
     folder = wxGetSingleChoice(wxT("Please select a Path:"), wxT("Path"), sNames);
   }
   // If we found an install then set the game path, otherwise just set to C:\ for now
-  
+
   if (folder == wxEmptyString || folder == wxString(L"Other"))
   {
     folder = gamePath;
@@ -105,18 +105,18 @@ wxString getGamePath(bool noSet)
     newPath = folder;
   if (!newPath.IsEmpty() && newPath.Last() != SLASH)
     newPath.Append(SLASH);
-  if(!newPath.EndsWith(wxString(L"Data\\")))
+  if (!newPath.EndsWith(wxString(L"Data\\")))
     newPath.Append(wxString(L"Data\\"));
 #elif _MAC // Mac OS X
   newPath = wxT("/Applications/World of Warcraft/");
-  if (!wxFileExists(gamePath+wxT("Data/common.MPQ")) && !wxFileExists(gamePath+wxT("Data/art.MPQ")) )
+  if (!wxFileExists(gamePath + wxT("Data/common.MPQ")) && !wxFileExists(gamePath + wxT("Data/art.MPQ")))
     newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
   if (!newPath.IsEmpty() && newPath.Last() != SLASH)
     newPath.Append(SLASH);
   newPath.Append(wxT("Data/"));
 #else // Linux
-  newPath = wxT(".")+SLASH;
-  if (!wxFileExists(newPath+wxT("Wow.exe")))
+  newPath = wxT(".") + SLASH;
+  if (!wxFileExists(newPath + wxT("Wow.exe")))
     newPath = wxDirSelector(wxT("Please select your World of Warcraft folder:"), newPath);
   if (!newPath.IsEmpty() && newPath.Last() != SLASH)
     newPath.Append(SLASH);
@@ -132,38 +132,38 @@ wxString getGamePath(bool noSet)
 wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
 {
   wxBitmap*   r_bitmapPtr = 0;
-  
-  char*       a_data      = 0;
-  DWORD       a_dataSize  = 0;
-  
-  if(loadDataFromResource(a_data, a_dataSize, t_name))
+
+  char*       a_data = 0;
+  DWORD       a_dataSize = 0;
+
+  if (loadDataFromResource(a_data, a_dataSize, t_name))
   {
     r_bitmapPtr = getBitmapFromMemory(a_data, a_dataSize, type, width, height);
   }
-  
+
   return r_bitmapPtr;
 }
 
 
 bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name)
 {
-  bool     r_result    = false;
+  bool     r_result = false;
   HGLOBAL  a_resHandle = 0;
   HRSRC    a_resource;
-  
+
   a_resource = FindResource(0, t_name.c_str(), RT_RCDATA);
-  
-  if(0 != a_resource)
+
+  if (0 != a_resource)
   {
-	a_resHandle = LoadResource(NULL, a_resource);
-	if (0 != a_resHandle)
+    a_resHandle = LoadResource(NULL, a_resource);
+    if (0 != a_resHandle)
     {
-	  t_data = (char*)LockResource(a_resHandle);
+      t_data = (char*)LockResource(a_resHandle);
       t_dataSize = SizeofResource(NULL, a_resource);
       r_result = true;
     }
   }
-  
+
   return r_result;
 }
 #endif
@@ -172,38 +172,38 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapType type, int width, int height)
 {
   wxMemoryInputStream a_is(t_data, t_size);
-  
+
   wxImage newImage(wxImage(a_is, type, -1));
-  
-  if((width != 0) && (height != 0))
-	newImage.Rescale(width,height);
+
+  if ((width != 0) && (height != 0))
+    newImage.Rescale(width, height);
   return new wxBitmap(newImage, -1);
 }
 
 bool correctType(ssize_t type, ssize_t slot)
 {
-	if (type == IT_ALL)
-		return true;
+  if (type == IT_ALL)
+    return true;
 
-	switch (slot) {
-	case CS_HEAD:		return (type == IT_HEAD);
-	case CS_SHOULDER:	return (type == IT_SHOULDER);
-	case CS_SHIRT:		return (type == IT_SHIRT);
-	case CS_CHEST:		return (type == IT_CHEST || type == IT_ROBE);
-	case CS_BELT:		return (type == IT_BELT);
-	case CS_PANTS:		return (type == IT_PANTS);
-	case CS_BOOTS:		return (type == IT_BOOTS);
-	case CS_BRACERS:	return (type == IT_BRACERS);
-	case CS_GLOVES:		return (type == IT_GLOVES);
+  switch (slot) {
+  case CS_HEAD:		return (type == IT_HEAD);
+  case CS_SHOULDER:	return (type == IT_SHOULDER);
+  case CS_SHIRT:		return (type == IT_SHIRT);
+  case CS_CHEST:		return (type == IT_CHEST || type == IT_ROBE);
+  case CS_BELT:		return (type == IT_BELT);
+  case CS_PANTS:		return (type == IT_PANTS);
+  case CS_BOOTS:		return (type == IT_BOOTS);
+  case CS_BRACERS:	return (type == IT_BRACERS);
+  case CS_GLOVES:		return (type == IT_GLOVES);
 
-	// Slight correction.  Type 21 = Lefthand weapon, Type 22 = Righthand weapon
-	//case CS_HAND_RIGHT:	return (type == IT_1HANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER);
-	//case CS_HAND_LEFT:	return (type == IT_1HANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_HAND_RIGHT:	return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_DAGGER);
-	case CS_HAND_LEFT:	return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_CAPE:		return (type == IT_CAPE);
-	case CS_TABARD:		return (type == IT_TABARD);
-	case CS_QUIVER:		return (type == IT_QUIVER);
-	}
-	return false;
+    // Slight correction.  Type 21 = Lefthand weapon, Type 22 = Righthand weapon
+    //case CS_HAND_RIGHT:	return (type == IT_1HANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER);
+    //case CS_HAND_LEFT:	return (type == IT_1HANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER || type == IT_OFFHAND);
+  case CS_HAND_RIGHT:	return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_DAGGER);
+  case CS_HAND_LEFT:	return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
+  case CS_CAPE:		return (type == IT_CAPE);
+  case CS_TABARD:		return (type == IT_TABARD);
+  case CS_QUIVER:		return (type == IT_QUIVER);
+  }
+  return false;
 }

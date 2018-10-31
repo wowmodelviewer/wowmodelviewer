@@ -1,17 +1,15 @@
 #include "wdb5file.h"
 
 #include "logger/Logger.h"
+#include "WoWDatabase.h"
 
 #include <sstream>
-
 #include <bitset>
-
-#include "WoWDatabase.h"
 
 #define WDB5_READ_DEBUG 0
 
 WDB5File::WDB5File(const QString & file) :
-DBFile(), m_isSparseTable(false), CASCFile(file)
+  DBFile(), m_isSparseTable(false), CASCFile(file)
 {
 }
 
@@ -38,7 +36,6 @@ WDB5File::header WDB5File::readHeader()
   return header;
 }
 
-
 bool WDB5File::open()
 {
   if (!CASCFile::open())
@@ -48,7 +45,7 @@ bool WDB5File::open()
   }
 
   WDB5File::header header = readHeader();
-  
+
   recordSize = header.record_size;
   recordCount = header.record_count;
   fieldCount = header.field_count;
@@ -72,7 +69,7 @@ bool WDB5File::open()
   stringSize = header.string_table_size;
 
   data = getPointer();
-  stringTable = data + recordSize*recordCount;
+  stringTable = data + recordSize * recordCount;
 
   if ((header.flags & 0x01) != 0)
   {
@@ -135,18 +132,18 @@ bool WDB5File::open()
       uint32 indexMask;
       switch (indexSize)
       {
-        case 1:
-          indexMask = 0x000000FF;
-          break;
-        case 2:
-          indexMask = 0x0000FFFF;
-          break;
-        case 3:
-          indexMask = 0x00FFFFFF;
-          break;
-        default:
-          indexMask = 0xFFFFFFFF;
-          break;
+      case 1:
+        indexMask = 0x000000FF;
+        break;
+      case 2:
+        indexMask = 0x0000FFFF;
+        break;
+      case 3:
+        indexMask = 0x00FFFFFF;
+        break;
+      default:
+        indexMask = 0xFFFFFFFF;
+        break;
       }
 #if WDB5_READ_DEBUG > 0
       LOG_INFO << "indexSize" << indexSize;
@@ -172,13 +169,13 @@ bool WDB5File::open()
   if (header.copy_table_size > 0)
   {
     uint nbEntries = header.copy_table_size / sizeof(copy_table_entry);
-    
+
     m_IDs.reserve(recordCount + nbEntries);
     m_recordOffsets.reserve(recordCount + nbEntries);
 
     copy_table_entry * copyTable = new copy_table_entry[nbEntries];
     read(copyTable, header.copy_table_size);
-    
+
     // create a id->offset map
     std::map<uint32, unsigned char*> IDToOffsetMap;
 
@@ -245,7 +242,7 @@ std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::Tab
       int fieldSize = (32 - m_fieldSizes.at(field->pos)) / 8;
       unsigned char * val = new unsigned char[fieldSize];
 
-      memcpy(val, recordOffset + field->pos + i*fieldSize, fieldSize);
+      memcpy(val, recordOffset + field->pos + i * fieldSize, fieldSize);
 
       if (field->type == "text")
       {

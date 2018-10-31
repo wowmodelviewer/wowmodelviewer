@@ -13,29 +13,25 @@
 #include "WoWModel.h"
 #include "GL/glew.h"
 
-
-
 void ModelAttachment::init(ModelAttachmentDef &mad)
 {
-	pos = fixCoordSystem(mad.pos);
-	bone = mad.bone;
-	id = mad.id;
+  pos = fixCoordSystem(mad.pos);
+  bone = mad.bone;
+  id = mad.id;
 }
 
 void ModelAttachment::setup()
 {
-	Matrix m = model->bones[bone].mat;
-	m.transpose();
-	glMultMatrixf(m);
-	glTranslatef(pos.x, pos.y, pos.z);
+  Matrix m = model->bones[bone].mat;
+  m.transpose();
+  glMultMatrixf(m);
+  glTranslatef(pos.x, pos.y, pos.z);
 }
 
 void ModelAttachment::setupParticle()
 {
-	Matrix m = model->bones[bone].mat;
-	m.transpose();
-	glMultMatrixf(m);
-	glTranslatef(pos.x, pos.y, pos.z);
+  Matrix m = model->bones[bone].mat;
+  m.transpose();
+  glMultMatrixf(m);
+  glTranslatef(pos.x, pos.y, pos.z);
 }
-
-

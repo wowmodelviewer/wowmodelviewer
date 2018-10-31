@@ -2,7 +2,6 @@
 
 #include "GameFile.h"
 #include "types.h"
-
 #include "logger/Logger.h"
 
 #include <sstream>
@@ -76,11 +75,11 @@ bool WDB2File::open()
   assert(fieldCount * 4 >= recordSize);
 
   if (db_type == FT_WDB2) {
-    seek(getSize() - recordSize*recordCount - stringSize);
+    seek(getSize() - recordSize * recordCount - stringSize);
   }
 
   data = getPointer();
-  stringTable = data + recordSize*recordCount;
+  stringTable = data + recordSize * recordCount;
 
   return true;
 }
@@ -142,18 +141,18 @@ std::vector<std::string> WDB2File::get(unsigned int recordIndex, const core::Tab
       unsigned int decal = 0;
       switch (offset)
       {
-        case 0:
-          decal = 24;
-          break;
-        case 1:
-          decal = 16;
-          break;
-        case 2:
-          decal = 8;
-          break;
-        default:
-          decal = 0;
-          break;
+      case 0:
+        decal = 24;
+        break;
+      case 1:
+        decal = 16;
+        break;
+      case 2:
+        decal = 8;
+        break;
+      default:
+        decal = 0;
+        break;
       }
 
       std::stringstream ss;

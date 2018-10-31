@@ -583,8 +583,6 @@ $CAH
 $CST
 */
 
-
-
 /*
  * This block specifies a bunch of locations on the body - hands, shoulders, head, back,
  * knees etc. It is used to put items on a character. This seems very likely as this block

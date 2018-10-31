@@ -20,24 +20,23 @@ class WoWModel;
 
 class Bone {
 public:
-	Animated<Vec3D> trans;
-	//Animated<Quaternion> rot;
-	Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
-	Animated<Vec3D> scale;
+  Animated<Vec3D> trans;
+  //Animated<Quaternion> rot;
+  Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
+  Animated<Vec3D> scale;
 
-	Vec3D pivot, transPivot;
-	int16 parent;
+  Vec3D pivot, transPivot;
+  int16 parent;
 
-	bool billboard;
-	Matrix mat;
-	Matrix mrot;
+  bool billboard;
+  Matrix mat;
+  Matrix mrot;
 
-	ModelBoneDef boneDef;
+  ModelBoneDef boneDef;
 
-	bool calc;
-	void calcMatrix(std::vector<Bone> & allbones, int32 anim, uint32 time, bool rotate=true);
+  bool calc;
+  void calcMatrix(std::vector<Bone> & allbones, int32 anim, uint32 time, bool rotate = true);
   void initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data);
 };
-
 
 #endif /* _BONE_H_ */

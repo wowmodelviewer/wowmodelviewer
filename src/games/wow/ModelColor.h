@@ -14,13 +14,12 @@
 
 class GameFile;
 
-struct ModelColor 
+struct ModelColor
 {
-	Animated<Vec3D> color;
-	AnimatedShort opacity;
+  Animated<Vec3D> color;
+  AnimatedShort opacity;
 
-	void init(GameFile * f, ModelColorDef &mcd, QVector<uint32> & global);
+  void init(GameFile * f, ModelColorDef &mcd, QVector<uint32> & global);
 };
-
 
 #endif /* _MODELCOLOR_H_ */

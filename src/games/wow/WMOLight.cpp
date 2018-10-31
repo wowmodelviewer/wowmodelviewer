@@ -1,5 +1,4 @@
 #include "WMOLight.h"
-
 #include "GameFile.h"
 
 #include "GL/glew.h"

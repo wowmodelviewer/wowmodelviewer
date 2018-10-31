@@ -22,27 +22,26 @@
 
 class CharDetailsCustomizationSpin : public wxWindow, public Observer
 {
-  public:
+public:
   CharDetailsCustomizationSpin(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type);
 
-  private:
-    DECLARE_CLASS(CharDetailsCustomizationSpin)
-    DECLARE_EVENT_TABLE()
+private:
+  DECLARE_CLASS(CharDetailsCustomizationSpin)
+  DECLARE_EVENT_TABLE()
 
-    void onSpin(wxSpinEvent &event);
-    virtual void onEvent(Event *);
+  void onSpin(wxSpinEvent &event);
+  virtual void onEvent(Event *);
 
-    void refresh();
+  void refresh();
 
-    CharDetails::CustomizationType m_type;
-    std::vector<int> m_values;
-    CharDetails & m_details;
-    CharDetails::CustomizationParam m_params;
+  CharDetails::CustomizationType m_type;
+  std::vector<int> m_values;
+  CharDetails & m_details;
+  CharDetails::CustomizationParam m_params;
 
-    wxSpinButton * m_spin;
-    wxStaticText * m_text;
+  wxSpinButton * m_spin;
+  wxStaticText * m_text;
 
 };
-
 
 #endif // _CHARDETAILSCUSTOMIZATIONSPIN_H_

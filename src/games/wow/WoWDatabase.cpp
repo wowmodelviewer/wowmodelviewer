@@ -19,12 +19,11 @@
 #include "wdc2file.h"
 #include "wdc3file.h"
 
-const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
+const std::vector<QString> POSSIBLE_DB_EXT = { ".db2", ".dbc" };
 
 wow::WoWDatabase::WoWDatabase()
   : GameDatabase()
 {
-
 }
 
 core::TableStructure *  wow::WoWDatabase::createTableStructure()
@@ -93,7 +92,6 @@ DBFile * wow::TableStructure::createDBFile()
   if (!fileToOpen)
     return 0;
 
-  
   if (fileToOpen)
   {
     if (fileToOpen->open())

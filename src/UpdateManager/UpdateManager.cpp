@@ -28,11 +28,11 @@
 #include "UpdateManager.h"
 #undef _UPDATEMANAGER_CPP_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QDesktopServices>
 #include <QGroupBox>
 #include <QPushButton>
@@ -86,11 +86,11 @@ UpdateManager::UpdateManager()
   // init download manager
   m_fileDownloader = new FileDownloader(this);
   connect(m_fileDownloader, SIGNAL(downloadFinished(QString &)),
-          this, SLOT(fileDownloaded(QString &)));
+    this, SLOT(fileDownloaded(QString &)));
 
   m_versionManager = new VersionManager(this);
   connect(m_versionManager, SIGNAL(downloadFinished(QString &)),
-      this, SLOT(fileDownloaded(QString &)));
+    this, SLOT(fileDownloaded(QString &)));
 
   connect(m_table, SIGNAL(cellClicked(int, int)), this, SLOT(cellClicked(int, int)));
 
@@ -117,12 +117,12 @@ void UpdateManager::updateTable()
 {
   int row = 0;
   int column = 0;
-  std::map<QString,QString>::iterator versionsIt = m_versionManager->m_currentVersionsMap.begin();
-  std::map<QString,QString>::iterator versionsItEnd = m_versionManager->m_currentVersionsMap.end();
+  std::map<QString, QString>::iterator versionsIt = m_versionManager->m_currentVersionsMap.begin();
+  std::map<QString, QString>::iterator versionsItEnd = m_versionManager->m_currentVersionsMap.end();
 
-  for( ; versionsIt != versionsItEnd ; versionsIt++)
+  for (; versionsIt != versionsItEnd; versionsIt++)
   {
-    if((*versionsIt).first == QString::fromStdWString(GLOBALSETTINGS.appName()))
+    if ((*versionsIt).first == QString::fromStdWString(GLOBALSETTINGS.appName()))
       break;
   }
 
@@ -132,16 +132,16 @@ void UpdateManager::updateTable()
   m_table->setItem(row, column, newItem);
   column++;
   newItem = new QTableWidgetItem((*versionsIt).second);
-  newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+  newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   m_table->setItem(row, column, newItem);
   column++;
   newItem = new QTableWidgetItem(tr("N/A"));
-  newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+  newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
   m_table->setItem(row, column, newItem);
   row++;
 
   // now fill all other stuff
-  for(versionsIt = m_versionManager->m_currentVersionsMap.begin() ; versionsIt != versionsItEnd ; versionsIt++)
+  for (versionsIt = m_versionManager->m_currentVersionsMap.begin(); versionsIt != versionsItEnd; versionsIt++)
   {
     column = 0;
     // core version already inserted, skip it
@@ -153,11 +153,11 @@ void UpdateManager::updateTable()
     m_table->setItem(row, column, newItem);
     column++;
     newItem = new QTableWidgetItem((*versionsIt).second);
-    newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_table->setItem(row, column, newItem);
     column++;
     newItem = new QTableWidgetItem(tr("N/A"));
-    newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     m_table->setItem(row, column, newItem);
     row++;
     m_table->resizeColumnsToContents();
@@ -168,7 +168,7 @@ void UpdateManager::updateTable()
 
 void UpdateManager::fileDownloaded(QString & filename)
 {
-  if(filename.contains("latest.json"))
+  if (filename.contains("latest.json"))
   {
     updateLastVersionInfo();
   }
@@ -176,23 +176,23 @@ void UpdateManager::fileDownloaded(QString & filename)
 
 void UpdateManager::updateLastVersionInfo()
 {
-  for(unsigned int i=0; i < m_versionManager->m_lastVersionInfos.size() ; i++)
+  for (unsigned int i = 0; i < m_versionManager->m_lastVersionInfos.size(); i++)
   {
-    for(int row=0 ; row < m_table->rowCount() ; row++)
+    for (int row = 0; row < m_table->rowCount(); row++)
     {
-      if(m_table->item(row,0)->text() == m_versionManager->m_lastVersionInfos[i]["name"].toString())
+      if (m_table->item(row, 0)->text() == m_versionManager->m_lastVersionInfos[i]["name"].toString())
       {
-        m_table->item(row,2)->setText(m_versionManager->m_lastVersionInfos[i]["version"].toString());
-        if(VersionManager::compareVersion(m_table->item(row,1)->text(),m_table->item(row,2)->text()) < 0)
+        m_table->item(row, 2)->setText(m_versionManager->m_lastVersionInfos[i]["version"].toString());
+        if (VersionManager::compareVersion(m_table->item(row, 1)->text(), m_table->item(row, 2)->text()) < 0)
         {
           QTableWidgetItem *newItem = new QTableWidgetItem(tr("Update Needed"));
-          newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+          newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
           m_table->setItem(row, 3, newItem);
         }
         else
         {
           QTableWidgetItem *newItem = new QTableWidgetItem(tr("Up to date"));
-          newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+          newItem->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
           m_table->setItem(row, 3, newItem);
         }
         m_table->resizeColumnsToContents();
@@ -206,7 +206,7 @@ void UpdateManager::resizeTable()
 {
   //get all columns width and resize window accordingly
   int finalWidth = 0;
-  for(int i = 0 ; i < m_table->columnCount() ; i++)
+  for (int i = 0; i < m_table->columnCount(); i++)
     finalWidth += m_table->columnWidth(i);
 
   finalWidth += 50; // make sure everything is visible (lines, margins, etc)
@@ -216,6 +216,6 @@ void UpdateManager::resizeTable()
 
 void UpdateManager::cellClicked(int row, int col)
 {
-  if(m_table->item(row,col) && m_table->item(row,col)->text() == tr("Update Needed"))
+  if (m_table->item(row, col) && m_table->item(row, col)->text() == tr("Update Needed"))
     QDesktopServices::openUrl(QUrl("http://download.wowmodelviewer.net"));
 }

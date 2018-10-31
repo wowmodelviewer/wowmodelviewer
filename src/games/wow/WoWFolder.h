@@ -34,33 +34,32 @@ namespace wow
 {
   class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
   {
-    public:
-      WoWFolder(const QString & path);
-      virtual ~WoWFolder() {}
+  public:
+    WoWFolder(const QString & path);
+    virtual ~WoWFolder() {}
 
-      void init();
-      void initFromListfile(const QString & file);
-      void addCustomFiles(const QString & path, bool bypassOriginalFiles);
+    void init();
+    void initFromListfile(const QString & file);
+    void addCustomFiles(const QString & path, bool bypassOriginalFiles);
 
-      GameFile * getFile(int id);
+    GameFile * getFile(int id);
 
-      bool openFile(std::string file, HANDLE * result);
+    bool openFile(std::string file, HANDLE * result);
 
-      QString version();
-      QString locale();
-      bool setConfig(core::GameConfig config);
-      std::vector<core::GameConfig> configsFound();
+    QString version();
+    QString locale();
+    bool setConfig(core::GameConfig config);
+    std::vector<core::GameConfig> configsFound();
 
-      int lastError();
+    int lastError();
 
-      void onChildAdded(GameFile *);
-      void onChildRemoved(GameFile *);
+    void onChildAdded(GameFile *);
+    void onChildRemoved(GameFile *);
 
-    private:
-      CASCFolder m_CASCFolder;
-      std::map<int, GameFile *> m_idMap;
+  private:
+    CASCFolder m_CASCFolder;
+    std::map<int, GameFile *> m_idMap;
   };
 }
-
 
 #endif /* _WOWFOLDER_H_ */

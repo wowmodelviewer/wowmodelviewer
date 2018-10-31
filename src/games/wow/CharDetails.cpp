@@ -5,11 +5,10 @@
 *
 */
 
-#include "CharDetails.h"
-
 #include <iostream>
 
 #include "animated.h" // randint
+#include "CharDetails.h"
 #include "CharDetailsEvent.h"
 #include "Game.h"
 #include "WoWModel.h"
@@ -19,12 +18,11 @@
 #include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
-CharDetails::CharDetails():
-eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
-showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_model(0), m_isDemonHunter(false), m_dhModel("")
+CharDetails::CharDetails() :
+  eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
+  showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true),
+  isNPC(true), m_model(0), m_isDemonHunter(false), m_dhModel("")
 {
-
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -271,52 +269,52 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
     type += 5;
 
   QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
-                          "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
-                          "LEFT JOIN TextureFileData AS TFD2 ON TextureName2 = TFD2.ID "
-                          "LEFT JOIN TextureFileData AS TFD3 ON TextureName3 = TFD3.ID ");
+    "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
+    "LEFT JOIN TextureFileData AS TFD2 ON TextureName2 = TFD2.ID "
+    "LEFT JOIN TextureFileData AS TFD3 ON TextureName3 = TFD3.ID ");
   switch (section)
   {
-    case SkinType:
-    case UnderwearType:
-      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[SKIN_COLOR])
-        .arg(type);
-      break;
-    case FaceType:
-      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[SKIN_COLOR])
-        .arg(m_currentCustomization[FACE])
-        .arg(type);
-      break;
-    case HairType:
-      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
-        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
-        .arg(type);
-      break;
-    case FacialHairType:
-      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
-        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
-        .arg(type);
-      break;
-    case TatooType:
-      query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg((m_customizationParamsMap[DH_TATTOO_STYLE].possibleValues.size() - 1) * m_currentCustomization[DH_TATTOO_COLOR] + m_currentCustomization[DH_TATTOO_STYLE])
-        .arg(type);
-      break;
-    default:
-      query = "";
+  case SkinType:
+  case UnderwearType:
+    query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4)")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(m_currentCustomization[SKIN_COLOR])
+      .arg(type);
+    break;
+  case FaceType:
+    query += QString("WHERE (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4 AND SectionType=%5)")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(m_currentCustomization[SKIN_COLOR])
+      .arg(m_currentCustomization[FACE])
+      .arg(type);
+    break;
+  case HairType:
+    query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
+      .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
+      .arg(type);
+    break;
+  case FacialHairType:
+    query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4 AND SectionType=%5)")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
+      .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
+      .arg(type);
+    break;
+  case TatooType:
+    query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4)")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg((m_customizationParamsMap[DH_TATTOO_STYLE].possibleValues.size() - 1) * m_currentCustomization[DH_TATTOO_COLOR] + m_currentCustomization[DH_TATTOO_STYLE])
+      .arg(type);
+    break;
+  default:
+    query = "";
   }
 
   if (query != "")
@@ -384,11 +382,11 @@ void CharDetails::fillCustomizationMap()
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
-                    "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
-                    .arg(*it)
-                    .arg(FaceType + sectionOffset);
+      "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(*it)
+      .arg(FaceType + sectionOffset);
 
     sqlResult faces = GAMEDATABASE.sqlQuery(query);
 
@@ -461,16 +459,15 @@ void CharDetails::fillCustomizationMap()
 
   m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, facialCustomizationStyle });
 
-
   // facial color customization depends on current facial style. We fill m_multiCustomizationMap first
   for (auto it = facialCustomizationStyle.possibleValues.begin(), itEnd = facialCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 "
-                    "AND SectionType = %3 AND VariationIndex = %4")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
-                    .arg(HairType + sectionOffset)
-                    .arg(*it);
+      "AND SectionType = %3 AND VariationIndex = %4")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(HairType + sectionOffset)
+      .arg(*it);
 
     sqlResult colors = GAMEDATABASE.sqlQuery(query);
 
@@ -605,51 +602,51 @@ void CharDetails::set(CustomizationType type, unsigned int val)
     CharDetailsEvent event(this, CharDetailsEvent::SKIN_COLOR_CHANGED);
     switch (type)
     {
-      case SKIN_COLOR:
-      {
-        m_customizationParamsMap[FACE] = m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]];
+    case SKIN_COLOR:
+    {
+      m_customizationParamsMap[FACE] = m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]];
 
-        // reset current face if not available for this skin color
-        std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
-        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
-          m_currentCustomization[FACE] = vec[0];
+      // reset current face if not available for this skin color
+      std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
+      if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
+        m_currentCustomization[FACE] = vec[0];
 
-        event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
-        break;
-      }
-      case FACE:
-        event.setType((Event::EventType)CharDetailsEvent::FACE_CHANGED);
-        break;
-      case FACIAL_CUSTOMIZATION_STYLE:
-      {
-        m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR] = m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]];
+      event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
+      break;
+    }
+    case FACE:
+      event.setType((Event::EventType)CharDetailsEvent::FACE_CHANGED);
+      break;
+    case FACIAL_CUSTOMIZATION_STYLE:
+    {
+      m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR] = m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]];
 
-        // reset current hair color if not available for this hair style
-        std::vector<int> & vec = m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
-        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
-          m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
+      // reset current hair color if not available for this hair style
+      std::vector<int> & vec = m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
+      if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
+        m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
 
-        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
-        break;
-      }
-      case FACIAL_CUSTOMIZATION_COLOR:
-        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
-        break;
-      case ADDITIONAL_FACIAL_CUSTOMIZATION:
-        event.setType((Event::EventType)CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED);
-        break;
-      case DH_TATTOO_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_STYLE_CHANGED);
-        break;
-      case DH_TATTOO_COLOR:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_COLOR_CHANGED);
-        break;
-      case DH_HORN_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_HORN_STYLE_CHANGED);
-        break;
-      case DH_BLINDFOLDS:
-        event.setType((Event::EventType)CharDetailsEvent::DH_BLINDFOLDS_CHANGED);
-        break;
+      event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+      break;
+    }
+    case FACIAL_CUSTOMIZATION_COLOR:
+      event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+      break;
+    case ADDITIONAL_FACIAL_CUSTOMIZATION:
+      event.setType((Event::EventType)CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED);
+      break;
+    case DH_TATTOO_STYLE:
+      event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_STYLE_CHANGED);
+      break;
+    case DH_TATTOO_COLOR:
+      event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_COLOR_CHANGED);
+      break;
+    case DH_HORN_STYLE:
+      event.setType((Event::EventType)CharDetailsEvent::DH_HORN_STYLE_CHANGED);
+      break;
+    case DH_BLINDFOLDS:
+      event.setType((Event::EventType)CharDetailsEvent::DH_BLINDFOLDS_CHANGED);
+      break;
     }
 
     notify(event);

@@ -23,5 +23,4 @@ public:
   void setup(int anim);
 };
 
-
 #endif /* _TEXTUREANIM_H_ */

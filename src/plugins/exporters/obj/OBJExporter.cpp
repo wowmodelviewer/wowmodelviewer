@@ -27,11 +27,11 @@
 #include "OBJExporter.h"
 #undef _OBJEXPORTER_CPP_
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
+ // Includes / class Declarations
+ //--------------------------------------------------------------------
+ // STL
 
-// Qt
+ // Qt
 #include <QFileInfo>
 #include <QImage>
 
@@ -41,7 +41,6 @@
 #include "Bone.h"
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
-
 #include "GlobalSettings.h"
 #include "logger/Logger.h"
 
@@ -70,7 +69,7 @@ void MakeModelFaceForwards(Vec3D &vect)
 {
   Vec3D Temp;
 
-  Temp.x = 0-vect.z;
+  Temp.x = 0 - vect.z;
   Temp.y = vect.y;
   Temp.z = vect.x;
 
@@ -92,12 +91,11 @@ std::wstring OBJExporter::fileSaveFilter() const
   return L"OBJ files (*.obj)|*.obj";
 }
 
-
 bool OBJExporter::exportModel(Model * m, std::wstring target)
 {
   WoWModel * model = dynamic_cast<WoWModel *>(m);
 
-  if(!model)
+  if (!model)
     return false;
 
   // prepare obj file
@@ -115,7 +113,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
   // prepare mtl file
   QString matFilename = QFileInfo(targetFile).completeBaseName();
   matFilename += ".mtl";
-  matFilename = QFileInfo(targetFile).absolutePath () + "/" + matFilename;
+  matFilename = QFileInfo(targetFile).absolutePath() + "/" + matFilename;
 
   LOG_INFO << "Exporting" << model->modelname.c_str() << "materials in" << matFilename;
 
@@ -131,7 +129,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
   obj << "# Wavefront OBJ exported by " << QString::fromStdWString(GLOBALSETTINGS.appName()) << " " << QString::fromStdWString(GLOBALSETTINGS.appVersion()) << "\n";
   obj << "\n";
-  obj << "mtllib " <<  QFileInfo(matFile).fileName() << "\n";
+  obj << "mtllib " << QFileInfo(matFile).fileName() << "\n";
   obj << "\n";
 
 
@@ -140,38 +138,38 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
   mtl << "#" << "\n";
   mtl << "\n";
 
-  int counter=1;
+  int counter = 1;
 
   // export main model
-  if(!exportModelVertices(model, obj, counter))
+  if (!exportModelVertices(model, obj, counter))
   {
     LOG_ERROR << "Error during obj export for model" << model->modelname.c_str();
     return false;
   }
 
-  if(!exportModelMaterials(model, mtl, matFilename))
+  if (!exportModelMaterials(model, mtl, matFilename))
   {
     LOG_ERROR << "Error during materials export for model" << model->modelname.c_str();
     return false;
   }
 
   // export equipped items
-  if(!GLOBALSETTINGS.bInitPoseOnlyExport)
+  if (!GLOBALSETTINGS.bInitPoseOnlyExport)
   {
 
-    for(WoWModel::iterator it = model->begin();
-        it != model->end();
-        ++it)
+    for (WoWModel::iterator it = model->begin();
+      it != model->end();
+      ++it)
     {
       std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
-      if(!itemModels.empty())
+      if (!itemModels.empty())
       {
         obj << "# " << "\n";
         obj << "# " << (*it)->name() << "\n";
         obj << "# " << "\n";
-        for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
-            it != itemModels.end();
-            ++it)
+        for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin();
+          it != itemModels.end();
+          ++it)
         {
           WoWModel * itemModel = it->second;
           LOG_INFO << "Exporting attached item" << itemModel->modelname.c_str();
@@ -180,19 +178,19 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
           int l = model->attLookup[it->first];
           Matrix m;
           Vec3D pos;
-          if (l>-1)
+          if (l > -1)
           {
             m = model->bones[model->atts[l].bone].mat;
             pos = model->atts[l].pos;
           }
 
-          if(!exportModelVertices(itemModel, obj, counter, m, pos))
+          if (!exportModelVertices(itemModel, obj, counter, m, pos))
           {
             LOG_ERROR << "Error during obj export for model" << itemModel->modelname.c_str();
             return false;
           }
 
-          if(!exportModelMaterials(itemModel, mtl, matFilename))
+          if (!exportModelMaterials(itemModel, mtl, matFilename))
           {
             LOG_ERROR << "Error during materials export for model" << itemModel->modelname.c_str();
             return false;
@@ -218,14 +216,14 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   bool vertMsg = false;
   // output all the vertice data
   int vertics = 0;
-  for (size_t i=0; i<model->passes.size(); i++)
+  for (size_t i = 0; i < model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
 
     if (p->init())
     {
       ModelGeosetHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint32 a = model->indices[b];
         Vec3D vert;
@@ -250,10 +248,10 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
         MakeModelFaceForwards(vert);
         vert *= 1.0;
         QString val;
-        val.sprintf("v %.06f %.06f %.06f",vert.x, vert.y, vert.z);
+        val.sprintf("v %.06f %.06f %.06f", vert.x, vert.y, vert.z);
         file << val << "\n";
 
-        vertics ++;
+        vertics++;
       }
     }
   }
@@ -262,41 +260,41 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   file << "\n";
   // output all the texture coordinate data
   int textures = 0;
-  for (size_t i=0; i<model->passes.size(); i++)
+  for (size_t i = 0; i < model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
     // we don't want to render completely transparent parts
     if (p->init())
     {
       ModelGeosetHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint32 a = model->indices[b];
-        Vec2D tc =  model->origVertices[a].texcoords;
+        Vec2D tc = model->origVertices[a].texcoords;
         QString val;
-        val.sprintf("vt %.06f %.06f", tc.x, 1-tc.y);
+        val.sprintf("vt %.06f %.06f", tc.x, 1 - tc.y);
         file << val << "\n";
-        textures ++;
+        textures++;
       }
     }
   }
 
   // output all the vertice normals data
   int normals = 0;
-  for (size_t i=0; i<model->passes.size(); i++)
+  for (size_t i = 0; i < model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
     if (p->init())
     {
       ModelGeosetHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint16 a = model->indices[b];
         Vec3D n = model->origVertices[a].normal;
         QString val;
         val.sprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
         file << val << "\n";
-        normals ++;
+        normals++;
       }
     }
   }
@@ -305,7 +303,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   uint32 pointnum = 0;
   // Polygon Data
   int triangles_total = 0;
-  for (size_t i=0; i<model->passes.size(); i++)
+  for (size_t i = 0; i < model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
 
@@ -314,15 +312,15 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       ModelGeosetHD * geoset = model->geosets[p->geoIndex];
       // Build Vert2Point DB
       uint16 *Vert2Point = new uint16[geoset->vstart + geoset->vcount];
-      for (uint16 v = geoset->vstart; v<(geoset->vstart + geoset->vcount); v++, pointnum++)
+      for (uint16 v = geoset->vstart; v < (geoset->vstart + geoset->vcount); v++, pointnum++)
         Vert2Point[v] = pointnum;
 
       int g = geoset->id;
 
       QString val;
-      val.sprintf("Geoset_%03i",g);
+      val.sprintf("Geoset_%03i", g);
       QString matName = QString(model->modelname.c_str()) + "_" + val;
-      matName.replace("\\","_");
+      matName.replace("\\", "_");
       QString partName = matName;
 
       if (p->unlit == true)
@@ -343,16 +341,16 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       file << "usemtl " << matName << "\n";
       file << "s 1" << "\n";
       int triangles = 0;
-      for (size_t k=0; k<geoset->icount; k+=3)
+      for (size_t k = 0; k < geoset->icount; k += 3)
       {
         file << "f ";
         file << QString("%1/%1/%1 ").arg(counter);
-        counter ++;
+        counter++;
         file << QString("%1/%1/%1 ").arg(counter);
-        counter ++;
+        counter++;
         file << QString("%1/%1/%1\n").arg(counter);
-        counter ++;
-        triangles ++;
+        counter++;
+        triangles++;
       }
       file << "# " << triangles << " triangles in group" << "\n" << "\n";
       triangles_total += triangles;
@@ -366,7 +364,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 {
   std::map<std::wstring, GLuint> texToExport;
 
-  for (size_t i=0; i<model->passes.size(); i++)
+  for (size_t i = 0; i < model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
 
@@ -382,13 +380,13 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       QString val;
       val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
       QString material = QString(model->modelname.c_str()) + "_" + val;
-      material.replace("\\","_");
+      material.replace("\\", "_");
       if (p->unlit == true)
       {
         // Add Lum, just in case there's a non-luminous surface with the same name.
         material = material + "_Lum";
         amb = 1.0f;
-        diff = Vec4D(0,0,0,0);
+        diff = Vec4D(0, 0, 0, 0);
       }
 
       // If Doublesided
@@ -417,8 +415,8 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
   LOG_INFO << "nb textures to export :" << texToExport.size();
 
-  for(auto it : texToExport)
-      exportGLTexture(it.second, it.first);
+  for (auto it : texToExport)
+    exportGLTexture(it.second, it.first);
 
   return true;
 }

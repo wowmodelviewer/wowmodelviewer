@@ -3,7 +3,7 @@
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-    #include <wx/wx.h>
+#include <wx/wx.h>
 #endif
 
 //#include "model.h"
@@ -20,82 +20,81 @@ typedef int GeosetNum;
 
 class TextureGroup
 {
-  public:
-    static const size_t num = 3;
-    size_t count;
-    int base;
-    GameFile * tex[num];
-    // tex gp is derived from CreatureDisplayInfo, not just a random skin in the folder:
-    bool definedTexture;
-    // For particle colour replacements:
-    int particleColInd; // ID for ParticleColor.dbc
-    int PCRIndex;  // index into PCRList - list of particle color replacement values
-    std::set<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
+public:
+  static const size_t num = 3;
+  size_t count;
+  int base;
+  GameFile * tex[num];
+  // tex gp is derived from CreatureDisplayInfo, not just a random skin in the folder:
+  bool definedTexture;
+  // For particle colour replacements:
+  int particleColInd; // ID for ParticleColor.dbc
+  int PCRIndex;  // index into PCRList - list of particle color replacement values
+  std::set<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
 
-    TextureGroup() : base(0), count(0)
+  TextureGroup() : base(0), count(0)
+  {
+    for (size_t i = 0; i < num; i++)
     {
-      for (size_t i=0; i<num; i++)
-      {
-        tex[i] = 0;
-      }
-      particleColInd = 0;
-      PCRIndex = -1;
-      creatureGeosetData.clear();
-      definedTexture = false;
+      tex[i] = 0;
     }
+    particleColInd = 0;
+    PCRIndex = -1;
+    creatureGeosetData.clear();
+    definedTexture = false;
+  }
 
-    // default copy constr
-    TextureGroup(const TextureGroup &grp)
+  // default copy constr
+  TextureGroup(const TextureGroup &grp)
+  {
+    for (size_t i = 0; i < num; i++)
     {
-      for (size_t i=0; i<num; i++)
-      {
-        tex[i] = grp.tex[i];
-      }
-      base = grp.base;
-      count = grp.count;
-      particleColInd = grp.particleColInd;
-      PCRIndex = grp.PCRIndex;
-      creatureGeosetData = grp.creatureGeosetData;
-      definedTexture = grp.definedTexture;
+      tex[i] = grp.tex[i];
     }
+    base = grp.base;
+    count = grp.count;
+    particleColInd = grp.particleColInd;
+    PCRIndex = grp.PCRIndex;
+    creatureGeosetData = grp.creatureGeosetData;
+    definedTexture = grp.definedTexture;
+  }
 
-    bool operator<(const TextureGroup &grp) const
-    {
-      if (!definedTexture && grp.definedTexture)
-        return false;
-      if (definedTexture && !grp.definedTexture)
-        return true;
-      for (size_t i=0; i<num; i++)
-      {
-        if (tex[i]<grp.tex[i]) return true;
-        if (tex[i]>grp.tex[i]) return false;
-      }
-      if (particleColInd < grp.particleColInd)
-        return true;
-      if (creatureGeosetData < grp.creatureGeosetData)
-        return true;
+  bool operator<(const TextureGroup &grp) const
+  {
+    if (!definedTexture && grp.definedTexture)
       return false;
-    }
-
-    bool operator==(const TextureGroup &grp) const
-    {
-      for (size_t i=0; i<num; i++)
-      {
-        if (tex[i] != grp.tex[i])
-          return false;
-      }
-      if (particleColInd != grp.particleColInd)
-        return false;
-      if (creatureGeosetData != grp.creatureGeosetData)
-        return false;
+    if (definedTexture && !grp.definedTexture)
       return true;
-    }
-
-    bool operator!=(const TextureGroup &grp) const
+    for (size_t i = 0; i < num; i++)
     {
-      return !((*this) == grp);
+      if (tex[i] < grp.tex[i]) return true;
+      if (tex[i] > grp.tex[i]) return false;
     }
+    if (particleColInd < grp.particleColInd)
+      return true;
+    if (creatureGeosetData < grp.creatureGeosetData)
+      return true;
+    return false;
+  }
 
+  bool operator==(const TextureGroup &grp) const
+  {
+    for (size_t i = 0; i < num; i++)
+    {
+      if (tex[i] != grp.tex[i])
+        return false;
+    }
+    if (particleColInd != grp.particleColInd)
+      return false;
+    if (creatureGeosetData != grp.creatureGeosetData)
+      return false;
+    return true;
+  }
+
+  bool operator!=(const TextureGroup &grp) const
+  {
+    return !((*this) == grp);
+  }
 };
 
 typedef std::set<TextureGroup> TextureSet;
@@ -105,14 +104,14 @@ typedef std::vector<particleColorSet> particleColorReplacements; // Holds 3 colo
                                                                  // colour set from 0, 1 or 2, depending on whether its
                                                                  // ParticleColorIndex is set to 11, 12 or 13
 
-class AnimControl: public wxWindow
+class AnimControl : public wxWindow
 {
   DECLARE_CLASS(AnimControl)
   DECLARE_EVENT_TABLE()
 
   wxComboBox *animCList, *animCList2, *animCList3, *wmoList, *loopList;
   wxButton *showBLPList;
-  wxStaticText *wmoLabel,*speedLabel, *speedMouthLabel, *frameLabel;
+  wxStaticText *wmoLabel, *speedLabel, *speedMouthLabel, *frameLabel;
   wxStaticText *BLPSkinsLabel, *BLPSkinLabel1, *BLPSkinLabel2, *BLPSkinLabel3;
   wxSlider *speedSlider, *speedMouthSlider, *frameSlider;
   wxButton *btnAdd;
@@ -143,7 +142,7 @@ public:
   void OnBLPSkin(wxCommandEvent &event);
   void OnItemSet(wxCommandEvent &event);
   void OnSliderUpdate(wxCommandEvent &event);
-  void OnLoop(wxCommandEvent &event); 
+  void OnLoop(wxCommandEvent &event);
   Vec4D AnimControl::fromARGB(int color);
   void SetSkinByDisplayID(int cdi);
   int AddSkin(TextureGroup grp);
@@ -156,12 +155,12 @@ public:
   QString GetModelFolder(WoWModel *m);
 
   bool randomSkins;
-  bool defaultDoodads; 
+  bool defaultDoodads;
   std::string oldname;
   QString modelFolder;
   bool modelFolderChanged, BLPListFilled;
   std::map<int, TextureGroup> CDIToTexGp;
-  std::vector<particleColorReplacements> PCRList; 
+  std::vector<particleColorReplacements> PCRList;
   int selectedAnim;
   int selectedAnim2;
   int selectedAnim3;
@@ -172,4 +171,3 @@ public:
 };
 
 #endif
-

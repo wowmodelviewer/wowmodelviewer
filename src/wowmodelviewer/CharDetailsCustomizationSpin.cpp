@@ -14,12 +14,12 @@
 IMPLEMENT_CLASS(CharDetailsCustomizationSpin, wxWindow)
 
 BEGIN_EVENT_TABLE(CharDetailsCustomizationSpin, wxWindow)
-  EVT_SPIN(wxID_ANY, CharDetailsCustomizationSpin::onSpin)
+EVT_SPIN(wxID_ANY, CharDetailsCustomizationSpin::onSpin)
 END_EVENT_TABLE()
 
 
 CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type)
-: wxWindow(parent, wxID_ANY),  m_type(type), m_details(details)
+  : wxWindow(parent, wxID_ANY), m_type(type), m_details(details)
 {
   wxFlexGridSizer *top = new wxFlexGridSizer(3, 0, 5);
   top->AddGrowableCol(2);
@@ -28,7 +28,7 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
   m_details.attach(this);
 
   top->Add(new wxStaticText(this, wxID_ANY, m_params.name.toStdWString()),
-           wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
+    wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
   m_spin = new wxSpinButton(this, wxID_ANY, wxDefaultPosition, wxSize(30, 16), wxSP_HORIZONTAL | wxSP_WRAP);
   m_spin->SetRange(0, m_params.possibleValues.size() - 1);
@@ -45,7 +45,6 @@ CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, Cha
 
   Layout();
 }
-
 
 void CharDetailsCustomizationSpin::onSpin(wxSpinEvent &event)
 {
@@ -78,5 +77,3 @@ void  CharDetailsCustomizationSpin::refresh()
     m_text->SetLabel(wxString::Format(wxT("%2i / %i"), pos, max));
   }
 }
-
-

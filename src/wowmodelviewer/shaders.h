@@ -23,29 +23,29 @@ void OldinitShaders();
 void OldreloadShaders();
 
 class Shader {
-	GLenum target;
-	GLuint id;
+  GLenum target;
+  GLuint id;
 public:
-	bool ok;
+  bool ok;
 
-	Shader(GLenum target, const char *program, bool fromFile = false);
-	virtual ~Shader();
+  Shader(GLenum target, const char *program, bool fromFile = false);
+  virtual ~Shader();
 
-	virtual void bind();
-	virtual void unbind();
+  virtual void bind();
+  virtual void unbind();
 };
 
 class ShaderPair {
-	Shader *vertex;
-	Shader *fragment;
+  Shader *vertex;
+  Shader *fragment;
 public:
 
-	ShaderPair():vertex(0),fragment(0) {}
-	ShaderPair(Shader *vs, Shader *ps):vertex(vs), fragment(ps) {}
-	ShaderPair(const char *vprog, const char *fprog, bool fromFile = false);
+  ShaderPair() :vertex(0), fragment(0) {}
+  ShaderPair(Shader *vs, Shader *ps) :vertex(vs), fragment(ps) {}
+  ShaderPair(const char *vprog, const char *fprog, bool fromFile = false);
 
-	void bind();
-	void unbind();
+  void bind();
+  void unbind();
 };
 
 extern ShaderPair *terrainShaders[4], *wmoShader, *waterShaders[1];

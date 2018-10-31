@@ -33,7 +33,6 @@ public:
 
 protected:
 
-
 private:
   DECLARE_CLASS(CharDetailsFrame)
   DECLARE_EVENT_TABLE()
@@ -46,6 +45,5 @@ private:
 
   WoWModel * m_model;
 };
-
 
 #endif /* _CHARDETAILSFRAME_H_ */

@@ -15,14 +15,13 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
-  useTex2(false), useEnvMap(false), cull(false), trans(false), 
+ModelRenderPass::ModelRenderPass(WoWModel * m, int geo) :
+  useTex2(false), useEnvMap(false), cull(false), trans(false),
   unlit(false), noZWrite(false), billboard(false),
   texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX),
   swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
   model(m), geoIndex(geo)
 {
-
 }
 
 void ModelRenderPass::deinit()
@@ -34,7 +33,7 @@ void ModelRenderPass::deinit()
   if (noZWrite)
     glDepthMask(GL_TRUE);
 
-  if (texanim!=-1)
+  if (texanim != -1)
   {
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -69,9 +68,9 @@ void ModelRenderPass::deinit()
     }
    */
 
-  if (opacity!=-1 || color!=-1)
+  if (opacity != -1 || color != -1)
   {
-    GLfloat czero[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    GLfloat czero[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
     glMaterialfv(GL_FRONT, GL_EMISSION, czero);
 
     //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -80,7 +79,6 @@ void ModelRenderPass::deinit()
     //glMaterialfv(GL_FRONT, GL_DIFFUSE, ocol);
   }
 }
-
 
 bool ModelRenderPass::init()
 {
@@ -114,9 +112,9 @@ bool ModelRenderPass::init()
   }
 
   // opacity
-  if (opacity != -1 && 
-      opacity < (int16)model->transparency.size() && 
-      model->transparency[opacity].trans.uses(0))
+  if (opacity != -1 &&
+    opacity < (int16)model->transparency.size() &&
+    model->transparency[opacity].trans.uses(0))
   {
     // Alfred 2008.10.02 buggy opacity make model invisible, TODO
     ocol.w *= model->transparency[opacity].trans.getValue(0, model->animtime);
@@ -126,7 +124,6 @@ bool ModelRenderPass::init()
   if (!((ocol.w > 0) && (color == -1 || ecol.w > 0)))
     return false;
 
-
   // TEXTURE
   // bind to our texture
   GLuint texId = model->getGLTexture(tex);
@@ -135,7 +132,7 @@ bool ModelRenderPass::init()
 
   // ALPHA BLENDING
   // blend mode
-  
+
   switch (blendmode)
   {
   case BM_OPAQUE:	         // 0
@@ -209,8 +206,8 @@ bool ModelRenderPass::init()
     glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, maptype);
   }
 
-  if (texanim != -1 && 
-      texanim < (int16)model->texAnims.size())
+  if (texanim != -1 &&
+    texanim < (int16)model->texAnims.size())
   {
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
@@ -226,7 +223,7 @@ bool ModelRenderPass::init()
   if (unlit)
     glDisable(GL_LIGHTING);
 
-  if (blendmode<=1 && ocol.w<1.0f)
+  if (blendmode <= 1 && ocol.w < 1.0f)
     glEnable(GL_BLEND);
 
   return true;
@@ -239,7 +236,6 @@ void ModelRenderPass::render(bool animated)
   // render
   if (animated)
   {
-    
     //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
     // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
     // I can't notice a difference but I guess it can't hurt

@@ -1,19 +1,17 @@
 #include "wdb6file.h"
 
 #include "logger/Logger.h"
-
 #include "Game.h" // GAMEDIRECTORY Singleton
+#include "WoWDatabase.h"
 
 #include <sstream>
-
 #include <bitset>
 
-#include "WoWDatabase.h"
 
 #define WDB6_READ_DEBUG 0
 
 WDB6File::WDB6File(const QString & file) :
-WDB5File(file)
+  WDB5File(file)
 {
 }
 
@@ -94,7 +92,7 @@ bool WDB6File::open()
 
     }
   }
-  
+
   return true;
 }
 
@@ -155,8 +153,6 @@ std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::Tab
       }
     }
   }
-
-
   return result;
 }
 

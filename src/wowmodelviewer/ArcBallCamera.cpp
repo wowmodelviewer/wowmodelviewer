@@ -37,7 +37,7 @@ void ArcBallCamera::reset()
   m_transform.m[0][2] = -1;
   m_transform.m[2][0] = 1;
   m_transform.m[2][2] = 0;
- 
+
   m_lastRot = Matrix::identity();
 
   m_startVec.reset();
@@ -61,7 +61,7 @@ void ArcBallCamera::zoomIn(const float speedfactor)
 {
   m_distance -= ((m_distance - m_minZoomDistance) / 5.0 * speedfactor);
 
-  if (m_distance < (m_minZoomDistance+1.0))
+  if (m_distance < (m_minZoomDistance + 1.0))
     m_distance = m_minZoomDistance + 1.0;
 }
 
@@ -91,22 +91,22 @@ void ArcBallCamera::setup()
 #if DISPLAY_ORIGIN > 0
   // Useful for debug : display a big coord system at world origin
   glPushMatrix();
- // glLoadIdentity();
+  // glLoadIdentity();
   glBegin(GL_LINES);
-    // red X axis
-    glColor3f(1.0,0.0,0.0);
-    glVertex3f(0.0,0.0,0.0);
-    glVertex3f(3,0.0,0.0);
+  // red X axis
+  glColor3f(1.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(3, 0.0, 0.0);
 
-    // green Y axis
-    glColor3f(0.0,1.0,0.0);
-    glVertex3f(0.0,0.0,0.0);
-    glVertex3f(0.0,3,0.0);
+  // green Y axis
+  glColor3f(0.0, 1.0, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 3, 0.0);
 
-    // blue Z axis
-    glColor3f(0.0,0.0,1.0);
-    glVertex3f(0.0,0.0,0.0);
-    glVertex3f(0.0,0.0,3);
+  // blue Z axis
+  glColor3f(0.0, 0.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, 3);
   glEnd();
   glPopMatrix();
 #endif  
@@ -115,21 +115,21 @@ void ArcBallCamera::setup()
   glPushMatrix();
   glTranslatef(m_lookAt.x, m_lookAt.y, m_lookAt.z);
 
-  glBegin(GL_LINES); 
-    // X Axis
-    glColor3f(0.5, 0.0, 1.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(1.5, 0.0, 0.0);
+  glBegin(GL_LINES);
+  // X Axis
+  glColor3f(0.5, 0.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(1.5, 0.0, 0.0);
 
-    // Y axis
-    glColor3f(1.0, 1.0, 0.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 1.5, 0.0);
+  // Y axis
+  glColor3f(1.0, 1.0, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 1.5, 0.0);
 
-    // Z axis
-    glColor3f(0.0, 1.0, 1.0);
-    glVertex3f(0.0, 0.0, 0.0);
-    glVertex3f(0.0, 0.0, 1.5);
+  // Z axis
+  glColor3f(0.0, 1.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, 1.5);
   glEnd();
   glPopMatrix();
 #endif
@@ -162,8 +162,8 @@ void ArcBallCamera::setup()
 Vec3D ArcBallCamera::mapToSphere(const int x, const int y)
 {
   Vec3D v = Vec3D(1.0*x / m_sceneWidth * 2 - 1.0,
-                          1.0*y / m_sceneHeight * 2 - 1.0,
-                          0);
+    1.0*y / m_sceneHeight * 2 - 1.0,
+    0);
 
   float length = v.lengthSquared();
 
@@ -228,7 +228,7 @@ void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float 
 
   // adjust current zoom based on object size
   float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
-  m_distance = abs((maxsize /2.)  / sinf(fov/2.*PI/180)) * 1.2;
+  m_distance = abs((maxsize / 2.) / sinf(fov / 2.*PI / 180)) * 1.2;
 
   // set min /max zoom bounds based on optimal zoom
   m_minZoomDistance = m_distance / 10;

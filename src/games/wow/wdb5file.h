@@ -18,7 +18,6 @@
 #    define _DBCFILE_API_
 #endif
 
-
 class _WDB5FILE_API_ WDB5File : public DBFile, public CASCFile
 {
 public:
@@ -71,9 +70,7 @@ protected:
   bool m_isSparseTable;
 
 private:
- 
 
-  
 };
 
 #endif

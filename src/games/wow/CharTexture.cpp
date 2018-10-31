@@ -5,14 +5,12 @@
  *
  */
 
-#include "CharTexture.h"
-
-
 #include <map>
 #include <string>
 
 #include <QPainter>
 
+#include "CharTexture.h"
 #include "Game.h"
 #include "GameFile.h"
 #include "Texture.h"
@@ -21,7 +19,7 @@
 
 #include "logger/Logger.h"
 
-std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
+std::map<int, std::pair<LayoutSize, std::map<int, CharRegionCoords> > > CharTexture::LAYOUTS;
 #define LAYOUT_BASE_REGION -1
 
 void CharTexture::addLayer(GameFile * file, int region, int layer)
@@ -51,7 +49,7 @@ void CharTexture::compose(TextureID texID)
 
   std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
-	std::sort(m_components.begin(), m_components.end());
+  std::sort(m_components.begin(), m_components.end());
 
   // burn base image
   const CharRegionCoords &coords = CharTexture::LAYOUTS[layoutSizeId].second[LAYOUT_BASE_REGION];
@@ -72,11 +70,11 @@ void CharTexture::compose(TextureID texID)
 #endif
   }
 
-	// good, upload this to video
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  // good, upload this to video
+  glBindTexture(GL_TEXTURE_2D, texID);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   delete baseImg;
 }
@@ -85,14 +83,14 @@ void CharTexture::initRegions()
 {
   sqlResult layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
 
-  if(!layouts.valid || layouts.empty())
+  if (!layouts.valid || layouts.empty())
   {
     LOG_ERROR << "Fail to retrieve Texture Layout information from game database";
     return;
   }
 
   // Iterate on layout to initialize our members (sections informations)
-  for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
+  for (int i = 0, imax = layouts.values.size(); i < imax; i++)
   {
     LayoutSize texLayout;
     int curLayout = layouts.values[i][0].toInt();
@@ -103,13 +101,13 @@ void CharTexture::initRegions()
     QString query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
     sqlResult regions = GAMEDATABASE.sqlQuery(query);
 
-    if(!regions.valid || regions.empty())
+    if (!regions.valid || regions.empty())
     {
       LOG_ERROR << "Fail to retrieve Section Layout information from game database for layout" << curLayout;
       continue;
     }
 
-    std::map<int,CharRegionCoords> regionCoords;
+    std::map<int, CharRegionCoords> regionCoords;
     CharRegionCoords base;
     base.xpos = 0;
     base.ypos = 0;
@@ -117,7 +115,7 @@ void CharTexture::initRegions()
     base.height = texLayout.height;
     regionCoords[LAYOUT_BASE_REGION] = base;
 
-    for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
+    for (int r = 0, rmax = regions.values.size(); r < rmax; r++)
     {
       CharRegionCoords coords;
       coords.xpos = regions.values[r][1].toInt();
@@ -128,7 +126,7 @@ void CharTexture::initRegions()
       regionCoords[regions.values[r][0].toInt()] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
-    CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);
+    CharTexture::LAYOUTS[curLayout] = make_pair(texLayout, regionCoords);
   }
 
 }
@@ -188,9 +186,8 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
 
   tex->getPixels(tempbuf, GL_BGRA_EXT);
   result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);
-  
+
   TEXTUREMANAGER.del(temptex);
 
   return result;
 }
-
