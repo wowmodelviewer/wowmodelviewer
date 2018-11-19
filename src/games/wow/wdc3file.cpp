@@ -501,7 +501,7 @@ bool WDC3File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDC3File::get(size_t recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
@@ -615,7 +615,7 @@ WDC3File::~WDC3File()
   close();
 }
 
-bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
+bool WDC3File::readFieldValue(size_t recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
 {
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
