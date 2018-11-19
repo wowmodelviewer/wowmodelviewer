@@ -1261,7 +1261,7 @@ void AnimControl::SetSkin(int num)
   g_selModel->setCreatureGeosetData(cgd);
   g_modelViewer->modelControl->UpdateGeosetSelection();
 
-  for (size_t i=0; i<grp->count; i++)
+  for (int i=0; i<grp->count; i++)
   {
     wxString texname;
     GameFile * tex = grp->tex[i];

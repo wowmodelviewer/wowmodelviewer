@@ -11,7 +11,6 @@
 
 #include "Game.h"
 #include "GlobalSettings.h"
-#include "LogStackWalker.h"
 #include "PluginManager.h"
 #include "resource1.h"
 #include "UserSkins.h"
@@ -50,11 +49,12 @@ IMPLEMENT_APP(WowModelViewApp)
 
 void dumpStackInLogs()
 {
-  LOG_ERROR << "---- WALK FROM EXCEPTION -----";
+  /*LOG_ERROR << "---- WALK FROM EXCEPTION -----";
   LogStackWalker sw;
   sw.WalkFromException();
   LOG_ERROR << "---- WALK FROM CURRENT CONTEXT -----";
   sw.Walk();
+  */
 }
 
 void WowModelViewApp::setInterfaceLocale()
