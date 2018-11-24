@@ -125,9 +125,9 @@ private:
   header m_header;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
-  std::map<uint32, uint32> m_palletBlockOffsets;
-  std::map<uint32, std::map<uint32, uint32> > m_commonData;
-  std::map<uint32, std::string> m_relationShipData;
+  std::map<size_t, size_t> m_palletBlockOffsets;
+  std::map<size_t, std::map<uint32, uint32> > m_commonData;
+  std::map<size_t, std::string> m_relationShipData;
 };
 
 #endif

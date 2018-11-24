@@ -120,8 +120,8 @@ bool WDC2File::open()
 #endif
   }
 
-  uint32 palletBlockOffset = getPos();
-  uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
+  size_t palletBlockOffset = getPos();
+  size_t commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
  
   // only one secion used in dbc files so far, so no loop for now
   seek(sectionHeader[0].file_offset);
@@ -129,7 +129,7 @@ bool WDC2File::open()
   data = getPointer();
 
   // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = getPos() + recordSize * recordCount;
+  size_t stringTableOffset = getPos() + recordSize * recordCount;
 
   // embedded strings in fields instead of stringTable
   if ((m_header.flags & 0x01) != 0)
@@ -141,11 +141,11 @@ bool WDC2File::open()
   seek(stringTableOffset);
   stringTable = getPointer();
 
-  uint32 IdBlockOffset = stringTableOffset + stringSize;
+  size_t IdBlockOffset = stringTableOffset + stringSize;
 
-  uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
+  size_t copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
 
-  uint32 relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_size;
+  size_t relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_size;
  
 #if WDC2_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
@@ -677,7 +677,7 @@ bool WDC2File::readFieldValue(size_t recordIndex, unsigned int fieldIndex, uint 
     {                                          
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * 4;
+      size_t offset = it->second + (size_t)index * 4;
       memcpy(&result, getBuffer() + offset, 4);
       break;
     }
@@ -685,7 +685,7 @@ bool WDC2File::readFieldValue(size_t recordIndex, unsigned int fieldIndex, uint 
     {
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
+      size_t offset = it->second + (size_t)index * arraySize * 4 + arrayIndex * 4;
       memcpy(&result, getBuffer() + offset, 4);
       break;
     }

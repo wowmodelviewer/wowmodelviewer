@@ -133,7 +133,7 @@ unsigned long CASCFile::readFile()
 {
   unsigned long result = 0;
   
-  if (!CascReadFile(m_handle, buffer, size, &result))
+  if (!CascReadFile(m_handle, buffer, (DWORD)size, &result))
     LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
   
   return result;

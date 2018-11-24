@@ -25,7 +25,7 @@
 class modelAnimData
 {
 public:
-  std::map<uint, int16> animIndexToAnimId;
+  std::map<size_t, int16> animIndexToAnimId;
   std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
   std::vector<uint32> globalSequences;  
 };
