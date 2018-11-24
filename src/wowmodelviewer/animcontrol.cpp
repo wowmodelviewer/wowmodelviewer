@@ -62,9 +62,9 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   const wxString strLoops[10] = { wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"),
                                   wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
   
-  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,16), 0,
+  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxDefaultSize, 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation"));
-  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,16), 0,
+  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10, 95), wxDefaultSize, 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList2->Enable(false);
   animCList2->Show(false);
@@ -76,7 +76,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   lockText->Show(false);
 
   // Our hidden head/mouth related controls
-  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170,95), wxSize(150,16), 0,
+  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170, 95), wxDefaultSize, 0,
                               NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList3->Enable(false);
   animCList3->Show(false);
@@ -88,12 +88,12 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   speedMouthLabel->Show(false);
 
   speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
-  speedMouthSlider->SetTickFreq(10, 1);
+  speedMouthSlider->SetTickFreq(10);
   speedMouthSlider->Show(false);
 
   // ---
 
-  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40,16), 10,
+  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxDefaultSize, 10,
                             strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
   btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
 
@@ -132,12 +132,12 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   wmoLabel->Show(FALSE);
 
   speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
-  speedSlider->SetTickFreq(10, 1);
+  speedSlider->SetTickFreq(10);
   speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
 
   frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
   frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
-  frameSlider->SetTickFreq(2, 1);
+  frameSlider->SetTickFreq(2);
 
   btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
   btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
@@ -345,7 +345,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Show(true);
 
     frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
-    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
+    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed);
     frameSlider->SetValue(0);
     frameLabel->SetLabel(L"Frame: 0");
 
@@ -386,7 +386,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 
 
 	frameSlider->SetRange(0, 10);
-	frameSlider->SetTickFreq(2, 1);
+	frameSlider->SetTickFreq(2);
 	PCRList.clear();
 	animCList->Show(false);
 	skinList->Show(false);
@@ -1127,7 +1127,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         g_selModel->animManager->Play();
         
         frameSlider->SetRange(0, g_selModel->anims[selectedAnim].length);
-        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
+        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed);
       }
     }
 
