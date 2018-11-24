@@ -3,7 +3,7 @@ image: Visual Studio 2013
 platform: x64
 build_script:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 1802eda0b7ea
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 196d4b0
 
     cd wmv_sdk
 
