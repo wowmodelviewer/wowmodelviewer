@@ -136,7 +136,7 @@ void EnchantsDialog::InitEnchants()
   if(!enchantsInfos.valid || enchantsInfos.values.empty())
     return;
 
-  for(int i=0, imax=enchantsInfos.values.size() ; i < imax ; i++)
+  for(size_t i=0, imax=enchantsInfos.values.size() ; i < imax ; i++)
   {
     EnchantsRec rec;
     rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].toStdString().c_str(), wxConvUTF8).mb_str()));;

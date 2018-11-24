@@ -116,7 +116,7 @@ class FBXExporter : public ExporterPlugin
     FbxNode    * m_p_skeletonNode;
 
     std::wstring m_filename;
-    std::map<int,FbxNode*> m_boneNodes;
+    std::map<size_t,FbxNode*> m_boneNodes;
     std::vector<FbxCluster*> m_boneClusters;
 
     std::map<std::wstring, GLuint> m_texturesToExport;

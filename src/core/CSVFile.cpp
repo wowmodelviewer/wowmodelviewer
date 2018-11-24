@@ -53,7 +53,7 @@ CSVFile::~CSVFile()
   close();
 }
 
-std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> CSVFile::get(size_t recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
 

@@ -637,7 +637,7 @@ void ModelViewer::InitDatabase()
     if (npc.valid && !npc.empty())
     {
       LOG_INFO << "Found" << npc.values.size() << "NPCs";
-      for (int i = 0, imax = npc.values.size(); i < imax; i++)
+      for (size_t i = 0, imax = npc.values.size(); i < imax; i++)
       {
         NPCRecord rec(npc.values[i]);
         if (rec.model != 0)
@@ -659,7 +659,7 @@ void ModelViewer::InitDatabase()
     if (item.valid && !item.empty())
     {
       LOG_INFO << "Found" << item.values.size() << "items";
-      for (int i = 0, imax = item.values.size(); i < imax; i++)
+      for (size_t i = 0, imax = item.values.size(); i < imax; i++)
       {
         ItemRecord rec(item.values[i]);
         items.items.push_back(rec);
@@ -1079,7 +1079,7 @@ void ModelViewer::LoadModel(GameFile * file)
 }
 
 // Load an NPC model
-void ModelViewer::LoadNPC(unsigned int modelid)
+void ModelViewer::LoadNPC(size_t modelid)
 {
   canvas->clearAttachments();
   canvas->setModel(NULL);
@@ -1157,7 +1157,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   interfaceManager.Update();
 }
 
-void ModelViewer::LoadItem(unsigned int id)
+void ModelViewer::LoadItem(size_t id)
 {
   canvas->clearAttachments();
   canvas->setModel(NULL);
@@ -1735,12 +1735,12 @@ void ModelViewer::LoadWoW()
  
   core::GameConfig config = configsFound[0];
 
-  unsigned int nbConfigs = configsFound.size();
+  int nbConfigs = (int)configsFound.size();
 
   if (nbConfigs > 1)
   {
     wxString * availableConfigs = new wxString[nbConfigs];
-    for (size_t i = 0; i < nbConfigs; i++)
+    for (int i = 0; i < nbConfigs; i++)
     {
       QString label = configsFound[i].locale + " (" + configsFound[i].version + ")";
       availableConfigs[i] = wxString(label.toStdWString().c_str());
@@ -1986,7 +1986,7 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
 
       if (skyboxesInfos.valid && !skyboxesInfos.values.empty())
       {
-        for (unsigned int i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
+        for (size_t i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
         {
           skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdWString());
         }
@@ -2142,7 +2142,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
       CharSlots legacySlots[15] = { CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS, CS_GLOVES, CS_HAND_RIGHT,
         CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS };
 
-      for (unsigned int i = 0; i < 15 && lineIndex < values.size(); i++, lineIndex++)
+      for (size_t i = 0; i < 15 && lineIndex < values.size(); i++, lineIndex++)
       {
         LOG_INFO << "item" << i << "=>" << values[lineIndex].toInt();
         WoWItem * item = charControl->model->getItem(legacySlots[i]);
@@ -2550,7 +2550,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
           animName << i;
           animName << L"]";
           values.Add(animName);
-          selection.Add(i);
+          selection.Add((int)i);
         }
 
         AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("Animation Choice"), values);
@@ -2561,7 +2561,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         selection = animChoiceDlg.GetSelections();
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
-        for (unsigned int i = 0; i < selection.GetCount(); i++)
+        for (size_t i = 0; i < selection.GetCount(); i++)
           animsToExport.push_back(canvas->model()->anims[selection[i]].Index);
 
         plugin->setAnimationsToExport(animsToExport);

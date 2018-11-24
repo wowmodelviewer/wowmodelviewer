@@ -1757,7 +1757,7 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
       LOG_INFO << "Found" << animsResult.values.size() << "animations for model";
 
       // remap database results on model header indexes
-      for (int i = 0, imax = animsResult.values.size(); i < imax; i++)
+      for (size_t i = 0, imax = animsResult.values.size(); i < imax; i++)
       {
         result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdWString();
       }
@@ -1858,13 +1858,13 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
   return result;
 }
 
-void WoWModel::showGeoset(uint geosetindex, bool value)
+void WoWModel::showGeoset(size_t geosetindex, bool value)
 {
   if (geosetindex < geosets.size())
     geosets[geosetindex]->display = value;
 }
 
-bool WoWModel::isGeosetDisplayed(uint geosetindex)
+bool WoWModel::isGeosetDisplayed(size_t geosetindex)
 {
   bool result = false;
 
@@ -1965,9 +1965,9 @@ void WoWModel::refreshMerging()
   uint mergeIndex = 0;
   for (auto modelsIt : mergedModels)
   {
-    uint nbVertices = origVertices.size();
-    uint nbIndices = indices.size();
-    uint nbGeosets = geosets.size();
+    uint32 nbVertices = (uint32)origVertices.size();
+    uint32 nbIndices = (uint32)indices.size();
+    uint32 nbGeosets = (uint32)geosets.size();
 
     // reinit merged model as well, just in case
     modelsIt->origVertices = modelsIt->rawVertices;
@@ -2068,7 +2068,7 @@ void WoWModel::refreshMerging()
       textures.push_back(it);
     }
 
-    uint tmax = specialTextures.size();
+    int tmax = (int)specialTextures.size();
     for (auto it : modelsIt->specialTextures)
     {
       int val = it;
@@ -2451,11 +2451,11 @@ void WoWModel::refresh()
   }
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = cd.eyeGlowType;
-  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  uint32 egt = cd.eyeGlowType;
+  uint32 egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
   for (size_t i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    uint32 id = geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
       showGeoset(i, (id == egtId));
   }

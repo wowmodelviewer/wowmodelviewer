@@ -60,7 +60,7 @@ namespace core
     QString type;
     bool isKey;
     bool needIndex;
-    unsigned int arraySize;
+    size_t arraySize;
     int id;
   };
 
