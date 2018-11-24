@@ -123,7 +123,7 @@ namespace core
 
       std::wstring	m_appName;
       std::wstring	m_buildName;
-      std::wstring m_platform;
+      //std::wstring m_platform;
 
       bool m_isBetaVersion;
       bool m_isAlphaVersion;
