@@ -103,7 +103,7 @@ bool WDB6File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDB6File::get(size_t recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result = WDB5File::get(recordIndex, structure);
 

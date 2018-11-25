@@ -11,7 +11,7 @@ class WMO;
 
 struct WMOBatch {
   unsigned short  a[2 * 3];        // indices? a box? (-2,-2,-1,2,2,3 in cameron)
-  unsigned int indexStart;
+  size_t indexStart;
   unsigned short indexCount, vertexStart, vertexEnd;
   unsigned char flags, texture;
 };

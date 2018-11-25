@@ -28,7 +28,7 @@
 	typedef __int32 int32;
   typedef unsigned __int64 uint64;
   typedef __int64 int64;
-	typedef int ssize_t;
+	typedef int64 ssize_t;
 #else
 	#include <stdint.h>
 	typedef uint8_t uint8;

@@ -112,7 +112,7 @@ bool CASCFile::isAlreadyOpened()
     return false;
 }
 
-bool CASCFile::getFileSize(unsigned int & s)
+bool CASCFile::getFileSize(size_t & s)
 {
   bool result = false;
   
@@ -133,7 +133,7 @@ unsigned long CASCFile::readFile()
 {
   unsigned long result = 0;
   
-  if (!CascReadFile(m_handle, buffer, size, &result))
+  if (!CascReadFile(m_handle, buffer, (DWORD)size, &result))
     LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
   
   return result;
@@ -149,7 +149,7 @@ void CASCFile::doPostOpenOperation()
     if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end() 
         && chunkHead.size <= size)
     {
-      unsigned int offset = 0;
+      size_t offset = 0;
 
       //LOG_INFO << "Parsing chunks for file" << filepath << "First chunk read :" << magic.c_str();
       while (offset < size)

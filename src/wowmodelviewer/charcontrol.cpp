@@ -433,8 +433,8 @@ void CharControl::RefreshModel()
   model->refresh();
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = model->cd.eyeGlowType;
-  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  uint egt = model->cd.eyeGlowType;
+  uint egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
  
   // Update Eye Glow Menu
   if (egt == EGT_NONE)
@@ -481,7 +481,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 
   if (itemClasses.valid && !itemClasses.empty())
   {
-    for (int i = 0, imax = itemClasses.values.size(); i < imax; i++)
+    for (size_t i = 0, imax = itemClasses.values.size(); i < imax; i++)
     {
       // first set verbose name
       wxString name = itemClasses.values[i][3].toStdWString();
@@ -557,7 +557,7 @@ void CharControl::selectSet()
 
   if (itemSet.valid && !itemSet.empty())
   {
-    for (int i = 0, imax = itemSet.values.size(); i < imax; i++)
+    for (size_t i = 0, imax = itemSet.values.size(); i < imax; i++)
     {
       NumStringPair p;
       p.id = itemSet.values[i][0].toInt();
@@ -599,7 +599,7 @@ void CharControl::selectStart()
 
   if (startOutfit.valid && !startOutfit.empty())
   {
-    for (int i = 0, imax = startOutfit.values.size(); i < imax; i++)
+    for (size_t i = 0, imax = startOutfit.values.size(); i < imax; i++)
     {
       choices.Add(startOutfit.values[i][0].toStdWString());
       numbers.push_back(startOutfit.values[i][1].toInt());
@@ -638,7 +638,7 @@ void CharControl::selectMount()
     "SELECT MountXDisplay.DisplayID, Mount.Name FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
   if (mountQuery.valid && !mountQuery.empty())
   {
-    for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
+    for (size_t i = 0, imax = mountQuery.values.size(); i < imax; i++)
     {
       NumStringPair p;
       p.id = mountQuery.values[i][0].toInt();
@@ -673,7 +673,7 @@ void CharControl::selectMount()
   for (size_t i = 0; i < creaturemodels.size(); i++)
   {
     choices.Add(creaturemodels[i].substr(9, string::npos)); // remove "creature/" bit for readability
-    numbers.push_back(i);
+    numbers.push_back((int)i);
     cats.push_back(1);
   }
 
@@ -709,7 +709,7 @@ void CharControl::selectNPC(ssize_t type)
 
   if (npccats.valid && !npccats.empty())
   {
-    for (int i = 0, imax = npccats.values.size(); i < imax; i++)
+    for (size_t i = 0, imax = npccats.values.size(); i < imax; i++)
     {
       catnames.Add(npccats.values[i][1].toStdWString());
       typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size() - 1;
@@ -763,7 +763,7 @@ void CharControl::selectNPC(ssize_t type)
   itemDialog->Show();
 }
 
-void CharControl::OnUpdateItem(int type, int id)
+void CharControl::OnUpdateItem(int type, size_t id)
 {
   switch (type)
   {

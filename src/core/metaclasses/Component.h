@@ -76,11 +76,11 @@ class _COMPONENT_API_ Component
 		virtual bool removeChild(Component *);
 		virtual void removeAllChildren() { }
 
-		virtual unsigned int nbChildren() const {return 0; }
+		virtual size_t nbChildren() const {return 0; }
 
 		virtual bool findChildComponent(Component * /* component */, bool /* recursive */ ) { return false; }
-		virtual Component * getChild(unsigned int /* index */) { return 0; }
-		virtual const Component * getChild(unsigned int /* index */) const { return 0; }
+		virtual Component * getChild(size_t /* index */) { return 0; }
+		virtual const Component * getChild(size_t /* index */) const { return 0; }
 
 		// parent management
 		void setParentComponent(Component *);
@@ -131,7 +131,7 @@ class _COMPONENT_API_ Component
 		// Members
 		Component * m_p_parent;
 
-		unsigned int m_refCounter;
+		size_t m_refCounter;
 
 		QString m_name;
 

@@ -204,8 +204,8 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 	if (!Destroy())
 		return false;
 
-	DWORD dwSize = GlobalSize(hMem);
-	if (!dwSize) return false;
+  if (!GlobalSize(hMem)) 
+    return false;
 
 	BYTE *lpVoid;						//pointer to the bitmap
 	lpVoid = (BYTE *)GlobalLock(hMem);
@@ -1365,7 +1365,7 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
     txt->lfont.lfClipPrecision = CLIP_DEFAULT_PRECIS; 
     txt->lfont.lfQuality       = PROOF_QUALITY; 
     txt->lfont.lfPitchAndFamily= DEFAULT_PITCH | FF_DONTCARE ; 
-    _stprintf( txt->lfont.lfFaceName, _T("Arial")); //use TCHAR mappings <Cesar M>
+    swprintf_s( txt->lfont.lfFaceName, 32, _T("Arial")); //use TCHAR mappings <Cesar M>
 
     // initial colors
     txt->fcolor = RGB( 255,255,160 );  // default foreground: light goldyellow
@@ -1379,7 +1379,7 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
     txt->b_round   = 20;    // default: rounding radius is 20% of the rectangle height
     // the text 
 #ifndef _MINGW
-    _stprintf( txt->text, _T("Sample Text 01234õû")); // text use TCHAR mappings <Cesar M>
+    swprintf_s(txt->text, 4096, _T("Sample Text 01234õû")); // text use TCHAR mappings <Cesar M>
 #else
     //swprintf( txt->text, _T("Sample Text 01234õû")); // TODO : find what to do with MinGW !
 #endif
