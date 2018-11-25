@@ -235,9 +235,9 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
-                                 "AND ComponentModelFileData.GenderIndex = %3").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid), 
+                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
                          iteminfos))
       {
         updateItemModel(ATT_HELMET, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
@@ -338,9 +338,8 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                "AND (ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -381,10 +380,9 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
-        iteminfos))
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
         {
@@ -429,9 +427,8 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -472,9 +469,8 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -516,9 +512,8 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -540,9 +535,8 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                 "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       {
         for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -560,10 +554,10 @@ void WoWItem::load()
       if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
-                                 "AND ComponentModelFileData.GenderIndex = %3 ").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid),
-                                 iteminfos))
+                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
       { 
         // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
         m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
@@ -663,9 +657,8 @@ void WoWItem::load()
         if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                   "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                                   "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                  "WHERE ItemDisplayInfoID = %1 "
-                                  "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                  "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                                  "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                                  "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                           iteminfos))
         {
           for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -1270,11 +1263,6 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
   QString filter = "_";
   switch (filterType)
   {
-  case MODEL:
-    filter += QString::fromStdString(infos.prefix);
-    filter += "(_?)";
-    filter += (infos.sexid == 0) ? "m" : "f";
-    break;
   case MERGED_MODEL:
     filter += QString::fromStdString(infos.prefix);
     filter += "(_?)";
