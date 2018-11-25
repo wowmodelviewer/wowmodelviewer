@@ -28,29 +28,32 @@ enum CharSlots {
 };
 
 enum CharGeosets {
-  CG_HAIRSTYLE,
-  CG_GEOSET100,
-  CG_GEOSET200,
-  CG_GEOSET300,
-  CG_GLOVES,
-  CG_BOOTS,		// 5
-  CG_EARS = 7,
-  CG_WRISTBANDS,
-  CG_KNEEPADS,
-  CG_PANTS,		// 10
-  CG_PANTS2,
-  CG_TARBARD,
-  CG_TROUSERS,
-  CG_TARBARD2,
-  CG_CAPE,		// 15
-  CG_EYEGLOW = 17,
-  CG_BELT,
-  CG_TAIL,
-  CG_HDFEET,
-  CG_HANDS = 23,
-  CG_DH_HORNS,
-  CG_DH_BLINDFOLDS,
-
+  CG_HAIRSTYLE     = 0,
+  CG_GEOSET100     = 1,
+  CG_GEOSET200     = 2,
+  CG_GEOSET300     = 3,
+  CG_GLOVES        = 4,
+  CG_BOOTS         = 5,
+  CG_EARS          = 7,
+  CG_WRISTBANDS    = 8,
+  CG_KNEEPADS      = 9,
+  CG_PANTS         = 10,
+  CG_PANTS2        = 11,
+  CG_TARBARD       = 12,
+  CG_TROUSERS      = 13,
+  CG_TARBARD2      = 14,
+  CG_CAPE          = 15,
+  CG_EYEGLOW       = 17,
+  CG_BELT          = 18,
+  CG_TAIL          = 19,
+  CG_HDFEET        = 20,
+  CG_GEOSET2100    = 21,
+  CG_GEOSET2200    = 22,
+  CG_HANDS         = 23,
+  CG_DH_HORNS      = 24,
+  CG_DH_BLINDFOLDS = 25,
+  CG_GEOSET2600    = 26,
+  CG_GEOSET2700    = 27,
   NUM_GEOSETS
 };
 
