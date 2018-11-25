@@ -470,21 +470,22 @@ void WoWItem::load()
     case CS_CHEST:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                        iteminfos,
-                        TEXTURE,
-                        0))
-        return;
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                        iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
 
