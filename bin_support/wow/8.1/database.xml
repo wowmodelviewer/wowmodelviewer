@@ -180,7 +180,7 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="Model" arraySize="2" pos="10" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="11" />
-    <field type="byte" name="GeosetGroup" arraySize="4" pos="12" />
+    <field type="byte" name="GeosetGroup" arraySize="6" pos="12" />
     <field type="uint" name="ParticleColorID" pos="3"/>
     <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="14" />
   </table>
