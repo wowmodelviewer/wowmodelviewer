@@ -589,22 +589,16 @@ void WoWItem::load()
     }
     case CS_CAPE:
     {
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "WHERE ItemDisplayInfoID = %1 "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
-                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+      if (queryItemInfo(QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
+                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
                         iteminfos))
       {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
+        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
+        if (texture)
         {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
+          TEXTUREMANAGER.add(texture);
+          m_itemTextures[getRegionForTexture(texture)] = texture;
         }
 
         // Cape: {geosetGroup[0] = 1501}
