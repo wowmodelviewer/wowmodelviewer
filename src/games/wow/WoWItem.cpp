@@ -335,23 +335,25 @@ void WoWItem::load()
     case CS_BOOTS:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                        iteminfos,
-                        TEXTURE,
-                        0))
-        return;
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                        iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
+
 
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
@@ -376,26 +378,22 @@ void WoWItem::load()
     case CS_BELT:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      QString query = QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                              "WHERE ItemDisplayInfoID = %1").arg(m_displayId);
-
-      iteminfos = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), TEXTURE, 0);
-
-      if (!iteminfos.valid /* || iteminfos.values.empty() */) // some belts have no texture, only model
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+        iteminfos))
       {
-        LOG_ERROR << "Impossible to query texture information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ")";
-        LOG_ERROR << query;
-        return;
-      }
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
-      {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
 
@@ -428,21 +426,22 @@ void WoWItem::load()
     case CS_PANTS:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                        iteminfos, 
-                        TEXTURE,
-                        0))
-        return;
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                        iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
 
@@ -514,43 +513,46 @@ void WoWItem::load()
     case CS_BRACERS:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                        iteminfos,
-                        TEXTURE,
-                        0))
-        return;
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                        iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
+
       break;
     }
     case CS_GLOVES:
     {
       // query texture infos from ItemDisplayInfoMaterialRes
-      if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                        iteminfos,
-                        TEXTURE,
-                        0))
-        return;
-
-      for (uint i = 0; i < iteminfos.values.size(); i++)
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                        iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
       }
 
@@ -587,16 +589,22 @@ void WoWItem::load()
     }
     case CS_CAPE:
     {
-      if (queryItemInfo(QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "WHERE ItemDisplayInfoID = %1 "
+                                "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
                         iteminfos))
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-        if (texture)
+        for (uint i = 0; i < iteminfos.values.size(); i++)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
+          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+          if (texture)
+          {
+            TEXTUREMANAGER.add(texture);
+            m_itemTextures[getRegionForTexture(texture)] = texture;
+          }
         }
 
         // Cape: {geosetGroup[0] = 1501}
@@ -658,22 +666,22 @@ void WoWItem::load()
       {
         m_charModel->td.showCustom = false;
 
-        // query texture infos from ItemDisplayInfoMaterialRes
-        if(!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+        if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                   "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                  "WHERE ItemDisplayInfoID = %1").arg(m_displayId),
-                          iteminfos,
-                          TEXTURE,
-                          0))
-          return;
-
-        for (uint i = 0; i < iteminfos.values.size(); i++)
+                                  "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                  "WHERE ItemDisplayInfoID = %1 "
+                                  "AND(ComponentTextureFileData.GenderIndex = 3 OR "
+                                  "ComponentTextureFileData.GenderIndex = %2)").arg(m_displayId).arg(charInfos.sexid),
+                          iteminfos))
         {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
+          for (uint i = 0; i < iteminfos.values.size(); i++)
           {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
+            GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+            if (texture)
+            {
+              TEXTUREMANAGER.add(texture);
+              m_itemTextures[getRegionForTexture(texture)] = texture;
+            }
           }
         }
 
@@ -1278,11 +1286,7 @@ sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filter
     filter += "(_?)";
     filter += (infos.sexid == 0) ? "m" : "f";
     break;
-  case TEXTURE:
-    filter += "[";
-    filter += (infos.sexid == 0) ? "m" : "f";
-    filter += "u";
-    filter += "]";
+  default:
     break;
   }
 

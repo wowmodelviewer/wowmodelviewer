@@ -114,7 +114,6 @@ class _WOWITEM_API_ WoWItem : public Component
     {
       MODEL,
       MERGED_MODEL,
-      TEXTURE,
       NONE
     };
 
