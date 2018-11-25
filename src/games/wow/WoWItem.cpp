@@ -554,21 +554,21 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      if(!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                        iteminfos,
-                        MERGED_MODEL,
-                        1))
-        return;
+      if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
+                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                 "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                 "WHERE ItemDisplayInfo.ID = %1 AND ComponentModelFileData.RaceID = %2 "
+                                 "AND ComponentModelFileData.GenderIndex = %3 ").arg(m_displayId).arg(charInfos.displayRaceid).arg(charInfos.sexid),
+                                 iteminfos))
+      { 
+        // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
+        m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
+        m_itemGeosets[CG_HANDS] = 1 + iteminfos.values[0][1].toInt();
 
-      // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
-      m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
-      m_itemGeosets[CG_HANDS] = 1 + iteminfos.values[0][1].toInt();
-
-      if (iteminfos.values[0][2].toInt() != 0)
-        mergeModel(CS_GLOVES, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+        if (iteminfos.values[0][2].toInt() != 0)
+          mergeModel(CS_GLOVES, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+      }    
 
       break;
     }
