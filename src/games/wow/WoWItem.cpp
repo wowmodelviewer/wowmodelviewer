@@ -489,7 +489,7 @@ void WoWItem::load()
       }
 
       // geosets
-      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, ModelID, TextureID FROM ItemDisplayInfo "
+      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, GeoSetGroup5, ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                 "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
@@ -503,9 +503,10 @@ void WoWItem::load()
       m_itemGeosets[CG_PANTS] = 1 + iteminfos.values[0][1].toInt();
       m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
       m_itemGeosets[CG_GEOSET2200] = 1 + iteminfos.values[0][3].toInt();
+      m_itemGeosets[CG_GEOSET2800] = 1 + iteminfos.values[0][4].toInt();
 
-      if (iteminfos.values[0][4].toInt() != 0)
-        mergeModel(CS_CHEST, iteminfos.values[0][4].toInt(), iteminfos.values[0][5].toInt());
+      if (iteminfos.values[0][5].toInt() != 0)
+        mergeModel(CS_CHEST, iteminfos.values[0][5].toInt(), iteminfos.values[0][6].toInt());
 
       break;
     }

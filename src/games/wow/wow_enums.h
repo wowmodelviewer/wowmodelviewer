@@ -54,6 +54,7 @@ enum CharGeosets {
   CG_DH_BLINDFOLDS = 25,
   CG_GEOSET2600    = 26,
   CG_GEOSET2700    = 27,
+  CG_GEOSET2800    = 28,
   NUM_GEOSETS
 };
 
