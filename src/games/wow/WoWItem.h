@@ -110,15 +110,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     CharRegions getRegionForTexture(GameFile * file) const;
 
-    enum FilteringType
-    {
-      MERGED_MODEL,
-      NONE
-    };
-
-    sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
-
-    bool queryItemInfo(QString & query, sqlResult & result, FilteringType type = FilteringType::NONE, uint itemToFilter = 0) const;
+    bool queryItemInfo(QString & query, sqlResult & result) const;
 
 };
 

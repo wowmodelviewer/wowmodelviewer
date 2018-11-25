@@ -353,12 +353,13 @@ void WoWItem::load()
         }
       }
 
-
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
                           iteminfos))
         return;
 
@@ -368,7 +369,6 @@ void WoWItem::load()
       m_itemGeosets[CG_HDFEET] = 1 + iteminfos.values[0][3].toInt();
 
       // models
-      iteminfos = filterSQLResultForModel(iteminfos, MERGED_MODEL, 0);
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
         mergeModel(CS_BOOTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
@@ -398,10 +398,14 @@ void WoWItem::load()
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
+                                  "LEFT JOIN ComponentModelFileData AS CMFD1 ON CMFD1.ID = MFD1.ModelID "
+                                  "AND CMFD1.RaceID = %1 AND CMFD1.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
                                   "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
+                                  "LEFT JOIN ComponentModelFileData AS CMFD2 ON CMFD2.ID = MFD2.ModelID "
+                                  "AND CMFD2.RaceID = %1 AND CMFD2.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
-                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
+                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
                           iteminfos))
         return;
 
@@ -415,7 +419,6 @@ void WoWItem::load()
       }
       else if (iteminfos.values[0][2].toInt() != 0)
       {
-        iteminfos = filterSQLResultForModel(iteminfos, MERGED_MODEL, 2);
         mergeModel(CS_BELT, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
       }
 
@@ -445,11 +448,11 @@ void WoWItem::load()
       // geosets / models
       if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                        iteminfos,
-                        MERGED_MODEL,
-                        3))
+                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
         return;
 
       // Pants: {geosetGroup[0] = 1101, geosetGroup[1] = 901, geosetGroup[2] = 1301}
@@ -487,11 +490,11 @@ void WoWItem::load()
       // geosets
       if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, GeoSetGroup5, ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                        iteminfos,
-                        MERGED_MODEL,
-                        4))
+                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
         return;
 
       // Chest: {geosetGroup[0] = 801, geosetGroup[1] = 1001, geosetGroup[2] = 1301, geosetGroup[3] = 2201, geosetGroup[4] = 2801}
@@ -1249,77 +1252,10 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
   return result;
 }
 
-sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType filterType, uint itemToFilter) const
+bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
 {
-  if (!sql.valid || (sql.values.size() <= 1) || itemToFilter >= sql.values[0].size())
-    return sql;
-
-  sqlResult result;
-  result.valid = sql.valid;
-
-  RaceInfos infos;
-  RaceInfos::getCurrent(m_charModel, infos);
-
-  QString filter = "_";
-  switch (filterType)
-  {
-  case MERGED_MODEL:
-    filter += QString::fromStdString(infos.prefix);
-    filter += "(_?)";
-    filter += (infos.sexid == 0) ? "m" : "f";
-    break;
-  default:
-    break;
-  }
-
-  filter += "\\.";
-
-#if DEBUG_FILTERING > 0
-  LOG_INFO << __FUNCTION__ << filter;
-#endif
-
-  QRegularExpression re(filter);
-
-  for (uint i = 0; i < sql.values.size(); i++)
-  {
-    GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
-    if (f)
-    {
-      QRegularExpressionMatch r = re.match(f->fullname());
-
-      if (r.hasMatch())
-        result.values.push_back(sql.values[i]);
-    }
-  }
-
-#if DEBUG_FILTERING > 0
-  LOG_INFO << __FUNCTION__ << "---- BEFORE -----";
-  for (uint i = 0; i < sql.values.size(); i++)
-  {
-    GameFile * f = GAMEDIRECTORY.getFile(sql.values[i][itemToFilter].toInt());
-    if (f)
-      LOG_INFO << f->fullname();
-  }
-
-  LOG_INFO << __FUNCTION__ << "---- AFTER -----";
-  for (uint i = 0; i < result.values.size(); i++)
-  {
-    GameFile * f = GAMEDIRECTORY.getFile(result.values[i][itemToFilter].toInt());
-    if (f)
-      LOG_INFO << f->fullname();
-  }
-#endif
-
-  return result;
-}
-
-bool WoWItem::queryItemInfo(QString & query, sqlResult & result, FilteringType type /* = FilteringType::NONE */, uint itemToFilter /* = 0 */) const
-{
-  if (type == FilteringType::NONE)
-    result = GAMEDATABASE.sqlQuery(query);
-  else
-    result = filterSQLResultForModel(GAMEDATABASE.sqlQuery(query), type, itemToFilter);
-
+  result = GAMEDATABASE.sqlQuery(query);
+ 
   if (!result.valid || result.values.empty())
   {
     LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
