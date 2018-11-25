@@ -234,7 +234,7 @@ void WoWItem::load()
     {
       if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -337,7 +337,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND (ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -356,7 +356,7 @@ void WoWItem::load()
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                  "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                   "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                   "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -379,7 +379,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -398,11 +398,11 @@ void WoWItem::load()
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
-                                  "LEFT JOIN ComponentModelFileData AS CMFD1 ON CMFD1.ID = MFD1.ModelID "
+                                  "INNER JOIN ComponentModelFileData AS CMFD1 ON CMFD1.ID = MFD1.ModelID "
                                   "AND CMFD1.RaceID = %1 AND CMFD1.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
                                   "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
-                                  "LEFT JOIN ComponentModelFileData AS CMFD2 ON CMFD2.ID = MFD2.ModelID "
+                                  "INNER JOIN ComponentModelFileData AS CMFD2 ON CMFD2.ID = MFD2.ModelID "
                                   "AND CMFD2.RaceID = %1 AND CMFD2.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
                                   "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -429,7 +429,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -448,7 +448,7 @@ void WoWItem::load()
       // geosets / models
       if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -471,7 +471,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -490,7 +490,7 @@ void WoWItem::load()
       // geosets
       if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, GeoSetGroup5, ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -514,7 +514,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -537,7 +537,7 @@ void WoWItem::load()
       // query texture infos from ItemDisplayInfoMaterialRes
       if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                 "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                 "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                 "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
@@ -556,7 +556,7 @@ void WoWItem::load()
       // now get geoset / model infos
       if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -659,7 +659,7 @@ void WoWItem::load()
 
         if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                                   "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                  "LEFT JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                                  "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                                   "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
                                   "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
                           iteminfos))
