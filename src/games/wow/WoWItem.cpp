@@ -43,8 +43,6 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_FILTERING 1
-
 map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                              { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
                                              { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
@@ -396,30 +394,42 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      if (!queryItemInfo(QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
-                                  "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
-                                  "INNER JOIN ComponentModelFileData AS CMFD1 ON CMFD1.ID = MFD1.ModelID "
-                                  "AND CMFD1.RaceID = %1 AND CMFD1.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
-                                  "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
-                                  "INNER JOIN ComponentModelFileData AS CMFD2 ON CMFD2.ID = MFD2.ModelID "
-                                  "AND CMFD2.RaceID = %1 AND CMFD2.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
-                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                          iteminfos))
-        return;
-
-      // Waist: {geosetGroup[0] = 1801}
-      m_itemGeosets[CG_BELT] = 1 + iteminfos.values[0][4].toInt();
-
-      // models
-      if (iteminfos.values[0][0].toInt() != 0) // we have a model for belt
+      // geosets
+      if (queryItemInfo(QString("SELECT GeoSetGroup1 FROM ItemDisplayInfo "
+                                "WHERE ItemDisplayInfo.ID = %1 ").arg(m_displayId), iteminfos))
       {
-        updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+        // Waist: {geosetGroup[0] = 1801}
+        m_itemGeosets[CG_BELT] = 1 + iteminfos.values[0][0].toInt();
       }
-      else if (iteminfos.values[0][2].toInt() != 0)
+
+      // buckle model
+      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
+                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
+                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
       {
-        mergeModel(CS_BELT, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+        if (iteminfos.values[0][0].toInt() != 0)
+        {
+          updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+        }
+      }
+      
+      // belt model
+      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
+                                "LEFT JOIN ModelFileData ON Model2 = ModelFileData.ID "
+                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
+                                "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.ID "
+                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
+                        iteminfos))
+      {
+        if (iteminfos.values[0][0].toInt() != 0)
+        {
+          mergeModel(CS_BELT, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+        }
       }
 
       break;
