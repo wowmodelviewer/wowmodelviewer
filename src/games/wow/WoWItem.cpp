@@ -934,6 +934,8 @@ void WoWItem::refresh()
         m_mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
         m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
         m_mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2200, 1);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2800, 1);
       }
 
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
