@@ -354,7 +354,7 @@ void WoWItem::load()
       // now get geoset / model infos
       if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                  "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
+                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                   "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
                                   "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                   "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
@@ -849,8 +849,12 @@ void WoWItem::refresh()
             if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
             {
               m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+
               if (m_mergedModel)
+              {
                 m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
+                m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
+              }
             }
           }
 
