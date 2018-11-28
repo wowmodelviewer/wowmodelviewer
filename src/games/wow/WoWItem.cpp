@@ -991,7 +991,10 @@ void WoWItem::refresh()
       {
         m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
         if (m_mergedModel)
+        {
           m_mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
+          m_mergedModel->setGeosetGroupDisplay(CG_HANDS, 1);
+        }
       }
 
       std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
