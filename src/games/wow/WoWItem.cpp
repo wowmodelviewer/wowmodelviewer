@@ -226,11 +226,21 @@ void WoWItem::load()
   RaceInfos::getCurrent(m_charModel, charInfos);
   sqlResult iteminfos;
 
+  // query geosets infos
+  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
+                             "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
+                     iteminfos))
+    return;
+
+  int geosetGroup[6] = { iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt() ,
+                         iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
+                         iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID FROM ItemDisplayInfo "
+      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                  "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
@@ -238,23 +248,23 @@ void WoWItem::load()
                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
                          iteminfos))
       {
-        updateItemModel(ATT_HELMET, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+        updateItemModel(ATT_HELMET, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
         // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
-        m_itemGeosets[CG_GEOSET2700] = 1 + iteminfos.values[0][0].toInt();
-        m_itemGeosets[CG_GEOSET2100] = 1 + iteminfos.values[0][1].toInt();
+        m_itemGeosets[CG_GEOSET2700] = 1 + geosetGroup[0];
+        m_itemGeosets[CG_GEOSET2100] = 1 + geosetGroup[1];
        }
       break;
     }
     case CS_SHOULDER:
     {
-      if (!queryItemInfo(QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2, GeoSetGroup1 FROM ItemDisplayInfo "
+      if (!queryItemInfo(QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2 FROM ItemDisplayInfo "
                                   "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
                           iteminfos))
         return;
 
       // Shoulder: {geosetGroup[0] = 2601}
-      m_itemGeosets[CG_GEOSET2600] = 1 + iteminfos.values[0][4].toInt();
+      m_itemGeosets[CG_GEOSET2600] = 1 + geosetGroup[0];
 
       if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
       {
@@ -352,7 +362,7 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
+      if (!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
                                   "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                   "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                   "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
@@ -363,8 +373,8 @@ void WoWItem::load()
 
       // geoset
       // Boots: {geosetGroup[0] = 501, geosetGroup[1] = 2000*}
-      m_itemGeosets[CG_BOOTS] = 1 + iteminfos.values[0][2].toInt();
-      m_itemGeosets[CG_HDFEET] = 1 + iteminfos.values[0][3].toInt();
+      m_itemGeosets[CG_BOOTS] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_HDFEET] = 1 + geosetGroup[1];
 
       // models
       if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
@@ -394,13 +404,9 @@ void WoWItem::load()
       }
 
       // now get geoset / model infos
-      // geosets
-      if (queryItemInfo(QString("SELECT GeoSetGroup1 FROM ItemDisplayInfo "
-                                "WHERE ItemDisplayInfo.ID = %1 ").arg(m_displayId), iteminfos))
-      {
-        // Waist: {geosetGroup[0] = 1801}
-        m_itemGeosets[CG_BELT] = 1 + iteminfos.values[0][0].toInt();
-      }
+      // Waist: {geosetGroup[0] = 1801}
+      m_itemGeosets[CG_BELT] = 1 + geosetGroup[0];
+
 
       // buckle model
       if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
@@ -456,7 +462,7 @@ void WoWItem::load()
       }
 
       // geosets / models
-      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
+      if(!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
@@ -466,12 +472,12 @@ void WoWItem::load()
         return;
 
       // Pants: {geosetGroup[0] = 1101, geosetGroup[1] = 901, geosetGroup[2] = 1301}
-      m_itemGeosets[CG_PANTS2] = 1 + iteminfos.values[0][0].toInt();
-      m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][1].toInt();
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
+      m_itemGeosets[CG_PANTS2] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_KNEEPADS] = 1 + geosetGroup[1];
+      m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
 
-      if (iteminfos.values[0][3].toInt() != 0)
-        mergeModel(CS_PANTS, iteminfos.values[0][3].toInt(), iteminfos.values[0][4].toInt());
+      if (iteminfos.values[0][0].toInt() != 0)
+        mergeModel(CS_PANTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
@@ -498,7 +504,15 @@ void WoWItem::load()
       }
 
       // geosets
-      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, GeoSetGroup5, ModelID, TextureID FROM ItemDisplayInfo "
+      // Chest: {geosetGroup[0] = 801, geosetGroup[1] = 1001, geosetGroup[2] = 1301, geosetGroup[3] = 2201, geosetGroup[4] = 2801}
+      m_itemGeosets[CG_WRISTBANDS] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_PANTS] = 1 + geosetGroup[1];
+      m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
+      m_itemGeosets[CG_GEOSET2200] = 1 + geosetGroup[3];
+      m_itemGeosets[CG_GEOSET2800] = 1 + geosetGroup[4];
+
+      // model
+      if(!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
@@ -507,15 +521,8 @@ void WoWItem::load()
                         iteminfos))
         return;
 
-      // Chest: {geosetGroup[0] = 801, geosetGroup[1] = 1001, geosetGroup[2] = 1301, geosetGroup[3] = 2201, geosetGroup[4] = 2801}
-      m_itemGeosets[CG_WRISTBANDS] = 1 + iteminfos.values[0][0].toInt();
-      m_itemGeosets[CG_PANTS] = 1 + iteminfos.values[0][1].toInt();
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
-      m_itemGeosets[CG_GEOSET2200] = 1 + iteminfos.values[0][3].toInt();
-      m_itemGeosets[CG_GEOSET2800] = 1 + iteminfos.values[0][4].toInt();
-
-      if (iteminfos.values[0][5].toInt() != 0)
-        mergeModel(CS_CHEST, iteminfos.values[0][5].toInt(), iteminfos.values[0][6].toInt());
+      if (iteminfos.values[0][0].toInt() != 0)
+        mergeModel(CS_CHEST, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
 
       break;
     }
@@ -563,8 +570,13 @@ void WoWItem::load()
         }
       }
 
-      // now get geoset / model infos
-      if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
+      // now get geoset 
+      // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
+      m_itemGeosets[CG_GLOVES] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_HANDS] = 1 + geosetGroup[1];
+
+      // model
+      if (queryItemInfo(QString("SELECT ModelID, TextureID  FROM ItemDisplayInfo "
                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
                                  "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
@@ -572,12 +584,10 @@ void WoWItem::load()
                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
                         iteminfos))
       { 
-        // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
-        m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
-        m_itemGeosets[CG_HANDS] = 1 + iteminfos.values[0][1].toInt();
+        
 
-        if (iteminfos.values[0][2].toInt() != 0)
-          mergeModel(CS_GLOVES, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+        if (iteminfos.values[0][0].toInt() != 0)
+          mergeModel(CS_GLOVES, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
       }    
 
       break;
@@ -596,7 +606,7 @@ void WoWItem::load()
     }
     case CS_CAPE:
     {
-      if (queryItemInfo(QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
+      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
                                 "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
                         iteminfos))
@@ -609,7 +619,7 @@ void WoWItem::load()
         }
 
         // Cape: {geosetGroup[0] = 1501}
-        m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][1].toInt();
+        m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
       }
 
       break;
@@ -687,10 +697,7 @@ void WoWItem::load()
 
         // geosets
         // Tabard: {geosetGroup[0] = 1201}
-        if(queryItemInfo(QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
-                                 "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                         iteminfos))
-          m_itemGeosets[CG_TARBARD] = 1 + iteminfos.values[0][0].toInt();
+        m_itemGeosets[CG_TARBARD] = 1 + geosetGroup[0];
       }
 
       break;
