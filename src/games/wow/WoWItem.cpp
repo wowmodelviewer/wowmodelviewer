@@ -714,9 +714,11 @@ void WoWItem::refresh()
   if (m_id == 0) // no item equipped, give up
     return;
 
+  // merge model if any
   if (m_mergedModel != 0)
     m_charModel->mergeModel(m_mergedModel);
 
+  // update geoset values
   for (auto it : m_itemGeosets)
   {
     if ((it.first != CG_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
@@ -729,34 +731,39 @@ void WoWItem::refresh()
     }
   }
 
+  // attach items if any
+  if (m_charModel->attachment)
+  {
+    if ((m_slot != CS_HAND_RIGHT) && // treat right hand attachment in a special case - cf CS_HAND_RIGHT
+        (m_slot != CS_HAND_LEFT))    // treat left hand attachment in a special case - cf CS_HAND_LEFT
+    {
+      m_charModel->attachment->delSlot(m_slot);
+      for (auto it : m_itemModels)
+        m_charModel->attachment->addChild(it.second, it.first, m_slot);
+    }
+  }
+
+  // add textures if any
+  if ((m_slot != CS_BOOTS) &&  // treat boots texturing in a special case - cf CS_BOOTS
+      (m_slot != CS_GLOVES) && // treat gloves texturing in a special case - cf CS_GLOVES 
+      (m_slot != CS_TABARD) && // treat tabard texturing in a special case - cf CS_TABARD 
+      (m_slot != CS_CAPE))     // treat cape texturing in a special case - cf CS_CAPE 
+  {
+    for (auto it : m_itemTextures)
+      m_charModel->tex.addLayer(it.second, it.first, SLOT_LAYERS[m_slot]);
+  }
+  
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_HEAD);
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_HELMET);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_HELMET, m_slot);
-      }
+      // nothing specific for head items
       break;
     }
     case CS_SHOULDER:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_SHOULDER);
-
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_SHOULDER);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
-
-        it = m_itemModels.find(ATT_RIGHT_SHOULDER);
-
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
-      }
+      // nothing specific for shoulder items
       break;
     }
     case CS_HAND_RIGHT:
@@ -829,22 +836,7 @@ void WoWItem::refresh()
     }
     case CS_BELT:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_BELT);
-
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
-
-        std::map<CharRegions, GameFile *>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
-        if (it2 != m_itemTextures.end())
-          m_charModel->tex.addLayer(it2->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-        it2 = m_itemTextures.find(CR_TORSO_LOWER);
-        if (it2 != m_itemTextures.end())
-          m_charModel->tex.addLayer(it2->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
-      }
+      // nothing specific for belt items
       break;
     }
     case CS_BOOTS:
@@ -904,50 +896,17 @@ void WoWItem::refresh()
         }
       }
 
-      auto texIt =  m_itemTextures.find(CR_LEG_UPPER);
-      if (texIt != m_itemTextures.end())
-        m_charModel->tex.addLayer(texIt->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-      texIt = m_itemTextures.find(CR_LEG_LOWER);
-      if (texIt != m_itemTextures.end())
-        m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-
       break;
     }
     case CS_SHIRT:
     case CS_CHEST:
     {
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_ARM_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_TORSO_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_TORSO_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_LEG_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_LEG_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-
+      // nothing specific for shirt & chest items
       break;
     }
     case CS_BRACERS:
     {
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      // nothing specific for bracers items
       break;
     }
     case CS_GLOVES:
