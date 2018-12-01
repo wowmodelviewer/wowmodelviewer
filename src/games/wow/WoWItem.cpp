@@ -714,6 +714,21 @@ void WoWItem::refresh()
   if (m_id == 0) // no item equipped, give up
     return;
 
+  if (m_mergedModel != 0)
+    m_charModel->mergeModel(m_mergedModel);
+
+  for (auto it : m_itemGeosets)
+  {
+    if ((it.first != CG_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
+        (it.first != CG_TROUSERS)) // treat trousers geoset in a special case - cf CS_PANTS
+    {
+      m_charModel->cd.geosets[it.first] = it.second;
+
+      if (m_mergedModel != 0)
+        m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+    }
+  }
+
   switch (m_slot)
   {
     case CS_HEAD:
@@ -736,7 +751,6 @@ void WoWItem::refresh()
         std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_SHOULDER);
         if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
-
 
         it = m_itemModels.find(ATT_RIGHT_SHOULDER);
 
@@ -819,12 +833,6 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_BELT);
 
-        if (m_mergedModel != 0)
-        {
-          m_charModel->mergeModel(m_mergedModel);
-          m_mergedModel->setGeosetGroupDisplay(CG_BELT, 1);
-        }
-
         std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
         if (it != m_itemModels.end())
           m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
@@ -843,37 +851,26 @@ void WoWItem::refresh()
     {
       if (m_charModel->attachment)
       {
-        if (m_mergedModel != 0)
-          m_charModel->mergeModel(m_mergedModel);
-
         auto geoIt = m_itemGeosets.find(CG_BOOTS);
 
         if (geoIt != m_itemGeosets.end())
         {
           // don't render boots behind robe
+          WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+          if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
           {
-            WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-            if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
-            {
-              m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
-
-              if (m_mergedModel)
-              {
-                m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
-                m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
-              }
-            }
+            m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+            if (m_mergedModel != 0)
+              m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
           }
 
           // handle 2000* group for hd models
+          RaceInfos infos;
+          if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
           {
-            RaceInfos infos;
-            if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
-            {
-              m_charModel->cd.geosets[CG_HDFEET] = 2;
-              if (m_mergedModel)
-                m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
-            }
+            m_charModel->cd.geosets[CG_HDFEET] = 2;
+            if (m_mergedModel)
+              m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
           }
         }
 
@@ -892,26 +889,7 @@ void WoWItem::refresh()
     }
     case CS_PANTS:
     {
-      if (m_mergedModel != 0)
-        m_charModel->mergeModel(m_mergedModel);
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_PANTS2);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_PANTS2] = geoIt->second;
-        if (m_mergedModel)
-          m_mergedModel->setGeosetGroupDisplay(CG_PANTS2, 1);
-      }
-        
-      geoIt = m_itemGeosets.find(CG_KNEEPADS);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
-        if (m_mergedModel)
-          m_mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1);
-      }
-
-      geoIt = m_itemGeosets.find(CG_TROUSERS);
+      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_TROUSERS);
 
       if (geoIt != m_itemGeosets.end())
       {
@@ -939,20 +917,6 @@ void WoWItem::refresh()
     case CS_SHIRT:
     case CS_CHEST:
     {
-      if (m_mergedModel != 0)
-      {
-        m_charModel->mergeModel(m_mergedModel);
-        m_mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2200, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2800, 1);
-      }
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
-      if (geoIt != m_itemGeosets.end())
-        m_charModel->cd.geosets[CG_WRISTBANDS] = geoIt->second;
-
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
       if (it != m_itemTextures.end())
         m_charModel->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
@@ -969,20 +933,14 @@ void WoWItem::refresh()
       if (it != m_itemTextures.end())
         m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
 
+      it = m_itemTextures.find(CR_LEG_UPPER);
+      if (it != m_itemTextures.end())
+        m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
 
-      geoIt = m_itemGeosets.find(CG_TROUSERS);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
+      it = m_itemTextures.find(CR_LEG_LOWER);
+      if (it != m_itemTextures.end())
+        m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
-        it = m_itemTextures.find(CR_LEG_UPPER);
-        if (it != m_itemTextures.end())
-          m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-        it = m_itemTextures.find(CR_LEG_LOWER);
-        if (it != m_itemTextures.end())
-          m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-      }
       break;
     }
     case CS_BRACERS:
@@ -994,20 +952,6 @@ void WoWItem::refresh()
     }
     case CS_GLOVES:
     {
-      if (m_mergedModel != 0)
-        m_charModel->mergeModel(m_mergedModel);
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_GLOVES);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
-        if (m_mergedModel)
-        {
-          m_mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
-          m_mergedModel->setGeosetGroupDisplay(CG_HANDS, 1);
-        }
-      }
-
       std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
 
       int layer = SLOT_LAYERS[m_slot];
@@ -1015,7 +959,7 @@ void WoWItem::refresh()
       // if we are wearing a robe, render gloves first in texture compositing
       // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
       WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-      if ((chestItem->m_type == IT_ROBE) && (geoIt->second == 1))
+      if ((chestItem->m_type == IT_ROBE) && (m_charModel->cd.geosets[CG_GLOVES] == 1))
         layer = SLOT_LAYERS[CS_CHEST] - 1;
 
       if (texIt != m_itemTextures.end())
@@ -1028,10 +972,6 @@ void WoWItem::refresh()
     }
     case CS_CAPE:
     {
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_CAPE);
-      if (geoIt != m_itemGeosets.end())
-        m_charModel->cd.geosets[CG_CAPE] = geoIt->second;
-
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
         m_charModel->updateTextureList(it->second, TEXTURE_CAPE);
@@ -1039,8 +979,6 @@ void WoWItem::refresh()
     }
     case CS_TABARD:
     {
-      m_charModel->cd.geosets[CG_TARBARD] = m_itemGeosets[CG_TARBARD];
-
       if (isCustomizableTabard())
       {
         std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_TABARD_1);
