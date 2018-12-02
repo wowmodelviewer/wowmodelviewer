@@ -236,108 +236,81 @@ void WoWItem::load()
                          iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
                          iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
 
+  // query models
+  int model[2] = { getCustomModelId(0), getCustomModelId(1) };
+
+  // query textures
+  int texture[2] = { getCustomTextureId(0), getCustomTextureId(1) };
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                         iteminfos))
-      {
-        updateItemModel(ATT_HELMET, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      updateItemModel(ATT_HELMET, model[0], texture[0]);
 
-        // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
-        m_itemGeosets[CG_GEOSET2700] = 1 + geosetGroup[0];
-        m_itemGeosets[CG_GEOSET2100] = 1 + geosetGroup[1];
-       }
+      // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
+      m_itemGeosets[CG_GEOSET2700] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_GEOSET2100] = 1 + geosetGroup[1];
       break;
     }
     case CS_SHOULDER:
     {
-      if (!queryItemInfo(QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2 FROM ItemDisplayInfo "
-                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
-                          iteminfos))
-        return;
-
       // Shoulder: {geosetGroup[0] = 2601}
       m_itemGeosets[CG_GEOSET2600] = 1 + geosetGroup[0];
 
-      if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
+      // find position index value from ComponentModelFileData table
+      QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                              "WHERE ID IN (%1,%2)").arg(model[0]).arg(model[1]);
+      sqlResult result = GAMEDATABASE.sqlQuery(query);
+      
+      int leftIndex = 0;
+      int rightIndex = 1;
+      if (result.valid && result.values.size() > 0)
       {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
-            !queryItemInfo(QString("SELECT ID, TextureID FROM TextureFileData WHERE ID IN( %1, %2)").arg(iteminfos.values[0][1]).arg(iteminfos.values[0][3]), texinfos))
-            return;
-
-        // associate left / right model infos
-        GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
-        int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive) || file->fullname().endsWith("_l.m2", Qt::CaseInsensitive)) ? 0 : 1;
-        int rightmodelindex = leftmodelindex ? 0 : 1;
-
-        // create texture map to use result correctly (especially when left texture is diffrent from right texture)
-        std::map<QString, int> textures;
-        for (uint i = 0; i < texinfos.values.size(); i++)
-          textures[texinfos.values[i][0]] = texinfos.values[i][1].toInt();
-
-        // left shoulder
-        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), textures[iteminfos.values[0][1]]);
-
-        // right shoulder
-        updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), textures[iteminfos.values[0][3]]);
-      }
-      else if (iteminfos.values[0][2].toInt() == 0) // only left shoulder
-      {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
-            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]), texinfos))
-            return;
-
-        int leftmodelindex = -1;
-
-        for (uint i = 0; i < modelinfos.values.size(); i++)
+        int modelid = result.values[0][0].toInt();
+        int position = result.values[0][1].toInt();
+        
+        if (modelid == model[0])
         {
-          GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
-          if (file)
+          if (position == 0)
           {
-            if (file->fullname().contains("lshoulder", Qt::CaseInsensitive))
-              leftmodelindex = i;
+            leftIndex = 0;
+            rightIndex = 1;
+          }
+          else
+          {
+            leftIndex = 1;
+            rightIndex = 0;
           }
         }
-
-        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), texinfos.values[0][0].toInt());
-      }
-      else if (iteminfos.values[0][0].toInt() == 0) // only right shoulder 
-      {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][2]), modelinfos) ||
-            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][3]), texinfos))
-            return;
-
-        int rightmodelindex = -1;
-
-        for (uint i = 0; i < modelinfos.values.size(); i++)
+        else
         {
-          GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
-          if (file)
+          if (position == 0)
           {
-            if (file->fullname().contains("rshoulder", Qt::CaseInsensitive))
-              rightmodelindex = i;
+            leftIndex = 1;
+            rightIndex = 0;
+          }
+          else
+          {
+            leftIndex = 0;
+            rightIndex = 1;
           }
         }
-
-        if (rightmodelindex != -1)
-          updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), texinfos.values[0][0].toInt());
       }
+      else
+      {
+        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
+        LOG_ERROR << query;
+      }
+
+      LOG_INFO << "leftIndex" << leftIndex << "rightIndex" << rightIndex;
+
+      // left shoulder
+      updateItemModel(ATT_LEFT_SHOULDER, model[leftIndex], texture[leftIndex]);
+
+      // right shoulder
+      updateItemModel(ATT_RIGHT_SHOULDER, model[rightIndex], texture[rightIndex]);
+      
       break;
     }
     case CS_BOOTS:
@@ -361,24 +334,13 @@ void WoWItem::load()
         }
       }
 
-      // now get geoset / model infos
-      if (!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                  "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                          iteminfos))
-        return;
-
       // geoset
       // Boots: {geosetGroup[0] = 501, geosetGroup[1] = 2000*}
       m_itemGeosets[CG_BOOTS] = 1 + geosetGroup[0];
       m_itemGeosets[CG_HDFEET] = 1 + geosetGroup[1];
 
       // models
-      if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
-        mergeModel(CS_BOOTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      mergeModel(CS_BOOTS, model[0], texture[0]);
 
       break;
     }
@@ -407,37 +369,12 @@ void WoWItem::load()
       // Waist: {geosetGroup[0] = 1801}
       m_itemGeosets[CG_BELT] = 1 + geosetGroup[0];
 
-
       // buckle model
-      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "LEFT JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        if (iteminfos.values[0][0].toInt() != 0)
-        {
-          updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-        }
-      }
+      updateItemModel(ATT_BELT_BUCKLE, model[0], texture[0]);
       
       // belt model
-      if (queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model2 = ModelFileData.ID "
-                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        if (iteminfos.values[0][0].toInt() != 0)
-        {
-          mergeModel(CS_BELT, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-        }
-      }
-
+      mergeModel(CS_BELT, model[1], texture[1]);
+     
       break;
     }
     case CS_PANTS:
@@ -461,23 +398,15 @@ void WoWItem::load()
         }
       }
 
-      // geosets / models
-      if(!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-        return;
-
+      // geosets
       // Pants: {geosetGroup[0] = 1101, geosetGroup[1] = 901, geosetGroup[2] = 1301}
       m_itemGeosets[CG_PANTS2] = 1 + geosetGroup[0];
       m_itemGeosets[CG_KNEEPADS] = 1 + geosetGroup[1];
       m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
 
-      if (iteminfos.values[0][0].toInt() != 0)
-        mergeModel(CS_PANTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+     
+      //model
+      mergeModel(CS_PANTS, model[0], texture[0]);
 
       break;
     }
@@ -512,17 +441,7 @@ void WoWItem::load()
       m_itemGeosets[CG_GEOSET2800] = 1 + geosetGroup[4];
 
       // model
-      if(!queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-        return;
-
-      if (iteminfos.values[0][0].toInt() != 0)
-        mergeModel(CS_CHEST, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      mergeModel(CS_CHEST, model[0], texture[0]);
 
       break;
     }
@@ -576,51 +495,27 @@ void WoWItem::load()
       m_itemGeosets[CG_HANDS] = 1 + geosetGroup[1];
 
       // model
-      if (queryItemInfo(QString("SELECT ModelID, TextureID  FROM ItemDisplayInfo "
-                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      { 
-        
-
-        if (iteminfos.values[0][0].toInt() != 0)
-          mergeModel(CS_GLOVES, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-      }    
-
+      mergeModel(CS_GLOVES, model[0], texture[0]);
+    
       break;
     }
     case CS_HAND_RIGHT:
     case CS_HAND_LEFT:
     {
-      if(queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                               "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                               "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                               "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                       iteminfos))
-        updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-
+      updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), model[0], texture[0]);
       break;
     }
     case CS_CAPE:
     {
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                        iteminfos))
+      GameFile * tex = GAMEDIRECTORY.getFile(texture[0]);
+      if (tex)
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-        if (texture)
-        {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
-        }
-
-        // Cape: {geosetGroup[0] = 1501}
-        m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
+        TEXTUREMANAGER.add(tex);
+        m_itemTextures[getRegionForTexture(tex)] = tex;
       }
+
+      // Cape: {geosetGroup[0] = 1501}
+      m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
 
       break;
     }
@@ -1089,6 +984,11 @@ void WoWItem::load(QString & f)
 
 void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 {
+  LOG_INFO << __FUNCTION__ << pos << modelId << textureId;
+
+  if (modelId == 0)
+    return;
+
   WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
   if (m->ok)
@@ -1103,10 +1003,17 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
   }
+  else
+  {
+    LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Model" << modelId << "can't be loaded";
+  }
 }
 
 void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 {
+  if (modelId == 0)
+    return;
+
   m_mergedModel = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
   if (m_mergedModel->ok)
@@ -1119,6 +1026,10 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 
     for (uint i = 0; i < m_mergedModel->geosets.size(); i++)
       m_mergedModel->showGeoset(i, false);
+  }
+  else
+  {
+    LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Model" << modelId << "can't be loaded";
   }
 }
 
@@ -1187,4 +1098,103 @@ bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
   }
 
   return true;
+}
+
+int WoWItem::getCustomModelId(size_t index)
+{
+  sqlResult infos;
+  if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
+                             "LEFT JOIN ModelFileData ON %1 = ModelFileData.ID "
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"Model1":"Model2").arg(m_displayId),
+                     infos))
+    return 0;
+
+  // if there is only one result, return directly model id
+  if (infos.values.size() == 1)
+    return infos.values[0][0].toInt();
+
+  // if there are multiple values, filter them based on ComponentModelFileData table
+  std::vector<QString> ids;
+  for (size_t i = 0; i < infos.values.size(); i++)
+    ids.push_back(infos.values[i][0]);
+
+  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
+  query += "FROM ComponentModelFileData WHERE ID IN(";
+  for (size_t i = 0; i < ids.size() - 1; i++)
+  {
+    query += ids[i];
+    query += ",";
+  }
+  query += ids[ids.size() - 1];
+  query += ")";
+
+  sqlResult iteminfos;
+  if (queryItemInfo(query, iteminfos))
+  {
+    RaceInfos charInfos;
+    RaceInfos::getCurrent(m_charModel, charInfos);
+
+    size_t i = 0;
+    for (auto it : iteminfos.values)
+    {
+      int gender = it[1].toInt();
+      int race = it[3].toInt();
+      // models are customized by race and gender
+      // if gender == 2, no customization
+      if ((gender == charInfos.sexid) && (race == charInfos.displayRaceid))
+        return it[0].toInt();
+      else if ((gender == 2) && (i == index))
+        return it[0].toInt();
+      i++;
+    }
+  }
+
+  return 0;
+}
+
+int WoWItem::getCustomTextureId(size_t index)
+{
+  sqlResult infos;
+  if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
+                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0) ? "TextureItemID1" : "TextureItemID2").arg(m_displayId),
+                     infos))
+    return 0;
+
+  // if there is only one result, return directly texture id
+  if (infos.values.size() == 1)
+    return infos.values[0][0].toInt();
+
+  // if there are multiple values, filter them based on ComponentTextureFileData table
+  std::vector<QString> ids;
+  for (size_t i = 0; i < infos.values.size(); i++)
+    ids.push_back(infos.values[i][0]);
+
+  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
+  query += "FROM ComponentTextureFileData WHERE ID IN(";
+  for (size_t i = 0; i < ids.size() - 1; i++)
+  {
+    query += ids[i];
+    query += ",";
+  }
+  query += ids[ids.size() - 1];
+  query += ")";
+
+  sqlResult iteminfos;
+  if (queryItemInfo(query, iteminfos))
+  {
+    RaceInfos charInfos;
+    RaceInfos::getCurrent(m_charModel, charInfos);
+
+    for (auto it : iteminfos.values)
+    {
+      int gender = it[1].toInt();
+      int race = it[3].toInt();
+      // models are customized by race and gender (gender == 3 means both sex)
+      if (((gender == charInfos.sexid) || (gender == 3)) && (race == charInfos.displayRaceid))
+        return it[0].toInt();
+    }
+  }
+
+  return 0;
 }
