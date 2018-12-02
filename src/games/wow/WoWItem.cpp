@@ -616,8 +616,8 @@ void WoWItem::refresh()
   // update geoset values
   for (auto it : m_itemGeosets)
   {
-    if ((it.first != CG_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
-        (it.first != CG_TROUSERS)) // treat trousers geoset in a special case - cf CS_PANTS
+    if ((m_slot != CS_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
+        (m_slot != CS_PANTS)) // treat trousers geoset in a special case - cf CS_PANTS
     {
       m_charModel->cd.geosets[it.first] = it.second;
 
@@ -736,46 +736,56 @@ void WoWItem::refresh()
     }
     case CS_BOOTS:
     {
-      if (m_charModel->attachment)
+      for (auto it : m_itemGeosets)
       {
-        auto geoIt = m_itemGeosets.find(CG_BOOTS);
-
-        if (geoIt != m_itemGeosets.end())
+        if (it.first != CG_BOOTS)
         {
-          // don't render boots behind robe
-          WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-          if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
-          {
-            m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
-            if (m_mergedModel != 0)
-              m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
-          }
+          m_charModel->cd.geosets[it.first] = it.second;
 
-          // handle 2000* group for hd models
-          RaceInfos infos;
-          if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
-          {
-            m_charModel->cd.geosets[CG_HDFEET] = 2;
-            if (m_mergedModel)
-              m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
-          }
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(it.first, 1);
         }
+      }
 
-        std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
+      auto geoIt = m_itemGeosets.find(CG_BOOTS);
+
+      if (geoIt != m_itemGeosets.end())
+      {
+        // don't render boots behind robe
+        WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+        if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
+        {
+          m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
+        }
+      }
+
+      std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+
+      if (!m_charModel->cd.showFeet)
+      {
+        texIt = m_itemTextures.find(CR_FOOT);
         if (texIt != m_itemTextures.end())
-          m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-
-        if (!m_charModel->cd.showFeet)
-        {
-          texIt = m_itemTextures.find(CR_FOOT);
-          if (texIt != m_itemTextures.end())
-            m_charModel->tex.addLayer(texIt->second, CR_FOOT, SLOT_LAYERS[m_slot]);
-        }
+          m_charModel->tex.addLayer(texIt->second, CR_FOOT, SLOT_LAYERS[m_slot]);
       }
       break;
     }
     case CS_PANTS:
     {
+      for (auto it : m_itemGeosets)
+      {
+        if (it.first != CG_TROUSERS)
+        {
+          m_charModel->cd.geosets[it.first] = it.second;
+
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+        }
+      }
+      
       std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_TROUSERS);
 
       if (geoIt != m_itemGeosets.end())
