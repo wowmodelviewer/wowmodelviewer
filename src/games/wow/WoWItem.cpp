@@ -43,8 +43,6 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_FILTERING 1
-
 map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                              { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
                                              { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
@@ -228,379 +226,210 @@ void WoWItem::load()
   RaceInfos::getCurrent(m_charModel, charInfos);
   sqlResult iteminfos;
 
+  // query geosets infos
+  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
+                             "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
+                     iteminfos))
+    return;
+
+  int geosetGroup[6] = { iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt() ,
+                         iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
+                         iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
+
+  // query models
+  int model[2] = { getCustomModelId(0), getCustomModelId(1) };
+
+  // query textures
+  int texture[2] = { getCustomTextureId(0), getCustomTextureId(1) };
+
+  // query textures from ItemDisplayInfoMaterialRes (if relevant)
+  sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
+  if (texinfos.valid && !texinfos.empty())
+  {
+    if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
+                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                              "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+                              "AND (ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
+                              "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
+                      iteminfos))
+    {
+      for (uint i = 0; i < iteminfos.values.size(); i++)
+      {
+        GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+        if (tex)
+        {
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[getRegionForTexture(tex)] = tex;
+        }
+      }
+    }
+  }
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID FROM ItemDisplayInfo "
-                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                         iteminfos))
-      {
-        updateItemModel(ATT_HELMET, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
+      // attachements
+      updateItemModel(ATT_HELMET, model[0], texture[0]);
 
-        // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
-        m_itemGeosets[CG_GEOSET2700] = 1 + iteminfos.values[0][0].toInt();
-        m_itemGeosets[CG_GEOSET2100] = 1 + iteminfos.values[0][1].toInt();
-       }
+      // geosets
+      // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
+      m_itemGeosets[CG_GEOSET2700] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_GEOSET2100] = 1 + geosetGroup[1];
       break;
     }
     case CS_SHOULDER:
     {
-      if (!queryItemInfo(QString("SELECT Model1, TextureItemID1, Model2, TextureItemID2, GeoSetGroup1 FROM ItemDisplayInfo "
-                                  "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
-                          iteminfos))
-        return;
-
+      //geosets
       // Shoulder: {geosetGroup[0] = 2601}
-      m_itemGeosets[CG_GEOSET2600] = 1 + iteminfos.values[0][4].toInt();
+      m_itemGeosets[CG_GEOSET2600] = 1 + geosetGroup[0];
 
-      if ((iteminfos.values[0][0].toInt() != 0) && (iteminfos.values[0][2].toInt() != 0)) // both shoulders
+      // find position index value from ComponentModelFileData table
+      QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                              "WHERE ID IN (%1,%2)").arg(model[0]).arg(model[1]);
+      sqlResult result = GAMEDATABASE.sqlQuery(query);
+      
+      int leftIndex = 0;
+      int rightIndex = 1;
+      if (result.valid && result.values.size() > 0)
       {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
-            !queryItemInfo(QString("SELECT ID, TextureID FROM TextureFileData WHERE ID IN( %1, %2)").arg(iteminfos.values[0][1]).arg(iteminfos.values[0][3]), texinfos))
-            return;
-
-        // associate left / right model infos
-        GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[0][0].toInt());
-        int leftmodelindex = (file->fullname().contains("lshoulder", Qt::CaseInsensitive) || file->fullname().endsWith("_l.m2", Qt::CaseInsensitive)) ? 0 : 1;
-        int rightmodelindex = leftmodelindex ? 0 : 1;
-
-        // create texture map to use result correctly (especially when left texture is diffrent from right texture)
-        std::map<QString, int> textures;
-        for (uint i = 0; i < texinfos.values.size(); i++)
-          textures[texinfos.values[i][0]] = texinfos.values[i][1].toInt();
-
-        // left shoulder
-        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), textures[iteminfos.values[0][1]]);
-
-        // right shoulder
-        updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), textures[iteminfos.values[0][3]]);
-      }
-      else if (iteminfos.values[0][2].toInt() == 0) // only left shoulder
-      {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][0]), modelinfos) ||
-            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][1]), texinfos))
-            return;
-
-        int leftmodelindex = -1;
-
-        for (uint i = 0; i < modelinfos.values.size(); i++)
+        int modelid = result.values[0][0].toInt();
+        int position = result.values[0][1].toInt();
+        
+        if (modelid == model[0])
         {
-          GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
-          if (file)
+          if (position == 0)
           {
-            if (file->fullname().contains("lshoulder", Qt::CaseInsensitive))
-              leftmodelindex = i;
+            leftIndex = 0;
+            rightIndex = 1;
+          }
+          else
+          {
+            leftIndex = 1;
+            rightIndex = 0;
           }
         }
-
-        updateItemModel(ATT_LEFT_SHOULDER, modelinfos.values[leftmodelindex][0].toInt(), texinfos.values[0][0].toInt());
-      }
-      else if (iteminfos.values[0][0].toInt() == 0) // only right shoulder 
-      {
-        sqlResult modelinfos;
-        sqlResult texinfos;
-
-        if (!queryItemInfo(QString("SELECT ModelID FROM ModelFileData WHERE ID = %1").arg(iteminfos.values[0][2]), modelinfos) ||
-            !queryItemInfo(QString("SELECT TextureID FROM TextureFileData WHERE ID = %1").arg(iteminfos.values[0][3]), texinfos))
-            return;
-
-        int rightmodelindex = -1;
-
-        for (uint i = 0; i < modelinfos.values.size(); i++)
+        else
         {
-          GameFile * file = GAMEDIRECTORY.getFile(modelinfos.values[i][0].toInt());
-          if (file)
+          if (position == 0)
           {
-            if (file->fullname().contains("rshoulder", Qt::CaseInsensitive))
-              rightmodelindex = i;
+            leftIndex = 1;
+            rightIndex = 0;
+          }
+          else
+          {
+            leftIndex = 0;
+            rightIndex = 1;
           }
         }
-
-        if (rightmodelindex != -1)
-          updateItemModel(ATT_RIGHT_SHOULDER, modelinfos.values[rightmodelindex][0].toInt(), texinfos.values[0][0].toInt());
       }
+      else
+      {
+        LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
+        LOG_ERROR << query;
+      }
+
+      LOG_INFO << "leftIndex" << leftIndex << "rightIndex" << rightIndex;
+
+      // left shoulder
+      updateItemModel(ATT_LEFT_SHOULDER, model[leftIndex], texture[leftIndex]);
+
+      // right shoulder
+      updateItemModel(ATT_RIGHT_SHOULDER, model[rightIndex], texture[rightIndex]);
+      
       break;
     }
     case CS_BOOTS:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND (ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
-
-      // now get geoset / model infos
-      if (!queryItemInfo(QString("SELECT ModelID, TextureID, GeoSetGroup1, GeoSetGroup2 FROM ItemDisplayInfo "
-                                  "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                  "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                  "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                          iteminfos))
-        return;
-
-      // geoset
+      // geosets
       // Boots: {geosetGroup[0] = 501, geosetGroup[1] = 2000*}
-      m_itemGeosets[CG_BOOTS] = 1 + iteminfos.values[0][2].toInt();
-      m_itemGeosets[CG_HDFEET] = 1 + iteminfos.values[0][3].toInt();
+      m_itemGeosets[CG_BOOTS] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_HDFEET] = 1 + geosetGroup[1];
 
       // models
-      if (iteminfos.values[0][0].toInt() != 0) // we have a model for boots
-        mergeModel(CS_BOOTS, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
+      mergeModel(CS_BOOTS, model[0], texture[0]);
 
       break;
     }
     case CS_BELT:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
-
-      // now get geoset / model infos
-      if (!queryItemInfo(QString("SELECT MFD1.ModelID, TFD1.TextureID, MFD2.ModelID, TFD2.TextureID, GeoSetGroup1 FROM ItemDisplayInfo "
-                                  "LEFT JOIN ModelFileData AS MFD1 ON Model1 = MFD1.ID "
-                                  "INNER JOIN ComponentModelFileData AS CMFD1 ON CMFD1.ID = MFD1.ModelID "
-                                  "AND CMFD1.RaceID = %1 AND CMFD1.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData AS TFD1 ON TextureItemID1 = TFD1.ID "
-                                  "LEFT JOIN ModelFileData AS MFD2 ON Model2 = MFD2.ID "
-                                  "INNER JOIN ComponentModelFileData AS CMFD2 ON CMFD2.ID = MFD2.ModelID "
-                                  "AND CMFD2.RaceID = %1 AND CMFD2.GenderIndex = %2 "
-                                  "LEFT JOIN TextureFileData AS TFD2 ON TextureItemID2 = TFD2.ID "
-                                  "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                          iteminfos))
-        return;
-
+ 
+      // geosets
       // Waist: {geosetGroup[0] = 1801}
-      m_itemGeosets[CG_BELT] = 1 + iteminfos.values[0][4].toInt();
+      m_itemGeosets[CG_BELT] = 1 + geosetGroup[0];
 
-      // models
-      if (iteminfos.values[0][0].toInt() != 0) // we have a model for belt
-      {
-        updateItemModel(ATT_BELT_BUCKLE, iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-      }
-      else if (iteminfos.values[0][2].toInt() != 0)
-      {
-        mergeModel(CS_BELT, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
-      }
-
+      // buckle model
+      updateItemModel(ATT_BELT_BUCKLE, model[0], texture[0]);
+      
+      // belt model
+      mergeModel(CS_BELT, model[1], texture[1]);
+     
       break;
     }
     case CS_PANTS:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
-
-      // geosets / models
-      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-        return;
-
+      // geosets
       // Pants: {geosetGroup[0] = 1101, geosetGroup[1] = 901, geosetGroup[2] = 1301}
-      m_itemGeosets[CG_PANTS2] = 1 + iteminfos.values[0][0].toInt();
-      m_itemGeosets[CG_KNEEPADS] = 1 + iteminfos.values[0][1].toInt();
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
+      m_itemGeosets[CG_PANTS2] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_KNEEPADS] = 1 + geosetGroup[1];
+      m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
 
-      if (iteminfos.values[0][3].toInt() != 0)
-        mergeModel(CS_PANTS, iteminfos.values[0][3].toInt(), iteminfos.values[0][4].toInt());
+     
+      //model
+      mergeModel(CS_PANTS, model[0], texture[0]);
 
       break;
     }
     case CS_SHIRT:
     case CS_CHEST:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
-
       // geosets
-      if(!queryItemInfo(QString("SELECT GeosetGroup1, GeosetGroup2, GeosetGroup3, GeoSetGroup4, GeoSetGroup5, ModelID, TextureID FROM ItemDisplayInfo "
-                                "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-        return;
-
       // Chest: {geosetGroup[0] = 801, geosetGroup[1] = 1001, geosetGroup[2] = 1301, geosetGroup[3] = 2201, geosetGroup[4] = 2801}
-      m_itemGeosets[CG_WRISTBANDS] = 1 + iteminfos.values[0][0].toInt();
-      m_itemGeosets[CG_PANTS] = 1 + iteminfos.values[0][1].toInt();
-      m_itemGeosets[CG_TROUSERS] = 1 + iteminfos.values[0][2].toInt();
-      m_itemGeosets[CG_GEOSET2200] = 1 + iteminfos.values[0][3].toInt();
-      m_itemGeosets[CG_GEOSET2800] = 1 + iteminfos.values[0][4].toInt();
+      m_itemGeosets[CG_WRISTBANDS] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_PANTS] = 1 + geosetGroup[1];
+      m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
+      m_itemGeosets[CG_GEOSET2200] = 1 + geosetGroup[3];
+      m_itemGeosets[CG_GEOSET2800] = 1 + geosetGroup[4];
 
-      if (iteminfos.values[0][5].toInt() != 0)
-        mergeModel(CS_CHEST, iteminfos.values[0][5].toInt(), iteminfos.values[0][6].toInt());
+      // model
+      mergeModel(CS_CHEST, model[0], texture[0]);
 
       break;
     }
     case CS_BRACERS:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
-
+      // nothing specific for bracers
       break;
     }
     case CS_GLOVES:
     {
-      // query texture infos from ItemDisplayInfoMaterialRes
-      if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      {
-        for (uint i = 0; i < iteminfos.values.size(); i++)
-        {
-          GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-          if (texture)
-          {
-            TEXTUREMANAGER.add(texture);
-            m_itemTextures[getRegionForTexture(texture)] = texture;
-          }
-        }
-      }
+      // geosets 
+      // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
+      m_itemGeosets[CG_GLOVES] = 1 + geosetGroup[0];
+      m_itemGeosets[CG_HANDS] = 1 + geosetGroup[1];
 
-      // now get geoset / model infos
-      if (queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, ModelID, TextureID  FROM ItemDisplayInfo "
-                                 "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                                 "INNER JOIN ComponentModelFileData ON ComponentModelFileData.ID = ModelFileData.ModelID "
-                                 "AND ComponentModelFileData.RaceID = %1 AND ComponentModelFileData.GenderIndex = %2 "
-                                 "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                 "WHERE ItemDisplayInfo.ID = %3").arg(charInfos.displayRaceid).arg(charInfos.sexid).arg(m_displayId),
-                        iteminfos))
-      { 
-        // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
-        m_itemGeosets[CG_GLOVES] = 1 + iteminfos.values[0][0].toInt();
-        m_itemGeosets[CG_HANDS] = 1 + iteminfos.values[0][1].toInt();
-
-        if (iteminfos.values[0][2].toInt() != 0)
-          mergeModel(CS_GLOVES, iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt());
-      }    
-
+      // model
+      mergeModel(CS_GLOVES, model[0], texture[0]);
+    
       break;
     }
     case CS_HAND_RIGHT:
     case CS_HAND_LEFT:
     {
-      if(queryItemInfo(QString("SELECT ModelID, TextureID FROM ItemDisplayInfo "
-                               "LEFT JOIN ModelFileData ON Model1 = ModelFileData.ID "
-                               "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                               "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                       iteminfos))
-        updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt());
-
+      updateItemModel(((m_slot == CS_HAND_RIGHT) ? ATT_RIGHT_PALM : ATT_LEFT_PALM), model[0], texture[0]);
       break;
     }
     case CS_CAPE:
     {
-      if (queryItemInfo(QString("SELECT TextureID, GeosetGroup1 FROM ItemDisplayInfo "
-                                "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                                "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                        iteminfos))
+      GameFile * tex = GAMEDIRECTORY.getFile(texture[0]);
+      if (tex)
       {
-        GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[0][0].toInt());
-        if (texture)
-        {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[getRegionForTexture(texture)] = texture;
-        }
-
-        // Cape: {geosetGroup[0] = 1501}
-        m_itemGeosets[CG_CAPE] = 1 + iteminfos.values[0][1].toInt();
+        TEXTUREMANAGER.add(tex);
+        m_itemTextures[getRegionForTexture(tex)] = tex;
       }
+
+      // Cape: {geosetGroup[0] = 1501}
+      m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
 
       break;
     }
@@ -657,30 +486,9 @@ void WoWItem::load()
       {
         m_charModel->td.showCustom = false;
 
-        if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                                  "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
-                                  "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                                  "AND(ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                                  "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
-                          iteminfos))
-        {
-          for (uint i = 0; i < iteminfos.values.size(); i++)
-          {
-            GameFile * texture = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
-            if (texture)
-            {
-              TEXTUREMANAGER.add(texture);
-              m_itemTextures[getRegionForTexture(texture)] = texture;
-            }
-          }
-        }
-
         // geosets
         // Tabard: {geosetGroup[0] = 1201}
-        if(queryItemInfo(QString("SELECT GeosetGroup1 FROM ItemDisplayInfo "
-                                 "WHERE ItemDisplayInfo.ID = %1").arg(m_displayId),
-                         iteminfos))
-          m_itemGeosets[CG_TARBARD] = 1 + iteminfos.values[0][0].toInt();
+        m_itemGeosets[CG_TARBARD] = 1 + geosetGroup[0];
       }
 
       break;
@@ -697,35 +505,56 @@ void WoWItem::refresh()
   if (m_id == 0) // no item equipped, give up
     return;
 
+  // merge model if any
+  if (m_mergedModel != 0)
+    m_charModel->mergeModel(m_mergedModel);
+
+  // update geoset values
+  for (auto it : m_itemGeosets)
+  {
+    if ((m_slot != CS_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
+        (m_slot != CS_PANTS)) // treat trousers geoset in a special case - cf CS_PANTS
+    {
+      m_charModel->cd.geosets[it.first] = it.second;
+
+      if (m_mergedModel != 0)
+        m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+    }
+  }
+
+  // attach items if any
+  if (m_charModel->attachment)
+  {
+    if ((m_slot != CS_HAND_RIGHT) && // treat right hand attachment in a special case - cf CS_HAND_RIGHT
+        (m_slot != CS_HAND_LEFT))    // treat left hand attachment in a special case - cf CS_HAND_LEFT
+    {
+      m_charModel->attachment->delSlot(m_slot);
+      for (auto it : m_itemModels)
+        m_charModel->attachment->addChild(it.second, it.first, m_slot);
+    }
+  }
+
+  // add textures if any
+  if ((m_slot != CS_BOOTS) &&  // treat boots texturing in a special case - cf CS_BOOTS
+      (m_slot != CS_GLOVES) && // treat gloves texturing in a special case - cf CS_GLOVES 
+      (m_slot != CS_TABARD) && // treat tabard texturing in a special case - cf CS_TABARD 
+      (m_slot != CS_CAPE))     // treat cape texturing in a special case - cf CS_CAPE 
+  {
+    for (auto it : m_itemTextures)
+      m_charModel->tex.addLayer(it.second, it.first, SLOT_LAYERS[m_slot]);
+  }
+  
+
   switch (m_slot)
   {
     case CS_HEAD:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_HEAD);
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_HELMET);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_HELMET, m_slot);
-      }
+      // nothing specific for head items
       break;
     }
     case CS_SHOULDER:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_SHOULDER);
-
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_SHOULDER);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_LEFT_SHOULDER, m_slot);
-
-
-        it = m_itemModels.find(ATT_RIGHT_SHOULDER);
-
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_RIGHT_SHOULDER, m_slot);
-      }
+      // nothing specific for shoulder items
       break;
     }
     case CS_HAND_RIGHT:
@@ -798,99 +627,62 @@ void WoWItem::refresh()
     }
     case CS_BELT:
     {
-      if (m_charModel->attachment)
-      {
-        m_charModel->attachment->delSlot(CS_BELT);
-
-        if (m_mergedModel != 0)
-        {
-          m_charModel->mergeModel(m_mergedModel);
-          m_mergedModel->setGeosetGroupDisplay(CG_BELT, 1);
-        }
-
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_BELT_BUCKLE);
-        if (it != m_itemModels.end())
-          m_charModel->attachment->addChild(it->second, ATT_BELT_BUCKLE, m_slot);
-
-        std::map<CharRegions, GameFile *>::iterator it2 = m_itemTextures.find(CR_LEG_UPPER);
-        if (it2 != m_itemTextures.end())
-          m_charModel->tex.addLayer(it2->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-        it2 = m_itemTextures.find(CR_TORSO_LOWER);
-        if (it2 != m_itemTextures.end())
-          m_charModel->tex.addLayer(it2->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
-      }
+      // nothing specific for belt items
       break;
     }
     case CS_BOOTS:
     {
-      if (m_charModel->attachment)
+      for (auto it : m_itemGeosets)
       {
-        if (m_mergedModel != 0)
-          m_charModel->mergeModel(m_mergedModel);
-
-        auto geoIt = m_itemGeosets.find(CG_BOOTS);
-
-        if (geoIt != m_itemGeosets.end())
+        if (it.first != CG_BOOTS)
         {
-          // don't render boots behind robe
-          {
-            WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-            if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
-            {
-              m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
-              if (m_mergedModel)
-                m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
-            }
-          }
+          m_charModel->cd.geosets[it.first] = it.second;
 
-          // handle 2000* group for hd models
-          {
-            RaceInfos infos;
-            if (RaceInfos::getCurrent(m_charModel, infos) && infos.isHD)
-            {
-              m_charModel->cd.geosets[CG_HDFEET] = 2;
-              if (m_mergedModel)
-                m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1);
-            }
-          }
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(it.first, 1);
         }
+      }
 
-        std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
+      auto geoIt = m_itemGeosets.find(CG_BOOTS);
+
+      if (geoIt != m_itemGeosets.end())
+      {
+        // don't render boots behind robe
+        WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+        if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
+        {
+          m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
+        }
+      }
+
+      std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
+      if (texIt != m_itemTextures.end())
+        m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
+
+      if (!m_charModel->cd.showFeet)
+      {
+        texIt = m_itemTextures.find(CR_FOOT);
         if (texIt != m_itemTextures.end())
-          m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-
-        if (!m_charModel->cd.showFeet)
-        {
-          texIt = m_itemTextures.find(CR_FOOT);
-          if (texIt != m_itemTextures.end())
-            m_charModel->tex.addLayer(texIt->second, CR_FOOT, SLOT_LAYERS[m_slot]);
-        }
+          m_charModel->tex.addLayer(texIt->second, CR_FOOT, SLOT_LAYERS[m_slot]);
       }
       break;
     }
     case CS_PANTS:
     {
-      if (m_mergedModel != 0)
-        m_charModel->mergeModel(m_mergedModel);
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_PANTS2);
-      if (geoIt != m_itemGeosets.end())
+      for (auto it : m_itemGeosets)
       {
-        m_charModel->cd.geosets[CG_PANTS2] = geoIt->second;
-        if (m_mergedModel)
-          m_mergedModel->setGeosetGroupDisplay(CG_PANTS2, 1);
-      }
-        
-      geoIt = m_itemGeosets.find(CG_KNEEPADS);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_KNEEPADS] = geoIt->second;
-        if (m_mergedModel)
-          m_mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1);
-      }
+        if (it.first != CG_TROUSERS)
+        {
+          m_charModel->cd.geosets[it.first] = it.second;
 
-      geoIt = m_itemGeosets.find(CG_TROUSERS);
+          if (m_mergedModel != 0)
+            m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+        }
+      }
+      
+      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_TROUSERS);
 
       if (geoIt != m_itemGeosets.end())
       {
@@ -905,83 +697,21 @@ void WoWItem::refresh()
         }
       }
 
-      auto texIt =  m_itemTextures.find(CR_LEG_UPPER);
-      if (texIt != m_itemTextures.end())
-        m_charModel->tex.addLayer(texIt->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-      texIt = m_itemTextures.find(CR_LEG_LOWER);
-      if (texIt != m_itemTextures.end())
-        m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-
       break;
     }
     case CS_SHIRT:
     case CS_CHEST:
     {
-      if (m_mergedModel != 0)
-      {
-        m_charModel->mergeModel(m_mergedModel);
-        m_mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
-        m_mergedModel->setGeosetGroupDisplay(CG_PANTS, 1);
-      }
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_WRISTBANDS);
-      if (geoIt != m_itemGeosets.end())
-        m_charModel->cd.geosets[CG_WRISTBANDS] = geoIt->second;
-
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_UPPER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_ARM_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_TORSO_UPPER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
-
-      it = m_itemTextures.find(CR_TORSO_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_TORSO_LOWER, SLOT_LAYERS[m_slot]);
-
-
-      geoIt = m_itemGeosets.find(CG_TROUSERS);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
-
-        it = m_itemTextures.find(CR_LEG_UPPER);
-        if (it != m_itemTextures.end())
-          m_charModel->tex.addLayer(it->second, CR_LEG_UPPER, SLOT_LAYERS[m_slot]);
-
-        it = m_itemTextures.find(CR_LEG_LOWER);
-        if (it != m_itemTextures.end())
-          m_charModel->tex.addLayer(it->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
-      }
+      // nothing specific for shirt & chest items
       break;
     }
     case CS_BRACERS:
     {
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_ARM_LOWER);
-      if (it != m_itemTextures.end())
-        m_charModel->tex.addLayer(it->second, CR_ARM_LOWER, SLOT_LAYERS[m_slot]);
+      // nothing specific for bracers items
       break;
     }
     case CS_GLOVES:
     {
-      if (m_mergedModel != 0)
-        m_charModel->mergeModel(m_mergedModel);
-
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_GLOVES);
-      if (geoIt != m_itemGeosets.end())
-      {
-        m_charModel->cd.geosets[CG_GLOVES] = geoIt->second;
-        if (m_mergedModel)
-          m_mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1);
-      }
-
       std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
 
       int layer = SLOT_LAYERS[m_slot];
@@ -989,7 +719,7 @@ void WoWItem::refresh()
       // if we are wearing a robe, render gloves first in texture compositing
       // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
       WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
-      if ((chestItem->m_type == IT_ROBE) && (geoIt->second == 1))
+      if ((chestItem->m_type == IT_ROBE) && (m_charModel->cd.geosets[CG_GLOVES] == 1))
         layer = SLOT_LAYERS[CS_CHEST] - 1;
 
       if (texIt != m_itemTextures.end())
@@ -1002,10 +732,6 @@ void WoWItem::refresh()
     }
     case CS_CAPE:
     {
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_CAPE);
-      if (geoIt != m_itemGeosets.end())
-        m_charModel->cd.geosets[CG_CAPE] = geoIt->second;
-
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
         m_charModel->updateTextureList(it->second, TEXTURE_CAPE);
@@ -1013,8 +739,6 @@ void WoWItem::refresh()
     }
     case CS_TABARD:
     {
-      m_charModel->cd.geosets[CG_TARBARD] = m_itemGeosets[CG_TARBARD];
-
       if (isCustomizableTabard())
       {
         std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_TABARD_1);
@@ -1166,6 +890,11 @@ void WoWItem::load(QString & f)
 
 void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
 {
+  LOG_INFO << __FUNCTION__ << pos << modelId << textureId;
+
+  if (modelId == 0)
+    return;
+
   WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
   if (m->ok)
@@ -1180,10 +909,17 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
   }
+  else
+  {
+    LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Model" << modelId << "can't be loaded";
+  }
 }
 
 void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 {
+  if (modelId == 0)
+    return;
+
   m_mergedModel = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
   if (m_mergedModel->ok)
@@ -1196,6 +932,10 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 
     for (uint i = 0; i < m_mergedModel->geosets.size(); i++)
       m_mergedModel->showGeoset(i, false);
+  }
+  else
+  {
+    LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Model" << modelId << "can't be loaded";
   }
 }
 
@@ -1264,4 +1004,103 @@ bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
   }
 
   return true;
+}
+
+int WoWItem::getCustomModelId(size_t index)
+{
+  sqlResult infos;
+  if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
+                             "LEFT JOIN ModelFileData ON %1 = ModelFileData.ID "
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"Model1":"Model2").arg(m_displayId),
+                     infos))
+    return 0;
+
+  // if there is only one result, return directly model id
+  if (infos.values.size() == 1)
+    return infos.values[0][0].toInt();
+
+  // if there are multiple values, filter them based on ComponentModelFileData table
+  std::vector<QString> ids;
+  for (size_t i = 0; i < infos.values.size(); i++)
+    ids.push_back(infos.values[i][0]);
+
+  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
+  query += "FROM ComponentModelFileData WHERE ID IN(";
+  for (size_t i = 0; i < ids.size() - 1; i++)
+  {
+    query += ids[i];
+    query += ",";
+  }
+  query += ids[ids.size() - 1];
+  query += ")";
+
+  sqlResult iteminfos;
+  if (queryItemInfo(query, iteminfos))
+  {
+    RaceInfos charInfos;
+    RaceInfos::getCurrent(m_charModel, charInfos);
+
+    size_t i = 0;
+    for (auto it : iteminfos.values)
+    {
+      int gender = it[1].toInt();
+      int race = it[3].toInt();
+      // models are customized by race and gender
+      // if gender == 2, no customization
+      if ((gender == charInfos.sexid) && (race == charInfos.displayRaceid))
+        return it[0].toInt();
+      else if ((gender == 2) && (i == index))
+        return it[0].toInt();
+      i++;
+    }
+  }
+
+  return 0;
+}
+
+int WoWItem::getCustomTextureId(size_t index)
+{
+  sqlResult infos;
+  if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
+                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0) ? "TextureItemID1" : "TextureItemID2").arg(m_displayId),
+                     infos))
+    return 0;
+
+  // if there is only one result, return directly texture id
+  if (infos.values.size() == 1)
+    return infos.values[0][0].toInt();
+
+  // if there are multiple values, filter them based on ComponentTextureFileData table
+  std::vector<QString> ids;
+  for (size_t i = 0; i < infos.values.size(); i++)
+    ids.push_back(infos.values[i][0]);
+
+  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
+  query += "FROM ComponentTextureFileData WHERE ID IN(";
+  for (size_t i = 0; i < ids.size() - 1; i++)
+  {
+    query += ids[i];
+    query += ",";
+  }
+  query += ids[ids.size() - 1];
+  query += ")";
+
+  sqlResult iteminfos;
+  if (queryItemInfo(query, iteminfos))
+  {
+    RaceInfos charInfos;
+    RaceInfos::getCurrent(m_charModel, charInfos);
+
+    for (auto it : iteminfos.values)
+    {
+      int gender = it[1].toInt();
+      int race = it[3].toInt();
+      // models are customized by race and gender (gender == 3 means both sex)
+      if (((gender == charInfos.sexid) || (gender == 3)) && (race == charInfos.displayRaceid))
+        return it[0].toInt();
+    }
+  }
+
+  return 0;
 }

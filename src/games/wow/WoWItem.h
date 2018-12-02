@@ -112,6 +112,8 @@ class _WOWITEM_API_ WoWItem : public Component
 
     bool queryItemInfo(QString & query, sqlResult & result) const;
 
+    int getCustomModelId(size_t index);
+    int getCustomTextureId(size_t index);
 };
 
 
