@@ -96,7 +96,7 @@ DBFile * wow::TableStructure::createDBFile()
   
   if (fileToOpen)
   {
-    if (fileToOpen->open())
+    if (fileToOpen->open(false))
     {
       char header[5];
 
