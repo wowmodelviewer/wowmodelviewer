@@ -109,6 +109,19 @@ size_t CASCFile::read(void* dest, size_t bytes)
   }
 }
 
+void CASCFile::seek(size_t offset)
+{
+  if (m_useMemoryBuffer)
+  {
+    GameFile::seek(offset);
+  }
+  else
+  {
+    if (CascSetFilePointer(m_handle, offset, 0, FILE_BEGIN) == CASC_INVALID_POS)
+      LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetLastError();
+  }
+}
+
 bool  CASCFile::openFile()
 {
   if (!GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))

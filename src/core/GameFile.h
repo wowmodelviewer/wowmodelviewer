@@ -41,7 +41,7 @@ class _GAMEFILE_API_ GameFile : public Component
     unsigned char* getBuffer() const;
     unsigned char* getPointer();
     bool isEof();
-    void seek(size_t offset);
+    virtual void seek(size_t offset);
     void seekRelative(size_t offset);
     bool open(bool useMemoryBuffer = true);
     bool close();
