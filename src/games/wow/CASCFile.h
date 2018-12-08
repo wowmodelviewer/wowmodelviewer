@@ -35,6 +35,7 @@ class _CASCFILE_API_ CASCFile : public GameFile
     ~CASCFile();
 
     // re implemented from GameFile
+    size_t read(void* dest, size_t bytes);
     void dumpStructure();
 
   protected:

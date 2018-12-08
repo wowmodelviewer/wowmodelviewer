@@ -46,7 +46,7 @@ void GameFile::seekRelative(size_t offset)
   eof = (pointer >= size);
 }
 
-bool GameFile::open()
+bool GameFile::open(bool useMemoryBuffer /* = true */)
 {
   if (isAlreadyOpened())
     return true;
@@ -56,14 +56,19 @@ bool GameFile::open()
   if (!openFile())
     return false;
 
+  m_useMemoryBuffer = useMemoryBuffer;
+
   if (getFileSize(size))
   {
-    allocate(size);
+    if (m_useMemoryBuffer)
+    {
+      allocate(size);
 
-    if (readFile() != 0)
-      eof = false;
+      if (readFile() != 0)
+        eof = false;
 
-    doPostOpenOperation();
+      doPostOpenOperation();
+    }
   }
 
   return true;

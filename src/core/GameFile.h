@@ -30,12 +30,12 @@ class _GAMEFILE_API_ GameFile : public Component
     GameFile(QString path, int id = -1) 
       : eof(true), buffer(0), pointer(0), size(0), 
         filepath(path), m_fileDataId(id), originalBuffer(0),
-        curChunk("")
+        curChunk(""), m_useMemoryBuffer(true)
     {}
 
     virtual ~GameFile() {}
 
-    size_t read(void* dest, size_t bytes);
+    virtual size_t read(void* dest, size_t bytes);
     size_t getSize();
     size_t getPos();
     unsigned char* getBuffer() const;
@@ -43,7 +43,7 @@ class _GAMEFILE_API_ GameFile : public Component
     bool isEof();
     void seek(size_t offset);
     void seekRelative(size_t offset);
-    bool open();
+    bool open(bool useMemoryBuffer = true);
     bool close();
     
     void setFullName(const QString & name) { filepath = name; }
@@ -85,6 +85,7 @@ class _GAMEFILE_API_ GameFile : public Component
     };
 
     std::vector<Chunk> chunks;
+    bool m_useMemoryBuffer;
 
   private:
     // disable copying

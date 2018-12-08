@@ -93,6 +93,22 @@ CASCFile::~CASCFile()
   close();
 }
 
+size_t CASCFile::read(void* dest, size_t bytes)
+{
+  if (m_useMemoryBuffer)
+  {
+    return GameFile::read(dest, bytes);
+  }
+  else
+  {
+    unsigned long result = 0;
+    if (!CascReadFile(m_handle, dest, bytes, &result))
+      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+
+    return result;
+  }
+}
+
 bool  CASCFile::openFile()
 {
   if (!GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))
