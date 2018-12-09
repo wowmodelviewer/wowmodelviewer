@@ -46,7 +46,7 @@ void WDC3File::readWDC3Header()
 
 bool WDC3File::open()
 {
-  if (!CASCFile::open())
+  if (!CASCFile::open(false))
   {
     LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname();
     return false;
@@ -121,13 +121,36 @@ bool WDC3File::open()
 #endif
   }
 
-  uint32 palletBlockOffset = getPos();
-  uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
- 
-  // this only supports one section. We need to be able to loop and support multiple sections.
-  seek(sectionHeader[0].file_offset);
+  // read pallet data
+  if (m_header.pallet_data_size > 0)
+  {
+    m_palletData = new unsigned char[m_header.pallet_data_size];
+    read(m_palletData, m_header.pallet_data_size);
+  }
 
-  data = getPointer();
+  // read common data
+  unsigned char * commonData = 0;
+  if (m_header.common_data_size > 0)
+  {
+    commonData = new unsigned char[m_header.common_data_size];
+    read(commonData, m_header.common_data_size);
+  }
+
+  // this only supports one section. We need to be able to loop and support multiple sections.
+  // compute section size is, for now, either :
+  // - nb sections is 2, then it's section 2 beginning - section 1 beginning
+  // - nb sections is 1, then it's filesize - section 1 beginning
+  size_t sectionSize = 0;
+
+  if (m_header.section_count == 1)
+    sectionSize = size - sectionHeader[0].file_offset;
+  else
+    sectionSize = sectionHeader[1].file_offset - sectionHeader[0].file_offset;
+
+  m_sectionData = new unsigned char[sectionSize];
+  read(m_sectionData, sectionSize);
+
+  data = m_sectionData;
 
   // compute various offset needed to read data in the file 
   uint32 stringTableOffset = getPos() + recordSize * recordCount;
@@ -139,8 +162,7 @@ bool WDC3File::open()
 //    stringTableOffset = m_header.offset_records_end + 6 * (m_header.max_id - m_header.min_id + 1);
   }
   
-  seek(stringTableOffset);
-  stringTable = getPointer();
+  stringTable = m_sectionData + stringTableOffset;
 
   uint32 IdBlockOffset = stringTableOffset + stringSize;
 
@@ -149,23 +171,25 @@ bool WDC3File::open()
   uint32 relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_count * 8;
  
 #if WDC3_READ_DEBUG > 2
+  LOG_INFO << "------------------------------------------";
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
-  LOG_INFO << "palletBlockOffset" << palletBlockOffset;
-  LOG_INFO << "commonBlockOffset" << commonBlockOffset;
+  LOG_INFO << "Section size" << sectionSize;
   LOG_INFO << "sectionHeader[0].file_offset" << sectionHeader[0].file_offset;
   LOG_INFO << "stringTableOffset" << stringTableOffset;
   LOG_INFO << "IdBlockOffset" << IdBlockOffset;
   LOG_INFO << "copyBlockOffset" << copyBlockOffset;
   LOG_INFO << "relationshipDataOffset" << relationshipDataOffset;
+  LOG_INFO << "------------------------------------------";
 #endif
 
   // sparse Table
   if ((m_header.flags & 0x01) != 0)
   {
     m_isSparseTable = true;
-    seek(sectionHeader[0].offset_records_end);
 
+    unsigned char * ptr = m_sectionData + sectionHeader[0].offset_records_end;
+ 
     recordCount = 0;
 
     for (uint i = 0; i < (m_header.max_id - m_header.min_id + 1); i++)
@@ -173,8 +197,10 @@ bool WDC3File::open()
       uint32 offset;
       uint16 length;
 
-      read(&offset, sizeof(offset));
-      read(&length, sizeof(length));
+      memcpy(&offset, ptr, sizeof(offset));
+      ptr += sizeof(offset);
+      memcpy(&length, ptr, sizeof(length));
+      ptr += sizeof(length);
 
       if ((offset == 0) || (length == 0))
         continue;
@@ -192,12 +218,12 @@ bool WDC3File::open()
     // read IDs
     if ((m_header.flags & 0x04) != 0)
     {
-      seek(IdBlockOffset);
+      unsigned char * ptr = m_sectionData + IdBlockOffset;
 #if WDC3_READ_DEBUG > 2
       LOG_INFO << "(header.flags & 0x04) != 0 -- BEGIN";
 #endif
       uint32 * vals = new uint32[recordCount];
-      read(vals, recordCount * sizeof(uint32));
+      memcpy(vals, ptr, recordCount * sizeof(uint32));
       m_IDs.assign(vals, vals + recordCount);
       delete[] vals;
 #if WDC3_READ_DEBUG > 2
@@ -275,14 +301,14 @@ bool WDC3File::open()
   // copy table
   if (sectionHeader[0].copy_table_count > 0)
   {
-    seek(copyBlockOffset);
+    unsigned char * ptr = m_sectionData + copyBlockOffset;
     uint nbEntries = sectionHeader[0].copy_table_count;
 
     m_IDs.reserve(recordCount + nbEntries);
     m_recordOffsets.reserve(recordCount + nbEntries);
 
     copy_table_entry * copyTable = new copy_table_entry[nbEntries];
-    read(copyTable, sectionHeader[0].copy_table_count * 8);
+    memcpy(copyTable, ptr, sectionHeader[0].copy_table_count * 8);
 
     // create a id->offset map
     std::map<uint32, unsigned char*> IDToOffsetMap;
@@ -320,7 +346,7 @@ bool WDC3File::open()
 
   if (sectionHeader[0].relationship_data_size > 0)
   {
-    seek(relationshipDataOffset);
+    unsigned char * ptr = m_sectionData + relationshipDataOffset;
     struct relationship_entry
     {
       uint32 foreign_id;
@@ -328,15 +354,18 @@ bool WDC3File::open()
     };
 
     uint32 nbEntries;
-    read(&nbEntries, 4);
+    memcpy(&nbEntries, ptr, 4);
+    ptr += (4+8);
+    LOG_INFO << "nbEntries" << nbEntries;
 
-    seekRelative(8);
     for (uint i = 0; i < nbEntries; i++)
     {
       uint32 foreignKey;
       uint32 recordIndex;
-      read(&foreignKey, 4);
-      read(&recordIndex, 4);
+      memcpy(&foreignKey, ptr, 4);
+      ptr += 4;
+      memcpy(&recordIndex, ptr, 4);
+      ptr += 4;
       std::stringstream ss;
       ss << foreignKey;
       m_relationShipData[recordIndex] = ss.str();
@@ -352,29 +381,19 @@ bool WDC3File::open()
 
   if (m_header.pallet_data_size > 0)
   {
-#if WDC3_READ_DEBUG > 4
-    seek(palletBlockOffset);
-    LOG_INFO << "PALLET DATA";
-    for (uint i = 0; i < m_header.pallet_data_size; i++)
-    {
-      uint32 val = 0;
-      read(&val, 1);
-      LOG_INFO << getPos() - 1 << val;
-    }
-    LOG_INFO << "PALLET DATA";
-#endif
     uint fieldId = 0;
+    uint32 offset = 0;
     for (auto it : m_fieldStorageInfo)
     {
       if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
         it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
         (it.additional_data_size != 0))
       {
-        m_palletBlockOffsets[fieldId] = palletBlockOffset;
+        m_palletBlockOffsets[fieldId] = offset;
 #if WDC3_READ_DEBUG > 4
         LOG_INFO << fieldId << "=>" << palletBlockOffset;
 #endif
-        palletBlockOffset += it.additional_data_size;
+        offset += it.additional_data_size;
       }
       fieldId++;
     }
@@ -383,12 +402,13 @@ bool WDC3File::open()
   if (m_header.common_data_size > 0)
   {
     uint fieldId = 0;
+    size_t offset = 0;
     for (auto it : m_fieldStorageInfo)
     {
       if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
       {
-        seek(commonBlockOffset);
-
+        unsigned char * ptr = commonData + offset;
+        
         std::map<uint32, uint32> commonVals;
 #if WDC3_READ_DEBUG > 4
         LOG_INFO << "Field" << fieldId;
@@ -397,19 +417,23 @@ bool WDC3File::open()
         {
           uint32 id;
           uint32 val;
-          read(&id, 4);
-          read(&val, 4);
+          memcpy(&id, ptr, 4);
+          ptr += 4;
+          memcpy(&val, ptr, 4);
+          ptr += 4;
+
 #if WDC3_READ_DEBUG > 4
           LOG_INFO << id << "=>" << val;
 #endif
           commonVals[id] = val;
         }
         m_commonData[fieldId] = commonVals;
-        commonBlockOffset += it.additional_data_size;
+        offset += it.additional_data_size;
 
       }
       fieldId++;
     }
+    delete[] commonData;
   }
 
   /*
@@ -613,6 +637,8 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
 WDC3File::~WDC3File()
 {
   close();
+  delete [] m_sectionData;
+  delete [] m_palletData;
 }
 
 bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
@@ -679,7 +705,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
       uint32 offset = it->second + index * 4;
-      memcpy(&result, getBuffer() + offset, 4);
+      memcpy(&result, m_palletData + offset, 4);
       break;
     }
     case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
@@ -687,7 +713,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
       uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
-      memcpy(&result, getBuffer() + offset, 4);
+      memcpy(&result, m_palletData + offset, 4);
       break;
     }
 

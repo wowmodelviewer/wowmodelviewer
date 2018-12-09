@@ -128,6 +128,9 @@ private:
   std::map<uint32, uint32> m_palletBlockOffsets;
   std::map<uint32, std::map<uint32, uint32> > m_commonData;
   std::map<uint32, std::string> m_relationShipData;
+
+  unsigned char * m_sectionData;
+  unsigned char * m_palletData;
 };
 
 #endif
