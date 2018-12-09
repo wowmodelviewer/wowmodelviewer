@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC3_READ_DEBUG 0
+#define WDC3_READ_DEBUG 3
 #define WDC3_READ_DEBUG_FIRST_RECORDS 0
 
 WDC3File::WDC3File(const QString & file):
@@ -65,6 +65,7 @@ bool WDC3File::open()
 #if WDC3_READ_DEBUG > 1
   for (uint i = 0; i < m_header.section_count; i++)
   {
+    LOG_INFO << "---------------SECTION--------------------";
     LOG_INFO << "tact_key_hash" << sectionHeader[i].tact_key_hash;
     LOG_INFO << "file_offset" << sectionHeader[i].file_offset;
     LOG_INFO << "record_count" << sectionHeader[i].record_count;
@@ -74,6 +75,7 @@ bool WDC3File::open()
     LOG_INFO << "relationship_data_size" << sectionHeader[i].relationship_data_size;
     LOG_INFO << "offset_map_id_count" << sectionHeader[i].offset_map_id_count;
     LOG_INFO << "copy_table_count" << sectionHeader[i].copy_table_count;
+    LOG_INFO << "------------------------------------------";
   }
 #endif
 
@@ -103,7 +105,7 @@ bool WDC3File::open()
       read(&info, sizeof(info));
       m_fieldStorageInfo.push_back(info);
     }
-#if WDC3_READ_DEBUG > 2
+#if WDC3_READ_DEBUG > 3
     LOG_INFO << fullname() << "----- BEGIN -------";
     uint fieldId = 0;
     for (auto it : m_fieldStorageInfo)
@@ -174,6 +176,7 @@ bool WDC3File::open()
   LOG_INFO << "------------------------------------------";
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
   LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
+  LOG_INFO << "Section data pointer" << m_sectionData;
   LOG_INFO << "Section size" << sectionSize;
   LOG_INFO << "sectionHeader[0].file_offset" << sectionHeader[0].file_offset;
   LOG_INFO << "stringTableOffset" << stringTableOffset;
@@ -188,7 +191,7 @@ bool WDC3File::open()
   {
     m_isSparseTable = true;
 
-    unsigned char * ptr = m_sectionData + sectionHeader[0].offset_records_end;
+    unsigned char * ptr = m_sectionData;
  
     recordCount = 0;
 
@@ -206,7 +209,7 @@ bool WDC3File::open()
         continue;
 
       m_IDs.push_back(m_header.min_id + i);
-      m_recordOffsets.push_back(buffer + offset);
+      m_recordOffsets.push_back(m_sectionData + offset);
       recordCount++;
     }
   }
@@ -645,13 +648,14 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 {
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
+
   switch (info.storage_type)
   {
     case FIELD_COMPRESSION::NONE:
     {
       uint fieldSize = info.field_size_bits / 8;
       unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
-
+  
       if (arraySize != 1)
       {
         fieldSize /= arraySize;
@@ -660,7 +664,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 
       unsigned char * val = new unsigned char[fieldSize];
       memcpy(val, fieldOffset, fieldSize);
-
+      
       // handle special case => when value is supposed to be 0, values read are all 0xFF
       // Don't understand why, so I use this ugly stuff...
       if (arraySize != 1)
