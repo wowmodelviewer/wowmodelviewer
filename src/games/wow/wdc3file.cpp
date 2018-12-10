@@ -128,6 +128,23 @@ bool WDC3File::open()
   {
     m_palletData = new unsigned char[m_header.pallet_data_size];
     read(m_palletData, m_header.pallet_data_size);
+
+    uint fieldId = 0;
+    uint32 offset = 0;
+    for (auto it : m_fieldStorageInfo)
+    {
+      if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
+        it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
+        (it.additional_data_size != 0))
+      {
+        m_palletBlockOffsets[fieldId] = offset;
+#if WDC3_READ_DEBUG > 4
+        LOG_INFO << fieldId << "=>" << palletBlockOffset;
+#endif
+        offset += it.additional_data_size;
+      }
+      fieldId++;
+    }
   }
 
   // read common data
@@ -136,7 +153,50 @@ bool WDC3File::open()
   {
     commonData = new unsigned char[m_header.common_data_size];
     read(commonData, m_header.common_data_size);
+
+    uint fieldId = 0;
+    size_t offset = 0;
+    for (auto it : m_fieldStorageInfo)
+    {
+      if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
+      {
+        unsigned char * ptr = commonData + offset;
+
+        std::map<uint32, uint32> commonVals;
+#if WDC3_READ_DEBUG > 4
+        LOG_INFO << "Field" << fieldId;
+#endif
+        for (uint i = 0; i < it.additional_data_size / 8; i++)
+        {
+          uint32 id;
+          uint32 val;                                                                                                                                 
+          memcpy(&id, ptr, 4);
+          ptr += 4;
+          memcpy(&val, ptr, 4);
+          ptr += 4;
+
+#if WDC3_READ_DEBUG > 4
+          LOG_INFO << id << "=>" << val;
+#endif
+          commonVals[id] = val;
+        }
+        m_commonData[fieldId] = commonVals;
+        offset += it.additional_data_size;
+
+      }
+      fieldId++;
+    }
+    delete[] commonData;
   }
+
+  // a section = 
+  // 1. records
+  // 2. string block
+  // 3. id list
+  // 4. copy table
+  // 5. offset map 
+  // 6. offset map id list
+  // 7. relationship map 
 
   // this only supports one section. We need to be able to loop and support multiple sections.
   // compute section size is, for now, either :
@@ -147,171 +207,155 @@ bool WDC3File::open()
   if (m_header.section_count == 1)
     sectionSize = size - sectionHeader[0].file_offset;
   else
-    sectionSize = sectionHeader[1].file_offset - sectionHeader[0].file_offset;
+    sectionSize = sectionHeader[1].file_offset - sectionHeader[0].file_offset;                                                      
 
   m_sectionData = new unsigned char[sectionSize];
   read(m_sectionData, sectionSize);
 
-  data = m_sectionData;
+  // maintain curPtr to location of the block along section reading
+  unsigned char * curPtr = m_sectionData;
 
-  // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = getPos() + recordSize * recordCount;
-
-  // embedded strings in fields instead of stringTable
-  if ((m_header.flags & 0x01) != 0)
-  {
-    stringSize = 0;
-//    stringTableOffset = m_header.offset_records_end + 6 * (m_header.max_id - m_header.min_id + 1);
-  }
-  
-  stringTable = m_sectionData + stringTableOffset;
-
-  uint32 IdBlockOffset = stringTableOffset + stringSize;
-
-  uint32 copyBlockOffset = IdBlockOffset + sectionHeader[0].id_list_size;
-
-  uint32 relationshipDataOffset = copyBlockOffset + sectionHeader[0].copy_table_count * 8;
- 
-#if WDC3_READ_DEBUG > 2
-  LOG_INFO << "------------------------------------------";
-  LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
-  LOG_INFO << "m_header.flags & 0x04" << (m_header.flags & 0x04);
-  LOG_INFO << "Section data pointer" << m_sectionData;
-  LOG_INFO << "Section size" << sectionSize;
-  LOG_INFO << "sectionHeader[0].file_offset" << sectionHeader[0].file_offset;
-  LOG_INFO << "stringTableOffset" << stringTableOffset;
-  LOG_INFO << "IdBlockOffset" << IdBlockOffset;
-  LOG_INFO << "copyBlockOffset" << copyBlockOffset;
-  LOG_INFO << "relationshipDataOffset" << relationshipDataOffset;
-  LOG_INFO << "------------------------------------------";
-#endif
-
-  // sparse Table
-  if ((m_header.flags & 0x01) != 0)
+  // 1. records
+  // note that we are only storing offset to the different record, actual reading is performed in get method
+  if ((m_header.flags & 0x01) != 0) // sparse table
   {
     m_isSparseTable = true;
 
-    unsigned char * ptr = m_sectionData;
- 
     recordCount = 0;
 
-    for (uint i = 0; i < (m_header.max_id - m_header.min_id + 1); i++)
+    for (uint i = 0; i < sectionHeader[0].id_list_size / 4; i++)
     {
       uint32 offset;
       uint16 length;
 
-      memcpy(&offset, ptr, sizeof(offset));
-      ptr += sizeof(offset);
-      memcpy(&length, ptr, sizeof(length));
-      ptr += sizeof(length);
+      memcpy(&offset, curPtr, sizeof(offset));
+      curPtr += sizeof(offset);
+      memcpy(&length, curPtr, sizeof(length));
+      curPtr += sizeof(length);
 
       if ((offset == 0) || (length == 0))
         continue;
 
-      m_IDs.push_back(m_header.min_id + i);
       m_recordOffsets.push_back(m_sectionData + offset);
       recordCount++;
     }
+
+    curPtr = m_sectionData + sectionHeader[0].offset_records_end;
+  }
+  else
+  { 
+    m_recordOffsets.reserve(recordCount);
+    // store offsets
+    for (uint i = 0; i < recordCount; i++)
+      m_recordOffsets.push_back(m_sectionData + (i*recordSize));
+
+    curPtr += (recordSize * recordCount);
+  }
+
+  // 2. string block
+  // only update curPtr, actual values are read in get method when accessing record
+#if WDC3_READ_DEBUG > 4
+  LOG_INFO << "---- STRING TABLE ----";
+  for (uint i = 0; i < sectionHeader[0].string_table_size; i += 5)
+  {
+    std::string value(reinterpret_cast<char *>(curPtr+i));
+    LOG_INFO << i << value.c_str();
+  }
+  LOG_INFO << "---- STRING TABLE ----";
+#endif
+  curPtr += sectionHeader[0].string_table_size;
+
+
+
+
+  // 3. id list
+  if (sectionHeader[0].id_list_size > 0)
+  {
+    size_t nbId = sectionHeader[0].id_list_size / 4;
+    m_IDs.reserve(nbId);
+
+    uint32 * vals = new uint32[nbId];
+    memcpy(vals, curPtr, nbId * sizeof(uint32));
+    curPtr += sectionHeader[0].id_list_size;
+
+    m_IDs.assign(vals, vals + nbId);
+    delete[] vals;
   }
   else
   {
     m_IDs.reserve(recordCount);
-    m_recordOffsets.reserve(recordCount);
-
-    // read IDs
-    if ((m_header.flags & 0x04) != 0)
-    {
-      unsigned char * ptr = m_sectionData + IdBlockOffset;
-#if WDC3_READ_DEBUG > 2
-      LOG_INFO << "(header.flags & 0x04) != 0 -- BEGIN";
-#endif
-      uint32 * vals = new uint32[recordCount];
-      memcpy(vals, ptr, recordCount * sizeof(uint32));
-      m_IDs.assign(vals, vals + recordCount);
-      delete[] vals;
-#if WDC3_READ_DEBUG > 2
-      LOG_INFO << "(header.flags & 0x04) != 0 -- END";
-#endif
-    }
-    else
-    {
-      field_storage_info info = m_fieldStorageInfo[m_header.id_index];
+    
+    field_storage_info info = m_fieldStorageInfo[m_header.id_index];
 
 #if WDC3_READ_DEBUG > 2     
-      LOG_INFO << "info.storage_type" << info.storage_type;
-      LOG_INFO << "info.field_size_bits" << info.field_size_bits;
-      LOG_INFO << "info.field_offset_bits" << info.field_offset_bits;
+    LOG_INFO << "info.storage_type" << info.storage_type;
+    LOG_INFO << "info.field_size_bits" << info.field_size_bits;
+    LOG_INFO << "info.field_offset_bits" << info.field_offset_bits;
 
-      if (info.storage_type)
-      {
-        LOG_INFO << "size" << (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-        LOG_INFO << "offset" << info.field_offset_bits / 8;
-      }
+    if (info.storage_type)
+    {
+      LOG_INFO << "size" << (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+      LOG_INFO << "offset" << info.field_offset_bits / 8;
+    }
 #endif
-      // read ids from data
-      for (uint i = 0; i < recordCount; i++)
+    // read ids from data
+    for (uint i = 0; i < recordCount; i++)
+    {
+      unsigned char * recordOffset = m_sectionData + (i*recordSize);
+      switch (info.storage_type)
       {
-        unsigned char * recordOffset = data + (i*recordSize);
-        switch (info.storage_type)
+        case FIELD_COMPRESSION::NONE:
         {
-          case FIELD_COMPRESSION::NONE:
-          {
-            unsigned char * val = new unsigned char[info.field_size_bits/8];
-            memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
-            m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
-            break;
-          }
-          case FIELD_COMPRESSION::BITPACKED:
-          {
-            unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-            unsigned int offset = info.field_offset_bits / 8;
-            unsigned char * val = new unsigned char[size];
-
-            memcpy(val, recordOffset + offset, size);
-
-            unsigned int id = (*reinterpret_cast<unsigned int*>(val));
-            id = id & ((1ull << info.field_size_bits) - 1);
-
-            m_IDs.push_back(id);
-
-            break;
-          }
-          case FIELD_COMPRESSION::COMMON_DATA:
-            LOG_ERROR << "Reading ID from Common Data is not implemented";
-            return false;
-          case FIELD_COMPRESSION::BITPACKED_INDEXED:
-          case FIELD_COMPRESSION::BITPACKED_SIGNED:
-          {
-            uint id = readBitpackedValue(info, recordOffset);
-            m_IDs.push_back(id);
-            break;
-          }
-          case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
-            LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
-            return false;
-          default:
-            LOG_ERROR << "Reading ID from type" << info.storage_type << "is not implemented";
-            return false;
+          unsigned char * val = new unsigned char[info.field_size_bits / 8];
+          memcpy(val, recordOffset + info.field_offset_bits / 8, info.field_size_bits / 8);
+          m_IDs.push_back((*reinterpret_cast<unsigned int*>(val)));
+          break;
         }
+        case FIELD_COMPRESSION::BITPACKED:
+        {
+          unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+          unsigned int offset = info.field_offset_bits / 8;
+          unsigned char * val = new unsigned char[size];
+
+          memcpy(val, recordOffset + offset, size);
+
+          unsigned int id = (*reinterpret_cast<unsigned int*>(val));
+          id = id & ((1ull << info.field_size_bits) - 1);
+
+          m_IDs.push_back(id);
+          break;
+        }
+        case FIELD_COMPRESSION::COMMON_DATA:
+          LOG_ERROR << "Reading ID from Common Data is not implemented";
+          return false;
+        case FIELD_COMPRESSION::BITPACKED_INDEXED:
+        case FIELD_COMPRESSION::BITPACKED_SIGNED:
+        {
+          uint id = readBitpackedValue(info, recordOffset);
+          m_IDs.push_back(id);
+          break;
+        }
+        case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
+          LOG_ERROR << "Reading ID from Bitpacked Indexed Array is not implemented";
+          return false;
+        default:
+          LOG_ERROR << "Reading ID from type" << info.storage_type << "is not implemented";
+          return false;
       }
     }
-
-    // store offsets
-    for (uint i = 0; i < recordCount; i++)
-      m_recordOffsets.push_back(data + (i*recordSize));
   }
 
-  // copy table
+  // 4. copy table
   if (sectionHeader[0].copy_table_count > 0)
   {
-    unsigned char * ptr = m_sectionData + copyBlockOffset;
     uint nbEntries = sectionHeader[0].copy_table_count;
 
     m_IDs.reserve(recordCount + nbEntries);
     m_recordOffsets.reserve(recordCount + nbEntries);
 
     copy_table_entry * copyTable = new copy_table_entry[nbEntries];
-    memcpy(copyTable, ptr, sectionHeader[0].copy_table_count * 8);
+    memcpy(copyTable, curPtr, sectionHeader[0].copy_table_count * 8);
+    curPtr += (sectionHeader[0].copy_table_count *8);
 
     // create a id->offset map
     std::map<uint32, unsigned char*> IDToOffsetMap;
@@ -333,23 +377,13 @@ bool WDC3File::open()
     recordCount += nbEntries;
   }
 
-  /*
-  {
-    seek(relationshipDataOffset);
+  // 5. offset map
+  // 6. offset map id list
+  curPtr += (sectionHeader[0].offset_map_id_count * 6);
 
-    while (getPos() < (pos + sectionHeader[0].relationship_data_size))
-    {
-      uint32 val;
-      LOG_INFO << read(&val, 4) << getPos() << val;
-    }
-
-    seek(pos);
-  }
-  */
-
+  // 7. relationship map
   if (sectionHeader[0].relationship_data_size > 0)
   {
-    unsigned char * ptr = m_sectionData + relationshipDataOffset;
     struct relationship_entry
     {
       uint32 foreign_id;
@@ -357,18 +391,18 @@ bool WDC3File::open()
     };
 
     uint32 nbEntries;
-    memcpy(&nbEntries, ptr, 4);
-    ptr += (4+8);
+    memcpy(&nbEntries, curPtr, 4);
+    curPtr += (4 + 8);
     LOG_INFO << "nbEntries" << nbEntries;
 
     for (uint i = 0; i < nbEntries; i++)
     {
       uint32 foreignKey;
       uint32 recordIndex;
-      memcpy(&foreignKey, ptr, 4);
-      ptr += 4;
-      memcpy(&recordIndex, ptr, 4);
-      ptr += 4;
+      memcpy(&foreignKey, curPtr, 4);
+      curPtr += 4;
+      memcpy(&recordIndex, curPtr, 4);
+      curPtr += 4;
       std::stringstream ss;
       ss << foreignKey;
       m_relationShipData[recordIndex] = ss.str();
@@ -382,62 +416,8 @@ bool WDC3File::open()
 #endif
   }
 
-  if (m_header.pallet_data_size > 0)
-  {
-    uint fieldId = 0;
-    uint32 offset = 0;
-    for (auto it : m_fieldStorageInfo)
-    {
-      if ((it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED ||
-        it.storage_type == FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY) &&
-        (it.additional_data_size != 0))
-      {
-        m_palletBlockOffsets[fieldId] = offset;
-#if WDC3_READ_DEBUG > 4
-        LOG_INFO << fieldId << "=>" << palletBlockOffset;
-#endif
-        offset += it.additional_data_size;
-      }
-      fieldId++;
-    }
-  }
 
-  if (m_header.common_data_size > 0)
-  {
-    uint fieldId = 0;
-    size_t offset = 0;
-    for (auto it : m_fieldStorageInfo)
-    {
-      if ((it.storage_type == FIELD_COMPRESSION::COMMON_DATA) && (it.additional_data_size != 0))
-      {
-        unsigned char * ptr = commonData + offset;
-        
-        std::map<uint32, uint32> commonVals;
-#if WDC3_READ_DEBUG > 4
-        LOG_INFO << "Field" << fieldId;
-#endif
-        for (uint i = 0; i < it.additional_data_size / 8; i++)
-        {
-          uint32 id;
-          uint32 val;
-          memcpy(&id, ptr, 4);
-          ptr += 4;
-          memcpy(&val, ptr, 4);
-          ptr += 4;
-
-#if WDC3_READ_DEBUG > 4
-          LOG_INFO << id << "=>" << val;
-#endif
-          commonVals[id] = val;
-        }
-        m_commonData[fieldId] = commonVals;
-        offset += it.additional_data_size;
-
-      }
-      fieldId++;
-    }
-    delete[] commonData;
-  }
+  
 
   /*
    // For reverse engineering purpose only
@@ -453,18 +433,7 @@ bool WDC3File::open()
   }
   */
 
-#if WDC3_READ_DEBUG > 4
-  if (stringSize)
-  {
-    LOG_INFO << "---- STRING TABLE ----";
-    for (uint i = 0; i < stringSize; i += 5)
-    {
-      std::string value(reinterpret_cast<char *>(stringTable + i));
-      LOG_INFO << i << value.c_str();
-    }
-    LOG_INFO << "---- STRING TABLE ----";
-  }
-#endif
+
 
 
 #if WDC3_READ_DEBUG_FIRST_RECORDS > 0
