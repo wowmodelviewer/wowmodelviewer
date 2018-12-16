@@ -123,6 +123,7 @@ private:
   int32 readSignedBitpackedValue(field_storage_info info, unsigned char * recordOffset) const;
 
   header m_header;
+  section_header * m_sectionHeader;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
   std::map<uint32, uint32> m_palletBlockOffsets;

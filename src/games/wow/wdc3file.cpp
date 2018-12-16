@@ -59,22 +59,22 @@ bool WDC3File::open()
   fieldCount = m_header.field_count;
   stringSize = m_header.string_table_size;
 
-  section_header * sectionHeader = new section_header[m_header.section_count];
-  read(sectionHeader, sizeof(section_header) * m_header.section_count);
+  m_sectionHeader = new section_header[m_header.section_count];
+  read(m_sectionHeader, sizeof(section_header) * m_header.section_count);
 
 #if WDC3_READ_DEBUG > 1
   for (uint i = 0; i < m_header.section_count; i++)
   {
     LOG_INFO << "---------------SECTION--------------------";
-    LOG_INFO << "tact_key_hash" << sectionHeader[i].tact_key_hash;
-    LOG_INFO << "file_offset" << sectionHeader[i].file_offset;
-    LOG_INFO << "record_count" << sectionHeader[i].record_count;
-    LOG_INFO << "string_table_size" << sectionHeader[i].string_table_size;
-    LOG_INFO << "offset_records_end" << sectionHeader[i].offset_records_end;
-    LOG_INFO << "id_list_size" << sectionHeader[i].id_list_size;
-    LOG_INFO << "relationship_data_size" << sectionHeader[i].relationship_data_size;
-    LOG_INFO << "offset_map_id_count" << sectionHeader[i].offset_map_id_count;
-    LOG_INFO << "copy_table_count" << sectionHeader[i].copy_table_count;
+    LOG_INFO << "tact_key_hash" << m_sectionHeader[i].tact_key_hash;
+    LOG_INFO << "file_offset" << m_sectionHeader[i].file_offset;
+    LOG_INFO << "record_count" << m_sectionHeader[i].record_count;
+    LOG_INFO << "string_table_size" << m_sectionHeader[i].string_table_size;
+    LOG_INFO << "offset_records_end" << m_sectionHeader[i].offset_records_end;
+    LOG_INFO << "id_list_size" << m_sectionHeader[i].id_list_size;
+    LOG_INFO << "relationship_data_size" << m_sectionHeader[i].relationship_data_size;
+    LOG_INFO << "offset_map_id_count" << m_sectionHeader[i].offset_map_id_count;
+    LOG_INFO << "copy_table_count" << m_sectionHeader[i].copy_table_count;
     LOG_INFO << "------------------------------------------";
   }
 #endif
@@ -205,9 +205,9 @@ bool WDC3File::open()
   size_t sectionSize = 0;
 
   if (m_header.section_count == 1)
-    sectionSize = size - sectionHeader[0].file_offset;
+    sectionSize = size - m_sectionHeader[0].file_offset;
   else
-    sectionSize = sectionHeader[1].file_offset - sectionHeader[0].file_offset;                                                      
+    sectionSize = m_sectionHeader[1].file_offset - m_sectionHeader[0].file_offset;                                                      
 
   m_sectionData = new unsigned char[sectionSize];
   read(m_sectionData, sectionSize);
@@ -219,6 +219,7 @@ bool WDC3File::open()
   // note that we are only storing offset to the different record, actual reading is performed in get method
   if ((m_header.flags & 0x01) == 0) // non sparse table
   { 
+    recordCount = m_sectionHeader[0].record_count;
     m_recordOffsets.reserve(recordCount);
     // store offsets
     for (uint i = 0; i < recordCount; i++)
@@ -228,7 +229,7 @@ bool WDC3File::open()
   }
   else
   {
-    curPtr += sectionHeader[0].offset_records_end;
+    curPtr += m_sectionHeader[0].offset_records_end;
   }
 
   LOG_INFO << "nb records" << m_recordOffsets.size();
@@ -236,24 +237,24 @@ bool WDC3File::open()
   // only update curPtr, actual values are read in get method when accessing record
 #if WDC3_READ_DEBUG > 4
   LOG_INFO << "---- STRING TABLE ----";
-  for (uint i = 0; i < sectionHeader[0].string_table_size; i += 5)
+  for (uint i = 0; i < 100 ; i++)
   {
     std::string value(reinterpret_cast<char *>(curPtr+i));
     LOG_INFO << i << value.c_str();
   }
   LOG_INFO << "---- STRING TABLE ----";
 #endif
-  curPtr += sectionHeader[0].string_table_size;
+  curPtr += m_sectionHeader[0].string_table_size;
 
   // 3. id list
-  if (sectionHeader[0].id_list_size > 0)
+  if (m_sectionHeader[0].id_list_size > 0)
   {
-    size_t nbId = sectionHeader[0].id_list_size / 4;
+    size_t nbId = m_sectionHeader[0].id_list_size / 4;
     m_IDs.reserve(nbId);
 
     uint32 * vals = new uint32[nbId];
     memcpy(vals, curPtr, nbId * sizeof(uint32));
-    curPtr += sectionHeader[0].id_list_size;
+    curPtr += m_sectionHeader[0].id_list_size;
 
     m_IDs.assign(vals, vals + nbId);
     delete[] vals;
@@ -323,16 +324,16 @@ bool WDC3File::open()
   }
 
   // 4. copy table
-  if (sectionHeader[0].copy_table_count > 0)
+  if (m_sectionHeader[0].copy_table_count > 0)
   {
-    uint nbEntries = sectionHeader[0].copy_table_count;
+    uint nbEntries = m_sectionHeader[0].copy_table_count;
 
     m_IDs.reserve(recordCount + nbEntries);
     m_recordOffsets.reserve(recordCount + nbEntries);
 
     copy_table_entry * copyTable = new copy_table_entry[nbEntries];
-    memcpy(copyTable, curPtr, sectionHeader[0].copy_table_count * 8);
-    curPtr += (sectionHeader[0].copy_table_count *8);
+    memcpy(copyTable, curPtr, m_sectionHeader[0].copy_table_count * 8);
+    curPtr += (m_sectionHeader[0].copy_table_count *8);
 
     // create a id->offset map
     std::map<uint32, unsigned char*> IDToOffsetMap;
@@ -355,11 +356,11 @@ bool WDC3File::open()
   }
 
   // 5. offset map
-  if (sectionHeader[0].offset_map_id_count > 0) // sparse table
+  if (m_sectionHeader[0].offset_map_id_count > 0) // sparse table
   {
     m_isSparseTable = true;
 
-    for (uint i = 0; i < sectionHeader[0].offset_map_id_count; i++)
+    for (uint i = 0; i < m_sectionHeader[0].offset_map_id_count; i++)
     {
       uint32 offset;
       uint16 length;
@@ -381,7 +382,7 @@ bool WDC3File::open()
   // ?
 
   // 7. relationship map
-  if (sectionHeader[0].relationship_data_size > 0)
+  if (m_sectionHeader[0].relationship_data_size > 0)
   {
     struct relationship_entry
     {
@@ -557,7 +558,7 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
         }
         else
         {
-          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val);
+          stringPtr = reinterpret_cast<char *>(recordOffset + m_fieldStorageInfo[field->pos].field_offset_bits / 8 + val - ((m_header.record_count - m_sectionHeader[0].record_count) * m_header.record_size));
         }
 
         std::string value(stringPtr);
