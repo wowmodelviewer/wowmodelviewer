@@ -217,32 +217,7 @@ bool WDC3File::open()
 
   // 1. records
   // note that we are only storing offset to the different record, actual reading is performed in get method
-  if ((m_header.flags & 0x01) != 0) // sparse table
-  {
-    m_isSparseTable = true;
-
-    recordCount = 0;
-
-    for (uint i = 0; i < sectionHeader[0].id_list_size / 4; i++)
-    {
-      uint32 offset;
-      uint16 length;
-
-      memcpy(&offset, curPtr, sizeof(offset));
-      curPtr += sizeof(offset);
-      memcpy(&length, curPtr, sizeof(length));
-      curPtr += sizeof(length);
-
-      if ((offset == 0) || (length == 0))
-        continue;
-
-      m_recordOffsets.push_back(m_sectionData + offset);
-      recordCount++;
-    }
-
-    curPtr = m_sectionData + sectionHeader[0].offset_records_end;
-  }
-  else
+  if ((m_header.flags & 0x01) == 0) // non sparse table
   { 
     m_recordOffsets.reserve(recordCount);
     // store offsets
@@ -251,7 +226,12 @@ bool WDC3File::open()
 
     curPtr += (recordSize * recordCount);
   }
+  else
+  {
+    curPtr += sectionHeader[0].offset_records_end;
+  }
 
+  LOG_INFO << "nb records" << m_recordOffsets.size();
   // 2. string block
   // only update curPtr, actual values are read in get method when accessing record
 #if WDC3_READ_DEBUG > 4
@@ -264,9 +244,6 @@ bool WDC3File::open()
   LOG_INFO << "---- STRING TABLE ----";
 #endif
   curPtr += sectionHeader[0].string_table_size;
-
-
-
 
   // 3. id list
   if (sectionHeader[0].id_list_size > 0)
@@ -378,8 +355,30 @@ bool WDC3File::open()
   }
 
   // 5. offset map
+  if (sectionHeader[0].offset_map_id_count > 0) // sparse table
+  {
+    m_isSparseTable = true;
+
+    for (uint i = 0; i < sectionHeader[0].offset_map_id_count; i++)
+    {
+      uint32 offset;
+      uint16 length;
+
+      memcpy(&offset, curPtr, sizeof(offset));
+      curPtr += sizeof(offset);
+      memcpy(&length, curPtr, sizeof(length));
+      curPtr += sizeof(length);
+
+      if ((offset == 0) || (length == 0))
+        continue;
+
+      m_recordOffsets.push_back(m_sectionData + offset);
+      recordCount++;
+    }
+  }
+
   // 6. offset map id list
-  curPtr += (sectionHeader[0].offset_map_id_count * 6);
+  // ?
 
   // 7. relationship map
   if (sectionHeader[0].relationship_data_size > 0)
@@ -416,8 +415,9 @@ bool WDC3File::open()
 #endif
   }
 
-
-  
+  LOG_INFO << "nb ids" << m_IDs.size();
+  LOG_INFO << "nb records" << m_recordOffsets.size();
+  LOG_INFO << "nb relationship data" << m_relationShipData.size();
 
   /*
    // For reverse engineering purpose only
