@@ -229,7 +229,7 @@ bool WDC3File::open()
   }
   else
   {
-    curPtr += m_sectionHeader[0].offset_records_end;
+    curPtr += (m_sectionHeader[0].offset_records_end - m_sectionHeader[0].file_offset);
   }
 
   // 2. string block
@@ -323,46 +323,41 @@ bool WDC3File::open()
     }
   }
 
-  // 5. offset map
-  // read offset map before copy table to manage sparse tables case (offset map needs to be populated)
-  if (m_sectionHeader[0].offset_map_id_count > 0) // sparse table
-  {
-    unsigned char * savedCurPtr = curPtr;
-
-    // move to offset map block
-    curPtr += (m_sectionHeader[0].copy_table_count * 8);
-
-    m_isSparseTable = true;
-
-    for (uint i = 0; i < m_sectionHeader[0].offset_map_id_count; i++)
-    {
-      uint32 offset;
-      uint16 length;
-
-      memcpy(&offset, curPtr, sizeof(offset));
-      curPtr += sizeof(offset);
-      memcpy(&length, curPtr, sizeof(length));
-      curPtr += sizeof(length);
-
-      if ((offset == 0) || (length == 0))
-        continue;
-
-      m_recordOffsets.push_back(m_sectionData + offset);
-      recordCount++;
-    }
-    curPtr = savedCurPtr;
-  }
-
   // 4. copy table
-  copy_table_entry * copyTable = 0;
+  std::vector<copy_table_entry> copyTable;
   if (m_sectionHeader[0].copy_table_count > 0)
   {
-    copyTable = new copy_table_entry[m_sectionHeader[0].copy_table_count];
-    memcpy(copyTable, curPtr, m_sectionHeader[0].copy_table_count * 8);
+    copyTable.reserve(m_sectionHeader[0].copy_table_count);
+    copy_table_entry * vals = new copy_table_entry[m_sectionHeader[0].copy_table_count];
+    memcpy(vals, curPtr, m_sectionHeader[0].copy_table_count * sizeof(copy_table_entry));
+    copyTable.assign(vals, vals + m_sectionHeader[0].copy_table_count);
+    
     curPtr += (m_sectionHeader[0].copy_table_count * sizeof(copy_table_entry));
+    delete[] vals;
   }
 
-  // 5. relationship map
+  // 5. offset map
+#pragma pack(2)
+  struct offset_map_entry
+  {
+    uint32 offset;
+    uint16 size;
+  };
+
+  std::vector<offset_map_entry> offsetMap;
+
+  if (m_sectionHeader[0].offset_map_id_count > 0)
+  {
+    offsetMap.reserve(m_sectionHeader[0].offset_map_id_count);
+    offset_map_entry * vals = new offset_map_entry[m_sectionHeader[0].offset_map_id_count];
+    memcpy(vals, curPtr, m_sectionHeader[0].offset_map_id_count * sizeof(offset_map_entry));
+    offsetMap.assign(vals, vals + m_sectionHeader[0].offset_map_id_count);
+
+    curPtr += (m_sectionHeader[0].offset_map_id_count * sizeof(offset_map_entry));
+    delete[] vals;
+  }
+
+  // 6. relationship map
   if (m_sectionHeader[0].relationship_data_size > 0)
   {
     struct relationship_entry
@@ -374,7 +369,6 @@ bool WDC3File::open()
     uint32 nbEntries;
     memcpy(&nbEntries, curPtr, 4);
     curPtr += (4 + 8);
-    LOG_INFO << "nbEntries" << nbEntries;
 
     for (uint i = 0; i < nbEntries; i++)
     {
@@ -397,7 +391,8 @@ bool WDC3File::open()
 #endif
   }
 
-  // 6. offset map id list
+  // 7. offset map id list
+  /*
   std::vector<uint32> offset_map_id_list;
   if (m_sectionHeader[0].offset_map_id_count > 0)
   {
@@ -409,11 +404,27 @@ bool WDC3File::open()
 
     delete[] vals;
   }
+  */
 
   // set up data based on elements read
-  if (copyTable)
+  if (offsetMap.size() > 0)
   {
-    uint nbEntries = m_sectionHeader[0].copy_table_count;
+    m_isSparseTable = true;
+
+    for (auto it : offsetMap)
+    {
+      if ((it.offset == 0) || (it.size == 0))
+        continue;
+
+      m_recordOffsets.push_back(m_sectionData + it.offset);
+    }
+  }
+
+  LOG_INFO << "m_recordOffsets.size()" << m_recordOffsets.size();
+
+  if (copyTable.size() > 0)
+  {
+    uint nbEntries = copyTable.size();
 
     m_IDs.reserve(recordCount + nbEntries);
     m_recordOffsets.reserve(recordCount + nbEntries);
@@ -426,23 +437,14 @@ bool WDC3File::open()
       IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
     }
 
-    for (uint i = 0; i < nbEntries; i++)
+    for (auto it : copyTable)
     {
-      copy_table_entry entry = copyTable[i];
-      m_IDs.push_back(entry.newRowId);
-      m_recordOffsets.push_back(IDToOffsetMap[entry.copiedRowId]);
+      m_IDs.push_back(it.newRowId);
+      m_recordOffsets.push_back(IDToOffsetMap[it.copiedRowId]);
     }
-
-    delete[] copyTable;
-
-    recordCount += nbEntries;
   }
 
-
-
-  LOG_INFO << "nb ids" << m_IDs.size();
-  LOG_INFO << "nb records" << m_recordOffsets.size();
-  LOG_INFO << "nb relationship data" << m_relationShipData.size();
+  recordCount = m_recordOffsets.size();
 
   /*
    // For reverse engineering purpose only
