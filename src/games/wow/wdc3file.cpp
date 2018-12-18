@@ -14,7 +14,7 @@
 #define WDC3_READ_DEBUG_FIRST_RECORDS 0
 
 WDC3File::WDC3File(const QString & file):
-WDB5File(file)
+WDB5File(file), m_sectionData(0), m_palletData(0)
 {
 }
 
@@ -232,7 +232,6 @@ bool WDC3File::open()
     curPtr += m_sectionHeader[0].offset_records_end;
   }
 
-  LOG_INFO << "nb records" << m_recordOffsets.size();
   // 2. string block
   // only update curPtr, actual values are read in get method when accessing record
 #if WDC3_READ_DEBUG > 4
@@ -257,6 +256,7 @@ bool WDC3File::open()
     curPtr += m_sectionHeader[0].id_list_size;
 
     m_IDs.assign(vals, vals + nbId);
+
     delete[] vals;
   }
   else
@@ -323,41 +323,15 @@ bool WDC3File::open()
     }
   }
 
-  // 4. copy table
-  if (m_sectionHeader[0].copy_table_count > 0)
-  {
-    uint nbEntries = m_sectionHeader[0].copy_table_count;
-
-    m_IDs.reserve(recordCount + nbEntries);
-    m_recordOffsets.reserve(recordCount + nbEntries);
-
-    copy_table_entry * copyTable = new copy_table_entry[nbEntries];
-    memcpy(copyTable, curPtr, m_sectionHeader[0].copy_table_count * 8);
-    curPtr += (m_sectionHeader[0].copy_table_count *8);
-
-    // create a id->offset map
-    std::map<uint32, unsigned char*> IDToOffsetMap;
-
-    for (uint i = 0; i < recordCount; i++)
-    {
-      IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
-    }
-
-    for (uint i = 0; i < nbEntries; i++)
-    {
-      copy_table_entry entry = copyTable[i];
-      m_IDs.push_back(entry.newRowId);
-      m_recordOffsets.push_back(IDToOffsetMap[entry.copiedRowId]);
-    }
-
-    delete[] copyTable;
-
-    recordCount += nbEntries;
-  }
-
   // 5. offset map
+  // read offset map before copy table to manage sparse tables case (offset map needs to be populated)
   if (m_sectionHeader[0].offset_map_id_count > 0) // sparse table
   {
+    unsigned char * savedCurPtr = curPtr;
+
+    // move to offset map block
+    curPtr += (m_sectionHeader[0].copy_table_count * 8);
+
     m_isSparseTable = true;
 
     for (uint i = 0; i < m_sectionHeader[0].offset_map_id_count; i++)
@@ -376,12 +350,19 @@ bool WDC3File::open()
       m_recordOffsets.push_back(m_sectionData + offset);
       recordCount++;
     }
+    curPtr = savedCurPtr;
   }
 
-  // 6. offset map id list
-  // ?
+  // 4. copy table
+  copy_table_entry * copyTable = 0;
+  if (m_sectionHeader[0].copy_table_count > 0)
+  {
+    copyTable = new copy_table_entry[m_sectionHeader[0].copy_table_count];
+    memcpy(copyTable, curPtr, m_sectionHeader[0].copy_table_count * 8);
+    curPtr += (m_sectionHeader[0].copy_table_count * sizeof(copy_table_entry));
+  }
 
-  // 7. relationship map
+  // 5. relationship map
   if (m_sectionHeader[0].relationship_data_size > 0)
   {
     struct relationship_entry
@@ -415,6 +396,49 @@ bool WDC3File::open()
     LOG_INFO << "---- RELATIONSHIP DATA ----";
 #endif
   }
+
+  // 6. offset map id list
+  std::vector<uint32> offset_map_id_list;
+  if (m_sectionHeader[0].offset_map_id_count > 0)
+  {
+    offset_map_id_list.reserve(m_sectionHeader[0].offset_map_id_count);
+    uint32 * vals = new uint32[m_sectionHeader[0].offset_map_id_count];
+    memcpy(vals, curPtr, m_sectionHeader[0].offset_map_id_count * sizeof(uint32));
+    
+    offset_map_id_list.assign(vals, vals + m_sectionHeader[0].offset_map_id_count);
+
+    delete[] vals;
+  }
+
+  // set up data based on elements read
+  if (copyTable)
+  {
+    uint nbEntries = m_sectionHeader[0].copy_table_count;
+
+    m_IDs.reserve(recordCount + nbEntries);
+    m_recordOffsets.reserve(recordCount + nbEntries);
+
+    // create a id->offset map
+    std::map<uint32, unsigned char*> IDToOffsetMap;
+
+    for (uint i = 0; i < recordCount; i++)
+    {
+      IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
+    }
+
+    for (uint i = 0; i < nbEntries; i++)
+    {
+      copy_table_entry entry = copyTable[i];
+      m_IDs.push_back(entry.newRowId);
+      m_recordOffsets.push_back(IDToOffsetMap[entry.copiedRowId]);
+    }
+
+    delete[] copyTable;
+
+    recordCount += nbEntries;
+  }
+
+
 
   LOG_INFO << "nb ids" << m_IDs.size();
   LOG_INFO << "nb records" << m_recordOffsets.size();
