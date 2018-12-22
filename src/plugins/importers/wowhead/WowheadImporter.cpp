@@ -34,6 +34,8 @@
 // Qt
 #include <QUrl>
 #include <QEventLoop>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -94,8 +96,8 @@ NPCInfos * WowheadImporter::importNPC(QString urlToGrab) const
 	int NPCId = extractSubString(infos, "id\":", ",").toInt();
 
 	// display id
-	QString NPCDispIdstr = extractSubString(infos, "ModelViewer.show({");
-	NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", " ");
+  QString NPCDispIdstr = extractSubString(htmldata, "ModelViewer.show({");
+  NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", "}");
 
 	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
 		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
@@ -123,35 +125,26 @@ ItemRecord * WowheadImporter::importItem(QString urlToGrab) const
 
 	// let's go : finding name
 	// extract global infos
-	QString infos = extractSubString(htmldata, "(g_items[", ";");
+  QString data = extractSubString(htmldata, "(g_items[", ";");
+  data = extractSubString(data, "],");
+  data.chop(1);
+  
+  QJsonParseError error;
+  QJsonObject infos = QJsonDocument::fromJson(data.toUtf8(), &error).object();
 
-	// finding name
-	QString itemName = extractSubString(infos, "name\":\"", "\",");
+  LOG_INFO << error.errorString();
 
-	// finding type
-	int itemType = extractSubString(infos, "slot\":", "}").toInt();
+  if (infos.count() != 0)
+  {
+    result = new ItemRecord();
 
-	// finding id
-	int itemId = extractSubString(infos, "[", "]").toInt();
-
-	// display id
-	int itemDisplayId = extractSubString(infos, "displayid\":", "\",").toInt();
-
-	// class
-	// 3 sss it's not a typo (probably to avoid conflict with "class" keyword in javascript)
-	int itemClass = extractSubString(infos, "classs\":", "\",").toInt();
-
-	// subclass
-	int idemSubClass = extractSubString(infos, "subclass\":", "\",").toInt();
-
-	result = new ItemRecord();
-
-	result->name = itemName;
-	result->type = itemType;
-	result->id = itemId;
-	result->model = itemDisplayId;
-	result->itemclass = itemClass;
-	result->subclass = idemSubClass;
+    result->name = infos.value("name").toString().toUtf8();
+    result->type = infos.value("slot").toInt();
+    result->id = infos.value("id").toInt();
+    result->model = infos.value("displayid").toInt();  
+    result->itemclass = infos.value("classs").toInt();
+    result->subclass = infos.value("subclass").toInt();
+  }
 
 	return result;
 }
@@ -168,7 +161,8 @@ QString WowheadImporter::extractSubString(QString & datas, QString beginPattern,
 	try
 	{
     result = datas.mid(datas.indexOf(beginPattern, 0, Qt::CaseInsensitive)+beginPattern.length());
-    result = result.mid(0, result.indexOf(endPattern, 0, Qt::CaseInsensitive));
+    if (!endPattern.isEmpty())
+      result = result.mid(0, result.indexOf(endPattern, 0, Qt::CaseInsensitive));
 	}
 	catch (...)
 	{
