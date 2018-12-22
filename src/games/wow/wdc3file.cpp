@@ -392,47 +392,39 @@ bool WDC3File::open()
   }
 
   // 7. offset map id list
-  /*
-  std::vector<uint32> offset_map_id_list;
   if (m_sectionHeader[0].offset_map_id_count > 0)
   {
-    offset_map_id_list.reserve(m_sectionHeader[0].offset_map_id_count);
+    m_IDs.clear();
+    m_IDs.reserve(m_sectionHeader[0].offset_map_id_count);
     uint32 * vals = new uint32[m_sectionHeader[0].offset_map_id_count];
     memcpy(vals, curPtr, m_sectionHeader[0].offset_map_id_count * sizeof(uint32));
     
-    offset_map_id_list.assign(vals, vals + m_sectionHeader[0].offset_map_id_count);
+    m_IDs.assign(vals, vals + m_sectionHeader[0].offset_map_id_count);
 
     delete[] vals;
   }
-  */
 
   // set up data based on elements read
-  if (offsetMap.size() > 0)
+  if (m_IDs.size() > 0)
   {
+    m_recordOffsets.clear();
     m_isSparseTable = true;
 
     for (auto it : offsetMap)
-    {
-      if ((it.offset == 0) || (it.size == 0))
-        continue;
-
-      m_recordOffsets.push_back(m_sectionData + it.offset);
-    }
+      m_recordOffsets.push_back(m_sectionData - m_sectionHeader[0].file_offset + it.offset);
   }
-
-  LOG_INFO << "m_recordOffsets.size()" << m_recordOffsets.size();
 
   if (copyTable.size() > 0)
   {
     uint nbEntries = copyTable.size();
 
-    m_IDs.reserve(recordCount + nbEntries);
-    m_recordOffsets.reserve(recordCount + nbEntries);
+    m_IDs.reserve(m_recordOffsets.size() + nbEntries);
+    m_recordOffsets.reserve(m_recordOffsets.size() + nbEntries);
 
     // create a id->offset map
     std::map<uint32, unsigned char*> IDToOffsetMap;
 
-    for (uint i = 0; i < recordCount; i++)
+    for (uint i = 0; i < m_recordOffsets.size(); i++)
     {
       IDToOffsetMap[m_IDs[i]] = m_recordOffsets[i];
     }
