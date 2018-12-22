@@ -405,7 +405,7 @@ bool WDC3File::open()
   }
 
   // set up data based on elements read
-  if (m_IDs.size() > 0)
+  if (offsetMap.size() > 0)
   {
     m_recordOffsets.clear();
     m_isSparseTable = true;
