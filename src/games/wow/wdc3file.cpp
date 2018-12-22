@@ -10,7 +10,7 @@
 
 #include "WoWDatabase.h"
 
-#define WDC3_READ_DEBUG 3
+#define WDC3_READ_DEBUG 0
 #define WDC3_READ_DEBUG_FIRST_RECORDS 0
 
 WDC3File::WDC3File(const QString & file):
