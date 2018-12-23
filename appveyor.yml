@@ -16,7 +16,8 @@ build_script:
 
     cmake --build . --target release --config Release
 
-    cd ..\bin
+    cd C:\projects\wowmodelviewer\bin
+
     ren WMV_Installer.exe WMV_Installer_%APPVEYOR_BUILD_VERSION%.exe
 test: off
 
