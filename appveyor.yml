@@ -1,9 +1,10 @@
-version: 1.0.{build}
+version: 0.9.0.{build}
 image: Visual Studio 2013
-build_script:
+
+before_build:
 - cmd: >-
     hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 3911b29
-
+    
     cd wmv_sdk
 
     .\wmv_set_env.bat
@@ -12,7 +13,23 @@ build_script:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "Visual Studio 12 2013" ..\src
+    cmake -G "Visual Studio 12 2013" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
 
+build_script:
+- cmd: >-
     cmake --build . --target release --config Release
+    
+    cd C:\projects\wowmodelviewer\bin
+
+    ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
+
 test: off
+
+for:
+-
+  branches:
+    only:
+      - default
+  
+  artifacts:
+    - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
