@@ -12,7 +12,7 @@ build_script:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "Visual Studio 12 2013" ..\src
+    cmake -G "Visual Studio 12 2013" -DBUILDNUMBER=$env:APPVEYOR_BUILD_NUMBER ..\src
 
     cmake --build . --target release --config Release
 test: off
