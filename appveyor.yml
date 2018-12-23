@@ -16,7 +16,7 @@ build_script:
 
     cmake --build . --target release --config Release
 
-	ren ..\bin\WMV_Installer.exe ..\bin\WMV_Installer_%version%.exe
+    ren ..\bin\WMV_Installer.exe ..\bin\WMV_Installer_%version%.exe
 test: off
 
 artifacts:
