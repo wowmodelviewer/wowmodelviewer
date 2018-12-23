@@ -43,7 +43,7 @@
 #include "Plugin.h"
 
 // if you need extra qualification on software version, move this to 1
-# define _BETAVERSION 1
+# define _BETAVERSION 0
 # define _ALPHAVERSION 0
 #ifndef _BUILDNUMBER
   #define _BUILDNUMBER 0
