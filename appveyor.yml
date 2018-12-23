@@ -18,7 +18,7 @@ build_script:
 
     cd C:\projects\wowmodelviewer\bin
 
-    ren WMV_Installer.exe WMV_Installer_%APPVEYOR_BUILD_VERSION%.exe
+    ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
 test: off
 
 artifacts:
