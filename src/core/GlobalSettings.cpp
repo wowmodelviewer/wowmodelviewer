@@ -45,6 +45,9 @@
 // if you need extra qualification on software version, move this to 1
 # define _BETAVERSION 1
 # define _ALPHAVERSION 0
+#ifndef _BUILDNUMBER
+  #define _BUILDNUMBER 0
+#endif
 
 
 // Namespaces used
@@ -144,7 +147,7 @@ std::wstring core::GlobalSettings::appVersion(std::wstring a_prefix)
   l_oss.precision(0);
 
   l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
-      << m_versionRevNumber;
+    << m_versionRevNumber << "." << _BUILDNUMBER;
   l_result += l_oss.str();
 
   l_result += m_versionSpecialExtend;
