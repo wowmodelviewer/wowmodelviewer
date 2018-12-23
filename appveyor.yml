@@ -18,4 +18,4 @@ build_script:
 test: off
 
 artifacts:
-- path: C:\projects\wowmodelviewer\bin\WMV_Installer.exe
+- path: bin\WMV_Installer.exe
