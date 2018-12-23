@@ -122,10 +122,6 @@ core::GlobalSettings::GlobalSettings()
   m_isAlphaVersion = false;
 #endif
 
-
-  // set it to whatever you want if you are building a special version
-  m_versionSpecialExtend = L".beta13";
-
   bShowParticle = false;
   bZeroParticle = false;
   bInitPoseOnlyExport = false;
@@ -149,8 +145,6 @@ std::wstring core::GlobalSettings::appVersion(std::wstring a_prefix)
   l_oss << m_versionMajorNumber << "." << m_versionMinorNumber << "."
     << m_versionRevNumber << "." << _BUILDNUMBER;
   l_result += l_oss.str();
-
-  l_result += m_versionSpecialExtend;
 
   return l_result;
 }
