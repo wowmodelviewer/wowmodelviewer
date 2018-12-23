@@ -19,6 +19,12 @@ build_script:
 - cmd: >-
     cmake --build . --target release --config Release
    
+after_build:
+- cmd: >-
+  cd C:\projects\wowmodelviewer\bin
+
+  ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
+
 test: off
 
 for:
@@ -26,12 +32,6 @@ for:
   branches:
     only:
       - default
-
-  after_build:
-  - cmd: >-
-    cd C:\projects\wowmodelviewer\bin
-
-    ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
   
   artifacts:
     - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
