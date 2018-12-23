@@ -21,5 +21,11 @@ build_script:
     ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
 test: off
 
-artifacts:
-  - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
+for:
+-
+  branches:
+    only:
+      - default
+
+  artifacts:
+    - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
