@@ -16,3 +16,6 @@ build_script:
 
     cmake --build . --target release --config Release
 test: off
+
+artifacts:
+- path: C:\projects\wowmodelviewer\bin\WMV_Installer.exe
