@@ -15,7 +15,9 @@ build_script:
     cmake -G "Visual Studio 12 2013" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
 
     cmake --build . --target release --config Release
+
+	ren ..\bin\WMV_Installer.exe ..\bin\WMV_Installer_%version%.exe
 test: off
 
 artifacts:
-- path: bin\WMV_Installer.exe
+  - path: bin\WMV_Installer_%version%.exe
