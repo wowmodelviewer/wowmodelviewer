@@ -18,12 +18,10 @@ before_build:
 build_script:
 - cmd: >-
     cmake --build . --target release --config Release
-   
-after_build:
-- cmd: >-
-  cd C:\projects\wowmodelviewer\bin
+    
+	cd C:\projects\wowmodelviewer\bin
 
-  ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
+    ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
 
 test: off
 
