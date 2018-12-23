@@ -16,7 +16,8 @@ build_script:
 
     cmake --build . --target release --config Release
 
-    ren ..\bin\WMV_Installer.exe ..\bin\WMV_Installer_%APPVEYOR_BUILD_VERSION%.exe
+    cd ..\bin
+    ren WMV_Installer.exe WMV_Installer_%APPVEYOR_BUILD_VERSION%.exe
 test: off
 
 artifacts:
