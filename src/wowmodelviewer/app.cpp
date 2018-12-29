@@ -148,9 +148,9 @@ bool WowModelViewApp::OnInit()
   LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
   // Just a little header to start off the log file.
-  LOG_INFO << "Starting:" << GLOBALSETTINGS.appName().c_str()
-    << GLOBALSETTINGS.appVersion().c_str()
-    << GLOBALSETTINGS.buildName().c_str();
+  LOG_INFO << "Starting:" << QString::fromStdWString(GLOBALSETTINGS.appName().c_str())
+    << QString::fromStdWString(GLOBALSETTINGS.appVersion().c_str())
+    << QString::fromStdWString(GLOBALSETTINGS.buildName().c_str());
 
 
   // Now create our main frame.

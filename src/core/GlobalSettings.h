@@ -119,7 +119,6 @@ namespace core
       int m_versionMajorNumber;
       int m_versionMinorNumber;
       int m_versionRevNumber;
-      std::wstring m_versionSpecialExtend;
 
       std::wstring	m_appName;
       std::wstring	m_buildName;
