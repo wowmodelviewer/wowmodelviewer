@@ -193,20 +193,23 @@ struct ModelVertex {
 	int unk1, unk2; // always 0,0 so this is probably unused
 };
 
-/// Lod part, 
-struct ModelView {
-	char id[4];				 // Signature
-    uint32 nIndex;
-    uint32 ofsIndex; // int16, Vertices in this model (index into vertices[])
-    uint32 nTris;
-	uint32 ofsTris;	 // int16[3], indices
-    uint32 nProps;
-	uint32 ofsProps; // int32, additional vtx properties
-    uint32 nSub;
-	uint32 ofsSub;	 // ModelGeoset, materials/renderops/submeshes
-    uint32 nTex;
-	uint32 ofsTex;	 // ModelTexUnit, material properties/textures
-	int32 lod;				 // LOD bias?
+/// Lod part,
+struct M2SkinProfile
+{
+  char magic[4];				 // Signature
+  uint32 nVertices;
+  uint32 ofsVertices; // int16, Vertices in this model (index into vertices[])
+  uint32 nIndices;
+  uint32 ofsIndices;	 // int16[3], indices
+  uint32 nBones;
+  uint32 ofsBones;
+  uint32 nSubmeshes;
+  uint32 ofsSubmeshes;
+  uint32 nBatches;
+  uint32 ofsBatches;
+  uint32 boneCountMax;
+  uint32 nShadowBatches;
+  uint32 ofsShadowBatches;
 };
 
 
@@ -292,6 +295,24 @@ struct ModelTexUnit
   uint16 transid;    // Index into transparency lookup table.
   uint16 texanimid;  // Index into uvanimation lookup table.
 };
+
+struct M2Batch
+{
+  uint8 flags;                       // Usually 16 for static textures, and 0 for animated textures. &0x1: materials invert something; &0x2: transform &0x4: projected texture; &0x10: something batch compatible; &0x20: projected texture?; &0x40: use textureWeights
+  int8 priorityPlane;
+  uint16 shader_id;                  // See below.
+  uint16 skinSectionIndex;           // A duplicate entry of a submesh from the list above.
+  uint16 geosetIndex;                // See below.
+  uint16 colorIndex;                 // A Color out of the Colors-Block or -1 if none.
+  uint16 materialIndex;              // The renderflags used on this texture-unit.
+  uint16 materialLayer;              // Capped at 7 (see CM2Scene::BeginDraw)
+  uint16 textureCount;               // 1 to 4. See below. Also seems to be the number of textures to load, starting at the texture lookup in the next field (0x10).
+  uint16 textureComboIndex;          // Index into Texture lookup table
+  uint16 textureCoordComboIndex;     // Index into the texture unit lookup table.
+  uint16 textureWeightComboIndex;    // Index into transparency lookup table.
+  uint16 textureTransformComboIndex; // Index into uvanimation lookup table. 
+};
+
 /*
 Shader thingey
 Its actually two uint8s defining the shader used. Everything below this is in binary. X represents a variable digit.

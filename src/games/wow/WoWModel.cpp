@@ -1151,9 +1151,9 @@ void WoWModel::setLOD(GameFile * f, int index)
     return;
   }
 
-  ModelView *view = (ModelView*)(g->getBuffer());
+  M2SkinProfile *profile = (M2SkinProfile*)(g->getBuffer());
 
-  if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N')
+  if (profile->magic[0] != 'S' || profile->magic[1] != 'K' || profile->magic[2] != 'I' || profile->magic[3] != 'N')
   {
     LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
     g->close();
@@ -1161,28 +1161,28 @@ void WoWModel::setLOD(GameFile * f, int index)
   }
 
   // Indices,  Triangles
-  uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
-  uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
+  uint16 *vertices = (uint16*)(g->getBuffer() + profile->ofsVertices);
+  uint16 *ind = (uint16*)(g->getBuffer() + profile->ofsIndices);
   rawIndices.clear();
-  rawIndices.resize(view->nTris);
+  rawIndices.resize(profile->nIndices);
 
-  for (size_t i = 0; i < view->nTris; i++)
+  for (size_t i = 0; i < profile->nIndices; i++)
   {
-    rawIndices[i] = indexLookup[triangles[i]];
+    rawIndices[i] = vertices[ind[i]];
   }
 
   indices = rawIndices;
 
   // render ops
-  ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
-  ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
+  ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + profile->ofsSubmeshes);
+  ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + profile->ofsBatches);
   ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsTexFlags);
   uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTexLookup);
   uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
   int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
-
+  
   uint32 istart = 0;
-  for (size_t i = 0; i < view->nSub; i++)
+  for (size_t i = 0; i < profile->nSubmeshes; i++)
   {
     ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
     hdgeo->istart = istart;
@@ -1195,7 +1195,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
   rawPasses.clear();
  
-  for (size_t j = 0; j < view->nTex; j++)
+  for (size_t j = 0; j < profile->nBatches; j++)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
      
