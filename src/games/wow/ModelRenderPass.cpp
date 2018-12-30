@@ -15,12 +15,18 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
+enum TextureFlags
+{
+  TEXTURE_WRAPX = 1,
+  TEXTURE_WRAPY
+};
+
+ModelRenderPass::ModelRenderPass(WoWModel * m):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
   unlit(false), noZWrite(false), billboard(false),
   texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX),
   swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
-  model(m), geoIndex(geo)
+  model(m), geoIndex(-1)
 {
 
 }
@@ -281,5 +287,61 @@ void ModelRenderPass::render(bool animated)
       glVertex3fv(model->vertices[a]);
     }
     glEnd();
+  }
+}
+
+void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
+{
+  if (!model)
+    return;
+
+  ModelTextureDef *texdef = (ModelTextureDef*)(model->gamefile->getBuffer() + model->header.ofsTextures);
+  int16 *transLookup = (int16*)(model->gamefile->getBuffer() + model->header.ofsTransparencyLookup);
+  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(model->gamefile->getBuffer() + model->header.ofsMaterials);
+  uint16 *texlookup = (uint16*)(model->gamefile->getBuffer() + model->header.ofsTextureLookup);
+  uint16 *texanimlookup = (uint16*)(model->gamefile->getBuffer() + model->header.ofsTextureTransformLookup);
+  int16 *texunitlookup = (int16*)(model->gamefile->getBuffer() + model->header.ofsTextureUnitLookup);
+
+  geoIndex = batch.skinSectionIndex;
+
+  tex = texlookup[batch.textureComboIndex];
+
+  // TODO: figure out these flags properly -_-
+  ModelRenderFlags &rf = renderFlags[batch.materialIndex];
+
+  blendmode = rf.blend;
+  //if (rf.blend == 0) // Test to disable/hide different blend types
+  //	continue;
+
+  color = batch.colorIndex;
+
+  opacity = transLookup[batch.textureWeightComboIndex];
+
+  unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
+
+  cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
+
+  billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
+
+  // Use environmental reflection effects?
+  useEnvMap = (texunitlookup[batch.textureCoordComboIndex] == -1) && billboard && rf.blend > 2; //&& rf.blend<5;
+
+  // Disable environmental mapping if its been unchecked.
+  if (useEnvMap && !video.useEnvMapping)
+    useEnvMap = false;
+
+  noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
+
+  // ToDo: Work out the correct way to get the true/false of transparency
+  trans = (blendmode > 0) && (opacity > 0);	// Transparency - not the correct way to get transparency
+
+  // Texture flags
+  swrap = (texdef[tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
+  twrap = (texdef[tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
+
+  // tex->flags: Usually 16 for static textures, and 0 for animated textures.
+  if ((batch.flags & TEXTUREUNIT_STATIC) == 0)
+  {
+    texanim = texanimlookup[batch.textureTransformComboIndex];
   }
 }

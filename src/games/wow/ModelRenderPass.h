@@ -29,7 +29,7 @@ class _MODELRENDERPASS_API_ ModelRenderPass
 {
 public:
 
-  ModelRenderPass(WoWModel *, int geo);
+  ModelRenderPass(WoWModel *);
 
   //TextureID texture, texture2;
   bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
@@ -48,11 +48,12 @@ public:
   int geoIndex;
 
   bool init();
-  int BlendValueForMode(int mode);
 
   void render(bool animated);
 
   void deinit();
+
+  void setupFromM2Batch(M2Batch & batch);
 
 
   bool operator< (const ModelRenderPass &m) const

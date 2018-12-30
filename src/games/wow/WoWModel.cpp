@@ -25,12 +25,6 @@
 
 #include <sstream>
 
-enum TextureFlags
-{
-  TEXTURE_WRAPX = 1,
-  TEXTURE_WRAPY
-};
-
 void WoWModel::dumpTextureStatus()
 {
   LOG_INFO << "-----------------------------------------";
@@ -1122,12 +1116,6 @@ void WoWModel::initAnimated(GameFile * f)
 
 void WoWModel::setLOD(GameFile * f, int index)
 {
-  // Texture definitions
-  ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
-
-  // Transparency
-  int16 *transLookup = (int16*)(f->getBuffer() + header.ofsTransparencyLookup);
-
   // I thought the view controlled the Level of detail,  but that doesn't seem to be the case.
   // Seems to only control the render order.  Which makes this function useless and not needed :(
 
@@ -1175,11 +1163,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   // render ops
   M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + profile->ofsSubmeshes);
   M2Batch *batch = (M2Batch*)(g->getBuffer() + profile->ofsBatches);
-  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsMaterials);
-  uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTextureLookup);
-  uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTextureTransformLookup);
-  int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTextureUnitLookup);
-  
+
   uint32 istart = 0;
   for (size_t i = 0; i < profile->nSubmeshes; i++)
   {
@@ -1196,49 +1180,8 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < profile->nBatches; j++)
   {
-    ModelRenderPass * pass = new ModelRenderPass(this, batch[j].skinSectionIndex);
-     
-    pass->tex = texlookup[batch[j].textureComboIndex];
- 
-    // TODO: figure out these flags properly -_-
-    ModelRenderFlags &rf = renderFlags[batch[j].materialIndex];
-
-    pass->blendmode = rf.blend;
-    //if (rf.blend == 0) // Test to disable/hide different blend types
-    //	continue;
-
-    pass->color = batch[j].colorIndex;
-
-    pass->opacity = transLookup[batch[j].textureWeightComboIndex];
-
-    pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
-
-    pass->cull = (rf.flags & RENDERFLAGS_TWOSIDED) == 0;
-
-    pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
-
-    // Use environmental reflection effects?
-    pass->useEnvMap = (texunitlookup[batch[j].textureCoordComboIndex] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
-
-    // Disable environmental mapping if its been unchecked.
-    if (pass->useEnvMap && !video.useEnvMapping)
-      pass->useEnvMap = false;
-
-    pass->noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
-
-    // ToDo: Work out the correct way to get the true/false of transparency
-    pass->trans = (pass->blendmode > 0) && (pass->opacity > 0);	// Transparency - not the correct way to get transparency
-
-    // Texture flags
-    pass->swrap = (texdef[pass->tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-    pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
-
-    // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
-    if ((batch[j].flags & TEXTUREUNIT_STATIC) == 0)
-    {
-      pass->texanim = texanimlookup[batch[j].textureTransformComboIndex];
-    }
-
+    ModelRenderPass * pass = new ModelRenderPass(this);
+    pass->setupFromM2Batch(batch[j]);
     rawPasses.push_back(pass);
   }
   g->close();
