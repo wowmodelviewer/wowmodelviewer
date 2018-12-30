@@ -116,28 +116,27 @@ struct ModelHeader {
 	uint32 ofsUnknown; // An array of shorts, related to renderflags.
 };
 
-#define	ANIMATION_HANDSCLOSED	15
-#define	ANIMATION_MOUNT			91
-#define	ANIMATION_LOOPED		0x20 // flags
+#define ANIMATION_STORED_IN_M2 0x20 // primary bone sequence -- If set, the animation data is in the.m2 file.If not set, the animation data is in an.anim file.
+#define ANIMATION_IS_ALIAS     0x40 // has next / is alias (To find the animation data, the client skips these by following aliasNext until an animation without 0x40 is found.)
+#define ANIMATION_IS_BLENDED   0x80 // Blended animation (if either side of a transition has 0x80, lerp between end->start states, unless end==start by comparing bone values) 
+
 // block B - animations, size 68 bytes, WotLK 64 bytes
 struct ModelAnimation {
-	int16 animID; // AnimationDataDB.ID
-	int16 subAnimID;
-	uint32 length;
-
-	float moveSpeed;
-
-	uint32 flags;
-	uint16 probability; // This is used to determine how often the animation is played. For all animations of the same type, this adds up to 0x7FFF (32767).
+  int16 animID;         // Animation id in AnimationData.dbc
+  int16 subAnimID;      // Sub-animation id: Which number in a row of animations this one is.
+  uint32 duration;      // The length of this animation sequence in milliseconds.
+  float moveSpeed;      // This is the speed the character moves with in this animation.
+  uint32 flags;         // See above.
+  int16 frequency;      // This is used to determine how often the animation is played. For all animations of the same type, this adds up to 0x7FFF (32767).
 	uint16 unused;
-	uint32 d1;
-	uint32 d2;
-	uint32 playSpeed;  // note: this can't be play speed because it's 0 for some models
-
-	Sphere boundSphere;
-
-	int16 NextAnimation;
-	int16 Index;
+  uint32 replay_min;    // May both be 0 to not repeat. Client will pick a random number of repetitions within bounds if given.
+  uint32 replay_max;
+  uint16 blendTimeIn;   // The client blends (lerp) animation states between animations where the end and start values differ. This specifies how long that blending takes. Values: 0, 50, 100, 150, 200, 250, 300, 350, 500.
+  uint16 blendTimeOut;  // The client blends between this sequence and the next sequence for blendTimeOut milliseconds.
+  // For both blendTimeIn and blendTimeOut, the client plays both sequences simultaneously while interpolating between their animation transforms.
+	Sphere bounds;
+  int16 NextAnimation;  // id of the following animation of this AnimationID, points to an Index or is -1 if none.
+  int16 Index;          // id in the list of animations. Used to find actual animation if this sequence is an alias (flags & 0x40)
 };
 
 // sub-block in block E - animation data, size 28 bytes, WotLK 20 bytes
@@ -163,8 +162,14 @@ struct AnimationBlockHeader
 	uint32 ofsEntrys;
 };
 
-#define	MODELBONE_BILLBOARD	8
-#define	MODELBONE_TRANSFORM	512
+#define	MODELBONE_SPHERICAL_BILLBOARD	0x8
+#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_X	0x10
+#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Y	0x20
+#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Z	0x40
+#define	MODELBONE_TRANSFORMED	0x200
+#define	MODELBONE_KINEMATIC	0x400  // MoP+: allow physics to influence this bone
+#define	MODELBONE_HELMET_ANIM_SCALED 0x1000 // set blend_modificator to helmetAnimScalingRec.m_amount for this bone
+
 // block E - bones
 struct ModelBoneDef {
 	int32 keyboneid; // Back-reference to the key bone lookup table. -1 if this is no key bone.
@@ -189,8 +194,7 @@ struct ModelVertex {
 	uint8 weights[4];
 	uint8 bones[4];
 	Vec3D normal;
-	Vec2D texcoords;
-	int unk1, unk2; // always 0,0 so this is probably unused
+	Vec2D texcoords[2];
 };
 
 /// Lod part,

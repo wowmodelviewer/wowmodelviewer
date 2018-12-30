@@ -247,7 +247,7 @@ void FBXExporter::createMesh()
     ModelVertex &v = m_p_model->origVertices[i];
     vertices[i].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
     layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
-    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords[0].x, 1.0 - v.texcoords[0].y));
   }
 
   // Create polygons.
@@ -456,11 +456,11 @@ void FBXExporter::createAnimations()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, QString::fromStdWString(anim_name).toStdString().c_str());
     anim_stack->AddMember(anim_layer);
 
-    uint32 timeInc = cur_anim.length/60;
+    uint32 timeInc = cur_anim.duration/60;
 
     FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
 
-    for(uint32 t = 0 ; t < cur_anim.length ; t += timeInc)
+    for(uint32 t = 0 ; t < cur_anim.duration ; t += timeInc)
     {
       FbxTime time;
       time.SetSecondDouble((float)t / 1000.0);

@@ -320,9 +320,9 @@ bool WoWModel::isAnimated(GameFile * f)
       if (ov_it->weights[b]>0)
       {
         ModelBoneDef &bb = bo[ov_it->bones[b]];
-        if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
+        if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_SPHERICAL_BILLBOARD))
         {
-          if (bb.flags & MODELBONE_BILLBOARD)
+          if (bb.flags & MODELBONE_SPHERICAL_BILLBOARD)
           {
             // if we have billboarding, the model will need per-instance animation
             ind = true;
@@ -1005,7 +1005,7 @@ void WoWModel::initAnimated(GameFile * f)
   texCoords = new Vec2D[origVertices.size()];
   auto ov_it = origVertices.begin();
   for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
-    texCoords[i] = ov_it->texcoords;
+    texCoords[i] = ov_it->texcoords[0];
 
   if (video.supportVBO)
   {
@@ -1248,6 +1248,8 @@ void WoWModel::setLOD(GameFile * f, int index)
   passes = rawPasses;
 }
 
+#define	ANIMATION_HANDSCLOSED	15
+
 void WoWModel::calcBones(ssize_t anim, size_t time)
 {
   // Reset all bones to 'false' which means they haven't been animated yet.
@@ -1433,7 +1435,7 @@ void WoWModel::animate(ssize_t anim)
   size_t t = 0;
 
   ModelAnimation &a = anims[anim];
-  int tmax = a.length;
+  int tmax = a.duration;
   if (tmax == 0)
     tmax = 1;
 
@@ -2632,16 +2634,17 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     else
       strName = "???";
     out << "      <animName>" << strName << "</animName>" << endl;
-    out << "      <length>" << m.anims[i].length << "</length>" << endl;
+    out << "      <duration>" << m.anims[i].duration << "</duration>" << endl;
     out << "      <moveSpeed>" << m.anims[i].moveSpeed << "</moveSpeed>" << endl;
     out << "      <flags>" << m.anims[i].flags << "</flags>" << endl;
-    out << "      <probability>" << m.anims[i].probability << "</probability>" << endl;
-    out << "      <d1>" << m.anims[i].d1 << "</d1>" << endl;
-    out << "      <d2>" << m.anims[i].d2 << "</d2>" << endl;
-    out << "      <playSpeed>" << m.anims[i].playSpeed << "</playSpeed>" << endl;
-    out << "      <boxA>" << m.anims[i].boundSphere.min << "</boxA>" << endl;
-    out << "      <boxB>" << m.anims[i].boundSphere.max << "</boxB>" << endl;
-    out << "      <rad>" << m.anims[i].boundSphere.radius << "</rad>" << endl;
+    out << "      <frequency>" << m.anims[i].frequency << "</frequency>" << endl;
+    out << "      <replay_min>" << m.anims[i].replay_min << "</replay_min>" << endl;
+    out << "      <replay_max>" << m.anims[i].replay_max << "</replay_max>" << endl;
+    out << "      <blendTimeIn>" << m.anims[i].blendTimeIn << "</blendTimeIn>" << endl;
+    out << "      <blendTimeOut>" << m.anims[i].blendTimeOut << "</blendTimeOut>" << endl;
+    out << "      <boxA>" << m.anims[i].bounds.min << "</boxA>" << endl;
+    out << "      <boxB>" << m.anims[i].bounds.max << "</boxB>" << endl;
+    out << "      <rad>" << m.anims[i].bounds.radius << "</rad>" << endl;
     out << "      <NextAnimation>" << m.anims[i].NextAnimation << "</NextAnimation>" << endl;
     out << "      <Index>" << m.anims[i].Index << "</Index>" << endl;
     out << "    </Animation>" << endl;
