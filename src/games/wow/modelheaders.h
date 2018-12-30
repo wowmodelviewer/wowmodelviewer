@@ -13,22 +13,22 @@ struct Vertex {
 
 struct Sphere
 {
-	/*0x00*/ Vec3D min;
-	/*0x0C*/ Vec3D max;
-	/*0x18*/ float radius;
+  /*0x00*/ Vec3D min;
+  /*0x0C*/ Vec3D max;
+  /*0x18*/ float radius;
 };
 
 struct CharModelDetails {
-	bool closeRHand;
-	bool closeLHand;
+  bool closeRHand;
+  bool closeLHand;
 
-	bool isChar;
+  bool isChar;
 
-	void Reset() {
-		closeRHand = false;
-		closeLHand = false;
-		isChar = false;
-	}
+  void Reset() {
+    closeRHand = false;
+    closeLHand = false;
+    isChar = false;
+  }
 };
 
 /* global flags
@@ -66,63 +66,63 @@ struct ModelHeader {
   uint32 globalFlags;                   // see above
   uint32 nGlobalLoops;                  // Timestamps used in global looping animations.
   uint32 ofsGlobalLoops;
-	uint32 nSequences;                    // Information about the animations in the model.
-	uint32 ofsSequences; 
+  uint32 nSequences;                    // Information about the animations in the model.
+  uint32 ofsSequences; 
   uint32 nAnimationLookup;              // Mapping of sequence IDs to the entries in the Animation sequences block.
-	uint32 ofsAnimationLookup; 
-	uint32 nBones;                        // MAX_BONES = 0x100 => Creature\SlimeGiant\GiantSlime.M2 has 312 bones (WOTLK)
-	uint32 ofsBones;
-	uint32 nKeyBoneLookup;                // Lookup table for key skeletal bones.
-	uint32 ofsKeyBoneLookup; 
-	uint32 nVertices; 
-	uint32 ofsVertices; 
-	uint32 nSkinProfiles;                 // Views (LOD) are now in .skins
-	uint32 nColors;                       // Color and alpha animations definitions.
-	uint32 ofsColors; 
-	uint32 nTextures; 
-	uint32 ofsTextures; 
+  uint32 ofsAnimationLookup; 
+  uint32 nBones;                        // MAX_BONES = 0x100 => Creature\SlimeGiant\GiantSlime.M2 has 312 bones (WOTLK)
+  uint32 ofsBones;
+  uint32 nKeyBoneLookup;                // Lookup table for key skeletal bones.
+  uint32 ofsKeyBoneLookup; 
+  uint32 nVertices; 
+  uint32 ofsVertices; 
+  uint32 nSkinProfiles;                 // Views (LOD) are now in .skins
+  uint32 nColors;                       // Color and alpha animations definitions.
+  uint32 ofsColors; 
+  uint32 nTextures; 
+  uint32 ofsTextures; 
   uint32 nTextureWeights;               // Transparency of textures.
   uint32 ofsTextureWeights;   
   uint32 nTextureTransforms;
   uint32 ofsTextureTransforms;
-	uint32 nTextureReplaceLookup;
-	uint32 ofsTextureReplaceLookup;
-	uint32 nMaterials;                    // Blending modes / render flags.
-	uint32 ofsMaterials; 
-	uint32 nBoneLookup; 
-	uint32 ofsBoneLookup; 
-	uint32 nTextureLookup; 
-	uint32 ofsTextureLookup; 
-	uint32 nTextureUnitLookup;		        // >= Cata : unused
-	uint32 ofsTextureUnitLookup; 
-	uint32 nTransparencyLookup; 
-	uint32 ofsTransparencyLookup; 
-	uint32 nTextureTransformLookup; 
-	uint32 ofsTextureTransformLookup; 
+  uint32 nTextureReplaceLookup;
+  uint32 ofsTextureReplaceLookup;
+  uint32 nMaterials;                    // Blending modes / render flags.
+  uint32 ofsMaterials; 
+  uint32 nBoneLookup; 
+  uint32 ofsBoneLookup; 
+  uint32 nTextureLookup; 
+  uint32 ofsTextureLookup; 
+  uint32 nTextureUnitLookup;            // >= Cata : unused
+  uint32 ofsTextureUnitLookup; 
+  uint32 nTransparencyLookup; 
+  uint32 ofsTransparencyLookup; 
+  uint32 nTextureTransformLookup; 
+  uint32 ofsTextureTransformLookup; 
   Sphere boundSphere;
-	Sphere collisionSphere;
-	uint32 nCollisionTriangles; 
+  Sphere collisionSphere;
+  uint32 nCollisionTriangles; 
   uint32 ofsCollisionTriangles;
   uint32 nCollisionVertices; 
   uint32 ofsCollisionVertices;
   uint32 nCollisionNormals; 
   uint32 ofsCollisionNormals;
-	uint32 nAttachments;                  // position of equipped weapons or effects
-	uint32 ofsAttachments;
-	uint32 nAttachLookup; 
-	uint32 ofsAttachLookup;
-	uint32 nEvents;                       // Used for playing sounds when dying and a lot else.
-	uint32 ofsEvents;
-	uint32 nLights;                       // Lights are mainly used in loginscreens but in wands and some doodads too.
-	uint32 ofsLights;
-	uint32 nCameras;                      // The cameras are present in most models for having a model in the character tab.
-	uint32 ofsCameras;
-	uint32 nCameraLookup;
-	uint32 ofsCameraLookup; 
-	uint32 nRibbonEmitters;               // Things swirling around. See the CoT-entrance for light-trails.
-	uint32 ofsRibbonEmitters;
-	uint32 nParticleEmitters;             
-	uint32 ofsParticleEmitters;
+  uint32 nAttachments;                  // position of equipped weapons or effects
+  uint32 ofsAttachments;
+  uint32 nAttachLookup; 
+  uint32 ofsAttachLookup;
+  uint32 nEvents;                       // Used for playing sounds when dying and a lot else.
+  uint32 ofsEvents;
+  uint32 nLights;                       // Lights are mainly used in loginscreens but in wands and some doodads too.
+  uint32 ofsLights;
+  uint32 nCameras;                      // The cameras are present in most models for having a model in the character tab.
+  uint32 ofsCameras;
+  uint32 nCameraLookup;
+  uint32 ofsCameraLookup; 
+  uint32 nRibbonEmitters;               // Things swirling around. See the CoT-entrance for light-trails.
+  uint32 ofsRibbonEmitters;
+  uint32 nParticleEmitters;             
+  uint32 ofsParticleEmitters;
   uint32 nTextureCombinerCombos;        // When set, textures blending is overriden by the associated array.
   uint32 ofsTextureCombinerCombos;
 };
@@ -139,83 +139,83 @@ struct ModelAnimation {
   float moveSpeed;      // This is the speed the character moves with in this animation.
   uint32 flags;         // See above.
   int16 frequency;      // This is used to determine how often the animation is played. For all animations of the same type, this adds up to 0x7FFF (32767).
-	uint16 unused;
+  uint16 unused;
   uint32 replay_min;    // May both be 0 to not repeat. Client will pick a random number of repetitions within bounds if given.
   uint32 replay_max;
   uint16 blendTimeIn;   // The client blends (lerp) animation states between animations where the end and start values differ. This specifies how long that blending takes. Values: 0, 50, 100, 150, 200, 250, 300, 350, 500.
   uint16 blendTimeOut;  // The client blends between this sequence and the next sequence for blendTimeOut milliseconds.
   // For both blendTimeIn and blendTimeOut, the client plays both sequences simultaneously while interpolating between their animation transforms.
-	Sphere bounds;
+  Sphere bounds;
   int16 NextAnimation;  // id of the following animation of this AnimationID, points to an Index or is -1 if none.
   int16 Index;          // id in the list of animations. Used to find actual animation if this sequence is an alias (flags & 0x40)
 };
 
 // sub-block in block E - animation data, size 28 bytes, WotLK 20 bytes
 struct AnimationBlock {
-	int16 type;		// interpolation type (0=none, 1=linear, 2=hermite)
-	int16 seq;		// global sequence id or -1
-	uint32 nTimes;
-	uint32 ofsTimes;
-	uint32 nKeys;
-	uint32 ofsKeys;
+  int16 type;    // interpolation type (0=none, 1=linear, 2=hermite)
+  int16 seq;    // global sequence id or -1
+  uint32 nTimes;
+  uint32 ofsTimes;
+  uint32 nKeys;
+  uint32 ofsKeys;
 };
 
 struct FakeAnimationBlock {
-	uint32 nTimes;
-	uint32 ofsTimes;
-	uint32 nKeys;
-	uint32 ofsKeys;
+  uint32 nTimes;
+  uint32 ofsTimes;
+  uint32 nKeys;
+  uint32 ofsKeys;
 };
 
 struct AnimationBlockHeader
 {
-	uint32 nEntrys;
-	uint32 ofsEntrys;
+  uint32 nEntrys;
+  uint32 ofsEntrys;
 };
 
-#define	MODELBONE_SPHERICAL_BILLBOARD	0x8
-#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_X	0x10
-#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Y	0x20
-#define	MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Z	0x40
-#define	MODELBONE_TRANSFORMED	0x200
-#define	MODELBONE_KINEMATIC	0x400  // MoP+: allow physics to influence this bone
-#define	MODELBONE_HELMET_ANIM_SCALED 0x1000 // set blend_modificator to helmetAnimScalingRec.m_amount for this bone
+#define  MODELBONE_SPHERICAL_BILLBOARD  0x8
+#define  MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_X  0x10
+#define  MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Y  0x20
+#define  MODELBONE_CYLINDRICAL_BILLBOARD_LOCK_Z  0x40
+#define  MODELBONE_TRANSFORMED  0x200
+#define  MODELBONE_KINEMATIC  0x400  // MoP+: allow physics to influence this bone
+#define  MODELBONE_HELMET_ANIM_SCALED 0x1000 // set blend_modificator to helmetAnimScalingRec.m_amount for this bone
 
 // block E - bones
 struct ModelBoneDef {
-	int32 keyboneid; // Back-reference to the key bone lookup table. -1 if this is no key bone.
-	int32 flags; // Only known flags: 8 - billboarded and 512 - transformed
-	int16 parent; // parent bone index
-	int16 geoid; // A geoset for this bone.
-	int32 unknown; // new int added to the bone definitions.  Added in WoW 2.0
-	AnimationBlock translation; // (Vec3D)
-	AnimationBlock rotation; // (QuatS)
-	AnimationBlock scaling; // (Vec3D)
-	Vec3D pivot;
+  int32 keyboneid; // Back-reference to the key bone lookup table. -1 if this is no key bone.
+  int32 flags; // Only known flags: 8 - billboarded and 512 - transformed
+  int16 parent; // parent bone index
+  int16 geoid; // A geoset for this bone.
+  int32 unknown; // new int added to the bone definitions.  Added in WoW 2.0
+  AnimationBlock translation; // (Vec3D)
+  AnimationBlock rotation; // (QuatS)
+  AnimationBlock scaling; // (Vec3D)
+  Vec3D pivot;
 };
 
 struct ModelTexAnimDef {
-	AnimationBlock trans; // (Vec3D)
-	AnimationBlock rot; // (QuatS)
-	AnimationBlock scale; // (Vec3D)
+  AnimationBlock trans; // (Vec3D)
+  AnimationBlock rot; // (QuatS)
+  AnimationBlock scale; // (Vec3D)
 };
 
 struct ModelVertex {
-	Vec3D pos;
-	uint8 weights[4];
-	uint8 bones[4];
-	Vec3D normal;
-	Vec2D texcoords[2];
+  Vec3D pos;
+  uint8 weights[4];
+  uint8 bones[4];
+  Vec3D normal;
+  Vec2D texcoords[2];
 };
 
 /// Lod part,
 struct M2SkinProfile
 {
-  char magic[4];				 // Signature
+  char magic[4];         // Signature
   uint32 nVertices;
   uint32 ofsVertices; // int16, Vertices in this model (index into vertices[])
   uint32 nIndices;
-  uint32 ofsIndices;	 // int16[3], indices
+  uint32 ofsIndices;   // int16[3], indices
   uint32 nBones;
   uint32 ofsBones;
   uint32 nSubmeshes;
@@ -297,7 +297,7 @@ class M2SkinSectionHD
 
 
 
-#define	TEXTUREUNIT_STATIC	16
+#define  TEXTUREUNIT_STATIC  16
 struct M2Batch
 {
   uint8 flags;                       // Usually 16 for static textures, and 0 for animated textures. &0x1: materials invert something; &0x2: transform &0x4: projected texture; &0x10: something batch compatible; &0x20: projected texture?; &0x40: use textureWeights
@@ -356,16 +356,16 @@ Mode   Shading     String
 
 // block X - render flags
 /* flags */
-#define	RENDERFLAGS_UNLIT	1
-#define	RENDERFLAGS_UNFOGGED	2
-#define	RENDERFLAGS_TWOSIDED	4
-#define	RENDERFLAGS_BILLBOARD	8
-#define	RENDERFLAGS_ZBUFFERED	16
+#define  RENDERFLAGS_UNLIT  1
+#define  RENDERFLAGS_UNFOGGED  2
+#define  RENDERFLAGS_TWOSIDED  4
+#define  RENDERFLAGS_BILLBOARD  8
+#define  RENDERFLAGS_ZBUFFERED  16
 struct ModelRenderFlags {
-	uint16 flags;
-	//unsigned char f1;
-	//unsigned char f2;
-	uint16 blend; // see enums.h, enum BlendModes
+  uint16 flags;
+  //unsigned char f1;
+  //unsigned char f2;
+  uint16 blend; // see enums.h, enum BlendModes
 };
 
 // block G - color defs
@@ -373,78 +373,78 @@ struct ModelRenderFlags {
 // Referenced from the Texture Unit blocks in the LOD part. Contains a separate timeline for transparency values. 
 // If no animation is used, the given value is constant.
 struct ModelColorDef {
-	AnimationBlock color; // (Vec3D) Three floats. One for each color.
-	AnimationBlock opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
+  AnimationBlock color; // (Vec3D) Three floats. One for each color.
+  AnimationBlock opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
 };
 
 // block H - transparency defs
 struct M2TextureWeight {
-	AnimationBlock weight; // (UInt16)
+  AnimationBlock weight; // (UInt16)
 };
 
 struct ModelTextureDef {
-	uint32 type;
-	uint32 flags;
-	uint32 nameLen;
-	uint32 nameOfs;
+  uint32 type;
+  uint32 flags;
+  uint32 nameLen;
+  uint32 nameOfs;
 };
 
 struct ModelLightDef {
-	int16 type; // 0: Directional, 1: Point light
-	int16 bone; // If its attached to a bone, this is the bone. Else here is a nice -1.
-	Vec3D pos; // Position, Where is this light?
-	AnimationBlock ambientColor; // (Vec3D) The ambient color. Three floats for RGB.
-	AnimationBlock ambientIntensity; // (Float) A float for the intensity.
-	AnimationBlock diffuseColor; // (Vec3D) The diffuse color. Three floats for RGB.
-	AnimationBlock diffuseIntensity; // (Float) A float for the intensity again.
-	AnimationBlock attenuationStart; // (Float) This defines, where the light starts to be.
-	AnimationBlock attenuationEnd; // (Float) And where it stops.
-	AnimationBlock useAttenuation; // (Uint32) Its an integer and usually 1.
+  int16 type; // 0: Directional, 1: Point light
+  int16 bone; // If its attached to a bone, this is the bone. Else here is a nice -1.
+  Vec3D pos; // Position, Where is this light?
+  AnimationBlock ambientColor; // (Vec3D) The ambient color. Three floats for RGB.
+  AnimationBlock ambientIntensity; // (Float) A float for the intensity.
+  AnimationBlock diffuseColor; // (Vec3D) The diffuse color. Three floats for RGB.
+  AnimationBlock diffuseIntensity; // (Float) A float for the intensity again.
+  AnimationBlock attenuationStart; // (Float) This defines, where the light starts to be.
+  AnimationBlock attenuationEnd; // (Float) And where it stops.
+  AnimationBlock useAttenuation; // (Uint32) Its an integer and usually 1.
 };
 
 struct ModelCameraDef {
-	int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
-	float fov; // No radians, no degrees. Multiply by 35 to get degrees.
-	float farclip; // Where it stops to be drawn.
-	float nearclip; // Far and near. Both of them.
-	AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
-	Vec3D pos; // float, Where the camera is located.
-	AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
-	Vec3D target; // float, Where the camera points to.
-	AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
+  int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
+  float fov; // No radians, no degrees. Multiply by 35 to get degrees.
+  float farclip; // Where it stops to be drawn.
+  float nearclip; // Far and near. Both of them.
+  AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  Vec3D pos; // float, Where the camera is located.
+  AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+  Vec3D target; // float, Where the camera points to.
+  AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
 };
 
 struct ModelCameraDefV10 {
-	int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
-	float farclip; // Where it stops to be drawn.
-	float nearclip; // Far and near. Both of them.
-	AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
-	Vec3D pos; // float, Where the camera is located.
-	AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
-	Vec3D target; // float, Where the camera points to.
-	AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
-	AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
+  int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
+  float farclip; // Where it stops to be drawn.
+  float nearclip; // Far and near. Both of them.
+  AnimationBlock transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  Vec3D pos; // float, Where the camera is located.
+  AnimationBlock transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+  Vec3D target; // float, Where the camera points to.
+  AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
+  AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
 };
 
 struct ModelParticleParams {
-	FakeAnimationBlock colors; 	// (Vec3D)	This one points to 3 floats defining red, green and blue.
-	FakeAnimationBlock opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
-	FakeAnimationBlock sizes; 		// (Vec2D)	It carries two floats per key. (x and y scale)
-	int32 d[2];
-	FakeAnimationBlock Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
-	FakeAnimationBlock unk2; 		// (UInt16)
-	float unk[3];
-	Vec3D scales;
-	float slowdown;
-	float unknown1[2];
-	float rotation;				//Sprite Rotation
-	float unknown2[2];
-	Vec3D Rot1;					//Model Rotation 1
-	Vec3D Rot2;					//Model Rotation 2
-	Vec3D Trans;				//Model Translation
-	float f2[4];
-	int32 nUnknownReference;
-	int32 ofsUnknownReferenc;
+  FakeAnimationBlock colors;   // (Vec3D)  This one points to 3 floats defining red, green and blue.
+  FakeAnimationBlock opacity;      // (UInt16)    Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
+  FakeAnimationBlock sizes;     // (Vec2D)  It carries two floats per key. (x and y scale)
+  int32 d[2];
+  FakeAnimationBlock Intensity;   // (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
+  FakeAnimationBlock unk2;     // (UInt16)
+  float unk[3];
+  Vec3D scales;
+  float slowdown;
+  float unknown1[2];
+  float rotation;        //Sprite Rotation
+  float unknown2[2];
+  Vec3D Rot1;          //Model Rotation 1
+  Vec3D Rot2;          //Model Rotation 2
+  Vec3D Trans;        //Model Translation
+  float f2[4];
+  int32 nUnknownReference;
+  int32 ofsUnknownReferenc;
 };
 
 // Most of these model particle flags are currently ignored by WMV:
@@ -518,24 +518,24 @@ struct M2ParticleDef
 };
 
 struct ModelRibbonEmitterDef {
-	int32 id;
-	int32 bone;
-	Vec3D pos;
-	int32 nTextures;
-	int32 ofsTextures;
-	int32 nUnknown;
-	int32 ofsUnknown;
-	AnimationBlock color; // (Vec3D)
-	AnimationBlock opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
-	AnimationBlock above; // (Float) The height above.
-	AnimationBlock below; // (Float) The height below. Do not set these to the same!
-	float res; // This defines how smooth the ribbon is. A low value may produce a lot of edges.
-	float length; // The length aka Lifespan.
-	float Emissionangle; // use arcsin(val) to get the angle in degree
-	int16 s1, s2;
-	AnimationBlock unk1; // (short)
-	AnimationBlock unk2; // (boolean)
-	int32 unknown; // This looks much like just some Padding to the fill up the 0x10 Bytes, always 0
+  int32 id;
+  int32 bone;
+  Vec3D pos;
+  int32 nTextures;
+  int32 ofsTextures;
+  int32 nUnknown;
+  int32 ofsUnknown;
+  AnimationBlock color; // (Vec3D)
+  AnimationBlock opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
+  AnimationBlock above; // (Float) The height above.
+  AnimationBlock below; // (Float) The height below. Do not set these to the same!
+  float res; // This defines how smooth the ribbon is. A low value may produce a lot of edges.
+  float length; // The length aka Lifespan.
+  float Emissionangle; // use arcsin(val) to get the angle in degree
+  int16 s1, s2;
+  AnimationBlock unk1; // (short)
+  AnimationBlock unk2; // (boolean)
+  int32 unknown; // This looks much like just some Padding to the fill up the 0x10 Bytes, always 0
 };
 
 /* 
@@ -544,65 +544,65 @@ The events you can use depend on the way, the model is used. Dynamic objects can
 Somehow there are some entries, that don't use the $... names but identifiers like "DEST" (destination), "POIN" (point) or "WHEE" (wheel). How they are used? Idk.
 */
 struct ModelEventDef {
-	char id[4]; // This is a (actually 3 character) name for the event with a $ in front.
-	int32 dbid; // This data is passed when the event is fired.
-	int32 bone; // Somewhere it has to be attached.
-	Vec3D pos; // Relative to that bone of course.
-	int16 type; // This is some fake-AnimationBlock.
-	int16 seq; // Built up like a real one but without timestamps(?). What the fuck?
-	uint32 nTimes; // See the documentation on AnimationBlocks at this topic.
-	uint32 ofsTimes; // This points to a list of timestamps for each animation given.
+  char id[4]; // This is a (actually 3 character) name for the event with a $ in front.
+  int32 dbid; // This data is passed when the event is fired.
+  int32 bone; // Somewhere it has to be attached.
+  Vec3D pos; // Relative to that bone of course.
+  int16 type; // This is some fake-AnimationBlock.
+  int16 seq; // Built up like a real one but without timestamps(?). What the fuck?
+  uint32 nTimes; // See the documentation on AnimationBlocks at this topic.
+  uint32 ofsTimes; // This points to a list of timestamps for each animation given.
 };
 /*
 There are a lot more of them. I did not list all up to now.
-ID	 Data	 Description
-DEST		 exploding ballista, that one has a really fucked up block. Oo
-POIN	 unk	 something alliance gunship related (flying in icecrown)
-WHEE	 601+	 Used on wheels at vehicles.
-$tsp		 p is {0 to 3} (position); t is {W, S, B, F (feet) or R} (type); s is {R or L} (right or left); this is used when running through snow for example.
-$AHx		 UnitCombat_C, x is {0 to 3}
-$BRT		 Plays some sound.
-$BTH		 Used for bubbles or breath. ("In front of head")
-$BWP		 UnitCombat_C
-$BWR		 Something with bow and rifle. Used in AttackRifle, AttackBow etc. "shoot now"?
-$CAH		 UnitCombat_C
-$Cxx		 UnitCombat_C, x is {P or S}
-$CSD	SoundEntries.dbc	 Emote sounds?
-$CVS	SoundEntriesAdvanced.dbc	 Sound
-$DSE		
-$DSL	SoundEntries.dbc	 Sound with something special. Use another one if you always want to have it playing..
-$DSO	SoundEntries.dbc	 Sound
-$DTH		 UnitCombat_C, death, this plays death sounds and more.
-$EMV		 MapLoad.cpp
-$ESD		 Plays some emote sound.
-$EWT		 MapLoad.cpp
-$FDx		 x is {1 to 5}. Calls some function in the Object VMT. Also plays some sound.
-$FDx		 x is {6 to 9}. Calls some function in the Object VMT.
-$FDX		 Should do nothing. But is existant.
-$FSD		 Plays some sound.
-$GCx		 Play gameobject custom sound referenced in GameObjectDisplayInfo.dbc. x can be from {0 to 3}: {Custom0, Custom1, Custom2, Custom3}
-$GOx		 Play gameobject sound referenced in GameObjectDisplayInfo.dbc. x can be from {0 to 5}: {Stand, Open, Loop, Close, Destroy, Opened}
-$HIT		 Get hit?
-$KVS		 MapLoad.cpp
-$SCD		 Plays some sound.
-$SHK	SpellEffectCameraShakes.dbc	 Add a camera shake
-$SHx		 x is {L or R}, fired on Sheath and SheathHip. "Left/right shoulder" was in the old list.
-$SMD		 Plays some sound.
-$SMG		 Plays some sound.
-$SND	SoundEntries.dbc	 Sound
-$TRD		 Does something with a spell, a sound and a spellvisual.
-$VGx		 UnitVehicle_C, x is {0 to 8}
-$VTx		 UnitVehicle_C, x is {0 to 8}
-$WxG		 x is {W or N}. Calls some function in the Object VMT.
--------	 ----------------------------------	 - Old documentation (?) ----------------------------------------------
-$CSx		 x is {L or R} ("Left/right hand") (?)
-$CFM		
-$CHD		 ("Head") (?)
-$CCH		 ("Bust") (?)
-$TRD		 ("Crotch") (?)
-$CCH		 ("Bust") (?)
-$BWR		 ("Right hand") (?)
-$CAH		
+ID   Data   Description
+DEST     exploding ballista, that one has a really fucked up block. Oo
+POIN   unk   something alliance gunship related (flying in icecrown)
+WHEE   601+   Used on wheels at vehicles.
+$tsp     p is {0 to 3} (position); t is {W, S, B, F (feet) or R} (type); s is {R or L} (right or left); this is used when running through snow for example.
+$AHx     UnitCombat_C, x is {0 to 3}
+$BRT     Plays some sound.
+$BTH     Used for bubbles or breath. ("In front of head")
+$BWP     UnitCombat_C
+$BWR     Something with bow and rifle. Used in AttackRifle, AttackBow etc. "shoot now"?
+$CAH     UnitCombat_C
+$Cxx     UnitCombat_C, x is {P or S}
+$CSD  SoundEntries.dbc   Emote sounds?
+$CVS  SoundEntriesAdvanced.dbc   Sound
+$DSE    
+$DSL  SoundEntries.dbc   Sound with something special. Use another one if you always want to have it playing..
+$DSO  SoundEntries.dbc   Sound
+$DTH     UnitCombat_C, death, this plays death sounds and more.
+$EMV     MapLoad.cpp
+$ESD     Plays some emote sound.
+$EWT     MapLoad.cpp
+$FDx     x is {1 to 5}. Calls some function in the Object VMT. Also plays some sound.
+$FDx     x is {6 to 9}. Calls some function in the Object VMT.
+$FDX     Should do nothing. But is existant.
+$FSD     Plays some sound.
+$GCx     Play gameobject custom sound referenced in GameObjectDisplayInfo.dbc. x can be from {0 to 3}: {Custom0, Custom1, Custom2, Custom3}
+$GOx     Play gameobject sound referenced in GameObjectDisplayInfo.dbc. x can be from {0 to 5}: {Stand, Open, Loop, Close, Destroy, Opened}
+$HIT     Get hit?
+$KVS     MapLoad.cpp
+$SCD     Plays some sound.
+$SHK  SpellEffectCameraShakes.dbc   Add a camera shake
+$SHx     x is {L or R}, fired on Sheath and SheathHip. "Left/right shoulder" was in the old list.
+$SMD     Plays some sound.
+$SMG     Plays some sound.
+$SND  SoundEntries.dbc   Sound
+$TRD     Does something with a spell, a sound and a spellvisual.
+$VGx     UnitVehicle_C, x is {0 to 8}
+$VTx     UnitVehicle_C, x is {0 to 8}
+$WxG     x is {W or N}. Calls some function in the Object VMT.
+-------   ----------------------------------   - Old documentation (?) ----------------------------------------------
+$CSx     x is {L or R} ("Left/right hand") (?)
+$CFM    
+$CHD     ("Head") (?)
+$CCH     ("Bust") (?)
+$TRD     ("Crotch") (?)
+$CCH     ("Bust") (?)
+$BWR     ("Right hand") (?)
+$CAH    
 $CST
 */
 
@@ -614,10 +614,10 @@ $CST
  * also contains positions for sheathed weapons, a shield, etc.
  */
 struct ModelAttachmentDef {
-	uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.
-	uint32 bone; // Somewhere it has to be attached.
-	Vec3D pos; // Relative to that bone of course.
-	AnimationBlock unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
+  uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.
+  uint32 bone; // Somewhere it has to be attached.
+  Vec3D pos; // Relative to that bone of course.
+  AnimationBlock unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
 };
 
 #pragma pack(pop)
