@@ -1175,7 +1175,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
   // render ops
   M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + profile->ofsSubmeshes);
-  ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + profile->ofsBatches);
+  M2Batch *batch = (M2Batch*)(g->getBuffer() + profile->ofsBatches);
   ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsTexFlags);
   uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTexLookup);
   uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
@@ -1197,20 +1197,20 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < profile->nBatches; j++)
   {
-    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
+    ModelRenderPass * pass = new ModelRenderPass(this, batch[j].skinSectionIndex);
      
-    pass->tex = texlookup[tex[j].textureid];
+    pass->tex = texlookup[batch[j].textureComboIndex];
  
     // TODO: figure out these flags properly -_-
-    ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
+    ModelRenderFlags &rf = renderFlags[batch[j].materialIndex];
 
     pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
     //	continue;
 
-    pass->color = tex[j].colorIndex;
+    pass->color = batch[j].colorIndex;
 
-    pass->opacity = transLookup[tex[j].transid];
+    pass->opacity = transLookup[batch[j].textureWeightComboIndex];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
@@ -1219,7 +1219,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
 
     // Use environmental reflection effects?
-    pass->useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
+    pass->useEnvMap = (texunitlookup[batch[j].textureCoordComboIndex] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
 
     // Disable environmental mapping if its been unchecked.
     if (pass->useEnvMap && !video.useEnvMapping)
@@ -1235,9 +1235,9 @@ void WoWModel::setLOD(GameFile * f, int index)
     pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
-    if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
+    if ((batch[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass->texanim = texanimlookup[tex[j].texanimid];
+      pass->texanim = texanimlookup[batch[j].textureTransformComboIndex];
     }
 
     rawPasses.push_back(pass);

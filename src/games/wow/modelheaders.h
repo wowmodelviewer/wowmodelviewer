@@ -283,25 +283,6 @@ class M2SkinSectionHD
 
 
 #define	TEXTUREUNIT_STATIC	16
-/// Lod part, A texture unit (sub of material)
-struct ModelTexUnit
-{
-  // probably the texture units size always >=number of materials it seems
-  uint16 flags;      // Usually 16 for static textures, and 0 for animated textures.
-  uint16 shading;    // If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
-  uint16 op;         // Material this texture is part of (index into mat)
-  uint16 op2;        // Usually same as above. Not sure what it's for
-  int16 colorIndex;  // A Color out of the Colors-Block or -1 if none.
-  uint16 flagsIndex; // RenderFlags (index into render flags, TexFlags)
-  uint16 texunit;    // Index into the texture unit lookup table.
-  uint16 op_count;   // Used for shaders (below), but also the number of textures to load,
-                     // starting at the texture lookup in the next field.
-  uint16 textureid;  // Index into Texture lookup table
-  uint16 texunit2;   // copy of texture unit value?
-  uint16 transid;    // Index into transparency lookup table.
-  uint16 texanimid;  // Index into uvanimation lookup table.
-};
-
 struct M2Batch
 {
   uint8 flags;                       // Usually 16 for static textures, and 0 for animated textures. &0x1: materials invert something; &0x2: transform &0x4: projected texture; &0x10: something batch compatible; &0x20: projected texture?; &0x40: use textureWeights
