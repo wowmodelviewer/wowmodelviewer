@@ -551,8 +551,8 @@ void CharDetails::fillCustomizationMap()
   std::unordered_set<int> hornsGeoset;
   for (auto it : m_model->geosets)
   {
-    if ((it->id / 100) == 24)
-      hornsGeoset.insert(it->id);
+    if ((it->skinSectionId / 100) == 24)
+      hornsGeoset.insert(it->skinSectionId);
   }
 
   if (hornsGeoset.size() > 0)
@@ -570,8 +570,8 @@ void CharDetails::fillCustomizationMap()
   std::unordered_set<int> blindfoldGeoset;
   for (auto it : m_model->geosets)
   {
-    if ((it->id / 100) == 25)
-      blindfoldGeoset.insert(it->id);
+    if ((it->skinSectionId / 100) == 25)
+      blindfoldGeoset.insert(it->skinSectionId);
   }
 
   if (blindfoldGeoset.size() > 0)

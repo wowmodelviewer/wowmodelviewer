@@ -213,64 +213,70 @@ struct M2SkinProfile
 };
 
 
-/// Lod part, One material + render operation
-struct ModelGeoset {
-	uint32 id;		// mesh part id?
-	uint16 vstart;	// first vertex, Starting vertex number.
-	uint16 vcount;	// num vertices, Number of vertices.
-	uint16 istart;	// first index, Starting triangle index (that's 3* the number of triangles drawn so far).
-	uint16 icount;	// num indices, Number of triangle indices.
-	uint16 nSkinnedBones;	// number of bone indices, Number of elements in the bone lookup table.
-	uint16 StartBones;		// ? always 1 to 4, Starting index in the bone lookup table.
-	uint16 rootBone;		// root bone?
-	uint16 nBones;		//
-	Vec3D BoundingBox[2];
-	float radius;
+struct M2SkinSection
+{
+  uint16 skinSectionId;       // Mesh part ID, see below.
+  uint16 level;               // (level << 16) is added (|ed) to startTriangle and alike to avoid having to increase those fields to uint32s.
+  uint16 vertexStart;         // Starting vertex number.
+  uint16 vertexCount;         // Number of vertices.
+  uint16 indexStart;          // Starting triangle index (that's 3* the number of triangles drawn so far).
+  uint16 indexCount;          // Number of triangle indices.
+  uint16 boneCount;           // Number of elements in the bone lookup table. Max seems to be 256 in Wrath. Shall be different from 0.
+  uint16 boneComboIndex;      // Starting index in the bone lookup table.
+  uint16 boneInfluences;      // <= 4
+  // from <=BC documentation: Highest number of bones needed at one time in this Submesh --Tinyn (wowdev.org) 
+  // In 2.x this is the amount of of bones up the parent-chain affecting the submesh --NaK
+  // Highest number of bones referenced by a vertex of this submesh. 3.3.5a and suspectedly all other client revisions. -- Skarn
+  uint16 centerBoneIndex;
+  Vec3D centerPosition;     // Average position of all the vertices in the sub mesh.
+  Vec3D sortCenterPosition; // The center of the box when an axis aligned box is built around the vertices in the submesh.
+  float sortRadius;             // Distance of the vertex farthest from CenterBoundingBox.
 };
 
 // same as ModelGeoset but with a uint32 as istart, to handle index > 65535 (present in HD models)
-class ModelGeosetHD {
+class M2SkinSectionHD
+{
   public:
-    ModelGeosetHD():
-      id(-1), vstart(0), vcount(0),
-      istart(0), icount(0), nSkinnedBones(0),
-      StartBones(0), rootBone(0), nBones(0), radius(0), display(false)
+    M2SkinSectionHD():
+      skinSectionId(-1), level(0), vertexStart(0), vertexCount(0),
+      indexStart(0), indexCount(0), boneCount(0),
+      boneComboIndex(0), boneInfluences(0), centerBoneIndex(0), sortRadius(0), display(false),
+      centerPosition(Vec3D(0, 0, 0)), sortCenterPosition(Vec3D(0, 0, 0))
       { 
-        BoundingBox[0] = Vec3D(0, 0, 0);
-        BoundingBox[1] = Vec3D(0, 0, 0);
       }
 
-    ModelGeosetHD(ModelGeoset & geo) :
-      id(geo.id&0x7FFF), vstart(geo.vstart), vcount(geo.vcount),
-      istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
-      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
-      radius(geo.radius), display(false)
+    M2SkinSectionHD(M2SkinSection & geo):
+      skinSectionId(geo.skinSectionId), vertexStart(geo.vertexStart), vertexCount(geo.vertexCount),
+      indexStart(geo.indexStart), indexCount(geo.indexCount), boneCount(geo.boneCount),
+      boneComboIndex(geo.boneComboIndex), boneInfluences(geo.boneInfluences), centerBoneIndex(geo.centerBoneIndex),
+      sortRadius(geo.sortRadius), display(false), centerPosition(geo.centerPosition), sortCenterPosition(geo.sortCenterPosition)
       {
-        BoundingBox[0] = geo.BoundingBox[0];
-        BoundingBox[1] = geo.BoundingBox[1];
       }
 
-    ModelGeosetHD(const ModelGeosetHD & geo) :
-      id(geo.id), vstart(geo.vstart), vcount(geo.vcount),
-      istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
-      StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
-      radius(geo.radius), display(geo.display)
+    M2SkinSectionHD(const M2SkinSectionHD & geo):
+      skinSectionId(geo.skinSectionId), level(geo.level), vertexStart(geo.vertexStart), vertexCount(geo.vertexCount),
+      indexStart(geo.indexStart), indexCount(geo.indexCount), boneCount(geo.boneCount),
+      boneComboIndex(geo.boneComboIndex), boneInfluences(geo.boneInfluences), centerBoneIndex(geo.centerBoneIndex),
+      sortRadius(geo.sortRadius), display(geo.display), centerPosition(geo.centerPosition), sortCenterPosition(geo.sortCenterPosition)
       {
-        BoundingBox[0] = geo.BoundingBox[0];
-        BoundingBox[1] = geo.BoundingBox[1];
       }
 
-    uint32 id;    // mesh part id?
-    uint16 vstart;  // first vertex, Starting vertex number.
-    uint16 vcount;  // num vertices, Number of vertices.
-    uint32 istart;  // first index, Starting triangle index (that's 3* the number of triangles drawn so far).
-    uint16 icount;  // num indices, Number of triangle indices.
-    uint16 nSkinnedBones; // number of bone indices, Number of elements in the bone lookup table.
-    uint16 StartBones;    // ? always 1 to 4, Starting index in the bone lookup table.
-    uint16 rootBone;    // root bone?
-    uint16 nBones;    //
-    Vec3D BoundingBox[2];
-    float radius;
+    uint16 skinSectionId;       // Mesh part ID, see below.
+    uint16 level;               // (level << 16) is added (|ed) to startTriangle and alike to avoid having to increase those fields to uint32s.
+    uint16 vertexStart;         // Starting vertex number.
+    uint16 vertexCount;         // Number of vertices.
+    uint32 indexStart;          // Starting triangle index (that's 3* the number of triangles drawn so far).
+    uint16 indexCount;          // Number of triangle indices.
+    uint16 boneCount;           // Number of elements in the bone lookup table. Max seems to be 256 in Wrath. Shall be different from 0.
+    uint16 boneComboIndex;      // Starting index in the bone lookup table.
+    uint16 boneInfluences;      // <= 4
+    // from <=BC documentation: Highest number of bones needed at one time in this Submesh --Tinyn (wowdev.org) 
+    // In 2.x this is the amount of of bones up the parent-chain affecting the submesh --NaK
+    // Highest number of bones referenced by a vertex of this submesh. 3.3.5a and suspectedly all other client revisions. -- Skarn
+    uint16 centerBoneIndex;
+    Vec3D centerPosition;     // Average position of all the vertices in the sub mesh.
+    Vec3D sortCenterPosition; // The center of the box when an axis aligned box is built around the vertices in the submesh.
+    float sortRadius;             // Distance of the vertex farthest from CenterBoundingBox.
     bool display;
 };
 

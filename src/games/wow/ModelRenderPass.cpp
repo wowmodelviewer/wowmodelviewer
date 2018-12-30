@@ -234,7 +234,7 @@ bool ModelRenderPass::init()
 
 void ModelRenderPass::render(bool animated)
 {
-  ModelGeosetHD * geoset = model->geosets[geoIndex];
+  M2SkinSectionHD * geoset = model->geosets[geoIndex];
   // we don't want to render completely transparent parts
   // render
   if (animated)
@@ -245,12 +245,12 @@ void ModelRenderPass::render(bool animated)
     // I can't notice a difference but I guess it can't hurt
     if (video.supportVBO && video.supportDrawRangeElements)
     {
-      glDrawRangeElements(GL_TRIANGLES, geoset->vstart, geoset->vstart + geoset->vcount, geoset->icount, GL_UNSIGNED_SHORT, &model->indices[geoset->istart]);
+      glDrawRangeElements(GL_TRIANGLES, geoset->vertexStart, geoset->vertexStart + geoset->vertexCount, geoset->indexCount, GL_UNSIGNED_SHORT, &model->indices[geoset->indexStart]);
     }
     else
     {
       glBegin(GL_TRIANGLES);
-      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+      for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
       {
         uint32 a = model->indices[b];
         glNormal3fv(model->normals[a]);
@@ -273,7 +273,7 @@ void ModelRenderPass::render(bool animated)
   else
   {
     glBegin(GL_TRIANGLES);
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+    for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
     {
       uint16 a = model->indices[b];
       glNormal3fv(model->normals[a]);

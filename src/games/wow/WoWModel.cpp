@@ -1174,7 +1174,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   indices = rawIndices;
 
   // render ops
-  ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + profile->ofsSubmeshes);
+  M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + profile->ofsSubmeshes);
   ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + profile->ofsBatches);
   ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsTexFlags);
   uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTexLookup);
@@ -1184,10 +1184,10 @@ void WoWModel::setLOD(GameFile * f, int index)
   uint32 istart = 0;
   for (size_t i = 0; i < profile->nSubmeshes; i++)
   {
-    ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
-    hdgeo->istart = istart;
-    istart += hdgeo->icount;
-    hdgeo->display = (hdgeo->id == 0);
+    M2SkinSectionHD * hdgeo = new M2SkinSectionHD(ops[i]);
+    hdgeo->indexStart = istart;
+    istart += hdgeo->indexCount;
+    hdgeo->display = (hdgeo->skinSectionId == 0);
     rawGeosets.push_back(hdgeo);
   }
 
@@ -1802,11 +1802,11 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
 
   for (auto & it : passes)
   {
-    ModelGeosetHD * geoset = geosets[it->geoIndex];
+    M2SkinSectionHD * geoset = geosets[it->geoIndex];
     if (!geoset->display)
       continue;
 
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+    for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
     {
       Vec3D v = vertices[indices[b]];
 
@@ -1885,7 +1885,7 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
   // geosets member
   for (uint i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    int id = geosets[i]->skinSectionId;
     if (id > a && id < b)
       showGeoset(i, (id == geosetID));
   }
@@ -1916,7 +1916,7 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
   // ALL geosets from 1 to 899 that aren't specified by it:
   for (uint i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    int id = geosets[i]->skinSectionId;
     if (id > 0 && id < geomax)
       showGeoset(i, cgd.count(id) > 0);
   }
@@ -1979,8 +1979,8 @@ void WoWModel::refreshMerging()
 
     for (auto it : modelsIt->geosets)
     {
-      it->istart += nbIndices;
-      it->vstart += nbVertices;
+      it->indexStart += nbIndices;
+      it->vertexStart += nbVertices;
       geosets.push_back(it);
     }
 
@@ -2035,7 +2035,7 @@ void WoWModel::refreshMerging()
     uint16 handTex = ModelRenderPass::INVALID_TEX;
     for (auto it : passes)
     {
-      if (geosets[it->geoIndex]->id / 100 == 23)
+      if (geosets[it->geoIndex]->skinSectionId / 100 == 23)
         handTex = it->tex;
     }
 
@@ -2044,7 +2044,7 @@ void WoWModel::refreshMerging()
       ModelRenderPass * p = new ModelRenderPass(*it);
       p->model = this;
       p->geoIndex += nbGeosets;
-      if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
+      if (geosets[it->geoIndex]->skinSectionId / 100 != 23) // don't copy texture for hands
         p->tex += (mergeIndex * TEXTURE_MAX);
       else
         p->tex = handTex; // use regular model texture instead
@@ -2381,7 +2381,7 @@ void WoWModel::refresh()
       {
         for (size_t i = 0; i < rawGeosets.size(); i++)
         {
-          int id = geosets[i]->id;
+          int id = geosets[i]->skinSectionId;
           if (id > 0 && id < 100)
             showGeoset(i, false);
         }
@@ -2392,7 +2392,7 @@ void WoWModel::refresh()
       {
         for (size_t i = 0; i < rawGeosets.size(); i++)
         {
-          int id = geosets[i]->id;
+          int id = geosets[i]->skinSectionId;
           if (id > 100 && id < 200)
             showGeoset(i, false);
         }
@@ -2403,7 +2403,7 @@ void WoWModel::refresh()
       {
         for (size_t i = 0; i < rawGeosets.size(); i++)
         {
-          int id = geosets[i]->id;
+          int id = geosets[i]->skinSectionId;
           if (id > 200 && id < 300)
             showGeoset(i, false);
         }
@@ -2414,7 +2414,7 @@ void WoWModel::refresh()
       {
         for (size_t i = 0; i < rawGeosets.size(); i++)
         {
-          int id = geosets[i]->id;
+          int id = geosets[i]->skinSectionId;
           if (id > 300 && id < 400)
             showGeoset(i, false);
         }
@@ -2425,7 +2425,7 @@ void WoWModel::refresh()
       {
         for (size_t i = 0; i < rawGeosets.size(); i++)
         {
-          int id = geosets[i]->id;
+          int id = geosets[i]->skinSectionId;
           if (id > 700 && id < 800)
             showGeoset(i, false);
         }
@@ -2455,7 +2455,7 @@ void WoWModel::refresh()
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
   for (size_t i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    int id = geosets[i]->skinSectionId;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
       showGeoset(i, (id == egtId));
   }
@@ -2517,7 +2517,7 @@ void WoWModel::restoreRawGeosets()
  
   for (auto it : rawGeosets)
   {
-    ModelGeosetHD * geo = new ModelGeosetHD(*it);
+    M2SkinSectionHD * geo = new M2SkinSectionHD(*it);
     geosets.push_back(geo);
   }
 
@@ -2721,11 +2721,11 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   {
     out << "	  <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass * p = m.passes[i];
-    ModelGeosetHD * geoset = m.geosets[p->geoIndex];
-    out << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
-    out << "      <indexCount>" << geoset->icount << "</indexCount>" << endl;
-    out << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;
-    out << "      <vertexEnd>" << geoset->vstart + geoset->vcount << "</vertexEnd>" << endl;
+    M2SkinSectionHD * geoset = m.geosets[p->geoIndex];
+    out << "      <indexStart>" << geoset->indexStart << "</indexStart>" << endl;
+    out << "      <indexCount>" << geoset->indexCount << "</indexCount>" << endl;
+    out << "      <vertexStart>" << geoset->vertexStart << "</vertexStart>" << endl;
+    out << "      <vertexEnd>" << geoset->vertexStart + geoset->vertexCount << "</vertexEnd>" << endl;
     out << "      <tex>" << p->tex << "</tex>" << endl;
     if (p->tex >= 0)
       out << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
@@ -2740,7 +2740,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <color>" << p->color << "</color>" << endl;
     out << "      <opacity>" << p->opacity << "</opacity>" << endl;
     out << "      <blendmode>" << p->blendmode << "</blendmode>" << endl;
-    out << "      <geoset>" << geoset->id << "</geoset>" << endl;
+    out << "      <geoset>" << geoset->skinSectionId << "</geoset>" << endl;
     out << "      <swrap>" << p->swrap << "</swrap>" << endl;
     out << "      <twrap>" << p->twrap << "</twrap>" << endl;
     out << "      <ocol>" << p->ocol << "</ocol>" << endl;
@@ -2753,18 +2753,18 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   for (size_t i = 0; i < m.geosets.size(); i++)
   {
     out << "	  <Geoset id=\"" << i << "\">" << endl;
-    out << "      <id>" << m.geosets[i]->id << "</id>" << endl;
-    out << "      <vstart>" << m.geosets[i]->vstart << "</vstart>" << endl;
-    out << "      <vcount>" << m.geosets[i]->vcount << "</vcount>" << endl;
-    out << "      <istart>" << m.geosets[i]->istart << "</istart>" << endl;
-    out << "      <icount>" << m.geosets[i]->icount << "</icount>" << endl;
-    out << "      <nSkinnedBones>" << m.geosets[i]->nSkinnedBones << "</nSkinnedBones>" << endl;
-    out << "      <StartBones>" << m.geosets[i]->StartBones << "</StartBones>" << endl;
-    out << "      <rootBone>" << m.geosets[i]->rootBone << "</rootBone>" << endl;
-    out << "      <nBones>" << m.geosets[i]->nBones << "</nBones>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0] << "</BoundingBox>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1] << "</BoundingBox>" << endl;
-    out << "      <radius>" << m.geosets[i]->radius << "</radius>" << endl;
+    out << "      <skinSectionId>" << m.geosets[i]->skinSectionId << "</skinSectionId>" << endl;
+    out << "      <vertexStart>" << m.geosets[i]->vertexStart << "</vertexStart>" << endl;
+    out << "      <vertexCount>" << m.geosets[i]->vertexCount << "</vertexCount>" << endl;
+    out << "      <indexStart>" << m.geosets[i]->indexStart << "</indexStart>" << endl;
+    out << "      <indexCount>" << m.geosets[i]->indexCount << "</indexCount>" << endl;
+    out << "      <boneCount>" << m.geosets[i]->boneCount << "</boneCount>" << endl;
+    out << "      <boneComboIndex>" << m.geosets[i]->boneComboIndex << "</boneComboIndex>" << endl;
+    out << "      <boneInfluences>" << m.geosets[i]->boneInfluences << "</boneInfluences>" << endl;
+    out << "      <centerBoneIndex>" << m.geosets[i]->centerBoneIndex << "</centerBoneIndex>" << endl;
+    out << "      <centerPosition>" << m.geosets[i]->centerPosition << "</centerPosition>" << endl;
+    out << "      <sortCenterPosition>" << m.geosets[i]->sortCenterPosition << "</sortCenterPosition>" << endl;
+    out << "      <sortRadius>" << m.geosets[i]->sortRadius << "</sortRadius>" << endl;
     out << "	  </Geoset>" << endl;
   }
   out << "	</Geosets>" << endl;

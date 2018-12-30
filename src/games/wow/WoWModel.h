@@ -94,7 +94,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<ModelVertex> rawVertices;
   std::vector<uint32> rawIndices;
   std::vector<ModelRenderPass *> rawPasses;
-  std::vector<ModelGeosetHD *> rawGeosets;
+  std::vector<M2SkinSectionHD *> rawGeosets;
 
   void restoreRawGeosets();
 
@@ -152,7 +152,7 @@ public:
   std::string lodname;
 
   std::vector<ModelRenderPass *> passes;
-  std::vector<ModelGeosetHD *> geosets;
+  std::vector<M2SkinSectionHD *> geosets;
 
   // ===============================
   // Toggles

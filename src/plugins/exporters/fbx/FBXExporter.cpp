@@ -272,14 +272,14 @@ void FBXExporter::createMesh()
       FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
       m_p_meshNode->AddMaterial(material);
 
-      ModelGeosetHD * g = m_p_model->geosets[p->geoIndex];
-      size_t num_of_faces = g->icount / 3;
+      M2SkinSectionHD * g = m_p_model->geosets[p->geoIndex];
+      size_t num_of_faces = g->indexCount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
         mesh->BeginPolygon(mtrl_index);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 1]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 2]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3 + 1]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3 + 2]);
         mesh->EndPolygon();
       }
 
