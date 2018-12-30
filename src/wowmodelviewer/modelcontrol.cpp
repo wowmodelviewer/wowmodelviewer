@@ -353,11 +353,11 @@ void ModelControl::Update()
 
   // Loop through all the views.
   cbLod->Clear();
-  if (model->header.nViews == 1)
+  if (model->header.nSkinProfiles == 1)
   {
     cbLod->Append(wxT("1 (Only View)"));
   }
-  else if (model->header.nViews == 2)
+  else if (model->header.nSkinProfiles == 2)
   {
 		cbLod->Append(wxT("1 (Worst)"));
 		cbLod->Append(wxT("2 (Best)"));
@@ -365,11 +365,11 @@ void ModelControl::Update()
   else
   {
     cbLod->Append(wxT("1 (Worst)"));
-    for (size_t i=1; i<(model->header.nViews-1); i++)
+    for (size_t i = 1; i<(model->header.nSkinProfiles - 1); i++)
     {
       cbLod->Append(wxString::Format(wxT("%i"), i+1));
     }
-    cbLod->Append(wxString::Format(wxT("%i (Best)"), model->header.nViews));
+    cbLod->Append(wxString::Format(wxT("%i (Best)"), model->header.nSkinProfiles));
   }
   cbLod->SetSelection(0);
 

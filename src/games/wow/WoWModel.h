@@ -103,7 +103,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<RibbonEmitter> ribbons;
   std::vector<TextureAnim> texAnims;
   std::vector<ModelColor> colors;
-  std::vector<ModelTransparency> transparency;
+  std::vector<ModelTransparency> textureWeights;
   std::vector<ModelLight> lights;
   std::vector<ModelEvent> events;
 

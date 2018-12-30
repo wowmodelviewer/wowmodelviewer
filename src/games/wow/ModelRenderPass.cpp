@@ -115,11 +115,11 @@ bool ModelRenderPass::init()
 
   // opacity
   if (opacity != -1 && 
-      opacity < (int16)model->transparency.size() && 
-      model->transparency[opacity].trans.uses(0))
+      opacity < (int16)model->textureWeights.size() && 
+      model->textureWeights[opacity].weight.uses(0))
   {
     // Alfred 2008.10.02 buggy opacity make model invisible, TODO
-    ocol.w *= model->transparency[opacity].trans.getValue(0, model->animtime);
+    ocol.w *= model->textureWeights[opacity].weight.getValue(0, model->animtime);
   }
 
   // exit and return false before affecting the opengl render state

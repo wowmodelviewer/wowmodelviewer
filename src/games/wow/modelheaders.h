@@ -31,89 +31,100 @@ struct CharModelDetails {
 	}
 };
 
+/* global flags
+uint32_t flag_tilt_x : 1;
+uint32_t flag_tilt_y : 1;
+uint32_t: 1;
+uint32_t flag_use_texture_combiner_combos : 1;      // add textureCombinerCombos array to end of data
+uint32_t: 1;
+uint32_t flag_load_phys_data : 1;
+uint32_t: 1;
+uint32_t flag_unk_0x80 : 1;                         // with this flag unset, demon hunter tattoos stop glowing
+// since Cata (4.0.1.12911) every model now has this flag
+uint32_t flag_camera_related : 1;                   // TODO: verify version
+uint32_t flag_new_particle_record : 1;              // In CATA: new version of ParticleEmitters. By default, length of M2ParticleOld is 476.
+// But if 0x200 is set or if version is bigger than 271, length of M2ParticleOld is 492.
+uint32_t flag_unk_0x400 : 1;
+uint32_t flag_texture_transforms_use_bone_sequences : 1; // >= WoD 0x800 -- When set, texture transforms are animated using the sequence being played on the bone found by index in tex_unit_lookup_table[textureTransformIndex], instead of using the sequence being played on the model's first bone. Example model: 6DU_HellfireRaid_FelSiege03_Creature
+uint32_t flag_unk_0x1000 : 1;
+uint32_t flag_unk_0x2000 : 1;                       // seen in various legion models
+uint32_t flag_unk_0x4000 : 1;
+uint32_t flag_unk_0x8000 : 1;                       // seen in UI_MainMenu_Legion
+uint32_t flag_unk_0x10000 : 1;
+uint32_t flag_unk_0x20000 : 1;
+uint32_t flag_unk_0x40000 : 1;
+uint32_t flag_unk_0x80000 : 1;
+uint32_t flag_unk_0x100000 : 1;
+uint32_t flag_unk_0x200000 : 1;                     // apparently: use 24500 upgraded model format: chunked .anim files, change in the exporter reordering sequence+bone blocks before name
+*/
+
 struct ModelHeader {
-	char id[4];
-	uint8 version[4];
-	uint32 nameLength;
-	uint32 nameOfs;
-	uint32 GlobalModelFlags; // 1: tilt x, 2: tilt y, 4:, 8: add BlendMaps fields in header, 16: ; 0x200000 : 24500 upgraded model format: chunked .anim files, change in the exporter reordering sequence+bone blocks before name
-
-	uint32 nGlobalSequences; // AnimationRelated
-	uint32 ofsGlobalSequences; // A list of timestamps.
-	uint32 nAnimations; // AnimationRelated
-	uint32 ofsAnimations; // Information about the animations in the model.
-	uint32 nAnimationLookup; // AnimationRelated
-	uint32 ofsAnimationLookup; // Mapping of global IDs to the entries in the Animation sequences block.
-	//uint32 nD;
-	//uint32 ofsD;
-	uint32 nBones; // BonesAndLookups
-	uint32 ofsBones; // Information about the bones in this model.
-	uint32 nKeyBoneLookup; // BonesAndLookups
-	uint32 ofsKeyBoneLookup; // Lookup table for key skeletal bones.
-
-	uint32 nVertices; // GeometryAndRendering
-	uint32 ofsVertices; // Vertices of the model.
-	uint32 nViews; // GeometryAndRendering
-	//uint32 ofsViews; // Views (LOD) are now in .skins.
-
-	uint32 nColors; // ColorsAndTransparency
-	uint32 ofsColors; // Color definitions.
-
-	uint32 nTextures; // TextureAndTheifAnimation
-	uint32 ofsTextures; // Textures of this model.
-
-	uint32 nTransparency; // H,  ColorsAndTransparency
-	uint32 ofsTransparency; // Transparency of textures.
-	//uint32 nI;   // always unused ?
-	//uint32 ofsI;
-	uint32 nTexAnims;	// J, TextureAndTheifAnimation
-	uint32 ofsTexAnims;
-	uint32 nTexReplace; // TextureAndTheifAnimation
-	uint32 ofsTexReplace; // Replaceable Textures.
-
-	uint32 nTexFlags; // Render Flags
-	uint32 ofsTexFlags; // Blending modes / render flags.
-	uint32 nBoneLookup; // BonesAndLookups
-	uint32 ofsBoneLookup; // A bone lookup table.
-
-	uint32 nTexLookup; // TextureAndTheifAnimation
-	uint32 ofsTexLookup; // The same for textures.
-
-	uint32 nTexUnitLookup;		// L, TextureAndTheifAnimation, seems gone after Cataclysm
-	uint32 ofsTexUnitLookup; // And texture units. Somewhere they have to be too.
-	uint32 nTransparencyLookup; // M, ColorsAndTransparency
-	uint32 ofsTransparencyLookup; // Everything needs its lookup. Here are the transparencies.
-	uint32 nTexAnimLookup; // TextureAndTheifAnimation
-	uint32 ofsTexAnimLookup; // Wait. Do we have animated Textures? Wasn't ofsTexAnims deleted? oO
-
+  char id[4];                           // "MD20". Legion uses a chunked file format starting with MD21.
+  uint8 version[4];
+  uint32 nameLength;                    // should be globally unique, used to reload by name in internal clients
+  uint32 nameOfs;
+  uint32 globalFlags;                   // see above
+  uint32 nGlobalLoops;                  // Timestamps used in global looping animations.
+  uint32 ofsGlobalLoops;
+	uint32 nSequences;                    // Information about the animations in the model.
+	uint32 ofsSequences; 
+  uint32 nAnimationLookup;              // Mapping of sequence IDs to the entries in the Animation sequences block.
+	uint32 ofsAnimationLookup; 
+	uint32 nBones;                        // MAX_BONES = 0x100 => Creature\SlimeGiant\GiantSlime.M2 has 312 bones (WOTLK)
+	uint32 ofsBones;
+	uint32 nKeyBoneLookup;                // Lookup table for key skeletal bones.
+	uint32 ofsKeyBoneLookup; 
+	uint32 nVertices; 
+	uint32 ofsVertices; 
+	uint32 nSkinProfiles;                 // Views (LOD) are now in .skins
+	uint32 nColors;                       // Color and alpha animations definitions.
+	uint32 ofsColors; 
+	uint32 nTextures; 
+	uint32 ofsTextures; 
+  uint32 nTextureWeights;               // Transparency of textures.
+  uint32 ofsTextureWeights;   
+  uint32 nTextureTransforms;
+  uint32 ofsTextureTransforms;
+	uint32 nTextureReplaceLookup;
+	uint32 ofsTextureReplaceLookup;
+	uint32 nMaterials;                    // Blending modes / render flags.
+	uint32 ofsMaterials; 
+	uint32 nBoneLookup; 
+	uint32 ofsBoneLookup; 
+	uint32 nTextureLookup; 
+	uint32 ofsTextureLookup; 
+	uint32 nTextureUnitLookup;		        // >= Cata : unused
+	uint32 ofsTextureUnitLookup; 
+	uint32 nTransparencyLookup; 
+	uint32 ofsTransparencyLookup; 
+	uint32 nTextureTransformLookup; 
+	uint32 ofsTextureTransformLookup; 
+  Sphere boundSphere;
 	Sphere collisionSphere;
-	Sphere boundSphere;
-
-	uint32 nBoundingTriangles; // Miscellaneous
-	uint32 ofsBoundingTriangles;
-	uint32 nBoundingVertices; // Miscellaneous
-	uint32 ofsBoundingVertices;
-	uint32 nBoundingNormals; // Miscellaneous
-	uint32 ofsBoundingNormals;
-
-	uint32 nAttachments; // O, Miscellaneous
-	uint32 ofsAttachments; // Attachments are for weapons etc.
-	uint32 nAttachLookup; // P, Miscellaneous
-	uint32 ofsAttachLookup; // Of course with a lookup.
-	uint32 nEvents; //
-	uint32 ofsEvents; // Used for playing sounds when dying and a lot else.
-	uint32 nLights; // R
-	uint32 ofsLights; // Lights are mainly used in loginscreens but in wands and some doodads too.
-	uint32 nCameras; // S, Miscellaneous
-	uint32 ofsCameras; // The cameras are present in most models for having a model in the Character-Tab.
-	uint32 nCameraLookup; // Miscellaneous
-	uint32 ofsCameraLookup; // And lookup-time again, unit16
-	uint32 nRibbonEmitters; // U, Effects
-	uint32 ofsRibbonEmitters; // Things swirling around. See the CoT-entrance for light-trails.
-	uint32 nParticleEmitters; // V, Effects
-	uint32 ofsParticleEmitters; // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
-	uint32 nUnknown; // Apparently added in models with the 8-flag only. If that flag is not set, this field does not exist!
-	uint32 ofsUnknown; // An array of shorts, related to renderflags.
+	uint32 nCollisionTriangles; 
+  uint32 ofsCollisionTriangles;
+  uint32 nCollisionVertices; 
+  uint32 ofsCollisionVertices;
+  uint32 nCollisionNormals; 
+  uint32 ofsCollisionNormals;
+	uint32 nAttachments;                  // position of equipped weapons or effects
+	uint32 ofsAttachments;
+	uint32 nAttachLookup; 
+	uint32 ofsAttachLookup;
+	uint32 nEvents;                       // Used for playing sounds when dying and a lot else.
+	uint32 ofsEvents;
+	uint32 nLights;                       // Lights are mainly used in loginscreens but in wands and some doodads too.
+	uint32 ofsLights;
+	uint32 nCameras;                      // The cameras are present in most models for having a model in the character tab.
+	uint32 ofsCameras;
+	uint32 nCameraLookup;
+	uint32 ofsCameraLookup; 
+	uint32 nRibbonEmitters;               // Things swirling around. See the CoT-entrance for light-trails.
+	uint32 ofsRibbonEmitters;
+	uint32 nParticleEmitters;             
+	uint32 ofsParticleEmitters;
+  uint32 nTextureCombinerCombos;        // When set, textures blending is overriden by the associated array.
+  uint32 ofsTextureCombinerCombos;
 };
 
 #define ANIMATION_STORED_IN_M2 0x20 // primary bone sequence -- If set, the animation data is in the.m2 file.If not set, the animation data is in an.anim file.
@@ -367,8 +378,8 @@ struct ModelColorDef {
 };
 
 // block H - transparency defs
-struct ModelTransDef {
-	AnimationBlock trans; // (UInt16)
+struct M2TextureWeight {
+	AnimationBlock weight; // (UInt16)
 };
 
 struct ModelTextureDef {
