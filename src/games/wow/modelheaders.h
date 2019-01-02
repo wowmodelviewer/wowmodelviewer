@@ -356,15 +356,18 @@ Mode   Shading     String
 
 // block X - render flags
 /* flags */
-#define  RENDERFLAGS_UNLIT  1
-#define  RENDERFLAGS_UNFOGGED  2
-#define  RENDERFLAGS_TWOSIDED  4
-#define  RENDERFLAGS_BILLBOARD  8
-#define  RENDERFLAGS_ZBUFFERED  16
-struct ModelRenderFlags {
+#define  RENDERFLAGS_UNLIT      0x01 // Unlit
+#define  RENDERFLAGS_UNFOGGED   0x02 // Unfogged
+#define  RENDERFLAGS_TWOSIDED   0x04 // Two - sided(no backface culling if set)
+#define  RENDERFLAGS_BILLBOARD  0x08 // depthTest
+#define  RENDERFLAGS_ZBUFFERED  0x10 // depthWrite
+#define  RENDERFLAGS_UNK1       0x40 // shadow batch related ? ? ? (seen in WoD)
+#define  RENDERFLAGS_UNK2       0x80 // shadow batch related ? ? ? (seen in WoD)
+#define  RENDERFLAGS_UNK3       0x400 // ? ? ? (seen in WoD)
+#define  RENDERFLAGS_NOALPHA    0x800 // prevent alpha for custom elements. if set, use(fully) opaque or transparent. (litSphere, shadowMonk) (MoP + )
+
+struct M2Material {
   uint16 flags;
-  //unsigned char f1;
-  //unsigned char f2;
   uint16 blend; // see enums.h, enum BlendModes
 };
 

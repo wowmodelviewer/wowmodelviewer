@@ -24,7 +24,7 @@ enum TextureFlags
 ModelRenderPass::ModelRenderPass(WoWModel * m):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
   unlit(false), noZWrite(false), billboard(false),
-  texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX),
+  texanim(-1), color(-1), opacity(-1), blendmode(-1),
   swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
   model(m), geoIndex(-1)
 {
@@ -91,7 +91,7 @@ void ModelRenderPass::deinit()
 bool ModelRenderPass::init()
 {
   // May as well check that we're going to render the geoset before doing all this crap.
-  if (!model || geoIndex == -1 || !model->geosets[geoIndex]->display)
+  if (!displayed())
     return false;
 
   // COLOUR
@@ -135,7 +135,7 @@ bool ModelRenderPass::init()
 
   // TEXTURE
   // bind to our texture
-  GLuint texId = model->getGLTexture(tex);
+  GLuint texId = model->getGLTexture(texs[0]);
   if (texId != INVALID_TEX)
     glBindTexture(GL_TEXTURE_2D, texId);
 
@@ -238,56 +238,34 @@ bool ModelRenderPass::init()
   return true;
 }
 
-void ModelRenderPass::render(bool animated)
+void ModelRenderPass::render()
 {
+  if (!init())
+    return;
+
   M2SkinSectionHD * geoset = model->geosets[geoIndex];
-  // we don't want to render completely transparent parts
-  // render
-  if (animated)
+  if (video.supportVBO && video.supportDrawRangeElements)
   {
     
     //glDrawElements(GL_TRIANGLES, p.indexCount, GL_UNSIGNED_SHORT, indices + p.indexStart);
     // a GDC OpenGL Performace Tuning paper recommended glDrawRangeElements over glDrawElements
     // I can't notice a difference but I guess it can't hurt
-    if (video.supportVBO && video.supportDrawRangeElements)
-    {
-      glDrawRangeElements(GL_TRIANGLES, geoset->vertexStart, geoset->vertexStart + geoset->vertexCount, geoset->indexCount, GL_UNSIGNED_SHORT, &model->indices[geoset->indexStart]);
-    }
-    else
-    {
-      glBegin(GL_TRIANGLES);
-      for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
-      {
-        uint32 a = model->indices[b];
-        glNormal3fv(model->normals[a]);
-        glTexCoord2fv(model->origVertices[a].texcoords[0]);
-        glVertex3fv(model->vertices[a]);
-        /*
-        if (geoset->id == 2401 && k < 10)
-        {
-          LOG_INFO << "b" << b;
-          LOG_INFO << "a" << model->indices[b] << a;
-          LOG_INFO << "model->normals[a]" << model->normals[a].x << model->normals[a].y << model->normals[a].z;
-          LOG_INFO << "model->vertices[a]" << model->vertices[a].x << model->vertices[a].y << model->vertices[a].z;
-        }
-        */
-
-      }
-      glEnd();
-    }
+    glDrawRangeElements(GL_TRIANGLES, geoset->vertexStart, geoset->vertexStart + geoset->vertexCount, geoset->indexCount, GL_UNSIGNED_SHORT, &model->indices[geoset->indexStart]);
   }
   else
   {
     glBegin(GL_TRIANGLES);
     for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
     {
-      uint16 a = model->indices[b];
+      uint32 a = model->indices[b];
       glNormal3fv(model->normals[a]);
       glTexCoord2fv(model->origVertices[a].texcoords[0]);
       glVertex3fv(model->vertices[a]);
     }
     glEnd();
   }
+
+  deinit();
 }
 
 void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
@@ -297,17 +275,39 @@ void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
 
   ModelTextureDef *texdef = (ModelTextureDef*)(model->gamefile->getBuffer() + model->header.ofsTextures);
   int16 *transLookup = (int16*)(model->gamefile->getBuffer() + model->header.ofsTransparencyLookup);
-  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(model->gamefile->getBuffer() + model->header.ofsMaterials);
+  M2Material *renderFlags = (M2Material*)(model->gamefile->getBuffer() + model->header.ofsMaterials);
   uint16 *texlookup = (uint16*)(model->gamefile->getBuffer() + model->header.ofsTextureLookup);
-  uint16 *texanimlookup = (uint16*)(model->gamefile->getBuffer() + model->header.ofsTextureTransformLookup);
+  int16 *texanimlookup = (int16*)(model->gamefile->getBuffer() + model->header.ofsTextureTransformLookup);
   int16 *texunitlookup = (int16*)(model->gamefile->getBuffer() + model->header.ofsTextureUnitLookup);
 
+  LOG_INFO << "texture lookup";
+  for (uint i = 0; i < model->header.nTextureLookup; i++)
+    LOG_INFO << i << texlookup[i];
+
+  LOG_INFO << "materials";
+  for (uint i = 0; i < model->header.nMaterials; i++)
+    LOG_INFO << i << renderFlags[i].blend << hex << renderFlags[i].flags;
+
+  LOG_INFO << "texture transform lookup";
+  for (uint i = 0; i < model->header.nTextureTransformLookup; i++)
+    LOG_INFO << i << texanimlookup[i];
+
+  LOG_INFO << "texture transparency lookup";
+  for (uint i = 0; i < model->header.nTransparencyLookup; i++)
+    LOG_INFO << i << transLookup[i];
+
+  LOG_INFO << "texture unit lookup";
+  for (uint i = 0; i < model->header.nTextureUnitLookup; i++)
+    LOG_INFO << i << texunitlookup[i];
+
+
   geoIndex = batch.skinSectionIndex;
-
-  tex = texlookup[batch.textureComboIndex];
-
+ 
+  for (uint i = 0; i < batch.textureCount; i++)
+    texs.push_back(texlookup[batch.textureComboIndex+i]);
+  
   // TODO: figure out these flags properly -_-
-  ModelRenderFlags &rf = renderFlags[batch.materialIndex];
+  M2Material &rf = renderFlags[batch.materialIndex];
 
   blendmode = rf.blend;
   //if (rf.blend == 0) // Test to disable/hide different blend types
@@ -336,8 +336,8 @@ void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
   trans = (blendmode > 0) && (opacity > 0);	// Transparency - not the correct way to get transparency
 
   // Texture flags
-  swrap = (texdef[tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
-  twrap = (texdef[tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
+  swrap = (texdef[texs[0]].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
+  twrap = (texdef[texs[0]].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
   // tex->flags: Usually 16 for static textures, and 0 for animated textures.
   if ((batch.flags & TEXTUREUNIT_STATIC) == 0)
@@ -345,3 +345,12 @@ void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
     texanim = texanimlookup[batch.textureTransformComboIndex];
   }
 }
+
+bool ModelRenderPass::displayed()
+{
+  if(!model || geoIndex == -1 || !model->geosets[geoIndex]->display)
+    return false;
+
+  return true;
+}
+

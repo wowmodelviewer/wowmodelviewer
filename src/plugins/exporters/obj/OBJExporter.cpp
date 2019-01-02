@@ -222,7 +222,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass * p = model->passes[i];
 
-    if (p->init())
+    if (p->displayed())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
@@ -266,7 +266,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass * p = model->passes[i];
     // we don't want to render completely transparent parts
-    if (p->init())
+    if (p->displayed())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
@@ -286,7 +286,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   for (size_t i=0; i<model->passes.size(); i++)
   {
     ModelRenderPass * p = model->passes[i];
-    if (p->init())
+    if (p->displayed())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
@@ -309,7 +309,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
   {
     ModelRenderPass * p = model->passes[i];
 
-    if (p->init())
+    if (p->displayed())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       // Build Vert2Point DB
@@ -370,9 +370,9 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
   {
     ModelRenderPass * p = model->passes[i];
 
-    if (p->init())
+    if (p->displayed())
     {
-      QString tex = model->getNameForTex(p->tex);
+      QString tex = model->getNameForTex(p->texs[0]);
       QString texfile = QFileInfo(tex).completeBaseName();
       tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
@@ -411,7 +411,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
 
       file << "map_Kd " << tex << "\n";
       tex = QFileInfo(mtlFile).absolutePath() + "\\" + tex;
-      texToExport[tex.toStdWString()] = model->getGLTexture(p->tex);
+      texToExport[tex.toStdWString()] = model->getGLTexture(p->texs[0]);
     }
   }
 

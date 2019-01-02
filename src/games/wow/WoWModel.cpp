@@ -1180,6 +1180,20 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < profile->nBatches; j++)
   {
+    LOG_INFO << "----- BATCH" << j << "-----";
+    LOG_INFO << "flags" << batch[j].flags;
+    LOG_INFO << "priorityPlane" << batch[j].priorityPlane;
+    LOG_INFO << "shader_id" << batch[j].shader_id;
+    LOG_INFO << "skinSectionIndex" << batch[j].skinSectionIndex;
+    LOG_INFO << "geosetIndex" << batch[j].geosetIndex;
+    LOG_INFO << "colorIndex" << batch[j].colorIndex;
+    LOG_INFO << "materialIndex" << batch[j].materialIndex;
+    LOG_INFO << "materialLayer" << batch[j].materialLayer;
+    LOG_INFO << "textureCount" << batch[j].textureCount;
+    LOG_INFO << "textureComboIndex" << batch[j].textureComboIndex;
+    LOG_INFO << "textureWeightComboIndex" << batch[j].textureWeightComboIndex;
+    LOG_INFO << "textureTransformComboIndex" << batch[j].textureTransformComboIndex;
+
     ModelRenderPass * pass = new ModelRenderPass(this);
     pass->setupFromM2Batch(batch[j]);
     rawPasses.push_back(pass);
@@ -1499,13 +1513,7 @@ inline void WoWModel::drawModel()
 
   // Render the various parts of the model.
   for (auto it : passes)
-  {
-    if (it->init())
-    {
-      it->render(animated);
-      it->deinit();
-    }
-  }
+    it->render();
   
   if (showWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1980,7 +1988,7 @@ void WoWModel::refreshMerging()
     for (auto it : passes)
     {
       if (geosets[it->geoIndex]->skinSectionId / 100 == 23)
-        handTex = it->tex;
+        handTex = it->texs[0];
     }
 
     for (auto it : modelsIt->passes)
@@ -1989,9 +1997,9 @@ void WoWModel::refreshMerging()
       p->model = this;
       p->geoIndex += nbGeosets;
       if (geosets[it->geoIndex]->skinSectionId / 100 != 23) // don't copy texture for hands
-        p->tex += (mergeIndex * TEXTURE_MAX);
+        p->texs[0] += (mergeIndex * TEXTURE_MAX);
       else
-        p->tex = handTex; // use regular model texture instead
+        p->texs[0] = handTex; // use regular model texture instead
 
       passes.push_back(p);
     }
@@ -2671,9 +2679,9 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <indexCount>" << geoset->indexCount << "</indexCount>" << endl;
     out << "      <vertexStart>" << geoset->vertexStart << "</vertexStart>" << endl;
     out << "      <vertexEnd>" << geoset->vertexStart + geoset->vertexCount << "</vertexEnd>" << endl;
-    out << "      <tex>" << p->tex << "</tex>" << endl;
-    if (p->tex >= 0)
-      out << "      <texName>" << TEXTUREMANAGER.get(p->tex).toStdString() << "</texName>" << endl;
+    out << "      <tex>" << p->texs[0] << "</tex>" << endl;
+    if (p->texs[0] >= 0)
+      out << "      <texName>" << TEXTUREMANAGER.get(p->texs[0]).toStdString() << "</texName>" << endl;
     out << "      <useTex2>" << p->useTex2 << "</useTex2>" << endl;
     out << "      <useEnvMap>" << p->useEnvMap << "</useEnvMap>" << endl;
     out << "      <cull>" << p->cull << "</cull>" << endl;
@@ -2867,7 +2875,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "  <TextureLists>" << endl;
   for (auto it : m.passes)
   {
-    GLuint tex = m.getGLTexture(it->tex);
+    GLuint tex = m.getGLTexture(it->texs[0]);
     if (tex != ModelRenderPass::INVALID_TEX)
       out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>" << endl;
   }
