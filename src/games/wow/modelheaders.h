@@ -297,7 +297,7 @@ class M2SkinSectionHD
 
 
 
-#define  TEXTUREUNIT_STATIC  16
+#define  M2BATCH_STATIC  16
 struct M2Batch
 {
   uint8 flags;                       // Usually 16 for static textures, and 0 for animated textures. &0x1: materials invert something; &0x2: transform &0x4: projected texture; &0x10: something batch compatible; &0x20: projected texture?; &0x40: use textureWeights
@@ -305,7 +305,7 @@ struct M2Batch
   uint16 shader_id;                  // See below.
   uint16 skinSectionIndex;           // A duplicate entry of a submesh from the list above.
   uint16 geosetIndex;                // See below.
-  uint16 colorIndex;                 // A Color out of the Colors-Block or -1 if none.
+  int16 colorIndex;                  // A Color out of the Colors-Block or -1 if none.
   uint16 materialIndex;              // The renderflags used on this texture-unit.
   uint16 materialLayer;              // Capped at 7 (see CM2Scene::BeginDraw)
   uint16 textureCount;               // 1 to 4. See below. Also seems to be the number of textures to load, starting at the texture lookup in the next field (0x10).
@@ -356,15 +356,15 @@ Mode   Shading     String
 
 // block X - render flags
 /* flags */
-#define  RENDERFLAGS_UNLIT      0x01 // Unlit
-#define  RENDERFLAGS_UNFOGGED   0x02 // Unfogged
-#define  RENDERFLAGS_TWOSIDED   0x04 // Two - sided(no backface culling if set)
-#define  RENDERFLAGS_BILLBOARD  0x08 // depthTest
-#define  RENDERFLAGS_ZBUFFERED  0x10 // depthWrite
-#define  RENDERFLAGS_UNK1       0x40 // shadow batch related ? ? ? (seen in WoD)
-#define  RENDERFLAGS_UNK2       0x80 // shadow batch related ? ? ? (seen in WoD)
-#define  RENDERFLAGS_UNK3       0x400 // ? ? ? (seen in WoD)
-#define  RENDERFLAGS_NOALPHA    0x800 // prevent alpha for custom elements. if set, use(fully) opaque or transparent. (litSphere, shadowMonk) (MoP + )
+#define  M2MATERIAL_UNLIT      0x01 // Unlit
+#define  M2MATERIAL_UNFOGGED   0x02 // Unfogged
+#define  M2MATERIAL_TWOSIDED   0x04 // Two - sided(no backface culling if set)
+#define  M2MATERIAL_BILLBOARD  0x08 // depthTest
+#define  M2MATERIAL_ZBUFFERED  0x10 // depthWrite
+#define  M2MATERIAL_UNK1       0x40 // shadow batch related ? ? ? (seen in WoD)
+#define  M2MATERIAL_UNK2       0x80 // shadow batch related ? ? ? (seen in WoD)
+#define  M2MATERIAL_UNK3       0x400 // ? ? ? (seen in WoD)
+#define  M2MATERIAL_NOALPHA    0x800 // prevent alpha for custom elements. if set, use(fully) opaque or transparent. (litSphere, shadowMonk) (MoP + )
 
 struct M2Material {
   uint16 flags;
@@ -384,6 +384,9 @@ struct ModelColorDef {
 struct M2TextureWeight {
   AnimationBlock weight; // (UInt16)
 };
+
+#define  MODELTEXTUREDEF_WRAP_X      0x01 // s wrap
+#define  MODELTEXTUREDEF_WRAP_Y      0x02 // t wrap
 
 struct ModelTextureDef {
   uint32 type;

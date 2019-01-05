@@ -603,18 +603,24 @@ void WoWModel::initCommon(GameFile * f)
       2	Texture wrap Y
       */
 
+      LOG_INFO << "model textures";
+      LOG_INFO << "type" << texdef[i].type;
+      LOG_INFO << "flags" << hex << texdef[i].flags;
+
       if (texdef[i].type == TEXTURE_FILENAME)  // 0
       {
         GameFile * tex;
         if (txids.size() > 0)
         {
           tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
+          
         }
         else
         {
           QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
           tex = GAMEDIRECTORY.getFile(texname);
         }
+        LOG_INFO << "name" << tex->fullname();
         textures[i] = TEXTUREMANAGER.add(tex);
       }
       else  // non-zero
@@ -1181,7 +1187,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   for (size_t j = 0; j < profile->nBatches; j++)
   {
     LOG_INFO << "----- BATCH" << j << "-----";
-    LOG_INFO << "flags" << batch[j].flags;
+    LOG_INFO << "flags" << hex << batch[j].flags;
     LOG_INFO << "priorityPlane" << batch[j].priorityPlane;
     LOG_INFO << "shader_id" << batch[j].shader_id;
     LOG_INFO << "skinSectionIndex" << batch[j].skinSectionIndex;

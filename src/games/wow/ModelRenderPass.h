@@ -71,8 +71,14 @@ public:
   static const uint16 INVALID_TEX = 50000;
 
 private:
-  bool init();
+  void init();
+  void init(uint16 tex);
   void deinit();
+  void draw();
+
+  std::vector<M2Material> materials;
+  std::vector<int16> textureTransforms;
+  std::vector<ModelTextureDef> textureDefs;
 };
 
 
