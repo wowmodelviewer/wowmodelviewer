@@ -74,7 +74,7 @@ private:
   void init();
   void init(uint16 tex);
   void deinit();
-  void draw();
+  void draw(uint16 tex);
 
   std::vector<M2Material> materials;
   std::vector<int16> textureTransforms;

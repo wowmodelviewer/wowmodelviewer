@@ -1125,6 +1125,8 @@ void WoWModel::setLOD(GameFile * f, int index)
   // I thought the view controlled the Level of detail,  but that doesn't seem to be the case.
   // Seems to only control the render order.  Which makes this function useless and not needed :(
 
+  index = 1;
+
   // remove suffix .M2
   QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
   lodname = QString("%1%2.skin").arg(tmpname).arg(index, 2, 10, QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
@@ -1152,6 +1154,17 @@ void WoWModel::setLOD(GameFile * f, int index)
     g->close();
     return;
   }
+
+  LOG_INFO << "SKIN PROFILE";
+  LOG_INFO << "nVertices" << profile->nVertices;
+  LOG_INFO << "nIndices" << profile->nIndices;
+  LOG_INFO << "nBones" << profile->nBones;
+  LOG_INFO << "nSubmeshes" << profile->nSubmeshes;
+  LOG_INFO << "nBatches" << profile->nBatches;
+  LOG_INFO << "boneCountMax" << profile->boneCountMax;
+  LOG_INFO << "nShadowBatches" << profile->nShadowBatches;
+
+
 
   // Indices,  Triangles
   uint16 *vertices = (uint16*)(g->getBuffer() + profile->ofsVertices);
@@ -1184,6 +1197,9 @@ void WoWModel::setLOD(GameFile * f, int index)
 
   rawPasses.clear();
  
+
+
+
   for (size_t j = 0; j < profile->nBatches; j++)
   {
     LOG_INFO << "----- BATCH" << j << "-----";
@@ -1197,6 +1213,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     LOG_INFO << "materialLayer" << batch[j].materialLayer;
     LOG_INFO << "textureCount" << batch[j].textureCount;
     LOG_INFO << "textureComboIndex" << batch[j].textureComboIndex;
+    LOG_INFO << "textureCoordComboIndex" << batch[j].textureCoordComboIndex;
     LOG_INFO << "textureWeightComboIndex" << batch[j].textureWeightComboIndex;
     LOG_INFO << "textureTransformComboIndex" << batch[j].textureTransformComboIndex;
 

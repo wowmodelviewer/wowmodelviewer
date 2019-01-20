@@ -251,7 +251,7 @@ void ModelRenderPass::init(uint16 tex)
       break;
     case BM_ALPHA_BLEND:      // 2
       // @TODO : buggy blendmode 2 management for now, return
-      return;
+      //return;
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -331,7 +331,7 @@ void ModelRenderPass::render()
   for (uint i = 0; i < texs.size(); i++)
   {
     init(i);
-    draw();
+    draw(i);
   }
   deinit();
 }
@@ -382,7 +382,7 @@ void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
     LOG_INFO << "-----------------------";
     LOG_INFO << "texture" << i;
     texs.push_back(texlookup[batch.textureComboIndex + i]);
-    LOG_INFO << "tex" << texs[i];
+    LOG_INFO << "tex" << texs[i] << model->getNameForTex(texs[i]);
     textureDefs.push_back(texdef[batch.textureComboIndex + i]);
     LOG_INFO << "flags" << hex << textureDefs[i].flags;
     LOG_INFO << "type" << hex << textureDefs[i].type;
@@ -393,6 +393,8 @@ void ModelRenderPass::setupFromM2Batch(M2Batch & batch)
     LOG_INFO << "transform" << textureTransforms[i];
 
   }
+
+  LOG_INFO << "video.supportVBO" << video.supportVBO << "video.supportDrawRangeElements" << video.supportDrawRangeElements;
 
   M2Material &rf = renderFlags[batch.materialIndex];
 
@@ -441,7 +443,7 @@ bool ModelRenderPass::displayed()
   return true;
 }
 
-void ModelRenderPass::draw()
+void ModelRenderPass::draw(uint16 tex)
 {
   M2SkinSectionHD * geoset = model->geosets[geoIndex];
   if (video.supportVBO && video.supportDrawRangeElements)
@@ -459,7 +461,10 @@ void ModelRenderPass::draw()
     {
       uint32 a = model->indices[b];
       glNormal3fv(model->normals[a]);
-      glTexCoord2fv(model->origVertices[a].texcoords[0]);
+      if(tex != 1)
+        glTexCoord2fv(model->origVertices[a].texcoords[0]);
+      else
+        glTexCoord2fv(model->origVertices[a].texcoords[1]);
       glVertex3fv(model->vertices[a]);
     }
     glEnd();
