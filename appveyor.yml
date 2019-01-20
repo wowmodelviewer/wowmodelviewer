@@ -1,9 +1,9 @@
 version: 0.9.0.{build}
-image: Visual Studio 2013
+image: Visual Studio 2015
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 3911b29
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 97087a5
     
     cd wmv_sdk
 
@@ -13,7 +13,7 @@ before_build:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "Visual Studio 12 2013" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
+    cmake -G "Visual Studio 14 2015" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
 
 build_script:
 - cmd: >-
