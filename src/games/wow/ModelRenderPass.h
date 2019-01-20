@@ -12,6 +12,8 @@
 #include "quaternion.h"
 #include "types.h"
 
+#include <vector>
+
 class WoWModel;
 
 #ifdef _WIN32
@@ -29,13 +31,13 @@ class _MODELRENDERPASS_API_ ModelRenderPass
 {
 public:
 
-  ModelRenderPass(WoWModel *, int geo);
+  ModelRenderPass(WoWModel *);
 
   //TextureID texture, texture2;
   bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
 
   int16 texanim, color, opacity, blendmode;
-  uint16 tex;
+  std::vector<uint16> texs;
 
   // texture wrapping
   bool swrap, twrap;
@@ -47,13 +49,11 @@ public:
 
   int geoIndex;
 
-  bool init();
-  int BlendValueForMode(int mode);
+  void render();
 
-  void render(bool animated);
+  void setupFromM2Batch(M2Batch & batch);
 
-  void deinit();
-
+  bool displayed();
 
   bool operator< (const ModelRenderPass &m) const
   {
@@ -69,6 +69,16 @@ public:
   }
 
   static const uint16 INVALID_TEX = 50000;
+
+private:
+  void init();
+  void init(uint16 tex);
+  void deinit();
+  void draw(uint16 tex);
+
+  std::vector<M2Material> materials;
+  std::vector<int16> textureTransforms;
+  std::vector<ModelTextureDef> textureDefs;
 };
 
 

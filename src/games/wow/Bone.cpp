@@ -82,7 +82,7 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data)
 
 	parent = b.parent;
 	pivot = fixCoordSystem(b.pivot);
-	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
+  billboard = (b.flags & MODELBONE_SPHERICAL_BILLBOARD) != 0;
 
 	boneDef = b;
 
