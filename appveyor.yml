@@ -1,9 +1,9 @@
 version: 0.9.0.{build}
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r d0f3f09
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r a48aaa3
     
     cd wmv_sdk
 
