@@ -135,7 +135,6 @@ void ModelRenderPass::init()
 
   // ALPHA BLENDING
   // blend mode
-  blendmode = 4;
   switch (blendmode)
   {
   case BM_OPAQUE:	         // 0
@@ -144,7 +143,7 @@ void ModelRenderPass::init()
   case BM_TRANSPARENT:      // 1
     glEnable(GL_ALPHA_TEST);
     glBlendFunc(GL_ONE, GL_ZERO);
-break;
+	break;
   case BM_ALPHA_BLEND:      // 2
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -196,7 +195,7 @@ break;
   {
     // Turn on the 'reflection' shine, using 18.0f as that is what WoW uses based on the reverse engineering
     // This is now set in InitGL(); - no need to call it every render.
-    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
+    // glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
 
     // env mapping
     glEnable(GL_TEXTURE_GEN_S);
@@ -251,7 +250,7 @@ void ModelRenderPass::init(uint16 tex)
       break;
     case BM_ALPHA_BLEND:      // 2
       // @TODO : buggy blendmode 2 management for now, return
-      //return;
+      return;
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
