@@ -13,7 +13,7 @@ before_build:
 
     cd C:\projects\wowmodelviewer\build
 
-    cmake -G "Visual Studio 14 2015" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
+    cmake -G "Visual Studio 15 2017" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
 
 build_script:
 - cmd: >-
