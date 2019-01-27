@@ -25,7 +25,7 @@
 class modelAnimData
 {
 public:
-  std::map<uint, int16> animIndexToAnimId;
+  std::map<size_t, int16> animIndexToAnimId;
   std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
   std::vector<uint32> globalSequences;  
 };
@@ -413,7 +413,7 @@ public:
 		out << "      <anims>"<< endl;
 		for(size_t j=0; j<v.sizes; j++) {
 			if (j != 0) continue; // only output walk animation
-			if (v.uses((unsigned int)j)) {
+			if (v.uses(j)) {
 				out << "    <anim id=\"" << j << "\" size=\""<< v.data[j].size() <<"\">" << endl;
 				for(size_t k=0; k<v.data[j].size(); k++) {
 					out << "      <data time=\"" << v.times[j][k]  << "\">" << v.data[j][k] << "</data>" << endl;

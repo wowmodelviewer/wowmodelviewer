@@ -11,7 +11,6 @@
 
 #include "Game.h"
 #include "GlobalSettings.h"
-#include "LogStackWalker.h"
 #include "PluginManager.h"
 #include "resource1.h"
 #include "UserSkins.h"
@@ -50,11 +49,12 @@ IMPLEMENT_APP(WowModelViewApp)
 
 void dumpStackInLogs()
 {
-  LOG_ERROR << "---- WALK FROM EXCEPTION -----";
+  /*LOG_ERROR << "---- WALK FROM EXCEPTION -----";
   LogStackWalker sw;
   sw.WalkFromException();
   LOG_ERROR << "---- WALK FROM CURRENT CONTEXT -----";
   sw.Walk();
+  */
 }
 
 void WowModelViewApp::setInterfaceLocale()
@@ -292,13 +292,15 @@ bool WowModelViewApp::OnInit()
 
   // check for last version
   if (wxExecute(L"UpdateManager.exe --no-ui", wxEXEC_SYNC) < 0)
-    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES) {
+    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO | wxICON_INFORMATION) == wxYES)
+    {
       wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
     }
 
 
   // Classic Mode?
-  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) == wxYES) {
+  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO | wxICON_INFORMATION) == wxYES)
+  {
     frame->LoadWoW();
   }
 

@@ -64,7 +64,7 @@ END_EVENT_TABLE()
 //		- Attach model
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
- : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0,  wxT("ModelControlFrame"))
+ : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 500), 0,  wxT("ModelControlFrame"))
 {
   model = NULL;
   att = NULL;

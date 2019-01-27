@@ -349,7 +349,7 @@ void WMOGroup::initDisplayList()
     // build indice to vert array.
     for (size_t i = 0; i <= batch->indexCount; i++){
       size_t a = indices[batch->indexStart + i];
-      for (size_t j = batch->vertexStart; j <= batch->vertexEnd; j++){
+      for (uint32 j = batch->vertexStart; j <= batch->vertexEnd; j++){
         if (vertices[a] == vertices[j]){
           IndiceToVerts[batch->indexStart + i] = j;
           break;

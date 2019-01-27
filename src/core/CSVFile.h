@@ -27,7 +27,7 @@ public:
 
   bool close();
 
-  std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
+  std::vector<std::string> get(size_t recordIndex, const core::TableStructure * structure) const;
 
 private:
   QString m_file;

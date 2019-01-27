@@ -213,7 +213,7 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
     /*
     LOG_INFO << "----------------------------";
     LOG_INFO << "Table" << tblStruct->name.c_str() << "/ hash" << tblStruct->hash;
-    for (unsigned int i = 0; i < tblStruct->fields.size(); i++)
+    for (size_t i = 0; i < tblStruct->fields.size(); i++)
     {
     fieldStructure field = tblStruct->fields[i];
     LOG_INFO << "fieldName =" << field.name.c_str()
@@ -254,7 +254,7 @@ bool core::TableStructure::create()
     }
     else // complex field
     {
-      for (unsigned int i = 1; i <= (*it)->arraySize; i++)
+      for (size_t i = 1; i <= (*it)->arraySize; i++)
       {
         create += (*it)->name;
         create += QString::number(i);
@@ -303,8 +303,8 @@ bool core::TableStructure::fill()
   QString query = "INSERT INTO ";
   query += name;
   query += "(";
-  int nbFields = fields.size();
-  int curfield = 0;
+  size_t nbFields = fields.size();
+  size_t curfield = 0;
   for (auto it = fields.begin(), itEnd = fields.end();
     it != itEnd;
     ++it, curfield++)
@@ -315,7 +315,7 @@ bool core::TableStructure::fill()
     }
     else
     {
-      for (unsigned int i = 1; i <= (*it)->arraySize; i++)
+      for (size_t i = 1; i <= (*it)->arraySize; i++)
       {
         query += (*it)->name;
         query += QString::number(i);
@@ -330,14 +330,14 @@ bool core::TableStructure::fill()
   query += ") VALUES";
 
   QString queryBase = query;
-  int record = 0;
-  int nbRecord = dbc->getRecordCount();
+  size_t record = 0;
+  size_t nbRecord = dbc->getRecordCount();
 
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
     std::vector<std::string> fields = it.get(this);
 
-    for (int field = 0, nbfield = fields.size(); field < nbfield; field++)
+    for (size_t field = 0, nbfield = fields.size(); field < nbfield; field++)
     {
       if (field == 0)
         query += " (";

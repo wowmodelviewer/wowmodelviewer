@@ -1,5 +1,5 @@
-#ifndef WDC2FILE_H
-#define WDC2FILE_H
+#ifndef WDC3FILE_H
+#define WDC3FILE_H
 
 #include <QString>
 
@@ -8,22 +8,22 @@
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
-#        define _WDC2FILE_API_ __declspec(dllexport)
+#        define _WDC3FILE_API_ __declspec(dllexport)
 #    else
-#        define _WDC2FILE_API_ __declspec(dllimport)
+#        define _WDC3FILE_API_ __declspec(dllimport)
 #    endif
 #else
-#    define _WDC2FILE_API_
+#    define _WDC3FILE_API_
 #endif
 
 
-class _WDC2FILE_API_ WDC2File : public WDB5File
+class _WDC3FILE_API_ WDC3File : public WDB5File
 {
 public:
 
   struct header
   {
-    char   magic[4];               // 'WDC2'
+    char   magic[4];               // 'WDC3'
     uint32 record_count;           // this is for all sections combined now
     uint32 field_count;
     uint32 record_size;
@@ -41,25 +41,25 @@ public:
     uint32 field_storage_info_size;
     uint32 common_data_size;
     uint32 pallet_data_size;
-    uint32 section_count;          // new to WDC2, this is number of sections of data (records + copy table + id list + relationship map = a section)
+    uint32 section_count;          // new to WDC3, this is number of sections of data (records + copy table + id list + relationship map = a section)
   };
 
   struct section_header
   {
-    uint32 wdc2_unk_header1;       // always 0 in Battle (8.0.1.26231) and unnamed in client binary
-    uint32 wdc2_unk_header2;       // always 0 in Battle (8.0.1.26231) and unnamed in client binary
-    uint32 file_offset;            // absolute position to the beginning of the section
+    uint64 tact_key_hash;          // TactKeyLookup hash
+    uint32 file_offset;            // Absolute position to the beginning of the section
     uint32 record_count;           // 'record_count' for the section
     uint32 string_table_size;      // 'string_table_size' for the section
-    uint32 copy_table_size;
-    uint32 offset_map_offset;      // Offset to array of struct {uint32_t offset; uint16_t size;}[max_id - min_id + 1];
-    uint32 id_list_size;           // List of ids present in the DB file
-    uint32 relationship_data_size;
+    uint32 offset_records_end;     // Offset to the spot where the records end in a file with an offset map structure;
+    uint32 id_list_size;           // Size of the list of ids present in the section
+    uint32 relationship_data_size; // Size of the relationship data in the section
+    uint32 offset_map_id_count;    // Count of ids present in the offset map in the section
+    uint32 copy_table_count;       // Count of the number of deduplication entries (you can multiply by 8 to mimic the old 'copy_table_size' field
   };
 
 
-  explicit WDC2File(const QString & file);
-  ~WDC2File();
+  explicit WDC3File(const QString & file);
+  ~WDC3File();
 
   bool open();
 
@@ -116,18 +116,28 @@ private:
     uint32 val3;
   };
 
-  void readWDBC2Header();
+  void readWDC3Header();
 
   bool readFieldValue(size_t recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const;
   uint32 readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const;
   int32 readSignedBitpackedValue(field_storage_info info, unsigned char * recordOffset) const;
 
   header m_header;
+  section_header * m_sectionHeader;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
+<<<<<<< working copy
   std::map<size_t, size_t> m_palletBlockOffsets;
   std::map<size_t, std::map<uint32, uint32> > m_commonData;
   std::map<size_t, std::string> m_relationShipData;
+=======
+  std::map<uint32, uint32> m_palletBlockOffsets;
+  std::map<uint32, std::map<uint32, uint32> > m_commonData;
+  std::map<uint32, std::string> m_relationShipData;
+
+  unsigned char * m_sectionData;
+  unsigned char * m_palletData;
+>>>>>>> merge rev
 };
 
 #endif

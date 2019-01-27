@@ -126,8 +126,8 @@ public:
 
 	void clear()
 	{
-		for (size_t i=0; i<50; i++) {
-			if(items.find((const unsigned int)i) != items.end()) {
+		for (unsigned int i=0; i<50; i++) {
+			if(items.find(i) != items.end()) {
 				del((GLuint)i);
 			}
 		}

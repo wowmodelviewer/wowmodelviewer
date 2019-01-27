@@ -129,7 +129,7 @@ wxString getGamePath(bool noSet)
 
 
 #ifdef _WINDOWS
-wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
+wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
 {
   wxBitmap*   r_bitmapPtr = 0;
   
@@ -138,7 +138,7 @@ wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMA
   
   if(loadDataFromResource(a_data, a_dataSize, t_name))
   {
-    r_bitmapPtr = getBitmapFromMemory(a_data, a_dataSize,type,width,height);
+    r_bitmapPtr = getBitmapFromMemory(a_data, a_dataSize, type, width, height);
   }
   
   return r_bitmapPtr;
@@ -169,7 +169,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 #endif
 
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height)
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapType type, int width, int height)
 {
   wxMemoryInputStream a_is(t_data, t_size);
   
