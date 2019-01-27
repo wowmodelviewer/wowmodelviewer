@@ -15,9 +15,9 @@ class GameFile;
 
 struct ModelTransparency 
 {
-	AnimatedShort trans;
+	AnimatedShort weight;
 
-  void init(GameFile * f, ModelTransDef &mtd, std::vector<uint32> & global);
+  void init(GameFile * f, M2TextureWeight &mtd, std::vector<uint32> & global);
 };
 
 

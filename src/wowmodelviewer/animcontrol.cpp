@@ -344,8 +344,8 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
-    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
+    frameSlider->SetRange(0, g_selModel->anims[useanim].duration - 1);
+    //frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
     frameSlider->SetValue(0);
     frameLabel->SetLabel(L"Frame: 0");
 
@@ -1126,8 +1126,8 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        frameSlider->SetRange(0, g_selModel->anims[selectedAnim].length);
-        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
+        frameSlider->SetRange(0, g_selModel->anims[selectedAnim].duration);
+        //frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
       }
     }
 
