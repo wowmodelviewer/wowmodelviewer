@@ -39,7 +39,6 @@ set(src  AnimationExportChoiceDialog.cpp
          itemselection.cpp
          lightcontrol.cpp
          liquid.cpp
-         LogStackWalker.cpp
          maptile.cpp
          modelbankcontrol.cpp
          modelcanvas.cpp
@@ -74,7 +73,6 @@ set(headers AnimationExportChoiceDialog.h
 			itemselection.h
 			lightcontrol.h
 			liquid.h
-			LogStackWalker.h
 			maptile.h
 			modelbankcontrol.h
 			modelcanvas.h

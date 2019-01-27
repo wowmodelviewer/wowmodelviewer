@@ -145,7 +145,7 @@ void Component::print(int a_depth /*= 0*/)
 
 	a_depth++;
 
-	for(unsigned int i = 0 ; i < nbChildren() ; i++)
+	for(size_t i = 0 ; i < nbChildren() ; i++)
 	{
 		getChild(i)->print(a_depth);
 	}

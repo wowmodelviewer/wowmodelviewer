@@ -53,7 +53,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-    : wxSingleChoiceDialog(parent, message, caption, choices, (char**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
+    : wxSingleChoiceDialog(parent, message, caption, choices, (void**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
 {
 	cc = dest;
 	this->type = type;
@@ -203,9 +203,9 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl *dest, int type, wxWindow
 	m_listctrl->DeleteAllItems();
 
 	wxListItem item; 
-	for(unsigned int i=0; i<choices.Count(); i++) {
+	for(size_t i=0; i<choices.Count(); i++) {
 		//item.m_mask=wxLIST_MASK_TEXT; 
-		item.SetId(i); 
+		item.SetId((long)i); 
 		//item.m_col=col; 
 		item.SetText(choices[i]);
 		/*
@@ -234,7 +234,7 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
 	if ( dlg->ShowModal() == wxID_OK ) {
 		int modelid = dlg->getImportedId();
 		if(modelid != -1) {
-			int id = 0;
+			size_t id = 0;
 			bool found = false;
 			for (std::vector<NPCRecord>::iterator it=npcs.begin();  it!=npcs.end(); ++it, id++) {
 				if(it->id == modelid) {
@@ -347,15 +347,15 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl *dest, int type,
       if(m_cats[j] == (int)i)
       {
         realcatnames.push_back(catnames[i]);
-        m_catsConvert[m_cats[j]] = realcatnames.size()-1;
+        m_catsConvert[m_cats[j]] = (int)realcatnames.size()-1;
         break;
       }
     }
   }
 
 	m_catlist = new wxCheckListBox(this, ID_CAT_LIST, wxDefaultPosition, wxDefaultSize, realcatnames, wxLB_HSCROLL);
-	for (size_t i=0; i<realcatnames.GetCount(); i++)
-		m_catlist->Check((unsigned int)i);
+	for (uint i=0; i < (uint)realcatnames.GetCount(); i++)
+		m_catlist->Check(i);
 
 	numcats = (int)realcatnames.GetCount();
 
