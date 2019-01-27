@@ -3,7 +3,7 @@ image: Visual Studio 2017
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 9571731
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r e96407a
     
     cd wmv_sdk
 
