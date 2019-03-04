@@ -529,8 +529,10 @@ void WoWModel::initCommon(GameFile * f)
   showModel = true;
   alpha = 1.0f;
 
-  ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
-  rawVertices.assign(mv, mv + header.nVertices);
+  ModelVertex * buffer = new ModelVertex[header.nVertices];
+  memcpy(buffer, f->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
+  rawVertices.assign(buffer, buffer + header.nVertices);
+  delete[] buffer;
 
   // Correct the data from the model, so that its using the Y-Up axis mode.
   for (auto & it : rawVertices)
@@ -565,15 +567,22 @@ void WoWModel::initCommon(GameFile * f)
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
-    bounds.assign(b, b + header.nBoundingVertices);
-    
+    Vec3D * buffer = new Vec3D[header.nBoundingVertices];
+    memcpy(buffer, f->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
+    bounds.assign(buffer, buffer + header.nBoundingVertices);
+    delete[] buffer;
+
     for (uint i = 0; i < bounds.size(); i++)
       bounds[i] = fixCoordSystem(bounds[i]);
   }
 
   if (header.nBoundingTriangles > 0)
-    boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles);
+  {
+    uint16 * buffer = new uint16[header.nBoundingTriangles];
+    memcpy(buffer, f->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
+    boundTris.assign(buffer, buffer + header.nBoundingTriangles);
+    delete[] buffer;
+  }
 
   // textures
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
