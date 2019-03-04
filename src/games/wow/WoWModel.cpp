@@ -478,8 +478,7 @@ void WoWModel::initCommon(GameFile * f)
           // globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
           uint32 * buffer = new uint32[sks1.nGlobalSequences];
           memcpy(buffer, skelFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
-          for (uint i = 0; i < sks1.nGlobalSequences; i++)
-            globalSequences.push_back(buffer[i]);
+          globalSequences.assign(buffer, buffer + sks1.nGlobalSequences);
           delete[] buffer;
         }
 
@@ -519,8 +518,7 @@ void WoWModel::initCommon(GameFile * f)
     // globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
     uint32 * buffer = new uint32[header.nGlobalSequences];
     memcpy(buffer, f->getBuffer() + header.ofsGlobalSequences, sizeof(uint32)*header.nGlobalSequences);
-    for (uint i = 0; i < header.nGlobalSequences; i++)
-      globalSequences.push_back(buffer[i]);
+    globalSequences.assign(buffer, buffer + header.nGlobalSequences);
     delete[] buffer;
   }
 
