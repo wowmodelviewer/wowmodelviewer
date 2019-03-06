@@ -84,7 +84,7 @@ bool GameFile::close()
   return doPostCloseOperation();
 }
 
-void GameFile::allocate(unsigned int s)
+void GameFile::allocate(size_t s)
 {
   if (originalBuffer)
     delete[] originalBuffer;

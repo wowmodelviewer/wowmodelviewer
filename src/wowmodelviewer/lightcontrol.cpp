@@ -56,7 +56,7 @@ LightControl::LightControl(wxWindow* parent, wxWindowID id)
 	lights = NULL;
 	lights = new Light[MAX_LIGHTS];
 	
-	if(Create(parent, id, wxDefaultPosition, wxSize(160,430), 0, wxT("LightControlFrame")) == false) {
+	if(Create(parent, id, wxDefaultPosition, wxSize(160, 430), 0, wxT("LightControlFrame")) == false) {
 		LOG_ERROR << "Failed to create a window frame for the LightControl!";
 		return;
 	}

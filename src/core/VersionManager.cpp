@@ -93,7 +93,7 @@ void VersionManager::updateCurrentVersionInfo()
 
 QString VersionManager::getLastVersionFor(QString & name)
 {
-  for(unsigned int i=0; i < m_lastVersionInfos.size() ; i++)
+  for(size_t i=0; i < m_lastVersionInfos.size() ; i++)
   {
     if(m_lastVersionInfos[i]["name"].toString() == name)
     {

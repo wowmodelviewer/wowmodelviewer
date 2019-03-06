@@ -216,7 +216,7 @@ WDB5File::~WDB5File()
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDB5File::get(size_t recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
 

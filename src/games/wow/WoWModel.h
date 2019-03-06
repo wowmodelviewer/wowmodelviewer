@@ -121,7 +121,7 @@ public:
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;
 
-  uint nbLights() const
+  size_t nbLights() const
   {
     return lights.size();
   }
@@ -254,8 +254,8 @@ public:
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector
-  void showGeoset(uint geosetindex, bool value);
-  bool isGeosetDisplayed(uint geosetindex);
+  void showGeoset(size_t geosetindex, bool value);
+  bool isGeosetDisplayed(size_t geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
 

@@ -65,8 +65,8 @@ public:
   AnimManager(WoWModel & m);
   ~AnimManager();
   void SetCount(int count);
-  void AddAnim(unsigned int id, short loop); // Adds an animation to our array.
-  void SetAnim(short index, unsigned int id, short loop);
+  void AddAnim(size_t id, short loop); // Adds an animation to our array.
+  void SetAnim(short index, size_t id, short loop);
        // sets one of the 4 existing animations and changes it (not really used currently)
 
   void SetSecondary(int id)

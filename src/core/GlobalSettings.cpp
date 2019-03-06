@@ -108,7 +108,7 @@ core::GlobalSettings::GlobalSettings()
    */
 
   // platform 
-  m_platform = L"Windows 32 bits";
+  //m_platform = L"Windows";
 
 #if _BETAVERSION > 0
   m_isBetaVersion = true;
@@ -161,7 +161,7 @@ std::wstring core::GlobalSettings::buildName()
 
 std::wstring core::GlobalSettings::appTitle()
 {
-  std::wstring title = appName() + appVersion(std::wstring(L" v")) + L" " + m_platform;
+  std::wstring title = appName() + appVersion(std::wstring(L" v")); // +L" " + m_platform;
   if(m_isBetaVersion)
     title += L" - BETA VERSION";
   if(m_isAlphaVersion)

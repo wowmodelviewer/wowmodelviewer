@@ -82,7 +82,7 @@ bool WDC1File::open()
   data = getPointer();
  
   // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = sizeof(header) + sizeof(field_structure) * fieldCount + recordSize * recordCount;
+  size_t stringTableOffset = sizeof(header) + sizeof(field_structure) * fieldCount + recordSize * recordCount;
 
   // embedded strings in fields instead of stringTable
   if ((m_header.flags & 0x01) != 0)
@@ -94,17 +94,17 @@ bool WDC1File::open()
   seek(stringTableOffset);
   stringTable = getPointer();
 
-  uint32 IdBlockOffset = stringTableOffset + stringSize;
+  size_t IdBlockOffset = stringTableOffset + stringSize;
 
-  uint32 copyBlockOffset = IdBlockOffset;
+  size_t copyBlockOffset = IdBlockOffset;
 
   if ((m_header.flags & 0x04) != 0)
     copyBlockOffset += (recordCount * 4);
 
-  uint32 fieldStorageInfoOffset = copyBlockOffset + m_header.copy_table_size;
-  uint32 palletBlockOffset = fieldStorageInfoOffset + m_header.field_storage_info_size;
-  uint32 commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
-  uint32 relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
+  size_t fieldStorageInfoOffset = copyBlockOffset + m_header.copy_table_size;
+  size_t palletBlockOffset = fieldStorageInfoOffset + m_header.field_storage_info_size;
+  size_t commonBlockOffset = palletBlockOffset + m_header.pallet_data_size;
+  size_t relationshipDataOffset = commonBlockOffset + m_header.common_data_size;
  
 #if WDC1_READ_DEBUG > 2
   LOG_INFO << "m_header.flags & 0x01" << (m_header.flags & 0x01);
@@ -457,7 +457,7 @@ bool WDC1File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDC1File::get(size_t recordIndex, const core::TableStructure * structure) const
 {
   std::vector<std::string> result;
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
@@ -532,7 +532,7 @@ WDC1File::~WDC1File()
   close();
 }
 
-bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
+bool WDC1File::readFieldValue(size_t recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const
 {
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
   field_storage_info info = m_fieldStorageInfo[fieldIndex];
@@ -594,7 +594,7 @@ bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     {
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * 4;
+      size_t offset = it->second + (size_t)index * 4;
       memcpy(&result, getBuffer() + offset, 4);
       break;
     }
@@ -602,7 +602,7 @@ bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     {
       uint32 index = readBitpackedValue(info, recordOffset);
       auto it = m_palletBlockOffsets.find(fieldIndex);
-      uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
+      size_t offset = it->second + (size_t)index * arraySize * 4 + arrayIndex * 4;
       memcpy(&result, getBuffer() + offset, 4);
       break;
     }

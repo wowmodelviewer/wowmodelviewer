@@ -85,7 +85,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		txtContent = new wxTextCtrl(this, ID_FILELIST_CONTENT, wxEmptyString, wxPoint(10, 10), wxSize(110, 20), wxTE_PROCESS_ENTER, wxDefaultValidator);
 		btnSearch = new wxButton(this, ID_FILELIST_SEARCH, _("Clear"), wxPoint(120, 10), wxSize(46,20));
 		fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(250,580), wxTR_HIDE_ROOT|wxTR_HAS_BUTTONS|wxTR_LINES_AT_ROOT|wxTR_FULL_ROW_HIGHLIGHT|wxTR_NO_LINES);
-		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
+    choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
 		choFilter->SetSelection(filterMode);
 	} catch(...) {};
 }
