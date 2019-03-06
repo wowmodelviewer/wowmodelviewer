@@ -53,7 +53,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-    : wxSingleChoiceDialog(parent, message, caption, choices, (void**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
+    : wxSingleChoiceDialog(parent, message, caption, choices, (char**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
 {
 	cc = dest;
 	this->type = type;

@@ -292,14 +292,14 @@ bool WowModelViewApp::OnInit()
 
   // check for last version
   if (wxExecute(L"UpdateManager.exe --no-ui", wxEXEC_SYNC) < 0)
-    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO | wxICON_INFORMATION) == wxYES)
+    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES)
     {
       wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
     }
 
 
   // Classic Mode?
-  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO | wxICON_INFORMATION) == wxYES)
+  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) == wxYES)
   {
     frame->LoadWoW();
   }
