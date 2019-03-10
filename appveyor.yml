@@ -4,7 +4,7 @@ platform: x64
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 8d382d0
+    hg clone https://bitbucket.org/jeromnimo/wmv_sdk -r 96785fa
 
     cd wmv_sdk
 
