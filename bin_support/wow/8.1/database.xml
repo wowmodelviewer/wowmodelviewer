@@ -75,16 +75,16 @@
   </table>
   <table name="ComponentModelFileData">
     <field primary="yes" type="uint" name="ID" />
-    <field type="int" name="GenderIndex" pos="0"/>
-    <field type="int" name="ClassID" pos="1"/>
-    <field type="int" name="RaceID" pos="2"/>
-    <field type="int" name="PositionIndex" pos="3"/>
+    <field type="byte" name="GenderIndex" pos="0"/>
+    <field type="byte" name="ClassID" pos="1"/>
+    <field type="byte" name="RaceID" pos="2"/>
+    <field type="byte" name="PositionIndex" pos="3"/>
   </table>
   <table name="ComponentTextureFileData">
     <field primary="yes" type="uint" name="ID" />
-    <field type="int" name="GenderIndex" pos="0"/>
-    <field type="int" name="ClassID" pos="1"/>
-    <field type="int" name="RaceID" pos="2"/>
+    <field type="byte" name="GenderIndex" pos="0"/>
+    <field type="byte" name="ClassID" pos="1"/>
+    <field type="byte" name="RaceID" pos="2"/>
   </table>
 
   <!-- Character tables - END -->
