@@ -189,9 +189,11 @@
     <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" createIndex="yes" />
     <field type="uint" name="TextureFileDataID" pos="1" />
   </table>
-  <table name="HelmetGeosetVisData">
+  <table name="HelmetGeosetData">
     <field type="uint" name="ID" primary="yes" />
-    <field type="int" name="HideGeoset" arraySize="9" pos="0" />
+    <field type="int" name="RaceID" pos="0" />
+    <field type="byte" name="GeosetGroup" pos="1" />
+    <field type="int" name="GeosetVisDataID" relationshipData="yes" createIndex="yes" />
   </table>
   <table name="ItemSet">
     <field type="uint" name="ID" primary="yes" />

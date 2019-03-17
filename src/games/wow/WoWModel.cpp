@@ -2387,69 +2387,22 @@ void WoWModel::refresh()
 
   if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
   {
-    QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
-                            "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
-                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
+    QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
+                            "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+                            "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+                            .arg(infos.raceid)
                             .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
                             .arg(headItem->id());
+
+
 
     sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
 
     if (helmetInfos.valid && !helmetInfos.values.empty())
     {
-      // hair styles
-      if (helmetInfos.values[0][0].toInt() != 0)
+      for (auto it : helmetInfos.values)
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 0 && id < 100)
-            showGeoset(i, false);
-        }
-      }
-
-      // facial 1
-      if (helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 100 && id < 200)
-            showGeoset(i, false);
-        }
-      }
-
-      // facial 2
-      if (helmetInfos.values[0][2].toInt() != 0 && infos.customization[1] != "FEATURES")
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 200 && id < 300)
-            showGeoset(i, false);
-        }
-      }
-
-      // facial 3
-      if (helmetInfos.values[0][3].toInt() != 0)
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 300 && id < 400)
-            showGeoset(i, false);
-        }
-      }
-
-      // ears
-      if (helmetInfos.values[0][4].toInt() != 0)
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 700 && id < 800)
-            showGeoset(i, false);
-        }
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
       }
     }
   }

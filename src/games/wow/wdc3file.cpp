@@ -139,7 +139,7 @@ bool WDC3File::open()
       {
         m_palletBlockOffsets[fieldId] = offset;
 #if WDC3_READ_DEBUG > 4
-        LOG_INFO << fieldId << "=>" << palletBlockOffset;
+        LOG_INFO << fieldId << "=>" << offset;
 #endif
         offset += it.additional_data_size;
       }
