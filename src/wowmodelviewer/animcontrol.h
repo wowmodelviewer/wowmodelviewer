@@ -126,6 +126,7 @@ class AnimControl: public wxWindow
   bool UpdateItemModel(WoWModel *m);
   bool FillSkinSelector(TextureSet &skins);
   bool FillBLPSkinSelector(TextureSet &skins, bool item = false);
+  void UpdateFrameSlider(int maxRange, int tickFreq);
 
 public:
   AnimControl(wxWindow* parent, wxWindowID id);

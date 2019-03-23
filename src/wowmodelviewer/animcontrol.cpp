@@ -344,10 +344,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
-    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed, 1);
-    frameSlider->SetValue(0);
-    frameLabel->SetLabel(L"Frame: 0");
+    UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -385,8 +382,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	g_selWMO = w;
 
 
-	frameSlider->SetRange(0, 10);
-	frameSlider->SetTickFreq(2, 1);
+	UpdateFrameSlider(10, 2);
 	PCRList.clear();
 	animCList->Show(false);
 	skinList->Show(false);
@@ -1126,8 +1122,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        frameSlider->SetRange(0, g_selModel->anims[selectedAnim].length);
-        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed, 1);
+        UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
       }
     }
 
@@ -1343,4 +1338,12 @@ void AnimControl::SetAnimFrame(size_t frame)
 
   frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
   frameSlider->SetValue((int)frame);
+}
+
+void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)
+{
+  frameSlider->SetRange(0, maxRange);
+  frameSlider->SetTickFreq(tickFreq, 1);
+  frameSlider->SetValue(0);
+  frameLabel->SetLabel(L"Frame: 0");
 }
