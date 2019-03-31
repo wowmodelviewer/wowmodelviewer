@@ -49,6 +49,7 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Flags" pos="7" />
     <field type="uint" name="MaleDisplayID" pos="8" />
     <field type="uint" name="FemaleDisplayID" pos="9" />
     <field type="byte" name="CharComponentTexLayoutID" pos="34" />
@@ -57,6 +58,10 @@
     <field type="uint" name="HighResFemaleDisplayId" pos="11" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
     <field type="int"  name="BaseRaceID" pos="24" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="38" />
+    <field type="int"  name="FemaleModelFallbackRaceID" pos="40" />
+    <field type="int"  name="MaleTextureFallbackRaceID" pos="42" />
+    <field type="int"  name="FemaleTextureFallbackRaceID" pos="44" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />

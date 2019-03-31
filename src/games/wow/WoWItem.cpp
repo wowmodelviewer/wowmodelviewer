@@ -1047,7 +1047,12 @@ int WoWItem::getCustomModelId(size_t index)
       int race = it[3].toInt();
       // models are customized by race and gender
       // if gender == 2, no customization
-      if ((gender == charInfos.sexid) && (race == charInfos.displayRaceid))
+      int fallbackRaceID = 0;
+      if (gender == 0)
+        fallbackRaceID = charInfos.MaleModelFallbackRaceID;
+      else if (gender == 1)
+        fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
+      if ((gender == charInfos.sexid) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
         return it[0].toInt();
       else if ((gender == 2) && (i == index))
         return it[0].toInt();
@@ -1096,8 +1101,13 @@ int WoWItem::getCustomTextureId(size_t index)
     {
       int gender = it[1].toInt();
       int race = it[3].toInt();
+      int fallbackRaceID = 0;
+      if (gender == 0)
+        fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
+      else if (gender == 1)
+        fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
       // models are customized by race and gender (gender == 3 means both sex)
-      if (((gender == charInfos.sexid) || (gender == 3)) && (race == charInfos.displayRaceid))
+      if (((gender == charInfos.sexid) || (gender == 3)) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
         return it[0].toInt();
     }
   }

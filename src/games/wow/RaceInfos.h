@@ -23,9 +23,10 @@ class _RACEINFOS_API_ RaceInfos
     int sexid; // 0 male / 1 female
     int textureLayoutID;
     bool isHD;
+    bool barefeet;
     std::string prefix;
     std::string customization[3];
-    int displayRaceid;
+    int MaleModelFallbackRaceID, FemaleModelFallbackRaceID, MaleTextureFallbackRaceID, FemaleTextureFallbackRaceID;
 
     static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();

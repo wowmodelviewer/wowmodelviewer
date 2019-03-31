@@ -2414,15 +2414,7 @@ void WoWModel::refresh()
   replaceTextures[TEXTURE_BODY] = charTex;
 
   // If model is one of these races, show the feet (don't wear boots)
-  if (infos.raceid == RACE_TAUREN ||
-      infos.raceid == RACE_TROLL ||
-      infos.raceid == RACE_DRAENEI ||
-      infos.raceid == RACE_NAGA ||
-      infos.raceid == RACE_BROKEN ||
-      infos.raceid == RACE_WORGEN)
-  {
-    cd.showFeet = true;
-  }
+  cd.showFeet = infos.barefeet;
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
   size_t egt = cd.eyeGlowType;
