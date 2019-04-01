@@ -126,8 +126,8 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 					tattooColor--;
 				}
 
-				result->DHtattooStyle = tattooStyle;
-				result->DHtattooColor = tattooColor;
+				result->DHTattooStyle = tattooStyle;
+				result->DHTattooColor = tattooColor;
 			}
 		}
 
