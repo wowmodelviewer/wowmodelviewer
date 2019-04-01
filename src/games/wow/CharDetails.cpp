@@ -267,8 +267,10 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
 
   size_t type = section;
 
-  if (infos.isHD && type != TattooType) // HD layout
-    type += 5;
+  if (type != TattooType)
+  {
+    type = getSectionType(type, infos.isHD);
+  }
 
   QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
                           "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
@@ -338,6 +340,13 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
   return result;
 }
 
+int CharDetails::getSectionType(int baseType, bool isHD)
+{
+  if (isHD && SectionTypeToHD.count(baseType) > 0)
+    return SectionTypeToHD[baseType];
+  return baseType;
+}
+
 void CharDetails::fillCustomizationMap()
 {
   if (!m_model)
@@ -345,11 +354,6 @@ void CharDetails::fillCustomizationMap()
 
   RaceInfos infos;
   RaceInfos::getCurrent(m_model, infos);
-
-  int sectionOffset = 0;
-  if (infos.isHD)
-    sectionOffset = 5;
-
 
   // clear any previous value found
   m_customizationParamsMap.clear();
@@ -363,7 +367,7 @@ void CharDetails::fillCustomizationMap()
   QString query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
     .arg(infos.raceid)
     .arg(infos.sexid)
-    .arg(SkinType + sectionOffset);
+    .arg(getSectionType(SkinType, infos.isHD));
 
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
 
@@ -388,7 +392,7 @@ void CharDetails::fillCustomizationMap()
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(*it)
-                    .arg(FaceType + sectionOffset);
+                    .arg(getSectionType(FaceType, infos.isHD));
 
     sqlResult faces = GAMEDATABASE.sqlQuery(query);
 
@@ -442,7 +446,7 @@ void CharDetails::fillCustomizationMap()
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 AND SectionType = %3")
     .arg(infos.raceid)
     .arg(infos.sexid)
-    .arg(HairType + sectionOffset);
+    .arg(getSectionType(HairType, infos.isHD));
 
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
@@ -469,7 +473,7 @@ void CharDetails::fillCustomizationMap()
                     "AND SectionType = %3 AND VariationIndex = %4")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
-                    .arg(HairType + sectionOffset)
+                    .arg(getSectionType(HairType, infos.isHD))
                     .arg(*it);
 
     sqlResult colors = GAMEDATABASE.sqlQuery(query);

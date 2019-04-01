@@ -46,9 +46,14 @@ public:
     FacialHairTypeHD = 7,
     HairTypeHD = 8,
     UnderwearTypeHD = 9,
-    TattooType = 11
+    TattooType = 11,
+    TattooTypeHD = 12,
+    Custom2Type = 13,
+    Custom2TypeHD = 14,
+    Custom3Type = 15,
+    Custom3TypeHD = 16
   };
-
+  
   enum CustomizationType
   {
     SKIN_COLOR = 0,
@@ -67,6 +72,19 @@ public:
   public:
     QString name;
     std::vector<int> possibleValues;
+  };
+
+
+  std::map<int, int> SectionTypeToHD =
+  {
+    { SkinType, SkinTypeHD },
+    { FaceType, FaceTypeHD },
+    { FacialHairType, FacialHairTypeHD },
+    { HairType, HairTypeHD },
+    { UnderwearType, UnderwearTypeHD },
+    { TattooType, TattooTypeHD },
+    { Custom2Type, Custom2TypeHD },
+    { Custom3Type, Custom3TypeHD }
   };
 
   EyeGlowTypes eyeGlowType;
@@ -108,7 +126,7 @@ private:
   WoWModel * m_model;
 
   void fillCustomizationMap();
-
+  int getSectionType(int baseType, bool isHD);
   std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
   std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 
