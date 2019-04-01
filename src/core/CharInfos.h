@@ -85,8 +85,8 @@ class _CHARINFOS_API_ CharInfos
     unsigned int eyeGlowType;
 
     bool isDemonHunter;
-    unsigned int DHTatooStyle;
-    unsigned int DHTatooColor;
+    unsigned int DHTattooStyle;
+    unsigned int DHTattooColor;
     unsigned int DHHorns;
     unsigned int DHBlindfolds;
 
