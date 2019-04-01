@@ -132,7 +132,7 @@ enum CharRegions {
   CR_UNK8 = 8,
   CR_FACE_UPPER = 9,
   CR_FACE_LOWER = 10,
-  CR_DH_TATOOS = 12,
+  CR_DH_TATTOOS = 12,
   // Not compositing anymore, only used for items
   CR_CAPE = 13,
   CR_TABARD_1,

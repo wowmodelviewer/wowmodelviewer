@@ -2325,10 +2325,10 @@ void WoWModel::refresh()
   }
 
   // DH customization
-  // tatoos
-  foundTextures = cd.getTextureForSection(CharDetails::TatooType);
+  // tattoos
+  foundTextures = cd.getTextureForSection(CharDetails::TattooType);
   if (foundTextures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATOOS, 1);
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
 
   // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);

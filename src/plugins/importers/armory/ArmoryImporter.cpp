@@ -113,21 +113,21 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 			result->DHHorns = custom.at(1).toInt();
 			result->DHBlindfolds = custom.at(2).toInt();
 
-			int tatoo = custom.at(0).toInt();
+			int tattoo = custom.at(0).toInt();
 
-			if (tatoo != 0)
+			if (tattoo != 0)
 			{
-				int tatooStyle = tatoo % 6;
-				int tatooColor = tatoo / 6;
+				int tattooStyle = tattoo % 6;
+				int tattooColor = tattoo / 6;
 
-				if (tatooStyle == 0)
+				if (tattooStyle == 0)
 				{
-					tatooStyle = 6;
-					tatooColor--;
+					tattooStyle = 6;
+					tattooColor--;
 				}
 
-				result->DHTatooStyle = tatooStyle;
-				result->DHTatooColor = tatooColor;
+				result->DHtattooStyle = tattooStyle;
+				result->DHtattooColor = tattooColor;
 			}
 		}
 

@@ -79,11 +79,11 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeAttribute("value", QString::number(m_isDemonHunter));
   stream.writeEndElement();
 
-  stream.writeStartElement("DHTatooStyle");
+  stream.writeStartElement("DHTattooStyle");
   stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_STYLE]));
   stream.writeEndElement();
 
-  stream.writeStartElement("DHTatooColor");
+  stream.writeStartElement("DHTattooColor");
   stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_COLOR]));
   stream.writeEndElement();
 
@@ -188,13 +188,13 @@ void CharDetails::load(QString & f)
         nbValuesRead++;
       }
 
-      if (reader.name() == "DHTatooStyle")
+      if (reader.name() == "DHTattooStyle")
       {
         set(DH_TATTOO_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
-      if (reader.name() == "DHTatooColor")
+      if (reader.name() == "DHTattooColor")
       {
         set(DH_TATTOO_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
@@ -267,7 +267,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
 
   size_t type = section;
 
-  if (infos.isHD && type != TatooType) // HD layout
+  if (infos.isHD && type != TattooType) // HD layout
     type += 5;
 
   QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
@@ -308,7 +308,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
         .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR])
         .arg(type);
       break;
-    case TatooType:
+    case TattooType:
       query += QString("WHERE (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND SectionType=%4)")
         .arg(infos.raceid)
         .arg(infos.sexid)
@@ -514,34 +514,34 @@ void CharDetails::fillCustomizationMap()
 
   m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
 
-  // Tatoos
+  // Tattoos
   // skin
-  CustomizationParam tatoos;
-  tatoos.name = "Tatoo";
+  CustomizationParam tattoos;
+  tattoos.name = "Tattoo";
 
   query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
     .arg(infos.raceid)
     .arg(infos.sexid)
-    .arg(TatooType);
+    .arg(TattooType);
 
   vals = GAMEDATABASE.sqlQuery(query);
 
   if (vals.valid && (vals.values.size() > 1))
   {
-    // harcoded for now (dh tatoos are 36 sequential values in CharSections table...)
-    // tatoo style = 0 to 6 (0 = no tatoo)
+    // harcoded for now (dh tattoos are 36 sequential values in CharSections table...)
+    // tattoo style = 0 to 6 (0 = no tattoo)
 
-    tatoos.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
-    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tatoos });
+    tattoos.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
+    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tattoos });
 
-    for (auto it = tatoos.possibleValues.begin(), itEnd = tatoos.possibleValues.end(); it != itEnd; ++it)
+    for (auto it = tattoos.possibleValues.begin(), itEnd = tattoos.possibleValues.end(); it != itEnd; ++it)
     {
-      // tatoo color = 0 to 5 for each tatoo style
-      CustomizationParam tatooColor;
-      tatooColor.name = "Tatoo Color";
-      tatooColor.possibleValues = { 0, 1, 2, 3, 4, 5 };
+      // tattoo color = 0 to 5 for each tattoo style
+      CustomizationParam tattooColor;
+      tattooColor.name = "Tattoo Color";
+      tattooColor.possibleValues = { 0, 1, 2, 3, 4, 5 };
 
-      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tatooColor });
+      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tattooColor });
     }
 
     m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });

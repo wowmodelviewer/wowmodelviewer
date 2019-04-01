@@ -46,7 +46,7 @@ public:
     FacialHairTypeHD = 7,
     HairTypeHD = 8,
     UnderwearTypeHD = 9,
-    TatooType = 11
+    TattooType = 11
   };
 
   enum CustomizationType
