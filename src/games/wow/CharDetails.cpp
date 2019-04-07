@@ -7,8 +7,6 @@
 
 #include "CharDetails.h"
 
-#include <iostream>
-
 #include "animated.h" // randint
 #include "CharDetailsEvent.h"
 #include "Game.h"
@@ -16,13 +14,12 @@
 #include "logger/Logger.h"
 
 #include <QFile>
-#include <QXmlStreamWriter>
 #include <QXmlStreamReader>
 
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_model(0), m_isDemonHunter(false), m_dhModel("")
+isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel("")
 {
 
 }
@@ -712,13 +709,13 @@ void CharDetails::setDemonHunterMode(bool val)
     if (m_isDemonHunter)
     {
       if (m_model->name().contains("bloodelfmale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_bem.m2";
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_be_m.m2";
       else if (m_model->name().contains("bloodelffemale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_bef.m2";
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_be_f.m2";
       else if (m_model->name().contains("nightelfmale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_nim.m2";
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_ni_m.m2";
       else if (m_model->name().contains("nightelffemale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_nif.m2";
+        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_ni_f.m2";
 
       m_model->mergeModel(m_dhModel);
     }
