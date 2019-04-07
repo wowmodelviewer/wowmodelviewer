@@ -410,9 +410,9 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 
 				QStringList strList = strURL.mid(7).split("/");
 
-				region = strList.at(0).mid(0, strURL.indexOf("."));
-				realm = strList.at(strList.size() - 2);
-				charName = strList.at(strList.size() - 1).mid(0, strURL.lastIndexOf("?") - 1);
+				region = strList.at(0).mid(0, strList.at(0).indexOf("."));
+				realm = strList.at(strList.size() - 3);
+				charName = strList.at(strList.size() - 2).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
 			}
 			else if (strURL.indexOf("worldofwarcraft.com") != -1)
