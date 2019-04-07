@@ -33,7 +33,6 @@
 // Qt
 #include <QObject>
 #include <QByteArray>
-#include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QString>

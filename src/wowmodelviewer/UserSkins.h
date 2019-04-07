@@ -1,11 +1,7 @@
 #ifndef USERSKINS_H
 #define USERSKINS_H
 
-#include <cassert>
-#include <string>
 #include <map>
-
-#include <wx/wx.h>
 
 #include "animcontrol.h"
 

@@ -8,8 +8,6 @@
 #ifndef _CASCFOLDER_H_
 #define _CASCFOLDER_H_
 
-#include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -17,10 +15,6 @@
   #define __CASCLIB_SELF__
 #endif
 #include "CascLib.h"
-
-#include <iostream>
-
-#include <QString>
 
 #include "GameFolder.h" // GameConfig
 

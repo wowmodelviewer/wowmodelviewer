@@ -1,7 +1,5 @@
 #include "dbfile.h"
 
-#include "logger/Logger.h"
-
 DBFile::DBFile() :
   data(0),
   stringTable(0),

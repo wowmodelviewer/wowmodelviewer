@@ -31,7 +31,6 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream>
 
 // Qt
 #ifdef min

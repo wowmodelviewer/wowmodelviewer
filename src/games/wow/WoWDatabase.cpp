@@ -7,7 +7,6 @@
 
 #include "WoWDatabase.h"
 
-#include <QDomElement>
 #include <QDomNamedNodeMap>
 
 #include "Game.h"

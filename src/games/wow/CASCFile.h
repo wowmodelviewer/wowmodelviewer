@@ -13,7 +13,6 @@
 #endif
 #include "CascLib.h"
 
-#include <string>
 #include "GameFile.h"
 
 class CASCFolder;

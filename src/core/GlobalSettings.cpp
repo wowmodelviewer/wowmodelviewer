@@ -32,7 +32,6 @@
 // STL
 #include <sstream>
 
-#include <iostream>
 // Wx
 
 // Externals

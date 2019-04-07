@@ -4,7 +4,6 @@
 #include <wx/wx.h>
 
 #include "modelcanvas.h"
-#include "util.h"
 #if defined(_WINDOWS)
 #include "AVIGenerator.h"
 #endif

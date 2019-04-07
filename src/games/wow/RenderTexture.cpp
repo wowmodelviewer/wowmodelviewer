@@ -1,7 +1,10 @@
 
 #include "RenderTexture.h"
 
+#include "video.h"
+
 #include "logger/Logger.h"
+
 
 bool CHECK_FRAMEBUFFER_STATUS()
 {

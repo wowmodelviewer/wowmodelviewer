@@ -30,7 +30,6 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream>
 #include <unordered_set>
 
 // Qt 

@@ -3,11 +3,10 @@
 
 // C++ files
 #include <map>
+#include <set>
 #include <vector>
 //#include <stdlib.h>
 //#include <crtdbg.h>
-
-#include <QString>
 
 // Our files
 
@@ -30,11 +29,14 @@
 #include "particle.h"
 #include "TabardDetails.h"
 #include "TextureAnim.h"
+#include "TextureManager.h"
 #include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
 
 #include "metaclasses/Container.h"
+
+
 
 class CASCFile;
 class GameFile;
@@ -88,7 +90,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<Vec3D> bounds;
 
   void refreshMerging();
-  std::set<WoWModel *> mergedModels;
+  set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
   std::vector<ModelVertex> rawVertices;

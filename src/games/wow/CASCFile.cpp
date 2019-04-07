@@ -9,7 +9,6 @@
 
 #include "CASCChunks.h"
 #include "Game.h"
-#include "globalvars.h"
 #include "logger/Logger.h"
 // #define DEBUG_READ
 

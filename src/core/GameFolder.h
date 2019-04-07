@@ -11,8 +11,6 @@
 #include <map>
 #include <set>
 
-#include <QString>
-
 #include "GameFile.h"
 
 #include "metaclasses/Container.h"

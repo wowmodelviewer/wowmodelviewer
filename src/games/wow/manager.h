@@ -2,7 +2,6 @@
 #define MANAGER_H
 
 // STL
-#include <iostream>
 #include <map>
 
 #include <QString>

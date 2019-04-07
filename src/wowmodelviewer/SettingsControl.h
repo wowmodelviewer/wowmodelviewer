@@ -11,9 +11,6 @@
 class wxNotebook;
 
 // Custom headers
-#include "util.h"
-#include "video.h"
-#include "modelcanvas.h"
 
 class DisplaySettings;
 class ExportSettings;

@@ -1,8 +1,6 @@
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
-#include <cmath>
-
 #include "vec3d.h"
 
 class Matrix;

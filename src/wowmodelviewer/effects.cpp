@@ -1,7 +1,6 @@
 #include "effects.h"
 
 #include "Attachment.h"
-#include "database.h"
 #include "enums.h"
 #include "Game.h"
 #include "itemselection.h"

@@ -7,8 +7,6 @@
 
 #include "GameFolder.h"
 
-#include <QDirIterator>
-#include <QFile>
 #include <QRegularExpression>
 
 #include "logger/Logger.h"

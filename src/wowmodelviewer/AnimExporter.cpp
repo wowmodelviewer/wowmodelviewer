@@ -1,13 +1,17 @@
 
 #include "AnimExporter.h"
 
-#include "logger/Logger.h"
+
 #include "Attachment.h"
+#include "enums.h"
 #include "globalvars.h"
+#include "Quantize.h"
+
+#include "logger/Logger.h"
+
 #include "ximage.h"
 #include "ximagif.h"
-#include "ximabmp.h"
-#include "Quantize.h"
+
 
 IMPLEMENT_CLASS(CAnimationExporter, wxFrame)
 

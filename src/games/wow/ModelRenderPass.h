@@ -8,7 +8,6 @@
 #ifndef _MODELRENDERPASS_H_
 #define _MODELRENDERPASS_H_
 
-#include "modelheaders.h"
 #include "quaternion.h"
 #include "types.h"
 

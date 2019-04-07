@@ -35,10 +35,8 @@
 #include "Attachment.h"
 #include "database.h" // items
 #include "Game.h"
-#include "globalvars.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
-#include "WoWDatabase.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"

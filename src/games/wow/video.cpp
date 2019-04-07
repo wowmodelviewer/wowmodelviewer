@@ -7,7 +7,6 @@
 
 #include "Game.h"
 #include "GameFile.h"
-#include "Texture.h"
 
 #include <QImage>
 

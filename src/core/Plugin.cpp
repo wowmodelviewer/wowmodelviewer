@@ -31,6 +31,7 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <iostream>
 
 // Qt 
 #include <QCoreApplication>
@@ -42,7 +43,6 @@
 // Other libraries
 
 // Current library
-#include "PluginManager.h"
 
 // Namespaces used
 //--------------------------------------------------------------------

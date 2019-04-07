@@ -25,17 +25,11 @@
  */
 
 #include <QApplication>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QTableWidget>
-#include <QVboxLayout>
 
 // Externals
 
 // Other libraries
-#include <iostream>
 #include <string>
-#include "FileDownloader.h"
 #include "VersionManager.h"
 #include "UpdateManager.h"
 

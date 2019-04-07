@@ -1,13 +1,11 @@
 #include "maptile.h"
 
 #include <cassert>
-#include <algorithm>
 
 #include "logger/Logger.h"
 
 #include "Game.h"
 #include "GameFile.h"
-#include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
 #include "vec3d.h"

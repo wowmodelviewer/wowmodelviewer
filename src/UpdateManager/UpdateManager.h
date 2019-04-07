@@ -32,7 +32,6 @@
 #include <map>
 
 // Qt
-#include <QLabel>
 #include <QMainWindow>
 #include <QNetworkAccessManager>
 #include <QTableWidget>

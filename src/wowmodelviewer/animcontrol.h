@@ -9,7 +9,6 @@
 //#include "model.h"
 //#include "wmo.h"
 #include "modelcanvas.h"
-#include "database.h"
 
 extern float animSpeed;
 

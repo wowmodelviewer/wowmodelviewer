@@ -2,25 +2,19 @@
 
 #include <cassert>
 #include <algorithm>
-#include <iostream>
 
 #include "Attachment.h"
 #include "GlobalSettings.h"
 #include "CASCFile.h"
-#include "WoWDatabase.h"
 #include "Game.h"
-#include "globalvars.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
-#include "WoWDatabase.h"
 
 #include "logger/Logger.h"
 
-#include <QFile>
-#include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 #include <sstream>

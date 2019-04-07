@@ -36,6 +36,8 @@
 #include <QSettings>
 #include <QXmlStreamWriter>
 
+#include <fstream>
+
 
 
 // default colour values
@@ -1493,8 +1495,8 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
       if (dialog.ShowModal() == wxID_OK) {
         wxString fn = dialog.GetPath();
 
-        // FIXME: ofstream is not compitable with multibyte path name
-        ofstream f(fn.fn_str(), ios_base::out | ios_base::trunc);
+        // FIXME: ofstream is not compatible with multibyte path name
+        std::ofstream f(fn.fn_str(), ios_base::out | ios_base::trunc);
 
         f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
         for (size_t i = 0; i < MAX_LIGHTS; i++) {
@@ -2351,7 +2353,7 @@ void ModelViewer::ModelInfo()
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   wxString fn = wxT("ModelInfo.xml");
   // FIXME: ofstream is not compatible with multibyte path name
-  ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
+  std::ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
 
   if (!xml.is_open()) {
     LOG_ERROR << "Unable to open file '" << QString::fromWCharArray(fn.c_str()) << "'. Could not export model.";

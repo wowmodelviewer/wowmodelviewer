@@ -15,8 +15,9 @@ class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "WoWModel.h"
 #include "animated.h"
+#include "OpenGLHeaders.h"
+
 #include <list>
 
 class Bone;

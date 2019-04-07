@@ -32,11 +32,9 @@
 // STL
 
 // Qt
-#include <QUrl>
 #include <QEventLoop>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 

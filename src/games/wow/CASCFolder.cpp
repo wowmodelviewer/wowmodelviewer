@@ -7,9 +7,6 @@
 
 #include "CASCFolder.h"
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <locale>
 #include <map>
 #include <utility>

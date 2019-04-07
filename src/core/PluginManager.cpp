@@ -31,6 +31,7 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <iostream>
 
 // Qt 
 #include <QDir>

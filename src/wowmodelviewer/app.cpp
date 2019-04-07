@@ -11,9 +11,9 @@
 
 #include "Game.h"
 #include "GlobalSettings.h"
+#include "globalvars.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
-#include "resource1.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -25,6 +25,7 @@
 
 #include <QCoreApplication>
 #include <QSettings>
+
 
 /*	THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.

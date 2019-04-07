@@ -1,8 +1,6 @@
 #ifndef WDC3FILE_H
 #define WDC3FILE_H
 
-#include <QString>
-
 #include "types.h"
 #include "wdb5file.h"
 

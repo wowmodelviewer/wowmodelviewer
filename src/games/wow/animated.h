@@ -1,7 +1,6 @@
 #ifndef ANIMATED_H
 #define ANIMATED_H
 
-#include <cassert>
 #include <map>
 #include <utility>
 #include <vector>

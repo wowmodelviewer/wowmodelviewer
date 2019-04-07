@@ -8,7 +8,6 @@
 #ifndef _GAMEFILE_H_
 #define _GAMEFILE_H_
 
-#include <stdio.h>
 #include <string>
 #include <vector>
 

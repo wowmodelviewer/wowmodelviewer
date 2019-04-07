@@ -1,12 +1,9 @@
 #ifndef DBFILE_H
 #define DBFILE_H
 
-#include <cassert>
 #include <map>
 #include <string>
 #include <vector>
-
-#include <QString>
 
 #include "GameDatabase.h"
 

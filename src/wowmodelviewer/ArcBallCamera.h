@@ -8,8 +8,6 @@
 #ifndef _ARCBALLCAMERA_H_
 #define _ARCBALLCAMERA_H_
 
-#include "OpenGLHeaders.h"
-
 #include "matrix.h"
 #include "vec3d.h"
 

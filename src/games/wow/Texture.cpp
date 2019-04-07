@@ -9,6 +9,7 @@
 #include <QImage>
 
 #include "OpenGLHeaders.h"
+#include "ddslib.h"
 
 Texture::Texture(GameFile * f)
 : ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f)

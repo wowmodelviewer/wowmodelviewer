@@ -1,8 +1,6 @@
 #ifndef WDB5FILE_H
 #define WDB5FILE_H
 
-#include <QString>
-
 #include "dbfile.h"
 #include "types.h"
 

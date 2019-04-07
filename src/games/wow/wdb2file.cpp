@@ -1,7 +1,6 @@
 #include "wdb2file.h"
 
 #include "GameFile.h"
-#include "types.h"
 
 #include "logger/Logger.h"
 

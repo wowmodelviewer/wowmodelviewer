@@ -27,7 +27,6 @@
 #define _WOWITEM_H_
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 

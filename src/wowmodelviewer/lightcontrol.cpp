@@ -1,6 +1,9 @@
 
 #include "lightcontrol.h"
 
+#include "enums.h"
+#include "OpenGLHeaders.h"
+
 #include "logger/Logger.h"
 
 #include <wx/colordlg.h>

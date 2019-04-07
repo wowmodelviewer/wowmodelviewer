@@ -16,7 +16,7 @@
 #include "Game.h"
 #include "GameFile.h"
 #include "Texture.h"
-#include "types.h"
+#include "TextureManager.h"
 #include "WoWDatabase.h"
 
 #include "logger/Logger.h"

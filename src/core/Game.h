@@ -8,8 +8,6 @@
 #ifndef _GAME_H_
 #define _GAME_H_
 
-#include <QString>
-
 #include "GameFolder.h"
 #include "GameDatabase.h"
 

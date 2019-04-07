@@ -19,8 +19,7 @@
 
 
 #if defined(_WINDOWS)
-  #include <windows.h>
-	typedef unsigned char uint8;
+typedef unsigned char uint8;
 	typedef char int8;
 	typedef unsigned __int16 uint16;
 	typedef __int16 int16;

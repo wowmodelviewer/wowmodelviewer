@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "OpenGLHeaders.h"
+
 #include "logger/Logger.h"
 
 #include <wx/string.h>

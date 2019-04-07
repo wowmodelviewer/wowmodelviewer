@@ -1,6 +1,5 @@
 #include "database.h"
 
-#include "globalvars.h"
 #include "wow_enums.h"
 #include "logger/Logger.h"
 

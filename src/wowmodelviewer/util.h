@@ -5,23 +5,15 @@
 #include <windows.h>
 #endif
 
-#include <algorithm>
 //#include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <map>
 #include <string>
-#include <set>
 #include <sstream>
 #include <vector>
-#include <cstddef>
 
 // Standard C++ headers
-#include <stdio.h>
 
 // Our other utility headers
-#include "vec3d.h"
-#include "quaternion.h"
 
 #include <QString>
 

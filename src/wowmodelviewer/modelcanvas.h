@@ -24,7 +24,6 @@
 #endif
 #include "BaseCanvas.h"
 #include "camera.h"
-#include "enums.h"
 #include "lightcontrol.h"
 #include "maptile.h"
 #include "RenderTexture.h"

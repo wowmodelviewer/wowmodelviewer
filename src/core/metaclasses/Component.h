@@ -30,9 +30,6 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream>
-#include <string.h>
-#include <typeinfo> // for std::bad_cast in inherited classes
 
 // Qt 
 #include <Qstring>

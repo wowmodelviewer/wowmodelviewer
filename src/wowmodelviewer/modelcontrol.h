@@ -12,8 +12,6 @@
 #include "modelcanvas.h"
 #include "animcontrol.h"
 
-#include "enums.h"
-
 // ModelName
 // LevelOfDetail
 // Opacity

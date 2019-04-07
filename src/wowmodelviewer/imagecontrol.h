@@ -9,7 +9,6 @@
 
 #include <wx/aui/aui.h>
 
-#include "video.h"
 #include "modelcanvas.h"
 
 

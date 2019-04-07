@@ -3,7 +3,6 @@
 
 // Video & graphics stuff
 #include "OpenGLHeaders.h"
-#include "video.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL

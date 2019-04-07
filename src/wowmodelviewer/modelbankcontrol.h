@@ -8,7 +8,6 @@
 
 #include <wx/arrstr.h>
 
-#include "enums.h"
 #include "GameFile.h"
 #include "vec3d.h"
 #include "wow_enums.h"
