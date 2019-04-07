@@ -32,9 +32,7 @@
 // STL
 
 // Qt
-#include <QUrl>
 #include <QEventLoop>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QJsonArray>
@@ -48,9 +46,7 @@
 // Other libraries
 //#include "charcontrol.h"
 #include "CharInfos.h"
-#include "TabardDetails.h"
 #include "database.h" // ItemRecord
-#include "globalvars.h"
 #include "wow_enums.h"
 
 
@@ -415,21 +411,22 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 				QStringList strList = strURL.mid(7).split("/");
 
 				region = strList.at(0).mid(0, strURL.indexOf("."));
-				realm = strList.at(4);
-				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
+				realm = strList.at(strList.size() - 2);
+				charName = strList.at(strList.size() - 1).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
 			}
 			else if (strURL.indexOf("worldofwarcraft.com") != -1)
 			{
 				// Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
+        // or (new form) https://worldofwarcraft.com/fr-fr/character/eu/les-sentinelles/jeromnimo
 
 				LOG_INFO << qPrintable(strURL);
 				QStringList strList = strURL.mid(8).split("/");
 
 
 				region = strList.at(1);
-				realm = strList.at(3);
-				charName = strList.at(4).mid(0, strURL.lastIndexOf("?") - 1);
+				realm = strList.at(strList.size() - 2);
+				charName = strList.at(strList.size() - 1).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
 				
 				// I don't believe these should be translated, as websites tend not to translate URLs...

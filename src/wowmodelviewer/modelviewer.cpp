@@ -9,7 +9,6 @@
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 
-#include "AnimationExportChoiceDialog.h"
 #include "Attachment.h"
 #include "app.h"
 #include "Bone.h"
@@ -22,13 +21,9 @@
 #include "globalvars.h"
 #include "ImporterPlugin.h"
 #include "MemoryUtils.h"
-#include "ModelColor.h"
-#include "ModelEvent.h"
 #include "ModelRenderPass.h"
-#include "ModelTransparency.h"
 #include "PluginManager.h"
 #include "RaceInfos.h"
-#include "TextureAnim.h"
 #include "SettingsControl.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -39,7 +34,6 @@
 
 #include <QFile>
 #include <QSettings>
-#include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 
@@ -199,7 +193,7 @@ ModelViewer::ModelViewer()
 {
   PLUGINMANAGER.init("./plugins");
   // our main class objects
-  animControl = NULL;
+  animControl = nullptr;
   canvas = NULL;
   charControl = NULL;
   enchants = NULL;
@@ -1446,7 +1440,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
       if (dialog.ShowModal() == wxID_OK){
         armoryPath = dialog.GetValue();
-        LOG_INFO << "Importing character from the Armory:" << QString::fromWCharArray(armoryPath.c_str());
         ImportArmoury(armoryPath);
       }
     }
@@ -2404,6 +2397,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
   CharInfos * result = NULL;
 
   QString url = strURL.utf8_str();
+  LOG_INFO << "Importing character from the Armory:" << url;
 
   for (PluginManager::iterator it = PLUGINMANAGER.begin();
        it != PLUGINMANAGER.end();
