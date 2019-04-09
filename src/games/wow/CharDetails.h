@@ -41,17 +41,9 @@ public:
     FacialHairType = 2,
     HairType = 3,
     UnderwearType = 4,
-    SkinTypeHD = 5,
-    FaceTypeHD = 6,
-    FacialHairTypeHD = 7,
-    HairTypeHD = 8,
-    UnderwearTypeHD = 9,
-    TattooType = 11,
-    TattooTypeHD = 12,
-    Custom2Type = 13,
-    Custom2TypeHD = 14,
-    Custom3Type = 15,
-    Custom3TypeHD = 16
+    TattooType = 5,
+    Custom2Type = 6,
+    Custom3Type = 7
   };
   
   enum CustomizationType
@@ -75,18 +67,6 @@ public:
   };
 
 
-  std::map<int, int> SectionTypeToHD =
-  {
-    { SkinType, SkinTypeHD },
-    { FaceType, FaceTypeHD },
-    { FacialHairType, FacialHairTypeHD },
-    { HairType, HairTypeHD },
-    { UnderwearType, UnderwearTypeHD },
-    { TattooType, TattooTypeHD },
-    { Custom2Type, Custom2TypeHD },
-    { Custom3Type, Custom3TypeHD }
-  };
-
   EyeGlowTypes eyeGlowType;
 
   bool showUnderwear, showEars, showHair, showFacialHair, showFeet, autoHideGeosetsForHeadItems;
@@ -108,7 +88,6 @@ public:
 
   std::vector<int> getTextureForSection(SectionType);
 
-
   // accessors to customization
   void set(CustomizationType type, uint val);
   uint get(CustomizationType type) const;
@@ -126,7 +105,6 @@ private:
   WoWModel * m_model;
 
   void fillCustomizationMap();
-  int getSectionType(int baseType, bool isHD);
   std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
   std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 

@@ -44,10 +44,10 @@
     <field type="byte" name="RaceID" pos="0" />
     <field type="byte" name="SexID" pos="1" />
     <field type="byte" name="SectionType" pos="2" />
-    <field type="uint" name="TextureName" arraySize="3" pos="6" />
-    <field type="uint16" name="Flags" pos="5" />
     <field type="byte" name="VariationIndex" pos="3" />
     <field type="byte" name="ColorIndex" pos="4" />
+    <field type="uint16" name="Flags" pos="5" />
+    <field type="uint" name="TextureName" arraySize="3" pos="6" />
   </table>
   <table name="ChrClasses">
     <field type="uint" name="ID" primary="yes" />
