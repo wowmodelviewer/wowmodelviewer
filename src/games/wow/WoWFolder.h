@@ -51,10 +51,13 @@ namespace wow
 
       void onChildAdded(GameFile *);
       void onChildRemoved(GameFile *);
-
+      QString fileName(int id);
+      int fileID(QString fileName);
     private:
       CASCFolder m_CASCFolder;
       std::map<int, GameFile *> m_idMap;
+      std::map<int, QString> m_idNameMap;
+      std::map<QString, int> m_nameIdMap;
   };
 }
 

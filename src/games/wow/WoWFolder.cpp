@@ -34,21 +34,26 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
   QFile file(core::Game::instance().configFolder() + filename);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
-    LOG_ERROR << "Fail to open" << filename;
+    LOG_ERROR << "Failed to open" << filename;
     return;
   }
 
   QTextStream in(&file);
 
-  LOG_INFO << "WoWFolder - Start to build object hierarchy";
+  LOG_INFO << "WoWFolder - Starting to build object hierarchy";
   while (!in.atEnd())
   {
     QString line = in.readLine().toLower();
-    line = QDir::fromNativeSeparators(line); // ensures path is UNIX format
-    int id = m_CASCFolder.fileDataId(line.toStdString());
-    if (id != -1)
+    QStringList lineData = line.split(';');
+    if (lineData.size() < 2)
+      continue;
+    int id = lineData.at(0).toInt();
+    if (/* m_CASCFolder.fileExists(id) */ id != -1)
     {
-      CASCFile * file = new CASCFile(line, id);
+      QString fileName = lineData.at(1);
+      m_idNameMap[id] = fileName;
+      m_nameIdMap[fileName] = id;
+      CASCFile * file = new CASCFile(fileName, id);
       file->setName(line.mid(line.lastIndexOf('/') + 1));
       addChild(file);
     }
@@ -90,10 +95,17 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
           addnewfile = false;
         }
       }
-
+      else
+      {
+        // Even though the file wasn't found in the game database, it's possible to assign it a specific ID in the listfile
+        // (useful in some situations) :
+        auto it = m_nameIdMap.find(filePath);
+        if (it != m_nameIdMap.end())
+          originalId = it->second;
+      }
       if(addnewfile)
       {
-        LOG_INFO << "Add custom file" << filePath << "from hard drive location" << dirIt.filePath();
+        LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" << dirIt.filePath();
         HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalId);
         file->setName(filePath.mid(filePath.lastIndexOf("/")+1));
         addChild(file);
@@ -121,7 +133,7 @@ GameFile * wow::WoWFolder::getFile(int id)
     LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
     HANDLE newfile;
-    if(m_CASCFolder.openFile(filename.toStdString(), &newfile))
+    if(m_CASCFolder.openFile(id, &newfile))
     {
       LOG_INFO << "Succesfully opened";
       m_CASCFolder.closeFile(newfile);
@@ -138,7 +150,10 @@ GameFile * wow::WoWFolder::getFile(int id)
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 {
-  return m_CASCFolder.openFile(file, result);
+  auto it = m_nameIdMap.find(QString::fromStdString(file));
+  if (it == m_nameIdMap.end())
+    return false;
+  return m_CASCFolder.openFile(it->second, result);
 }
 
 QString wow::WoWFolder::version()
@@ -178,3 +193,19 @@ void wow::WoWFolder::onChildRemoved(GameFile * child)
   m_idMap.erase(child->fileDataId());
 }
 
+QString wow::WoWFolder::fileName(int id)
+{
+  auto it = m_idNameMap.find(id);
+  if (it == m_idNameMap.end())
+    return QString();
+  return it->second;
+}
+
+int wow::WoWFolder::fileID(QString fileName)
+{
+  auto it = m_nameIdMap.find(fileName);
+  if (it == m_nameIdMap.end())
+    return -1;
+  return it->second;
+}
+   

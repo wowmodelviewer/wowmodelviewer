@@ -43,12 +43,12 @@ class _CASCFOLDER_API_ CASCFolder
     
     int lastError() { return m_openError; }
 
-    bool fileExists(std::string file);
+    bool fileExists(int id);
 
-    bool openFile(std::string file, HANDLE * result);
+    bool openFile(int id, HANDLE * result);
     bool closeFile(HANDLE file);
 
-    int fileDataId(std::string & filename);
+    // int fileDataId(std::string & filename);
 
   private:
     CASCFolder(const CASCFolder &);
