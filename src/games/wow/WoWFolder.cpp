@@ -48,11 +48,13 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     if (lineData.size() < 2)
       continue;
     int id = lineData.at(0).toInt();
+    QString fileName = lineData.at(1);
+    // Add the file to the name-ID mappings even if it can't be found in CASC,
+    // as it could be a custom file added by the user:
+    m_idNameMap[id] = fileName;
+    m_nameIdMap[fileName] = id;
     if (m_CASCFolder.fileExists(id))
     {
-      QString fileName = lineData.at(1);
-      m_idNameMap[id] = fileName;
-      m_nameIdMap[fileName] = id;
       CASCFile * file = new CASCFile(fileName, id);
       file->setName(line.mid(line.lastIndexOf('/') + 1));
       addChild(file);
