@@ -107,7 +107,8 @@ set(common_files wowmodelviewer.json
 				 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
 				 ${WMV_BASE_PATH}/appveyor.yml)
 
-set(wow8_0_files ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.txt
+set(wow8_0_files 
+         ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
@@ -169,20 +170,23 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
-set(GAMEFILES_WOW8_0 ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.txt
+set(GAMEFILES_WOW8_0 
+                 ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
         		     ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
+					       ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
+					       ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
 
-set(GAMEFILES_WOW8_1 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
+set(GAMEFILES_WOW8_1 
+                 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
         		     ${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
+					       ${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
+					       ${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
 
-set(GAMEFILES_WOW8_2 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
+set(GAMEFILES_WOW8_2 
+                 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
         		     ${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
+					       ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
+					       ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
            
 set(files ${QT_FILES} ${EXTRA_FILES})
 
