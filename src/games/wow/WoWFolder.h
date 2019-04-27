@@ -40,8 +40,9 @@ namespace wow
 
       GameFile * getFile(int id);
 
+      bool openFile(int id, HANDLE * result);
       bool openFile(std::string file, HANDLE * result);
-
+      
       QString version();
       QString locale();
       bool setConfig(core::GameConfig config);

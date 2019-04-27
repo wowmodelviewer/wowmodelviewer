@@ -68,7 +68,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
       if (!CascOpenStorage(m_folder.toStdWString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
-        LOG_ERROR << "Opening" << m_folder << "failed." << "Error" << m_openError;
+        LOG_ERROR << "CASCFolder: Opening" << m_folder << "failed." << "Error" << m_openError;
         return false;
       }
 
@@ -171,8 +171,7 @@ bool CASCFolder::fileExists(int id)
     CascCloseFile(dummy);
     return true;
   }
-
-  LOG_ERROR << "File" << id << "doesn't seem to exist." << "Error" << GetLastError();
+  // LOG_ERROR << "File" << id << "doesn't exist." << "Error" << GetLastError();
   return false;
 }
 

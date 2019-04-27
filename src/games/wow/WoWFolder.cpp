@@ -48,7 +48,7 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     if (lineData.size() < 2)
       continue;
     int id = lineData.at(0).toInt();
-    if (/* m_CASCFolder.fileExists(id) */ id != -1)
+    if (m_CASCFolder.fileExists(id))
     {
       QString fileName = lineData.at(1);
       m_idNameMap[id] = fileName;
@@ -97,8 +97,8 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
       }
       else
       {
-        // Even though the file wasn't found in the game database, it's possible to assign it a specific ID in the listfile
-        // (useful in some situations) :
+        // Even though the file wasn't found in the game database, it's possible to assign it
+        // a specific ID in the listfile (useful in some situations) :
         auto it = m_nameIdMap.find(filePath);
         if (it != m_nameIdMap.end())
           originalId = it->second;
@@ -147,6 +147,10 @@ GameFile * wow::WoWFolder::getFile(int id)
   return result;
 }
 
+bool wow::WoWFolder::openFile(int id, HANDLE * result)
+{
+  return m_CASCFolder.openFile(id, result);
+}
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE * result)
 {
