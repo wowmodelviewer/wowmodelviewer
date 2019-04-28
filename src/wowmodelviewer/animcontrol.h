@@ -155,7 +155,6 @@ public:
   void SetAnimFrame(size_t frame);
   QString GetModelFolder(WoWModel *m);
 
-  bool randomSkins;
   bool defaultDoodads; 
   std::string oldname;
   QString modelFolder;
