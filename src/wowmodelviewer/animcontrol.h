@@ -64,6 +64,12 @@ class TextureGroup
         return false;
       if (definedTexture && !grp.definedTexture)
         return true;
+      QString texname1 = tex[0]->fullname();
+      QString texname2 = grp.tex[0]->fullname();
+      texname1 = texname1.mid(texname1.lastIndexOf("/"));
+      texname2 = texname2.mid(texname2.lastIndexOf("/"));
+      if(texname1 != texname2)
+        return texname1 < texname2;
       for (size_t i=0; i<num; i++)
       {
         if (tex[i]<grp.tex[i]) return true;
