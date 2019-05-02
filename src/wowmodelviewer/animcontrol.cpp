@@ -121,7 +121,6 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,16), 0, NULL, wxCB_READONLY);
   BLPSkinList3->Show(false);
 
-  randomSkins = true;
   defaultDoodads = true;
   modelFolderChanged = true;
   BLPListFilled = false;
@@ -667,7 +666,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
     if (ret)
     { // Don't call SetSkin without a skin
-      int mySkin = randomSkins ? randint(0, (int)count-1) : 0;
+      int mySkin = useRandomLooks ? randint(0, (int)count-1) : 0;
       SetSkin(mySkin);
     }
   }
@@ -865,7 +864,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     if (ret)
     {
       // Don't call SetSkin without a skin
-      int mySkin = randomSkins ? randint(0, (int)skins.size()-1) : 0;
+      int mySkin = useRandomLooks ? randint(0, (int)skins.size()-1) : 0;
       SetSkin(mySkin);
     }
   }
