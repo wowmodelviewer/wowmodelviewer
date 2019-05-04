@@ -278,8 +278,8 @@ class ModelGeosetHD {
 struct ModelTexUnit
 {
   // probably the texture units size always >=number of materials it seems
-  uint8 flags;      // Usually 16 for static textures, and 0 for animated textures.
-  int8 priorityPlane;
+  uint8_t flags;      // Usually 16 for static textures, and 0 for animated textures.
+  int8_t priorityPlane;
   uint16 shading;    // If set to 0x8000: shaders. Used in skyboxes to ditch the need for depth buffering. See below.
   uint16 op;         // Material this texture is part of (index into mat)
   uint16 op2;        // Usually same as above. Not sure what it's for
