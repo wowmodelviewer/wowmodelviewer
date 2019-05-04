@@ -102,7 +102,7 @@ Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::G
   }
   else
   {
-    std::cout << "Unable to load plugin file " << path << ":" << loader.errorString().toStdString() << std::endl;
+    std::cout << "Unable to load plugin file " << path << ": " << loader.errorString().toStdString() << std::endl;
   }
   return newPlugin;
 }
