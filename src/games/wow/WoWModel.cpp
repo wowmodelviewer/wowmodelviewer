@@ -1212,9 +1212,28 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < view->nTex; j++)
   {
+    uint texOffset = 0;
+    uint texCount = tex[j].op_count;
+    if (texCount > 1)
+    {
+      // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
+      // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
+      // displaying one randomly. So for now we try to guess which one is the most important by checking
+      // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
+      for (size_t k = 0; k < texCount; k++)
+      {
+        int special = specialTextures[texlookup[tex[j].textureid + k]];
+        if (special == 11 || special == 12 || special ==13)
+        {
+          texOffset = k;
+          LOG_INFO << "setLOD: texture unit"<<j<<"has" << texCount << "textures. Choosing texture"<<k+1<<", which has special type ="<<special;
+          break;
+        }
+      }
+    }
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
      
-    pass->tex = texlookup[tex[j].textureid];
+    pass->tex = texlookup[tex[j].textureid + texOffset];
  
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
@@ -1225,7 +1244,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
     pass->color = tex[j].colorIndex;
 
-    pass->opacity = transLookup[tex[j].transid];
+    pass->opacity = transLookup[tex[j].transid + texOffset];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
@@ -1252,7 +1271,7 @@ void WoWModel::setLOD(GameFile * f, int index)
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
     if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass->texanim = texanimlookup[tex[j].texanimid];
+      pass->texanim = texanimlookup[tex[j].texanimid + texOffset];
     }
 
     rawPasses.push_back(pass);
