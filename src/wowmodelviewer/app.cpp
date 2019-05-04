@@ -47,7 +47,7 @@ I hope this gives some insight into the "program flow".
 */
 
 // tell wxwidgets which class is our app
-IMPLEMENT_APP(WowModelViewApp)
+// IMPLEMENT_APP(WowModelViewApp)
 
 void dumpStackInLogs()
 {
@@ -403,6 +403,7 @@ void WowModelViewApp::SaveSettings()
   config.setValue("Settings/displayItemAndNPCId", displayItemAndNPCId);
   config.setValue("Settings/SSCounter", ssCounter);
   config.setValue("Settings/DefaultFormat", imgFormat);
+  config.sync();
 }
 
 

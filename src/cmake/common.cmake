@@ -3,7 +3,7 @@
 ###################
 
 # set build type you want
-# availabke values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
+# available values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # define base repo path to use it cross folder

@@ -8,3 +8,5 @@ syntax: glob
 .settings/*
 ./Installers/Windows/NSIS/*.exe
 ./VisualStudio2013/*
+build
+.vs

@@ -121,15 +121,26 @@ use_core()
 use_glew()
 use_casclib()
 
-
 add_definitions(-DBUILDING_WOW_DLL)
 
-add_library(wow SHARED ${src} ${headers})
-set_property(TARGET wow PROPERTY FOLDER "libraries")
+set(NAME wow)
+add_library(${NAME} SHARED ${src} ${headers})
+set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
-target_link_libraries(wow core casc Qt5::Core Qt5::Xml Qt5::Gui)
-add_dependencies(wow casclib)
+target_link_libraries(${NAME} core casc Qt5::Core Qt5::Xml Qt5::Gui)
+add_dependencies(${NAME} casclib)
+
+set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+
+if (MSVC_IDE)
+	# Enable Qt in Visual Studio
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+endif()
 
 if(WIN32)
-  install(TARGETS wow RUNTIME DESTINATION "${WMV_BASE_PATH}/bin/")
+  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 endif(WIN32)

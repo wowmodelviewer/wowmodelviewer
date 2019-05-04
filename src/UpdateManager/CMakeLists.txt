@@ -30,11 +30,27 @@ source_group("Header Files" FILES ${headers})
 use_core()
 use_wow()
 
-add_executable(UpdateManager WIN32 ${src} ${headers})
-set_property(TARGET UpdateManager PROPERTY FOLDER "executables")
+set(NAME UpdateManager)
+add_executable(${NAME} WIN32 ${src} ${headers})
+set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-target_link_libraries(UpdateManager core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(${NAME} core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
-install(TARGETS UpdateManager 
-          RUNTIME DESTINATION ${WMV_BASE_PATH}/bin)
- 
+set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+
+if (MSVC_IDE)
+	# Enable Qt in Visual Studio
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:windows")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+endif()
+
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})

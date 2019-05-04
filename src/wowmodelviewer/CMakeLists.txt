@@ -1,4 +1,7 @@
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
+
 project(wowmodelviewer)
+
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
 include_directories(.)
@@ -12,10 +15,11 @@ include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})
 
 # find required Qt packages
-find_package(Qt5Core)
-find_package(Qt5Xml)
-find_package(Qt5Gui)
-find_package(Qt5Network)
+find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Xml Gui)
+
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # add wmv source files compilation
 set(src  AnimationExportChoiceDialog.cpp
@@ -40,6 +44,7 @@ set(src  AnimationExportChoiceDialog.cpp
          lightcontrol.cpp
          liquid.cpp
          LogStackWalker.cpp
+		 main.cpp
          maptile.cpp
          modelbankcontrol.cpp
          modelcanvas.cpp
@@ -136,19 +141,38 @@ set(useful_files ${common_files} ${wow8_0_files} ${wow8_1_files} ${wow8_2_files}
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
+set(NAME wowmodelviewer)
+add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
-add_executable(wowmodelviewer WIN32 ${src} ${headers} ${RES_FILES} ${useful_files})
+set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-set_property(TARGET wowmodelviewer PROPERTY FOLDER "executables")
+set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 
-target_link_libraries(wowmodelviewer
+if (MSVC_IDE)
+	# Enable Qt in Visual Studio
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+endif()
+
+target_link_libraries(${NAME}
   ${wxWidgets_LIBRARIES}
   wow
   cximage
+  Qt5::Xml
+  Qt5::Gui
+  Qt5::Network
+  Qt5::Widgets
 )
 
-install(TARGETS wowmodelviewer 
-        RUNTIME DESTINATION ${WMV_BASE_PATH}/bin)
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
@@ -190,9 +214,9 @@ set(GAMEFILES_WOW8_2
            
 set(files ${QT_FILES} ${EXTRA_FILES})
 
-install(FILES ${files} DESTINATION ${WMV_BASE_PATH}/bin)
-install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${WMV_BASE_PATH}/bin/platforms)
-install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${WMV_BASE_PATH}/bin/plugins/imageformats)
+install(FILES ${files} DESTINATION ${BIN_DIR})
+install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
+install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 
 install(FILES ${GAMEFILES_WOW8_0} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.0)
 install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.1)
