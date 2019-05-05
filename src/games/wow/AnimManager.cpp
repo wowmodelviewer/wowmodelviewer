@@ -25,7 +25,7 @@ AnimManager::AnimManager(WoWModel & m)
   if (model.anims.size() > 0)
   {
     Frame = 0;
-    TotalFrames = model.anims[0].length;
+    TotalFrames = model.anims[0].duration;
   }
   else
   {
@@ -71,7 +71,7 @@ void AnimManager::SetAnim(short index, unsigned int id, short loops)
     Count = 1;
     PlayIndex = index;
     Frame = 0;
-    TotalFrames = model.anims[id].length;
+    TotalFrames = model.anims[id].duration;
   }
 
   if (index+1 > Count)
@@ -149,7 +149,7 @@ void AnimManager::Prev()
     CurLoop++;
   }
 
-  Frame = model.anims[animList[PlayIndex].AnimID].length;
+  Frame = model.anims[animList[PlayIndex].AnimID].duration;
   TotalFrames = GetFrameCount();
 }
 
@@ -165,8 +165,8 @@ int AnimManager::Tick(int time)
   {
     FrameMouth += (time*mouthSpeed);
 
-    if (FrameMouth >= model.anims[AnimIDMouth].length)
-      FrameMouth -= model.anims[AnimIDMouth].length;
+    if (FrameMouth >= model.anims[AnimIDMouth].duration)
+      FrameMouth -= model.anims[AnimIDMouth].duration;
   }
 
   // animate our second (upper body) animation
@@ -174,11 +174,11 @@ int AnimManager::Tick(int time)
   {
     FrameSecondary += (time*Speed);
 
-    if (FrameSecondary >= model.anims[AnimIDSecondary].length)
-      FrameSecondary -= model.anims[AnimIDSecondary].length;
+    if (FrameSecondary >= model.anims[AnimIDSecondary].duration)
+      FrameSecondary -= model.anims[AnimIDSecondary].duration;
   }
 
-  if (Frame >= model.anims[animList[PlayIndex].AnimID].length)
+  if (Frame >= model.anims[animList[PlayIndex].AnimID].duration)
   {
     Next();
     return 1;
@@ -189,7 +189,7 @@ int AnimManager::Tick(int time)
 
 size_t AnimManager::GetFrameCount()
 {
-  return model.anims[animList[PlayIndex].AnimID].length;
+  return model.anims[animList[PlayIndex].AnimID].duration;
 }
 
 
@@ -197,7 +197,7 @@ void AnimManager::NextFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  TimeDiff = (model.anims[id].length / 60);
+  TimeDiff = (model.anims[id].duration / 60);
   Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
@@ -206,7 +206,7 @@ void AnimManager::PrevFrame()  // Only called by the animation controls
 {
   ssize_t TimeDiff;
   ssize_t id = animList[PlayIndex].AnimID;
-  TimeDiff = (model.anims[id].length / 60) * -1;
+  TimeDiff = (model.anims[id].duration / 60) * -1;
   Frame += TimeDiff;
   ForceModelUpdate(TimeDiff);
 }
@@ -218,7 +218,7 @@ void AnimManager::SetFrame(size_t f)  // Only called by the animation slider, or
   ssize_t id = animList[PlayIndex].AnimID;
 
   // ideal frame interval:
-  int frameInterval = model.anims[id].length / 60;
+  int frameInterval = model.anims[id].duration / 60;
 
   uint i = 1;
 

@@ -343,7 +343,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
+    //UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -1121,7 +1121,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
+       // UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
       }
     }
 

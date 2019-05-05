@@ -246,7 +246,7 @@ void FBXExporter::createMesh()
     ModelVertex &v = m_p_model->origVertices[i];
     vertices[i].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
     layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
-    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords[0].x, 1.0 - v.texcoords[0].y));
   }
 
   // Create polygons.
@@ -260,7 +260,7 @@ void FBXExporter::createMesh()
   for (size_t i = 0; i < num_of_passes; i++)
   {
     ModelRenderPass * p = m_p_model->passes[i];
-    if (p->init())
+    if (p->displayed())
     {
       // Build material name.
       FbxString mtrl_name = "testToChange";
@@ -271,14 +271,14 @@ void FBXExporter::createMesh()
       FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
       m_p_meshNode->AddMaterial(material);
 
-      ModelGeosetHD * g = m_p_model->geosets[p->geoIndex];
-      size_t num_of_faces = g->icount / 3;
+      M2SkinSectionHD * g = m_p_model->geosets[p->geoIndex];
+      size_t num_of_faces = g->indexCount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
         mesh->BeginPolygon(mtrl_index);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 1]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 2]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3 + 1]);
+        mesh->AddPolygon(m_p_model->indices[g->indexStart + j * 3 + 2]);
         mesh->EndPolygon();
       }
 
@@ -455,11 +455,11 @@ void FBXExporter::createAnimations()
     FbxAnimLayer* anim_layer = FbxAnimLayer::Create(m_p_scene, QString::fromStdWString(anim_name).toStdString().c_str());
     anim_stack->AddMember(anim_layer);
 
-    uint32 timeInc = cur_anim.length/60;
+    uint32 timeInc = cur_anim.duration/60;
 
     FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
 
-    for(uint32 t = 0 ; t < cur_anim.length ; t += timeInc)
+    for(uint32 t = 0 ; t < cur_anim.duration ; t += timeInc)
     {
       FbxTime time;
       time.SetSecondDouble((float)t / 1000.0);
@@ -582,7 +582,7 @@ void FBXExporter::createMaterials()
   for (unsigned int i = 0; i < m_p_model->passes.size(); i++)
   {
     ModelRenderPass * pass = m_p_model->passes[i];
-    if (pass->init())
+    if (pass->displayed())
     {
       // Build material name.
       FbxString mtrl_name = m_p_model->name().toStdString().c_str();
@@ -596,7 +596,7 @@ void FBXExporter::createMaterials()
       FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
       material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-      QString tex = m_p_model->getNameForTex(pass->tex);
+      QString tex = m_p_model->getNameForTex(pass->texs[0]);
 
       QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
       tex_name = tex_name.replace(".blp", ".png");
@@ -604,7 +604,7 @@ void FBXExporter::createMaterials()
       QString tex_fullpath_filename = QString::fromStdWString(m_filename);
       tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
 
-      m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getGLTexture(pass->tex);
+      m_texturesToExport[tex_fullpath_filename.toStdWString()] = m_p_model->getGLTexture(pass->texs[0]);
 
       FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
       texture->SetFileName(tex_fullpath_filename.toStdString().c_str());

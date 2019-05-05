@@ -224,31 +224,73 @@ void VideoSettings::InitGL()
 
 	if (supportDrawRangeElements && supportVBO) {
 		glEnableClientState(GL_VERTEX_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 		glEnableClientState(GL_NORMAL_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	} else {
 		glDisableClientState(GL_VERTEX_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 		glDisableClientState(GL_NORMAL_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    err = glGetError();
+    if (err)
+      LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	}
 	
 	if(supportAntiAlias && curCap.aaSamples>0)
 		glEnable(GL_MULTISAMPLE_ARB);
 
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
+
 	// Colour and materials
 	glEnable(GL_COLOR_MATERIAL);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glColorMaterial(GL_FRONT_AND_BACK, GL_EMISSION);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	
 	// For environmental mapped meshes
 	glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 
 	// TODO: Implement a scene graph, or scene manager to optimise OpenGL?
 	// Default texture settings.
 	glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	/*
 	glTexEnvf(GL_TEXTURE_ENV,GL_RGB_SCALE, 1.000000);
 	glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB, GL_PREVIOUS);
@@ -278,19 +320,38 @@ void VideoSettings::InitGL()
 	*/
 
 	glAlphaFunc(GL_GEQUAL, 0.9f);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glDepthFunc(GL_LEQUAL);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glPixelStorei(GL_PACK_SWAP_BYTES, false);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glPixelStorei(GL_PACK_LSB_FIRST, false);
-
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glShadeModel(GL_SMOOTH);
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-	err = glGetError();
-	if (err)
-	  LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
+  err = glGetError();
+  if (err)
+    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 }
 
 

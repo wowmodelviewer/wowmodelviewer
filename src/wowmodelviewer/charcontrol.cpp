@@ -763,6 +763,8 @@ void CharControl::selectNPC(ssize_t type)
   itemDialog->Show();
 }
 
+#define	ANIMATION_MOUNT	91
+
 void CharControl::OnUpdateItem(int type, int id)
 {
   switch (type)
