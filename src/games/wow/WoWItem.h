@@ -60,7 +60,7 @@ class _WOWITEM_API_ WoWItem : public Component
     int id() { return m_id; }
 
     void setDisplayId(int id);
-    void setLevel(unsigned int level);
+    void setLevel(int level);
 
     CharSlots slot() { return m_slot; }
 

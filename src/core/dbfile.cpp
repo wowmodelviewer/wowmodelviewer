@@ -1,9 +1,9 @@
 #include "dbfile.h"
 
 DBFile::DBFile() :
-  data(0),
-  stringTable(0),
+  data(nullptr),
   recordSize(0),
+  stringTable(0),
   recordCount(0),
   fieldCount(0),
   stringSize(0)

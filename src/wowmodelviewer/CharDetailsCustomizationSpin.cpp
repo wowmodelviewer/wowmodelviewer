@@ -64,7 +64,7 @@ void  CharDetailsCustomizationSpin::refresh()
   if (m_text)
   {
     uint pos = 0;
-    uint currentValue = m_details.get(m_type);
+    const int currentValue = static_cast<int>(m_details.get(m_type));
 
     for (; pos < m_params.possibleValues.size(); pos++)
       if (m_params.possibleValues[pos] == currentValue) break;

@@ -35,7 +35,7 @@
 
 // Qt 
 #include <QDir>
-#include <Qstring>
+#include <QString>
 #include <QStringList>
 
 

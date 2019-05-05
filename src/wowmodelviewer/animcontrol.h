@@ -31,7 +31,7 @@ class TextureGroup
     int PCRIndex;  // index into PCRList - list of particle color replacement values
     std::set<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
 
-    TextureGroup() : base(0), count(0)
+    TextureGroup() : count(0), base(0)
     {
       for (size_t i=0; i<num; i++)
       {
@@ -150,7 +150,7 @@ public:
   void OnItemSet(wxCommandEvent &event);
   void OnSliderUpdate(wxCommandEvent &event);
   void OnLoop(wxCommandEvent &event); 
-  Vec4D AnimControl::fromARGB(int color);
+  Vec4D fromARGB(int color);
   void SetSkinByDisplayID(int cdi);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);

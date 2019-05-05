@@ -102,7 +102,7 @@ public:
 
 	IDTYPE get(QString name)
 	{
-	  std::map<QString, IDTYPE>::iterator it = names.find(name);
+	  auto it = names.find(name);
 	  if(it != names.end())
 	    return it->second;
 

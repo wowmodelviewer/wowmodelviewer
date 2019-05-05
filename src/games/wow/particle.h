@@ -185,7 +185,6 @@ class RibbonEmitter
   Animated<float> above, below;
 
   Bone *parent;
-  float f1, f2;
 
   Vec3D pos;
 

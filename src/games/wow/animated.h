@@ -407,22 +407,22 @@ public:
 	{
 		if (v.sizes == 0)
 			return out;
-		out << "      <type>"<< v.type << "</type>" << endl;
-		out << "      <seq>"<< v.seq << "</seq>" << endl;
-		out << "      <anims>"<< endl;
+		out << "      <type>"<< v.type << "</type>" << std::endl;
+		out << "      <seq>"<< v.seq << "</seq>" << std::endl;
+		out << "      <anims>"<< std::endl;
 		for(size_t j=0; j<v.sizes; j++) {
 			if (j != 0) continue; // only output walk animation
 			if (v.uses((unsigned int)j)) {
-				out << "    <anim id=\"" << j << "\" size=\""<< v.data[j].size() <<"\">" << endl;
+				out << "    <anim id=\"" << j << "\" size=\""<< v.data[j].size() <<"\">" << std::endl;
 				for(size_t k=0; k<v.data[j].size(); k++) {
-					out << "      <data time=\"" << v.times[j][k]  << "\">" << v.data[j][k] << "</data>" << endl;
+					out << "      <data time=\"" << v.times[j][k]  << "\">" << v.data[j][k] << "</data>" << std::endl;
 				}
-				out << "    </anim>" << endl;
+				out << "    </anim>" << std::endl;
 			}
 			if (v.seq > -1 && j > 0)
 				break;
 		}
-		out << "      </anims>"<< endl;
+		out << "      </anims>"<< std::endl;
 		return out;
 	}
 };

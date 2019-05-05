@@ -32,7 +32,7 @@
 // STL
 
 // Qt 
-#include <Qstring>
+#include <QString>
 
 // Externals
 
