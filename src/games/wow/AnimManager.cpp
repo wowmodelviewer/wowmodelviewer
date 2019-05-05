@@ -46,7 +46,7 @@ void AnimManager::SetCount(int count)
   Count = count;
 }
 
-void AnimManager::AddAnim(unsigned int id, short loops)
+void AnimManager::AddAnim(size_t id, short loops)
 {
   if (Count > 3)
     return;
@@ -56,7 +56,7 @@ void AnimManager::AddAnim(unsigned int id, short loops)
   Count++;
 }
 
-void AnimManager::SetAnim(short index, unsigned int id, short loops)
+void AnimManager::SetAnim(short index, size_t id, short loops)
 {
   // error check, we currently only support 4 animations.
   if (index > 3)

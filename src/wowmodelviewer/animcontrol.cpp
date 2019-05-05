@@ -62,9 +62,9 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   const wxString strLoops[10] = { wxT("0"), wxT("1"), wxT("2"), wxT("3"), wxT("4"),
                                   wxT("5"), wxT("6"), wxT("7"), wxT("8"), wxT("9")};
   
-  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150,16), 0,
+  animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10,10), wxSize(150, 16), 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Animation"));
-  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10,95), wxSize(150,16), 0,
+  animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10, 95), wxSize(150, 16), 0,
                              NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList2->Enable(false);
   animCList2->Show(false);
@@ -76,7 +76,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   lockText->Show(false);
 
   // Our hidden head/mouth related controls
-  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170,95), wxSize(150,16), 0,
+  animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170, 95), wxSize(150, 16), 0,
                               NULL, wxCB_READONLY|wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
   animCList3->Enable(false);
   animCList3->Show(false);
@@ -93,7 +93,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 
   // ---
 
-  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40,16), 10,
+  loopList = new wxComboBox(this, ID_LOOPS, wxT("0"), wxPoint(330, 10), wxSize(40, 16), 10,
                             strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
   btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45,20));
 
@@ -1255,7 +1255,7 @@ void AnimControl::SetSkin(int num)
   g_selModel->setCreatureGeosetData(cgd);
   g_modelViewer->modelControl->UpdateGeosetSelection();
 
-  for (size_t i=0; i<grp->count; i++)
+  for (int i=0; i<grp->count; i++)
   {
     wxString texname;
     GameFile * tex = grp->tex[i];

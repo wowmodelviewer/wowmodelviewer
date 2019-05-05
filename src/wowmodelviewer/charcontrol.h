@@ -61,7 +61,7 @@ class CharControl : public wxWindow, public Observer
   void OnButton(wxCommandEvent &event);
   void OnItemLevelChange(wxCommandEvent& event);
 
-  void OnUpdateItem(int type, int id);
+  void OnUpdateItem(int type, size_t id);
 
   Attachment *charAtt;
   WoWModel *model;

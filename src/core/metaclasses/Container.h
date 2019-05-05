@@ -71,11 +71,11 @@ class Container : public Component
 		template <class ChildType>
 			int removeAllChildrenOfType();
 
-		unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
+		size_t nbChildren() const {return (size_t)m_children.size(); }
 
 		bool findChildComponent(Component * child, bool recursive = false);
-		Component * getChild(unsigned int index);
-		const Component * getChild(unsigned int index) const;
+		Component * getChild(size_t index);
+		const Component * getChild(size_t index) const;
 		
 		iterator begin()
 		{
@@ -214,12 +214,12 @@ bool Container<DataType>::findChildComponent(Component * child, bool recursive /
 }
 
 template<class DataType>
-Component * Container<DataType>::getChild(unsigned int index)
+Component * Container<DataType>::getChild(size_t index)
 {
 	DataType * l_p_result = 0;
 	if(index < m_children.size())
 	{
-	  unsigned int l_index = 0;
+	  size_t l_index = 0;
 		typename std::unordered_set<DataType *>::iterator l_it;
     for(l_it = m_children.begin() ; l_index < index ;  l_index++)
 		{
@@ -231,12 +231,12 @@ Component * Container<DataType>::getChild(unsigned int index)
 }
 
 template<class DataType>
-const Component * Container<DataType>::getChild(unsigned int index) const
+const Component * Container<DataType>::getChild(size_t index) const
 {
 	const DataType * l_p_result = 0;
 	if(index < m_children.size())
 	{
-	  unsigned int l_index = 0;
+	  size_t l_index = 0;
 		typename std::unordered_set<DataType *>::const_iterator l_it;
         for(l_it = m_children.begin() ; l_index < index ; l_index++)
 		{

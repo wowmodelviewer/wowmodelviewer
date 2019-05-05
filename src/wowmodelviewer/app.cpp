@@ -12,7 +12,6 @@
 #include "Game.h"
 #include "GlobalSettings.h"
 #include "globalvars.h"
-#include "LogStackWalker.h"
 #include "PluginManager.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -51,11 +50,12 @@ I hope this gives some insight into the "program flow".
 
 void dumpStackInLogs()
 {
-  LOG_ERROR << "---- WALK FROM EXCEPTION -----";
+  /*LOG_ERROR << "---- WALK FROM EXCEPTION -----";
   LogStackWalker sw;
   sw.WalkFromException();
   LOG_ERROR << "---- WALK FROM CURRENT CONTEXT -----";
   sw.Walk();
+  */
 }
 
 void WowModelViewApp::setInterfaceLocale()
@@ -293,13 +293,15 @@ bool WowModelViewApp::OnInit()
 
   // check for last version
   if (wxExecute(L"UpdateManager.exe --no-ui", wxEXEC_SYNC) < 0)
-    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES) {
+    if (wxMessageBox(_("A new version is available, do you want to open Update Manager now ?"), _("Update Software"), wxYES_NO) == wxYES)
+    {
       wxExecute(L"UpdateManager.exe", wxEXEC_SYNC);
     }
 
 
   // Classic Mode?
-  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) == wxYES) {
+  if (wxMessageBox(_("Would you like to load World of Warcraft right now?"), _("Load World of Warcraft"), wxYES_NO) == wxYES)
+  {
     frame->LoadWoW();
   }
 

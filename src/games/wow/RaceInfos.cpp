@@ -49,7 +49,7 @@ void RaceInfos::init()
     return;
   }
 
-  for(int i=0, imax = races.values.size() ; i < imax ; i++)
+  for(size_t i=0, imax = races.values.size() ; i < imax ; i++)
   {
     std::string displayPrefix = "";
 

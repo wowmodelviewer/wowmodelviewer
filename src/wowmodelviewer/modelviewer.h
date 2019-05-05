@@ -97,8 +97,8 @@ public:
 	void SaveChar(QString fn, bool equipmentOnly = false);
 
 	void LoadModel(GameFile * f);
-	void LoadItem(unsigned int displayID);
-	void LoadNPC(unsigned int modelid);
+	void LoadItem(size_t displayID);
+	void LoadNPC(size_t modelid);
 
 	// Window GUI event related functions
 	//void OnIdle();

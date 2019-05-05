@@ -435,7 +435,7 @@ void FBXExporter::createAnimations()
   }
 
   std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
-  for (unsigned int anim=0; anim<m_p_model->anims.size(); anim++)
+  for (size_t anim=0; anim<m_p_model->anims.size(); anim++)
   {
     ModelAnimation cur_anim = m_p_model->anims[anim];
 
@@ -467,7 +467,7 @@ void FBXExporter::createAnimations()
       for(auto it : m_boneNodes)
 
       {
-        int b = it.first;
+        size_t b = it.first;
         Bone& bone = m_p_model->bones[b];
 
         bool rot = bone.rot.uses(cur_anim.Index);
@@ -579,7 +579,7 @@ void FBXExporter::createAnimations()
 // Create materials.
 void FBXExporter::createMaterials()
 {
-  for (unsigned int i = 0; i < m_p_model->passes.size(); i++)
+  for (size_t i = 0; i < m_p_model->passes.size(); i++)
   {
     ModelRenderPass * pass = m_p_model->passes[i];
     if (pass->init())

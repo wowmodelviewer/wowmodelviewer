@@ -32,7 +32,7 @@ public:
 	class Iterator
 	{
 	  public:
-    Iterator(DBFile &f, unsigned int index) :
+    Iterator(DBFile &f, size_t index) :
       file(f), recordIndex(index) {}
 		  
       /// Advance (prefix only)
@@ -60,7 +60,7 @@ public:
 	  
     private:
       DBFile &file;
-      unsigned int recordIndex;
+      size_t recordIndex;
 	};
 
 	/// Get begin iterator over records
@@ -72,7 +72,7 @@ public:
 	size_t getRecordCount() const { return recordCount; }
 
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const = 0;
+  virtual std::vector<std::string> get(size_t recordIndex, const core::TableStructure * structure) const = 0;
 
 protected:
 	size_t recordSize;

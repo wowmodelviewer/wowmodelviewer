@@ -41,7 +41,7 @@ class _CASCFILE_API_ CASCFile : public GameFile
   protected:
     virtual bool openFile();
     virtual bool isAlreadyOpened();
-    virtual bool getFileSize(unsigned int & s);
+    virtual bool getFileSize(size_t & s);
     virtual unsigned long readFile();
     virtual void doPostOpenOperation();
     virtual bool doPostCloseOperation();
