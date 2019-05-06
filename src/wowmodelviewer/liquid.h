@@ -1,10 +1,6 @@
 #ifndef LIQUID_H
 #define LIQUID_H
 
-class Liquid;
-
-#include <string>
-#include "video.h"
 #include "maptile.h"
 
 #include <wx/string.h>

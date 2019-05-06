@@ -31,6 +31,7 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
+#include <iostream>
 
 // Qt 
 #include <QCoreApplication>
@@ -42,7 +43,6 @@
 // Other libraries
 
 // Current library
-#include "PluginManager.h"
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -102,7 +102,7 @@ Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::G
 	}
 	else
 	{
-		std::cout << "Unable to load plugin file " << path << ":" << loader.errorString().toStdString() << std::endl;
+    std::cout << "Unable to load plugin file " << path << ": " << loader.errorString().toStdString() << std::endl;
 	}
 	return newPlugin;
 }
@@ -130,9 +130,9 @@ void Plugin::onExec()
   {
     int argc = 1;
     char * argv[] = {"plugin.app", NULL};
-    Plugin::app = new QCoreApplication(argc,argv);
-    Plugin::app->exec();
-    if (Plugin::app)
-      delete Plugin::app;
+    app = new QCoreApplication(argc,argv);
+    app->exec();
+    if (app)
+      delete app;
   }
 }

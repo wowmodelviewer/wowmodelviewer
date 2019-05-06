@@ -6,23 +6,15 @@
 #include <windows.h>
 #endif
 
-#include <algorithm>
 //#include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <map>
 #include <string>
-#include <set>
 #include <sstream>
 #include <vector>
-#include <cstddef>
 
 // Standard C++ headers
-#include <stdio.h>
 
 // Our other utility headers
-#include "vec3d.h"
-#include "quaternion.h"
 
 #include <QString>
 
@@ -58,9 +50,7 @@ extern wxString locales[];
 #else
 	#define SLASH '/'
 #endif
-#define	MPQ_SLASH   '\\'
 
-wxString fixMPQPath(wxString path);
 float frand();
 
 template <class T>
@@ -70,47 +60,12 @@ bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&)
 	return !(iss >> f >> t).fail();
 }
 
-wxString CSConv(wxString str);
-wxString CSConv(QString str);
-// void fixname(wxString &name);
-// void fixnamen(char *name, size_t len);
-wxString Vec3DToString(Vec3D vec);
-int wxStringToInt(const wxString& str);
 float round(float input, int limit);
-void MakeDirs(wxString PathBase, wxString ExtPaths);
-unsigned short _SwapTwoBytes (unsigned short w);
 
 double getCurrentTime();
 
 wxString getGamePath(bool noSet = false);
 
-// Byte Swapping
-#if defined _WINDOWS || defined _MSWIN
-	#define MSB2			_SwapTwoBytes
-	#define MSB4			_SwapFourBytes
-	#define LSB2(w)			(w)
-	#define LSB4(w)			(w)
-#else
-	#define MSB2(w)			(w)
-	#define MSB4			static_cast
-	#define LSB2			_SwapTwoBytes
-	#define LSB4			_SwapFourBytes 
-#endif
-
-template <typename T>
-inline T _SwapFourBytes (T w)
-{
-	T a;
-	unsigned char *src = (unsigned char*)&w;
-	unsigned char *dst = (unsigned char*)&a;
-
-	dst[0] = src[3];
-	dst[1] = src[2];
-	dst[2] = src[1];
-	dst[3] = src[0];
-
-	return a;
-}
 
 #if defined _WINDOWS
 wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type = wxBITMAP_TYPE_PNG, int width = 0, int height = 0);

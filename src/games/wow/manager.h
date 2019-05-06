@@ -2,7 +2,6 @@
 #define MANAGER_H
 
 // STL
-#include <iostream>
 #include <map>
 
 #include <QString>
@@ -103,7 +102,7 @@ public:
 
 	IDTYPE get(QString name)
 	{
-	  std::map<QString, IDTYPE>::iterator it = names.find(name);
+	  auto it = names.find(name);
 	  if(it != names.end())
 	    return it->second;
 

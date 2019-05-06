@@ -13,7 +13,6 @@
 #endif
 #include "CascLib.h"
 
-#include <string>
 #include "GameFile.h"
 
 class CASCFolder;
@@ -35,6 +34,8 @@ class _CASCFILE_API_ CASCFile : public GameFile
     ~CASCFile();
 
     // re implemented from GameFile
+    size_t read(void* dest, size_t bytes);
+    void seek(size_t offset);
     void dumpStructure();
 
   protected:

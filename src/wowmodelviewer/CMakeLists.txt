@@ -137,26 +137,30 @@ set(common_files wowmodelviewer.json
 				 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
 				 ${WMV_BASE_PATH}/appveyor.yml)
 
-set(wow7_3_files ${WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
-				 ${WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/7.3/ChrRacesCustomization.csv)
-
-source_group("wowData\\wow7.3" FILES ${wow7_3_files})
-
-set(wow8_0_files ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.txt
+set(wow8_0_files 
+				 ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
 
 source_group("wowData\\wow8.0" FILES ${wow8_0_files})
 
-set(wow8_1_files ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.txt
+set(wow8_1_files 
+				 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
 				 ${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
 
 source_group("wowData\\wow8.1" FILES ${wow8_1_files})
+
+set(wow8_2_files 
+				 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
+				 ${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
+				 ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
+				 ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
+
+source_group("wowData\\wow8.2" FILES ${wow8_2_files})
+
 
 set(TRANSLATION_PATH ${WMV_BASE_PATH}/src/Translations/)
 
@@ -209,36 +213,37 @@ qt5_create_translation(QM_FILES
 
 source_group("GeneratedFiles" FILES ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
 
-set(useful_files ${common_files} ${wow7_3_files} ${wow8_0_files} ${wow8_1_files})
+set(useful_files ${common_files} ${wow8_0_files} ${wow8_1_files} ${wow8_2_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
-add_executable(${PROJECTNAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${windowFiles} ${uifiles} ${useful_files} ${resources} ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES})
+set(NAME wowmodelviewer)
+add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${translationfiles} ${windowFiles} ${uifiles} ${useful_files} ${resources} ${UI_HEADERS} ${MOC_SRCS} ${QTRESOURCES} )
 
-set_property(TARGET ${PROJECTNAME} PROPERTY FOLDER "executables")
-set_property(TARGET ${PROJECTNAME} PROPERTY CXX_STANDARD 17)
+set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+# set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio
-	set_property(TARGET ${PROJECTNAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(${PROJECTNAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
-	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
-	set_target_properties(${PROJECTNAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
 
-	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-	set_target_properties(${PROJECTNAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 file(MAKE_DIRECTORY ${WoWModelViewer_BINARY_DIR}/GeneratedFiles)
-set_property(TARGET ${PROJECTNAME} PROPERTY AUTOGEN_TARGETS_FOLDER ${WoWModelViewer_BINARY_DIR}/GeneratedFiles/)
+set_property(TARGET ${NAME} PROPERTY AUTOGEN_TARGETS_FOLDER ${WoWModelViewer_BINARY_DIR}/GeneratedFiles/)
 include_directories(${WoWModelViewer_BINARY_DIR}/GeneratedFiles)
 
-target_link_libraries(${PROJECTNAME}
+target_link_libraries(${NAME}
   ${wxWidgets_LIBRARIES}
   wow
   cximage
@@ -248,7 +253,7 @@ target_link_libraries(${PROJECTNAME}
   Qt5::Widgets
 )
 
-install(TARGETS ${PROJECTNAME} RUNTIME DESTINATION ${BIN_DIR})
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
@@ -270,27 +275,30 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vc_redist.x64.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
-set(GAMEFILES_WOW7_3 ${WMV_BASE_PATH}/bin_support/wow/7.3/listfile.txt
-        		     ${WMV_BASE_PATH}/bin_support/wow/7.3/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/7.3/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/7.3/ChrRacesCustomization.csv)
+set(GAMEFILES_WOW8_0 
+				${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
+				${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
 
-set(GAMEFILES_WOW8_0 ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.txt
-        		     ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
+set(GAMEFILES_WOW8_1 
+				${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
+				${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
 
-set(GAMEFILES_WOW8_1 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.txt
-        		     ${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
-					 ${WMV_BASE_PATH}/bin_support/wow/8.1/AnimationData.csv
-					 ${WMV_BASE_PATH}/bin_support/wow/8.1/ChrRacesCustomization.csv)
-
+set(GAMEFILES_WOW8_2 
+				${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
+				${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
+				${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
+           
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 
-install(FILES ${GAMEFILES_WOW7_3} DESTINATION ${BIN_DIR}games/wow/7.3)
 install(FILES ${GAMEFILES_WOW8_0} DESTINATION ${BIN_DIR}games/wow/8.0)
 install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${BIN_DIR}games/wow/8.1)
+install(FILES ${GAMEFILES_WOW8_2} DESTINATION ${BIN_DIR}games/wow/8.2)

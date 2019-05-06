@@ -7,9 +7,6 @@
 
 #include "CASCFolder.h"
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <locale>
 #include <map>
 #include <utility>
@@ -22,14 +19,14 @@
 #include <qdebug.h>
 
 CASCFolder::CASCFolder()
- : hStorage(NULL), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
+ : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)
 {
 
 }
 
-void CASCFolder::init(const QString &folder)
+void CASCFolder::init(const QString &path)
 {
-  m_folder = folder;
+  m_folder = path;
 
   if(m_folder.endsWith("\\"))
     m_folder.remove(m_folder.size()-1,1);
@@ -161,7 +158,7 @@ void CASCFolder::initBuildInfo()
 }
 
 
-bool CASCFolder::fileExists(std::string file)
+bool CASCFolder::fileExists(int id)
 {
   //LOG_INFO << __FUNCTION__ << " " << file.c_str();
   if(!hStorage)
@@ -169,21 +166,19 @@ bool CASCFolder::fileExists(std::string file)
 
   HANDLE dummy;
 
-  if(CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, &dummy))
+  if(CascOpenFile(hStorage, CASC_IDTONAME(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, &dummy))
   {
    // LOG_INFO << "OK";
     CascCloseFile(dummy);
     return true;
   }
-
- // LOG_ERROR << "Opening" << file.c_str() << "failed." << "Error" << GetLastError();
+  // LOG_ERROR << "File" << id << "doesn't exist." << "Error" << GetLastError();
   return false;
 }
 
-bool CASCFolder::openFile(std::string file, HANDLE * result)
+bool CASCFolder::openFile(int id, HANDLE * result)
 {
- 
-  return CascOpenFile(hStorage,file.c_str(), m_currentCascLocale, 0, result);
+  return CascOpenFile(hStorage, CASC_IDTONAME(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, result);
 }
 
 bool CASCFolder::closeFile(HANDLE file)
@@ -191,8 +186,9 @@ bool CASCFolder::closeFile(HANDLE file)
   return CascCloseFile(file);
 }
 
+/*
 int CASCFolder::fileDataId(std::string & filename)
 {
   return CascGetFileId(hStorage, filename.c_str());
 }
-
+*/

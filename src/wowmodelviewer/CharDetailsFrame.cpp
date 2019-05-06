@@ -7,15 +7,11 @@
 
 #include "CharDetailsFrame.h"
 
-#include <iostream>
-
 #include <wx/sizer.h>
 
 #include "charcontrol.h"
 #include "CharDetailsCustomizationSpin.h"
 #include "CharDetailsEvent.h"
-#include "enums.h"
-#include "globalvars.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"

@@ -15,8 +15,9 @@ class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
 
-#include "WoWModel.h"
 #include "animated.h"
+#include "OpenGLHeaders.h"
+
 #include <list>
 
 class Bone;
@@ -184,7 +185,6 @@ class RibbonEmitter
   Animated<float> above, below;
 
   Bone *parent;
-  float f1, f2;
 
   Vec3D pos;
 

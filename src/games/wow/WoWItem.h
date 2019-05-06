@@ -27,7 +27,6 @@
 #define _WOWITEM_H_
 
 #include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -61,7 +60,7 @@ class _WOWITEM_API_ WoWItem : public Component
     int id() { return m_id; }
 
     void setDisplayId(int id);
-    void setLevel(unsigned int level);
+    void setLevel(int level);
 
     CharSlots slot() { return m_slot; }
 
@@ -110,18 +109,10 @@ class _WOWITEM_API_ WoWItem : public Component
 
     CharRegions getRegionForTexture(GameFile * file) const;
 
-    enum FilteringType
-    {
-      MODEL,
-      MERGED_MODEL,
-      TEXTURE,
-      NONE
-    };
+    bool queryItemInfo(QString & query, sqlResult & result) const;
 
-    sqlResult WoWItem::filterSQLResultForModel(sqlResult & sql, FilteringType type, uint itemToFilter) const;
-
-    bool queryItemInfo(QString & query, sqlResult & result, FilteringType type = FilteringType::NONE, uint itemToFilter = 0) const;
-
+    int getCustomModelId(size_t index);
+    int getCustomTextureId(size_t index);
 };
 
 

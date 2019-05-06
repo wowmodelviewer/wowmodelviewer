@@ -33,7 +33,6 @@
 // Qt
 #include <QObject>
 #include <QByteArray>
-#include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QString>
@@ -105,7 +104,7 @@ class _FILEDOWNLOADER_API_ FileDownloader : public QObject
 		// Methods
   private slots:
        void fileDownloaded();
-
+       void downloadError(QNetworkReply::NetworkError error);
 
   private:
 		// Members

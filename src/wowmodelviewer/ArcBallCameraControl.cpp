@@ -8,11 +8,8 @@
 #include "ArcBallCameraControl.h"
 
 #include "ArcBallCamera.h"
-#include "quaternion.h"
 
 #include <wx/event.h>
-
-#include "logger/Logger.h"
 
 ArcBallCameraControl::ArcBallCameraControl(ArcBallCamera & cam) :
 m_camera(cam)

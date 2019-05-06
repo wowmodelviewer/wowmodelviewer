@@ -7,9 +7,12 @@
 #include <wx/ffile.h>
 #include <wx/textctrl.h>
 
-#include "logger/Logger.h"
 #include "Attachment.h"
+#include "enums.h"
 #include "WoWItem.h"
+
+#include "logger/Logger.h"
+
 
 
 IMPLEMENT_CLASS(ModelControl, wxWindow)
@@ -309,7 +312,7 @@ void ModelControl::RefreshModel(Attachment *root)
 			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m) {
 				tmp = m->name().toStdWString();
-				modelname->Append(tmp.AfterLast(MPQ_SLASH));
+				modelname->Append(tmp.AfterLast('\\'));
 			}
 		}
 

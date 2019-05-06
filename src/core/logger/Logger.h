@@ -29,7 +29,6 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <list>
 
 // Qt
 #include <QDebug>
@@ -41,8 +40,6 @@ class QMessageLogContext;
 // Externals
 
 // Other libraries
-#include "../GlobalSettings.h"
-#include "../Plugin.h"
 #include "../metaclasses/Container.h"
 
 // Current library

@@ -9,7 +9,6 @@
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 
-#include "AnimationExportChoiceDialog.h"
 #include "Attachment.h"
 #include "app.h"
 #include "Bone.h"
@@ -22,13 +21,9 @@
 #include "globalvars.h"
 #include "ImporterPlugin.h"
 #include "MemoryUtils.h"
-#include "ModelColor.h"
-#include "ModelEvent.h"
 #include "ModelRenderPass.h"
-#include "ModelTransparency.h"
 #include "PluginManager.h"
 #include "RaceInfos.h"
-#include "TextureAnim.h"
 #include "SettingsControl.h"
 #include "UserSkins.h"
 #include "util.h"
@@ -39,8 +34,9 @@
 
 #include <QFile>
 #include <QSettings>
-#include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+
+#include <fstream>
 
 
 
@@ -199,7 +195,7 @@ ModelViewer::ModelViewer()
 {
   PLUGINMANAGER.init("./plugins");
   // our main class objects
-  animControl = NULL;
+  animControl = nullptr;
   canvas = NULL;
   charControl = NULL;
   enchants = NULL;
@@ -1446,7 +1442,6 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
       wxTextEntryDialog dialog(this, wxT("Please paste in the URL to the character you wish to import."), wxT("Please enter text"), armoryPath, wxOK | wxCANCEL | wxCENTRE, wxDefaultPosition);
       if (dialog.ShowModal() == wxID_OK){
         armoryPath = dialog.GetValue();
-        LOG_INFO << "Importing character from the Armory:" << QString::fromWCharArray(armoryPath.c_str());
         ImportArmoury(armoryPath);
       }
     }
@@ -1500,8 +1495,8 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
       if (dialog.ShowModal() == wxID_OK) {
         wxString fn = dialog.GetPath();
 
-        // FIXME: ofstream is not compitable with multibyte path name
-		std::ofstream f(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
+        // FIXME: ofstream is not compatible with multibyte path name
+        std::ofstream f(fn.fn_str(), std::ios_base::out | std::ios_base::trunc);
 
         f << lightMenu->IsChecked(ID_LT_DIRECTION) << " " << lightMenu->IsChecked(ID_LT_TRUE) << " " << lightMenu->IsChecked(ID_LT_DIRECTIONAL) << " " << lightMenu->IsChecked(ID_LT_AMBIENT) << " " << lightMenu->IsChecked(ID_LT_MODEL) << endl;
         for (size_t i = 0; i < MAX_LIGHTS; i++) {
@@ -1696,7 +1691,7 @@ void ModelViewer::OnViewLog(wxCommandEvent &event)
 {
   int ID = event.GetId();
   if (ID == ID_FILE_VIEWLOG) {
-    wxString logPath = cfgPath.BeforeLast(SLASH) + SLASH + wxT("log.txt");
+    wxString logPath = cfgPath.BeforeLast(SLASH) + qPrintable(QString(SLASH)) + wxT("log.txt");
 #ifdef	_WINDOWS
     wxExecute(wxT("notepad.exe ") + logPath);
 #elif	_MAC
@@ -1775,15 +1770,15 @@ void ModelViewer::LoadWoW()
 
   LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
   core::Game::instance().setConfigFolder(baseConfigFolder);
-
-  GAMEDIRECTORY.initFromListfile("listfile.txt");
+ 
+  GAMEDIRECTORY.initFromListfile("listfile.csv");
   
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
   InitDatabase();
-  
+ 
   /*
   // Error check
   if (!initDB)
@@ -2404,6 +2399,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
   CharInfos * result = NULL;
 
   QString url = strURL.utf8_str();
+  LOG_INFO << "Importing character from the Armory:" << url;
 
   for (PluginManager::iterator it = PLUGINMANAGER.begin();
        it != PLUGINMANAGER.end();
@@ -2470,8 +2466,8 @@ void ModelViewer::ImportArmoury(wxString strURL)
       g_charControl->model->cd.setDemonHunterMode(true);
       g_charControl->model->cd.set(CharDetails::DH_HORN_STYLE, result->DHHorns);
       g_charControl->model->cd.set(CharDetails::DH_BLINDFOLDS, result->DHBlindfolds);
-      g_charControl->model->cd.set(CharDetails::DH_TATTOO_STYLE, result->DHTatooStyle);
-      g_charControl->model->cd.set(CharDetails::DH_TATTOO_COLOR, result->DHTatooColor);
+      g_charControl->model->cd.set(CharDetails::DH_TATTOO_STYLE, result->DHTattooStyle);
+      g_charControl->model->cd.set(CharDetails::DH_TATTOO_COLOR, result->DHTattooColor);
     }
 
     if (result->customTabard)

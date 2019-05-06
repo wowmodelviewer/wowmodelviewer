@@ -34,9 +34,7 @@
 // Externals
 
 // Other libraries
-#include <iostream>
 #include <string>
-#include "FileDownloader.h"
 #include "VersionManager.h"
 #include "UpdateManager.h"
 

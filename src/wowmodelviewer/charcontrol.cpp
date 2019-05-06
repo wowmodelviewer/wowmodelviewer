@@ -322,7 +322,7 @@ void CharControl::RefreshEquipment()
       WoWItem * item = model->getItem((CharSlots)i);
       if (item)
       {
-        labels[i]->SetLabel(CSConv(item->name()));
+        labels[i]->SetLabel(item->name().toStdWString());
         labels[i]->SetForegroundColour(ItemQualityColour(item->quality()));
 
         // refresh level combo box
@@ -489,7 +489,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
       if (name.IsEmpty())
         name = itemClasses.values[i][2].toStdWString();
 
-      catnames.Add(CSConv(name));
+      catnames.Add(name);
       subclasslookup[std::pair<int, int>(itemClasses.values[i][0].toInt(), itemClasses.values[i][1].toInt())] = (int)catnames.size() - 1;
     }
   }
@@ -686,7 +686,6 @@ void CharControl::selectMount()
   const int w = 250;
   itemDialog->SetSizeHints(w, -1, -1, -1, -1, -1);
   itemDialog->SetSize(w, -1);
-  this->itemDialog = itemDialog;
 }
 
 void CharControl::selectNPC(ssize_t type)
@@ -711,7 +710,7 @@ void CharControl::selectNPC(ssize_t type)
   {
     for (int i = 0, imax = npccats.values.size(); i < imax; i++)
     {
-      catnames.Add(CSConv(npccats.values[i][1]));
+      catnames.Add(npccats.values[i][1].toStdWString());
       typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size() - 1;
     }
   }
@@ -774,7 +773,7 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         item->setId(numbers[id]);
 
-        labels[choosingSlot]->SetLabel(CSConv(item->name()));
+        labels[choosingSlot]->SetLabel(item->name().toStdWString());
         labels[choosingSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
 
         // refresh level combo box
@@ -1087,7 +1086,7 @@ void CharControl::tryToEquipItem(int id)
       if (item)
       {
         item->setId(id);
-        labels[itemSlot]->SetLabel(CSConv(item->name()));
+        labels[itemSlot]->SetLabel(item->name().toStdWString());
         labels[itemSlot]->SetForegroundColour(ItemQualityColour(item->quality()));
 
         // refresh level combo box

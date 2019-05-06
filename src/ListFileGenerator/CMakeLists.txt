@@ -23,7 +23,6 @@ set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 target_link_libraries(${NAME} wow Qt5::Core)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
-
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio
 	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")

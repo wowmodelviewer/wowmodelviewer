@@ -88,7 +88,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   speedMouthLabel->Show(false);
 
   speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
-  speedMouthSlider->SetTickFreq(10);
+  speedMouthSlider->SetTickFreq(10, 1);
   speedMouthSlider->Show(false);
 
   // ---
@@ -121,7 +121,6 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635,85), wxSize(150,16), 0, NULL, wxCB_READONLY);
   BLPSkinList3->Show(false);
 
-  randomSkins = true;
   defaultDoodads = true;
   modelFolderChanged = true;
   BLPListFilled = false;
@@ -132,12 +131,12 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   wmoLabel->Show(FALSE);
 
   speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
-  speedSlider->SetTickFreq(10);
+  speedSlider->SetTickFreq(10, 1);
   speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
 
   frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
   frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
-  frameSlider->SetTickFreq(2);
+  frameSlider->SetTickFreq(2, 1);
 
   btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
   btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
@@ -301,7 +300,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     wxString strStand;
     int selectAnim = 0;
 
-	std::map<int, std::wstring> animsVal = m->getAnimsMap();
+    std::map<int, std::wstring> animsVal = m->getAnimsMap();
 
     for (size_t i=0; i<m->anims.size(); i++)
     {
@@ -344,10 +343,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    frameSlider->SetRange(0, g_selModel->anims[useanim].length - 1);
-    frameSlider->SetTickFreq(g_selModel->anims[useanim].playSpeed);
-    frameSlider->SetValue(0);
-    frameLabel->SetLabel(L"Frame: 0");
+    UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -385,8 +381,7 @@ void AnimControl::UpdateWMO(WMO *w, int group)
 	g_selWMO = w;
 
 
-	frameSlider->SetRange(0, 10);
-	frameSlider->SetTickFreq(2);
+	UpdateFrameSlider(10, 2);
 	PCRList.clear();
 	animCList->Show(false);
 	skinList->Show(false);
@@ -671,7 +666,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
     if (ret)
     { // Don't call SetSkin without a skin
-      int mySkin = randomSkins ? randint(0, (int)count-1) : 0;
+      int mySkin = useRandomLooks ? randint(0, (int)count-1) : 0;
       SetSkin(mySkin);
     }
   }
@@ -869,7 +864,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     if (ret)
     {
       // Don't call SetSkin without a skin
-      int mySkin = randomSkins ? randint(0, (int)skins.size()-1) : 0;
+      int mySkin = useRandomLooks ? randint(0, (int)skins.size()-1) : 0;
       SetSkin(mySkin);
     }
   }
@@ -1126,8 +1121,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        frameSlider->SetRange(0, g_selModel->anims[selectedAnim].length);
-        frameSlider->SetTickFreq(g_selModel->anims[selectedAnim].playSpeed);
+        UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
       }
     }
 
@@ -1343,4 +1337,12 @@ void AnimControl::SetAnimFrame(size_t frame)
 
   frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
   frameSlider->SetValue((int)frame);
+}
+
+void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)
+{
+  frameSlider->SetRange(0, maxRange);
+  frameSlider->SetTickFreq(tickFreq, 1);
+  frameSlider->SetValue(0);
+  frameLabel->SetLabel(L"Frame: 0");
 }

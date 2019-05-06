@@ -8,8 +8,6 @@
 #ifndef _CASCFOLDER_H_
 #define _CASCFOLDER_H_
 
-#include <map>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -17,10 +15,6 @@
   #define __CASCLIB_SELF__
 #endif
 #include "CascLib.h"
-
-#include <iostream>
-
-#include <QString>
 
 #include "GameFolder.h" // GameConfig
 
@@ -49,12 +43,12 @@ class _CASCFOLDER_API_ CASCFolder
     
     int lastError() { return m_openError; }
 
-    bool fileExists(std::string file);
+    bool fileExists(int id);
 
-    bool openFile(std::string file, HANDLE * result);
+    bool openFile(int id, HANDLE * result);
     bool closeFile(HANDLE file);
 
-    int fileDataId(std::string & filename);
+    // int fileDataId(std::string & filename);
 
   private:
     CASCFolder(const CASCFolder &);

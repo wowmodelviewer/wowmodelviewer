@@ -20,7 +20,7 @@ ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
 	unlit(false), noZWrite(false), billboard(false),
 	texanim(-1), color(-1), opacity(-1), blendmode(-1), tex(INVALID_TEX),
 	swrap(false), twrap(false), ocol(0.0f, 0.0f, 0.0f, 0.0f), ecol(0.0f, 0.0f, 0.0f, 0.0f),
-	model(m), geoIndex(geo)
+  model(m), geoIndex(geo), specialTex(-1)
 {
 }
 

@@ -9,7 +9,6 @@
 
 #include "CASCChunks.h"
 #include "Game.h"
-#include "globalvars.h"
 #include "logger/Logger.h"
 // #define DEBUG_READ
 
@@ -91,6 +90,35 @@ CASCFile::CASCFile(QString path, int id)
 CASCFile::~CASCFile()
 {
   close();
+}
+
+size_t CASCFile::read(void* dest, size_t bytes)
+{
+  if (m_useMemoryBuffer)
+  {
+    return GameFile::read(dest, bytes);
+  }
+  else
+  {
+    unsigned long result = 0;
+    if (!CascReadFile(m_handle, dest, bytes, &result))
+      LOG_ERROR << "Reading" << filepath << "failed." << "Error" << GetLastError();
+
+    return result;
+  }
+}
+
+void CASCFile::seek(size_t offset)
+{
+  if (m_useMemoryBuffer)
+  {
+    GameFile::seek(offset);
+  }
+  else
+  {
+    if (CascSetFilePointer(m_handle, offset, 0, FILE_BEGIN) == CASC_INVALID_POS)
+      LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetLastError();
+  }
 }
 
 bool  CASCFile::openFile()

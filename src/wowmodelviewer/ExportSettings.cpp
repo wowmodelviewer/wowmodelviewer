@@ -7,9 +7,11 @@
 
 #include "ExportSettings.h"
 
-#include "logger/Logger.h"
+#include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
+
+#include "logger/Logger.h"
 
 IMPLEMENT_CLASS(ExportSettings, wxWindow)
 

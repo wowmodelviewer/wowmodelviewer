@@ -11,6 +11,8 @@
 
 #include "camera.h"
 
+#include "OpenGLHeaders.h"
+
 
 CCamera::CCamera()
 {

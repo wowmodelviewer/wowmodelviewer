@@ -333,15 +333,15 @@ public:
 		double sinb = sin(b);
 		double cosb = cos(b);
 
-		m[0][0] = cosh * cosb + sinh * sinp * sinb;
-		m[1][0] = cosp * sinb;
-		m[2][0] = -sinh * cosb + cosh * sinp * sinb;
-		m[0][1] = -cosh * sinb + sinh * sinp * cosb;
-		m[1][1] = cosp * cosb;
-		m[2][1] = sinh * sinb + cosh * sinp * cosb;
-		m[0][2] = sinh * cosp;
-		m[1][2] = -sinp;
-		m[2][2] = cosh * cosp;
+		m[0][0] = (float) (cosh * cosb + sinh * sinp * sinb);
+		m[1][0] = (float) (cosp * sinb);
+		m[2][0] = (float) (-sinh * cosb + cosh * sinp * sinb);
+		m[0][1] = (float) (-cosh * sinb + sinh * sinp * cosb);
+		m[1][1] = (float) (cosp * cosb);
+		m[2][1] = (float) (sinh * sinb + cosh * sinp * cosb);
+		m[0][2] = (float) (sinh * cosp);
+		m[1][2] = (float) (-sinp);
+		m[2][2] = (float) (cosh * cosp);
 	}
 
 	Matrix newRotate_HPB(const double h, const double p, double b){
@@ -368,19 +368,19 @@ public:
 		{
 			hpb.x = 0;
 			if (!zzero[1])
-				hpb.y = (z.y < 0.0) ? HALFPI : -HALFPI;
+				hpb[1] = (z[1] < 0) ? HALFPIf : -HALFPIf;
 			else
 				hpb.y = 0;
 		}
 		else
 		{
 			if (zzero[2])
-				hpb.x = (z.x < 0.0) ? -HALFPI : HALFPI;
+				hpb[0] = (z[0] < 0) ? -HALFPIf : HALFPIf;
 			else
 				hpb.x = atan2(z.x, z.z);
 			double hyp = sqrt(z.x * z.x + z.z * z.z);
 			if (hyp <= std::numeric_limits<double>::epsilon())
-				hpb.y = (z.y < 0.0) ? HALFPI : -HALFPI;
+				hpb[1] = (z[1] < 0.0) ? HALFPIf : -HALFPIf;
 			else
 				hpb.y = -atan2(z.y, hyp);
 		}
@@ -397,7 +397,7 @@ public:
 		if(rot_yzero[0] && rot_yzero[1])
 			hpb.z = 0;
 		else if(rot_yzero[1])
-			hpb.z = (rot_y.x < 0.0) ? HALFPI : -HALFPI;
+			hpb[2] = (rot_y[0] < 0) ? HALFPIf : -HALFPIf;
 		else
 			hpb.z = atan2(-rot_y.x, rot_y.y);
 

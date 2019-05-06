@@ -3,6 +3,8 @@
 #include "particle.h"
 
 #include "GlobalSettings.h"
+#include "WoWModel.h"
+
 #include "logger/Logger.h"
 
 

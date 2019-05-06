@@ -2,10 +2,7 @@
 #define VIDEO_H
 
 #include <vector>
-#include "ddslib.h"
-#include "TextureManager.h"
 #include "RenderTexture.h"
-#include "vec3d.h"
 
 typedef GLuint TextureID;
 

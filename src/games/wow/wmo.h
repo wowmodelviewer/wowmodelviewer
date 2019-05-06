@@ -3,7 +3,6 @@
 
 // STL
 #include <vector>
-#include <set>
 #include <string>
 
 // Our headers

@@ -37,7 +37,7 @@ void RaceInfos::init()
                           "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
                           "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
-                          "ChrRaces.ID, BaseRaceID FROM ChrRaces "
+                          "ChrRaces.ID, BaseRaceID, Flags, MaleModelFallbackRaceID, FemaleModelFallbackRaceID, MaleTextureFallbackRaceID, FemaleTextureFallbackRaceID FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
@@ -62,14 +62,21 @@ void RaceInfos::init()
         infos.textureLayoutID = races.values[i][r+2].toInt();
         infos.raceid = races.values[i][12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-        infos.displayRaceid = (races.values[i][13].toInt() != 0) ? races.values[i][13].toInt() : infos.raceid;
-        
+        infos.barefeet = (races.values[i][14].toInt() & 0x2);
+        // Get fallback display race ID (this is mostly for allied races and others that rely on
+        // item display info from other race models):
+        infos.MaleModelFallbackRaceID = races.values[i][15].toInt();
+        infos.FemaleModelFallbackRaceID = races.values[i][16].toInt();
+        infos.MaleTextureFallbackRaceID = races.values[i][17].toInt();
+        infos.FemaleTextureFallbackRaceID = races.values[i][18].toInt();
+
+ /*      
         // workaround - manually associate display race id with related race - info not in db ?
         switch (infos.raceid)
         {
-          case 25: // padaren 2
-          case 26: // padaren 3
-            infos.displayRaceid = 24; // padaren 1
+          case 25: // pandaren 2
+          case 26: // pandaren 3
+            infos.displayRaceid = 24; // pandaren 1
             break;
           case 28: // High Roc Tauren
             infos.displayRaceid = 6; // Tauren
@@ -83,6 +90,7 @@ void RaceInfos::init()
           default:
             break;
         }
+*/
 
         int modelfileid = races.values[i][r].toInt();
         

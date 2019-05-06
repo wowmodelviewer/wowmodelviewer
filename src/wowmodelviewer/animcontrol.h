@@ -9,7 +9,6 @@
 //#include "model.h"
 //#include "wmo.h"
 #include "modelcanvas.h"
-#include "database.h"
 
 extern float animSpeed;
 
@@ -32,7 +31,7 @@ class TextureGroup
     int PCRIndex;  // index into PCRList - list of particle color replacement values
     std::set<GeosetNum> creatureGeosetData;  // Defines which geosets are switched on for a particular display ID of a model
 
-    TextureGroup() : base(0), count(0)
+    TextureGroup() : count(0), base(0)
     {
       for (size_t i=0; i<num; i++)
       {
@@ -65,6 +64,12 @@ class TextureGroup
         return false;
       if (definedTexture && !grp.definedTexture)
         return true;
+      QString texname1 = tex[0]->fullname();
+      QString texname2 = grp.tex[0]->fullname();
+      texname1 = texname1.mid(texname1.lastIndexOf("/"));
+      texname2 = texname2.mid(texname2.lastIndexOf("/"));
+      if(texname1 != texname2)
+        return texname1 < texname2;
       for (size_t i=0; i<num; i++)
       {
         if (tex[i]<grp.tex[i]) return true;
@@ -126,6 +131,7 @@ class AnimControl: public wxWindow
   bool UpdateItemModel(WoWModel *m);
   bool FillSkinSelector(TextureSet &skins);
   bool FillBLPSkinSelector(TextureSet &skins, bool item = false);
+  void UpdateFrameSlider(int maxRange, int tickFreq);
 
 public:
   AnimControl(wxWindow* parent, wxWindowID id);
@@ -144,7 +150,7 @@ public:
   void OnItemSet(wxCommandEvent &event);
   void OnSliderUpdate(wxCommandEvent &event);
   void OnLoop(wxCommandEvent &event); 
-  Vec4D AnimControl::fromARGB(int color);
+  Vec4D fromARGB(int color);
   void SetSkinByDisplayID(int cdi);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);
@@ -155,7 +161,6 @@ public:
   void SetAnimFrame(size_t frame);
   QString GetModelFolder(WoWModel *m);
 
-  bool randomSkins;
   bool defaultDoodads; 
   std::string oldname;
   QString modelFolder;

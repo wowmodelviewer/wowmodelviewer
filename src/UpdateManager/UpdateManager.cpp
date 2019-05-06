@@ -34,10 +34,9 @@
 
 // Qt
 #include <QDesktopServices>
-#include <QGroupBox>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QVboxLayout>
+#include <QVBoxLayout>
 
 // Externals
 

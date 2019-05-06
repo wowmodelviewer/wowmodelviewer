@@ -11,8 +11,6 @@
 #include <map>
 #include <set>
 
-#include <QString>
-
 #include "GameFile.h"
 
 #include "metaclasses/Container.h"
@@ -57,7 +55,8 @@ namespace core
       virtual GameFile * getFile(int id) = 0;
 
       virtual bool openFile(std::string file, void ** result) = 0;
-
+      virtual bool openFile(int id, void ** result) = 0;
+      
       virtual QString version() = 0;
       virtual QString locale() = 0;
       virtual bool setConfig(GameConfig config) = 0;

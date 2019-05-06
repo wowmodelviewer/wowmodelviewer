@@ -8,13 +8,8 @@
 // different objects need to access them at one point or another.
 
 // STL
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <string>
 #include <vector>
 #include <map>
-#include <set>
 
 
 #include <QString>

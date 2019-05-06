@@ -9,6 +9,7 @@
 #include <QImage>
 
 #include "OpenGLHeaders.h"
+#include "ddslib.h"
 
 Texture::Texture(GameFile * f)
 : ManagedItem(f->fullname()), w(0), h(0), id(0), compressed(false), file(f)
@@ -89,9 +90,9 @@ void Texture::load()
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.width(), image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 
     delete buffer;
-    buffer = 0;
-    delete buf;
-    buf = 0;
+    buffer = nullptr;
+    delete [] buf;
+    buf = nullptr;
   }
   else if (type == 1) 
   {
@@ -168,12 +169,12 @@ void Texture::load()
         height >>= 1;
       }
 
-      delete buf;
-      buf = 0;
+      delete [] buf;
+      buf = nullptr;
       if (!video.supportCompression)
       {
         delete ucbuf;
-        ucbuf = 0;
+		ucbuf = nullptr;
       }
 
     }
@@ -269,10 +270,10 @@ void Texture::load()
         height >>= 1;
       }
 
-      delete buf2;
-      buf2 = 0;
-      delete buf;
-      buf = 0;
+      delete [] buf2;
+      buf2 = nullptr;
+      delete [] buf;
+      buf = nullptr;
     }
     else 
     {

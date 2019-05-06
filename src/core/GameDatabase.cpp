@@ -7,15 +7,14 @@
 
 #include "GameDatabase.h"
 
-#include "DBFile.h"
+#include "dbfile.h"
 #include "CSVFile.h"
 
-#include <QDomDocument>
 #include <QDomElement>
-#include <QDomNamedNodeMap>
 #include <QFile>
 
 #include "logger/Logger.h"
+#include "Game.h"
 
 core::GameDatabase::~GameDatabase()
 {

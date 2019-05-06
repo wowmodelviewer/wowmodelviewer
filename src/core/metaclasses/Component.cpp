@@ -33,7 +33,6 @@
 // STL
 #include <iostream>
 #include <string>
-#include <typeinfo>
 
 // Qt 
 

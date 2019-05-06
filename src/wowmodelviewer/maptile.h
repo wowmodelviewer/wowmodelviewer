@@ -22,7 +22,7 @@ class GameFile;
 
 class MapTile;
 class MapChunk;
-
+class Liquid;
 class World;
 
 typedef unsigned char      uint8;

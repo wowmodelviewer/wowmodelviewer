@@ -1,7 +1,6 @@
 #ifndef SHADERS_H
 #define SHADERS_H
 
-#include "video.h"
 #if defined _WINDOWS
 #include "GL\glew.h"
 #endif

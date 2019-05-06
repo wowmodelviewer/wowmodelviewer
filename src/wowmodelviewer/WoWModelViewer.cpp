@@ -12,6 +12,7 @@
 #include <qinputdialog.h>
 #include <qdebug.h>
 #include <qfile.h>
+#include <qdir.h>
 
 WoWModelViewer::WoWModelViewer(QWidget *parent)
 	: QMainWindow(parent)
@@ -243,9 +244,9 @@ void WoWModelViewer::LoadWoW()
 {
 	double timeStart = getCurrentTime();
 	fileListWidget->setEnabled(false);
-	if (gamePath.IsEmpty() || !wxDirExists(gamePath)) {
+	if (gamePath.IsEmpty() || !QDir(QString(gamePath.char_str())).exists()) {
 		getGamePath();
-		qDebug() << "Game Path:" << qPrintable(gamePath.c_str().AsChar());
+		qDebug() << "Game Path:" << qPrintable(QString(gamePath.char_str()));
 	}
 	qDebug() << "Initializing Game...";
 	setStatusMessage(tr("Loading WoW data from directory: %1").arg(QString::fromWCharArray(gamePath.c_str())));

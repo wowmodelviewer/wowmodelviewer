@@ -9,7 +9,6 @@
 #endif
 
 #if defined(__WIN32__) && !defined(__WIN__)
-	#include <winsock.h>
 #endif
 
 
@@ -23,13 +22,10 @@
 #include "lightcontrol.h"
 #include "modelcontrol.h"
 #include "imagecontrol.h"
-#include "util.h"
 #include "AnimExporter.h"
 #include "effects.h"
 #include "modelbankcontrol.h"
 #include "filecontrol.h"
-
-#include "enums.h"
 
 class SettingsControl;
 

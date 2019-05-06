@@ -33,6 +33,7 @@
 // STL
 
 // Qt 
+#include <QTextStream>
 
 // Externals
 

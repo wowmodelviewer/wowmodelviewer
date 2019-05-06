@@ -32,9 +32,7 @@
 // STL
 
 // Qt
-#include <QUrl>
 #include <QEventLoop>
-#include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QJsonArray>
@@ -48,9 +46,7 @@
 // Other libraries
 //#include "charcontrol.h"
 #include "CharInfos.h"
-#include "TabardDetails.h"
 #include "database.h" // ItemRecord
-#include "globalvars.h"
 #include "wow_enums.h"
 
 
@@ -98,36 +94,36 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		result->raceId = root.value("race").toInt();
 		result->gender = (root.value("gender").toInt() == 0) ? "Male" : "Female";
 
-		QJsonObject *app = &root.value("appearance").toObject();
-		result->skinColor = app->value("skinColor").toInt();
-		result->faceType = app->value("faceVariation").toInt();
-		result->hairColor = app->value("hairColor").toInt();
-		result->hairStyle = app->value("hairVariation").toInt();
-		result->facialHair = app->value("featureVariation").toInt();
+		QJsonObject app = root.value("appearance").toObject();
+		result->skinColor = app.value("skinColor").toInt();
+		result->faceType = app.value("faceVariation").toInt();
+		result->hairColor = app.value("hairColor").toInt();
+		result->hairStyle = app.value("hairVariation").toInt();
+		result->facialHair = app.value("featureVariation").toInt();
 
 		// Gather Demon Hunter options if present
-		if (!app->value("customDisplayOptions").isUndefined() && !app->value("customDisplayOptions").isNull())
+		if (!app.value("customDisplayOptions").isUndefined() && !app.value("customDisplayOptions").isNull())
 		{
-			QJsonArray custom = app->value("customDisplayOptions").toArray();
+			QJsonArray custom = app.value("customDisplayOptions").toArray();
 			result->isDemonHunter = true;
 			result->DHHorns = custom.at(1).toInt();
 			result->DHBlindfolds = custom.at(2).toInt();
 
-			int tatoo = custom.at(0).toInt();
+			int tattoo = custom.at(0).toInt();
 
-			if (tatoo != 0)
+			if (tattoo != 0)
 			{
-				int tatooStyle = tatoo % 6;
-				int tatooColor = tatoo / 6;
+				int tattooStyle = tattoo % 6;
+				int tattooColor = tattoo / 6;
 
-				if (tatooStyle == 0)
+				if (tattooStyle == 0)
 				{
-					tatooStyle = 6;
-					tatooColor--;
+					tattooStyle = 6;
+					tattooColor--;
 				}
 
-				result->DHTatooStyle = tatooStyle;
-				result->DHTatooColor = tatooColor;
+				result->DHTattooStyle = tattooStyle;
+				result->DHTattooColor = tattooColor;
 			}
 		}
 
@@ -414,22 +410,23 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 
 				QStringList strList = strURL.mid(7).split("/");
 
-				region = strList.at(0).mid(0, strURL.indexOf("."));
-				realm = strList.at(4);
-				charName = strList.at(5).mid(0, strURL.lastIndexOf("?") - 1);
+				region = strList.at(0).mid(0, strList.at(0).indexOf("."));
+				realm = strList.at(strList.size() - 3);
+				charName = strList.at(strList.size() - 2).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
 			}
 			else if (strURL.indexOf("worldofwarcraft.com") != -1)
 			{
 				// Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
+        // or (new form) https://worldofwarcraft.com/fr-fr/character/eu/les-sentinelles/jeromnimo
 
 				LOG_INFO << qPrintable(strURL);
 				QStringList strList = strURL.mid(8).split("/");
 
 
 				region = strList.at(1);
-				realm = strList.at(3);
-				charName = strList.at(4).mid(0, strURL.lastIndexOf("?") - 1);
+				realm = strList.at(strList.size() - 2);
+				charName = strList.at(strList.size() - 1).mid(0, strURL.lastIndexOf("?") - 1);
 				LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
 				
 				// I don't believe these should be translated, as websites tend not to translate URLs...

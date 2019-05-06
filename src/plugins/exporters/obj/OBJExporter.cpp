@@ -33,7 +33,6 @@
 
 // Qt
 #include <QFileInfo>
-#include <QImage>
 
 // Externals
 

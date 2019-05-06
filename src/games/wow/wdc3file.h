@@ -1,8 +1,6 @@
 #ifndef WDC3FILE_H
 #define WDC3FILE_H
 
-#include <QString>
-
 #include "types.h"
 #include "wdb5file.h"
 
@@ -123,11 +121,15 @@ private:
   int32 readSignedBitpackedValue(field_storage_info info, unsigned char * recordOffset) const;
 
   header m_header;
+  section_header * m_sectionHeader;
   std::vector<field_storage_info> m_fieldStorageInfo;
 
   std::map<uint32, uint32> m_palletBlockOffsets;
   std::map<uint32, std::map<uint32, uint32> > m_commonData;
   std::map<uint32, std::string> m_relationShipData;
+
+  unsigned char * m_sectionData;
+  unsigned char * m_palletData;
 };
 
 #endif

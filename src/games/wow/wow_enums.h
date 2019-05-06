@@ -28,29 +28,33 @@ enum CharSlots {
 };
 
 enum CharGeosets {
-  CG_HAIRSTYLE,
-  CG_GEOSET100,
-  CG_GEOSET200,
-  CG_GEOSET300,
-  CG_GLOVES,
-  CG_BOOTS,		// 5
-  CG_EARS = 7,
-  CG_WRISTBANDS,
-  CG_KNEEPADS,
-  CG_PANTS,		// 10
-  CG_PANTS2,
-  CG_TARBARD,
-  CG_TROUSERS,
-  CG_TARBARD2,
-  CG_CAPE,		// 15
-  CG_EYEGLOW = 17,
-  CG_BELT,
-  CG_TAIL,
-  CG_HDFEET,
-  CG_HANDS = 23,
-  CG_DH_HORNS,
-  CG_DH_BLINDFOLDS,
-
+  CG_HAIRSTYLE     = 0,
+  CG_GEOSET100     = 1,
+  CG_GEOSET200     = 2,
+  CG_GEOSET300     = 3,
+  CG_GLOVES        = 4,
+  CG_BOOTS         = 5,
+  CG_EARS          = 7,
+  CG_WRISTBANDS    = 8,
+  CG_KNEEPADS      = 9,
+  CG_PANTS         = 10,
+  CG_PANTS2        = 11,
+  CG_TARBARD       = 12,
+  CG_TROUSERS      = 13,
+  CG_TARBARD2      = 14,
+  CG_CAPE          = 15,
+  CG_EYEGLOW       = 17,
+  CG_BELT          = 18,
+  CG_TAIL          = 19,
+  CG_HDFEET        = 20,
+  CG_GEOSET2100    = 21,
+  CG_GEOSET2200    = 22,
+  CG_HANDS         = 23,
+  CG_DH_HORNS      = 24,
+  CG_DH_BLINDFOLDS = 25,
+  CG_GEOSET2600    = 26,
+  CG_GEOSET2700    = 27,
+  CG_GEOSET2800    = 28,
   NUM_GEOSETS
 };
 
@@ -111,7 +115,8 @@ enum POSITION_SLOTS { // wxString Attach_Names[]
   ATT_ALTERED_SHOULDER_R,
   ATT_ALTERED_SHOULDER_L,
   ATT_BELT_BUCKLE,
-  ATT_SHEATH_CROSSBOW
+  ATT_SHEATH_CROSSBOW,
+  ATT_HEAD_TOP
 };
 
 enum CharRegions {
@@ -127,7 +132,7 @@ enum CharRegions {
   CR_UNK8 = 8,
   CR_FACE_UPPER = 9,
   CR_FACE_LOWER = 10,
-  CR_DH_TATOOS = 12,
+  CR_DH_TATTOOS = 12,
   // Not compositing anymore, only used for items
   CR_CAPE = 13,
   CR_TABARD_1,
@@ -328,6 +333,16 @@ enum Races
   RACE_PANDAREN = 24,	// Pandaren #1
   RACE_PANDAREN2 = 25,	// Pandaren #2
   RACE_PANDAREN3 = 26,	// Pandaren #3
+  RACE_NIGHTBORNE = 27,
+  RACE_HIGHMOUNTAIN_TAUREN = 28,
+  RACE_VOID_ELF = 29,
+  RACE_LIGHTFORGED_DRAENEI = 30,
+  RACE_ZANDALARI_TROLL = 31,
+  RACE_KUL_TIRAN = 32,
+  RACE_THIN_HUMAN = 33,
+  RACE_DARK_IRON_DWARF = 34,
+  RACE_VULPERA = 35,
+  RACE_MAGHAR_ORC = 36
 };
 
 #endif /* _WOW_ENUMS_H_ */

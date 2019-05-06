@@ -30,7 +30,6 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream>
 #include <unordered_set>
 
 // Qt 
@@ -195,7 +194,7 @@ int Container<DataType>::removeAllChildrenOfType()
 template<class DataType>
 bool Container<DataType>::findChildComponent(Component * child, bool recursive /* = false */)
 {
-  std::unordered_set<DataType *>::const_iterator l_it = m_children.find(dynamic_cast<DataType *>(child));
+	auto l_it = m_children.find(dynamic_cast<DataType *>(child));
 
   if (l_it != m_children.end())
     return true;
@@ -203,7 +202,7 @@ bool Container<DataType>::findChildComponent(Component * child, bool recursive /
   // resursive part
   if (recursive)
   {
-    std::unordered_set<DataType *>::const_iterator l_itEnd = m_children.end();
+	  auto l_itEnd = m_children.end();
     for (l_it = m_children.begin(); l_it != l_itEnd; ++l_it)
     {
       if ((*l_it)->findChildComponent(child, recursive))
@@ -211,7 +210,7 @@ bool Container<DataType>::findChildComponent(Component * child, bool recursive /
     }
   }
 
-  return 0;
+	return false;
 }
 
 template<class DataType>

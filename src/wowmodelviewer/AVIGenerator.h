@@ -18,9 +18,6 @@
 
 // needed headers
 #include <comdef.h>
-#include <memory.h>
-#include <tchar.h>
-#include <string.h>
 
 #include <vfw.h>
 

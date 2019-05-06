@@ -6,6 +6,10 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER QTAutoMoc)
 
+if(DEFINED BUILDNUMBER)
+	add_definitions(-D_BUILDNUMBER=${BUILDNUMBER})
+endif()
+
 # add external libraries compilation
 add_subdirectory(CxImage)
 
@@ -20,7 +24,6 @@ add_subdirectory(games)
 # then trigs executables compilation
 add_subdirectory(wowmodelviewer)
 add_subdirectory(UpdateManager)
-add_subdirectory(ListFileGenerator)
 
 # add plugins compilation
 add_subdirectory(plugins)

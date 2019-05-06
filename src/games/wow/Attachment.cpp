@@ -18,7 +18,7 @@
 #include "GL/glew.h"
 
 Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, Vec3D rot, Vec3D pos)
-  : parent(parent), m_model(0), id(id), slot(slot), scale(scale), rot(rot), pos(pos)
+  : parent(parent), id(id), slot(slot), scale(scale), rot(rot), pos(pos), m_model(nullptr)
 {
   setModel(model);
 }

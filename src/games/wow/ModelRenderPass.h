@@ -8,7 +8,6 @@
 #ifndef _MODELRENDERPASS_H_
 #define _MODELRENDERPASS_H_
 
-#include "modelheaders.h"
 #include "quaternion.h"
 #include "types.h"
 
@@ -34,7 +33,7 @@ public:
   //TextureID texture, texture2;
   bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
 
-  int16 texanim, color, opacity, blendmode;
+  int16 texanim, color, opacity, blendmode, specialTex;
   uint16 tex;
 
   // texture wrapping
@@ -54,7 +53,9 @@ public:
 
   void deinit();
 
-
+  static const uint16 INVALID_TEX = 50000;
+  
+/*
   bool operator< (const ModelRenderPass &m) const
   {
     // Probably not 100% right, but seems to work better than just geoset sorting.
@@ -67,8 +68,8 @@ public:
     }
     return (trans < m.trans);
   }
+*/
 
-  static const uint16 INVALID_TEX = 50000;
 };
 
 

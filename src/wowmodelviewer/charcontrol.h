@@ -7,18 +7,14 @@
 #endif
 
 // stl
-#include <string>
 #include <vector>
 
 // our headers
 #include "CharDetails.h"
 #include "CharDetailsFrame.h"
-#include "CharTexture.h"
 #include "database.h"
 #include "enums.h"
 #include "WoWModel.h"
-#include "modelcanvas.h"
-#include "TabardDetails.h"
 
 #include "metaclasses/Observer.h"
 

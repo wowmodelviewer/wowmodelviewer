@@ -32,8 +32,6 @@
 
 // Qt
 #include <QFile>
-#include <QString>
-#include <QTextStream>
 
 // Externals
 

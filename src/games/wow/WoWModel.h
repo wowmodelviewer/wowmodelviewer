@@ -3,11 +3,10 @@
 
 // C++ files
 #include <map>
+#include <set>
 #include <vector>
 //#include <stdlib.h>
 //#include <crtdbg.h>
-
-#include <QString>
 
 // Our files
 
@@ -30,6 +29,7 @@
 #include "particle.h"
 #include "TabardDetails.h"
 #include "TextureAnim.h"
+#include "TextureManager.h"
 #include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
@@ -97,7 +97,8 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<ModelGeosetHD *> rawGeosets;
 
   void restoreRawGeosets();
-
+  static bool sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2);
+  
   std::vector<uint32> globalSequences;
   std::vector<ParticleSystem> particleSystems;
   std::vector<RibbonEmitter> ribbons;

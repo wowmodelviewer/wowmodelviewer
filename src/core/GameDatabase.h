@@ -8,7 +8,6 @@
 #ifndef _GAMEDATABASE_H_
 #define _GAMEDATABASE_H_
 
-#include <map>
 #include <vector>
 #include "sqlite3.h"
 
@@ -49,9 +48,9 @@ namespace core
       name(""),
       type(""),
       isKey(false),
-      arraySize(1),
-      id(0),
-      needIndex(false)
+      needIndex(false),
+	  arraySize(1),
+	  id(0)
     {}
 
     virtual ~FieldStructure() {}

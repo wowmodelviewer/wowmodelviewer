@@ -203,7 +203,7 @@ void FileControl::Export(wxString val, int select)
 
   LOG_INFO << "Saving" << QString::fromWCharArray(val.c_str());
 
-	wxFileName fn = fixMPQPath(val);
+	wxFileName fn(val);
 
 	FILE *hFile = NULL;
 	wxString filename;
@@ -213,7 +213,7 @@ void FileControl::Export(wxString val, int select)
 	}
 	else
 	{
-		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetFullName();
+    filename = wxGetCwd() + qPrintable(QString(SLASH)) + wxT("Export") + qPrintable(QString(SLASH)) + fn.GetFullName();
 	}
 
   LOG_INFO << "Saving to" << QString::fromWCharArray(filename.c_str());
@@ -254,7 +254,7 @@ wxString FileControl::ExportPNG(wxString val)
 	filename = wxFileSelector(wxT("Save PNG ..."), wxGetCwd(), fn.GetName(), _T("png"),wxT("PNG Files (.png)|*.png"));
 
 	if ( filename.empty() ){
-		filename = wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png");
+		filename = wxGetCwd() + qPrintable(QString(SLASH)) + wxT("Export") + qPrintable(QString(SLASH)) + fn.GetName() + wxT(".png");
 	}
 
 	unsigned char *tempbuf = (unsigned char*)malloc(tex.w*tex.h*4);
@@ -544,7 +544,7 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
 		wxString val(data->file->fullname().toStdWString());
 		ExportPNG(val);
 		wxFileName fn(val);
-		wxString temp(wxGetCwd()+SLASH+wxT("Export")+SLASH+fn.GetName()+wxT(".png"));
+		wxString temp(wxGetCwd() + qPrintable(QString(SLASH)) + wxT("Export") + qPrintable(QString(SLASH)) + fn.GetName() + wxT(".png"));
 		modelviewer->canvas->LoadBackground(temp);
 		wxRemoveFile(temp);
 

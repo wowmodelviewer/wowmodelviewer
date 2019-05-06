@@ -7,12 +7,16 @@
 
 #include "GeneralSettings.h"
 
-#include "logger/Logger.h"
+#include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "util.h"
+
+#include "logger/Logger.h"
+
 #include <wx/stattext.h>
 #include <wx/statline.h>
+
 
 IMPLEMENT_CLASS(GeneralSettings, wxWindow)
 

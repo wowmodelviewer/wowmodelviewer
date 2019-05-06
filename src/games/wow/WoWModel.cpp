@@ -2,25 +2,19 @@
 
 #include <cassert>
 #include <algorithm>
-#include <iostream>
 
 #include "Attachment.h"
 #include "GlobalSettings.h"
 #include "CASCFile.h"
-#include "WoWDatabase.h"
 #include "Game.h"
-#include "globalvars.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
-#include "WoWDatabase.h"
 
 #include "logger/Logger.h"
 
-#include <QFile>
-#include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 #include <sstream>
@@ -473,7 +467,14 @@ void WoWModel::initCommon(GameFile * f)
         memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
 
         if (sks1.nGlobalSequences > 0)
-          globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
+        {
+          // vector.assign() isn't working:
+          // globalSequences.assign(skelFile->getBuffer() + sks1.ofsGlobalSequences, skelFile->getBuffer() + sks1.ofsGlobalSequences + sks1.nGlobalSequences);
+          uint32 * buffer = new uint32[sks1.nGlobalSequences];
+          memcpy(buffer, skelFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
+          globalSequences.assign(buffer, buffer + sks1.nGlobalSequences);
+          delete[] buffer;
+        }
 
         // let's try to read parent skel file if needed
         if (skelFile->setChunk("SKPD"))
@@ -507,7 +508,12 @@ void WoWModel::initCommon(GameFile * f)
   }
   else if (header.nGlobalSequences)
   {
-    globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
+    // vector.assign() isn't working:
+    // globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
+    uint32 * buffer = new uint32[header.nGlobalSequences];
+    memcpy(buffer, f->getBuffer() + header.ofsGlobalSequences, sizeof(uint32)*header.nGlobalSequences);
+    globalSequences.assign(buffer, buffer + header.nGlobalSequences);
+    delete[] buffer;
   }
 
   if (forceAnim)
@@ -517,8 +523,10 @@ void WoWModel::initCommon(GameFile * f)
   showModel = true;
   alpha = 1.0f;
 
-  ModelVertex * mv = (ModelVertex *)(f->getBuffer() + header.ofsVertices);
-  rawVertices.assign(mv, mv + header.nVertices);
+  ModelVertex * buffer = new ModelVertex[header.nVertices];
+  memcpy(buffer, f->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
+  rawVertices.assign(buffer, buffer + header.nVertices);
+  delete[] buffer;
 
   // Correct the data from the model, so that its using the Y-Up axis mode.
   for (auto & it : rawVertices)
@@ -553,15 +561,22 @@ void WoWModel::initCommon(GameFile * f)
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    Vec3D *b = (Vec3D*)(f->getBuffer() + header.ofsBoundingVertices);
-    bounds.assign(b, b + header.nBoundingVertices);
+    Vec3D * buffer = new Vec3D[header.nBoundingVertices];
+    memcpy(buffer, f->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
+    bounds.assign(buffer, buffer + header.nBoundingVertices);
+    delete[] buffer;
 
     for (uint i = 0; i < bounds.size(); i++)
       bounds[i] = fixCoordSystem(bounds[i]);
   }
 
   if (header.nBoundingTriangles > 0)
-    boundTris.assign(f->getBuffer() + header.ofsBoundingTriangles, f->getBuffer() + header.ofsBoundingTriangles + header.nBoundingTriangles);
+  {
+    uint16 * buffer = new uint16[header.nBoundingTriangles];
+    memcpy(buffer, f->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
+    boundTris.assign(buffer, buffer + header.nBoundingTriangles);
+    delete[] buffer;
+  }
 
   // textures
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
@@ -1199,7 +1214,26 @@ void WoWModel::setLOD(GameFile * f, int index)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
 
-    pass->tex = texlookup[tex[j].textureid];
+    uint texOffset = 0;
+    uint texCount = tex[j].op_count;
+    // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
+    // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
+    // displaying one randomly. So for now we try to guess which one is the most important by checking
+    // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
+    pass->specialTex = specialTextures[texlookup[tex[j].textureid]];
+    for (size_t k = 0; k < texCount; k++)
+    {
+      int special = specialTextures[texlookup[tex[j].textureid + k]];
+      if (special == 11 || special == 12 || special == 13)
+      {
+        texOffset = k;
+        pass->specialTex = special;
+        if (texCount > 1)
+          LOG_INFO << "setLOD: texture unit"<<j<<"has" << texCount << "textures. Choosing texture"<<k+1<<", which has special type ="<<special;
+        break;
+      }
+    }
+    pass->tex = texlookup[tex[j].textureid + texOffset];
 
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
@@ -1210,7 +1244,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
     pass->color = tex[j].colorIndex;
 
-    pass->opacity = transLookup[tex[j].transid];
+    pass->opacity = transLookup[tex[j].transid + texOffset];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
@@ -1237,15 +1271,24 @@ void WoWModel::setLOD(GameFile * f, int index)
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
     if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass->texanim = texanimlookup[tex[j].texanimid];
+      pass->texanim = texanimlookup[tex[j].texanimid + texOffset];
     }
 
     rawPasses.push_back(pass);
   }
   g->close();
-  // transparent parts come later
-  std::sort(rawPasses.begin(), rawPasses.end());
+
+  std::sort(rawPasses.begin(), rawPasses.end(), &WoWModel::sortPasses);
   passes = rawPasses;
+}
+
+bool WoWModel::sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2)
+{
+  if (mrp1->geoIndex == mrp2->geoIndex)
+    return mrp1->specialTex < mrp2->specialTex;
+  if (mrp1->blendmode == mrp2->blendmode)
+    return (mrp1->geoIndex < mrp2->geoIndex);
+  return mrp1->blendmode < mrp2->blendmode;
 }
 
 void WoWModel::calcBones(ssize_t anim, size_t time)
@@ -2304,10 +2347,10 @@ void WoWModel::refresh()
   }
 
   // DH customization
-  // tatoos
-  foundTextures = cd.getTextureForSection(CharDetails::TatooType);
+  // tattoos
+  foundTextures = cd.getTextureForSection(CharDetails::TattooType);
   if (foundTextures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATOOS, 1);
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
 
   // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
@@ -2366,69 +2409,22 @@ void WoWModel::refresh()
 
   if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
   {
-    QString query = QString("SELECT HideGeoset1, HideGeoset2, HideGeoset3, HideGeoset4, HideGeoset5,"
-      "HideGeoset6,HideGeoset7 FROM HelmetGeosetVisData WHERE ID = (SELECT %1 FROM ItemDisplayInfo "
-      "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %2)))")
+    QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
+                            "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+                            "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+                            .arg(infos.raceid)
       .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
       .arg(headItem->id());
+
+
 
     sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
 
     if (helmetInfos.valid && !helmetInfos.values.empty())
     {
-      // hair styles
-      if (helmetInfos.values[0][0].toInt() != 0)
+      for (auto it : helmetInfos.values)
       {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 0 && id < 100)
-            showGeoset((uint)i, false);
-        }
-      }
-
-      // facial 1
-      if (helmetInfos.values[0][1].toInt() != 0 && infos.customization[0] != "FEATURES")
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 100 && id < 200)
-            showGeoset((uint)i, false);
-        }
-      }
-
-      // facial 2
-      if (helmetInfos.values[0][2].toInt() != 0 && infos.customization[1] != "FEATURES")
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 200 && id < 300)
-            showGeoset((uint)i, false);
-        }
-      }
-
-      // facial 3
-      if (helmetInfos.values[0][3].toInt() != 0)
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 300 && id < 400)
-            showGeoset((uint)i, false);
-        }
-      }
-
-      // ears
-      if (helmetInfos.values[0][4].toInt() != 0)
-      {
-        for (size_t i = 0; i < rawGeosets.size(); i++)
-        {
-          int id = geosets[i]->id;
-          if (id > 700 && id < 800)
-            showGeoset((uint)i, false);
-        }
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
       }
     }
   }
@@ -2440,15 +2436,7 @@ void WoWModel::refresh()
   replaceTextures[TEXTURE_BODY] = charTex;
 
   // If model is one of these races, show the feet (don't wear boots)
-  if (infos.raceid == RACE_TAUREN ||
-    infos.raceid == RACE_TROLL ||
-    infos.raceid == RACE_DRAENEI ||
-    infos.raceid == RACE_NAGA ||
-    infos.raceid == RACE_BROKEN ||
-    infos.raceid == RACE_WORGEN)
-  {
-    cd.showFeet = true;
-  }
+  cd.showFeet = infos.barefeet;
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
   int egt = cd.eyeGlowType;

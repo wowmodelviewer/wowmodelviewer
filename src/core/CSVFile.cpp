@@ -3,6 +3,7 @@
 #include "logger/Logger.h"
 
 #include <QFile>
+#include "Game.h"
 
 CSVFile::CSVFile(const QString & file) :
 DBFile(), m_file(file)

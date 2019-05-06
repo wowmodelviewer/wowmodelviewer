@@ -33,7 +33,6 @@
 #include <vector>
 
 // Qt
-#include <QObject>
 
 // Externals
 #include "GL/glew.h"

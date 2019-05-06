@@ -8,6 +8,12 @@
     <field type="byte" name="VariationID" pos="3" />
     <field type="uint" name="Geoset" arraySize="5" pos="0" />
   </table>
+  <table name="CharBaseSection">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="LayoutResType" pos="0" />
+    <field type="uint" name="VariationEnum" pos="1" />
+    <field type="uint" name="ResolutionVariationEnum" pos="2" />
+  </table>
   <table name="CharComponentTextureLayouts">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint16" name="Width" pos="0" />
@@ -180,7 +186,7 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="Model" arraySize="2" pos="10" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="11" />
-    <field type="byte" name="GeosetGroup" arraySize="4" pos="12" />
+    <field type="byte" name="GeosetGroup" arraySize="6" pos="12" />
     <field type="uint" name="ParticleColorID" pos="3"/>
     <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="14" />
   </table>

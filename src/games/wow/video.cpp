@@ -7,7 +7,6 @@
 
 #include "Game.h"
 #include "GameFile.h"
-#include "Texture.h"
 
 #include <QImage>
 
@@ -160,7 +159,7 @@ bool VideoSettings::Init()
 	LOG_INFO << "Driver Version:" << version;
 
 	
-	if (renderer == "GDI Generic")
+	if (std::string(renderer) == std::string("GDI Generic"))
 	{
 	  LOG_INFO << "Warning: Running in software mode, this is not enough. Please try updating your video drivers.";
 	  // bloody oath - wtb a graphics card

@@ -8,6 +8,12 @@
     <field type="byte" name="VariationID" pos="3" />
     <field type="uint" name="Geoset" arraySize="5" pos="0" />
   </table>
+  <table name="CharBaseSection">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="LayoutResType" pos="0" />
+    <field type="uint" name="VariationEnum" pos="1" />
+    <field type="uint" name="ResolutionVariationEnum" pos="2" />
+  </table>
   <table name="CharComponentTextureLayouts">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint16" name="Width" pos="0" />
@@ -49,6 +55,7 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Flags" pos="7" />
     <field type="uint" name="MaleDisplayID" pos="8" />
     <field type="uint" name="FemaleDisplayID" pos="9" />
     <field type="byte" name="CharComponentTexLayoutID" pos="34" />
@@ -57,6 +64,10 @@
     <field type="uint" name="HighResFemaleDisplayId" pos="11" />
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
     <field type="int"  name="BaseRaceID" pos="24" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="38" />
+    <field type="int"  name="FemaleModelFallbackRaceID" pos="40" />
+    <field type="int"  name="MaleTextureFallbackRaceID" pos="42" />
+    <field type="int"  name="FemaleTextureFallbackRaceID" pos="44" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
@@ -75,16 +86,16 @@
   </table>
   <table name="ComponentModelFileData">
     <field primary="yes" type="uint" name="ID" />
-    <field type="int" name="GenderIndex" pos="0"/>
-    <field type="int" name="ClassID" pos="1"/>
-    <field type="int" name="RaceID" pos="2"/>
-    <field type="int" name="PositionIndex" pos="3"/>
+    <field type="byte" name="GenderIndex" pos="0"/>
+    <field type="byte" name="ClassID" pos="1"/>
+    <field type="byte" name="RaceID" pos="2"/>
+    <field type="byte" name="PositionIndex" pos="3"/>
   </table>
   <table name="ComponentTextureFileData">
     <field primary="yes" type="uint" name="ID" />
-    <field type="int" name="GenderIndex" pos="0"/>
-    <field type="int" name="ClassID" pos="1"/>
-    <field type="int" name="RaceID" pos="2"/>
+    <field type="byte" name="GenderIndex" pos="0"/>
+    <field type="byte" name="ClassID" pos="1"/>
+    <field type="byte" name="RaceID" pos="2"/>
   </table>
 
   <!-- Character tables - END -->
@@ -180,7 +191,7 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="Model" arraySize="2" pos="10" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="11" />
-    <field type="byte" name="GeosetGroup" arraySize="4" pos="12" />
+    <field type="byte" name="GeosetGroup" arraySize="6" pos="12" />
     <field type="uint" name="ParticleColorID" pos="3"/>
     <field type="uint" name="HelmetGeosetVis" arraySize="2" pos="14" />
   </table>
@@ -189,9 +200,11 @@
     <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" createIndex="yes" />
     <field type="uint" name="TextureFileDataID" pos="1" />
   </table>
-  <table name="HelmetGeosetVisData">
+  <table name="HelmetGeosetData">
     <field type="uint" name="ID" primary="yes" />
-    <field type="int" name="HideGeoset" arraySize="9" pos="0" />
+    <field type="int" name="RaceID" pos="0" />
+    <field type="byte" name="GeosetGroup" pos="1" />
+    <field type="int" name="GeosetVisDataID" relationshipData="yes" createIndex="yes" />
   </table>
   <table name="ItemSet">
     <field type="uint" name="ID" primary="yes" />

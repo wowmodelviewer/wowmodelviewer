@@ -9,9 +9,6 @@
 
 
 // OpenGL headers
-#include "OpenGLHeaders.h"
-
-#include "enums.h"
 
 // Vector types
 #include "vec3d.h"

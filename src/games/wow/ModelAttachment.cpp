@@ -8,7 +8,6 @@
 #include "ModelAttachment.h"
 
 #include "Bone.h"
-#include "GameFile.h"
 #include "matrix.h"
 #include "WoWModel.h"
 #include "GL/glew.h"
