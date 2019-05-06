@@ -36,8 +36,6 @@
 
 #include "metaclasses/Container.h"
 
-
-
 class CASCFile;
 class GameFile;
 class ModelRenderPass;
@@ -90,7 +88,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<Vec3D> bounds;
 
   void refreshMerging();
-  set<WoWModel *> mergedModels;
+  std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
   std::vector<ModelVertex> rawVertices;
@@ -112,19 +110,19 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   bool animGeometry, animBones;
 
-  vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
-  vector<TXID> readTXIDSFromFile(GameFile * f);
+  std::vector<AFID> readAFIDSFromFile(GameFile * f);
+  void readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
+  std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
 
   GameFile * gamefile;
 
-  std::vector<uint> replacableParticleColorIDs;
+  std::vector<size_t> replacableParticleColorIDs;
   bool replaceParticleColors;
 
-  uint nbLights() const
+  size_t nbLights() const
   {
     return lights.size();
   }
@@ -181,8 +179,8 @@ public:
   bool animated;
 
   // Misc values
-  float rad;
-  float trans;
+  double rad;
+  double trans;
 
   // -------------------------------
 
@@ -196,7 +194,7 @@ public:
 
   size_t currentAnim;
   bool animcalc;
-  size_t anim, animtime;
+  ssize_t anim, animtime;
 
   void reset()
   {
@@ -257,7 +255,7 @@ public:
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector
-  void showGeoset(uint geosetindex, bool value);
+  void showGeoset(uint32 geosetindex, bool value);
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
@@ -277,6 +275,5 @@ public:
 
   friend class ModelRenderPass; // to allow access to rendering elements (texAnims, etc.)
 };
-
 
 #endif

@@ -79,6 +79,7 @@ add_definitions(-DBUILDING_CORE_DLL)
 set(NAME core)
 add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
 

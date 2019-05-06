@@ -5,11 +5,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building OBJ exporter")
 
-set(wxWidgets_USE_UNICODE ON)
-find_package(wxWidgets REQUIRED core)
-include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS})
-
 # Qt5 stuff
 find_package(Qt5Core)
 #find_package(Qt5Network)
@@ -36,6 +31,7 @@ use_wow()
 set(NAME objexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} Qt5::Core core wow)
 

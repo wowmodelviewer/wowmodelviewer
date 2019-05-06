@@ -32,15 +32,34 @@ int ssCounter = 100; // ScreenShot Counter
 int imgFormat = 0;
 
 wxString locales[] = {wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("zhCN"), wxT("zhTW"), wxT("esES"), wxT("esMX"), wxT("ruRU")};
+// Convert UTF8 string to local string
+wxString CSConv(wxString str)
+{
+	return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.mb_str())); // from private.h
+}
+
+wxString CSConv(QString str)
+{
+	return wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(str.toStdString().c_str()));
+}
+double getCurrentTime()
+{
+	SYSTEMTIME st;
+	memset(&st, 0, sizeof(SYSTEMTIME));
+	double ourTime = 0;
+	GetLocalTime(&st);
+	ourTime += (st.wDay * 86400) + (st.wHour * 3600) + (st.wMinute * 60) + st.wSecond + (double)(st.wMilliseconds / 1000.0f);
+	return ourTime;
+}
 
 // Round a float, down to the specified decimal
-float round(float input, int limit = 2){
-	if (limit > 0){
-		input *= (10^limit);
+float round(float input, int limit = 2) {
+	if (limit > 0) {
+		input *= (10 ^ limit);
 	}
-	input = int(input+0.5);
-	if (limit > 0){
-		input /= (10^limit);
+	input = int(input + 0.5);
+	if (limit > 0) {
+		input /= (10 ^ limit);
 	}
 	return input;
 }
@@ -129,7 +148,7 @@ wxString getGamePath(bool noSet)
 
 
 #ifdef _WINDOWS
-wxBitmap* createBitmapFromResource(const wxString& t_name,long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
+wxBitmap* createBitmapFromResource(const wxString& t_name, wxBitmapType type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */, int height /* = 0 */)
 {
   wxBitmap*   r_bitmapPtr = 0;
   
@@ -169,7 +188,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 #endif
 
 
-wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type, int width, int height)
+wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, wxBitmapType type, int width, int height)
 {
   wxMemoryInputStream a_is(t_data, t_size);
   

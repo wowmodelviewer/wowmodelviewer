@@ -41,7 +41,7 @@
 
 #include "logger/Logger.h"
 
-map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
+std::map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                              { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
                                              { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
                                              { CS_GLOVES, 20 }, { CS_HAND_RIGHT, 21 }, { CS_HAND_LEFT, 22 },

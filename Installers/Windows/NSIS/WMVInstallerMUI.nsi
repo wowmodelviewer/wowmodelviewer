@@ -81,11 +81,11 @@ WriteRegStr HKCU "Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\la
 writeUninstaller $INSTDIR\uninstaller.exe
 
 # install vcredist package and launch if not found
-ReadRegDword $0 HKLM "SOFTWARE\Wow6432Node\Microsoft\DevDiv\vc\Servicing\12.0\RuntimeMinimum" "Install"
+ReadRegDword $0 HKLM "SOFTWARE\Microsoft\DevDiv\vc\Servicing\14.0\RuntimeMinimum" "Install"
 ${If} $0 == ""
-File "${wmvroot}\bin\vcredist_x86.exe"
-ExecWait '"$INSTDIR\vcredist_x86.exe" /install /quiet /norestart'
-Delete "$INSTDIR\vcredist_x86.exe"
+File "${wmvroot}\bin\vc_redist.x64.exe"
+ExecWait '"$INSTDIR\vc_redist.x64.exe" /install /quiet /norestart'
+Delete "$INSTDIR\vc_redist.x64.exe"
 ${EndIf}
 
 sectionEnd

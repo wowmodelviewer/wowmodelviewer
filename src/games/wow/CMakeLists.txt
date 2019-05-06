@@ -126,6 +126,7 @@ add_definitions(-DBUILDING_WOW_DLL)
 set(NAME wow)
 add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} core casc Qt5::Core Qt5::Xml Qt5::Gui)
 add_dependencies(${NAME} casclib)

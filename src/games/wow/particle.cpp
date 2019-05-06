@@ -48,7 +48,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
 
   for (size_t i=0; i<3; i++)
   {
-    float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
+    double opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
     colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f,
         colors2[i].z/255.0f, opacity/32767.0f);
     sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
@@ -381,7 +381,7 @@ void ParticleSystem::draw()
   Vec3D vUp(0,1,0);
 
   // position stuff
-  const float f = 1;//0.707106781f; // sqrt(2)/2
+  const double f = 1;//0.707106781f; // sqrt(2)/2
   Vec3D bv0 = Vec3D(-f,+f,0);
   Vec3D bv1 = Vec3D(+f,+f,0);
 

@@ -351,7 +351,7 @@ void WMOGroup::initDisplayList()
       size_t a = indices[batch->indexStart + i];
       for (size_t j = batch->vertexStart; j <= batch->vertexEnd; j++){
         if (vertices[a] == vertices[j]){
-          IndiceToVerts[batch->indexStart + i] = j;
+          IndiceToVerts[batch->indexStart + (uint32)i] = (uint32)j;
           break;
         }
       }

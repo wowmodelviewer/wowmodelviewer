@@ -14,6 +14,7 @@
 #include "globalvars.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
+#include "resource1.h"
 #include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
@@ -25,7 +26,6 @@
 
 #include <QCoreApplication>
 #include <QSettings>
-
 
 /*	THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.
@@ -45,9 +45,6 @@ I hope this gives some insight into the "program flow".
 #define new DEBUG_CLIENTBLOCK
 #endif
 */
-
-// tell wxwidgets which class is our app
-// IMPLEMENT_APP(WowModelViewApp)
 
 void dumpStackInLogs()
 {
@@ -73,7 +70,7 @@ void WowModelViewApp::setInterfaceLocale()
 
   if (wxFileExists(fn))
   {
-    locale.Init(langIds[interfaceID], wxLOCALE_CONV_ENCODING);
+    locale.Init(langIds[interfaceID]);
 
     wxLocale::AddCatalogLookupPathPrefix(wxT("mo"));
     //wxLocale::AddCatalogLookupPathPrefix(wxT(".."));
@@ -134,7 +131,7 @@ bool WowModelViewApp::OnInit()
 
   wxString execPath = wxStandardPaths::Get().GetExecutablePath();
   wxFileName fname(execPath);
-  wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings");
+  wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + qPrintable(QString(SLASH)) + wxT("userSettings");
   wxFileName::Mkdir(userPath, 0777, wxPATH_MKDIR_FULL);
 
   // Application Info
@@ -142,16 +139,16 @@ bool WowModelViewApp::OnInit()
   SetAppName(wxT("WoWModelViewer"));
 
   // set the config file path.
-  cfgPath = userPath + SLASH + wxT("Config.ini");
+  cfgPath = userPath + qPrintable(QString(SLASH)) + wxT("Config.ini");
   LoadSettings();
 
   setInterfaceLocale();
   LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
 
   // Just a little header to start off the log file.
-  LOG_INFO << "Starting:" << QString::fromStdWString(GLOBALSETTINGS.appName().c_str())
-    << QString::fromStdWString(GLOBALSETTINGS.appVersion().c_str())
-    << QString::fromStdWString(GLOBALSETTINGS.buildName().c_str());
+  LOG_INFO << "Starting:" << GLOBALSETTINGS.appName().c_str()
+    << GLOBALSETTINGS.appVersion().c_str()
+    << GLOBALSETTINGS.buildName().c_str();
 
 
   // Now create our main frame.

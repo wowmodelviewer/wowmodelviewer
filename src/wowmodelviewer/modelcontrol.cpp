@@ -474,7 +474,7 @@ void ModelControl::TogglePCRFields()
 
   if (model)
   {
-    std::vector<uint> pcrIDs = model->replacableParticleColorIDs;
+    std::vector<size_t> pcrIDs = model->replacableParticleColorIDs;
     show11 = (std::find(pcrIDs.begin(), pcrIDs.end(), 11) != pcrIDs.end());
     show12 = (std::find(pcrIDs.begin(), pcrIDs.end(), 12) != pcrIDs.end());
     show13 = (std::find(pcrIDs.begin(), pcrIDs.end(), 13) != pcrIDs.end());
@@ -635,7 +635,7 @@ void ModelControl::OnSlider(wxScrollEvent &event)
 
 Vec4D ModelControl::fromColWidget(wxColour col)
 {
-  return Vec4D((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
+	return Vec4D((double)col.Red() / 255.0, (double)col.Green() / 255.0, (double)col.Blue() / 255.0, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent &event)

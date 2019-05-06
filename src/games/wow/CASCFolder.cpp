@@ -16,6 +16,7 @@
 
 #include "CASCFile.h"
 #include "logger/Logger.h"
+#include <qdebug.h>
 
 CASCFolder::CASCFolder()
  : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)
@@ -63,12 +64,12 @@ bool CASCFolder::setConfig(core::GameConfig config)
     if (it != locales.end())
     {
       HANDLE dummy;
-      LOG_INFO << "Loading Game Folder:" << m_folder;
+	  qInfo() << "Loading Game Folder:" << m_folder;
       // locale found => try to open it
       if (!CascOpenStorage(m_folder.toStdWString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
-        LOG_ERROR << "CASCFolder: Opening" << m_folder << "failed." << "Error" << m_openError;
+		qCritical() << "Opening" << m_folder << "failed." << "Error" << m_openError;
         return false;
       }
 
@@ -76,11 +77,11 @@ bool CASCFolder::setConfig(core::GameConfig config)
       {
         CascCloseFile(dummy);
         m_currentCascLocale = it->second;
-        LOG_INFO << "Locale succesfully set:" << m_currentConfig.locale;
+		qInfo() << "Locale succesfully set:" << m_currentConfig.locale;
       }
       else
       {
-        LOG_ERROR << "Setting Locale" << m_currentConfig.locale << "for folder" << m_folder << "failed";
+		  qCritical() << "Setting Locale" << m_currentConfig.locale << "for folder" << m_folder << "failed";
         return false;
       }
     }
@@ -92,12 +93,12 @@ bool CASCFolder::setConfig(core::GameConfig config)
 void CASCFolder::initBuildInfo()
 {
   QString buildinfofile = m_folder + "\\..\\.build.info";
-  LOG_INFO << "buildinfofile : " << buildinfofile;
+  qInfo() << "buildinfofile : " << buildinfofile;
 
   QFile file(buildinfofile);
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
   {
-    LOG_ERROR << "Fail to open .build.info to grab game config info";
+	  qCritical() << "Fail to open .build.info to grab game config info";
     return;
   }
 
@@ -153,7 +154,7 @@ void CASCFolder::initBuildInfo()
   }
 
   for (auto it : m_configs)
-    LOG_INFO << "config" << it.locale << it.version;
+	  qInfo() << "config" << it.locale << it.version;
 }
 
 
