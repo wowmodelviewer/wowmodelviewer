@@ -27,9 +27,9 @@ class _GAMEFILE_API_ GameFile : public Component
 {
   public:
     GameFile(QString path, int id = -1) 
-      : eof(true), buffer(0), pointer(0), size(0), 
-        filepath(path), m_fileDataId(id), originalBuffer(0),
-        curChunk(""), m_useMemoryBuffer(true)
+      : eof(true), buffer(nullptr), pointer(0), size(0), 
+        filepath(path), m_useMemoryBuffer(true), m_fileDataId(id),
+        originalBuffer(nullptr), curChunk("")
     {}
 
     virtual ~GameFile() {}

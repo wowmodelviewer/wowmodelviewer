@@ -49,9 +49,9 @@ map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, 
 
 
 WoWItem::WoWItem(CharSlots slot)
-  : m_charModel(0), m_id(-1), m_quality(0),
-  m_slot(slot), m_displayId(-1), m_level(0),
-  m_nbLevels(0), m_type(0), m_mergedModel(0)
+  : m_charModel(nullptr), m_id(-1), m_displayId(-1),
+  m_quality(0), m_level(0), m_type(0),
+  m_nbLevels(0), m_slot(slot), m_mergedModel(0)
 {
   setName("---- None ----");
 }
@@ -141,7 +141,7 @@ void WoWItem::setDisplayId(int id)
   }
 }
 
-void WoWItem::setLevel(unsigned int level)
+void WoWItem::setLevel(int level)
 {
   if ((m_nbLevels > 1) && (m_level != level))
   {

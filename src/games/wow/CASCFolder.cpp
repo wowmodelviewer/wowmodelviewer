@@ -18,14 +18,14 @@
 #include "logger/Logger.h"
 
 CASCFolder::CASCFolder()
- : hStorage(NULL), m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS)
+ : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)
 {
 
 }
 
-void CASCFolder::init(const QString &folder)
+void CASCFolder::init(const QString &path)
 {
-  m_folder = folder;
+  m_folder = path;
 
   if(m_folder.endsWith("\\"))
     m_folder.remove(m_folder.size()-1,1);

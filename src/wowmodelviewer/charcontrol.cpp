@@ -686,7 +686,6 @@ void CharControl::selectMount()
   const int w = 250;
   itemDialog->SetSizeHints(w, -1, -1, -1, -1, -1);
   itemDialog->SetSize(w, -1);
-  this->itemDialog = itemDialog;
 }
 
 void CharControl::selectNPC(ssize_t type)

@@ -3,7 +3,7 @@
 
 #include <QString>
 
-#include "DBFile.h"
+#include "dbfile.h"
 
 #include "CASCFile.h"
 

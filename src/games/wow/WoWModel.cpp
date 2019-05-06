@@ -1212,27 +1212,27 @@ void WoWModel::setLOD(GameFile * f, int index)
  
   for (size_t j = 0; j < view->nTex; j++)
   {
+    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
+
     uint texOffset = 0;
     uint texCount = tex[j].op_count;
-    if (texCount > 1)
+    // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
+    // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
+    // displaying one randomly. So for now we try to guess which one is the most important by checking
+    // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
+    pass->specialTex = specialTextures[texlookup[tex[j].textureid]];
+    for (size_t k = 0; k < texCount; k++)
     {
-      // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
-      // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
-      // displaying one randomly. So for now we try to guess which one is the most important by checking
-      // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
-      for (size_t k = 0; k < texCount; k++)
+      int special = specialTextures[texlookup[tex[j].textureid + k]];
+      if (special == 11 || special == 12 || special == 13)
       {
-        int special = specialTextures[texlookup[tex[j].textureid + k]];
-        if (special == 11 || special == 12 || special ==13)
-        {
-          texOffset = k;
+        texOffset = k;
+        pass->specialTex = special;
+        if (texCount > 1)
           LOG_INFO << "setLOD: texture unit"<<j<<"has" << texCount << "textures. Choosing texture"<<k+1<<", which has special type ="<<special;
-          break;
-        }
+        break;
       }
     }
-    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
-     
     pass->tex = texlookup[tex[j].textureid + texOffset];
  
     // TODO: figure out these flags properly -_-
@@ -1277,9 +1277,18 @@ void WoWModel::setLOD(GameFile * f, int index)
     rawPasses.push_back(pass);
   }
   g->close();
-  // transparent parts come later
-  std::sort(rawPasses.begin(), rawPasses.end());
+
+  std::sort(rawPasses.begin(), rawPasses.end(), &WoWModel::sortPasses);
   passes = rawPasses;
+}
+
+bool WoWModel::sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2)
+{
+  if (mrp1->geoIndex == mrp2->geoIndex)
+    return mrp1->specialTex < mrp2->specialTex;
+  if (mrp1->blendmode == mrp2->blendmode)
+    return (mrp1->geoIndex < mrp2->geoIndex);
+  return mrp1->blendmode < mrp2->blendmode;
 }
 
 void WoWModel::calcBones(ssize_t anim, size_t time)

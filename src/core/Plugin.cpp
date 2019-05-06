@@ -130,9 +130,9 @@ void Plugin::onExec()
   {
     int argc = 1;
     char * argv[] = {"plugin.app", NULL};
-    Plugin::app = new QCoreApplication(argc,argv);
-    Plugin::app->exec();
-    if (Plugin::app)
-      delete Plugin::app;
+    app = new QCoreApplication(argc,argv);
+    app->exec();
+    if (app)
+      delete app;
   }
 }
