@@ -172,20 +172,34 @@ bool WowModelViewApp::OnInit()
   frame->Show(true);
 
   // Set the icon, different source location for the icon under Linux & Mac
-  wxIcon icon;
+  wxIcon *icon;
 #if defined (_WINDOWS)
-  if (icon.LoadFile(wxT("mainicon"), wxBITMAP_TYPE_ICO_RESOURCE) == false)
-    wxMessageBox(wxT("Failed to load Icon"), wxT("Failure"));
+  icon = new wxICON("MAINICON");
+  if (!icon->Ok())
+  {
+    wxBitmap * bitmap = createBitmapFromResource(L"ICON3");
+    if (!bitmap) {
+      wxMessageBox(wxT("Failed to load bitmap"), wxT("Failure"));
+    }
+    else {
+      icon->CopyFromBitmap(*bitmap);
+      if (!icon->Ok()) {
+        if (icon->LoadFile(L"ICON3", wxBITMAP_TYPE_PNG_RESOURCE) == false)
+          wxMessageBox(wxT("Failed to load Icon"), wxT("Failure"));
+      }
+    }
+  }
+  //
 #elif defined (_LINUX)
   // This probably needs to be fixed...
-  //if (icon.LoadFile(wxT("../bin_support/icon/wmv_xpm")) == false)
+  //if (icon->LoadFile(wxT("../bin_support/icon/wmv_xpm")) == false)
   //	wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #elif defined (_MAC)
   // Dunno what to do about Macs...
-  //if (icon.LoadFile(wxT("../bin_support/icon/wmv.icns")) == false)
+  //if (icon->LoadFile(wxT("../bin_support/icon/wmv.icns")) == false)
   //	wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #endif
-  frame->SetIcon(icon);
+  frame->SetIcon(*icon);
   // --
 
   // Point our global vars at the correct memory location
