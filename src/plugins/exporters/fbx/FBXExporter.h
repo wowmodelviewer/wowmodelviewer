@@ -40,6 +40,7 @@
 
 // Other libraries
 class WoWModel;
+struct ModelAnimation;
 
 
 #define _EXPORTERPLUGIN_CPP_ // to define interface
@@ -101,10 +102,12 @@ class FBXExporter : public ExporterPlugin
     // Methods
     void createMaterials();
     void createMesh();
-    void createSkeleton();
+    void createSkeleton(FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes);
     void createAnimations();
+    void createAnimation(FbxScene* &l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*> &skeleton);
+    bool createAnimationFiles();
     void linkMeshAndSkeleton();
-    void storeBindPose();
+    void storeBindPose(FbxScene* &l_scene);
     void reset();
 
 
@@ -115,6 +118,7 @@ class FBXExporter : public ExporterPlugin
     FbxNode    * m_p_meshNode;
     FbxNode    * m_p_skeletonNode;
 
+    bool useAltAnimNaming = false;
     std::wstring m_filename;
     std::map<int,FbxNode*> m_boneNodes;
     std::vector<FbxCluster*> m_boneClusters;
