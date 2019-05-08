@@ -40,7 +40,6 @@ class _ANIMMANAGER_API_ AnimManager
   WoWModel & model;
 
   bool Paused;
-  bool AnimParticles;
 
   AnimInfo animList[4];
 

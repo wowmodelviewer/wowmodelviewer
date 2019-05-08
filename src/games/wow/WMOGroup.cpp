@@ -2,7 +2,7 @@
 
 #include "CASCFile.h"
 #include "types.h"
-#include "WMO.h"
+#include "wmo.h"
 
 
 

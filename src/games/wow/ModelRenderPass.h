@@ -55,6 +55,9 @@ public:
 
   bool displayed();
 
+  static const uint16 INVALID_TEX = 50000;
+  
+/*
   bool operator< (const ModelRenderPass &m) const
   {
     // Probably not 100% right, but seems to work better than just geoset sorting.
@@ -67,8 +70,7 @@ public:
     }
     return (trans < m.trans);
   }
-
-  static const uint16 INVALID_TEX = 50000;
+*/
 
 private:
   void init();

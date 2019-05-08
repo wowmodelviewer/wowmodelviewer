@@ -36,7 +36,7 @@
 #include <QDesktopServices>
 #include <QPushButton>
 #include <QTableWidget>
-#include <QVboxLayout>
+#include <QVBoxLayout>
 
 // Externals
 

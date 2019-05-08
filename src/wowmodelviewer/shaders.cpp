@@ -14,12 +14,9 @@ static bool initedShaders = false;
 ShaderPair *terrainShaders[4]={0,0,0,0}, *wmoShader=0, *waterShaders[1]={0};
 
 // TODO
-bool isExtensionSupported(char * s)
+bool isExtensionSupported(std::string s)
 {
-	bool ret = false;
-	ret = glewIsSupported(s) == GL_TRUE ? true : false;
-
-	return ret;
+	return (glewIsSupported(s.c_str()) == GL_TRUE);
 }
 
 void OldinitShaders()

@@ -94,17 +94,17 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		result->raceId = root.value("race").toInt();
 		result->gender = (root.value("gender").toInt() == 0) ? "Male" : "Female";
 
-		QJsonObject *app = &root.value("appearance").toObject();
-		result->skinColor = app->value("skinColor").toInt();
-		result->faceType = app->value("faceVariation").toInt();
-		result->hairColor = app->value("hairColor").toInt();
-		result->hairStyle = app->value("hairVariation").toInt();
-		result->facialHair = app->value("featureVariation").toInt();
+		QJsonObject app = root.value("appearance").toObject();
+		result->skinColor = app.value("skinColor").toInt();
+		result->faceType = app.value("faceVariation").toInt();
+		result->hairColor = app.value("hairColor").toInt();
+		result->hairStyle = app.value("hairVariation").toInt();
+		result->facialHair = app.value("featureVariation").toInt();
 
 		// Gather Demon Hunter options if present
-		if (!app->value("customDisplayOptions").isUndefined() && !app->value("customDisplayOptions").isNull())
+		if (!app.value("customDisplayOptions").isUndefined() && !app.value("customDisplayOptions").isNull())
 		{
-			QJsonArray custom = app->value("customDisplayOptions").toArray();
+			QJsonArray custom = app.value("customDisplayOptions").toArray();
 			result->isDemonHunter = true;
 			result->DHHorns = custom.at(1).toInt();
 			result->DHBlindfolds = custom.at(2).toInt();

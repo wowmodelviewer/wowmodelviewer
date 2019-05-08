@@ -1212,13 +1212,21 @@ void WoWModel::setLOD(GameFile * f, int index)
     LOG_INFO << "textureTransformComboIndex" << batch[j].textureTransformComboIndex;
 
     ModelRenderPass * pass = new ModelRenderPass(this);
+
     pass->setupFromM2Batch(batch[j]);
     rawPasses.push_back(pass);
   }
   g->close();
   // transparent parts come later
-  std::sort(rawPasses.begin(), rawPasses.end());
+  std::sort(rawPasses.begin(), rawPasses.end(), &WoWModel::sortPasses);
   passes = rawPasses;
+}
+
+bool WoWModel::sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2)
+{
+	if (mrp1->blendmode == mrp2->blendmode)
+		return (mrp1->geoIndex < mrp2->geoIndex);
+	return mrp1->blendmode < mrp2->blendmode;
 }
 
 #define	ANIMATION_HANDSCLOSED	15

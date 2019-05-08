@@ -301,7 +301,7 @@ void FBXExporter::createSkeleton()
   m_p_skeletonNode = FbxNode::Create(m_p_scene, m_p_model->name().toStdString().c_str());
   FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(m_p_scene, "");
   bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
-  bone_group_skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
+  bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
   m_p_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
 
   std::vector<FbxSkeleton::EType> bone_types;
@@ -359,17 +359,17 @@ void FBXExporter::createSkeleton()
 
     if (bone_types[i] == FbxSkeleton::eRoot)
     {
-      skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
+      skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
       m_p_skeletonNode->AddChild(skeleton_node);
     }
     else if (bone_types[i] == FbxSkeleton::eLimb)
     {
-      skeleton_attribute->LimbLength.Set(100.0 * SCALE_FACTOR * (sqrtf(trans.x * trans.x + trans.y * trans.y + trans.z * trans.z)));
+      skeleton_attribute->LimbLength.Set(5.0 * SCALE_FACTOR * (sqrtf(trans.x * trans.x + trans.y * trans.y + trans.z * trans.z)));
       m_boneNodes[pid]->AddChild(skeleton_node);
     }
     else
     {
-      skeleton_attribute->Size.Set(100.0 * SCALE_FACTOR);
+      skeleton_attribute->Size.Set(1.0 * SCALE_FACTOR);
       m_boneNodes[pid]->AddChild(skeleton_node);
     }
 

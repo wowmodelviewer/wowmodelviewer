@@ -7,7 +7,7 @@
 
 #include "GameDatabase.h"
 
-#include "DBFile.h"
+#include "dbfile.h"
 #include "CSVFile.h"
 
 #include <QDomElement>
