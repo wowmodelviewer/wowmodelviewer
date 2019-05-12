@@ -609,8 +609,9 @@ void ModelViewer::InitDatabase()
   if (!GAMEDATABASE.initFromXML("database.xml"))
   {
     initDB = false;
-    LOG_ERROR << "Initializing failed !";
-    // return;
+    LOG_ERROR << "Initializing failed!";
+    SetStatusText(wxT("Initializing failed!"));
+    return;
   }
   else
   {
@@ -1805,6 +1806,7 @@ void ModelViewer::LoadWoW()
     SetStatusText(wxT("Error Initializing the Character Controls."));
   };
   fileControl->Enable();
+  SetStatusText(wxT("File Control Initialized."));
 }
 
 void ModelViewer::OnCharToggle(wxCommandEvent &event)
