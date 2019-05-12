@@ -1758,7 +1758,7 @@ WoWItem * WoWModel::getItem(CharSlots slot)
 
 void WoWModel::update(int dt) // (float dt)
 {
-  if (animated)
+  if (animated && animManager != NULL)
     animManager->Tick(dt);
   updateEmitters((dt/1000.0f));
 }
