@@ -163,8 +163,12 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
 
     storeBindPose(m_p_scene);
 
-    createAnimations();
-    LOG_INFO << "Animations successfully created";
+    // Export 0 or 1 animations
+    if (m_animsToExport.size() < 2)
+    {
+      createAnimations();
+      LOG_INFO << "Animations successfully created";
+    }
   }
   catch(const std::exception& ex)
   {
@@ -194,8 +198,23 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   }
 
   // delete texture files created during export
-  for(auto it : m_texturesToExport)
-   _wremove((it.first).c_str());
+  for (auto it : m_texturesToExport)
+    _wremove((it.first).c_str());
+
+  // Export bulk animations
+  if (m_animsToExport.size() > 1)
+  {
+    try
+    {
+      createAnimations();
+      LOG_INFO << "Animations successfully created";
+    }
+    catch (const std::exception& ex)
+    {
+      LOG_ERROR << "Error during export : " << ex.what();
+      return false;
+    }
+  }
 
   LOG_INFO << "FBX scene successfully exported";
   return true;
@@ -429,13 +448,13 @@ void FBXExporter::createAnimations()
 {
   if (m_boneNodes.empty())
   {
-    LOG_INFO << "No bone in skeleton, so no animation will be exported";
+    LOG_ERROR << "No bone in skeleton, so no animation will be exported";
     return;
   }
 
   if (m_animsToExport.size() < 2)
   {
-    LOG_INFO << "0 or 1 animations";
+    // LOG_INFO << "0 or 1 animations";
     std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
 
     for (size_t anim = 0; anim < m_p_model->anims.size(); anim++)
@@ -451,10 +470,10 @@ void FBXExporter::createAnimations()
     }
   }
   else {
-    LOG_INFO << "Plenty of animations";
+    // LOG_INFO << "Plenty of animations";
     if (!createAnimationFiles())
     {
-      LOG_INFO << "An error occured while exporting Animation files.";
+      LOG_ERROR << "An error occured while exporting Animation files.";
       return;
     }
   }
@@ -464,7 +483,7 @@ void FBXExporter::createAnimation(FbxScene* &l_scene, QString animName, ModelAni
 {
   if (skeleton.empty())
   {
-    LOG_INFO << "No bones in skeleton, so animation will not be exported";
+    LOG_ERROR << "No bones in skeleton, so animation will not be exported";
     return;
   }
 
