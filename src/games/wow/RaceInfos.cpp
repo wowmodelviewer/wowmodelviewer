@@ -18,7 +18,7 @@ bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
     return false;
   }
 
-  auto raceInfosIt = RACES.find(model->gamefile->fileDataId());
+  const auto raceInfosIt = RACES.find(model->gamefile->fileDataId());
   if(raceInfosIt != RACES.end())
   {
     result = raceInfosIt->second;
@@ -49,26 +49,26 @@ void RaceInfos::init()
     return;
   }
 
-  for(int i=0, imax = races.values.size() ; i < imax ; i++)
+  for (auto& value : races.values)
   {
-    std::string displayPrefix = "";
+    std::string displayPrefix;
 
     for(int r = 0; r <12 ; r+=3)
     {
-      if(races.values[i][r] != "")
+      if(value[r] != "")
       {
         RaceInfos infos;
-        infos.prefix = (displayPrefix != "") ? displayPrefix : races.values[i][r + 1].toStdString();
-        infos.textureLayoutID = races.values[i][r+2].toInt();
-        infos.raceid = races.values[i][12].toInt();
+        infos.prefix = !displayPrefix.empty() ? displayPrefix : value[r + 1].toStdString();
+        infos.textureLayoutID = value[r+2].toInt();
+        infos.raceid = value[12].toInt();
         infos.sexid = (r == 0 || r == 6)?0:1;
-        infos.barefeet = (races.values[i][14].toInt() & 0x2);
+        infos.barefeet = (value[14].toInt() & 0x2);
         // Get fallback display race ID (this is mostly for allied races and others that rely on
         // item display info from other race models):
-        infos.MaleModelFallbackRaceID = races.values[i][15].toInt();
-        infos.FemaleModelFallbackRaceID = races.values[i][16].toInt();
-        infos.MaleTextureFallbackRaceID = races.values[i][17].toInt();
-        infos.FemaleTextureFallbackRaceID = races.values[i][18].toInt();
+        infos.MaleModelFallbackRaceID = value[15].toInt();
+        infos.FemaleModelFallbackRaceID = value[16].toInt();
+        infos.MaleTextureFallbackRaceID = value[17].toInt();
+        infos.FemaleTextureFallbackRaceID = value[18].toInt();
 
  /*      
         // workaround - manually associate display race id with related race - info not in db ?
@@ -92,7 +92,7 @@ void RaceInfos::init()
         }
 */
 
-        int modelfileid = races.values[i][r].toInt();
+        int modelfileid = value[r].toInt();
         
         if ((r == 6) || (r == 9)) // if we are dealing with a HD model
           infos.isHD = true;
@@ -123,19 +123,19 @@ void RaceInfos::init()
 
 int RaceInfos::getHDModelForFileID(int fileid)
 {
-  int result = fileid; // return same file id by default
+  auto result = fileid; // return same file id by default
 
-  auto it = RACES.find(fileid);
-  if ((it != RACES.end()) && (it->second.isHD == false))
+  const auto it = RACES.find(fileid);
+  if (it != RACES.end() && !it->second.isHD)
   {
-    int raceid = it->second.raceid;
-    int sexid = it->second.sexid;
+    const auto raceid = it->second.raceid;
+    const auto sexid = it->second.sexid;
 
-    for (auto it = RACES.begin(), itEnd = RACES.end(); it != itEnd; ++it)
+    for (auto &r : RACES)
     {
-      if ((it->second.raceid == raceid) && (it->second.sexid == sexid) && (it->second.isHD == true))
+      if (r.second.raceid == raceid && r.second.sexid == sexid && r.second.isHD)
       {
-        result = it->first;
+        result = r.first;
         break;
       }
     }
