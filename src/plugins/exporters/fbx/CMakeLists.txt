@@ -24,9 +24,13 @@ add_definitions(-DQT_PLUGIN)
 include_directories($ENV{WMV_SDK_BASEDIR}/include)
 include_directories(${WMV_BASE_PATH}/src/wowmodelviewer) # needed for util.h inclusion
 
-set(src FBXExporter.cpp)
+set(src FBXExporter.cpp
+	FBXAnimExporter.cpp
+	FBXHeaders.cpp)
 
-set(headers FBXExporter.h)
+set(headers FBXExporter.h
+	FBXAnimExporter.h
+	FBXHeaders.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -41,7 +45,8 @@ set(NAME fbxexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
-target_link_libraries(${NAME} Qt5::Core core wow $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
+target_link_libraries(${NAME} Qt5::Core core wow 
+	$ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 

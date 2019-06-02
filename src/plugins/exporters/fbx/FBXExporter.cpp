@@ -33,26 +33,26 @@
 #include <sstream>
 
 // Qt
-#include <qdir.h>
+#include <qthreadpool.h>
 
 // Externals
 
 // Other libraries
-#include "Bone.h"
+#include "FBXHeaders.h"
+#include "FBXAnimExporter.h"
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
 
 #include "util.h" // SLASH
 
-
 // Current library
+
 
 // Namespaces used
 //--------------------------------------------------------------------
 
 // Beginning of implementation
 //--------------------------------------------------------------------
-#define SCALE_FACTOR 50.0f
 
 // Constructors
 //--------------------------------------------------------------------
@@ -94,44 +94,31 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
       return false;
 
   m_filename = target;
-
   m_p_manager = FbxManager::Create();
-
   if (!m_p_manager)
   {
     LOG_ERROR << "Unable to create the FBX SDK manager";
     return false;
   }
-  LOG_INFO << "FBX SDK manager successfully created";
 
-  // create an IOSettings object
   FbxIOSettings *ios = FbxIOSettings::Create(m_p_manager, IOSROOT);
   m_p_manager->SetIOSettings(ios);
 
   // ensure that textures are embed in final fbx file
+  ios->SetBoolProp(EXP_FBX_MATERIAL, true);
+  ios->SetBoolProp(EXP_FBX_TEXTURE, true);
   ios->SetBoolProp(EXP_FBX_EMBEDDED, true);
+  ios->SetBoolProp(EXP_FBX_SHAPE, true);
+  ios->SetBoolProp(EXP_FBX_GOBO, true);
+  ios->SetBoolProp(EXP_FBX_ANIMATION, false);
+  ios->SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
-  // Create an exporter.
-  FbxExporter* exporter = FbxExporter::Create(m_p_manager, "");
+  FbxExporter* exporter = 0;
 
-  // Initialize the exporter.
-  if(!exporter->Initialize(QString::fromStdWString(m_filename.c_str()).toStdString().c_str(), -1, m_p_manager->GetIOSettings()))
-  {
-    LOG_ERROR << "Unable to create the FBX SDK exporter";
+  m_fileVersion = FBX_2014_00_COMPATIBLE;
+
+  if (FBXHeaders::createFBXHeaders(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), m_p_manager, exporter, m_p_scene) == false)
     return false;
-  }
-  LOG_INFO << "FBX SDK exporter successfully created";
-
-  // make file compatible with older fbx versions
-  exporter->SetFileExportVersion(FBX_2014_00_COMPATIBLE);
-
-  m_p_scene = FbxScene::Create(m_p_manager, "My Scene");
-  if(!m_p_scene)
-  {
-    LOG_ERROR << "Unable to create FBX scene";
-    return false;
-  }
-  LOG_INFO << "FBX SDK scene successfully created";
 
   // add some info to exported scene
   FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager,"SceneInfo");
@@ -140,6 +127,22 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
   m_p_scene->SetSceneInfo(sceneInfo);
 
+  // Build Attached Model List
+  if (m_p_model->charModelDetails.isChar == true)
+  {
+    for (size_t i = 0; i < CharSlots::NUM_CHAR_SLOTS; i++)
+    {
+      WoWItem *item = m_p_model->getItem((CharSlots)i);
+      std::map<POSITION_SLOTS, WoWModel *> models = item->models();
+      for (auto modelIter = models.begin(); modelIter != models.end(); modelIter++)
+      {
+        WoWModel* model = modelIter->second;
+        LOG_INFO << "Attached Model Found:" << model->modelname.c_str();
+        m_p_attachedModels.push_back(model);
+      }
+    }
+    LOG_INFO << "Number of Attachments found:" << m_p_attachedModels.size();
+  }
 
   // export main model mesh
   // follow FBX SDK example (ExportScene01) for organization
@@ -151,7 +154,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     createMaterials();
     LOG_INFO << "Materials successfully created";
 
-    createSkeleton(m_p_scene, m_p_skeletonNode, m_boneNodes);
+    FBXHeaders::createSkeleton(m_p_model, m_p_scene, m_p_skeletonNode, m_boneNodes);
     LOG_INFO << "Skeleton successfully created";
 
     // add all those things to the scene
@@ -161,7 +164,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
 
     linkMeshAndSkeleton();
 
-    storeBindPose(m_p_scene);
+    FBXHeaders::storeBindPose(m_p_scene, m_boneClusters, m_p_meshNode);
 
     // Export 0 or 1 animations
     if (m_animsToExport.size() < 2)
@@ -172,7 +175,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   }
   catch(const std::exception& ex)
   {
-    LOG_ERROR << "Error during export : " << ex.what();
+    LOG_ERROR << "Error during export:" << ex.what();
     return false;
   }
 
@@ -196,6 +199,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     LOG_ERROR << "Unable to export FBX scene";
     return false;
   }
+  LOG_INFO << "Model successfully created";
 
   // delete texture files created during export
   for (auto it : m_texturesToExport)
@@ -211,7 +215,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     }
     catch (const std::exception& ex)
     {
-      LOG_ERROR << "Error during export : " << ex.what();
+      LOG_ERROR << "Error during bulk animation export:" << ex.what();
       return false;
     }
   }
@@ -225,6 +229,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
 
 // Private methods
 //--------------------------------------------------------------------
+
 // Create mesh.
 void FBXExporter::createMesh()
 {
@@ -234,7 +239,12 @@ void FBXExporter::createMesh()
   // Create mesh.
   size_t num_of_vertices = m_p_model->origVertices.size();
   FbxMesh* mesh = FbxMesh::Create(m_p_manager, m_p_model->name().toStdString().c_str());
-  mesh->InitControlPoints((int)num_of_vertices);
+  size_t numTotalVerts = num_of_vertices;
+  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
+  {
+    numTotalVerts += m_p_attachedModels.at(i)->origVertices.size();
+  }
+  mesh->InitControlPoints((int)numTotalVerts);
   FbxVector4* vertices = mesh->GetControlPoints();
 
   // Set the normals on Layer 0.
@@ -259,12 +269,29 @@ void FBXExporter::createMesh()
   layer->SetUVs(layer_texcoord, FbxLayerElement::eTextureDiffuse);
 
   // Fill data.
+  LOG_INFO << "Adding main mesh Verts...";
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex &v = m_p_model->origVertices[i];
     vertices[i].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
     layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
     layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+  }
+
+  // Add submesh Verticies
+  size_t processedVerts = num_of_vertices;
+  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
+  {
+    WoWModel *model = m_p_attachedModels.at(i);
+    LOG_INFO.nospace() << "Adding verts for attachment #" << i << ", name: " << model->modelname.c_str();
+    for (size_t vertID = 0; vertID < model->origVertices.size(); vertID++)
+    {
+      ModelVertex &v = model->origVertices[vertID];
+      vertices[vertID + processedVerts].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
+      layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
+      layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+    }
+    processedVerts += model->origVertices.size();
   }
 
   // Create polygons.
@@ -275,6 +302,7 @@ void FBXExporter::createMesh()
   layer->SetMaterials(layer_material);
 
   int mtrl_index = 0;
+  LOG_INFO << "Setting main mesh Polys...";
   for (size_t i = 0; i < num_of_passes; i++)
   {
     ModelRenderPass * p = m_p_model->passes[i];
@@ -304,6 +332,43 @@ void FBXExporter::createMesh()
     }
   }
 
+  // Add submesh Polys
+  processedVerts = num_of_vertices;
+  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
+  {
+    WoWModel *model = m_p_attachedModels.at(i);
+    LOG_INFO.nospace() << "Setting Polys for attachment #" << i << ", name: " << model->modelname.c_str();
+    for (size_t passID = 0; passID < model->passes.size(); passID++)
+    {
+      ModelRenderPass * p = model->passes[passID];
+      if (p->init())
+      {
+        // Build material name.
+        FbxString mtrl_name = "testToChange";
+        mtrl_name.Append("_", 1);
+        char tmp[32];
+        _itoa((int)passID, tmp, 10);
+        mtrl_name.Append(tmp, strlen(tmp));
+        FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
+        m_p_meshNode->AddMaterial(material);
+
+        ModelGeosetHD * g = model->geosets[p->geoIndex];
+        size_t num_of_faces = g->icount / 3;
+        for (size_t j = 0; j < num_of_faces; j++)
+        {
+          mesh->BeginPolygon(mtrl_index);
+          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3]);
+          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3 + 1]);
+          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3 + 2]);
+          mesh->EndPolygon();
+        }
+
+        mtrl_index++;
+      }
+    }
+    processedVerts += model->origVertices.size();
+  }
+
   // Set mesh smoothness.
   mesh->SetMeshSmoothness(FbxMesh::eFine);
 
@@ -312,87 +377,6 @@ void FBXExporter::createMesh()
 
   // Set the shading mode to view texture.
   m_p_meshNode->SetShadingMode(FbxNode::eTextureShading);
-}
-
-void FBXExporter::createSkeleton(FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes)
-{
-  l_skeletonNode = FbxNode::Create(l_scene, m_p_model->name().toStdString().c_str());
-  FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(l_scene, "");
-  bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
-  bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
-  l_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
-
-  std::vector<FbxSkeleton::EType> bone_types;
-  size_t num_of_bones = m_p_model->bones.size();
-
-  // Set bone type.
-  std::vector<bool> has_children;
-  has_children.resize(num_of_bones);
-  for (size_t i = 0; i < num_of_bones; ++i)
-  {
-    Bone bone = m_p_model->bones[i];
-    if(bone.parent != -1)
-      has_children[bone.parent] = true;
-  }
-
-  bone_types.resize(num_of_bones);
-  for (size_t i = 0; i < num_of_bones; ++i)
-  {
-    Bone bone = m_p_model->bones[i];
-
-    if (bone.parent == -1)
-    {
-      bone_types[i] = FbxSkeleton::eRoot;
-    }
-    else if(has_children[i])
-    {
-      bone_types[i] = FbxSkeleton::eLimb;
-    }
-    else
-    {
-      bone_types[i] = FbxSkeleton::eLimbNode;
-    }
-  }
-
-  // Create bone.
-  for (size_t i = 0; i < num_of_bones; ++i)
-  {
-    Bone &bone = m_p_model->bones[i];
-    Vec3D trans = bone.pivot;
-
-    int pid = bone.parent;
-    if (pid > -1)
-      trans -= m_p_model->bones[pid].pivot;
-
-    FbxString bone_name(m_p_model->name().toStdString().c_str());
-    bone_name += "_bone_";
-    bone_name += static_cast<int>(i);
-
-    FbxNode* skeleton_node = FbxNode::Create(l_scene, bone_name);
-    l_boneNodes[i] = skeleton_node;
-    skeleton_node->LclTranslation.Set(FbxVector4(trans.x * SCALE_FACTOR, trans.y * SCALE_FACTOR, trans.z * SCALE_FACTOR));
-
-    FbxSkeleton* skeleton_attribute = FbxSkeleton::Create(l_scene, bone_name);
-    skeleton_attribute->SetSkeletonType(bone_types[i]);
-
-    if (bone_types[i] == FbxSkeleton::eRoot)
-    {
-      skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
-      l_skeletonNode->AddChild(skeleton_node);
-    }
-    else if (bone_types[i] == FbxSkeleton::eLimb)
-    {
-      skeleton_attribute->LimbLength.Set(5.0 * SCALE_FACTOR * (sqrtf(trans.x * trans.x + trans.y * trans.y + trans.z * trans.z)));
-      l_boneNodes[pid]->AddChild(skeleton_node);
-    }
-    else
-    {
-      skeleton_attribute->Size.Set(1.0 * SCALE_FACTOR);
-      l_boneNodes[pid]->AddChild(skeleton_node);
-    }
-
-    skeleton_node->SetNodeAttribute(skeleton_attribute);
-  }
 }
 
 void FBXExporter::linkMeshAndSkeleton()
@@ -404,6 +388,18 @@ void FBXExporter::linkMeshAndSkeleton()
     m_boneClusters.push_back(cluster);
     cluster->SetLink(it.second);
     cluster->SetLinkMode(FbxCluster::eTotalOne);
+  }
+
+  // define control points
+  int i = 0;
+  for (auto it : m_p_model->origVertices)
+  {
+    for (size_t j = 0; j < 4; j++)
+    {
+      if (it.weights[j] > 0)
+        m_boneClusters[it.bones[j]]->AddControlPointIndex((int)i, static_cast<double>(it.weights[j]) / 255.0);
+    }
+    i++;
   }
 
   // set initial matrices
@@ -420,18 +416,6 @@ void FBXExporter::linkMeshAndSkeleton()
     matrix = it.second->EvaluateGlobalTransform();
     (*clusterIt)->SetTransformLinkMatrix(matrix);
     ++clusterIt;
-  }
-
-  // define control points
-  int i = 0;
-  for (auto it : m_p_model->origVertices)
-  {
-    for (size_t j = 0; j < 4; j++)
-    {
-      if (it.weights[j] > 0)
-        m_boneClusters[it.bones[j]]->AddControlPointIndex((int)i, static_cast<double>(it.weights[j]) / 255.0);
-    }
-    i++;
   }
 
   // add cluster to skin
@@ -452,21 +436,20 @@ void FBXExporter::createAnimations()
     return;
   }
 
+  LOG_INFO << "Num animations to export:" << m_animsToExport.size();
+
   if (m_animsToExport.size() < 2)
   {
     // LOG_INFO << "0 or 1 animations";
     std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
 
-    for (size_t anim = 0; anim < m_p_model->anims.size(); anim++)
+    for (auto it : m_animsToExport)
     {
-      ModelAnimation cur_anim = m_p_model->anims[anim];
+      ModelAnimation cur_anim = m_p_model->anims[it];
 
-      if (std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.Index) == m_animsToExport.end())
-        continue;
+      QString anim_name = QString("%1 [%2]").arg(animsMap[cur_anim.animID]).arg(cur_anim.Index);
 
-      QString anim_name = QString("%1 [%2]").arg(animsMap[cur_anim.animID], cur_anim.Index);
-
-      createAnimation(m_p_scene, anim_name, cur_anim, m_boneNodes);
+      FBXHeaders::createAnimation(m_p_model, m_p_scene, anim_name, cur_anim, m_boneNodes);
     }
   }
   else {
@@ -479,250 +462,40 @@ void FBXExporter::createAnimations()
   }
 }
 
-void FBXExporter::createAnimation(FbxScene* &l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*> &skeleton)
-{
-  if (skeleton.empty())
-  {
-    LOG_ERROR << "No bones in skeleton, so animation will not be exported";
-    return;
-  }
-
-  // Animation stack and layer.
-  FbxAnimStack* anim_stack = FbxAnimStack::Create(l_scene, qPrintable(animName));
-  FbxAnimLayer* anim_layer = FbxAnimLayer::Create(l_scene, qPrintable(animName));
-  anim_stack->AddMember(anim_layer);
-
-  uint32 timeInc = cur_anim.length / 60;
-
-  FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
-
-  for (uint32 t = 0; t < cur_anim.length; t += timeInc)
-  {
-    FbxTime time;
-    time.SetSecondDouble((float)t / 1000.0);
-
-    for (auto it : skeleton)
-
-    {
-      int b = it.first;
-      Bone& bone = m_p_model->bones[b];
-
-      bool rot = bone.rot.uses(cur_anim.Index);
-      bool scale = bone.scale.uses(cur_anim.Index);
-      bool trans = bone.trans.uses(cur_anim.Index);
-
-      if (!rot && !scale && !trans) // bone is not animated, skip it
-        continue;
-
-      FbxAnimCurve* t_curve_x = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* t_curve_y = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* t_curve_z = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      FbxAnimCurve* r_curve_x = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-      FbxAnimCurve* s_curve_x = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X, true);
-      FbxAnimCurve* s_curve_y = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
-      FbxAnimCurve* s_curve_z = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
-
-      if (trans)
-      {
-        Vec3D v = bone.trans.getValue(cur_anim.Index, t);
-
-        if (bone.parent != -1)
-        {
-          Bone& parent_bone = m_p_model->bones[bone.parent];
-          v += (bone.pivot - parent_bone.pivot);
-        }
-
-        t_curve_x->KeyModifyBegin();
-        int key_index = t_curve_x->KeyAdd(time);
-        t_curve_x->KeySetValue(key_index, v.x * SCALE_FACTOR);
-        t_curve_x->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_x->KeyModifyEnd();
-
-        t_curve_y->KeyModifyBegin();
-        key_index = t_curve_y->KeyAdd(time);
-        t_curve_y->KeySetValue(key_index, v.y * SCALE_FACTOR);
-        t_curve_y->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_y->KeyModifyEnd();
-
-        t_curve_z->KeyModifyBegin();
-        key_index = t_curve_z->KeyAdd(time);
-        t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
-        t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        t_curve_z->KeyModifyEnd();
-      }
-
-      if (rot)
-      {
-        float x, y, z;
-
-        Quaternion q = bone.rot.getValue(cur_anim.Index, t);
-        Quaternion tq;
-        tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
-
-        Vec3D rot = tq.toEulerXYZ();
-
-        x = rot.x * -(180.0f / PI);
-        y = rot.y * -(180.0f / PI);
-        z = rot.z * -(180.0f / PI);
-
-        r_curve_x->KeyModifyBegin();
-        int key_index = r_curve_x->KeyAdd(time);
-        r_curve_x->KeySetValue(key_index, x);
-        r_curve_x->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_x->KeyModifyEnd();
-
-        r_curve_y->KeyModifyBegin();
-        key_index = r_curve_y->KeyAdd(time);
-        r_curve_y->KeySetValue(key_index, y);
-        r_curve_y->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_y->KeyModifyEnd();
-
-        r_curve_z->KeyModifyBegin();
-        key_index = r_curve_z->KeyAdd(time);
-        r_curve_z->KeySetValue(key_index, z);
-        r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        r_curve_z->KeyModifyEnd();
-      }
-
-      if (scale)
-      {
-        Vec3D v = bone.scale.getValue(cur_anim.Index, t);
-
-        s_curve_x->KeyModifyBegin();
-        int key_index = s_curve_x->KeyAdd(time);
-        s_curve_x->KeySetValue(key_index, v.x);
-        s_curve_x->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_x->KeyModifyEnd();
-
-        s_curve_y->KeyModifyBegin();
-        key_index = s_curve_y->KeyAdd(time);
-        s_curve_y->KeySetValue(key_index, v.y);
-        s_curve_y->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_y->KeyModifyEnd();
-
-        s_curve_z->KeyModifyBegin();
-        key_index = s_curve_z->KeyAdd(time);
-        s_curve_z->KeySetValue(key_index, v.z);
-        s_curve_z->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
-        s_curve_z->KeyModifyEnd();
-      }
-    }
-  }
-}
-
 // Creates separate FBX files for each animation, in a folder with the original FBX file's name.
 bool FBXExporter::createAnimationFiles()
 {
+  int maxThreads = QThread::idealThreadCount();   // Get the ideal number of threads we can run at once. This usually equals the total number of threads in a CPU.
   std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
-  int creationError = 0;
 
-  for (size_t anim = 0; anim < m_p_model->anims.size(); anim++)
+  /**** NOTICE! ****//*
+
+  While the QThreadPool code DOES start the FBX animation exporting in threads, the FBX SDK itself is not thread-safe!
+
+  We will have to develop our own threaded wrapper for FBX, or copy the FBX data, or find some other method to make the SDK work in a thread-safe manner before we can re-enable multi-threaded animation exporting.
+  Without doing this, WMV will crash while exporting animations, as the data becomes cross-contaminated, and thus, invalidated.
+
+  *//****         ****/
+
+  // If we allow users to set the number of threads WMV can use, we can limit it here. I would recommend using no more than 3/4ths of the total thread count! (Gotta leave some for normal CPU usage...)
+  //if (maxThreads > 5)
+  //  maxThreads = 5;
+
+  //LOG_INFO << "Exporting animations with" << maxThreads << "threads...";
+  //QThreadPool::globalInstance()->setMaxThreadCount(maxThreads);   // Use to limit the number of threads we can run at once.
+
+  for (auto it : m_animsToExport)
   {
-    ModelAnimation cur_anim = m_p_model->anims[anim];
-    if (std::find(m_animsToExport.begin(), m_animsToExport.end(), cur_anim.Index) == m_animsToExport.end())
-      continue;
-
-    QString srcfileName = QString("%1").arg(m_filename);
-    // LOG_INFO << "FBX Animation Source Filename: " << qPrintable(srcfileName);
-    srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
-    QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
-    QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH)+1);
-    QString animationName = QString("%1").arg(animsMap[cur_anim.animID]);
-    QString anim_name = QString("%1 [%2]").arg(animationName, cur_anim.Index);
-    QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(cur_anim.Index).arg(wxT("Animations"));
-    if (useAltAnimNaming)
-    {
-      file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(cur_anim.Index).arg(wxT("Animations"));
-    }
-    // LOG_INFO << "FBX Animation Filename: " << qPrintable(file_name);
-    QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));
-    if (dir.exists() == false)
-    {
-      dir.mkpath(file_name.mid(0, file_name.lastIndexOf('/')));
-    }
-    // LOG_INFO << "FBX Animation File Path: " << qPrintable(dir.absolutePath());
-
-    FbxManager *l_manager = FbxManager::Create();
-
-    if (!l_manager)
-    {
-      LOG_ERROR << "Unable to create the FBX SDK animation manager";
-      return false;
-    }
-    // LOG_INFO << "FBX SDK animation manager successfully created";
-
-    // create an IOSettings object
-    FbxIOSettings *ios = FbxIOSettings::Create(l_manager, IOSROOT);
-    l_manager->SetIOSettings(ios);
-
-    // Create Exporter for this
-    FbxExporter* exporter = FbxExporter::Create(l_manager, "animExporter");
-
-    if (!exporter->Initialize(qPrintable(file_name), -1, l_manager->GetIOSettings()))
-    {
-      LOG_ERROR << "Unable to create the FBX SDK exporter for animation #" << anim;
-
-      if (creationError > 6)
-      {
-        LOG_ERROR << "Too many creation errors. Aborting animation export.";
-        return false;
-      }
-      creationError++;
-      continue;
-    }
-    // LOG_INFO << "FBX animation exporter successfully created";
-
-    // make file compatible with older fbx versions
-    exporter->SetFileExportVersion(FBX_2014_00_COMPATIBLE);
-
-    // Build a new FBX file with just the skeleton.
-    FbxScene *l_animscene = 0;
-    l_animscene = FbxScene::Create(l_manager, "Animation");
-    if (!l_animscene)
-    {
-      LOG_ERROR << "Unable to create FBX scene for animation #" << anim;
-      if (creationError > 6)
-      {
-        LOG_ERROR << "Too many creation errors. Aborting animation export.";
-        return false;
-      }
-      creationError++;
-      continue;
-    }
-    FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(l_manager, "SceneInfo");
-    sceneInfo->mTitle = qPrintable(QString("%1 %2").arg(m_p_model->name()).arg(anim_name));
-    sceneInfo->mAuthor = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appName()));
-    sceneInfo->mRevision = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appVersion()));
-    l_animscene->SetSceneInfo(sceneInfo);
-
-    std::map<int, FbxNode*> l_boneNodes;
-    FbxNode* l_skeletonNode = 0;
-    createSkeleton(l_animscene, l_skeletonNode, l_boneNodes);
-
-    FbxNode* root_node = l_animscene->GetRootNode();
-    root_node->AddChild(l_skeletonNode);
-
-    storeBindPose(l_animscene);
-
-    // Add this animation to our new FBX file.
-    createAnimation(l_animscene, anim_name, cur_anim, l_boneNodes);
-
-    if (!exporter->Export(l_animscene))
-    {
-      LOG_ERROR << "Unable to export FBX animation scene";
-      if (creationError > 6)
-      {
-        LOG_ERROR << "Too many creation errors. Aborting animation export.";
-        return false;
-      }
-      creationError++;
-      continue;
-    }
-    LOG_INFO << "FBX animation #" << anim << " of " << (m_p_model->anims.size() - 1) << " successfully exported.";
-    l_manager->Destroy();
+    QMutexLocker locker(&m_mutex);
+    ModelAnimation curAnimation = m_p_model->anims[it];
+    FBXAnimExporter *exporter = new FBXAnimExporter();
+    exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters, m_p_meshNode, it);
+    exporter->setAutoDelete(true);
+    exporter->run();
+    //QThreadPool::globalInstance()->start(exporter);   // Queue this exporter for threaded execution. Automatically starts the run() function of an FBXAnimExporter when a thread is free.
   }
+
+  //QThreadPool::globalInstance()->waitForDone();   // Don't finish until all the threads have been processed.
   return true;
 }
 
@@ -773,26 +546,57 @@ void FBXExporter::createMaterials()
     }
   }
 
+  for (unsigned int att = 0; att < (size_t)m_p_attachedModels.size(); att++)
+  {
+    WoWModel* model = m_p_attachedModels.at(att);
+    for (unsigned int i = 0; i < model->passes.size(); i++)
+    {
+      ModelRenderPass * pass = model->passes[i];
+      if (pass->init())
+      {
+        // Build material name.
+        FbxString mtrl_name = model->name().toStdString().c_str();
+        mtrl_name.Append("_", 1);
+        char tmp[32];
+        _itoa((int)i, tmp, 10);
+        mtrl_name.Append(tmp, strlen(tmp));
+
+        // Create material.
+        FbxString shading_name = "Phong";
+        FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
+        material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
+
+        QString tex = model->getNameForTex(pass->tex);
+
+        QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
+        tex_name = tex_name.replace(".blp", ".png");
+
+        QString tex_fullpath_filename = QString::fromStdWString(m_filename);
+        tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
+
+        m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getGLTexture(pass->tex);
+
+        FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+        texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
+        texture->SetTextureUse(FbxTexture::eStandard);
+        texture->SetMappingType(FbxTexture::eUV);
+        texture->SetMaterialUse(FbxFileTexture::eModelMaterial);
+        texture->SetSwapUV(false);
+        texture->SetTranslation(0.0, 0.0);
+        texture->SetScale(1.0, 1.0);
+        texture->SetRotation(0.0, 0.0);
+        texture->UVSet.Set(FbxString("DiffuseUV"));
+        material->Diffuse.ConnectSrcObject(texture);
+
+        // Add material to the scene.
+        m_p_meshNode->AddMaterial(material);
+      }
+    }
+  }
+
   for(auto it : m_texturesToExport)
     exportGLTexture(it.second, it.first);
 
-}
-
-void FBXExporter::storeBindPose(FbxScene* &l_scene)
-{
-  FbxPose* pose = FbxPose::Create(l_scene,"Bind Pose");
-  pose->SetIsBindPose(true);
-
-  for(auto it : m_boneClusters)
-  {
-    FbxNode*  node   = it->GetLink();
-    FbxMatrix matrix = node->EvaluateGlobalTransform();
-    pose->Add(node, matrix);
-  }
-
-  pose->Add(m_p_meshNode, m_p_meshNode->EvaluateGlobalTransform());
-
-  l_scene->AddPose(pose);
 }
 
 void FBXExporter::reset()

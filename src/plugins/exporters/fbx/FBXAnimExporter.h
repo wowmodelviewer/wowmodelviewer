@@ -17,40 +17,36 @@
 \*----------------------------------------------------------------------*/
 
 /*
- * FBXExporter.h
+ * FBXAnimExporter.h
  *
- *  Created on: 13 june 2015
- *   Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
+ *  Created on: 14 may 2019
+ *   Copyright: 2019 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _FBXEXPORTER_H_
-#define _FBXEXPORTER_H_
+#ifndef _FBXANIMEXPORTER_H_
+#define _FBXANIMEXPORTER_H_
 
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <map>
-#include <string>
+#include <vector>
 
 // Qt
-#include <QtPlugin>
-#include <qlist.h>
-#include <qmutex.h>
+#include <QString>
+#include <QRunnable>
+#include <QMutex>
 
 // Externals
 #include "fbxsdk.h"
 
 // Other libraries
-class WoWModel;
-struct ModelAnimation;
 
-
-#define _EXPORTERPLUGIN_CPP_ // to define interface
-#include "ExporterPlugin.h"
-#undef _EXPORTERPLUGIN_CPP_
 
 // Current library
 
+
+class WoWModel;
+struct ModelAnimation;
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -58,28 +54,19 @@ struct ModelAnimation;
 
 // Class Declaration
 //--------------------------------------------------------------------
-class FBXExporter : public ExporterPlugin
+class FBXAnimExporter : public QRunnable
 {
-    Q_INTERFACES(ExporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.FBXExporter" FILE "fbxexporter.json")
 
   public :
     // Constants / Enums
 
     // Constructors
-    FBXExporter();
 
     // Destructors
-    ~FBXExporter() {}
 
     // Methods
-   std::wstring menuLabel() const;
-
-   std::wstring fileSaveTitle() const;
-   std::wstring fileSaveFilter() const;
-
-   bool exportModel(Model *, std::wstring file);
+    void run() override;
+    void setValues(FbxString fileVersion, QString fn, QString an, WoWModel *m, std::vector<FbxCluster*> bc, FbxNode* &meshnode, int aID, bool uan = false);
 
     // Members
 
@@ -100,40 +87,27 @@ class FBXExporter : public ExporterPlugin
     // Constructors
 
     // Destructors
-    
-    // Methods
-    void createMaterials();
-    void createMesh();
-    void createAnimations();
-    bool createAnimationFiles();
-    void linkMeshAndSkeleton();
-    void reset();
 
+    // Methods
 
     // Members
-    FbxManager        * m_p_manager;
-    FbxScene          * m_p_scene;
-    WoWModel          * m_p_model;
-    FbxNode           * m_p_meshNode;
-    FbxNode           * m_p_skeletonNode;
-    QList<WoWModel*>    m_p_attachedModels;
-
+    FbxString l_fileVersion;
+    QString srcfileName;
+    QString animationName;
+    WoWModel *l_model;
+    std::vector<FbxCluster*> l_boneClusters;
+    FbxNode *l_meshNode;
+    int animID;
+    bool useAltNaming = false;
     mutable QMutex m_mutex;
-    bool useAltAnimNaming = false;
-    FbxString m_fileVersion;
-    std::wstring m_filename;
-    std::map<int,FbxNode*> m_boneNodes;
-    std::vector<FbxCluster*> m_boneClusters;
-
-    std::map<std::wstring, GLuint> m_texturesToExport;
 
     // friend class declarations
 
 };
 
 // static members definition
-#ifdef _FBXEXPORTER_CPP_
+#ifdef _FBXANIMEXPORTER_CPP_
 
 #endif
 
-#endif /* _FBXEXPORTER_H_ */
+#endif /* _FBXANIMEXPORTER_H_ */

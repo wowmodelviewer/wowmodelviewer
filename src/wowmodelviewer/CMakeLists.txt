@@ -12,7 +12,7 @@ find_package(wxWidgets REQUIRED net gl aui xml adv core base)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS})
+include_directories(${wxWidgets_INCLUDE_DIRS} $ENV{WMV_SDK_BASEDIR}/include)
 
 # find required Qt packages
 find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)

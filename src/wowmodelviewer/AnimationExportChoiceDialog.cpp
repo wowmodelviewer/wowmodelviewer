@@ -35,6 +35,7 @@
 // Qt
 
 // Externals
+#include <fbxsdk/fileio/fbx/fbxio.h>
 
 // Other libraries
 
@@ -68,8 +69,32 @@ AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const
   wxStaticText * explain =  new wxStaticText(this, wxID_ANY, wxT("Select animations you want to export"));
 
   // @TODO : to remove once bug corrected
-  wxStaticText * bugexplain =  new wxStaticText(this, wxID_ANY, wxT("Due to FBX export bug, export only one at a time for now"));
+  // wxStaticText * bugexplain =  new wxStaticText(this, wxID_ANY, wxT("Due to FBX export bug, export only one at a time for now"));
 
+  // wxStaticText * fbxversionexplain = new wxStaticText(this, wxID_ANY, wxT("Select an FBX Compatibility Version"));
+  // wxComboBox * fbxVersionChoice = new wxComboBox(this, wxID_ANY);
+  // fbxVersionChoice->SetEditable(false);
+  // fbxVersionChoice->SetLabel(wxT("FBX Compatibility Version"));
+  // int i = 0;
+  // 
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2019_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2018_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2016_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2014_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2013_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2012_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2011_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2010_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2009_00_V7_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2009_00_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_11_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_08_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2006_02_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_2005_08_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_60_COMPATIBLE), i++);
+  // fbxVersionChoice->Insert(wxString::FromAscii(FBX_53_MB55_COMPATIBLE), i++);
+  // 
+  // fbxVersionChoice->SetSelection(0);
 
   m_selectall = new wxButton(this, ID_SELECT_ALL,_("Select all"));
   m_unselectall = new wxButton(this, ID_UNSELECT_ALL,_("Unselect all"));
@@ -77,7 +102,9 @@ AnimationExportChoiceDialog::AnimationExportChoiceDialog(wxWindow *parent, const
   sizer->Add(m_unselectall, 0, wxLEFT|wxRIGHT|wxBOTTOM, 5);
 
   topsizer->Prepend(sizer, 0, wxEXPAND | wxALL, 0);
-  topsizer->Prepend(bugexplain, 0, wxALL, 5);
+  //topsizer->Prepend(bugexplain, 0, wxALL, 5);
+  //topsizer->Prepend(fbxVersionChoice, 0, wxALL, 5);
+  //topsizer->Prepend(fbxversionexplain, 0, wxALL, 5);
   topsizer->Prepend(explain, 0, wxALL, 5);
   topsizer->SetSizeHints( this );
   topsizer->Fit( this );
