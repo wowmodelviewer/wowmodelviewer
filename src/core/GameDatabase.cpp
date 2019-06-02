@@ -52,13 +52,34 @@ bool core::GameDatabase::initFromXML(const QString & file)
    return createDatabaseFromXML(core::Game::instance().configFolder() + file);
 }
 
-sqlResult core::GameDatabase::sqlQuery(const QString & query)
+sqlResult core::GameDatabase::sqlQuery(const QString & query) const
 {
   sqlResult result;
 
-  char *zErrMsg = 0;
-  int rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, (void *)&result, &zErrMsg);
+  char *zErrMsg = nullptr;
+  const auto rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, static_cast<void *>(&result), &zErrMsg);
   if( rc != SQLITE_OK )
+  {
+    LOG_ERROR << "Querying in database" << query;
+    LOG_ERROR << "SQL error:" << zErrMsg;
+    sqlite3_free(zErrMsg);
+    result.valid = false;
+  }
+  else
+  {
+    result.valid = true; // result is valid
+  }
+
+  return result;
+}
+
+sqlResultAssoc core::GameDatabase::sqlQueryAssoc(const QString & query) const
+{
+  sqlResultAssoc result;
+
+  char *zErrMsg = nullptr;
+  const auto rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQueryAssoc, static_cast<void *>(&result), &zErrMsg);
+  if (rc != SQLITE_OK)
   {
     LOG_ERROR << "Querying in database" << query;
     LOG_ERROR << "SQL error:" << zErrMsg;
@@ -80,22 +101,37 @@ void core::GameDatabase::addTable(TableStructure * tbl)
 
 int core::GameDatabase::treatQuery(void *resultPtr, int nbcols, char ** vals , char ** cols)
 {
-  sqlResult * r = (sqlResult *)resultPtr;
+  auto * r = static_cast<sqlResult *>(resultPtr);
   if(!r)
     return 1;
 
   std::vector<QString> values;
   // update columns
-  for(int i=0; i<nbcols; i++)
-  {
+  for(auto i=0; i<nbcols; i++)
     values.push_back(QString(vals[i]));
-  }
 
   r->values.push_back(values);
   r->nbcols = nbcols;
 
   return 0;
 }
+
+int core::GameDatabase::treatQueryAssoc(void *resultPtr, int nbcols, char ** vals, char ** cols)
+{
+  auto * r = static_cast<sqlResultAssoc *>(resultPtr);
+  if (!r)
+    return 1;
+
+  std::map<QString, QString> values;
+  // update columns
+  for (auto i = 0; i < nbcols; i++)
+    values[QString(cols[i])] = (QString(vals[i]));
+
+  r->values.push_back(values);
+
+  return 0;
+}
+
 
 bool core::GameDatabase::createDatabaseFromXML(const QString & file)
 {
