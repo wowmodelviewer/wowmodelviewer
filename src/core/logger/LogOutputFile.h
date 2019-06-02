@@ -32,6 +32,7 @@
 
 // Qt
 #include <QFile>
+#include <qmutex.h>
 
 // Externals
 
@@ -98,6 +99,7 @@ class _LOGOUTPUTFILE_API_ LogOutputFile : public LogOutput
 		// Methods
 		
 		// Members
+    mutable QMutex mutex;
     QFile m_logFile;
 		
 		// friend class declarations

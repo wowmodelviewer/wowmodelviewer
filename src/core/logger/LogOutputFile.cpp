@@ -65,6 +65,7 @@ LogOutputFile::LogOutputFile(std::string fileName)
 //--------------------------------------------------------------------
 void LogOutputFile::write(const QString & message)
 {
+  QMutexLocker locker(&mutex);
   QTextStream out(&m_logFile);
   out << message << "\n";
 }
