@@ -83,9 +83,9 @@ void CharTexture::compose(TextureID texID)
 
 void CharTexture::initRegions()
 {
-  sqlResult layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
+  auto layouts = GAMEDATABASE.sqlQueryAssoc("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
 
-  if(!layouts.valid || layouts.empty())
+  if(layouts.empty())
   {
     LOG_ERROR << "Fail to retrieve Texture Layout information from game database";
     return;
@@ -95,15 +95,15 @@ void CharTexture::initRegions()
   for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
   {
     LayoutSize texLayout;
-    int curLayout = layouts.values[i][0].toInt();
-    texLayout.width = layouts.values[i][1].toInt();
-    texLayout.height = layouts.values[i][2].toInt();
+    int curLayout = layouts.values[i]["ID"].toInt();
+    texLayout.width = layouts.values[i]["Width"].toInt();
+    texLayout.height = layouts.values[i]["Height"].toInt();
 
     // search all regions for this layout
-    QString query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
-    sqlResult regions = GAMEDATABASE.sqlQuery(query);
+    auto query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
+    auto regions = GAMEDATABASE.sqlQueryAssoc(query);
 
-    if(!regions.valid || regions.empty())
+    if(regions.empty())
     {
       LOG_ERROR << "Fail to retrieve Section Layout information from game database for layout" << curLayout;
       continue;
@@ -117,15 +117,15 @@ void CharTexture::initRegions()
     base.height = texLayout.height;
     regionCoords[LAYOUT_BASE_REGION] = base;
 
-    for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
+    for(auto &r : regions.values)
     {
       CharRegionCoords coords;
-      coords.xpos = regions.values[r][1].toInt();
-      coords.ypos = regions.values[r][2].toInt();
-      coords.width = regions.values[r][3].toInt();
-      coords.height = regions.values[r][4].toInt();
-      //LOG_INFO << regions.values[r][0].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
-      regionCoords[regions.values[r][0].toInt()] = coords;
+      coords.xpos = r["X"].toInt();
+      coords.ypos = r["Y"].toInt();
+      coords.width = r["Width"].toInt();
+      coords.height = r["Height"].toInt();
+      //LOG_INFO << r["Section"].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
+      regionCoords[r["Section"].toInt()] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
     CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);
