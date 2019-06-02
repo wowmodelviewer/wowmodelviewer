@@ -23,16 +23,17 @@ struct LayoutSize {
   int width, height;
 };
 
-struct CharTextureComponent
+class CharTextureComponent
 {
-  GameFile * file;
-  int region;
-  int layer;
+  public:
+    GameFile * file;
+    int region;
+    int layer;
 
-  bool operator<(const CharTextureComponent& c) const
-  {
-	return layer < c.layer;
-  }
+    bool operator<(const CharTextureComponent& c) const
+    {
+	    return layer < c.layer;
+    }
 };
 
 #ifdef _WIN32
@@ -48,8 +49,8 @@ struct CharTextureComponent
 class _CHARTEXTURE_API_ CharTexture
 {
   public:
-    CharTexture(unsigned int _layoutSizeId = 0)
-      : layoutSizeId(_layoutSizeId), baseImage(0)
+    explicit CharTexture(unsigned int _layoutSizeId = 0)
+      : layoutSizeId(_layoutSizeId), baseImage(nullptr)
   {}
 
     void setBaseImage(GameFile * img) { baseImage = img; }
@@ -62,7 +63,7 @@ class _CHARTEXTURE_API_ CharTexture
     static void initRegions();
 
   private:
-    void burnComponent(QImage & destImage, CharTextureComponent &);
+    void burnComponent(QImage & destImage, CharTextureComponent &) const;
     static QImage * gameFileToQImage(GameFile * file);
     unsigned int layoutSizeId;
     GameFile * baseImage;
