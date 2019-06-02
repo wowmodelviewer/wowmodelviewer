@@ -33,7 +33,7 @@ class _GAMEDATABASE_API_ sqlResult
 public:
   sqlResult() : valid(false), nbcols(0) {}
   ~sqlResult() = default;
-  bool empty() const { return values.empty(); }
+  bool empty() const { return !valid || values.empty(); }
   bool valid;
   int nbcols;
   std::vector<std::vector<QString> > values;
@@ -44,7 +44,7 @@ class _GAMEDATABASE_API_ sqlResultAssoc
 public:
   sqlResultAssoc() : valid(false) {}
   ~sqlResultAssoc() = default;
-  bool empty() const { return values.empty(); }
+  bool empty() const { return !valid || values.empty(); }
   bool valid;
   std::vector<std::map<QString, QString> > values;
 };
