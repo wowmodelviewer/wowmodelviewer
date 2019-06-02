@@ -41,7 +41,6 @@
 #include "FBXAnimExporter.h"
 #include "ModelRenderPass.h"
 #include "WoWModel.h"
-#include "FBXExporterOptions.h"
 
 #include "util.h" // SLASH
 
