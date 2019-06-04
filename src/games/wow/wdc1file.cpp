@@ -82,7 +82,7 @@ bool WDC1File::open()
   data = getPointer();
  
   // compute various offset needed to read data in the file 
-  uint32 stringTableOffset = sizeof(header) + sizeof(field_structure) * fieldCount + recordSize * recordCount;
+  size_t stringTableOffset = sizeof(header) + sizeof(field_structure) * fieldCount + recordSize * recordCount;
 
   // embedded strings in fields instead of stringTable
   if ((m_header.flags & 0x01) != 0)
@@ -94,9 +94,9 @@ bool WDC1File::open()
   seek(stringTableOffset);
   stringTable = getPointer();
 
-  uint32 IdBlockOffset = stringTableOffset + stringSize;
+  size_t IdBlockOffset = stringTableOffset + stringSize;
 
-  uint32 copyBlockOffset = IdBlockOffset;
+  size_t copyBlockOffset = IdBlockOffset;
 
   if ((m_header.flags & 0x04) != 0)
     copyBlockOffset += (recordCount * 4);

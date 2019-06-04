@@ -69,10 +69,10 @@ UpdateManager::UpdateManager()
 
   // create main table
   m_table = new QTableWidget(0, 4, this);
-  QStringList labels("Name");
-  labels.append("Current Version");
-  labels.append("Last Version");
-  labels.append("State");
+  QStringList labels(tr("Name"));
+  labels.append(tr("Current Version"));
+  labels.append(tr("Last Version"));
+  labels.append(tr("State"));
   m_table->setHorizontalHeaderLabels(labels);
 
   // fill main layout
@@ -127,10 +127,10 @@ void UpdateManager::updateTable()
 
   // insert core version first
   m_table->insertRow(row);
-  QTableWidgetItem *newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).first));
+  QTableWidgetItem *newItem = new QTableWidgetItem((*versionsIt).first);
   m_table->setItem(row, column, newItem);
   column++;
-  newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).second));
+  newItem = new QTableWidgetItem((*versionsIt).second);
   newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
   m_table->setItem(row, column, newItem);
   column++;
@@ -148,10 +148,10 @@ void UpdateManager::updateTable()
       continue;
 
     m_table->insertRow(row);
-    QTableWidgetItem *newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).first));
+    QTableWidgetItem *newItem = new QTableWidgetItem((*versionsIt).first);
     m_table->setItem(row, column, newItem);
     column++;
-    newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).second));
+    newItem = new QTableWidgetItem((*versionsIt).second);
     newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
     m_table->setItem(row, column, newItem);
     column++;
@@ -215,6 +215,6 @@ void UpdateManager::resizeTable()
 
 void UpdateManager::cellClicked(int row, int col)
 {
-  if(m_table->item(row,col) && m_table->item(row,col)->text() == "Update Needed")
+  if(m_table->item(row,col) && m_table->item(row,col)->text() == tr("Update Needed"))
     QDesktopServices::openUrl(QUrl("http://download.wowmodelviewer.net"));
 }

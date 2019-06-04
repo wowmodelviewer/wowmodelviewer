@@ -9,10 +9,10 @@
 
 #include "matrix.h"
 
-const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Quaternion &v2)
+const Quaternion Quaternion::slerp(const double r, const Quaternion &v1, const Quaternion &v2)
 {
   // SLERP
-  float dot = v1*v2;
+  double dot = v1*v2;
 
   if (fabs(dot) > 0.9995f)
   {
@@ -20,14 +20,14 @@ const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Qu
     return Quaternion::lerp(r, v1, v2);
   }
 
-  float a = acosf(dot) * r;
+  double a = acos(dot) * r;
   Quaternion q = (v2 - v1 * dot);
   q.normalize();
 
-  return v1 * cosf(a) + q * sinf(a);
+  return v1 * cos(a) + q * sin(a);
 }
 
-const Quaternion Quaternion::lerp(const float r, const Quaternion &v1, const Quaternion &v2)
+const Quaternion Quaternion::lerp(const double r, const Quaternion &v1, const Quaternion &v2)
 {
   return v1*(1.0f-r) + v2*r;
 }
@@ -36,7 +36,7 @@ Vec3D Quaternion::GetHPB()
 {
   Vec3D hpb;
   hpb.x = atan2(2 * (x*z + y*w), 1 - 2 * (x*x + y*y));
-  float sp = 2*(x*w - y*z);
+  double sp = 2 * (x*w - y*z);
   if(sp < -1) sp = -1;
   else if(sp > 1) sp = 1;
   hpb.y = asin(sp);
@@ -49,28 +49,28 @@ Matrix Quaternion::toMat()
 {
   Matrix result;
 
-  float fTx  = ((float)2.0)*y;
-  float fTy  = ((float)2.0)*z;
-  float fTz  = ((float)2.0)*w;
-  float fTwx = fTx*x;
-  float fTwy = fTy*x;
-  float fTwz = fTz*x;
-  float fTxx = fTx*y;
-  float fTxy = fTy*y;
-  float fTxz = fTz*y;
-  float fTyy = fTy*z;
-  float fTyz = fTz*z;
-  float fTzz = fTz*w;
+  double fTx = 2.0*y;
+  double fTy = 2.0*z;
+  double fTz = 2.0*w;
+  double fTwx = fTx*x;
+  double fTwy = fTy*x;
+  double fTwz = fTz*x;
+  double fTxx = fTx*y;
+  double fTxy = fTy*y;
+  double fTxz = fTz*y;
+  double fTyy = fTy*z;
+  double fTyz = fTz*z;
+  double fTzz = fTz*w;
 
-  result.m[0][0] = (float)1.0-(fTyy+fTzz);
+  result.m[0][0] = 1.0-(fTyy + fTzz);
   result.m[0][1] = fTxy-fTwz;
   result.m[0][2] = fTxz+fTwy;
   result.m[1][0] = fTxy+fTwz;
-  result.m[1][1] = (float)1.0-(fTxx+fTzz);
+  result.m[1][1] = 1.0-(fTxx+fTzz);
   result.m[1][2] = fTyz-fTwx;
   result.m[2][0] = fTxz-fTwy;
   result.m[2][1] = fTyz+fTwx;
-  result.m[2][2] = (float)1.0-(fTxx+fTyy);
+  result.m[2][2] = 1.0-(fTxx+fTyy);
 
   return result;
 }
@@ -81,14 +81,14 @@ Vec3D Quaternion::toEulerXYZ()
 
   Matrix mat = toMat();
 
-  if (mat.m[0][2] < (float)1.0)
+  if (mat.m[0][2] < 1.0)
   {
-    if (mat.m[0][2] > -(float)1.0)
+    if (mat.m[0][2] > -1.0)
     {
       // y_angle = asin(r02)
               // x_angle = atan2(-r12,r22)
               // z_angle = atan2(-r01,r00)
-              result.y = (float)asin((double)mat.m[0][2]);
+              result.y = asin(mat.m[0][2]);
               result.x = atan2(-mat.m[1][2],mat.m[2][2]);
               result.z = atan2(-mat.m[0][1],mat.m[0][0]);
     }
@@ -99,7 +99,7 @@ Vec3D Quaternion::toEulerXYZ()
       // WARNING.  Solution is not unique.  Choosing z_angle = 0.
       result.y = -HALFPIf;
       result.x = -atan2(mat.m[1][0],mat.m[1][1]);
-      result.z = (float)0.0f;
+      result.z = 0.0f;
     }
   }
   else
@@ -109,7 +109,7 @@ Vec3D Quaternion::toEulerXYZ()
     // WARNING.  Solutions is not unique.  Choosing z_angle = 0.
     result.y = HALFPIf;
     result.x = atan2(mat.m[1][0],mat.m[1][1]);
-    result.z = (float)0.0f;
+    result.z = 0.0f;
   }
   return result;
 }

@@ -75,9 +75,9 @@ void Logger::init()
 void Logger::writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
   QString message = Logger::formatLog(type, context, msg);
-  for(Logger::iterator it = LOGGER.begin();
-      it != LOGGER.end();
-      ++it)
+  for (Logger::iterator it = LOGGER.begin();
+    it != LOGGER.end();
+    ++it)
     (*it)->write(message);
 }
 
@@ -85,39 +85,40 @@ void Logger::writeLog(QtMsgType type, const QMessageLogContext &context, const Q
 QString Logger::formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
   QString msgType;
-  switch(type)
+  switch (type)
   {
-    case QtDebugMsg:
-      msgType = "INFO";
-      break;
-    case QtWarningMsg:
-      msgType = "WARN";
-      break;
-    case QtCriticalMsg:
-      msgType = "ERROR";
-      break;
-    case QtFatalMsg:
-      msgType = "FATAL";
-      break;
+  case QtDebugMsg:
+    msgType = "DEBUG";
+    break;
+  case QtInfoMsg:
+    msgType = "INFO ";
+    break;
+  case QtWarningMsg:
+    msgType = "WARN ";
+    break;
+  case QtCriticalMsg:
+    msgType = "ERROR";
+    break;
+  case QtFatalMsg:
+    msgType = "FATAL";
+    break;
   }
 
-  return msgType + "\t| " +
-         QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") + "\t| " +
-         msg;
+  return msgType + " | " + QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz") + " | " + msg;
 }
 
 QDebug Logger::operator()(Logger::LogType type)
 {
-  switch(type)
+  switch (type)
   {
-    case INFO_LOG:
-      return QDebug(QtDebugMsg);
-    case WARNING_LOG:
-      return QDebug(QtWarningMsg);
-    case ERROR_LOG:
-      return QDebug(QtCriticalMsg);
-    case FATAL_LOG:
-      return QDebug(QtFatalMsg);
+  case INFO_LOG:
+    return QDebug(QtInfoMsg);
+  case WARNING_LOG:
+    return QDebug(QtWarningMsg);
+  case ERROR_LOG:
+    return QDebug(QtCriticalMsg);
+  case FATAL_LOG:
+    return QDebug(QtFatalMsg);
   }
   return QDebug(QtDebugMsg);
 }

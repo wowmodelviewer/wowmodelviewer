@@ -19,6 +19,7 @@ find_package(Qt5Network)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
+set(AUTORCC ON)
 
 set(src main.cpp
         UpdateManager.cpp)
@@ -26,13 +27,35 @@ set(src main.cpp
 set(headers UpdateManager.h)
 
 source_group("Header Files" FILES ${headers})
-        
+
+set (resources ../../updateManager.qrc)
+source_group("Resources" FILES ${resources})
+QT5_ADD_RESOURCES(QTRESOURCES ${resources})
+
+set(TRANSLATION_PATH ${WMV_BASE_PATH}/src/Translations/)
+
+# Translation files for the various languages
+set(translationfiles ${TRANSLATION_PATH}updatemanager_en_US.ts)
+
+source_group("Translation Files" FILES ${translationfiles})
+
+find_package(Qt5LinguistTools REQUIRED)
+set(LUPDATE_OPTIONS "-ts ${translationfiles}" CACHE STRING "specifies options passed to lupdate")
+# adds the translations and a target for it
+qt5_create_translation(QM_FILES
+	${src} ${headers}
+	OPTIONS ${LUPDATE_OPTIONS}
+)
+
+source_group("GeneratedFiles" FILES ${QTRESOURCES})
+
 use_core()
 use_wow()
 
 set(NAME UpdateManager)
-add_executable(${NAME} WIN32 ${src} ${headers})
+add_executable(${NAME} WIN32 ${src} ${headers} ${translationfiles} ${resources} ${QTRESOURCES})
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
+set_property(TARGET ${NAME} PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(${NAME} core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 

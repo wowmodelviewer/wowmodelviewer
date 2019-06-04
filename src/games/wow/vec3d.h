@@ -36,9 +36,9 @@
 
 class Vec3D {
 public:
-	float x,y,z;
+	double x, y, z;
 
-	Vec3D(float x0 = 0.0f, float y0 = 0.0f, float z0 = 0.0f) : x(x0), y(y0), z(z0) {}
+	Vec3D(double x0 = 0.0f, double y0 = 0.0f, double z0 = 0.0f) : x(x0), y(y0), z(z0) {}
 
 	Vec3D(const Vec3D& v) : x(v.x), y(v.y), z(v.z) {}
 
@@ -54,8 +54,8 @@ public:
 	}
 
 	/*
-	float[3] operator= (const Vec3D &v) {
-		float f[3] = {v.x, v.y, v.z};
+	double[3] operator= (const Vec3D &v) {
+		double f[3] = {v.x, v.y, v.z};
 		return f;
 	}
 	*/
@@ -72,24 +72,24 @@ public:
 		return r;
 	}
 
-	float operator* (const Vec3D &v) const
+	double operator* (const Vec3D &v) const
 	{
         return x*v.x + y*v.y + z*v.z;
 	}
 
-	Vec3D operator* (float d) const
+	Vec3D operator* (double d) const
 	{
 		Vec3D r(x*d,y*d,z*d);
         return r;
 	}
 
-	Vec3D operator/ (float d) const
+	Vec3D operator/ (double d) const
 	{
 		Vec3D r(x/d,y/d,z/d);
         return r;
 	}
 
-	friend Vec3D operator* (float d, const Vec3D& v)
+	friend Vec3D operator* (double d, const Vec3D& v)
 	{
 		return v * d;
 	}
@@ -117,7 +117,7 @@ public:
 		return *this;
 	}
 
-	Vec3D& operator*= (float d)
+	Vec3D& operator*= (double d)
 	{
 		x *= d;
 		y *= d;
@@ -125,14 +125,14 @@ public:
 		return *this;
 	}
 
-	float lengthSquared() const
+	double lengthSquared() const
 	{
 		return x*x+y*y+z*z;
 	}
 
-	float length() const
+	double length() const
 	{
-        return sqrtf(x*x+y*y+z*z);
+        return sqrt(x*x+y*y+z*z);
 	}
 
 	Vec3D& normalize()
@@ -160,10 +160,10 @@ public:
 		return out;
 	}
 
-  friend bool operator==(const Vec3D& lhs, const Vec3D& rhs)
-  {
-    return (abs(lhs.x - rhs.x) < 0.0001) && (abs(lhs.y - rhs.y) < 0.0001) && (abs(lhs.z - rhs.z) < 0.0001);
-  }
+	friend bool operator==(const Vec3D& lhs, const Vec3D& rhs)
+	{
+		return (abs(lhs.x - rhs.x) < 0.0001) && (abs(lhs.y - rhs.y) < 0.0001) && (abs(lhs.z - rhs.z) < 0.0001);
+	}
 
 	operator float*()
 	{
@@ -182,9 +182,10 @@ public:
 
 class Vec2D {
 public:
-	float x,y;
+	double x,y;
 	
-	Vec2D(float x0 = 0.0f, float y0 = 0.0f) : x(x0), y(y0) {}
+	Vec2D(double x0 = 0.0f, double y0 = 0.0f) : x(x0), y(y0) {}
+	Vec2D(float x0, float y0) : x(x0), y(y0) {}
 
 	Vec2D(const Vec2D& v) : x(v.x), y(v.y) {}
 
@@ -206,18 +207,18 @@ public:
 		return r;
 	}
 
-	float operator* (const Vec2D &v) const
+	double operator* (const Vec2D &v) const
 	{
         return x*v.x + y*v.y;
 	}
 
-	Vec2D operator* (float d) const
+	Vec2D operator* (double d) const
 	{
 		Vec2D r(x*d,y*d);
         return r;
 	}
 
-	friend Vec2D operator* (float d, const Vec2D& v)
+	friend Vec2D operator* (double d, const Vec2D& v)
 	{
 		return v * d;
 	}
@@ -236,21 +237,21 @@ public:
 		return *this;
 	}
 
-	Vec2D& operator*= (float d)
+	Vec2D& operator*= (double d)
 	{
 		x *= d;
 		y *= d;
 		return *this;
 	}
 
-	float lengthSquared() const
+	double lengthSquared() const
 	{
 		return x*x+y*y;
 	}
 
-	float length() const
+	double length() const
 	{
-        return sqrtf(x*x+y*y);
+        return sqrt(x*x+y*y);
 	}
 
 	Vec2D& normalize()
@@ -287,11 +288,11 @@ public:
 };
 
 
-inline void rotate(float x0, float y0, float *x, float *y, float angle)
+inline void rotate(double x0, double y0, double *x, double *y, double angle)
 {
-	float xa = *x - x0, ya = *y - y0;
-	*x = xa*cosf(angle) - ya*sinf(angle) + x0;
-	*y = xa*sinf(angle) + ya*cosf(angle) + y0;
+	double xa = *x - x0, ya = *y - y0;
+	*x = xa*cos(angle) - ya*sin(angle) + x0;
+	*y = xa*sin(angle) + ya*cos(angle) + y0;
 }
 
 

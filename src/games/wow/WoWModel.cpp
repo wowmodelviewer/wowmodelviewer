@@ -101,10 +101,10 @@ void glInitAll()
   glDepthFunc(GL_NEVER);
 }
 
-WoWModel::WoWModel(GameFile * file, bool forceAnim):
-ManagedItem(""),
-forceAnim(forceAnim),
-gamefile(file)
+WoWModel::WoWModel(GameFile * file, bool forceAnim) :
+  ManagedItem(""),
+  forceAnim(forceAnim),
+  gamefile(file)
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -114,7 +114,7 @@ gamefile(file)
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
-  
+
   for (size_t i = 0; i < ATT_MAX; i++)
     attLookup[i] = -1;
 
@@ -306,12 +306,12 @@ bool WoWModel::isAnimated(GameFile * f)
   animGeometry = false;
   animBones = false;
   ind = false;
-  
+
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); (ov_it != ov_end) && !animGeometry; ++ov_it)
   {
     for (size_t b = 0; b < 4; b++)
     {
-      if (ov_it->weights[b]>0)
+      if (ov_it->weights[b] > 0)
       {
         ModelBoneDef &bb = bo[ov_it->bones[b]];
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
@@ -334,7 +334,7 @@ bool WoWModel::isAnimated(GameFile * f)
   }
   else
   {
-    for (uint i = 0; i < bones.size() ; i++)
+    for (uint i = 0; i < bones.size(); i++)
     {
       ModelBoneDef &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type)
@@ -531,8 +531,8 @@ void WoWModel::initCommon(GameFile * f)
   // Correct the data from the model, so that its using the Y-Up axis mode.
   for (auto & it : rawVertices)
   {
-     it.pos = fixCoordSystem(it.pos);
-     it.normal = fixCoordSystem(it.normal);
+    it.pos = fixCoordSystem(it.pos);
+    it.normal = fixCoordSystem(it.normal);
   }
 
   origVertices = rawVertices;
@@ -584,7 +584,7 @@ void WoWModel::initCommon(GameFile * f)
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
-    vector<TXID> txids;
+    std::vector<TXID> txids;
 
     if (f->isChunked() && f->setChunk("TXID"))
     {
@@ -785,9 +785,9 @@ void WoWModel::initStatic(GameFile * f)
   indices.clear();
 }
 
-vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
+std::vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {
-  vector<TXID> txids;
+  std::vector<TXID> txids;
 
   if (f->setChunk("TXID"))
   {
@@ -801,9 +801,9 @@ vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
   return txids;
 }
 
-vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+std::vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
-  vector<AFID> afids;
+  std::vector<AFID> afids;
 
   if (f->setChunk("AFID"))
   {
@@ -819,12 +819,12 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
     ModelAnimation a;
-    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+    memcpy(&a, f->getBuffer() + ofsAnimation + i * sizeof(ModelAnimation), sizeof(ModelAnimation));
 
     anims.push_back(a);
 
@@ -852,12 +852,12 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
     if (anim && anim->open())
     {
       anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
-      {     
+      {
         auto animIt = data.animfiles.find(anims[i].animID);
         if (animIt != data.animfiles.end())
           LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
       }
-      
+
       data.animfiles[anims[i].animID] = std::make_pair(anim, f);
     }
   }
@@ -891,7 +891,7 @@ void WoWModel::initAnimated(GameFile * f)
     if (skelFile->open())
     {
       // skelFile->dumpStructure();
-      vector<AFID> afids = readAFIDSFromFile(skelFile);
+      std::vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
@@ -929,7 +929,7 @@ void WoWModel::initAnimated(GameFile * f)
         }
 
         animManager = new AnimManager(*this);
-        
+
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
@@ -973,7 +973,7 @@ void WoWModel::initAnimated(GameFile * f)
   }
   else if (header.nAnimations > 0)
   {
-    vector<AFID> afids;
+    std::vector<AFID> afids;
 
     if (f->isChunked() && f->setChunk("AFID"))
     {
@@ -1050,7 +1050,7 @@ void WoWModel::initAnimated(GameFile * f)
   {
     texAnims.resize(header.nTexAnims);
     ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
-                                                                 
+
     for (uint i = 0; i < texAnims.size(); i++)
       texAnims[i].init(f, ta[i], globalSequences);
   }
@@ -1209,7 +1209,7 @@ void WoWModel::setLOD(GameFile * f, int index)
   restoreRawGeosets();
 
   rawPasses.clear();
- 
+
   for (size_t j = 0; j < view->nTex; j++)
   {
     ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
@@ -1234,7 +1234,7 @@ void WoWModel::setLOD(GameFile * f, int index)
       }
     }
     pass->tex = texlookup[tex[j].textureid + texOffset];
- 
+
     // TODO: figure out these flags properly -_-
     ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
 
@@ -1497,7 +1497,7 @@ void WoWModel::animate(ssize_t anim)
   }
 
   if (animGeometry)
-  { 
+  {
     if (video.supportVBO)
     {
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
@@ -1605,7 +1605,7 @@ inline void WoWModel::drawModel()
       it->deinit();
     }
   }
-  
+
   if (showWireframe)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -1746,8 +1746,8 @@ WoWItem * WoWModel::getItem(CharSlots slot)
 {
 
   for (WoWModel::iterator it = this->begin();
-       it != this->end();
-       ++it)
+    it != this->end();
+    ++it)
   {
     if ((*it)->slot() == slot)
       return *it;
@@ -1760,7 +1760,7 @@ void WoWModel::update(int dt) // (float dt)
 {
   if (animated && animManager != NULL)
     animManager->Tick(dt);
-  updateEmitters((dt/1000.0f));
+  updateEmitters((dt / 1000.0f));
 }
 
 void WoWModel::updateTextureList(GameFile * tex, int special)
@@ -1800,7 +1800,7 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
       LOG_INFO << "Found" << animsResult.values.size() << "animations for model";
 
       // remap database results on model header indexes
-      for (int i = 0, imax = animsResult.values.size(); i < imax; i++)
+      for (int32 i = 0, imax = (int32)animsResult.values.size(); i < imax; i++)
       {
         result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdWString();
       }
@@ -1901,7 +1901,7 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
   return result;
 }
 
-void WoWModel::showGeoset(uint geosetindex, bool value)
+void WoWModel::showGeoset(uint32 geosetindex, bool value)
 {
   if (geosetindex < geosets.size())
     geosets[geosetindex]->display = value;
@@ -1950,8 +1950,8 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
   if (geomax > 900)
   {
     LOG_ERROR << "setCreatureGeosetData value of " << geomax <<
-                 " detected. We were assuming the maximum was 899.";
-    geomax = ((geomax/100)+1)*100;  // round the max up to the next 100 (next geoset group)
+      " detected. We were assuming the maximum was 899.";
+    geomax = ((geomax / 100) + 1) * 100;  // round the max up to the next 100 (next geoset group)
   }
   else
     geomax = 900;
@@ -1969,9 +1969,9 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 void WoWModel::mergeModel(QString & name)
 {
   LOG_INFO << __FUNCTION__ << name;
-  if(mergedModels.end() != std::find_if(std::begin(mergedModels),
-                                        std::end(mergedModels),
-                                        [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); }))
+  if (mergedModels.end() != std::find_if(std::begin(mergedModels),
+    std::end(mergedModels),
+    [&](const WoWModel * m) { return m->gamefile->fullname() == name.replace("\\", "/"); }))
     return;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
@@ -1989,7 +1989,7 @@ void WoWModel::mergeModel(WoWModel * m)
   if (it.second == true) // new element inserted
     refreshMerging();
 }
-  
+
 void WoWModel::refreshMerging()
 {
   LOG_INFO << __FUNCTION__;
@@ -2008,9 +2008,9 @@ void WoWModel::refreshMerging()
   uint mergeIndex = 0;
   for (auto modelsIt : mergedModels)
   {
-    uint nbVertices = origVertices.size();
-    uint nbIndices = indices.size();
-    uint nbGeosets = geosets.size();
+    uint nbVertices = (uint)origVertices.size();
+    uint nbIndices = (uint)indices.size();
+    uint nbGeosets = (uint)geosets.size();
 
     // reinit merged model as well, just in case
     modelsIt->origVertices = modelsIt->rawVertices;
@@ -2040,8 +2040,8 @@ void WoWModel::refreshMerging()
       for (uint b = 0; b < bones.size(); ++b)
       {
         Vec3D p = bones[b].pivot;
-        if ((p == pivot) && 
-            (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
+        if ((p == pivot) &&
+          (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
           boneConvertTable[i] = b;
           break;
@@ -2111,7 +2111,7 @@ void WoWModel::refreshMerging()
       textures.push_back(it);
     }
 
-    uint tmax = specialTextures.size();
+    uint tmax = (uint)specialTextures.size();
     for (auto it : modelsIt->specialTextures)
     {
       int val = it;
@@ -2171,8 +2171,8 @@ void WoWModel::unmergeModel(QString & name)
 {
   LOG_INFO << __FUNCTION__ << name;
   auto it = std::find_if(std::begin(mergedModels),
-                         std::end(mergedModels),
-                         [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); });
+    std::end(mergedModels),
+    [&](const WoWModel * m) { return m->gamefile->fullname() == name.replace("\\", "/"); });
 
   if (it != mergedModels.end())
   {
@@ -2208,7 +2208,7 @@ void WoWModel::refresh()
 
     return;
   }
-   
+
   cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
 
   // show ears, if toggled
@@ -2284,11 +2284,11 @@ void WoWModel::refresh()
     {
       int id = geosets[j]->id;
       if (!id) // 0 is for skin, not hairstyle
-        continue;
+      continue;
       if (id == geosetId)
-        showGeoset(j, cd.showHair);
+      showGeoset(j, cd.showHair);
       else if (id < 100)
-        showGeoset(j, false);
+      showGeoset(j, false);
     }
     */
   }
@@ -2384,8 +2384,8 @@ void WoWModel::refresh()
     cd.geosets[CG_WRISTBANDS] = 0;
 
   // pandaren female -> hide tabard geoset if TROUSERS geosets are displayed
-  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE) 
-      && (cd.geosets[CG_TROUSERS] > 1))
+  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)
+    && (cd.geosets[CG_TROUSERS] > 1))
     cd.geosets[CG_TARBARD2] = 0;
 
   // reset geosets
@@ -2403,7 +2403,7 @@ void WoWModel::refresh()
     }
   }
 
-  
+
 
   WoWItem * headItem = getItem(CS_HEAD);
 
@@ -2413,8 +2413,8 @@ void WoWModel::refresh()
                             "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
                             "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
                             .arg(infos.raceid)
-                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                            .arg(headItem->id());
+      .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg(headItem->id());
 
 
 
@@ -2439,13 +2439,13 @@ void WoWModel::refresh()
   cd.showFeet = infos.barefeet;
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = cd.eyeGlowType;
+  int egt = cd.eyeGlowType;
   int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
   for (size_t i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
-      showGeoset(i, (id == egtId));
+      showGeoset((uint32)i, (id == egtId));
   }
 
   // Quick & Dirty fix for gobelins => deactivate buggy geosets
@@ -2488,7 +2488,7 @@ GLuint WoWModel::getGLTexture(uint16 tex) const
     else
       return replaceTextures[specialTextures[tex]];
   }
-    
+
 }
 
 void WoWModel::restoreRawGeosets()
@@ -2502,7 +2502,7 @@ void WoWModel::restoreRawGeosets()
   }
 
   geosets.clear();
- 
+
   for (auto it : rawGeosets)
   {
     ModelGeosetHD * geo = new ModelGeosetHD(*it);
@@ -2612,7 +2612,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   {
     out << "    <Animation id=\"" << i << "\">" << endl;
     out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
-    string strName;
+    std::string strName;
     QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
     sqlResult anim = GAMEDATABASE.sqlQuery(query);
     if (anim.valid && !anim.empty())

@@ -16,16 +16,14 @@ class wxTextCtrl;
 
 #include "database.h"
 
-
 class ItemImporterDialog : public wxDialog
 {
-  public:
-	ItemImporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = _T("Import Item from URL"),
-			 const wxPoint & position = wxDefaultPosition, const wxSize & size = wxSize(300, 300));
+public:
+	ItemImporterDialog(wxWindow * parent = NULL, wxWindowID id = -1, const wxString & title = _T("Import Item from URL"), const wxPoint & position = wxDefaultPosition, const wxSize & size = wxSize(300, 300));
 
 	ItemRecord & getImportedItem();
 
-  private:
+private:
 	wxTextCtrl * m_URLname;
 	wxButton * m_importBtn;
 	wxButton * m_displayBtn;

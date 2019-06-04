@@ -68,12 +68,12 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
   LOG_INFO << "Add customFiles from folder" << path;
   QDirIterator dirIt(path, QDirIterator::Subdirectories);
 
-  while(dirIt.hasNext())
+  while (dirIt.hasNext())
   {
     dirIt.next();
     QString filePath = dirIt.filePath().toLower();
 
-    if(QFileInfo(filePath).isFile())
+    if (QFileInfo(filePath).isFile())
     {
       QString toRemove = path;
       toRemove += "\\";
@@ -82,9 +82,9 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
       GameFile * originalFile = GameFolder::getFile(filePath);
       bool addnewfile = true;
       int originalId = -1;
-      if(originalFile)
+      if (originalFile)
       {
-        if(bypassOriginalFiles)
+        if (bypassOriginalFiles)
         {
           originalId = originalFile->fileDataId();
           removeChild(originalFile);
@@ -105,11 +105,11 @@ void wow::WoWFolder::addCustomFiles(const QString & path, bool bypassOriginalFil
         if (it != m_nameIdMap.end())
           originalId = it->second;
       }
-      if(addnewfile)
+      if (addnewfile)
       {
         LOG_INFO << "Add custom file" << filePath << "(ID:" << originalId << ")from hard drive location" << dirIt.filePath();
         HardDriveFile * file = new HardDriveFile(filePath, dirIt.filePath(), originalId);
-        file->setName(filePath.mid(filePath.lastIndexOf("/")+1));
+        file->setName(filePath.mid(filePath.lastIndexOf("/") + 1));
         addChild(file);
       }
     }
@@ -124,9 +124,9 @@ GameFile * wow::WoWFolder::getFile(int id)
   if (id <= 0) // bad id given
     return result;
 
-  auto it = m_idMap.find(id);
-  if (it != m_idMap.end())
-    result = it->second;
+  auto it = m_idMap.at(id);
+  if (it != *m_idMap.end())
+    result = it;
 
   if (!result) // if not found, try to force open by id
   {
@@ -169,7 +169,7 @@ QString wow::WoWFolder::version()
 
 QString wow::WoWFolder::locale()
 {
-   return m_CASCFolder.locale();
+  return m_CASCFolder.locale();
 }
 
 bool wow::WoWFolder::setConfig(core::GameConfig config)
@@ -190,15 +190,16 @@ int wow::WoWFolder::lastError()
 void wow::WoWFolder::onChildAdded(GameFile * child)
 {
   GameFolder::onChildAdded(child);
+  if (child->fileDataId() >= m_idMap.size())
+    m_idMap.resize(child->fileDataId() + 1);
   m_idMap[child->fileDataId()] = child;
 }
 
 void wow::WoWFolder::onChildRemoved(GameFile * child)
 {
   GameFolder::onChildRemoved(child);
-  m_idMap.erase(child->fileDataId());
+  m_idMap.takeAt(child->fileDataId());
 }
-
 QString wow::WoWFolder::fileName(int id)
 {
   auto it = m_idNameMap.find(id);

@@ -11,6 +11,7 @@
 #include <map>
 
 #include <QString>
+#include <QVector>
 
 #include "CASCFolder.h"
 #include "GameFile.h"
@@ -56,7 +57,7 @@ namespace wow
       int fileID(QString fileName);
     private:
       CASCFolder m_CASCFolder;
-      std::map<int, GameFile *> m_idMap;
+      QVector<GameFile *> m_idMap;
       std::map<int, QString> m_idNameMap;
       std::map<QString, int> m_nameIdMap;
   };

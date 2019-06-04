@@ -24,8 +24,8 @@
 class modelAnimData
 {
 public:
-  std::map<uint, int16> animIndexToAnimId;
-  std::map<int16, std::pair<GameFile *, GameFile *> > animfiles;
+  std::map<uint32, size_t> animIndexToAnimId;
+  std::map<size_t, std::pair<GameFile *, GameFile *> > animfiles;
   std::vector<uint32> globalSequences;  
 };
 
@@ -294,7 +294,7 @@ public:
 		if( b.nTimes == 0 )
 			return;
 
-		for(size_t j=0; j < b.nTimes; j++) 
+		for(uint32 j=0; j < b.nTimes; j++) 
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
@@ -326,7 +326,7 @@ public:
     {
 			D *keys;
       AnimationBlockHeader* pHeadKeys;
-      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at((uint32)j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;

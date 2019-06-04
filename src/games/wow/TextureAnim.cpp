@@ -22,7 +22,7 @@ void TextureAnim::calc(ssize_t anim, size_t time)
 	}
 }
 
-void TextureAnim::setup(ssize_t anim)
+void TextureAnim::setup(int anim)
 {
 	glLoadIdentity();
 	if (trans.uses(anim)) {

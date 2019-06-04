@@ -10,7 +10,7 @@
 
 #include <wx/dialog.h>
 class wxButton;
-class	wxStaticText;
+class wxStaticText;
 class wxTextCtrl;
 
 #include <QString>

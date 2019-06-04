@@ -1,0 +1,1008 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>wmvMainWindow</class>
+ <widget class="QMainWindow" name="wmvMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1024</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>WoW Model Viewer</string>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
+  <property name="dockOptions">
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::GroupedDragging</set>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>3</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QFrame" name="displayFrame">
+      <property name="styleSheet">
+       <string notr="true">* {
+	background: rgb(104, 123, 148)
+}</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1024</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuExport_Model">
+     <property name="title">
+      <string>Export Model</string>
+     </property>
+     <addaction name="actionExport_ModelInfo_xml"/>
+    </widget>
+    <addaction name="actionLoad_World_of_Warcraft"/>
+    <addaction name="actionView_Log"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Screenshot"/>
+    <addaction name="actionSave_Sized_Screenshot"/>
+    <addaction name="actionGIF_Sequence_Export"/>
+    <addaction name="actionExport_AVI"/>
+    <addaction name="separator"/>
+    <addaction name="menuExport_Model"/>
+    <addaction name="separator"/>
+    <addaction name="actionReset_Layout"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <widget class="QMenu" name="menuCamera">
+     <property name="title">
+      <string>Camera</string>
+     </property>
+     <addaction name="actionCamera_UseModel"/>
+     <addaction name="separator"/>
+     <addaction name="actionCameraPerspective"/>
+     <addaction name="actionCameraFront"/>
+     <addaction name="actionCameraBack"/>
+     <addaction name="actionCameraLeft"/>
+     <addaction name="actionCameraRight"/>
+     <addaction name="actionCameraTop"/>
+    </widget>
+    <widget class="QMenu" name="menuSet_Canvas_Size">
+     <property name="title">
+      <string>Set Canvas Size</string>
+     </property>
+     <widget class="QMenu" name="menuRatio_1_1">
+      <property name="title">
+       <string>Ratio 1:1</string>
+      </property>
+      <addaction name="action128_x_128"/>
+      <addaction name="action256_x_256"/>
+      <addaction name="action512_x_512"/>
+      <addaction name="action1024_x_1024"/>
+      <addaction name="action2048_x_2048"/>
+     </widget>
+     <widget class="QMenu" name="menuRatio_4_3">
+      <property name="title">
+       <string>Ratio 4:3</string>
+      </property>
+      <addaction name="action640_x_480"/>
+      <addaction name="action800_x_600"/>
+      <addaction name="action1024_x_768"/>
+      <addaction name="action1280_x_1024"/>
+     </widget>
+     <widget class="QMenu" name="menuRatio_16_9">
+      <property name="title">
+       <string>Ratio 16:9</string>
+      </property>
+      <addaction name="action864_x_480"/>
+      <addaction name="action1280_x_720"/>
+      <addaction name="action1920_x_1080"/>
+      <addaction name="action2560_x_1440"/>
+      <addaction name="action3840_x_2160"/>
+     </widget>
+     <widget class="QMenu" name="menuMisc_Ratios">
+      <property name="title">
+       <string>Misc Ratios</string>
+      </property>
+      <addaction name="action1280_x_768"/>
+      <addaction name="action1920_x_1200"/>
+     </widget>
+     <addaction name="action2160p"/>
+     <addaction name="action1080p"/>
+     <addaction name="action720p"/>
+     <addaction name="separator"/>
+     <addaction name="menuRatio_1_1"/>
+     <addaction name="menuRatio_4_3"/>
+     <addaction name="menuRatio_16_9"/>
+     <addaction name="separator"/>
+     <addaction name="menuMisc_Ratios"/>
+    </widget>
+    <addaction name="actionView_NPC"/>
+    <addaction name="actionView_Item"/>
+    <addaction name="separator"/>
+    <addaction name="actionShow_File_List"/>
+    <addaction name="actionShow_Animation_Controls"/>
+    <addaction name="actionShow_Character_Designer"/>
+    <addaction name="actionShow_Equipment_Selector"/>
+    <addaction name="actionShow_Light_Controls"/>
+    <addaction name="actionShow_Model_Controls"/>
+    <addaction name="actionShow_Model_Bank"/>
+    <addaction name="separator"/>
+    <addaction name="actionBackground_Color"/>
+    <addaction name="actionLoad_Background"/>
+    <addaction name="actionSkybox"/>
+    <addaction name="actionShow_Grid"/>
+    <addaction name="actionShow_Mask"/>
+    <addaction name="separator"/>
+    <addaction name="menuCamera"/>
+    <addaction name="separator"/>
+    <addaction name="menuSet_Canvas_Size"/>
+   </widget>
+   <widget class="QMenu" name="menuCharacter">
+    <property name="title">
+     <string>Character</string>
+    </property>
+    <widget class="QMenu" name="menuEye_Glow">
+     <property name="title">
+      <string>Eye Glow</string>
+     </property>
+     <addaction name="actionEyeGlowNone"/>
+     <addaction name="actionEyeGlowDefault"/>
+     <addaction name="actionEyeGlowDeathKnight"/>
+    </widget>
+    <addaction name="actionLoad_Character"/>
+    <addaction name="actionSave_Character"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Armory_Character"/>
+    <addaction name="separator"/>
+    <addaction name="menuEye_Glow"/>
+    <addaction name="actionCharacterShowUnderwear"/>
+    <addaction name="actionCharacterShowEars"/>
+    <addaction name="actionCharacterShowHair"/>
+    <addaction name="actionCharacterShowFacialHair"/>
+    <addaction name="actionCharacterShowFeet"/>
+    <addaction name="actionCharacterAutoHideGeosets"/>
+    <addaction name="actionCharacterSheatheWeapons"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadEquipment"/>
+    <addaction name="actionSaveEquipment"/>
+    <addaction name="actionClearEquipment"/>
+    <addaction name="separator"/>
+    <addaction name="actionLoadItemSet"/>
+    <addaction name="actionLoadStartingOutfit"/>
+    <addaction name="separator"/>
+    <addaction name="actionMount_Dismount"/>
+    <addaction name="actionRandomizeCharacter"/>
+   </widget>
+   <widget class="QMenu" name="menuLighting">
+    <property name="title">
+     <string>Lighting</string>
+    </property>
+    <addaction name="actionLoad_Lighting"/>
+    <addaction name="actionSave_Lighting"/>
+    <addaction name="separator"/>
+    <addaction name="actionRender_Light_Objects"/>
+    <addaction name="separator"/>
+    <addaction name="actionUse_True_lighting"/>
+    <addaction name="actionUse_Dynamic_lighting"/>
+    <addaction name="actionUse_Ambient_Lighting"/>
+    <addaction name="actionModel_Lights_only"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionAlwaysShowDefaultDoodadsInWMOs"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuEffects">
+    <property name="title">
+     <string>Effects</string>
+    </property>
+    <addaction name="actionApply_Enchants"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <widget class="QMenu" name="menuLanguage">
+     <property name="title">
+      <string>Language</string>
+     </property>
+    </widget>
+    <addaction name="menuLanguage"/>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
+    <addaction name="separator"/>
+    <addaction name="actionCheck_for_Update"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuView"/>
+   <addaction name="menuCharacter"/>
+   <addaction name="menuLighting"/>
+   <addaction name="menuOptions"/>
+   <addaction name="menuEffects"/>
+   <addaction name="menuAbout"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QDockWidget" name="widgetLighting">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Lighting</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetModelControls">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Model Controls</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetFileList">
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>File List</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetCharacterControl">
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Character Designer</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetAnimation">
+   <property name="windowTitle">
+    <string>Animation</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetModelBank">
+   <property name="floating">
+    <bool>true</bool>
+   </property>
+   <property name="windowTitle">
+    <string>Model Bank</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+  </widget>
+  <widget class="QDockWidget" name="widgetEquipment">
+   <property name="allowedAreas">
+    <set>Qt::LeftDockWidgetArea|Qt::RightDockWidgetArea</set>
+   </property>
+   <property name="windowTitle">
+    <string>Equipment</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+  </widget>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="iconText">
+    <string>Help</string>
+   </property>
+   <property name="toolTip">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionCheck_for_Update">
+   <property name="text">
+    <string>Check for Update</string>
+   </property>
+  </action>
+  <action name="actionApply_Enchants">
+   <property name="text">
+    <string>Apply Enchants</string>
+   </property>
+  </action>
+  <action name="actionAlwaysShowDefaultDoodadsInWMOs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Always show Default doodads in WMOs</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options...</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionLoad_World_of_Warcraft">
+   <property name="text">
+    <string>Load World of Warcraft</string>
+   </property>
+  </action>
+  <action name="actionView_Log">
+   <property name="text">
+    <string>View Log</string>
+   </property>
+  </action>
+  <action name="actionSave_Screenshot">
+   <property name="text">
+    <string>Save Screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
+   </property>
+  </action>
+  <action name="actionSave_Sized_Screenshot">
+   <property name="text">
+    <string>Save Sized Screenshot</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionGIF_Sequence_Export">
+   <property name="text">
+    <string>GIF/Sequence Export</string>
+   </property>
+  </action>
+  <action name="actionExport_AVI">
+   <property name="text">
+    <string>Export AVI</string>
+   </property>
+  </action>
+  <action name="actionExport_ModelInfo_xml">
+   <property name="text">
+    <string>Export ModelInfo.xml</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionReset_Layout">
+   <property name="text">
+    <string>Reset Layout</string>
+   </property>
+  </action>
+  <action name="actionView_NPC">
+   <property name="text">
+    <string>View NPC</string>
+   </property>
+  </action>
+  <action name="actionView_Item">
+   <property name="text">
+    <string>View Item</string>
+   </property>
+  </action>
+  <action name="actionShow_File_List">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show File List</string>
+   </property>
+  </action>
+  <action name="actionShow_Animation_Controls">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Animation Controls</string>
+   </property>
+  </action>
+  <action name="actionShow_Character_Designer">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Character Designer</string>
+   </property>
+  </action>
+  <action name="actionShow_Light_Controls">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Light Controls</string>
+   </property>
+  </action>
+  <action name="actionShow_Model_Controls">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Model Controls</string>
+   </property>
+  </action>
+  <action name="actionShow_Model_Bank">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Model Bank</string>
+   </property>
+  </action>
+  <action name="actionBackground_Color">
+   <property name="text">
+    <string>Background Color...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Background">
+   <property name="text">
+    <string>Load Background</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionSkybox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Skybox</string>
+   </property>
+  </action>
+  <action name="actionShow_Grid">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Grid</string>
+   </property>
+  </action>
+  <action name="actionShow_Mask">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Mask</string>
+   </property>
+  </action>
+  <action name="actionCamera_UseModel">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use model camera</string>
+   </property>
+  </action>
+  <action name="actionCameraPerspective">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Perspective</string>
+   </property>
+  </action>
+  <action name="actionCameraFront">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Front</string>
+   </property>
+  </action>
+  <action name="actionCameraBack">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Back</string>
+   </property>
+  </action>
+  <action name="actionCameraLeft">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Left</string>
+   </property>
+  </action>
+  <action name="actionCameraRight">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Right</string>
+   </property>
+  </action>
+  <action name="actionCameraTop">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Top</string>
+   </property>
+  </action>
+  <action name="action1080p">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1080p (HD)</string>
+   </property>
+   <property name="toolTip">
+    <string>1920 x 1080, the High Definition Standard</string>
+   </property>
+  </action>
+  <action name="action720p">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>720p (HD)</string>
+   </property>
+   <property name="toolTip">
+    <string>1280 x 720, a smaller High Definition format.</string>
+   </property>
+  </action>
+  <action name="action2160p">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2160p (UHD)</string>
+   </property>
+   <property name="toolTip">
+    <string>3840 x 2160, also known has UHD 4K.</string>
+   </property>
+  </action>
+  <action name="action512_x_512">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>512 x 512</string>
+   </property>
+  </action>
+  <action name="action1024_x_1024">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1024 x 1024</string>
+   </property>
+  </action>
+  <action name="action640_x_480">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>640 x 480</string>
+   </property>
+  </action>
+  <action name="action800_x_600">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>800 x 600</string>
+   </property>
+  </action>
+  <action name="action1024_x_768">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1024 x 768</string>
+   </property>
+  </action>
+  <action name="action1280_x_1024">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1280 x 1024</string>
+   </property>
+  </action>
+  <action name="action1280_x_768">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1280 x 768 (5:3)</string>
+   </property>
+  </action>
+  <action name="action1920_x_1200">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1920 x 1200 (8:5)</string>
+   </property>
+  </action>
+  <action name="action2560_x_1440">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2560 x 1440</string>
+   </property>
+  </action>
+  <action name="action256_x_256">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>256 x 256</string>
+   </property>
+  </action>
+  <action name="action128_x_128">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>128 x 128</string>
+   </property>
+  </action>
+  <action name="action2048_x_2048">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>2048 x 2048</string>
+   </property>
+  </action>
+  <action name="action1920_x_1080">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1920 x 1080</string>
+   </property>
+  </action>
+  <action name="action1280_x_720">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>1280 x 720</string>
+   </property>
+  </action>
+  <action name="action864_x_480">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>864 x 480</string>
+   </property>
+  </action>
+  <action name="action3840_x_2160">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>3840 x 2160</string>
+   </property>
+  </action>
+  <action name="actionLoad_Character">
+   <property name="text">
+    <string>Load Character</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionSave_Character">
+   <property name="text">
+    <string>Save Character</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
+  </action>
+  <action name="actionImport_Armory_Character">
+   <property name="text">
+    <string>Import Armory Character</string>
+   </property>
+  </action>
+  <action name="actionEyeGlowNone">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>None</string>
+   </property>
+  </action>
+  <action name="actionEyeGlowDefault">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Default</string>
+   </property>
+  </action>
+  <action name="actionEyeGlowDeathKnight">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Death Knight</string>
+   </property>
+  </action>
+  <action name="actionCharacterShowUnderwear">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Underwear</string>
+   </property>
+  </action>
+  <action name="actionCharacterShowEars">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Ears</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionCharacterShowHair">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Hair</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
+   </property>
+  </action>
+  <action name="actionCharacterShowFacialHair">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Facial Hair</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionCharacterShowFeet">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Show Feet</string>
+   </property>
+  </action>
+  <action name="actionCharacterAutoHideGeosets">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Auto Hide Geosets for head items</string>
+   </property>
+  </action>
+  <action name="actionCharacterSheatheWeapons">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sheathe Weapons</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionSaveEquipment">
+   <property name="text">
+    <string>Save Equipment</string>
+   </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
+  </action>
+  <action name="actionLoadEquipment">
+   <property name="text">
+    <string>Load Equipment</string>
+   </property>
+   <property name="shortcut">
+    <string>F7</string>
+   </property>
+  </action>
+  <action name="actionClearEquipment">
+   <property name="text">
+    <string>Clear Equipment</string>
+   </property>
+   <property name="shortcut">
+    <string>F9</string>
+   </property>
+  </action>
+  <action name="actionLoadItemSet">
+   <property name="text">
+    <string>Load Item Set</string>
+   </property>
+  </action>
+  <action name="actionLoadStartingOutfit">
+   <property name="text">
+    <string>Load Starting Outfit</string>
+   </property>
+  </action>
+  <action name="actionMount_Dismount">
+   <property name="text">
+    <string>Mount / Dismount</string>
+   </property>
+  </action>
+  <action name="actionRandomizeCharacter">
+   <property name="text">
+    <string>Randomize Character</string>
+   </property>
+   <property name="shortcut">
+    <string>F10</string>
+   </property>
+  </action>
+  <action name="actionLoad_Lighting">
+   <property name="text">
+    <string>Load Lighting</string>
+   </property>
+  </action>
+  <action name="actionSave_Lighting">
+   <property name="text">
+    <string>Save Lighting</string>
+   </property>
+  </action>
+  <action name="actionRender_Light_Objects">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Render Light Objects</string>
+   </property>
+  </action>
+  <action name="actionUse_True_lighting">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use True lighting</string>
+   </property>
+  </action>
+  <action name="actionUse_Dynamic_lighting">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Dynamic lighting</string>
+   </property>
+  </action>
+  <action name="actionUse_Ambient_Lighting">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Ambient Lighting</string>
+   </property>
+  </action>
+  <action name="actionModel_Lights_only">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Model Lights only</string>
+   </property>
+  </action>
+  <action name="actionShow_Equipment_Selector">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show Equipment Selector</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionExit</sender>
+   <signal>triggered()</signal>
+   <receiver>wmvMainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>511</x>
+     <y>451</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

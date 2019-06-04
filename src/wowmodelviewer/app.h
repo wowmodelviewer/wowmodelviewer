@@ -12,7 +12,11 @@
 #endif
 
 // headers
+#include "util.h"
+#include "globalvars.h"
 #include "modelviewer.h"
+
+#include "logger/Logger.h"
 
 // vars
 static wxString langNames[] =

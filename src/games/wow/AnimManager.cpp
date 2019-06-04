@@ -214,7 +214,7 @@ void AnimManager::PrevFrame()  // Only called by the animation controls
 void AnimManager::SetFrame(size_t f)  // Only called by the animation slider, or if Stop is called
 {
   ssize_t TimeDiff;
-  TimeDiff = f - Frame;
+  TimeDiff = (ssize_t)(f - Frame);
   ssize_t id = animList[PlayIndex].AnimID;
 
   // ideal frame interval:
