@@ -3,7 +3,7 @@ image: Visual Studio 2017
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/wowmodelviewer/wmv_sdk -r e96407a
+    hg clone https://bitbucket.org/wowmodelviewer/wmv_sdk -r de97ca8
     
     cd wmv_sdk
 
