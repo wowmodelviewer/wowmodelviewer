@@ -4,7 +4,7 @@ platform: x64
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/wowmodelviewer/wmv_sdk -r 727ac31
+    hg clone https://bitbucket.org/wowmodelviewer/wmv_sdk -r 0640637
 
     cd wmv_sdk
 
