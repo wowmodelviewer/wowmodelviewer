@@ -864,9 +864,22 @@ void ModelViewer::SaveSession()
     canvas->GetClientSize(&canvx, &canvy);
     if (charControl->IsShown() == true)
     {
-      int x = 0;
-      charControl->GetClientSize(&x, NULL);
-      canvx += x + 6; // 6 seems to cover margins and borders...
+      wxAuiPaneInfo info = interfaceManager.GetPane(wxT("charControl"));
+      if (info.IsFloating() == false)
+      {
+        if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_RIGHT || info.dock_direction == wxAUI_DOCK_LEFT))
+        {
+          int x = 0;
+          charControl->GetClientSize(&x, NULL);
+          canvx += x + 6; // 6 seems to cover margins and borders...
+        }
+        else if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_TOP || info.dock_direction == wxAUI_DOCK_BOTTOM))
+        {
+          int y = 0;
+          charControl->GetClientSize(NULL, &y);
+          canvy += y + 23; // 23 covers the margins, borders, and title bar...
+        }
+      }
     }
 
     config.setValue("Session/CanvasWidth", canvx);
