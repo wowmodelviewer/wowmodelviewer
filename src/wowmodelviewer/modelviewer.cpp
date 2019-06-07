@@ -862,6 +862,13 @@ void ModelViewer::SaveSession()
   {
     int canvx = 0, canvy = 0;
     canvas->GetClientSize(&canvx, &canvy);
+    if (charControl->IsShown() == true)
+    {
+      int x = 0;
+      charControl->GetClientSize(&x, NULL);
+      canvx += x + 6; // 6 seems to cover margins and borders...
+    }
+
     config.setValue("Session/CanvasWidth", canvx);
     config.setValue("Session/CanvasHeight", canvy);
 
