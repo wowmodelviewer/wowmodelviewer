@@ -44,7 +44,6 @@
 class WoWModel;
 struct ModelAnimation;
 
-
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
@@ -103,10 +102,11 @@ class FBXExporter : public ExporterPlugin
     
     // Methods
     void createMaterials();
-    void createMesh();
+    void createMeshes();
+    void createSkeletons();
+    void linkMeshAndSkeleton();
     void createAnimations();
     bool createAnimationFiles();
-    void linkMeshAndSkeleton();
     void reset();
 
 
@@ -124,6 +124,11 @@ class FBXExporter : public ExporterPlugin
     std::wstring m_filename;
     std::map<int,FbxNode*> m_boneNodes;
     std::vector<FbxCluster*> m_boneClusters;
+
+    std::map<int, FbxNode*> m_attachSkeletonNode;
+    std::map<int, FbxNode*> m_attachMeshNodes;
+    std::map<int, std::map<int, FbxNode*>> m_attachBoneNodes;
+    std::map<int, std::vector<FbxCluster*>> m_attachBoneClusters;
 
     std::map<std::wstring, GLuint> m_texturesToExport;
 

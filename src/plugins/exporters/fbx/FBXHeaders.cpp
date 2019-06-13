@@ -84,9 +84,108 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
   return true;
 }
 
+// Create mesh.
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, Matrix matrix, Vec3D offset)
+{
+  // Create a node for the mesh.
+  FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
+
+  // Create new Matrix Data
+  Matrix m = Matrix::newScale(matrix.GetScale());
+
+  // Create mesh.
+  size_t num_of_vertices = model->origVertices.size();
+  FbxMesh* mesh = FbxMesh::Create(l_manager, model->name().toStdString().c_str());
+  mesh->InitControlPoints((int)num_of_vertices);
+  FbxVector4* vertices = mesh->GetControlPoints();
+
+  // Set the normals on Layer 0.
+  FbxLayer* layer = mesh->GetLayer(0);
+  if (layer == 0)
+  {
+    mesh->CreateLayer();
+    layer = mesh->GetLayer(0);
+  }
+
+  // We want to have one normal for each vertex (or control point),
+  // so we set the mapping mode to eBY_CONTROL_POINT.
+  FbxLayerElementNormal* layer_normal = FbxLayerElementNormal::Create(mesh, "");
+  layer_normal->SetMappingMode(FbxLayerElement::eByControlPoint);
+  layer_normal->SetReferenceMode(FbxLayerElement::eDirect);
+
+  // Create UV for Diffuse channel.
+  FbxLayerElementUV* layer_texcoord = FbxLayerElementUV::Create(mesh, "DiffuseUV");
+  layer_texcoord->SetMappingMode(FbxLayerElement::eByControlPoint);
+  layer_texcoord->SetReferenceMode(FbxLayerElement::eDirect);
+  layer->SetUVs(layer_texcoord, FbxLayerElement::eTextureDiffuse);
+
+  // Fill data.
+  LOG_INFO << "Adding main mesh Verts...";
+  for (size_t i = 0; i < num_of_vertices; i++)
+  {
+    ModelVertex &v = model->origVertices[i];
+    Vec3D Position = m * (v.pos + offset);
+    vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
+    Vec3D vn = v.normal.normalize();
+    layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
+    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+  }
+
+  // Create polygons.
+  size_t num_of_passes = model->passes.size();
+  FbxLayerElementMaterial* layer_material = FbxLayerElementMaterial::Create(mesh, "");
+  layer_material->SetMappingMode(FbxLayerElement::eByPolygon);
+  layer_material->SetReferenceMode(FbxLayerElement::eIndexToDirect);
+  layer->SetMaterials(layer_material);
+
+  int mtrl_index = 0;
+  LOG_INFO << "Setting main mesh Polys...";
+  for (size_t i = 0; i < num_of_passes; i++)
+  {
+    ModelRenderPass * p = model->passes[i];
+    if (p->init())
+    {
+      // Build material name.
+      FbxString mtrl_name = "testToChange";
+      mtrl_name.Append("_", 1);
+      char tmp[32];
+      _itoa((int)i, tmp, 10);
+      mtrl_name.Append(tmp, strlen(tmp));
+      FbxSurfaceMaterial* material = l_scene->GetMaterial(mtrl_name.Buffer());
+      meshNode->AddMaterial(material);
+
+      ModelGeosetHD * g = model->geosets[p->geoIndex];
+      size_t num_of_faces = g->icount / 3;
+      for (size_t j = 0; j < num_of_faces; j++)
+      {
+        mesh->BeginPolygon(mtrl_index);
+        mesh->AddPolygon(model->indices[g->istart + j * 3]);
+        mesh->AddPolygon(model->indices[g->istart + j * 3 + 1]);
+        mesh->AddPolygon(model->indices[g->istart + j * 3 + 2]);
+        mesh->EndPolygon();
+      }
+
+      mtrl_index++;
+    }
+  }
+
+  layer->SetNormals(layer_normal);
+
+  // Set mesh smoothness.
+  mesh->SetMeshSmoothness(FbxMesh::eFine);
+
+  // Set the mesh as the node attribute of the node.
+  meshNode->SetNodeAttribute(mesh);
+
+  // Set the shading mode to view texture.
+  meshNode->SetShadingMode(FbxNode::eTextureShading);
+
+  return meshNode;
+}
+
 void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode *& l_skeletonNode, std::map<int, FbxNode*>& l_boneNodes)
 {
-  l_skeletonNode = FbxNode::Create(l_scene, l_model->name().toStdString().c_str());
+  l_skeletonNode = FbxNode::Create(l_scene, qPrintable(QString::fromWCharArray(wxT("%1_rig")).arg(l_model->name())));
   FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(l_scene, "");
   bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
   bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
@@ -134,7 +233,7 @@ void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode
     if (pid > -1)
       trans -= l_model->bones[pid].pivot;
 
-    FbxString bone_name(l_model->name().toStdString().c_str());
+    FbxString bone_name(qPrintable(l_model->name()));
     bone_name += "_bone_";
     bone_name += static_cast<int>(i);
 
@@ -185,6 +284,55 @@ void FBXHeaders::storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_bo
 
   pose->Add(l_meshNode, l_meshNode->EvaluateGlobalTransform());
 
+  l_scene->AddPose(pose);
+}
+
+void FBXHeaders::storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot)
+{
+  if (l_SkeletonRoot == NULL || l_SkeletonRoot == nullptr)
+    return;
+  FbxString lNodeName;
+  FbxNode* lKFbxNode;
+  FbxMatrix lTransformMatrix;
+  FbxVector4 lT, lR, lS(1.0, 1.0, 1.0);
+
+  // Create the rest pose
+  FbxPose* pose = FbxPose::Create(l_scene, "Rest Pose");
+
+  // Set the skeleton root node to the global position (10, 10, 10)
+  // and global rotation of 45deg along the Z axis.
+  lT.Set(10.0, 10.0, 10.0);
+  lR.Set(0.0, 0.0, 45.0);
+
+  lTransformMatrix.SetTRS(lT, lR, lS);
+
+  // Add the skeleton root node to the pose
+  lKFbxNode = l_SkeletonRoot;
+  pose->Add(lKFbxNode, lTransformMatrix, false /*it's a global matrix*/);
+
+  // Set the lLimbNode1 node to the local position of (0, 40, 0)
+  // and local rotation of -90deg along the Z axis. This show that
+  // you can mix local and global coordinates in a rest pose.
+  lT.Set(0.0, 40.0, 0.0);
+  lR.Set(0.0, 0.0, -90.0);
+  lTransformMatrix.SetTRS(lT, lR, lS);
+
+  // Add the skeleton second node to the pose
+  lKFbxNode = lKFbxNode->GetChild(0);
+  pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
+
+  // Set the lLimbNode2 node to the local position of (0, 40, 0)
+  // and local rotation of 45deg along the Z axis.
+  lT.Set(0.0, 40.0, 0.0);
+  lR.Set(0.0, 0.0, 45.0);
+  lTransformMatrix.SetTRS(lT, lR, lS);
+
+  // Add the skeleton second node to the pose
+  lKFbxNode = lKFbxNode->GetChild(0);
+  lNodeName = lKFbxNode->GetName();
+  pose->Add(lKFbxNode, lTransformMatrix, true /*it's a local matrix*/);
+
+  // Now add the pose to the scene
   l_scene->AddPose(pose);
 }
 

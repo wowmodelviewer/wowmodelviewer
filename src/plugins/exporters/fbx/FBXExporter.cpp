@@ -127,50 +127,37 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
   m_p_scene->SetSceneInfo(sceneInfo);
 
-  // Build Attached Model List
-  if (m_p_model->charModelDetails.isChar == true)
-  {
-    for (size_t i = 0; i < CharSlots::NUM_CHAR_SLOTS; i++)
-    {
-      WoWItem *item = m_p_model->getItem((CharSlots)i);
-      std::map<POSITION_SLOTS, WoWModel *> models = item->models();
-      for (auto modelIter = models.begin(); modelIter != models.end(); modelIter++)
-      {
-        WoWModel* model = modelIter->second;
-        LOG_INFO << "Attached Model Found:" << model->modelname.c_str();
-        m_p_attachedModels.push_back(model);
-      }
-    }
-    LOG_INFO << "Number of Attachments found:" << m_p_attachedModels.size();
-  }
-
   // export main model mesh
   // follow FBX SDK example (ExportScene01) for organization
   try
   {
-    createMesh();
-    LOG_INFO << "Mesh successfully created";
+    createMeshes();
+    LOG_INFO << "Meshes successfully created";
 
     createMaterials();
     LOG_INFO << "Materials successfully created";
 
-    FBXHeaders::createSkeleton(m_p_model, m_p_scene, m_p_skeletonNode, m_boneNodes);
+    createSkeletons();
     LOG_INFO << "Skeleton successfully created";
-
-    // add all those things to the scene
-    FbxNode* root_node = m_p_scene->GetRootNode();
-    root_node->AddChild(m_p_meshNode);
-    root_node->AddChild(m_p_skeletonNode);
 
     linkMeshAndSkeleton();
 
     FBXHeaders::storeBindPose(m_p_scene, m_boneClusters, m_p_meshNode);
+    FBXHeaders::storeRestPose(m_p_scene, m_p_skeletonNode);
 
-    // Export 0 or 1 animations
-    if (m_animsToExport.size() < 2)
+    for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
     {
-      createAnimations();
-      LOG_INFO << "Animations successfully created";
+      std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
+      if (!itemModels.empty())
+      {
+        for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+        {
+          if (m_attachBoneClusters.find(it->first) != m_attachBoneClusters.end() && m_attachMeshNodes.find(it->first) != m_attachMeshNodes.end())
+            FBXHeaders::storeBindPose(m_p_scene, m_attachBoneClusters[it->first], m_attachMeshNodes[it->first]);
+          //if (m_attachSkeletonNode.find(it->first) != m_attachSkeletonNode.end())
+            //FBXHeaders::storeRestPose(m_p_scene, m_attachSkeletonNode[it->first]);
+        }
+      }
     }
   }
   catch(const std::exception& ex)
@@ -178,21 +165,6 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     LOG_ERROR << "Error during export:" << ex.what();
     return false;
   }
-
-  /*
-  // export equipped item
-  Iterator<WoWItem> itemIt(model);
-  for(itemIt.begin(); !itemIt.ended(); itemIt++)
-  {
-    std::map<POSITION_SLOTS, WoWModel *> itemModels = (*itemIt)->itemModels;
-    for(std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin() ;
-        it != itemModels.end();
-        ++it)
-    {
-      createMesh(m_p_manager, scene, it->second);
-    }
-  }
-*/
 
   if(!exporter->Export(m_p_scene))
   {
@@ -206,7 +178,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
     _wremove((it.first).c_str());
 
   // Export bulk animations
-  if (m_animsToExport.size() > 1)
+  if (m_animsToExport.size() > 0)
   {
     try
     {
@@ -230,153 +202,69 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
 // Private methods
 //--------------------------------------------------------------------
 
-// Create mesh.
-void FBXExporter::createMesh()
+void FBXExporter::createMeshes()
 {
-  // Create a node for the mesh.
-  m_p_meshNode = FbxNode::Create(m_p_manager, m_p_model->name().toStdString().c_str());
+  m_p_meshNode = FBXHeaders::createMesh(m_p_manager, m_p_scene ,m_p_model);
 
-  // Create mesh.
-  size_t num_of_vertices = m_p_model->origVertices.size();
-  FbxMesh* mesh = FbxMesh::Create(m_p_manager, m_p_model->name().toStdString().c_str());
-  size_t numTotalVerts = num_of_vertices;
-  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
+  FbxNode* root_node = m_p_scene->GetRootNode();
+  root_node->AddChild(m_p_meshNode);
+
+  for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
   {
-    numTotalVerts += m_p_attachedModels.at(i)->origVertices.size();
-  }
-  mesh->InitControlPoints((int)numTotalVerts);
-  FbxVector4* vertices = mesh->GetControlPoints();
-
-  // Set the normals on Layer 0.
-  FbxLayer* layer = mesh->GetLayer(0);
-  if (layer == 0)
-  {
-    mesh->CreateLayer();
-    layer = mesh->GetLayer(0);
-  }
-
-  // We want to have one normal for each vertex (or control point),
-  // so we set the mapping mode to eBY_CONTROL_POINT.
-  FbxLayerElementNormal* layer_normal= FbxLayerElementNormal::Create(mesh, "");
-  layer_normal->SetMappingMode(FbxLayerElement::eByControlPoint );
-  layer_normal->SetReferenceMode(FbxLayerElement::eDirect);
-  layer->SetNormals(layer_normal);
-
-  // Create UV for Diffuse channel.
-  FbxLayerElementUV* layer_texcoord = FbxLayerElementUV::Create(mesh, "DiffuseUV");
-  layer_texcoord->SetMappingMode(FbxLayerElement::eByControlPoint);
-  layer_texcoord->SetReferenceMode(FbxLayerElement::eDirect);
-  layer->SetUVs(layer_texcoord, FbxLayerElement::eTextureDiffuse);
-
-  // Fill data.
-  LOG_INFO << "Adding main mesh Verts...";
-  for (size_t i = 0; i < num_of_vertices; i++)
-  {
-    ModelVertex &v = m_p_model->origVertices[i];
-    vertices[i].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
-    layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
-    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
-  }
-
-  // Add submesh Verticies
-  size_t processedVerts = num_of_vertices;
-  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
-  {
-    WoWModel *model = m_p_attachedModels.at(i);
-    LOG_INFO.nospace() << "Adding verts for attachment #" << i << ", name: " << model->modelname.c_str();
-    for (size_t vertID = 0; vertID < model->origVertices.size(); vertID++)
+    std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
+    if (!itemModels.empty())
     {
-      ModelVertex &v = model->origVertices[vertID];
-      vertices[vertID + processedVerts].Set(v.pos.x * SCALE_FACTOR, v.pos.y * SCALE_FACTOR, v.pos.z * SCALE_FACTOR);
-      layer_normal->GetDirectArray().Add(FbxVector4(v.normal.x, v.normal.y, v.normal.z));
-      layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
-    }
-    processedVerts += model->origVertices.size();
-  }
-
-  // Create polygons.
-  size_t num_of_passes = m_p_model->passes.size();
-  FbxLayerElementMaterial* layer_material=FbxLayerElementMaterial::Create(mesh, "");
-  layer_material->SetMappingMode(FbxLayerElement::eByPolygon);
-  layer_material->SetReferenceMode(FbxLayerElement::eIndexToDirect);
-  layer->SetMaterials(layer_material);
-
-  int mtrl_index = 0;
-  LOG_INFO << "Setting main mesh Polys...";
-  for (size_t i = 0; i < num_of_passes; i++)
-  {
-    ModelRenderPass * p = m_p_model->passes[i];
-    if (p->init())
-    {
-      // Build material name.
-      FbxString mtrl_name = "testToChange";
-      mtrl_name.Append("_", 1);
-      char tmp[32];
-      _itoa((int)i, tmp, 10);
-      mtrl_name.Append(tmp, strlen(tmp));
-      FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
-      m_p_meshNode->AddMaterial(material);
-
-      ModelGeosetHD * g = m_p_model->geosets[p->geoIndex];
-      size_t num_of_faces = g->icount / 3;
-      for (size_t j = 0; j < num_of_faces; j++)
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
       {
-        mesh->BeginPolygon(mtrl_index);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 1]);
-        mesh->AddPolygon(m_p_model->indices[g->istart + j * 3 + 2]);
-        mesh->EndPolygon();
-      }
+        WoWModel * itemModel = it->second;
+        LOG_INFO << "Found attached item:" << itemModel->modelname.c_str();
 
-      mtrl_index++;
-    }
-  }
-
-  // Add submesh Polys
-  processedVerts = num_of_vertices;
-  for (size_t i = 0; i < (size_t)m_p_attachedModels.count(); i++)
-  {
-    WoWModel *model = m_p_attachedModels.at(i);
-    LOG_INFO.nospace() << "Setting Polys for attachment #" << i << ", name: " << model->modelname.c_str();
-    for (size_t passID = 0; passID < model->passes.size(); passID++)
-    {
-      ModelRenderPass * p = model->passes[passID];
-      if (p->init())
-      {
-        // Build material name.
-        FbxString mtrl_name = "testToChange";
-        mtrl_name.Append("_", 1);
-        char tmp[32];
-        _itoa((int)passID, tmp, 10);
-        mtrl_name.Append(tmp, strlen(tmp));
-        FbxSurfaceMaterial* material = m_p_scene->GetMaterial(mtrl_name.Buffer());
-        m_p_meshNode->AddMaterial(material);
-
-        ModelGeosetHD * g = model->geosets[p->geoIndex];
-        size_t num_of_faces = g->icount / 3;
-        for (size_t j = 0; j < num_of_faces; j++)
+        int l = m_p_model->attLookup[it->first];
+        Matrix m;
+        Vec3D pos;
+        if (l > -1)
         {
-          mesh->BeginPolygon(mtrl_index);
-          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3]);
-          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3 + 1]);
-          mesh->AddPolygon(processedVerts + model->indices[g->istart + j * 3 + 2]);
-          mesh->EndPolygon();
+          m = m_p_model->bones[m_p_model->atts[l].bone].mat;
         }
 
-        mtrl_index++;
+        FbxNode* itemMeshNode = FBXHeaders::createMesh(m_p_manager, m_p_scene, itemModel, m);
+        m_attachMeshNodes[it->first] = itemMeshNode;
+
+        root_node->AddChild(itemMeshNode);
       }
     }
-    processedVerts += model->origVertices.size();
   }
+}
 
-  // Set mesh smoothness.
-  mesh->SetMeshSmoothness(FbxMesh::eFine);
+void FBXExporter::createSkeletons()
+{
+  FBXHeaders::createSkeleton(m_p_model, m_p_scene, m_p_skeletonNode, m_boneNodes);
 
-  // Set the mesh as the node attribute of the node.
-  m_p_meshNode->SetNodeAttribute(mesh);
+  FbxNode* root_node = m_p_scene->GetRootNode();
+  root_node->AddChild(m_p_skeletonNode);
 
-  // Set the shading mode to view texture.
-  m_p_meshNode->SetShadingMode(FbxNode::eTextureShading);
+  for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
+  {
+    std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
+    if (!itemModels.empty())
+    {
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+      {
+        WoWModel * itemModel = it->second;
+        if (itemModel->animated == false || itemModel->bones.size() < 2)
+          continue;
+
+        FbxNode* itemSkeleton;
+        std::map<int, FbxNode*> itemboneNodes;
+
+        FBXHeaders::createSkeleton(itemModel, m_p_scene, itemSkeleton, itemboneNodes);
+
+        m_attachSkeletonNode[it->first] = itemSkeleton;
+        m_attachBoneNodes[it->first] = itemboneNodes;
+        root_node->AddChild(itemSkeleton);
+      }
+    }
+  }
 }
 
 void FBXExporter::linkMeshAndSkeleton()
@@ -387,7 +275,7 @@ void FBXExporter::linkMeshAndSkeleton()
     FbxCluster* cluster = FbxCluster::Create(m_p_scene, "");
     m_boneClusters.push_back(cluster);
     cluster->SetLink(it.second);
-    cluster->SetLinkMode(FbxCluster::eTotalOne);
+    cluster->SetLinkMode(FbxCluster::ELinkMode::eNormalize);
   }
 
   // define control points
@@ -438,27 +326,10 @@ void FBXExporter::createAnimations()
 
   LOG_INFO << "Num animations to export:" << m_animsToExport.size();
 
-  if (m_animsToExport.size() < 2)
+  if (!createAnimationFiles())
   {
-    // LOG_INFO << "0 or 1 animations";
-    std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
-
-    for (auto it : m_animsToExport)
-    {
-      ModelAnimation cur_anim = m_p_model->anims[it];
-
-      QString anim_name = QString("%1 [%2]").arg(animsMap[cur_anim.animID]).arg(cur_anim.Index);
-
-      FBXHeaders::createAnimation(m_p_model, m_p_scene, anim_name, cur_anim, m_boneNodes);
-    }
-  }
-  else {
-    // LOG_INFO << "Plenty of animations";
-    if (!createAnimationFiles())
-    {
-      LOG_ERROR << "An error occured while exporting Animation files.";
-      return;
-    }
+    LOG_ERROR << "An error occured while exporting Animation files.";
+    return;
   }
 }
 
@@ -478,8 +349,9 @@ bool FBXExporter::createAnimationFiles()
   *//****         ****/
 
   // If we allow users to set the number of threads WMV can use, we can limit it here. I would recommend using no more than 3/4ths of the total thread count! (Gotta leave some for normal CPU usage...)
-  //if (maxThreads > 5)
-  //  maxThreads = 5;
+  //int allocatedThreads = 5;
+  //if (maxThreads > allocatedThreads)
+  //  maxThreads = allocatedThreads;
 
   //LOG_INFO << "Exporting animations with" << maxThreads << "threads...";
   //QThreadPool::globalInstance()->setMaxThreadCount(maxThreads);   // Use to limit the number of threads we can run at once.
@@ -491,7 +363,7 @@ bool FBXExporter::createAnimationFiles()
     FBXAnimExporter *exporter = new FBXAnimExporter();
     exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters, m_p_meshNode, it);
     exporter->setAutoDelete(true);
-    exporter->run();
+    exporter->run();    // Remove this line before adding to the QThreadPool!
     //QThreadPool::globalInstance()->start(exporter);   // Queue this exporter for threaded execution. Automatically starts the run() function of an FBXAnimExporter when a thread is free.
   }
 
@@ -546,58 +418,65 @@ void FBXExporter::createMaterials()
     }
   }
 
-  for (unsigned int att = 0; att < (size_t)m_p_attachedModels.size(); att++)
+  for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
   {
-    WoWModel* model = m_p_attachedModels.at(att);
-    for (unsigned int i = 0; i < model->passes.size(); i++)
+    std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
+    if (!itemModels.empty())
     {
-      ModelRenderPass * pass = model->passes[i];
-      if (pass->init())
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
       {
-        // Build material name.
-        FbxString mtrl_name = model->name().toStdString().c_str();
-        mtrl_name.Append("_", 1);
-        char tmp[32];
-        _itoa((int)i, tmp, 10);
-        mtrl_name.Append(tmp, strlen(tmp));
+        WoWModel* model = it->second;
+        for (unsigned int i = 0; i < model->passes.size(); i++)
+        {
+          ModelRenderPass * pass = model->passes[i];
+          if (pass->init())
+          {
+            // Build material name.
+            FbxString mtrl_name = model->name().toStdString().c_str();
+            mtrl_name.Append("_", 1);
+            char tmp[32];
+            _itoa((int)i, tmp, 10);
+            mtrl_name.Append(tmp, strlen(tmp));
 
-        // Create material.
-        FbxString shading_name = "Phong";
-        FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
-        material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
+            // Create material.
+            FbxString shading_name = "Phong";
+            FbxSurfacePhong* material = FbxSurfacePhong::Create(m_p_manager, mtrl_name.Buffer());
+            material->Ambient.Set(FbxDouble3(0.7, 0.7, 0.7));
 
-        QString tex = model->getNameForTex(pass->tex);
+            QString tex = model->getNameForTex(pass->tex);
 
-        QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
-        tex_name = tex_name.replace(".blp", ".png");
+            QString tex_name = tex.mid(tex.lastIndexOf('/') + 1);
+            tex_name = tex_name.replace(".blp", ".png");
 
-        QString tex_fullpath_filename = QString::fromStdWString(m_filename);
-        tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
+            QString tex_fullpath_filename = QString::fromStdWString(m_filename);
+            tex_fullpath_filename = tex_fullpath_filename.left(tex_fullpath_filename.lastIndexOf('\\') + 1) + tex_name;
 
-        m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getGLTexture(pass->tex);
+            m_texturesToExport[tex_fullpath_filename.toStdWString()] = model->getGLTexture(pass->tex);
 
-        FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
-        texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
-        texture->SetTextureUse(FbxTexture::eStandard);
-        texture->SetMappingType(FbxTexture::eUV);
-        texture->SetMaterialUse(FbxFileTexture::eModelMaterial);
-        texture->SetSwapUV(false);
-        texture->SetTranslation(0.0, 0.0);
-        texture->SetScale(1.0, 1.0);
-        texture->SetRotation(0.0, 0.0);
-        texture->UVSet.Set(FbxString("DiffuseUV"));
-        material->Diffuse.ConnectSrcObject(texture);
+            FbxFileTexture* texture = FbxFileTexture::Create(m_p_manager, tex_name.toStdString().c_str());
+            texture->SetFileName(tex_fullpath_filename.toStdString().c_str());
+            texture->SetTextureUse(FbxTexture::eStandard);
+            texture->SetMappingType(FbxTexture::eUV);
+            texture->SetMaterialUse(FbxFileTexture::eModelMaterial);
+            texture->SetSwapUV(false);
+            texture->SetTranslation(0.0, 0.0);
+            texture->SetScale(1.0, 1.0);
+            texture->SetRotation(0.0, 0.0);
+            texture->UVSet.Set(FbxString("DiffuseUV"));
+            material->Diffuse.ConnectSrcObject(texture);
 
-        // Add material to the scene.
-        m_p_meshNode->AddMaterial(material);
+            // Add material to the scene.
+            m_attachMeshNodes[it->first]->AddMaterial(material);
+          }
+        }
       }
     }
   }
 
   for(auto it : m_texturesToExport)
     exportGLTexture(it.second, it.first);
-
 }
+
 
 void FBXExporter::reset()
 {
