@@ -356,6 +356,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     timeInc = cur_anim.length;
   }
   FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
+  //LOG_INFO << "Skeleton Bone count:" << skeleton.size();
 
   //LOG_INFO << "Starting frame loop...";
   for (uint32 t = 0; t < cur_anim.length; t += timeInc)
@@ -364,7 +365,6 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     FbxTime time;
     time.SetSecondDouble((float)t / 1000.0);
 
-    //LOG_INFO << "Skeleton count:" << skeleton.size();
     for (auto it : skeleton)
     {
       int b = it.first;
@@ -408,10 +408,6 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
         t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         t_curve_z->KeyModifyEnd();
-
-        t_curve_x->Destroy();
-        t_curve_y->Destroy();
-        t_curve_z->Destroy();
       }
 
       if (rot)
@@ -449,10 +445,6 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         r_curve_z->KeySetValue(key_index, z);
         r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         r_curve_z->KeyModifyEnd();
-
-        r_curve_x->Destroy();
-        r_curve_y->Destroy();
-        r_curve_z->Destroy();
       }
 
       if (scale)
@@ -480,15 +472,9 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         s_curve_z->KeySetValue(key_index, v.z);
         s_curve_z->KeySetInterpolation(key_index, bone.scale.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         s_curve_z->KeyModifyEnd();
-
-        s_curve_x->Destroy();
-        s_curve_y->Destroy();
-        s_curve_z->Destroy();
       }
     }
 
     //LOG_INFO << "Ended frame" << t;
   }
-
-  anim_stack->Destroy(true);
 }
