@@ -7,6 +7,11 @@
 
 #include "CASCFolder.h"
 
+#ifndef __CASCLIB_SELF__
+  #define __CASCLIB_SELF__
+#endif
+#include "CascLib.h"
+
 #include <locale>
 #include <map>
 #include <utility>
@@ -165,7 +170,7 @@ bool CASCFolder::fileExists(int id)
 
   HANDLE dummy;
 
-  if(CascOpenFile(hStorage, CASC_IDTONAME(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, &dummy))
+  if(CascOpenFile(hStorage, CASC_FILE_DATA_ID(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, &dummy))
   {
    // LOG_INFO << "OK";
     CascCloseFile(dummy);
@@ -177,7 +182,7 @@ bool CASCFolder::fileExists(int id)
 
 bool CASCFolder::openFile(int id, HANDLE * result)
 {
-  return CascOpenFile(hStorage, CASC_IDTONAME(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, result);
+  return CascOpenFile(hStorage, CASC_FILE_DATA_ID(id), m_currentCascLocale, CASC_OPEN_BY_FILEID, result);
 }
 
 bool CASCFolder::closeFile(HANDLE file)

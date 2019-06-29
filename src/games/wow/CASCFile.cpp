@@ -7,6 +7,11 @@
 
 #include "CASCFile.h"
 
+#ifndef __CASCLIB_SELF__
+  #define __CASCLIB_SELF__
+#endif
+#include "CascLib.h"
+
 #include "CASCChunks.h"
 #include "Game.h"
 #include "logger/Logger.h"

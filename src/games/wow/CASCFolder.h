@@ -8,13 +8,9 @@
 #ifndef _CASCFOLDER_H_
 #define _CASCFOLDER_H_
 
-#include <string>
 #include <vector>
 
-#ifndef __CASCLIB_SELF__
-  #define __CASCLIB_SELF__
-#endif
-#include "CascLib.h"
+typedef void* HANDLE;
 
 #include "GameFolder.h" // GameConfig
 
