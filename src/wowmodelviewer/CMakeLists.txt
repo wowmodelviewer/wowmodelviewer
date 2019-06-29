@@ -112,14 +112,6 @@ set(common_files wowmodelviewer.json
 				 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
 				 ${WMV_BASE_PATH}/appveyor.yml)
 
-set(wow8_0_files 
-         ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
-
-source_group("wow8.0" FILES ${wow8_0_files})
-
 set(wow8_1_files 
 				 ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
@@ -137,7 +129,7 @@ set(wow8_2_files
 source_group("wow8.2" FILES ${wow8_2_files})
 
 
-set(useful_files ${common_files} ${wow8_0_files} ${wow8_1_files} ${wow8_2_files})
+set(useful_files ${common_files} ${wow8_1_files} ${wow8_2_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -194,12 +186,6 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
         		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
 
-set(GAMEFILES_WOW8_0 
-                 ${WMV_BASE_PATH}/bin_support/wow/8.0/listfile.csv
-        		     ${WMV_BASE_PATH}/bin_support/wow/8.0/database.xml
-					       ${WMV_BASE_PATH}/bin_support/wow/8.0/AnimationData.csv
-					       ${WMV_BASE_PATH}/bin_support/wow/8.0/ChrRacesCustomization.csv)
-
 set(GAMEFILES_WOW8_1 
                  ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
         		     ${WMV_BASE_PATH}/bin_support/wow/8.1/database.xml
@@ -218,6 +204,5 @@ install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 
-install(FILES ${GAMEFILES_WOW8_0} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.0)
 install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.1)
 install(FILES ${GAMEFILES_WOW8_2} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.2)
