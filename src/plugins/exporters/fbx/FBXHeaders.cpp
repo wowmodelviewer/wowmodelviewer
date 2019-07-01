@@ -289,6 +289,9 @@ void FBXHeaders::storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_bo
 
 void FBXHeaders::storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot)
 {
+  // Not ready yet...
+  return;
+
   if (l_SkeletonRoot == NULL || l_SkeletonRoot == nullptr)
     return;
   FbxString lNodeName;
