@@ -17,11 +17,10 @@
 #include <QXmlStreamReader>
 
 CharDetails::CharDetails():
-eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
-showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel("")
+  eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
+  showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true),
+  isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel("")
 {
-
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -49,7 +48,7 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeEndElement();
 
   stream.writeStartElement("eyeGlowType");
-  stream.writeAttribute("value", QString::number((int)eyeGlowType));
+  stream.writeAttribute("value", QString::number(static_cast<int>(eyeGlowType)));
   stream.writeEndElement();
 
   stream.writeStartElement("showUnderwear");
@@ -144,7 +143,7 @@ void CharDetails::load(QString & f)
 
       if (reader.name() == "eyeGlowType")
       {
-        eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
+        eyeGlowType = static_cast<EyeGlowTypes>(reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
@@ -320,12 +319,12 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
 
   if (query != "")
   {
-    sqlResult vals = GAMEDATABASE.sqlQuery(query);
-    if (vals.valid && !vals.values.empty())
+    auto vals = GAMEDATABASE.sqlQuery(query);
+    if (!vals.empty())
     {
-      for (size_t i = 0; i < vals.values[0].size(); i++)
-        if (!vals.values[0][i].isEmpty())
-          result.push_back(vals.values[0][i].toInt());
+      for (auto& v : vals.values[0])
+        if (!v.isEmpty())
+          result.push_back(v.toInt());
     }
     else
     {
@@ -361,17 +360,17 @@ void CharDetails::fillCustomizationMap()
   CustomizationParam skin;
   skin.name = "Skin";
 
-  QString query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
+  auto query = QString("SELECT ColorIndex FROM CharSections WHERE RaceID=%1 AND SexID=%2 AND SectionType=%3")
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(getSectionType(SkinType, infos.isHD));
 
-  sqlResult vals = GAMEDATABASE.sqlQuery(query);
+  sqlResultAssoc vals = GAMEDATABASE.sqlQueryAssoc(query);
 
-  if (vals.valid && !vals.values.empty())
+  if (!vals.empty())
   {
-    for (uint i = 0; i < vals.values.size(); i++)
-      skin.possibleValues.push_back(vals.values[i][0].toInt());
+    for (auto& v : vals.values)
+      skin.possibleValues.push_back(v["ColorIndex"].toInt());
   }
   else
   {
@@ -382,54 +381,55 @@ void CharDetails::fillCustomizationMap()
 
   // face customization
   // face possible customization depends on current skin color. We fill m_multiCustomizationMap first
-  for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
+  for (auto &it : skin.possibleValues)
   {
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections WHERE RaceID=%1 "
                     "AND SexID=%2 AND ColorIndex=%3 AND SectionType=%4")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
-                    .arg(*it)
+                    .arg(it)
                     .arg(getSectionType(FaceType, infos.isHD));
 
-    sqlResult faces = GAMEDATABASE.sqlQuery(query);
+    auto faces = GAMEDATABASE.sqlQueryAssoc(query);
 
     CustomizationParam face;
     face.name = "Face";
 
-    if (faces.valid && !faces.values.empty())
+    if (!faces.empty())
     {
-      for (uint i = 0; i < faces.values.size(); i++)
-        face.possibleValues.push_back(faces.values[i][0].toInt());
+      for (auto& v : faces.values)
+        face.possibleValues.push_back(v["VariationIndex"].toInt());
     }
     else
     {
-      LOG_ERROR << "No face customization available for skin color" << *it << "for model" << m_model->name();
+      LOG_ERROR << "No face customization available for skin color" << it << "for model" << m_model->name();
     }
 
-    m_multiCustomizationMap[FACE].insert({ *it, face });
+    m_multiCustomizationMap[FACE].insert({ it, face });
   }
 
   m_customizationParamsMap.insert({ FACE, m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]] });
 
   // starting from here, customization may differ based on database values
   // get customization names
-  query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRacesCustomization WHERE ID = %2")
-    .arg(infos.sexid + 1)
+  auto colname = QString("FacialHairCustomization%1").arg(infos.sexid + 1);
+  query = QString("SELECT HairCustomization, %1 FROM ChrRacesCustomization WHERE ID = %2")
+    .arg(colname)
     .arg(infos.raceid);
 
-  sqlResult names = GAMEDATABASE.sqlQuery(query);
+  auto names = GAMEDATABASE.sqlQueryAssoc(query);
 
   QString facialCustomizationBaseName;
   QString additionalCustomizationName;
 
-  if (names.valid && !names.values.empty())
+  if (!names.empty())
   {
-    facialCustomizationBaseName = names.values[0][0];
+    facialCustomizationBaseName = names.values[0]["HairCustomization"];
     facialCustomizationBaseName = facialCustomizationBaseName.at(0).toUpper() + facialCustomizationBaseName.mid(1).toLower();
     if (facialCustomizationBaseName == "Normal")
       facialCustomizationBaseName = "Hair";
 
-    additionalCustomizationName = names.values[0][1];
+    additionalCustomizationName = names.values[0][colname];
     additionalCustomizationName = additionalCustomizationName.at(0).toUpper() + additionalCustomizationName.mid(1).toLower();
     if (additionalCustomizationName == "Normal")
       additionalCustomizationName = "Facial Hair";
@@ -445,15 +445,15 @@ void CharDetails::fillCustomizationMap()
     .arg(infos.sexid)
     .arg(getSectionType(HairType, infos.isHD));
 
-  sqlResult styles = GAMEDATABASE.sqlQuery(query);
+  auto styles = GAMEDATABASE.sqlQueryAssoc(query);
 
   CustomizationParam facialCustomizationStyle;
   facialCustomizationStyle.name = QString(facialCustomizationBaseName + " Style");
 
-  if (styles.valid && !styles.values.empty())
+  if (!styles.empty())
   {
-    for (uint i = 0; i < styles.values.size(); i++)
-      facialCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
+    for (auto& v : styles.values)
+      facialCustomizationStyle.possibleValues.push_back(v["VariationIndex"].toInt());
   }
   else
   {
@@ -464,31 +464,31 @@ void CharDetails::fillCustomizationMap()
 
 
   // facial color customization depends on current facial style. We fill m_multiCustomizationMap first
-  for (auto it = facialCustomizationStyle.possibleValues.begin(), itEnd = facialCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
+  for (auto &it : facialCustomizationStyle.possibleValues)
   {
     query = QString("SELECT DISTINCT ColorIndex FROM CharSections WHERE RaceID = %1 AND SexID = %2 "
                     "AND SectionType = %3 AND VariationIndex = %4")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(getSectionType(HairType, infos.isHD))
-                    .arg(*it);
+                    .arg(it);
 
-    sqlResult colors = GAMEDATABASE.sqlQuery(query);
+    auto colors = GAMEDATABASE.sqlQueryAssoc(query);
 
     CustomizationParam facialColor;
     facialColor.name = QString(facialCustomizationBaseName + " Color");
 
-    if (colors.valid && !colors.values.empty())
+    if (!colors.empty())
     {
-      for (uint i = 0; i < colors.values.size(); i++)
-        facialColor.possibleValues.push_back(colors.values[i][0].toInt());
+      for (auto& v : colors.values)
+        facialColor.possibleValues.push_back(v["ColorIndex"].toInt());
     }
     else
     {
-      LOG_ERROR << "No facial color available for facial customization style " << *it << "for model" << m_model->name();
+      LOG_ERROR << "No facial color available for facial customization style " << it << "for model" << m_model->name();
     }
 
-    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, facialColor });
+    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ it, facialColor });
   }
 
   m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]] });
@@ -498,15 +498,15 @@ void CharDetails::fillCustomizationMap()
     .arg(infos.raceid)
     .arg(infos.sexid);
 
-  sqlResult additional = GAMEDATABASE.sqlQuery(query);
+  auto additional = GAMEDATABASE.sqlQueryAssoc(query);
 
   CustomizationParam additionalCustomization;
   additionalCustomization.name = additionalCustomizationName;
 
-  if (additional.valid && !additional.values.empty())
+  if (!additional.empty())
   {
-    for (uint i = 0; i < additional.values.size(); i++)
-      additionalCustomization.possibleValues.push_back(additional.values[i][0].toInt());
+    for (auto& v : additional.values)
+      additionalCustomization.possibleValues.push_back(v["VariationID"].toInt());
   }
   else
   {
@@ -525,7 +525,7 @@ void CharDetails::fillCustomizationMap()
     .arg(infos.sexid)
     .arg(TattooType);
 
-  vals = GAMEDATABASE.sqlQuery(query);
+  vals = GAMEDATABASE.sqlQueryAssoc(query);
 
   if (vals.valid && (vals.values.size() > 1))
   {
@@ -535,14 +535,14 @@ void CharDetails::fillCustomizationMap()
     tattoos.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
     m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tattoos });
 
-    for (auto it = tattoos.possibleValues.begin(), itEnd = tattoos.possibleValues.end(); it != itEnd; ++it)
+    for (auto &it : tattoos.possibleValues)
     {
       // tattoo color = 0 to 5 for each tattoo style
       CustomizationParam tattooColor;
       tattooColor.name = "Tattoo Color";
       tattooColor.possibleValues = { 0, 1, 2, 3, 4, 5 };
 
-      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tattooColor });
+      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ it, tattooColor });
     }
 
     m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
@@ -556,7 +556,7 @@ void CharDetails::fillCustomizationMap()
       hornsGeoset.insert(it->id);
   }
 
-  if (hornsGeoset.size() > 0)
+  if (!hornsGeoset.empty())
   {
     CustomizationParam horns;
     horns.name = "Horns";
@@ -575,7 +575,7 @@ void CharDetails::fillCustomizationMap()
       blindfoldGeoset.insert(it->id);
   }
 
-  if (blindfoldGeoset.size() > 0)
+  if (!blindfoldGeoset.empty())
   {
     CustomizationParam blindfold;
     blindfold.name = "Blindfolds";
@@ -589,7 +589,7 @@ void CharDetails::fillCustomizationMap()
 
 CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
 {
-  auto it = m_customizationParamsMap.find(type);
+  const auto it = m_customizationParamsMap.find(type);
 
   if (it != m_customizationParamsMap.end())
     return it->second;
@@ -611,15 +611,15 @@ void CharDetails::set(CustomizationType type, unsigned int val)
         m_customizationParamsMap[FACE] = m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]];
 
         // reset current face if not available for this skin color
-        std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
+        auto& vec = m_customizationParamsMap[FACE].possibleValues;
         if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
           m_currentCustomization[FACE] = vec[0];
 
-        event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::SKIN_COLOR_CHANGED));
         break;
       }
       case FACE:
-        event.setType((Event::EventType)CharDetailsEvent::FACE_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::FACE_CHANGED));
         break;
       case FACIAL_CUSTOMIZATION_STYLE:
       {
@@ -630,26 +630,26 @@ void CharDetails::set(CustomizationType type, unsigned int val)
         if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
           m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
 
-        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED));
         break;
       }
       case FACIAL_CUSTOMIZATION_COLOR:
-        event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED));
         break;
       case ADDITIONAL_FACIAL_CUSTOMIZATION:
-        event.setType((Event::EventType)CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED));
         break;
       case DH_TATTOO_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_STYLE_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::DH_TATTOO_STYLE_CHANGED));
         break;
       case DH_TATTOO_COLOR:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_COLOR_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::DH_TATTOO_COLOR_CHANGED));
         break;
       case DH_HORN_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_HORN_STYLE_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::DH_HORN_STYLE_CHANGED));
         break;
       case DH_BLINDFOLDS:
-        event.setType((Event::EventType)CharDetailsEvent::DH_BLINDFOLDS_CHANGED);
+        event.setType(static_cast<Event::EventType>(CharDetailsEvent::DH_BLINDFOLDS_CHANGED));
         break;
     }
 
@@ -664,7 +664,7 @@ uint CharDetails::get(CustomizationType type) const
 
 void CharDetails::setRandomValue(CustomizationType type)
 {
-  uint maxVal = m_customizationParamsMap[type].possibleValues.size() - 1;
+  const auto maxVal = m_customizationParamsMap[type].possibleValues.size() - 1;
   set(type, randint(0, maxVal));
 }
 
