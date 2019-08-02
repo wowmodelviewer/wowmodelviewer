@@ -128,13 +128,13 @@ void CASCFile::seek(size_t offset)
 
 bool  CASCFile::openFile()
 {
-  if (!GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))
+  if ((m_fileDataId > 0 && GAMEDIRECTORY.openFile(m_fileDataId, &m_handle))
+      || GAMEDIRECTORY.openFile(filepath.toStdString(), &m_handle))
   {
-    LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
-    return false;
+    return true;
   }
-
-  return true;
+  LOG_ERROR << "Opening" << filepath << "(ID:" << m_fileDataId << ")" << "failed." << "Error" << GetLastError();
+  return false;
 }
 
 bool CASCFile::isAlreadyOpened()
