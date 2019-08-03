@@ -516,6 +516,25 @@ void WoWModel::initCommon(GameFile * f)
     delete[] buffer;
   }
 
+  if (f->isChunked() && f->setChunk("SFID"))
+  {
+    uint32 skinfile;
+    
+    if (header.nViews > 0)
+    { 
+      for (uint i = 0; i < header.nViews; i++)
+      {
+        f->read(&skinfile, sizeof(skinfile));
+        skinFileIDs.push_back(skinfile);
+        LOG_INFO << "Adding skin file" << i << ":" << skinfile;
+        // If the first view is the best, and we don't need to switch to a lower one, then maybe we don't need to store all these file IDs, but we can for now.
+      }
+    }
+    // LOD .skin file IDs are next in SFID, but we'll ignore them. They're probably unnecessary in a model viewer.
+
+    f->setChunk("MD21");
+  }
+
   if (forceAnim)
     animBones = true;
 
@@ -1138,30 +1157,58 @@ void WoWModel::initAnimated(GameFile * f)
 
 void WoWModel::setLOD(GameFile * f, int index)
 {
+  GameFile * g;
+  
+  if (f->isChunked())
+  {
+    int numSkinFiles = sizeof(skinFileIDs);
+    if (!numSkinFiles)
+    {
+      LOG_ERROR << "Attempt to set view level when no .skin files exist.";
+      return;
+    }
+    
+    if (index < 0)
+    {
+      index = 0;
+      LOG_ERROR << "Attempt to set view level to negative number (" << index << ").";
+    }
+    else if (index >= numSkinFiles)
+    {
+      index = numSkinFiles - 1;
+      LOG_ERROR << "Attempt to set view level too high (" << index << "). Setting LOD to valid max (" << index << ").";
+    }
+  
+    uint32 skinfile = skinFileIDs[index];
+    g = GAMEDIRECTORY.getFile(skinfile);
+    if (!g || !g->open())
+    {
+      LOG_ERROR << "Unable to load .skin file with ID" << skinfile << ".";
+      return;
+    }
+  }
+  else
+  {
+    QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
+    lodname = QString("%1%2.skin").arg(tmpname).arg(index, 2, 10, QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
+
+    g = GAMEDIRECTORY.getFile(lodname.c_str());
+    if (!g || !g->open())
+    {
+      LOG_ERROR << "Unable to load .skin file:" << lodname.c_str();
+      return;
+    }  
+  }
+  
   // Texture definitions
   ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
 
   // Transparency
   int16 *transLookup = (int16*)(f->getBuffer() + header.ofsTransparencyLookup);
 
-  // I thought the view controlled the Level of detail,  but that doesn't seem to be the case.
-  // Seems to only control the render order.  Which makes this function useless and not needed :(
-
-  // remove suffix .M2
-  QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
-  lodname = QString("%1%2.skin").arg(tmpname).arg(index, 2, 10, QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
-
-  GameFile * g = GAMEDIRECTORY.getFile(lodname.c_str());
-
-  if (!g || !g->open())
-  {
-    LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
-    return;
-  }
-
   if (g->isEof())
   {
-    LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
+    LOG_ERROR << "Unable to load .skin file:" << g->fullname() << ", ID:" << g->fileDataId();
     g->close();
     return;
   }
@@ -1170,7 +1217,7 @@ void WoWModel::setLOD(GameFile * f, int index)
 
   if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N')
   {
-    LOG_ERROR << "Unable to load Lods:" << lodname.c_str();
+    LOG_ERROR << "Doesn't appear to be .skin file:" << g->fullname() << ", ID:" << g->fileDataId();
     g->close();
     return;
   }

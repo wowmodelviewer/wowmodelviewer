@@ -36,7 +36,8 @@ class ModelControl: public wxWindow
       size_t geosetId;
   };
 	
-  wxComboBox *cbLod, *modelname;
+  wxComboBox *modelname;
+  // wxComboBox *cbLod;
   wxSlider *alpha, *scale;
   wxCheckBox *bones, *box, *render, *wireframe, *texture, *particles, *particlecolreplace;
   //wxCheckListBox *clbGeosets;

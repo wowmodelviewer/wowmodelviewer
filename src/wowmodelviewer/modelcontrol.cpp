@@ -80,10 +80,12 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
   modelname = new wxComboBox(this, ID_MODEL_NAME);
   top->Add(modelname, 1, wxEXPAND);
 
+/*
   cbLod = new wxComboBox(this, ID_MODEL_LOD);
   top->AddSpacer(5);
   top->Add(new wxStaticText(this, wxID_ANY, wxT("View")), 1, wxEXPAND);
   top->Add(cbLod, 1, wxEXPAND);
+*/
 
   top->AddSpacer(5);
   alpha = new wxSlider(this, ID_MODEL_ALPHA, 100, 0, 100);
@@ -219,7 +221,7 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 ModelControl::~ModelControl()
 {
   modelname->Destroy();
-  cbLod->Destroy();
+  // cbLod->Destroy();
   alpha->Destroy();
   scale->Destroy();
   bones->Destroy();
@@ -354,27 +356,27 @@ void ModelControl::Update()
   if (!model)
     return;
 
+/*
+  // Set view code is disabled / doesn't work, so I just removed this widget for now - Wayne
   // Loop through all the views.
   cbLod->Clear();
-  if (model->header.nViews == 1)
+  
+  int numViews = sizeof(model->skinFileIDs);
+  
+  if (numViews == 1)
   {
     cbLod->Append(wxT("1 (Only View)"));
   }
-  else if (model->header.nViews == 2)
-  {
-		cbLod->Append(wxT("1 (Worst)"));
-		cbLod->Append(wxT("2 (Best)"));
-  }
   else
   {
-    cbLod->Append(wxT("1 (Worst)"));
-    for (size_t i=1; i<(model->header.nViews-1); i++)
-    {
-      cbLod->Append(wxString::Format(wxT("%i"), i+1));
+    cbLod->Append(wxT("1 (Worst)")); //Pretty sure lowest is actually BEST view - Wayne
+    for (size_t i=0; i<numViews; i++)
+    { 
+      cbLod->Append(wxString::Format(wxT("%i%s"), i+1, (i==numViews-1) ? " (Best)" : ""));
     }
-    cbLod->Append(wxString::Format(wxT("%i (Best)"), model->header.nViews));
   }
   cbLod->SetSelection(0);
+*/
 
   // Loop through all the geosets.
   wxArrayString geosetItems;

@@ -97,7 +97,8 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<uint32> rawIndices;
   std::vector<ModelRenderPass *> rawPasses;
   std::vector<ModelGeosetHD *> rawGeosets;
-
+  std::vector<uint32> skinFileIDs;
+    
   void restoreRawGeosets();
   static bool sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2);
   
