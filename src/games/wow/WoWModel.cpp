@@ -1840,16 +1840,16 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
         query += ")";
     }
 
-    sqlResult animsResult = GAMEDATABASE.sqlQuery(query);
+    auto animsResult = GAMEDATABASE.sqlQueryAssoc(query);
 
-    if (animsResult.valid && !animsResult.empty())
+    if (!animsResult.empty())
     {
       LOG_INFO << "Found" << animsResult.values.size() << "animations for model";
 
       // remap database results on model header indexes
       for (int i = 0, imax = animsResult.values.size(); i < imax; i++)
       {
-        result[animsResult.values[i][0].toInt()] = animsResult.values[i][1].toStdWString();
+        result[animsResult.values[i]["ID"].toInt()] = animsResult.values[i]["NAME"].toStdWString();
       }
     }
   }
@@ -2315,14 +2315,14 @@ void WoWModel::refresh()
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
-  sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
+  auto hairStyle = GAMEDATABASE.sqlQueryAssoc(query);
 
   LOG_INFO << query;
 
-  if (hairStyle.valid && !hairStyle.values.empty())
+  if (!hairStyle.empty())
   {
-    showScalp = (bool)hairStyle.values[0][1].toInt();
-    unsigned int geosetId = hairStyle.values[0][0].toInt();
+    showScalp = (bool)hairStyle.values[0]["ShowScalp"].toInt();
+    unsigned int geosetId = hairStyle.values[0]["GeoSetID"].toInt();
     if (!geosetId)  // adds missing scalp if no other hair geoset used. Seems to work that way, anyway...
       geosetId = 1;
     cd.geosets[CG_HAIRSTYLE] = geosetId;
@@ -2374,23 +2374,28 @@ void WoWModel::refresh()
     .arg(infos.sexid)
     .arg(cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION));
 
-  sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
 
-  if (facialHairStyle.valid && !facialHairStyle.values.empty() && cd.showFacialHair)
+  if (cd.showFacialHair)
   {
-    LOG_INFO << "Facial GeoSets : " << facialHairStyle.values[0][0].toInt()
-      << " " << facialHairStyle.values[0][1].toInt()
-      << " " << facialHairStyle.values[0][2].toInt()
-      << " " << facialHairStyle.values[0][3].toInt()
-      << " " << facialHairStyle.values[0][4].toInt();
+    auto facialHairStyle = GAMEDATABASE.sqlQueryAssoc(query);
 
-    cd.geosets[CG_GEOSET100] = facialHairStyle.values[0][0].toInt();
-    cd.geosets[CG_GEOSET200] = facialHairStyle.values[0][2].toInt();
-    cd.geosets[CG_GEOSET300] = facialHairStyle.values[0][1].toInt();
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
+    if (!facialHairStyle.empty())
+    {
+
+      LOG_INFO << "Facial GeoSets : " << facialHairStyle.values[0]["GeoSet1"].toInt()
+        << " " << facialHairStyle.values[0]["GeoSet2"].toInt()
+        << " " << facialHairStyle.values[0]["GeoSet3"].toInt()
+        << " " << facialHairStyle.values[0]["GeoSet4"].toInt()
+        << " " << facialHairStyle.values[0]["GeoSet5"].toInt();
+
+      cd.geosets[CG_GEOSET100] = facialHairStyle.values[0]["GeoSet1"].toInt();
+      cd.geosets[CG_GEOSET200] = facialHairStyle.values[0]["GeoSet3"].toInt();
+      cd.geosets[CG_GEOSET300] = facialHairStyle.values[0]["GeoSet2"].toInt();
+    }
+    else
+    {
+      LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
+    }
   }
 
   // DH customization
@@ -2456,22 +2461,18 @@ void WoWModel::refresh()
 
   if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
   {
-    QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
-                            "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-                            "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-                            .arg(infos.raceid)
-                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                            .arg(headItem->id());
+    auto helmetInfos = GAMEDATABASE.sqlQueryAssoc(QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+                                                          "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+                                                          "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+                                                          .arg(infos.raceid)
+                                                          .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+                                                          .arg(headItem->id()));
 
-
-
-    sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
-
-    if (helmetInfos.valid && !helmetInfos.values.empty())
+    if (!helmetInfos.empty())
     {
-      for (auto it : helmetInfos.values)
+      for (auto &it : helmetInfos.values)
       {
-        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+        setGeosetGroupDisplay(static_cast<CharGeosets>(it["GeoSetGroup"].toInt()), 0);
       }
     }
   }
@@ -2661,9 +2662,9 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
     string strName;
     QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
-    sqlResult anim = GAMEDATABASE.sqlQuery(query);
-    if (anim.valid && !anim.empty())
-      strName = anim.values[0][0].toStdString();
+    auto anim = GAMEDATABASE.sqlQueryAssoc(query);
+    if (!anim.empty())
+      strName = anim.values[0]["Name"].toStdString();
     else
       strName = "???";
     out << "      <animName>" << strName << "</animName>" << endl;
