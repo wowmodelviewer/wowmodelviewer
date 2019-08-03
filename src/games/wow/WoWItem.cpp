@@ -28,7 +28,6 @@
 #include <QFile>
 #include <QRegularExpression>
 #include <QString>
-#include <QXmlStreamReader>
 #include <QXmlStreamWriter>
 
 
@@ -51,7 +50,7 @@ map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, 
 WoWItem::WoWItem(CharSlots slot)
   : m_charModel(nullptr), m_id(-1), m_displayId(-1),
   m_quality(0), m_level(0), m_type(0),
-  m_nbLevels(0), m_slot(slot), m_mergedModel(0)
+  m_nbLevels(0), m_slot(slot), m_mergedModel(nullptr)
 {
   setName("---- None ----");
 }
@@ -79,27 +78,26 @@ void WoWItem::setId(int id)
       return;
     }
 
-    QString query = QString("SELECT ItemLevel, ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id);
-    sqlResult itemlevels = GAMEDATABASE.sqlQuery(query);
+    auto itemlevels = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ItemLevel, ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id));
 
-    if (itemlevels.valid && !itemlevels.values.empty())
+    if (!itemlevels.empty())
     {
       m_nbLevels = 0;
       m_level = 0;
       m_levelDisplayMap.clear();
-      for (unsigned int i = 0; i < itemlevels.values.size(); i++)
+      for (auto &it : itemlevels.values)
       {
-        int curid = itemlevels.values[i][1].toInt();
+        const auto curid = it["ItemAppearanceID"].toInt();
 
         // if display id is null (case when item's look doesn't change with level)
         if (curid == 0)
           continue;
 
         //check if display id already in the map (do not duplicate when look is the same)
-        bool found = false;
-        for (std::map<int, int>::iterator it = m_levelDisplayMap.begin(); it != m_levelDisplayMap.end(); ++it)
+        auto found = false;
+        for (auto &lvl : m_levelDisplayMap)
         {
-          if (it->second == curid)
+          if (lvl.second == curid)
           {
             found = true;
             break;
@@ -114,15 +112,12 @@ void WoWItem::setId(int id)
       }
     }
 
-    query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
-      .arg(m_levelDisplayMap[m_level]);
+    auto iteminfos = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1").arg(m_levelDisplayMap[m_level]));
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    if (!iteminfos.empty())
+      m_displayId = iteminfos.values[0]["ItemDisplayInfoID"].toInt();
 
-    if (iteminfos.valid && !iteminfos.values.empty())
-      m_displayId = iteminfos.values[0][0].toInt();
-
-    ItemRecord itemRcd = items.getById(id);
+    const auto itemRcd = items.getById(id);
     setName(itemRcd.name);
     m_quality = itemRcd.quality;
     m_type = itemRcd.type;
@@ -147,15 +142,12 @@ void WoWItem::setLevel(int level)
   {
     m_level = level;
 
-    QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
-      .arg(m_levelDisplayMap[m_level]);
+    auto iteminfos = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1").arg(m_levelDisplayMap[m_level]));
 
-    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+    if (!iteminfos.empty())
+      m_displayId = iteminfos.values[0]["ItemDisplayInfoID"].toInt();
 
-    if (iteminfos.valid && !iteminfos.values.empty())
-      m_displayId = iteminfos.values[0][0].toInt();
-
-    ItemRecord itemRcd = items.getById(m_id);
+    const auto itemRcd = items.getById(m_id);
     setName(itemRcd.name);
     m_quality = itemRcd.quality;
     m_type = itemRcd.type;
@@ -172,22 +164,16 @@ void WoWItem::onParentSet(Component * parent)
 void WoWItem::unload()
 {
   // delete models and clear map
-  for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.begin(),
-       itEnd = m_itemModels.end();
-       it != itEnd;
-  ++it)
+  for (auto& m_itemModel : m_itemModels)
   {
-    delete it->second;
+    delete m_itemModel.second;
   }
   m_itemModels.clear();
 
   // release textures and clear map
-  for (std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.begin(),
-       itEnd = m_itemTextures.end();
-       it != itEnd;
-  ++it)
+  for (auto& m_itemTexture : m_itemTextures)
   {
-    TEXTUREMANAGER.delbyname(it->second->fullname());
+    TEXTUREMANAGER.delbyname(m_itemTexture.second->fullname());
   }
   m_itemTextures.clear();
 
@@ -199,12 +185,12 @@ void WoWItem::unload()
     m_charModel->attachment->delSlot(m_slot);
 
   // unload any merged model
-  if (m_mergedModel != 0)
+  if (m_mergedModel != nullptr)
   {
     // TODO : unmerge trigs refreshMerging that trigs refresh... so m_mergedModel must be null...
     // need to find a better way to solve this
-    WoWModel * m = m_mergedModel;
-    m_mergedModel = 0;
+    const auto m = m_mergedModel;
+    m_mergedModel = nullptr;
     m_charModel->unmergeModel(m);
     delete m_mergedModel;
   }
@@ -222,7 +208,7 @@ void WoWItem::load()
 
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
 
   // query geosets infos
   if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
@@ -230,9 +216,9 @@ void WoWItem::load()
                      iteminfos))
     return;
 
-  int geosetGroup[6] = { iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt() ,
-                         iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
-                         iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
+  int geosetGroup[6] = { iteminfos.values[0]["GeoSetGroup1"].toInt(), iteminfos.values[0]["GeoSetGroup2"].toInt() ,
+                         iteminfos.values[0]["GeoSetGroup3"].toInt(), iteminfos.values[0]["GeoSetGroup4"].toInt() ,
+                         iteminfos.values[0]["GeoSetGroup5"].toInt(), iteminfos.values[0]["GeoSetGroup6"].toInt()};
 
   // query models
   int model[2] = { getCustomModelId(0), getCustomModelId(1) };
@@ -241,7 +227,7 @@ void WoWItem::load()
   int texture[2] = { getCustomTextureId(0), getCustomTextureId(1) };
 
   // query textures from ItemDisplayInfoMaterialRes (if relevant)
-  sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
+  const auto texinfos = GAMEDATABASE.sqlQuery(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
   if (texinfos.valid && !texinfos.empty())
   {
     if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
@@ -253,7 +239,7 @@ void WoWItem::load()
     {
       for (uint i = 0; i < iteminfos.values.size(); i++)
       {
-        GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+        GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i]["TextureID"].toInt());
         if (tex)
         {
           TEXTUREMANAGER.add(tex);
@@ -283,16 +269,16 @@ void WoWItem::load()
       m_itemGeosets[CG_GEOSET2600] = 1 + geosetGroup[0];
 
       // find position index value from ComponentModelFileData table
-      QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-                              "WHERE ID IN (%1,%2)").arg(model[0]).arg(model[1]);
-      sqlResult result = GAMEDATABASE.sqlQuery(query);
-      
-      int leftIndex = 0;
-      int rightIndex = 1;
-      if (result.valid && result.values.size() > 0)
+      const auto query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                                 "WHERE ID IN (%1,%2)").arg(model[0]).arg(model[1]);
+      auto result = GAMEDATABASE.sqlQueryAssoc(query);
+
+      auto leftIndex = 0;
+      auto rightIndex = 1;
+      if (!result.empty())
       {
-        int modelid = result.values[0][0].toInt();
-        int position = result.values[0][1].toInt();
+        const auto modelid = result.values[0]["ID"].toInt();
+        const auto position = result.values[0]["PositionIndex"].toInt();
         
         if (modelid == model[0])
         {
@@ -438,46 +424,46 @@ void WoWItem::load()
         m_charModel->td.showCustom = true;
         m_itemGeosets[CG_TARBARD] = 2;
 
-        GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
-        if (texture)
+        auto tex = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_1] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_1] = tex;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER));
-        if (texture)
+        tex = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_2] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_2] = tex;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_UPPER));
-        if (texture)
+        tex = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_UPPER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_3] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_3] = tex;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_LOWER));
-        if (texture)
+        tex = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_LOWER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_4] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_4] = tex;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_UPPER));
-        if (texture)
+        tex = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_UPPER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_5] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_5] = tex;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_LOWER));
-        if (texture)
+        tex = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_LOWER));
+        if (tex)
         {
-          TEXTUREMANAGER.add(texture);
-          m_itemTextures[CR_TABARD_6] = texture;
+          TEXTUREMANAGER.add(tex);
+          m_itemTextures[CR_TABARD_6] = tex;
         }
       }
       else
@@ -504,18 +490,18 @@ void WoWItem::refresh()
     return;
 
   // merge model if any
-  if (m_mergedModel != 0)
+  if (m_mergedModel != nullptr)
     m_charModel->mergeModel(m_mergedModel);
 
   // update geoset values
-  for (auto it : m_itemGeosets)
+  for (auto &it : m_itemGeosets)
   {
     if ((m_slot != CS_BOOTS) && // treat boots geoset in a special case - cf CS_BOOTS
         (m_slot != CS_PANTS)) // treat trousers geoset in a special case - cf CS_PANTS
     {
       m_charModel->cd.geosets[it.first] = it.second;
 
-      if (m_mergedModel != 0)
+      if (m_mergedModel != nullptr)
         m_mergedModel->setGeosetGroupDisplay(it.first, 1);
     }
   }
@@ -527,7 +513,7 @@ void WoWItem::refresh()
         (m_slot != CS_HAND_LEFT))    // treat left hand attachment in a special case - cf CS_HAND_LEFT
     {
       m_charModel->attachment->delSlot(m_slot);
-      for (auto it : m_itemModels)
+      for (auto &it : m_itemModels)
         m_charModel->attachment->addChild(it.second, it.first, m_slot);
     }
   }
@@ -538,7 +524,7 @@ void WoWItem::refresh()
       (m_slot != CS_TABARD) && // treat tabard texturing in a special case - cf CS_TABARD 
       (m_slot != CS_CAPE))     // treat cape texturing in a special case - cf CS_CAPE 
   {
-    for (auto it : m_itemTextures)
+    for (auto &it : m_itemTextures)
       m_charModel->tex.addLayer(it.second, it.first, SLOT_LAYERS[m_slot]);
   }
   
@@ -561,11 +547,11 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_HAND_RIGHT);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_RIGHT_PALM);
+        const auto it = m_itemModels.find(ATT_RIGHT_PALM);
         if (it != m_itemModels.end())
         {
           int attachement = ATT_RIGHT_PALM;
-          const ItemRecord &item = items.getById(m_id);
+          const auto& item = items.getById(m_id);
           if (m_charModel->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
           {
             // make the weapon cross
@@ -593,17 +579,17 @@ void WoWItem::refresh()
       {
         m_charModel->attachment->delSlot(CS_HAND_LEFT);
 
-        std::map<POSITION_SLOTS, WoWModel *>::iterator it = m_itemModels.find(ATT_LEFT_PALM);
+        const auto it = m_itemModels.find(ATT_LEFT_PALM);
         if (it != m_itemModels.end())
         {
-          const ItemRecord &item = items.getById(m_id);
+          const auto& item = items.getById(m_id);
           int attachement = ATT_LEFT_PALM;
 
           if (item.type == IT_SHIELD)
             attachement = ATT_LEFT_WRIST;
 
           if (m_charModel->bSheathe &&  item.sheath != SHEATHETYPE_NONE)
-            attachement = (POSITION_SLOTS)item.sheath;
+            attachement = static_cast<POSITION_SLOTS>(item.sheath);
 
           if (m_charModel->bSheathe || item.type == IT_SHIELD)
             m_charModel->charModelDetails.closeLHand = false;
@@ -630,32 +616,32 @@ void WoWItem::refresh()
     }
     case CS_BOOTS:
     {
-      for (auto it : m_itemGeosets)
+      for (auto &it : m_itemGeosets)
       {
         if (it.first != CG_BOOTS)
         {
           m_charModel->cd.geosets[it.first] = it.second;
 
-          if (m_mergedModel != 0)
+          if (m_mergedModel != nullptr)
             m_mergedModel->setGeosetGroupDisplay(it.first, 1);
         }
       }
 
-      auto geoIt = m_itemGeosets.find(CG_BOOTS);
+      const auto geoIt = m_itemGeosets.find(CG_BOOTS);
 
       if (geoIt != m_itemGeosets.end())
       {
         // don't render boots behind robe
-        WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+        const auto chestItem = m_charModel->getItem(CS_CHEST);
         if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
         {
           m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
-          if (m_mergedModel != 0)
+          if (m_mergedModel != nullptr)
             m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
         }
       }
 
-      std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_LEG_LOWER);
+      auto texIt = m_itemTextures.find(CR_LEG_LOWER);
       if (texIt != m_itemTextures.end())
         m_charModel->tex.addLayer(texIt->second, CR_LEG_LOWER, SLOT_LAYERS[m_slot]);
 
@@ -669,23 +655,23 @@ void WoWItem::refresh()
     }
     case CS_PANTS:
     {
-      for (auto it : m_itemGeosets)
+      for (auto &it : m_itemGeosets)
       {
         if (it.first != CG_TROUSERS)
         {
           m_charModel->cd.geosets[it.first] = it.second;
 
-          if (m_mergedModel != 0)
+          if (m_mergedModel != nullptr)
             m_mergedModel->setGeosetGroupDisplay(it.first, 1);
         }
       }
-      
-      std::map<CharGeosets, int>::iterator geoIt = m_itemGeosets.find(CG_TROUSERS);
+
+      const auto geoIt = m_itemGeosets.find(CG_TROUSERS);
 
       if (geoIt != m_itemGeosets.end())
       {
         // apply trousers geosets only if character is not already wearing a robe
-        const ItemRecord &item = items.getById(m_charModel->getItem(CS_CHEST)->id());
+        const auto& item = items.getById(m_charModel->getItem(CS_CHEST)->id());
 
         if (item.type != IT_ROBE)
         {
@@ -710,13 +696,13 @@ void WoWItem::refresh()
     }
     case CS_GLOVES:
     {
-      std::map<CharRegions, GameFile *>::iterator texIt = m_itemTextures.find(CR_ARM_LOWER);
+      auto texIt = m_itemTextures.find(CR_ARM_LOWER);
 
-      int layer = SLOT_LAYERS[m_slot];
+      auto layer = SLOT_LAYERS[m_slot];
 
       // if we are wearing a robe, render gloves first in texture compositing
       // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
-      WoWItem * chestItem = m_charModel->getItem(CS_CHEST);
+      const auto chestItem = m_charModel->getItem(CS_CHEST);
       if ((chestItem->m_type == IT_ROBE) && (m_charModel->cd.geosets[CG_GLOVES] == 1))
         layer = SLOT_LAYERS[CS_CHEST] - 1;
 
@@ -730,7 +716,7 @@ void WoWItem::refresh()
     }
     case CS_CAPE:
     {
-      std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
+      const auto it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
         m_charModel->updateTextureList(it->second, TEXTURE_CAPE);
       break;
@@ -739,7 +725,7 @@ void WoWItem::refresh()
     {
       if (isCustomizableTabard())
       {
-        std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_TABARD_1);
+        auto it = m_itemTextures.find(CR_TABARD_1);
         if (it != m_itemTextures.end())
           m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -766,7 +752,7 @@ void WoWItem::refresh()
       }
       else
       {
-        std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_TORSO_UPPER);
+        auto it = m_itemTextures.find(CR_TORSO_UPPER);
         if (it != m_itemTextures.end())
           m_charModel->tex.addLayer(it->second, CR_TORSO_UPPER, SLOT_LAYERS[m_slot]);
 
@@ -788,7 +774,7 @@ bool WoWItem::isCustomizableTabard() const
           m_id == 69210);  // Renowned Guild Tabard
 }
 
-void WoWItem::save(QXmlStreamWriter & stream)
+void WoWItem::save(QXmlStreamWriter & stream) const
 {
   stream.writeStartElement("item");
 
@@ -826,14 +812,14 @@ void WoWItem::load(QString & f)
   QXmlStreamReader reader;
   reader.setDevice(&file);
 
-  int nbValuesRead = 0;
+  auto nbValuesRead = 0;
   while (!reader.atEnd() && nbValuesRead != 3)
   {
     if (reader.isStartElement())
     {
       if (reader.name() == "slot")
       {
-        unsigned int slot = reader.attributes().value("value").toString().toUInt();
+        const auto slot = reader.attributes().value("value").toString().toUInt();
 
         if (slot == m_slot)
         {
@@ -843,7 +829,7 @@ void WoWItem::load(QString & f)
             {
               if (reader.name() == "id")
               {
-                int id = reader.attributes().value("value").toString().toInt();
+                const auto id = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
                 if (id != -1)
                   setId(id);
@@ -851,7 +837,7 @@ void WoWItem::load(QString & f)
 
               if (reader.name() == "displayId")
               {
-                int id = reader.attributes().value("value").toString().toInt();
+                const auto id = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
                 if (m_id == -1)
                   setDisplayId(id);
@@ -859,7 +845,7 @@ void WoWItem::load(QString & f)
 
               if (reader.name() == "level")
               {
-                int level = reader.attributes().value("value").toString().toInt();
+                const auto level = reader.attributes().value("value").toString().toInt();
                 nbValuesRead++;
                 setLevel(level);
               }
@@ -875,7 +861,7 @@ void WoWItem::load(QString & f)
   if (isCustomizableTabard()) // look for extra tabard details
   {
     reader.readNext();
-    while (reader.isStartElement() == false)
+    while (!reader.isStartElement())
       reader.readNext();
 
     if (reader.name() == "TabardDetails")
@@ -893,7 +879,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
   if (modelId == 0)
     return;
 
-  WoWModel *m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
+  auto m = new WoWModel(GAMEDIRECTORY.getFile(modelId), true);
 
   if (m->ok)
   {
@@ -901,7 +887,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
       m->showGeoset(i, true);
 
     m_itemModels[pos] = m;
-    GameFile * texture = GAMEDIRECTORY.getFile(textureId);
+    const auto texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
       m->updateTextureList(texture, TEXTURE_ITEM);
     else
@@ -939,11 +925,11 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
 
 CharRegions WoWItem::getRegionForTexture(GameFile * file) const
 {
-  CharRegions result = CR_UNK8;
+  auto result = CR_UNK8;
 
   if (file)
   {
-    QString fullname = file->fullname();
+    const auto fullname = file->fullname();
 
     if (fullname.contains("armlowertexture", Qt::CaseInsensitive))
     {
@@ -990,11 +976,11 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
   return result;
 }
 
-bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
+bool WoWItem::queryItemInfo(QString & query, sqlResultAssoc & result) const
 {
-  result = GAMEDATABASE.sqlQuery(query);
+  result = GAMEDATABASE.sqlQueryAssoc(query);
  
-  if (!result.valid || result.values.empty())
+  if (result.empty())
   {
     LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
     LOG_ERROR << query;
@@ -1004,9 +990,9 @@ bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
   return true;
 }
 
-int WoWItem::getCustomModelId(size_t index)
+int WoWItem::getCustomModelId(size_t index) const
 {
-  sqlResult infos;
+  sqlResultAssoc infos;
   if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
                              "LEFT JOIN ModelFileData ON %1 = ModelFileData.ID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"Model1":"Model2").arg(m_displayId),
@@ -1015,12 +1001,12 @@ int WoWItem::getCustomModelId(size_t index)
 
   // if there is only one result, return directly model id
   if (infos.values.size() == 1)
-    return infos.values[0][0].toInt();
+    return infos.values[0]["ModelID"].toInt();
 
   // if there are multiple values, filter them based on ComponentModelFileData table
   std::vector<QString> ids;
-  for (size_t i = 0; i < infos.values.size(); i++)
-    ids.push_back(infos.values[i][0]);
+  for (auto& value : infos.values)
+    ids.push_back(value["ModelID"]);
 
   QString query = "SELECT ID, GenderIndex, classID, RaceID ";
   query += "FROM ComponentModelFileData WHERE ID IN(";
@@ -1032,28 +1018,28 @@ int WoWItem::getCustomModelId(size_t index)
   query += ids[ids.size() - 1];
   query += ")";
 
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
   if (queryItemInfo(query, iteminfos))
   {
     RaceInfos charInfos;
     RaceInfos::getCurrent(m_charModel, charInfos);
 
     size_t i = 0;
-    for (auto it : iteminfos.values)
+    for (auto &it : iteminfos.values)
     {
-      int gender = it[1].toInt();
-      int race = it[3].toInt();
+      const auto gender = it["GenderIndex"].toInt();
+      const auto race = it["RaceID"].toInt();
       // models are customized by race and gender
       // if gender == 2, no customization
-      int fallbackRaceID = 0;
+      auto fallbackRaceID = 0;
       if (gender == 0)
         fallbackRaceID = charInfos.MaleModelFallbackRaceID;
       else if (gender == 1)
         fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
       if ((gender == charInfos.sexid) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
+        return it["ID"].toInt();
       else if ((gender == 2) && (i == index))
-        return it[0].toInt();
+        return it["ID"].toInt();
       i++;
     }
   }
@@ -1061,9 +1047,9 @@ int WoWItem::getCustomModelId(size_t index)
   return 0;
 }
 
-int WoWItem::getCustomTextureId(size_t index)
+int WoWItem::getCustomTextureId(size_t index) const
 {
-  sqlResult infos;
+  sqlResultAssoc infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
                              "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0) ? "TextureItemID1" : "TextureItemID2").arg(m_displayId),
@@ -1072,12 +1058,12 @@ int WoWItem::getCustomTextureId(size_t index)
 
   // if there is only one result, return directly texture id
   if (infos.values.size() == 1)
-    return infos.values[0][0].toInt();
+    return infos.values[0]["TextureID"].toInt();
 
   // if there are multiple values, filter them based on ComponentTextureFileData table
   std::vector<QString> ids;
-  for (size_t i = 0; i < infos.values.size(); i++)
-    ids.push_back(infos.values[i][0]);
+  for (auto& value : infos.values)
+    ids.push_back(value["TextureID"]);
 
   QString query = "SELECT ID, GenderIndex, classID, RaceID ";
   query += "FROM ComponentTextureFileData WHERE ID IN(";
@@ -1089,7 +1075,7 @@ int WoWItem::getCustomTextureId(size_t index)
   query += ids[ids.size() - 1];
   query += ")";
 
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
   if (queryItemInfo(query, iteminfos))
   {
     RaceInfos charInfos;
@@ -1097,16 +1083,16 @@ int WoWItem::getCustomTextureId(size_t index)
 
     for (auto it : iteminfos.values)
     {
-      int gender = it[1].toInt();
-      int race = it[3].toInt();
-      int fallbackRaceID = 0;
+      const auto gender = it["GenderIndex"].toInt();
+      const auto race = it["RaceID"].toInt();
+      auto fallbackRaceID = 0;
       if (gender == 0)
         fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
       else if (gender == 1)
         fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
       // models are customized by race and gender (gender == 3 means both sex)
       if (((gender == charInfos.sexid) || (gender == 3)) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
+        return it["ID"].toInt();
     }
   }
 
