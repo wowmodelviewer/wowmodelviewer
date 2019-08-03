@@ -208,7 +208,7 @@ void WoWItem::load()
 
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
 
   // query geosets infos
   if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
@@ -216,9 +216,9 @@ void WoWItem::load()
                      iteminfos))
     return;
 
-  int geosetGroup[6] = { iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt() ,
-                         iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
-                         iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
+  int geosetGroup[6] = { iteminfos.values[0]["GeoSetGroup1"].toInt(), iteminfos.values[0]["GeoSetGroup2"].toInt() ,
+                         iteminfos.values[0]["GeoSetGroup3"].toInt(), iteminfos.values[0]["GeoSetGroup4"].toInt() ,
+                         iteminfos.values[0]["GeoSetGroup5"].toInt(), iteminfos.values[0]["GeoSetGroup6"].toInt()};
 
   // query models
   int model[2] = { getCustomModelId(0), getCustomModelId(1) };
@@ -239,7 +239,7 @@ void WoWItem::load()
     {
       for (uint i = 0; i < iteminfos.values.size(); i++)
       {
-        GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
+        GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i]["TextureID"].toInt());
         if (tex)
         {
           TEXTUREMANAGER.add(tex);
@@ -976,11 +976,11 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
   return result;
 }
 
-bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
+bool WoWItem::queryItemInfo(QString & query, sqlResultAssoc & result) const
 {
-  result = GAMEDATABASE.sqlQuery(query);
+  result = GAMEDATABASE.sqlQueryAssoc(query);
  
-  if (!result.valid || result.values.empty())
+  if (result.empty())
   {
     LOG_ERROR << "Impossible to query information for item" << name() << "(id " << m_id << "- display id" << m_displayId << ") - SQL ERROR";
     LOG_ERROR << query;
@@ -992,7 +992,7 @@ bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
 
 int WoWItem::getCustomModelId(size_t index) const
 {
-  sqlResult infos;
+  sqlResultAssoc infos;
   if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
                              "LEFT JOIN ModelFileData ON %1 = ModelFileData.ID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"Model1":"Model2").arg(m_displayId),
@@ -1001,12 +1001,12 @@ int WoWItem::getCustomModelId(size_t index) const
 
   // if there is only one result, return directly model id
   if (infos.values.size() == 1)
-    return infos.values[0][0].toInt();
+    return infos.values[0]["ModelID"].toInt();
 
   // if there are multiple values, filter them based on ComponentModelFileData table
   std::vector<QString> ids;
   for (auto& value : infos.values)
-    ids.push_back(value[0]);
+    ids.push_back(value["ModelID"]);
 
   QString query = "SELECT ID, GenderIndex, classID, RaceID ";
   query += "FROM ComponentModelFileData WHERE ID IN(";
@@ -1018,17 +1018,17 @@ int WoWItem::getCustomModelId(size_t index) const
   query += ids[ids.size() - 1];
   query += ")";
 
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
   if (queryItemInfo(query, iteminfos))
   {
     RaceInfos charInfos;
     RaceInfos::getCurrent(m_charModel, charInfos);
 
     size_t i = 0;
-    for (auto it : iteminfos.values)
+    for (auto &it : iteminfos.values)
     {
-      const auto gender = it[1].toInt();
-      const auto race = it[3].toInt();
+      const auto gender = it["GenderIndex"].toInt();
+      const auto race = it["RaceID"].toInt();
       // models are customized by race and gender
       // if gender == 2, no customization
       auto fallbackRaceID = 0;
@@ -1037,9 +1037,9 @@ int WoWItem::getCustomModelId(size_t index) const
       else if (gender == 1)
         fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
       if ((gender == charInfos.sexid) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
+        return it["ID"].toInt();
       else if ((gender == 2) && (i == index))
-        return it[0].toInt();
+        return it["ID"].toInt();
       i++;
     }
   }
@@ -1049,7 +1049,7 @@ int WoWItem::getCustomModelId(size_t index) const
 
 int WoWItem::getCustomTextureId(size_t index) const
 {
-  sqlResult infos;
+  sqlResultAssoc infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
                              "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0) ? "TextureItemID1" : "TextureItemID2").arg(m_displayId),
@@ -1058,12 +1058,12 @@ int WoWItem::getCustomTextureId(size_t index) const
 
   // if there is only one result, return directly texture id
   if (infos.values.size() == 1)
-    return infos.values[0][0].toInt();
+    return infos.values[0]["TextureID"].toInt();
 
   // if there are multiple values, filter them based on ComponentTextureFileData table
   std::vector<QString> ids;
   for (auto& value : infos.values)
-    ids.push_back(value[0]);
+    ids.push_back(value["TextureID"]);
 
   QString query = "SELECT ID, GenderIndex, classID, RaceID ";
   query += "FROM ComponentTextureFileData WHERE ID IN(";
@@ -1075,7 +1075,7 @@ int WoWItem::getCustomTextureId(size_t index) const
   query += ids[ids.size() - 1];
   query += ")";
 
-  sqlResult iteminfos;
+  sqlResultAssoc iteminfos;
   if (queryItemInfo(query, iteminfos))
   {
     RaceInfos charInfos;
@@ -1083,8 +1083,8 @@ int WoWItem::getCustomTextureId(size_t index) const
 
     for (auto it : iteminfos.values)
     {
-      const auto gender = it[1].toInt();
-      const auto race = it[3].toInt();
+      const auto gender = it["GenderIndex"].toInt();
+      const auto race = it["RaceID"].toInt();
       auto fallbackRaceID = 0;
       if (gender == 0)
         fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
@@ -1092,7 +1092,7 @@ int WoWItem::getCustomTextureId(size_t index) const
         fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
       // models are customized by race and gender (gender == 3 means both sex)
       if (((gender == charInfos.sexid) || (gender == 3)) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
+        return it["ID"].toInt();
     }
   }
 
