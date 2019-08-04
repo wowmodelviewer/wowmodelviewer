@@ -477,20 +477,20 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 
   std::map<std::pair<int, int>, int> subclasslookup;
 
-  sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ID, SubClassID, Name, VerboseName FROM ItemSubClass");
+  auto itemClasses = GAMEDATABASE.sqlQueryAssoc("SELECT ID, SubClassID, Name, VerboseName FROM ItemSubClass");
 
-  if (itemClasses.valid && !itemClasses.empty())
+  if (!itemClasses.empty())
   {
-    for (int i = 0, imax = itemClasses.values.size(); i < imax; i++)
+    for (auto& value : itemClasses.values)
     {
       // first set verbose name
-      wxString name = itemClasses.values[i][3].toStdWString();
+      wxString name = value["VerboseName"].toStdWString();
       // if empty, fall back to normal one
       if (name.IsEmpty())
-        name = itemClasses.values[i][2].toStdWString();
+        name = value["Name"].toStdWString();
 
       catnames.Add(name);
-      subclasslookup[std::pair<int, int>(itemClasses.values[i][0].toInt(), itemClasses.values[i][1].toInt())] = (int)catnames.size() - 1;
+      subclasslookup[std::pair<int, int>(value["ID"].toInt(), value["SubClassID"].toInt())] = static_cast<int>(catnames.size()) - 1;
     }
   }
 
@@ -553,15 +553,15 @@ void CharControl::selectSet()
   n.name = wxT("---- None ----");
   items.push_back(n);
 
-  sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name FROM ItemSet");
+  auto itemSet = GAMEDATABASE.sqlQueryAssoc("SELECT ID, Name FROM ItemSet");
 
-  if (itemSet.valid && !itemSet.empty())
+  if (!itemSet.empty())
   {
-    for (int i = 0, imax = itemSet.values.size(); i < imax; i++)
+    for (auto& value : itemSet.values)
     {
       NumStringPair p;
-      p.id = itemSet.values[i][0].toInt();
-      p.name = itemSet.values[i][1].toStdWString();
+      p.id = value["ID"].toInt();
+      p.name = value["Name"].toStdWString();
       items.push_back(p);
     }
   }
@@ -591,18 +591,16 @@ void CharControl::selectStart()
 
   LOG_INFO << "race =" << infos.raceid << "sex = " << infos.sexid;
 
-  QString query = QString("SELECT ChrClasses.name, CSO.ID "
-                          "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
-                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid);
+  auto startOutfit = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ChrClasses.name as Name, CSO.ID as ID "
+                                                        "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
+                                                        "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid));
 
-  sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
-
-  if (startOutfit.valid && !startOutfit.empty())
+  if (!startOutfit.empty())
   {
-    for (int i = 0, imax = startOutfit.values.size(); i < imax; i++)
+    for (auto& value : startOutfit.values)
     {
-      choices.Add(startOutfit.values[i][0].toStdWString());
-      numbers.push_back(startOutfit.values[i][1].toInt());
+      choices.Add(value["Name"].toStdWString());
+      numbers.push_back(value["ID"].toInt());
     }
   }
 
@@ -634,15 +632,15 @@ void CharControl::selectMount()
   numbers.push_back(-1);
 
   // Proper player mounts:
-  sqlResult mountQuery = GAMEDATABASE.sqlQuery(
-    "SELECT MountXDisplay.DisplayID, Mount.Name FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
-  if (mountQuery.valid && !mountQuery.empty())
+  auto mountQuery = GAMEDATABASE.sqlQueryAssoc("SELECT MountXDisplay.DisplayID as ID, Mount.Name as Name "
+                                               "FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
+  if (!mountQuery.empty())
   {
-    for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
+    for (auto& value : mountQuery.values)
     {
       NumStringPair p;
-      p.id = mountQuery.values[i][0].toInt();
-      p.name = mountQuery.values[i][1].toStdWString();
+      p.id = value["ID"].toInt();
+      p.name = value["Name"].toStdWString();
       mounts.push_back(p);
     }
   }
@@ -704,14 +702,14 @@ void CharControl::selectNPC(ssize_t type)
 
   std::map<int, int> typeLookup;
 
-  sqlResult npccats = GAMEDATABASE.sqlQuery("SELECT ID,Name FROM CreatureType");
+  auto npccats = GAMEDATABASE.sqlQueryAssoc("SELECT ID,Name FROM CreatureType");
 
-  if (npccats.valid && !npccats.empty())
+  if (!npccats.empty())
   {
-    for (int i = 0, imax = npccats.values.size(); i < imax; i++)
+    for (auto& value : npccats.values)
     {
-      catnames.Add(npccats.values[i][1].toStdWString());
-      typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size() - 1;
+      catnames.Add(value["Name"].toStdWString());
+      typeLookup[value["ID"].toInt()] = static_cast<int>(catnames.size()) - 1;
     }
   }
 
@@ -797,22 +795,17 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (id && model)
       {
-        QString query = QString("SELECT item1, item2, item3, item4, item5, "
-                                "item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id);
+        auto itemSet = GAMEDATABASE.sqlQueryAssoc(QString("SELECT item1, item2, item3, item4, item5, "
+                                                          "item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id));
 
-        sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
-
-        if (itemSet.valid && !itemSet.empty())
+        if (!itemSet.empty())
         {
           // reset previously equipped items
+          for (auto it : *model)
+            it->setId(0);
 
-          for (WoWModel::iterator it = model->begin();
-               it != model->end();
-               ++it)
-               (*it)->setId(0);
-
-          for (unsigned i = 0; i < 8; i++)
-            tryToEquipItem(itemSet.values[0][i].toInt());
+          for (auto &it : itemSet.values[0])
+            tryToEquipItem(it.second.toInt());
 
           RefreshEquipment();
           RefreshModel();
@@ -825,26 +818,20 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (id && model)
       {
-        QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
-                                "CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
-                                "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
-                                "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
-                                "FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id);
+        auto startOutfit = GAMEDATABASE.sqlQueryAssoc(QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
+                                                              "CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
+                                                              "CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
+                                                              "CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
+                                                              "FROM CharStartOutfit AS CSO WHERE CSO.ID=%1").arg(id));
 
-        sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
-
-        if (startOutfit.valid && !startOutfit.empty())
+        if (!startOutfit.empty())
         {
           // reset previously equipped items
-          for (WoWModel::iterator it = model->begin();
-               it != model->end();
-               ++it)
-               (*it)->setId(0);
+          for (auto &it : *model)
+            it->setId(0);
 
-          for (unsigned i = 0; i < 24; i++)
-          {
-            tryToEquipItem(startOutfit.values[0][i].toInt());
-          }
+          for (auto &it : startOutfit.values[0])
+            tryToEquipItem(it.second.toInt());
 
           RefreshEquipment();
           RefreshModel();
@@ -890,15 +877,13 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         morphID = numbers[id];
         // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-        QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                                "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
-                                "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                                "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
-
-        sqlResult mountQuery = GAMEDATABASE.sqlQuery(query);
-        if (!mountQuery.valid || mountQuery.empty())
+        auto mountQuery = GAMEDATABASE.sqlQueryAssoc(QString("SELECT CreatureModelData.FileID as ID FROM CreatureDisplayInfo "
+                                                             "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+                                                             "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID));
+        if (mountQuery.empty())
           break;
-        modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0][0].toInt());
+
+        modelFile = GAMEDIRECTORY.getFile(mountQuery.values[0]["ID"].toInt());
       }
       else if (cats[id] == 1) // create mount from any old creature model file name
       {
