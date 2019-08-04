@@ -227,8 +227,8 @@ void WoWItem::load()
   int texture[2] = { getCustomTextureId(0), getCustomTextureId(1) };
 
   // query textures from ItemDisplayInfoMaterialRes (if relevant)
-  const auto texinfos = GAMEDATABASE.sqlQuery(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
-  if (texinfos.valid && !texinfos.empty())
+  const auto texinfos = GAMEDATABASE.sqlQueryAssoc(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
+  if (!texinfos.empty())
   {
     if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
