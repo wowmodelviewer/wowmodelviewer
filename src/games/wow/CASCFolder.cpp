@@ -116,6 +116,7 @@ void CASCFolder::initBuildInfo()
   int activeIndex = 0;
   int versionIndex = 0;
   int tagIndex = 0;
+  int productIndex = 0;
   for (int index = 0; index < headers.size(); index++)
   {
     if (headers[index].contains("Active", Qt::CaseInsensitive))
@@ -124,12 +125,14 @@ void CASCFolder::initBuildInfo()
       versionIndex = index;
     else if (headers[index].contains("Tags", Qt::CaseInsensitive))
       tagIndex = index;
+    else if (headers[index].contains("Product", Qt::CaseInsensitive))
+      productIndex = index;
   }
 
   // now loop across file lines with actual values
   while (in.readLineInto(&line))
   {
-    QString version;
+    QString version, product;
     QStringList values = line.split('|');
 
     // if inactive config, skip it
@@ -142,6 +145,9 @@ void CASCFolder::initBuildInfo()
     if (result.hasMatch())
       version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + " (" + result.captured(4) + ")";
 
+    // grab product name for this line
+    product = values[productIndex];
+
     // grab locale(s) for this line
     values = values[tagIndex].split(':');
     for (int i = 0; i < values.size(); i++)
@@ -152,9 +158,11 @@ void CASCFolder::initBuildInfo()
         core::GameConfig config;
         config.locale = tags[tags.size() - 2];
         config.version = version;
+        config.product = product;
         m_configs.push_back(config);
       }
     }
+
   }
 
   for (auto it : m_configs)

@@ -32,6 +32,7 @@ namespace core
     public:
       QString locale;
       QString version;
+      QString product;
   };
 
   class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
