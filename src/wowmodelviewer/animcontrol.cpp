@@ -546,17 +546,16 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       }
       else // BfA:
       {
-        QString query2 = QString("SELECT GeosetType, GeosetID "
-                                 "FROM CreatureDisplayInfoGeosetData "
-                                 "WHERE DisplayID = %1")
-                                .arg( cdi );
-        sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
-        if(r2.valid && !r2.values.empty())
+        auto r2 = GAMEDATABASE.sqlQueryAssoc(QString("SELECT GeosetType, GeosetID "
+                                                     "FROM CreatureDisplayInfoGeosetData "
+                                                     "WHERE DisplayID = %1")
+                                                    .arg(cdi));
+        if(r2.empty())
         {
-          for(size_t j = 0 ; j < r2.values.size() ; j++)
+          for (auto& j : r2.values)
           {
-            int geotype = 100 * (r2.values[j][0].toInt() + 1);
-            int geoid = r2.values[j][1].toInt();
+            auto geotype = 100 * (j["GeosetType"].toInt() + 1);
+            auto geoid = j["GeosetID"].toInt();
             if (geoid > 0)
               grp.creatureGeosetData.insert(geotype + geoid);
           }
@@ -574,9 +573,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         if(pcir.valid && !pcir.empty())
         {
           std::vector<Vec4D> cols;
-          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          for (auto& j : pcir.values[0])
           {
-            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+            cols.push_back(fromARGB(j.toInt()));
           }
           PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
           grp.PCRIndex = numPCRs;
@@ -684,39 +683,37 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   LOG_INFO << "Searching skins for" << m->itemName();
 
   // query textures for model1
-  QString query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
-                         "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
-                         "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                         "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
+  auto r = GAMEDATABASE.sqlQueryAssoc(QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID as IDIID FROM ItemDisplayInfo "
+                                              "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.ID "
+                                              "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                                              "WHERE ModelID = %1").arg(m->gamefile->fileDataId()));
 
-  sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-  if(r.valid && !r.empty())
+  if(!r.empty())
   {
-    for(size_t i = 0 ; i < r.values.size() ; i++)
+    for (auto& value : r.values)
     {
       TextureGroup grp;
       grp.base = TEXTURE_ITEM;
       grp.definedTexture = true;
       grp.count = 1;
-      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
+      auto * tex = GAMEDIRECTORY.getFile(value["TextureID"].toInt());
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
-      int cdi = r.values[i][2].toInt();
-      int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
+      auto cdi = value["IDIID"].toInt();
+      auto pci = value["ParticleColorID"].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;
-        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-        "WHERE ID = %1;").arg(pci);
-        sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
-        if(pcir.valid && !pcir.empty())
+        auto pcir = GAMEDATABASE.sqlQuery(QString("SELECT StartColor1, MidColor1, EndColor1, "
+                                                  "StartColor2, MidColor2, EndColor2, "
+                                                  "StartColor3, MidColor3, EndColor3 "
+                                                  "FROM ParticleColor WHERE ID = %1;").arg(pci));
+        if(!pcir.empty())
         {
           std::vector<Vec4D> cols;
-          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          for (auto& j : pcir.values[0])
           {
-            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+            cols.push_back(fromARGB(j.toInt()));
           }
           PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
           grp.PCRIndex = numPCRs;
@@ -733,39 +730,37 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   }
   
   // do the same for model2
-  query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
-                 "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.ID "
-                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                 "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
-
-  r = GAMEDATABASE.sqlQuery(query);
+  r = GAMEDATABASE.sqlQueryAssoc(QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID as IDIID FROM ItemDisplayInfo "
+                                         "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.ID "
+                                         "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                                         "WHERE ModelID = %1").arg(m->gamefile->fileDataId()));
 
   if(r.valid && !r.empty())
   {
-    for(size_t i = 0 ; i < r.values.size() ; i++)
+    for (auto& value : r.values)
     {
       TextureGroup grp;
       grp.base = TEXTURE_ITEM;
       grp.definedTexture = true;
       grp.count = 1;
-      GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
+      auto * tex = GAMEDIRECTORY.getFile(value["TextureID"].toInt());
       alreadyUsedTextures.insert(tex);
       grp.tex[0] = tex;
-      int cdi = r.values[i][2].toInt();
-      int pci = r.values[i][1].toInt(); // particleColorIndex, for replacing particle color
+      auto cdi = value["IDIID"].toInt();
+      auto pci = value["ParticleColorID"].toInt(); // particleColorIndex, for replacing particle color
       if (pci)
       {
         grp.particleColInd = pci;
-        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
-        "WHERE ID = %1;").arg(pci);
-        sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
+        auto pcir = GAMEDATABASE.sqlQuery(QString("SELECT StartColor1, MidColor1, EndColor1, "
+                                                  "StartColor2, MidColor2, EndColor2, "
+                                                  "StartColor3, MidColor3, EndColor3 "
+                                                  "FROM ParticleColor WHERE ID = %1;").arg(pci));
         if(pcir.valid && !pcir.empty())
         {
           std::vector<Vec4D> cols;
-          for (size_t j = 0; j < pcir.values[0].size(); j++)
+          for (auto& j : pcir.values[0])
           {
-            cols.push_back(fromARGB(pcir.values[0][j].toInt()));
+            cols.push_back(fromARGB(j.toInt()));
           }
           PCRList.push_back({ {cols[0],cols[1],cols[2]}, {cols[3],cols[4],cols[5]}, {cols[6],cols[7],cols[8]} });
           grp.PCRIndex = numPCRs;
