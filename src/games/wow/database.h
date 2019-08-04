@@ -43,7 +43,7 @@ struct _DATABASE_API_ ItemRecord {
 	QString name;
 	int id, itemclass, subclass, type, model, sheath, quality;
 
-	ItemRecord(const std::vector<QString> &);
+	ItemRecord(const std::map<QString,QString> &);
 	ItemRecord():id(0), itemclass(-1), subclass(-1), type(0), model(0), sheath(0), quality(0)
 	{}
 
@@ -72,7 +72,7 @@ struct _DATABASE_API_ NPCRecord
 	int id, model, type;
 
 	NPCRecord(QString line);
-	NPCRecord(const std::vector<QString> &);
+	NPCRecord(const std::map<QString,QString> &);
 	NPCRecord(): id(0), model(0), type(0) {}
 	NPCRecord(const NPCRecord &r): name(r.name), id(r.id), model(r.model), type(r.type) {}
 

@@ -1830,7 +1830,7 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
   std::map<int, std::wstring> result;
   if (animated && anims.size() > 0)
   {
-    QString query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
+    QString query = "SELECT ID,Name FROM AnimationData WHERE ID IN(";
     for (unsigned int i = 0; i < anims.size(); i++)
     {
       query += QString::number(anims[i].animID);
@@ -1847,10 +1847,8 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
       LOG_INFO << "Found" << animsResult.values.size() << "animations for model";
 
       // remap database results on model header indexes
-      for (int i = 0, imax = animsResult.values.size(); i < imax; i++)
-      {
-        result[animsResult.values[i]["ID"].toInt()] = animsResult.values[i]["NAME"].toStdWString();
-      }
+      for (auto& value : animsResult.values)
+        result[value["ID"].toInt()] = value["Name"].toStdWString();
     }
   }
   return result;
