@@ -77,6 +77,8 @@ bool CASCFolder::setConfig(core::GameConfig config)
         return false;
       }
 
+      addExtraEncryptionKeys();
+
       if (CascOpenFile(hStorage, "Interface\\FrameXML\\Localization.lua", it->second, 0, &dummy))
       {
         CascCloseFile(dummy);
@@ -196,6 +198,37 @@ bool CASCFolder::openFile(int id, HANDLE * result)
 bool CASCFolder::closeFile(HANDLE file)
 {
   return CascCloseFile(file);
+}
+
+void CASCFolder::addExtraEncryptionKeys()
+{
+  QFile tactKeys("extraEncryptionKeys.csv");
+
+  if (tactKeys.open(QIODevice::ReadOnly | QIODevice::Text))
+  {
+    QTextStream in(&tactKeys);
+    while (!in.atEnd())
+    {
+      QString line = in.readLine();
+      if (line.startsWith("##"))  // ignore lines beginning with ##, useful for adding comments.
+        continue;
+        
+      QStringList lineData = line.split(';');
+      if (lineData.size() != 2)
+        continue;
+      QString keyName = lineData.at(0);
+      QString keyValue = lineData.at(1);
+      if (keyName.isEmpty() || keyValue.isEmpty())
+        continue;
+
+      bool ok, ok2;
+      ok2 = CascAddStringEncryptionKey(hStorage, keyName.toULongLong(&ok, 16), keyValue.toStdString().c_str());
+      if (ok2)
+        LOG_INFO << "Adding TACT key from file, Name:" << keyName << ", Value:" << keyValue ;
+      else
+        LOG_ERROR << "Failed to add TACT key from file, Name:" << keyName << ", Value:" << keyValue ;  
+    }
+  }
 }
 
 /*

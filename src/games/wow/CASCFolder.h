@@ -52,7 +52,8 @@ class _CASCFOLDER_API_ CASCFolder
     void initLocales();
     void initVersion();
     void initBuildInfo();
-    
+    void addExtraEncryptionKeys();
+
     int m_currentCascLocale;
     core::GameConfig m_currentConfig;
 
