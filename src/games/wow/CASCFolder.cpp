@@ -210,7 +210,7 @@ void CASCFolder::addExtraEncryptionKeys()
     while (!in.atEnd())
     {
       QString line = in.readLine();
-      if (line.startsWith("##"))  // ignore lines beginning with ##, useful for adding comments.
+      if (line.startsWith("##") || line.startsWith("\"##"))  // ignore lines beginning with ##, useful for adding comments.
         continue;
         
       QStringList lineData = line.split(';');
