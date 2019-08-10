@@ -184,7 +184,8 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                         
 set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
         		$ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
-        		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll)
+        		$ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll
+            ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(GAMEFILES_WOW8_1 
                  ${WMV_BASE_PATH}/bin_support/wow/8.1/listfile.csv
