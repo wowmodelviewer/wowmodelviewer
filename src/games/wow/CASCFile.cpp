@@ -145,7 +145,7 @@ bool CASCFile::isAlreadyOpened()
     return false;
 }
 
-bool CASCFile::getFileSize(unsigned int & s)
+bool CASCFile::getFileSize(unsigned long long & s)
 {
   bool result = false;
   
