@@ -72,10 +72,11 @@
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="uint" name="Field1" pos="1" />
-    <field type="byte" name="Field2" pos="2" />
-    <field type="byte" name="Field3" pos="3" />
-    <field type="int"  name="Field4" arraySize="3" pos="5" />
+    <field type="uint" name="Sex" pos="1" />
+    <field type="uint" name="BaseSection" pos="2" />
+    <field type="uint" name="UiCustomizationType" pos="3" />
+    <field type="uint" name="Flags" pos="4" />
+    <field type="int"  name="ComponentSection" arraySize="3" pos="5" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
