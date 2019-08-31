@@ -319,12 +319,12 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
 
   if (query != "")
   {
-    auto vals = GAMEDATABASE.sqlQuery(query);
+    auto vals = GAMEDATABASE.sqlQueryAssoc(query);
     if (!vals.empty())
     {
       for (auto& v : vals.values[0])
-        if (!v.isEmpty())
-          result.push_back(v.toInt());
+        if (!v.second.isEmpty())
+          result.push_back(v.second.toInt());
     }
     else
     {
@@ -403,6 +403,7 @@ void CharDetails::fillCustomizationMap()
     else
     {
       LOG_ERROR << "No face customization available for skin color" << it << "for model" << m_model->name();
+      LOG_ERROR << query;
     }
 
     m_multiCustomizationMap[FACE].insert({ it, face });

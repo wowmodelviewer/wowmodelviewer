@@ -611,7 +611,6 @@ void ModelViewer::InitDatabase()
     initDB = false;
     LOG_ERROR << "Initializing failed!";
     SetStatusText(wxT("Initializing failed!"));
-    return;
   }
   else
   {
