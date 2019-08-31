@@ -13,27 +13,28 @@ _DATABASE_API_ std::vector<NPCRecord> npcs;
 //
 
 ////////////////////
-ItemRecord::ItemRecord(const std::vector<QString> & vals)
+ItemRecord::ItemRecord(const std::map<QString,QString> & vals)
   : id(0), itemclass(0), subclass(0), type(0), model(0), sheath(0), quality(0)
 {
-  if(vals.size() < 6)
-      return;
-
-  id = vals[0].toInt();
-  type = vals[2].toInt();
-  itemclass = vals[3].toInt();
-  subclass = vals[4].toInt();
-  model = 1;
-  quality = 0;
-  switch(vals[5].toInt())
+  try
   {
-    case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;
-    case SHEATHETYPE_LARGEWEAPON: sheath = ATT_LEFT_BACK; break;
-    case SHEATHETYPE_HIPWEAPON: sheath = ATT_LEFT_HIP_SHEATH; break;
-    case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
-    default: sheath = SHEATHETYPE_NONE;
+    id = vals.at("ID").toInt();
+    type = vals.at("Type").toInt();
+    itemclass = vals.at("Class").toInt();
+    subclass = vals.at("SubClass").toInt();
+    model = 1;
+    quality = 0;
+    switch (vals.at("Sheath").toInt())
+    {
+      case SHEATHETYPE_MAINHAND: sheath = ATT_LEFT_BACK_SHEATH; break;
+      case SHEATHETYPE_LARGEWEAPON: sheath = ATT_LEFT_BACK; break;
+      case SHEATHETYPE_HIPWEAPON: sheath = ATT_LEFT_HIP_SHEATH; break;
+      case SHEATHETYPE_SHIELD: sheath = ATT_MIDDLE_BACK_SHEATH; break;
+      default: sheath = SHEATHETYPE_NONE;
+    }
+    name = vals.at("Name");
   }
-  name = vals[1];
+  catch(...) { }
 }
 
 int ItemRecord::slot()
@@ -124,14 +125,15 @@ NPCRecord::NPCRecord(QString line)
 }
 
 
-NPCRecord::NPCRecord(const std::vector<QString> & vals)
+NPCRecord::NPCRecord(const std::map<QString,QString> & vals)
     : id(0), model(0), type(0)
 {
-  if(vals.size() < 4)
-    return;
-
-  id = vals[0].toInt();
-  model = vals[1].toInt();
-  type = vals[2].toInt();
-  name = vals[3];
+  try 
+  {
+    id = vals.at("ID").toInt();
+    model = vals.at("DisplayID1").toInt();
+    type = vals.at("CreatureTypeID").toInt();
+    name = vals.at("Name");
+  }
+  catch(...) { }
 }

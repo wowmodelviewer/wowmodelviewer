@@ -51,32 +51,32 @@ class QXmlStreamReader;
 #    define _WOWITEM_API_
 #endif
 
-class _WOWITEM_API_ WoWItem : public Component
+class _WOWITEM_API_ WoWItem final : public Component
 {
   public:
-    WoWItem(CharSlots slot);
+  explicit WoWItem(CharSlots slot);
 
     void setId(int id);
-    int id() { return m_id; }
+    int id() const { return m_id; }
 
     void setDisplayId(int id);
     void setLevel(int level);
 
-    CharSlots slot() { return m_slot; }
+    CharSlots slot() const { return m_slot; }
 
-    int quality() { return m_quality; }
+    int quality() const { return m_quality; }
 
     void refresh();
 
-    void onParentSet(Component *);
+    void onParentSet(Component *) override;
 
     void load();
 
-    unsigned int nbLevels() { return m_nbLevels; }
+    unsigned int nbLevels() const { return m_nbLevels; }
 
-    std::map<POSITION_SLOTS, WoWModel *> models() { return m_itemModels; }
+    std::map<POSITION_SLOTS, WoWModel *> models() const { return m_itemModels; }
 
-    void save(QXmlStreamWriter &);
+    void save(QXmlStreamWriter &) const;
     void load(QString &);
 
   private:
@@ -109,10 +109,10 @@ class _WOWITEM_API_ WoWItem : public Component
 
     CharRegions getRegionForTexture(GameFile * file) const;
 
-    bool queryItemInfo(QString & query, sqlResult & result) const;
+    bool queryItemInfo(QString & query, sqlResultAssoc & result) const;
 
-    int getCustomModelId(size_t index);
-    int getCustomTextureId(size_t index);
+    int getCustomModelId(size_t index) const;
+    int getCustomTextureId(size_t index) const;
 };
 
 

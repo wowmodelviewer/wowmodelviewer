@@ -120,36 +120,36 @@ void EnchantsDialog::InitObjects()
 
 void EnchantsDialog::InitEnchants()
 {
-  QString query = "SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 \
-                   FROM SpellItemEnchantment \
-                   LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID \
-                   LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID \
-                   LEFT JOIN ItemVisualEffects IVE2 ON ItemVisuals .itemVisualEffects1 = IVE2.ID \
-                   LEFT JOIN ItemVisualEffects IVE3 ON ItemVisuals .itemVisualEffects3 = IVE3.ID \
-                   LEFT JOIN ItemVisualEffects IVE4 ON ItemVisuals .itemVisualEffects4 = IVE4.ID \
-                   LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID \
-                   WHERE VisualID != 0";
+  auto enchantsInfos = GAMEDATABASE.sqlQueryAssoc("SELECT SpellItemEnchantment.ID as ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, "
+                                                  "IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 "
+                                                  "FROM SpellItemEnchantment "
+                                                  "LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID "
+                                                  "LEFT JOIN ItemVisualEffects IVE1 ON ItemVisuals .itemVisualEffects1 = IVE1.ID "
+                                                  "LEFT JOIN ItemVisualEffects IVE2 ON ItemVisuals .itemVisualEffects1 = IVE2.ID "
+                                                  "LEFT JOIN ItemVisualEffects IVE3 ON ItemVisuals .itemVisualEffects3 = IVE3.ID "
+                                                  "LEFT JOIN ItemVisualEffects IVE4 ON ItemVisuals .itemVisualEffects4 = IVE4.ID "
+                                                  "LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID "
+                                                  "WHERE VisualID != 0");
 
-  sqlResult enchantsInfos = GAMEDATABASE.sqlQuery(query);
-
-  if(!enchantsInfos.valid || enchantsInfos.values.empty())
+  if(enchantsInfos.empty())
     return;
 
-  for(int i=0, imax=enchantsInfos.values.size() ; i < imax ; i++)
+  for (auto& value : enchantsInfos.values)
   {
     EnchantsRec rec;
-    rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].toStdString().c_str(), wxConvUTF8).mb_str()));;
-    rec.models[0] = enchantsInfos.values[i][2].toStdString();
-    rec.models[1] = enchantsInfos.values[i][3].toStdString();
-    rec.models[2] = enchantsInfos.values[i][4].toStdString();
-    rec.models[3] = enchantsInfos.values[i][5].toStdString();
-    rec.models[4] = enchantsInfos.values[i][6].toStdString();
-    enchants[enchantsInfos.values[i][0].toInt()] = rec;
+    rec.name = wxConvLocal.cWC2WX(wxConvUTF8.cMB2WC(wxString(value["Name"].toStdString().c_str(), wxConvUTF8).mb_str()));;
+    rec.models[0] = value["enchant1"].toStdString();
+    rec.models[1] = value["enchant2"].toStdString();
+    rec.models[2] = value["enchant3"].toStdString();
+    rec.models[3] = value["enchant4"].toStdString();
+    rec.models[4] = value["enchant5"].toStdString();
+    enchants[value["ID"].toInt()] = rec;
   }
 
   choices.Clear();
-  for (std::map<int, EnchantsRec>::iterator it=enchants.begin();  it!=enchants.end();  ++it)
-    choices.Add(it->second.name.c_str());
+
+  for (auto& enchant : enchants)
+    choices.Add(enchant.second.name.c_str());
 
   EnchantsInitiated = true;
 }
