@@ -180,7 +180,7 @@
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemDisplayInfoID" pos="1" />
+    <field type="uint" name="ItemDisplayInfoID" pos="2" />
   </table>
   <table name="ItemModifiedAppearance">
     <field type="uint" name="ID" primary="yes" />
