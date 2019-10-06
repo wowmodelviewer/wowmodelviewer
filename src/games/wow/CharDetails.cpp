@@ -268,7 +268,7 @@ std::vector<int> CharDetails::getTextureForSection(SectionType section)
     type = getSectionType(type, infos.isHD);
   }
 
-  QString query = QString("SELECT TFD1.TextureID, TFD2.TextureID, TFD3.TextureID FROM CharSections "
+  QString query = QString("SELECT TFD1.TextureID as Tex1, TFD2.TextureID as Tex2, TFD3.TextureID as Tex3 FROM CharSections "
                           "LEFT JOIN TextureFileData AS TFD1 ON TextureName1 = TFD1.ID "
                           "LEFT JOIN TextureFileData AS TFD2 ON TextureName2 = TFD2.ID "
                           "LEFT JOIN TextureFileData AS TFD3 ON TextureName3 = TFD3.ID ");
