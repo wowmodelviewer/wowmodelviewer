@@ -6,7 +6,7 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_RACEINFOS 0
+#define DEBUG_RACEINFOS 1
 
 std::map<int, RaceInfos> RaceInfos::RACES;
 
@@ -109,10 +109,12 @@ void RaceInfos::init()
         LOG_INFO << "infos.textureLayoutID =" << infos.textureLayoutID;
         LOG_INFO << "infos.raceid =" << infos.raceid;
         LOG_INFO << "infos.sexid =" << infos.sexid;
-        LOG_INFO << "infos.customization[0] =" << infos.customization[0].c_str();
-        LOG_INFO << "infos.customization[1] =" << infos.customization[1].c_str();
-        LOG_INFO << "infos.customization[2] =" << infos.customization[2].c_str();
         LOG_INFO << "infos.isHD =" << infos.isHD;
+        LOG_INFO << "infos.barefeet =" << infos.barefeet;
+        LOG_INFO << "infos.MaleModelFallbackRaceID =" << infos.MaleModelFallbackRaceID;
+        LOG_INFO << "infos.FemaleModelFallbackRaceID =" << infos.FemaleModelFallbackRaceID;
+        LOG_INFO << "infos.MaleTextureFallbackRaceID =" << infos.MaleTextureFallbackRaceID;
+        LOG_INFO << "infos.FemaleTextureFallbackRaceID =" << infos.FemaleTextureFallbackRaceID;
         LOG_INFO << "---------------------------";
 #endif
       }

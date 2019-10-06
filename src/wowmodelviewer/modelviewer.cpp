@@ -611,7 +611,6 @@ void ModelViewer::InitDatabase()
     initDB = false;
     LOG_ERROR << "Initializing failed!";
     SetStatusText(wxT("Initializing failed!"));
-    return;
   }
   else
   {
@@ -629,14 +628,14 @@ void ModelViewer::InitDatabase()
   initDB = true;
 
   {
-    sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID1, CreatureTypeID, Name From Creature;");
+    auto npc = GAMEDATABASE.sqlQueryAssoc("SELECT ID, DisplayID1, CreatureTypeID, Name From Creature;");
 
-    if (npc.valid && !npc.empty())
+    if (!npc.empty())
     {
       LOG_INFO << "Found" << npc.values.size() << "NPCs";
-      for (int i = 0, imax = npc.values.size(); i < imax; i++)
+      for (auto &n : npc.values)
       {
-        NPCRecord rec(npc.values[i]);
+        NPCRecord rec(n);
         if (rec.model != 0)
           npcs.push_back(rec);
       }
@@ -651,14 +650,16 @@ void ModelViewer::InitDatabase()
   }
   
   {
-    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
+    auto item = GAMEDATABASE.sqlQueryAssoc("SELECT Item.ID as ID, ItemSparse.Name as Name, Item.Type as Type, "
+                                           "Item.Class as Class, Item.SubClass as SubClass, Item.Sheath as Sheath "
+                                           "FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
 
-    if (item.valid && !item.empty())
+    if (!item.empty())
     {
       LOG_INFO << "Found" << item.values.size() << "items";
-      for (int i = 0, imax = item.values.size(); i < imax; i++)
+      for (auto& value : item.values)
       {
-        ItemRecord rec(item.values[i]);
+        ItemRecord rec(value);
         items.items.push_back(rec);
       }
     }
@@ -1105,57 +1106,52 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   isChar = false;
   isWMO = false;
 
+  auto r = GAMEDATABASE.sqlQueryAssoc(QString("SELECT CreatureModelData.FileID as FileID, CreatureDisplayInfo.ExtendedDisplayInfoID as EDIID, "
+                                              "CreatureDisplayInfo.ID as ID FROM Creature "
+                                              "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
+                                              "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
+                                              "WHERE Creature.ID = %1;").arg(modelid));
 
-  QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
-                          "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
-                          "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
-                          "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
-                          "WHERE Creature.ID = %1;").arg(modelid);
-
-  sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-  if (r.valid && !r.empty())
+  if (r.empty())
   {
-    int extraId = r.values[0][4].toInt();
+    const auto extraId = r.values[0]["EDIID"].toInt();
     // if npc is a simple one (no extra info CreatureDisplayInfoExtra)
     if (extraId == 0)
     {
-      LoadModel(GAMEDIRECTORY.getFile(r.values[0][0].toInt()));
-      WoWModel * m = const_cast<WoWModel *>(canvas->model());
+      LoadModel(GAMEDIRECTORY.getFile(r.values[0]["FileID"].toInt()));
+      auto * m = const_cast<WoWModel *>(canvas->model());
       m->modelType = MT_NORMAL;
-      animControl->SetSkinByDisplayID(r.values[0][5].toInt());
+      animControl->SetSkinByDisplayID(r.values[0]["ID"].toInt());
     }
     else
     {
-      LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0][0].toInt())));
+      LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getHDModelForFileID(r.values[0]["FileID"].toInt())));
 
-      query = QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId);
+      r = GAMEDATABASE.sqlQueryAssoc(QString("SELECT Skin, Face, HairStyle, HairColor, FacialHair "
+                                             "FROM CreatureDisplayInfoExtra WHERE ID = %1").arg(extraId));
 
-      r = GAMEDATABASE.sqlQuery(query);
-
-      if (r.valid && !r.empty())
+      if (!r.empty())
       {
-        g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
-        g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][2].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][3].toInt());
-        g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
+        g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0]["Skin"].toInt());
+        g_charControl->model->cd.set(CharDetails::FACE, r.values[0]["Face"].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0]["HairStyle"].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0]["HairColor"].toInt());
+        g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0]["FacialHair"].toInt());
       }
 
-      query = QString("SELECT ItemDisplayInfoID, ItemType FROM NpcModelItemSlotDisplayInfo WHERE CreatureDisplayInfoExtraID = %1").arg(extraId);
+      r = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ItemDisplayInfoID, ItemType "
+                                             "FROM NpcModelItemSlotDisplayInfo "
+                                             "WHERE CreatureDisplayInfoExtraID = %1").arg(extraId));
 
-      r = GAMEDATABASE.sqlQuery(query);
-
-      if (r.valid && !r.empty())
+      if (!r.empty())
       {
         static map<int, CharSlots> ItemTypeToInternal = { { 0, CS_HEAD }, { 1, CS_SHOULDER }, { 2, CS_SHIRT }, { 3, CS_CHEST }, { 4, CS_BELT }, { 5, CS_PANTS },
         { 6, CS_BOOTS }, { 7, CS_BRACERS }, { 8, CS_GLOVES }, { 9, CS_TABARD }, { 10, CS_CAPE } };
-        for (uint i = 0; i < r.values.size(); i++)
+        for (auto& value : r.values)
         {
-          WoWItem * item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
+          auto * item = g_charControl->model->getItem(ItemTypeToInternal[value["ItemType"].toInt()]);
           if (item)
-            item->setDisplayId(r.values[i][0].toInt());
+            item->setDisplayId(value["ItemDisplayInfoID"].toInt());
         }
       }
 
@@ -1185,26 +1181,23 @@ void ModelViewer::LoadItem(unsigned int id)
 
   try
   {
-    QString query = QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-                            "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
-                            "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
-                            "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
+    auto itemInfos = GAMEDATABASE.sqlQueryAssoc(QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID as ItemID FROM ItemDisplayInfo "
+                                                        "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
+                                                        "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
+                                                        "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
+                                                        "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id));
 
-    sqlResult itemInfos = GAMEDATABASE.sqlQuery(query);
-    // LOG_INFO << query;
-
-    if (itemInfos.valid && !itemInfos.empty())
+    if (!itemInfos.empty())
     {
-      if (itemInfos.values[0][0] != "" && itemInfos.values[0][1] != "")
+      if (!itemInfos.values[0]["ModelID"].isEmpty() && !itemInfos.values[0]["TextureID"].isEmpty())
       {
-        LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
+        LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0]["ModelID"].toInt()));
         TextureGroup grp;
         grp.base = TEXTURE_ITEM;
         grp.count = 1;
-        grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
+        grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0]["TextureID"].toInt());
         if (grp.tex[0])
-          animControl->SetSkinByDisplayID(itemInfos.values[0][2].toInt());
+          animControl->SetSkinByDisplayID(itemInfos.values[0]["ItemID"].toInt());
       }
     }
 
@@ -1999,13 +1992,13 @@ void ModelViewer::OnBackground(wxCommandEvent &event)
       // List of skybox models, LightSkybox.dbc
       wxArrayString skyboxes;
 
-      sqlResult skyboxesInfos = GAMEDATABASE.sqlQuery("SELECT DISTINCT name FROM LightSkybox");
+      auto skyboxesInfos = GAMEDATABASE.sqlQueryAssoc("SELECT DISTINCT Name FROM LightSkybox");
 
       if (skyboxesInfos.valid && !skyboxesInfos.values.empty())
       {
-        for (unsigned int i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
+        for (auto& value : skyboxesInfos.values)
         {
-          skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdWString());
+          skyboxes.Add(value["Name"].replace(".mdx", ".m2").toStdWString());
         }
       }
 
@@ -2443,14 +2436,12 @@ void ModelViewer::ImportArmoury(wxString strURL)
     }
 
     // retrieve model files id from DB
-    QString query = QString("SELECT CMDM.FileID as malemodel, CMDF.FileID AS femalemodel, CMDMHD.FileID as malemodelHD, CMDFHD.FileID AS femalemodelHD FROM ChrRaces "
-                            "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
-                            "WHERE ChrRaces.ID = %1").arg(result->raceId);
-
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
+    auto r = GAMEDATABASE.sqlQuery(QString("SELECT CMDM.FileID as malemodel, CMDF.FileID AS femalemodel, CMDMHD.FileID as malemodelHD, CMDFHD.FileID AS femalemodelHD FROM ChrRaces "
+                                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
+                                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
+                                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
+                                           "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
+                                           "WHERE ChrRaces.ID = %1").arg(result->raceId));
 
     if (!r.valid || r.values.empty())
     {

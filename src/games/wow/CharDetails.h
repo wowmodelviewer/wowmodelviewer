@@ -95,7 +95,7 @@ public:
 
   RaceInfos infos;
 
-  int geosets[NUM_GEOSETS];
+  int geosets[NUM_GEOSETS]{};
 
   // save + load
   void save(QXmlStreamWriter &);
@@ -104,10 +104,7 @@ public:
 
   void reset(WoWModel *);
 
-  void print();
-
   std::vector<int> getTextureForSection(SectionType);
-
 
   // accessors to customization
   void set(CustomizationType type, uint val);

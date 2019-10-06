@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "sqlite3.h"
+#include <map>
 
 class DBFile;
 class GameFile;
@@ -31,12 +32,23 @@ class _GAMEDATABASE_API_ sqlResult
 {
 public:
   sqlResult() : valid(false), nbcols(0) {}
-  ~sqlResult() { /* TODO :free char** */ }
-  bool empty() { return values.size() == 0; }
+  ~sqlResult() = default;
+  bool empty() const { return !valid || values.empty(); }
   bool valid;
   int nbcols;
   std::vector<std::vector<QString> > values;
 };
+
+class _GAMEDATABASE_API_ sqlResultAssoc
+{
+public:
+  sqlResultAssoc() : valid(false) {}
+  ~sqlResultAssoc() = default;
+  bool empty() const { return !valid || values.empty(); }
+  bool valid;
+  std::vector<std::map<QString, QString> > values;
+};
+
 
 namespace core
 {
@@ -92,7 +104,8 @@ namespace core
 
     bool initFromXML(const QString & file);
 
-    sqlResult sqlQuery(const QString &query);
+    sqlResult sqlQuery(const QString &query) const;
+    sqlResultAssoc sqlQueryAssoc(const QString &query) const;
 
     void setFastMode() { m_fastMode = true; }
 
@@ -109,7 +122,9 @@ namespace core
   protected:
 
   private:
-    static int treatQuery(void *NotUsed, int nbcols, char ** values, char ** cols);
+    static int treatQuery(void *resultPtr, int nbcols, char ** vals, char ** cols);
+    static int treatQueryAssoc(void *resultPtr, int nbcols, char ** vals, char ** cols);
+
     static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
     bool createDatabaseFromXML(const QString & file);
