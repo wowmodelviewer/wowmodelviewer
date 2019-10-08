@@ -128,8 +128,15 @@ set(wow8_2_files
 
 source_group("wow8.2" FILES ${wow8_2_files})
 
+set(wow8_3_files 
+				 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
+				 ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
+				 ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
+				 ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv)
 
-set(useful_files ${common_files} ${wow8_1_files} ${wow8_2_files})
+source_group("wow8.3" FILES ${wow8_3_files})
+
+set(useful_files ${common_files} ${wow8_1_files} ${wow8_2_files} ${wow8_3_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -198,7 +205,13 @@ set(GAMEFILES_WOW8_2
         		     ${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
 					       ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
 					       ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
-           
+ 
+set(GAMEFILES_WOW8_3
+                 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
+        		     ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
+					       ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
+					       ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv) 
+                 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
@@ -207,3 +220,4 @@ install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformat
 
 install(FILES ${GAMEFILES_WOW8_1} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.1)
 install(FILES ${GAMEFILES_WOW8_2} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.2)
+install(FILES ${GAMEFILES_WOW8_3} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.3)
