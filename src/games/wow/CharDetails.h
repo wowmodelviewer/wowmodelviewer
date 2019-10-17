@@ -34,6 +34,19 @@ public:
   CharDetails();
 
   // Types
+  enum BaseSectionType
+  {
+    SkinBaseType = 0,
+    FaceBaseType = 1,
+    FacialHairBaseType = 2,
+    HairBaseType = 3,
+    UnderwearBaseType = 4,
+    Custom1BaseType = 5,
+    Custom2BaseType = 6,
+    Custom3BaseType = 7,
+  };
+  
+  // Types
   enum SectionType
   {
     SkinType = 0,
@@ -106,7 +119,7 @@ public:
 
   void print();
 
-  std::vector<int> getTextureForSection(SectionType);
+  std::vector<int> getTextureForSection(BaseSectionType);
 
 
   // accessors to customization

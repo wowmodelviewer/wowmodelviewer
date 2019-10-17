@@ -2264,7 +2264,7 @@ void WoWModel::refresh()
 
   tex.reset(infos.textureLayoutID);
 
-  std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinType);
+  std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
 
   if (foundTextures.size() > 0)
     tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
@@ -2278,7 +2278,7 @@ void WoWModel::refresh()
   // Display underwear on the model?
   if (cd.showUnderwear)
   {
-    foundTextures = cd.getTextureForSection(CharDetails::UnderwearType);
+    foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
     if (foundTextures.size() > 0)
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 1); // pants
 
@@ -2295,7 +2295,7 @@ void WoWModel::refresh()
   }
 
   // face
-  foundTextures = cd.getTextureForSection(CharDetails::FaceType);
+  foundTextures = cd.getTextureForSection(CharDetails::FaceBaseType);
   if (foundTextures.size() > 0)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_FACE_LOWER, 1);
 
@@ -2303,7 +2303,7 @@ void WoWModel::refresh()
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_FACE_UPPER, 1);
 
   // facial hair
-  foundTextures = cd.getTextureForSection(CharDetails::FacialHairType);
+  foundTextures = cd.getTextureForSection(CharDetails::FacialHairBaseType);
   if (foundTextures.size() > 0)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_FACE_LOWER, 2);
 
@@ -2344,7 +2344,7 @@ void WoWModel::refresh()
 
 
   // Hair texture
-  foundTextures = cd.getTextureForSection(CharDetails::HairType);
+  foundTextures = cd.getTextureForSection(CharDetails::HairBaseType);
   if (foundTextures.size() > 0)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(foundTextures[0]);
@@ -2395,9 +2395,21 @@ void WoWModel::refresh()
 
   // DH customization
   // tattoos
-  foundTextures = cd.getTextureForSection(CharDetails::TattooType);
+  foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
   if (foundTextures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
+  {
+    // HACK: The component section we add the texture to should be obtained from 
+    // chrcustomization.db2, but for now we'll hardcode it. 12 for DHs & LF Draenei,
+    // 13 for other races (but none for male Dark Irons):
+    if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF || infos.raceid == RACE_LIGHTFORGED_DRAENEI)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
+    }
+    else if (infos.raceid == RACE_NIGHTBORNE || infos.raceid == RACE_HIGHMOUNTAIN_TAUREN || infos.raceid == RACE_ZANDALARI_TROLL || infos.raceid == RACE_VULPERA || (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_FEMALE))
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 13, 1);
+    }
+  }
 
   // horns
   cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
