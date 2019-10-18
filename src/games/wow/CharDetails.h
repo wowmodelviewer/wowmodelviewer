@@ -59,8 +59,8 @@ public:
     FacialHairTypeHD = 7,
     HairTypeHD = 8,
     UnderwearTypeHD = 9,
-    TattooType = 11,
-    TattooTypeHD = 12,
+    Custom1Type = 11,
+    Custom2TypeHD = 12,
     Custom2Type = 13,
     Custom2TypeHD = 14,
     Custom3Type = 15,
@@ -85,19 +85,6 @@ public:
   public:
     QString name;
     std::vector<int> possibleValues;
-  };
-
-
-  std::map<int, int> SectionTypeToHD =
-  {
-    { SkinType, SkinTypeHD },
-    { FaceType, FaceTypeHD },
-    { FacialHairType, FacialHairTypeHD },
-    { HairType, HairTypeHD },
-    { UnderwearType, UnderwearTypeHD },
-    { TattooType, TattooTypeHD },
-    { Custom2Type, Custom2TypeHD },
-    { Custom3Type, Custom3TypeHD }
   };
 
   EyeGlowTypes eyeGlowType;
