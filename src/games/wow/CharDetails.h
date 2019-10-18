@@ -60,7 +60,7 @@ public:
     HairTypeHD = 8,
     UnderwearTypeHD = 9,
     Custom1Type = 11,
-    Custom2TypeHD = 12,
+    Custom1TypeHD = 12,
     Custom2Type = 13,
     Custom2TypeHD = 14,
     Custom3Type = 15,
