@@ -126,7 +126,7 @@ private:
   WoWModel * m_model;
 
   void fillCustomizationMap();
-  int getSectionType(int baseType, bool isHD);
+  QString getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization = false);
   std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
   std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 

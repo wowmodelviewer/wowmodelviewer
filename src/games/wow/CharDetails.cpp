@@ -356,7 +356,7 @@ void CharDetails::fillCustomizationMap()
   // common part for all characters
   // skin
   CustomizationParam skin;
-  skin.name = "Skin";
+  skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
 
   QString query = QString("SELECT ColorIndex FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
@@ -382,6 +382,7 @@ void CharDetails::fillCustomizationMap()
 
   // face customization
   // face possible customization depends on current skin color. We fill m_multiCustomizationMap first
+  QString faceName = getCustomizationName(FaceBaseType, infos.raceid, infos.sexid);
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
@@ -396,7 +397,7 @@ void CharDetails::fillCustomizationMap()
     sqlResult faces = GAMEDATABASE.sqlQuery(query);
 
     CustomizationParam face;
-    face.name = "Face";
+    face.name = faceName;
 
     if (faces.valid && !faces.values.empty())
     {
@@ -413,35 +414,8 @@ void CharDetails::fillCustomizationMap()
 
   m_customizationParamsMap.insert({ FACE, m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]] });
 
-  // starting from here, customization may differ based on database values
-  // get customization names
-  query = QString("SELECT HairCustomization, FacialHairCustomization%1 FROM ChrRacesCustomization WHERE ID = %2")
-    .arg(infos.sexid + 1)
-    .arg(infos.raceid);
-
-  sqlResult names = GAMEDATABASE.sqlQuery(query);
-
-  QString facialCustomizationBaseName;
-  QString additionalCustomizationName;
-
-  if (names.valid && !names.values.empty())
-  {
-    facialCustomizationBaseName = names.values[0][0];
-    facialCustomizationBaseName = facialCustomizationBaseName.at(0).toUpper() + facialCustomizationBaseName.mid(1).toLower();
-    if (facialCustomizationBaseName == "Normal")
-      facialCustomizationBaseName = "Hair";
-
-    additionalCustomizationName = names.values[0][1];
-    additionalCustomizationName = additionalCustomizationName.at(0).toUpper() + additionalCustomizationName.mid(1).toLower();
-    if (additionalCustomizationName == "Normal")
-      additionalCustomizationName = "Facial Hair";
-  }
-  else
-  {
-    LOG_ERROR << "Unable to collect customization names for model" << m_model->name() << "(race id" << infos.raceid << "- sex id" << infos.sexid << ")";
-  }
-
-  // facial style customization
+  // Hair style customization (horn style for some races)
+  
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                   "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4")
@@ -452,24 +426,25 @@ void CharDetails::fillCustomizationMap()
 
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
-  CustomizationParam facialCustomizationStyle;
-  facialCustomizationStyle.name = QString(facialCustomizationBaseName + " Style");
+  QString hairName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid);
+  QString hairColName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid, true);
+  
+  CustomizationParam hairCustomizationStyle;
+  hairCustomizationStyle.name = hairName;
 
   if (styles.valid && !styles.values.empty())
   {
     for (uint i = 0; i < styles.values.size(); i++)
-      facialCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
+      hairCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
   }
   else
   {
     LOG_ERROR << "Unable to facial style parameters for model" << m_model->name();
   }
 
-  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, facialCustomizationStyle });
+  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, hairCustomizationStyle });
 
-
-  // facial color customization depends on current facial style. We fill m_multiCustomizationMap first
-  for (auto it = facialCustomizationStyle.possibleValues.begin(), itEnd = facialCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
+  for (auto it = hairCustomizationStyle.possibleValues.begin(), itEnd = hairCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
                     "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
@@ -482,25 +457,27 @@ void CharDetails::fillCustomizationMap()
 
     sqlResult colors = GAMEDATABASE.sqlQuery(query);
 
-    CustomizationParam facialColor;
-    facialColor.name = QString(facialCustomizationBaseName + " Color");
+    CustomizationParam hairColor;
+    hairColor.name = hairColName;
 
     if (colors.valid && !colors.values.empty())
     {
       for (uint i = 0; i < colors.values.size(); i++)
-        facialColor.possibleValues.push_back(colors.values[i][0].toInt());
+        hairColor.possibleValues.push_back(colors.values[i][0].toInt());
     }
     else
     {
-      LOG_ERROR << "No facial color available for facial customization style " << *it << "for model" << m_model->name();
+      LOG_ERROR << "No hair color available for hair customization style " << *it << "for model" << m_model->name();
     }
 
-    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, facialColor });
+    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, hairColor });
   }
 
   m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]] });
 
-  // addtional facial customization
+
+  // Additional facial customization - facial hair, earrings, horns, tusks, depending on model:
+  
   query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2")
     .arg(infos.raceid)
     .arg(infos.sexid);
@@ -508,7 +485,7 @@ void CharDetails::fillCustomizationMap()
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
   CustomizationParam additionalCustomization;
-  additionalCustomization.name = additionalCustomizationName;
+  additionalCustomization.name = getCustomizationName(FacialHairBaseType, infos.raceid, infos.sexid);
 
   if (additional.valid && !additional.values.empty())
   {
@@ -522,11 +499,13 @@ void CharDetails::fillCustomizationMap()
 
   m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
 
-  // Tattoos
-  // skin
-  CustomizationParam tattoos;
-  tattoos.name = "Tattoo";
 
+  // Custom1 Section (tattoos and some other things, depending on race)
+  
+  CustomizationParam custom1;
+  custom1.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid);
+  QString custom1ColName = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
+        
   // Night Elf & Blood Elf (Demon Hunters) only:
   // For some reason tattoo colour indices aren't used in CharDetails.db2.
   // Instead the variation index goes from 0-36, even though there are actually 6
@@ -546,24 +525,24 @@ void CharDetails::fillCustomizationMap()
 
     if (vals.valid && (vals.values.size() > 1))
     {
-      tattoos.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
-      m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tattoos });
+      custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
+      m_customizationParamsMap.insert({ DH_TATTOO_STYLE, custom1 });
  
-      for (auto it = tattoos.possibleValues.begin(), itEnd = tattoos.possibleValues.end(); it != itEnd; ++it)
+      for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
       {
         // tattoo color = 0 to 5 for each tattoo style
-        CustomizationParam tattooColor;
-        tattooColor.name = "Tattoo Color";
-        tattooColor.possibleValues = { 0, 1, 2, 3, 4, 5 };
+        CustomizationParam custom1Color;
+        custom1Color.name = custom1ColName;
+        custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
  
-        m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tattooColor });
+        m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, custom1Color });
       }
       m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
     }
   }
   // Other races with tattoos don't seem to have tattoo colours at all (yet?), but we'll
   // add the check in case it's used in the future. Also note that not all races use the
-  // Custom1 section for tattoos - a fix to support other cusomtization types needs to be
+  // Custom1 section for tattoos - a fix to support other customization types needs to be
   // added next.
   else
   {
@@ -578,24 +557,21 @@ void CharDetails::fillCustomizationMap()
   
     sqlResult styles = GAMEDATABASE.sqlQuery(query);
   
-    CustomizationParam tattooCustomizationStyle;
-    tattooCustomizationStyle.name = QString("Tattoo");
-  
     if (styles.valid && !styles.values.empty())
     {
       for (uint i = 0; i < styles.values.size(); i++)
-        tattooCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
+        custom1.possibleValues.push_back(styles.values[i][0].toInt());
     }
     else
-     {
+    {
       LOG_ERROR << "Unable to get custom1 style parameters for model" << m_model->name();
     }
   
-    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, tattooCustomizationStyle });
+    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, custom1 });
   
   
     // Tattoo color customization depends on current tattoo style. We fill m_multiCustomizationMap first
-    for (auto it = tattooCustomizationStyle.possibleValues.begin(), itEnd = tattooCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
+    for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
     {
       query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
                       "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
@@ -609,20 +585,20 @@ void CharDetails::fillCustomizationMap()
   
       sqlResult colors = GAMEDATABASE.sqlQuery(query);
   
-      CustomizationParam tattooColor;
+      CustomizationParam custom1Color;
 
-      tattooColor.name = QString("Tattoo Color");
+      custom1Color.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
   
       if (colors.valid && (colors.values.size() > 1))
       {
         for (uint i = 0; i < colors.values.size(); i++)
-          tattooColor.possibleValues.push_back(colors.values[i][0].toInt());
+          custom1Color.possibleValues.push_back(colors.values[i][0].toInt());
       }
       else
       {
         LOG_ERROR << "No tattoo color available for tattoo customization style " << *it << "for model" << m_model->name();
       }
-      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, tattooColor });
+      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, custom1Color });
     }
     m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
   }
@@ -784,6 +760,46 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
   return result;
 }
 
+QString CharDetails::getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization)
+{
+  // Names for most customization types are stored in ChrCustomization.db2, by race, sex and section.
+  // Some are listed for "either sex" (sex = 3) or "any race" (race = 0), so we need to sort the query
+  // so entries for specific race/sex combos have priority over generic ones. UiCustomizationType is
+  // only relevant when there are two entries for the same section: usually the lower value is the
+  // style and the higher one is for colour variation.
+  QString query = QString("SELECT Name, RaceId, Sex, UiCustomizationType FROM ChrCustomization "
+                  "WHERE BaseSection = %1 "
+                  "AND (RaceId = %2 OR RaceId = 0) "
+                  "AND (Sex = %3 OR Sex = 3)"
+                  "ORDER BY RaceId DESC, Sex, UiCustomizationType")
+                  .arg(section)
+                  .arg(raceID)
+                  .arg(sexID);
+  
+  sqlResult styles = GAMEDATABASE.sqlQuery(query);
+
+  if (styles.valid && !styles.values.empty())
+  {
+    if (secondCustomization)
+    {
+      // If the race and sex values in the second entry are the same as the first, return the name from that:
+      if (styles.values.size() > 1 && styles.values[0][1] == styles.values[1][1] && styles.values[0][2] == styles.values[1][2])
+        return QString(styles.values[1][0]);
+      // Otherwise it's likely we constructed the secondary customization category ourselves, e.g. WMV allows config. of
+      // Vulpera marking colour even though the game client doesn't. In these few cases we need to make up a category name by
+      // guesswork (or hardcoding them):
+      QString custName1 = QString(styles.values[0][0]);
+      if (custName1.endsWith(" Style", Qt::CaseInsensitive))
+        return custName1.replace(" Style", " Color");
+      return custName1.append(" Color");
+    }
+    return QString(styles.values[0][0]);
+  }
+  else
+    LOG_ERROR << "Unable to get customization name for race:" << raceID << "sex:" << sexID << "section:" << section;
+  return QString("");
+}
+  
 void CharDetails::setDemonHunterMode(bool val)
 {
   if (val != m_isDemonHunter)
