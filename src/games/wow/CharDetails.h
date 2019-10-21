@@ -43,7 +43,7 @@ public:
     UnderwearBaseType = 4,
     Custom1BaseType = 5,
     Custom2BaseType = 6,
-    Custom3BaseType = 7,
+    Custom3BaseType = 7
   };
   
   // Types
