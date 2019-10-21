@@ -55,6 +55,9 @@ enum CharGeosets {
   CG_GEOSET2600    = 26,
   CG_GEOSET2700    = 27,
   CG_GEOSET2800    = 28,
+  CG_GEOSET2900    = 29,
+  CG_GEOSET3000    = 30,
+  CG_GEOSET3100    = 31,
   NUM_GEOSETS
 };
 
