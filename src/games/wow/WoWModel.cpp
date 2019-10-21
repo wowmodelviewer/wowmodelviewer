@@ -2326,18 +2326,6 @@ void WoWModel::refresh()
     if (!geosetId)  // adds missing scalp if no other hair geoset used. Seems to work that way, anyway...
       geosetId = 1;
     cd.geosets[CG_HAIRSTYLE] = geosetId;
-    /*
-    for (size_t j = 0; j < rawGeosets.size(); j++)
-    {
-      int id = geosets[j]->id;
-      if (!id) // 0 is for skin, not hairstyle
-        continue;
-      if (id == geosetId)
-        showGeoset(j, cd.showHair);
-      else if (id < 100)
-        showGeoset(j, false);
-    }
-    */
   }
   else
     LOG_ERROR << "Unable to collect hair style " << cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE) << " for model " << name();
@@ -2393,29 +2381,118 @@ void WoWModel::refresh()
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
   }
 
-  // DH customization
-  // tattoos
+  // Custom1 - Tattoos for Demon Hunters, Markings for Vulpera, Piercings for Male Dark Iron Dwarves.
+  // Because this section could deal with configuring textures or geosets, we check both.
+  // Tattoos:
   foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
   if (foundTextures.size() > 0)
   {
     // HACK: The component section we add the texture to should be obtained from 
-    // chrcustomization.db2, but for now we'll hardcode it. 12 for DHs & LF Draenei,
-    // 13 for other races (but none for male Dark Irons):
+    // chrCustomization.db2, but for now we'll hardcode it. 12 for DHs & LF Draenei,
+    // 13 for other races:
     if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF || infos.raceid == RACE_LIGHTFORGED_DRAENEI)
     {
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
     }
-    else if (infos.raceid == RACE_NIGHTBORNE || infos.raceid == RACE_HIGHMOUNTAIN_TAUREN || infos.raceid == RACE_ZANDALARI_TROLL || infos.raceid == RACE_VULPERA || (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_FEMALE))
+    else if (infos.raceid == RACE_NIGHTBORNE || infos.raceid == RACE_HIGHMOUNTAIN_TAUREN ||
+             infos.raceid == RACE_ZANDALARI_TROLL || infos.raceid == RACE_VULPERA ||
+             (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_FEMALE))
     {
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 13, 1);
     }
+    else if (infos.raceid == RACE_MECHAGNOME)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 9, 1);
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 10, 1);
+    }
+  }
+  // Geoset modifications, e.g. Piercings for male Dark Irons:
+  query = QString("SELECT GeoSetID,GeoSetType FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3 AND VariationType = %4")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(cd.get(CharDetails::DH_TATTOO_STYLE))
+      .arg(CharDetails::Custom1BaseType);
+  sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
+  LOG_INFO << query;
+  if (custom1Style.valid && !custom1Style.values.empty())
+  {
+    unsigned int geoId = custom1Style.values[0][0].toInt();
+    unsigned int geoType = custom1Style.values[0][1].toInt();
+    cd.geosets[geoType] = geoId;
   }
 
+  // Custom2 - Tattoos for male Dark Iron Dwarves, Snouts for Vulpera, Earrings for female Kul Tiran,
+  //           Tusks for male Zandalari, Horns for Demon Hunters, Arm Upgrades for Mechagnomes.
+  // Because this section could deal with configuring textures or geosets, we check both.
+  // Tattoos:
+  foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
+  if (foundTextures.size() > 0)
+  {
+    // HACK: The component section we add the texture to should be obtained from 
+    // chrCustomization.db2, but for now we'll hardcode it. 13 for male Dark Irons,
+    // 0 for Mechagnomes:
+    if (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_MALE)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 13, 1);
+    }
+    else if (infos.raceid == RACE_MECHAGNOME)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 0, 1);
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 1, 1);
+    }
+  }
+  // Geoset modifications:
+  query = QString("SELECT GeoSetID,GeoSetType FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3 AND VariationType = %4")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(cd.get(CharDetails::DH_HORN_STYLE))
+      .arg(CharDetails::Custom2BaseType);
+  sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
+  LOG_INFO << query;
+  if (custom2Style.valid && !custom2Style.values.empty())
+  {
+    unsigned int geoId = custom2Style.values[0][0].toInt();
+    unsigned int geoType = custom2Style.values[0][1].toInt();
+    cd.geosets[geoType] = geoId;
+  }
+  
+  // Custom3 - Blindfolds for Demon Hunters, Posture for Orc males, Runes for Lightforged,
+  //           Earrings (and Ears) for Zandalari, Necklaces for Kul Tiran females,
+  //           Leg Upgrades for Mechagnomes.
+  // Because this section could deal with configuring textures or geosets, we check both.
+  // Tattoos:
+  foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
+  if (foundTextures.size() > 0)
+  {
+    // HACK: The component section we add the texture to should be obtained from 
+    // chrCustomization.db2, but for now we'll hardcode it.
+    // 5 for Mechagnomes. Still need to implement second texture for mechagnomes.
+    if (infos.raceid == RACE_MECHAGNOME)
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 5, 1);
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 6, 1);
+    }
+  }
+  // Geoset modifications:
+  query = QString("SELECT GeoSetID,GeoSetType FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3 AND VariationType = %4")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(cd.get(CharDetails::DH_BLINDFOLDS))
+      .arg(CharDetails::Custom3BaseType);
+  sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
+  LOG_INFO << query;
+  if (custom3Style.valid && !custom3Style.values.empty())
+  {
+    unsigned int geoId = custom3Style.values[0][0].toInt();
+    unsigned int geoType = custom3Style.values[0][1].toInt();
+    cd.geosets[geoType] = geoId;
+  }
+  
   // horns
-  cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
+  // cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
 
   // blindfolds
-  cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::DH_BLINDFOLDS);
+  // cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::DH_BLINDFOLDS);
 
   //refresh equipment
 
@@ -2505,21 +2582,6 @@ void WoWModel::refresh()
     int id = geosets[i]->id;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
       showGeoset(i, (id == egtId));
-  }
-
-  // Quick & Dirty fix for gobelins => deactivate buggy geosets
-  if (infos.raceid == 9)
-  {
-    if (infos.sexid == 0)
-    {
-      showGeoset(1, false);
-      showGeoset(6, false);
-    }
-    else
-    {
-      showGeoset(0, false);
-      showGeoset(3, false);
-    }
   }
 }
 
