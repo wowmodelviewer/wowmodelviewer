@@ -774,7 +774,7 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
 }
 
 QString CharDetails::getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization)
-{
+{ 
   // Names for most customization types are stored in ChrCustomization.db2, by race, sex and section.
   // Some are listed for "either sex" (sex = 3) or "any race" (race = 0), so we need to sort the query
   // so entries for specific race/sex combos have priority over generic ones. UiCustomizationType is
@@ -811,6 +811,33 @@ QString CharDetails::getCustomizationName(BaseSectionType section, uint raceID, 
   return QString("");
 }
   
+std::vector<int> CharDetails::getComponentsForSection(BaseSectionType section)
+{
+  std::vector<int> result = {-1, -1, -1};
+
+  RaceInfos infos;
+  if (!RaceInfos::getCurrent(m_model, infos))
+    return result;
+  QString query = QString("SELECT ComponentSection1, ComponentSection2, ComponentSection3 FROM ChrCustomization "
+                  "WHERE BaseSection = %1 "
+                  "AND (RaceId = %2 OR RaceId = 0) "
+                  "AND (Sex = %3 OR Sex = 3)"
+                  "ORDER BY RaceId DESC, Sex, UiCustomizationType")
+                  .arg(section)
+                  .arg(infos.raceid)
+                  .arg(infos.sexid);
+  
+  sqlResult vals = GAMEDATABASE.sqlQuery(query);
+
+  if (vals.valid && !vals.values.empty())
+  {
+    result[0] = vals.values[0][0].toInt();
+    result[1] = vals.values[0][1].toInt();
+    result[2] = vals.values[0][2].toInt();
+  }
+  return result;
+}
+
 void CharDetails::setDemonHunterMode(bool val)
 {
   if (val != m_isDemonHunter)

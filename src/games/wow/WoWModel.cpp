@@ -2265,7 +2265,8 @@ void WoWModel::refresh()
   tex.reset(infos.textureLayoutID);
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
-
+  std::vector<int> foundComponents;  // component sections that textures are applied to, used only in Custom1+ sections
+  
   if (foundTextures.size() > 0)
     tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
 
@@ -2385,25 +2386,13 @@ void WoWModel::refresh()
   // Because this section could deal with configuring textures or geosets, we check both.
   // Tattoos:
   foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
+  foundComponents = cd.getComponentsForSection(CharDetails::Custom1BaseType);
   if (foundTextures.size() > 0)
   {
-    // HACK: The component section we add the texture to should be obtained from 
-    // chrCustomization.db2, but for now we'll hardcode it. 12 for DHs & LF Draenei,
-    // 13 for other races:
-    if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF || infos.raceid == RACE_LIGHTFORGED_DRAENEI)
+    for (uint i = 0; i < foundTextures.size(); i++)
     {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_DH_TATTOOS, 1);
-    }
-    else if (infos.raceid == RACE_NIGHTBORNE || infos.raceid == RACE_HIGHMOUNTAIN_TAUREN ||
-             infos.raceid == RACE_ZANDALARI_TROLL || infos.raceid == RACE_VULPERA ||
-             (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_FEMALE))
-    {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 13, 1);
-    }
-    else if (infos.raceid == RACE_MECHAGNOME)
-    {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 9, 1);
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 10, 1);
+      if (foundTextures[i] > 0 && foundComponents[i] > 0)
+        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundComponents[i], 1);
     }
   }
   // Geoset modifications, e.g. Piercings for male Dark Irons:
@@ -2426,19 +2415,13 @@ void WoWModel::refresh()
   // Because this section could deal with configuring textures or geosets, we check both.
   // Tattoos:
   foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
+  foundComponents = cd.getComponentsForSection(CharDetails::Custom2BaseType);
   if (foundTextures.size() > 0)
   {
-    // HACK: The component section we add the texture to should be obtained from 
-    // chrCustomization.db2, but for now we'll hardcode it. 13 for male Dark Irons,
-    // 0 for Mechagnomes:
-    if (infos.raceid == RACE_DARK_IRON_DWARF && infos.sexid == GENDER_MALE)
+    for (uint i = 0; i < foundTextures.size(); i++)
     {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 13, 1);
-    }
-    else if (infos.raceid == RACE_MECHAGNOME)
-    {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 0, 1);
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 1, 1);
+      if (foundTextures[i] > 0 && foundComponents[i] > 0)
+        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundComponents[i], 1);
     }
   }
   // Geoset modifications:
@@ -2462,15 +2445,13 @@ void WoWModel::refresh()
   // Because this section could deal with configuring textures or geosets, we check both.
   // Tattoos:
   foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
+  foundComponents = cd.getComponentsForSection(CharDetails::Custom3BaseType);
   if (foundTextures.size() > 0)
   {
-    // HACK: The component section we add the texture to should be obtained from 
-    // chrCustomization.db2, but for now we'll hardcode it.
-    // 5 for Mechagnomes. Still need to implement second texture for mechagnomes.
-    if (infos.raceid == RACE_MECHAGNOME)
+    for (uint i = 0; i < foundTextures.size(); i++)
     {
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), 5, 1);
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), 6, 1);
+      if (foundTextures[i] > 0 && foundComponents[i] > 0)
+        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundComponents[i], 1);
     }
   }
   // Geoset modifications:

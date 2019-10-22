@@ -107,7 +107,7 @@ public:
   void print();
 
   std::vector<int> getTextureForSection(BaseSectionType);
-
+  std::vector<int> getComponentsForSection(BaseSectionType);
 
   // accessors to customization
   void set(CustomizationType type, uint val);
