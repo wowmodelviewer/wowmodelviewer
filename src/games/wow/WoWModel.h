@@ -264,9 +264,12 @@ public:
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
 
   void mergeModel(QString & name);
+  void mergeModel(uint fileID);
   void mergeModel(WoWModel * model);
   void unmergeModel(QString & name);
+  void unmergeModel(uint fileID);
   void unmergeModel(WoWModel * model);
+  WoWModel* getMergedModel(uint fileID);
 
   void refresh();
 

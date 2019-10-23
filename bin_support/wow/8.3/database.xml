@@ -38,6 +38,8 @@
     <field type="byte" name="GeoSetType" pos="6" />
     <field type="byte" name="ShowScalp" pos="4" />
     <field type="uint" name="ColorIndex" pos="7" />
+    <field type="uint" name="CustomGeoFileDataID" pos="8" />
+    <field type="uint" name="HdCustomGeoFileDataID" pos="9" />
   </table>
   <table name="CharSections">
     <field type="uint" name="ID" primary="yes" />
