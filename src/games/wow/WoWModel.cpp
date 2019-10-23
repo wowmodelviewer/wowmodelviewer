@@ -2276,25 +2276,6 @@ void WoWModel::refresh()
     updateTextureList(tex, TEXTURE_FUR);
   }
 
-  // Display underwear on the model?
-  if (cd.showUnderwear)
-  {
-    foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
-    if (foundTextures.size() > 0)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 1); // pants
-
-    if (foundTextures.size() > 1)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
-
-    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
-      cd.geosets[CG_TARBARD2] = 1;
-  }
-  else
-  {
-    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
-      cd.geosets[CG_TARBARD2] = 0;
-  }
-
   // face
   foundTextures = cd.getTextureForSection(CharDetails::FaceBaseType);
   if (foundTextures.size() > 0)
@@ -2467,6 +2448,26 @@ void WoWModel::refresh()
     unsigned int geoId = custom3Style.values[0][0].toInt();
     unsigned int geoType = custom3Style.values[0][1].toInt();
     cd.geosets[geoType] = geoId;
+  }
+  
+  
+  // Display underwear on the model?
+  if (cd.showUnderwear)
+  {
+    foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
+    if (foundTextures.size() > 0)
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 1); // pants
+
+    if (foundTextures.size() > 1)
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
+
+    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+      cd.geosets[CG_TARBARD2] = 1;
+  }
+  else
+  {
+    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+      cd.geosets[CG_TARBARD2] = 0;
   }
   
   // horns
