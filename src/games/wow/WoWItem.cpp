@@ -436,7 +436,7 @@ void WoWItem::load()
       if (isCustomizableTabard())
       {
         m_charModel->td.showCustom = true;
-        m_itemGeosets[CG_TARBARD] = 2;
+        m_itemGeosets[CG_TABARD] = 2;
 
         GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
         if (texture)
@@ -486,7 +486,7 @@ void WoWItem::load()
 
         // geosets
         // Tabard: {geosetGroup[0] = 1201}
-        m_itemGeosets[CG_TARBARD] = 1 + geosetGroup[0];
+        m_itemGeosets[CG_TABARD] = 1 + geosetGroup[0];
       }
 
       break;

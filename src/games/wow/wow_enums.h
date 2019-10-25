@@ -39,9 +39,9 @@ enum CharGeosets {
   CG_KNEEPADS      = 9,
   CG_PANTS         = 10,
   CG_PANTS2        = 11,
-  CG_TARBARD       = 12,
+  CG_TABARD       = 12,
   CG_TROUSERS      = 13,
-  CG_TARBARD2      = 14,
+  CG_TABARD2      = 14,
   CG_CAPE          = 15,
   CG_EYEGLOW       = 17,
   CG_BELT          = 18,
@@ -136,8 +136,8 @@ enum CharRegions {
   CR_FACE_UPPER = 9,
   CR_FACE_LOWER = 10,
   CR_DH_TATTOOS = 12,
-  // Not compositing anymore, only used for items
   CR_CAPE = 13,
+  // Not compositing anymore, only used for items
   CR_TABARD_1,
   CR_TABARD_2,
   CR_TABARD_3,

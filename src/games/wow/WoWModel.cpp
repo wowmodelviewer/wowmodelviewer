@@ -1936,8 +1936,8 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
   static std::map<CharGeosets, QString> groups =
   { { CG_HAIRSTYLE, "Main" }, { CG_GEOSET100, "Facial1" }, { CG_GEOSET200, "Facial2" }, { CG_GEOSET300, "Facial3" },
   { CG_GLOVES, "Bracers" }, { CG_BOOTS, "Boots" }, { CG_EARS, "Ears" }, { CG_WRISTBANDS, "Wristbands" },
-  { CG_KNEEPADS, "Kneepads" }, { CG_PANTS, "Pants" }, { CG_PANTS2, "Pants2" }, { CG_TARBARD, "Tabard" },
-  { CG_TROUSERS, "Trousers" }, { CG_TARBARD2, "Tabard2" }, { CG_CAPE, "Cape" }, { CG_EYEGLOW, "Eyeglows" },
+  { CG_KNEEPADS, "Kneepads" }, { CG_PANTS, "Pants" }, { CG_PANTS2, "Pants2" }, { CG_TABARD, "Tabard" },
+  { CG_TROUSERS, "Trousers" }, { CG_TABARD2, "Tabard2" }, { CG_CAPE, "Cape" }, { CG_EYEGLOW, "Eyeglows" },
   { CG_BELT, "Belt" }, { CG_TAIL, "Tail" }, { CG_HDFEET, "Feet" }, { CG_HANDS, "Hands" },
   { CG_DH_HORNS, "Horns" }, { CG_DH_BLINDFOLDS, "BlindFolds" } };
 
@@ -2413,7 +2413,7 @@ void WoWModel::refresh()
       .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
       .arg(infos.raceid)
       .arg(infos.sexid)
-      .arg(cd.get(CharDetails::DH_TATTOO_STYLE))
+      .arg(cd.get(CharDetails::CUSTOM1_STYLE))
       .arg(CharDetails::Custom1BaseType);
   sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
   LOG_INFO << query;
@@ -2452,7 +2452,7 @@ void WoWModel::refresh()
       .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
       .arg(infos.raceid)
       .arg(infos.sexid)
-      .arg(cd.get(CharDetails::DH_HORN_STYLE))
+      .arg(cd.get(CharDetails::CUSTOM2_STYLE))
       .arg(CharDetails::Custom2BaseType);
   sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
   LOG_INFO << query;
@@ -2492,7 +2492,7 @@ void WoWModel::refresh()
       .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
       .arg(infos.raceid)
       .arg(infos.sexid)
-      .arg(cd.get(CharDetails::DH_BLINDFOLDS))
+      .arg(cd.get(CharDetails::CUSTOM3_STYLE))
       .arg(CharDetails::Custom3BaseType);
   sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
   LOG_INFO << query;
@@ -2532,19 +2532,19 @@ void WoWModel::refresh()
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
 
     if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
-      cd.geosets[CG_TARBARD2] = 1;
+      cd.geosets[CG_TABARD2] = 1;
   }
   else
   {
     if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
-      cd.geosets[CG_TARBARD2] = 0;
+      cd.geosets[CG_TABARD2] = 0;
   }
   
   // horns
-  // cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::DH_HORN_STYLE);
+  // cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::CUSTOM2_STYLE);
 
   // blindfolds
-  // cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::DH_BLINDFOLDS);
+  // cd.geosets[CG_DH_BLINDFOLDS] = cd.get(CharDetails::CUSTOM3_STYLE);
 
   //refresh equipment
 
@@ -2574,7 +2574,7 @@ void WoWModel::refresh()
   // pandaren female -> hide tabard geoset if TROUSERS geosets are displayed
   if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE) 
       && (cd.geosets[CG_TROUSERS] > 1))
-    cd.geosets[CG_TARBARD2] = 0;
+    cd.geosets[CG_TABARD2] = 0;
 
   // reset geosets
   for (uint i = 0; i < NUM_GEOSETS; i++)

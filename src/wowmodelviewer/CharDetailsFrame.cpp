@@ -124,9 +124,9 @@ void CharDetailsFrame::randomiseChar()
 
   if (m_model->cd.isDemonHunter())
   {
-    m_model->cd.setRandomValue(CharDetails::DH_TATTOO_STYLE);
-    m_model->cd.setRandomValue(CharDetails::DH_TATTOO_COLOR);
-    m_model->cd.setRandomValue(CharDetails::DH_HORN_STYLE);
-    m_model->cd.setRandomValue(CharDetails::DH_BLINDFOLDS);
+    m_model->cd.setRandomValue(CharDetails::CUSTOM1_STYLE);
+    m_model->cd.setRandomValue(CharDetails::CUSTOM1_COLOR);
+    m_model->cd.setRandomValue(CharDetails::CUSTOM2_STYLE);
+    m_model->cd.setRandomValue(CharDetails::CUSTOM3_STYLE);
   }
 }

@@ -78,19 +78,19 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeEndElement();
 
   stream.writeStartElement("DHTattooStyle");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_STYLE]));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM1_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHTattooColor");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_TATTOO_COLOR]));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM1_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHHornStyle");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_HORN_STYLE]));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM2_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHBlindFolds");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[DH_BLINDFOLDS]));
+  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM3_STYLE]));
   stream.writeEndElement();
 
   stream.writeEndElement(); // CharDetails
@@ -188,25 +188,25 @@ void CharDetails::load(QString & f)
 
       if (reader.name() == "DHTattooStyle")
       {
-        set(DH_TATTOO_STYLE, reader.attributes().value("value").toString().toUInt());
+        set(CUSTOM1_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if (reader.name() == "DHTattooColor")
       {
-        set(DH_TATTOO_COLOR, reader.attributes().value("value").toString().toUInt());
+        set(CUSTOM1_COLOR, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if (reader.name() == "DHHornStyle")
       {
-        set(DH_HORN_STYLE, reader.attributes().value("value").toString().toUInt());
+        set(CUSTOM2_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
       if (reader.name() == "DHBlindFolds")
       {
-        set(DH_BLINDFOLDS, reader.attributes().value("value").toString().toUInt());
+        set(CUSTOM3_STYLE, reader.attributes().value("value").toString().toUInt());
         nbValuesRead++;
       }
 
@@ -225,10 +225,10 @@ void CharDetails::reset(WoWModel * model)
   m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
   m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
   m_currentCustomization.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
-  m_currentCustomization.insert({ DH_TATTOO_STYLE, 0 });
-  m_currentCustomization.insert({ DH_TATTOO_COLOR, 0 });
-  m_currentCustomization.insert({ DH_HORN_STYLE, 0 });
-  m_currentCustomization.insert({ DH_BLINDFOLDS, 0 });
+  m_currentCustomization.insert({ CUSTOM1_STYLE, 0 });
+  m_currentCustomization.insert({ CUSTOM1_COLOR, 0 });
+  m_currentCustomization.insert({ CUSTOM2_STYLE, 0 });
+  m_currentCustomization.insert({ CUSTOM3_STYLE, 0 });
 
   showUnderwear = true;
   showHair = true;
@@ -307,28 +307,28 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
           .arg(infos.raceid)
           .arg(infos.sexid)
-          .arg((m_customizationParamsMap[DH_TATTOO_STYLE].possibleValues.size() - 1) * m_currentCustomization[DH_TATTOO_COLOR] + m_currentCustomization[DH_TATTOO_STYLE]);
+          .arg((m_customizationParamsMap[CUSTOM1_STYLE].possibleValues.size() - 1) * m_currentCustomization[CUSTOM1_COLOR] + m_currentCustomization[CUSTOM1_STYLE]);
       }
       else
       {
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex = %4)")
           .arg(infos.raceid)
           .arg(infos.sexid)
-          .arg(m_currentCustomization[DH_TATTOO_STYLE])
-          .arg(m_currentCustomization[DH_TATTOO_COLOR]);
+          .arg(m_currentCustomization[CUSTOM1_STYLE])
+          .arg(m_currentCustomization[CUSTOM1_COLOR]);
       }
       break;
     case Custom2BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
           .arg(infos.raceid)
           .arg(infos.sexid)
-          .arg(m_currentCustomization[DH_HORN_STYLE]);
+          .arg(m_currentCustomization[CUSTOM2_STYLE]);
       break;
     case Custom3BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
           .arg(infos.raceid)
           .arg(infos.sexid)
-          .arg(m_currentCustomization[DH_BLINDFOLDS]);
+          .arg(m_currentCustomization[CUSTOM3_STYLE]);
       break;
     default:
       query = "";
@@ -538,7 +538,7 @@ void CharDetails::fillCustomizationMap()
     if (vals.valid && (vals.values.size() > 1))
     {
       custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
-      m_customizationParamsMap.insert({ DH_TATTOO_STYLE, custom1 });
+      m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
  
       for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
       {
@@ -547,9 +547,9 @@ void CharDetails::fillCustomizationMap()
         custom1Color.name = custom1ColName;
         custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
  
-        m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, custom1Color });
+        m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
       }
-      m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
+      m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
     }
   }
   // Dark Iron males use this section for piercings. Other races for tattoos/markings.
@@ -578,7 +578,7 @@ void CharDetails::fillCustomizationMap()
       LOG_ERROR << "Unable to get custom1 style parameters for model" << m_model->name();
     }
   
-    m_customizationParamsMap.insert({ DH_TATTOO_STYLE, custom1 });
+    m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
   
     // Tattoo color customization depends on current tattoo style. We fill m_multiCustomizationMap first
     for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
@@ -604,9 +604,9 @@ void CharDetails::fillCustomizationMap()
         for (uint i = 0; i < colors.values.size(); i++)
           custom1Color.possibleValues.push_back(colors.values[i][0].toInt());
       }
-      m_multiCustomizationMap[DH_TATTOO_COLOR].insert({ *it, custom1Color });
+      m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
-    m_customizationParamsMap.insert({ DH_TATTOO_COLOR, m_multiCustomizationMap[DH_TATTOO_COLOR][m_currentCustomization[DH_TATTOO_STYLE]] });
+    m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
   }
 
   // BASE SECTION 6 (= Sections 12 & 13) : Custom2 Section (tusk, tattoos, snouts, earrings and some other things, depending on race)
@@ -629,7 +629,7 @@ void CharDetails::fillCustomizationMap()
     for (uint i = 0; i < vals.values.size(); i++)
       custom2.possibleValues.push_back(vals.values[i][0].toInt());
   }
-  m_customizationParamsMap.insert({ DH_HORN_STYLE, custom2 });
+  m_customizationParamsMap.insert({ CUSTOM2_STYLE, custom2 });
 
 
   // BASE SECTION 7 (= Sections 14 & 15) : Custom3 Section (various things, depending on race)
@@ -652,7 +652,7 @@ void CharDetails::fillCustomizationMap()
     for (uint i = 0; i < vals.values.size(); i++)
       custom3.possibleValues.push_back(vals.values[i][0].toInt());
   }
-  m_customizationParamsMap.insert({ DH_BLINDFOLDS, custom3 });
+  m_customizationParamsMap.insert({ CUSTOM3_STYLE, custom3 });
 }
 
 CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
@@ -707,17 +707,17 @@ void CharDetails::set(CustomizationType type, unsigned int val)
       case ADDITIONAL_FACIAL_CUSTOMIZATION:
         event.setType((Event::EventType)CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED);
         break;
-      case DH_TATTOO_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_STYLE_CHANGED);
+      case CUSTOM1_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::CUSTOM1_STYLE_CHANGED);
         break;
-      case DH_TATTOO_COLOR:
-        event.setType((Event::EventType)CharDetailsEvent::DH_TATTOO_COLOR_CHANGED);
+      case CUSTOM1_COLOR:
+        event.setType((Event::EventType)CharDetailsEvent::CUSTOM1_COLOR_CHANGED);
         break;
-      case DH_HORN_STYLE:
-        event.setType((Event::EventType)CharDetailsEvent::DH_HORN_STYLE_CHANGED);
+      case CUSTOM2_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::CUSTOM2_STYLE_CHANGED);
         break;
-      case DH_BLINDFOLDS:
-        event.setType((Event::EventType)CharDetailsEvent::DH_BLINDFOLDS_CHANGED);
+      case CUSTOM3_STYLE:
+        event.setType((Event::EventType)CharDetailsEvent::CUSTOM3_STYLE_CHANGED);
         break;
     }
 
@@ -754,21 +754,21 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
-  if (m_customizationParamsMap.find(DH_TATTOO_STYLE) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(DH_TATTOO_STYLE).possibleValues.size() > 1)
-    result.push_back(DH_TATTOO_STYLE);
+  if (m_customizationParamsMap.find(CUSTOM1_STYLE) != m_customizationParamsMap.end() &&
+      m_customizationParamsMap.at(CUSTOM1_STYLE).possibleValues.size() > 1)
+    result.push_back(CUSTOM1_STYLE);
 
-  if (m_customizationParamsMap.find(DH_TATTOO_COLOR) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(DH_TATTOO_COLOR).possibleValues.size() > 1)
-    result.push_back(DH_TATTOO_COLOR);
+  if (m_customizationParamsMap.find(CUSTOM1_COLOR) != m_customizationParamsMap.end() &&
+      m_customizationParamsMap.at(CUSTOM1_COLOR).possibleValues.size() > 1)
+    result.push_back(CUSTOM1_COLOR);
 
-  if (m_customizationParamsMap.find(DH_HORN_STYLE) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(DH_HORN_STYLE).possibleValues.size() > 1)
-    result.push_back(DH_HORN_STYLE);
+  if (m_customizationParamsMap.find(CUSTOM2_STYLE) != m_customizationParamsMap.end() &&
+      m_customizationParamsMap.at(CUSTOM2_STYLE).possibleValues.size() > 1)
+    result.push_back(CUSTOM2_STYLE);
 
-  if (m_customizationParamsMap.find(DH_BLINDFOLDS) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(DH_BLINDFOLDS).possibleValues.size() > 1)
-    result.push_back(DH_BLINDFOLDS);
+  if (m_customizationParamsMap.find(CUSTOM3_STYLE) != m_customizationParamsMap.end() &&
+      m_customizationParamsMap.at(CUSTOM3_STYLE).possibleValues.size() > 1)
+    result.push_back(CUSTOM3_STYLE);
 
   return result;
 }
