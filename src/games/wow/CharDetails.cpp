@@ -811,7 +811,7 @@ QString CharDetails::getCustomizationName(BaseSectionType section, uint raceID, 
   return QString("");
 }
   
-std::vector<int> CharDetails::getComponentsForSection(BaseSectionType section)
+std::vector<int> CharDetails::getRegionForSection(BaseSectionType section)
 {
   std::vector<int> result = {-1, -1, -1};
 

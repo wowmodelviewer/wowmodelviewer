@@ -2431,7 +2431,7 @@ void WoWModel::refresh()
   }
   // Textures (tattoos):
   foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
-  foundComponents = cd.getComponentsForSection(CharDetails::Custom1BaseType);
+  foundComponents = cd.getRegionForSection(CharDetails::Custom1BaseType);
   if (foundTextures.size() > 0)
   {
     for (uint i = 0; i < foundTextures.size(); i++)
@@ -2470,7 +2470,7 @@ void WoWModel::refresh()
   }
   // Textures (tattoos):
   foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
-  foundComponents = cd.getComponentsForSection(CharDetails::Custom2BaseType);
+  foundComponents = cd.getRegionForSection(CharDetails::Custom2BaseType);
   if (foundTextures.size() > 0)
   {
     for (uint i = 0; i < foundTextures.size(); i++)
@@ -2510,7 +2510,7 @@ void WoWModel::refresh()
   }
   // Textures (markings/tattoos):
   foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
-  foundComponents = cd.getComponentsForSection(CharDetails::Custom3BaseType);
+  foundComponents = cd.getRegionForSection(CharDetails::Custom3BaseType);
   if (foundTextures.size() > 0)
   {
     for (uint i = 0; i < foundTextures.size(); i++)
