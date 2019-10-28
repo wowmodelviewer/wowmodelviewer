@@ -61,7 +61,11 @@ void CharDetailsFrame::setModel(WoWModel * model)
   std::vector<CharDetails::CustomizationType> options = m_model->cd.getCustomizationOptions();
 
   for (auto it = options.begin(), itEnd = options.end(); it != itEnd; ++it)
-    charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, *it), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  {
+    LOG_INFO << m_model->cd.getParams(*it).name << "->" << m_model->cd.getParams(*it).possibleValues.size();
+    if(m_model->cd.getParams(*it).possibleValues.size() > 1)
+      charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, *it), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+  }
 
   RaceInfos infos;
   if (RaceInfos::getCurrent(model, infos))
