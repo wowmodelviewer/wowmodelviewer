@@ -1979,6 +1979,9 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
     if (id > a && id < b)
       showGeoset(i, (id == geosetID));
   }
+
+  for (auto it : mergedModels)
+    it->setGeosetGroupDisplay(group, val);
 }
 
 void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
@@ -2581,18 +2584,6 @@ void WoWModel::refresh()
   for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
 
-  // refresh DH geosets
-  for (auto it : mergedModels)
-  {
-    if (it->name().contains("demonhuntergeosets"))
-    {
-      it->setGeosetGroupDisplay(CG_DH_HORNS, cd.geosets[CG_DH_HORNS]);
-      it->setGeosetGroupDisplay(CG_DH_BLINDFOLDS, cd.geosets[CG_DH_BLINDFOLDS]);
-      break;
-    }
-  }
-
-  
 
   WoWItem * headItem = getItem(CS_HEAD);
 
