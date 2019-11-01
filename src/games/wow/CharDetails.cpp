@@ -754,22 +754,29 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
-  if (m_customizationParamsMap.find(CUSTOM1_STYLE) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(CUSTOM1_STYLE).possibleValues.size() > 1)
-    result.push_back(CUSTOM1_STYLE);
+  // For Night Elves and Blood Elves, Custom 1-3 options are only used by demon hunters:
+  if (m_isDemonHunter || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  {
+    if (m_customizationParamsMap.find(CUSTOM1_STYLE) != m_customizationParamsMap.end() &&
+        m_customizationParamsMap.at(CUSTOM1_STYLE).possibleValues.size() > 1)
+      result.push_back(CUSTOM1_STYLE);
 
-  if (m_customizationParamsMap.find(CUSTOM1_COLOR) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(CUSTOM1_COLOR).possibleValues.size() > 1)
-    result.push_back(CUSTOM1_COLOR);
+    if (m_customizationParamsMap.find(CUSTOM1_COLOR) != m_customizationParamsMap.end() &&
+        m_customizationParamsMap.at(CUSTOM1_COLOR).possibleValues.size() > 1)
+      result.push_back(CUSTOM1_COLOR);
 
-  if (m_customizationParamsMap.find(CUSTOM2_STYLE) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(CUSTOM2_STYLE).possibleValues.size() > 1)
-    result.push_back(CUSTOM2_STYLE);
+    if (m_customizationParamsMap.find(CUSTOM2_STYLE) != m_customizationParamsMap.end() &&
+        m_customizationParamsMap.at(CUSTOM2_STYLE).possibleValues.size() > 1)
+      result.push_back(CUSTOM2_STYLE);
 
-  if (m_customizationParamsMap.find(CUSTOM3_STYLE) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(CUSTOM3_STYLE).possibleValues.size() > 1)
-    result.push_back(CUSTOM3_STYLE);
-
+    if (m_customizationParamsMap.find(CUSTOM3_STYLE) != m_customizationParamsMap.end() &&
+        m_customizationParamsMap.at(CUSTOM3_STYLE).possibleValues.size() > 1)
+    {
+      // workaround to hide male orc "posture" setting, since it doesn't work:
+      if ((infos.sexid != GENDER_MALE) || (infos.raceid != RACE_ORC && infos.raceid != RACE_MAGHAR_ORC))  
+      result.push_back(CUSTOM3_STYLE);
+    }
+  }
   return result;
 }
 
