@@ -101,6 +101,13 @@ void RaceInfos::init()
 
         if (RACES.find(modelfileid) == RACES.end())
           RACES[modelfileid] = infos;
+        
+         // cheap workaround to include the upright male orc model, because I
+         // can't find anything in the database that links it to the orc races:
+        if (infos.raceid == 2 && infos.sexid == 0 && infos.isHD)
+        {
+          RACES[1968587] = infos;
+        }
 
 #if DEBUG_RACEINFOS > 0
         LOG_INFO << "---------------------------";
