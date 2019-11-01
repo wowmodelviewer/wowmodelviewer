@@ -2407,123 +2407,130 @@ void WoWModel::refresh()
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
   }
 
-     
+    
   // CUSTOM1 - Tattoos for Demon Hunters, Markings for Vulpera, Piercings for Male Dark Iron Dwarves.
   // Because custom sections could deal with textures or geosets, we check both.
-  
-  // Geoset modifications, e.g. Piercings for male Dark Irons:
-  query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
+  // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
+  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  {
+    // Geoset modifications, e.g. Piercings for male Dark Irons:
+    query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
-      .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
-      .arg(cd.get(CharDetails::CUSTOM1_STYLE))
-      .arg(CharDetails::Custom1BaseType);
-  sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
-  LOG_INFO << query;
-  if (custom1Style.valid && !custom1Style.values.empty())
-  {
-    for (auto it : custom1Style.values)
+        .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(cd.get(CharDetails::CUSTOM1_STYLE))
+        .arg(CharDetails::Custom1BaseType);
+    sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
+    LOG_INFO << query;
+    if (custom1Style.valid && !custom1Style.values.empty())
     {
-      uint customGeoFile = it[2].toInt();
-      if (customGeoFile > 0)
-        mergeModel(customGeoFile);
-      uint geoId = it[0].toInt();
-      uint geoType = it[1].toInt();
-      cd.geosets[geoType] = geoId;
-    }
-  }  
-  // Textures (tattoos):
-  foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
-  foundRegions = cd.getRegionForSection(CharDetails::Custom1BaseType);
-  if (foundTextures.size() > 0)
-  {
-    for (uint i = 0; i < foundTextures.size(); i++)
+      for (auto it : custom1Style.values)
+      {
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          mergeModel(customGeoFile);
+        uint geoId = it[0].toInt();
+        uint geoType = it[1].toInt();
+        cd.geosets[geoType] = geoId;
+      }
+    }  
+    // Textures (tattoos):
+    foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
+    foundRegions = cd.getRegionForSection(CharDetails::Custom1BaseType);
+    if (foundTextures.size() > 0)
     {
-      if (foundTextures[i] > 0 && foundRegions[i] > 0)
-        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+      for (uint i = 0; i < foundTextures.size(); i++)
+      {
+        if (foundTextures[i] > 0 && foundRegions[i] > 0)
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+      }
     }
   }
-
 
   // CUSTOM2 - Tattoos for male Dark Iron Dwarves, Snouts for Vulpera, Earrings for female Kul Tiran,
   //           Tusks for male Zandalari, Horns for Demon Hunters, Arm Upgrades for Mechagnomes.
   // Because custom sections could deal with textures or geosets, we check both.
 
-  // Geoset modifications:
-  query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
-                  "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
-      .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
-      .arg(cd.get(CharDetails::CUSTOM2_STYLE))
-      .arg(CharDetails::Custom2BaseType);
-  sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
-  LOG_INFO << query;
-  if (custom2Style.valid && !custom2Style.values.empty())
+  // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
+  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
   {
-    for (auto it : custom2Style.values)
+    // Geoset modifications:
+    query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
+                    "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
+        .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(cd.get(CharDetails::CUSTOM2_STYLE))
+        .arg(CharDetails::Custom2BaseType);
+    sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
+    LOG_INFO << query;
+    if (custom2Style.valid && !custom2Style.values.empty())
     {
-      uint customGeoFile = it[2].toInt();
-      if (customGeoFile > 0)
-        mergeModel(customGeoFile);
-      uint geoId = it[0].toInt();
-      uint geoType = it[1].toInt();
-      cd.geosets[geoType] = geoId;
+     for (auto it : custom2Style.values)
+      {
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          mergeModel(customGeoFile);
+        uint geoId = it[0].toInt();
+        uint geoType = it[1].toInt();
+        cd.geosets[geoType] = geoId;
+      }
+    }
+    // Textures (tattoos):
+    foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
+    foundRegions = cd.getRegionForSection(CharDetails::Custom2BaseType);
+    if (foundTextures.size() > 0)
+    {
+      for (uint i = 0; i < foundTextures.size(); i++)
+      {
+        if (foundTextures[i] > 0 && foundRegions[i] > 0)
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+      }
     }
   }
-  // Textures (tattoos):
-  foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
-  foundRegions = cd.getRegionForSection(CharDetails::Custom2BaseType);
-  if (foundTextures.size() > 0)
-  {
-    for (uint i = 0; i < foundTextures.size(); i++)
-    {
-      if (foundTextures[i] > 0 && foundRegions[i] > 0)
-        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
-    }
-  }
-
 
   // CUSTOM3 - Blindfolds for Demon Hunters, Posture for Orc males, Runes for Lightforged,
   //           Earrings (and Ears) for Zandalari, Necklaces for Kul Tiran females,
   //           Leg Upgrades for Mechagnomes.
   // Because custom sections could deal with textures or geosets, we check both.
-
-  // Geoset modifications:
-  query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
+  // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
+  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  {
+    // Geoset modifications:
+    query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
-      .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
-      .arg(cd.get(CharDetails::CUSTOM3_STYLE))
-      .arg(CharDetails::Custom3BaseType);
-  sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
-  LOG_INFO << query;
-  if (custom3Style.valid && !custom3Style.values.empty())
-  {
-    for (auto it : custom3Style.values)
+        .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
+        .arg(infos.raceid)
+        .arg(infos.sexid)
+        .arg(cd.get(CharDetails::CUSTOM3_STYLE))
+        .arg(CharDetails::Custom3BaseType);
+    sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
+    LOG_INFO << query;
+    if (custom3Style.valid && !custom3Style.values.empty())
     {
-      uint customGeoFile = it[2].toInt();
-      if (customGeoFile > 0)
-        mergeModel(customGeoFile);
-      uint geoId = it[0].toInt();
-      uint geoType = it[1].toInt();
-      cd.geosets[geoType] = geoId;
+      for (auto it : custom3Style.values)
+      {
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          mergeModel(customGeoFile);
+        uint geoId = it[0].toInt();
+        uint geoType = it[1].toInt();
+        cd.geosets[geoType] = geoId;
+      }
+    }
+    // Textures (markings/tattoos):
+    foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
+    foundRegions = cd.getRegionForSection(CharDetails::Custom3BaseType);
+    if (foundTextures.size() > 0)
+    {
+      for (uint i = 0; i < foundTextures.size(); i++)
+      {
+        if (foundTextures[i] > 0 && foundRegions[i] > 0)
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+      }
     }
   }
-  // Textures (markings/tattoos):
-  foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
-  foundRegions = cd.getRegionForSection(CharDetails::Custom3BaseType);
-  if (foundTextures.size() > 0)
-  {
-    for (uint i = 0; i < foundTextures.size(); i++)
-    {
-      if (foundTextures[i] > 0 && foundRegions[i] > 0)
-        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
-    }
-  }
-
 
   // Display underwear on the model?
   if (cd.showUnderwear)
