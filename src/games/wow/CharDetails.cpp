@@ -304,10 +304,14 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
     case Custom1BaseType:
       if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF) // for Night Elves and Blood Elves - Demon Hunter Tattoos are handled strangely:
       {
+        uint tattvar = 0;
+        if (m_currentCustomization[CUSTOM1_STYLE] > 0)  // style = 0 means no tattoos, so variation is always 0
+          tattvar = (m_customizationParamsMap[CUSTOM1_STYLE].possibleValues.size() - 1) * m_currentCustomization[CUSTOM1_COLOR]
+                    + m_currentCustomization[CUSTOM1_STYLE];
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
           .arg(infos.raceid)
           .arg(infos.sexid)
-          .arg((m_customizationParamsMap[CUSTOM1_STYLE].possibleValues.size() - 1) * m_currentCustomization[CUSTOM1_COLOR] + m_currentCustomization[CUSTOM1_STYLE]);
+          .arg(tattvar);
       }
       else
       {
@@ -526,31 +530,19 @@ void CharDetails::fillCustomizationMap()
   // colours of 6 tattoo types (plus 0 = no tattoo). So we have to hardcode this instead:
   if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF)
   {
-    query = QString("SELECT ColorIndex FROM CharSections "
-                    "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                    "WHERE RaceID=%1 AND SexID=%2 "
-                    "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
-      .arg(Custom1BaseType)
-      .arg(infos.isHD ? 1 : 0);
-    vals = GAMEDATABASE.sqlQuery(query);
-    if (vals.valid && (vals.values.size() > 1))
+    custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
+    m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
+ 
+    for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
     {
-      custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
-      m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
+      // tattoo color = 0 to 5 for each tattoo style
+      CustomizationParam custom1Color;
+      custom1Color.name = custom1ColName;
+      custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
  
-      for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
-      {
-        // tattoo color = 0 to 5 for each tattoo style
-        CustomizationParam custom1Color;
-        custom1Color.name = custom1ColName;
-        custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
- 
-        m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
-      }
-      m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
+      m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
+    m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
   }
   // Dark Iron males use this section for piercings. Other races for tattoos/markings.
   // Not many races use the colour variant setting for this section, but we'll check for it
