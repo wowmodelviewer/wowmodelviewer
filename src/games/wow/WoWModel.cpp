@@ -2443,7 +2443,7 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
-          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
       }
     }
   }
@@ -2485,7 +2485,7 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
-          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
       }
     }
   }
@@ -2527,7 +2527,7 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
-          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 2);
+          tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
       }
     }
   }
@@ -2537,10 +2537,10 @@ void WoWModel::refresh()
   {
     foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
     if (foundTextures.size() > 0)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 1); // pants
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2); // pants
 
     if (foundTextures.size() > 1)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 1); // top
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2); // top
 
     if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
       cd.geosets[CG_TABARD2] = 1;
