@@ -42,6 +42,9 @@ void WoWModel::dumpTextureStatus()
   TEXTUREMANAGER.dump();
   LOG_INFO << " ########################";
 
+  for (uint i = 0; i < passes.size(); i++)
+    LOG_INFO << "passes[" << i << "] -> tex =" << passes[i]->tex << "specialTex" << passes[i]->specialTex << "useTex2" << passes[i]->useTex2;
+
   LOG_INFO << "-----------------------------------------";
 }
 
@@ -2183,19 +2186,14 @@ void WoWModel::refreshMerging()
     for (auto it : modelsIt->textures)
     {
       if (it != ModelRenderPass::INVALID_TEX)
-        TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it)));
-      textures.push_back(it);
+        textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it))));
+      else
+        textures.push_back(ModelRenderPass::INVALID_TEX);
     }
 
     uint tmax = specialTextures.size();
     for (auto it : modelsIt->specialTextures)
-    {
-      int val = it;
-      if (it != -1)
-        val += tmax;
-
-      specialTextures.push_back(val);
-    }
+      specialTextures.push_back(it);
 
     for (auto it : modelsIt->replaceTextures)
       replaceTextures.push_back(it);
@@ -2650,17 +2648,9 @@ GLuint WoWModel::getGLTexture(uint16 tex) const
     return ModelRenderPass::INVALID_TEX;
 
   if (specialTextures[tex] == -1)
-  {
     return textures[tex];
-  }
   else
-  {
-    if (specialTextures[tex] == -1)
-      return ModelRenderPass::INVALID_TEX;
-    else
-      return replaceTextures[specialTextures[tex]];
-  }
-    
+    return replaceTextures[specialTextures[tex]];
 }
 
 void WoWModel::restoreRawGeosets()
