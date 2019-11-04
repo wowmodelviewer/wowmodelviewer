@@ -375,7 +375,8 @@ void CharDetails::fillCustomizationMap()
   skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
   QString query = QString("SELECT ColorIndex FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                          "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4" )
+                          "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
+                          "ORDER BY ColorIndex")
                          .arg(infos.raceid)
                          .arg(infos.sexid)
                          .arg(SkinBaseType)
@@ -404,7 +405,8 @@ void CharDetails::fillCustomizationMap()
   {
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                     "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum " 
-                    "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5")
+                    "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
+                    "ORDER BY VariationIndex")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(*it)
@@ -433,7 +435,8 @@ void CharDetails::fillCustomizationMap()
 
   // BASE SECTION 2 (= Sections 2 & 7) : Additional facial customization - facial hair, earrings, horns, tusks, depending on model:
   
-  query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2")
+  query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2 "
+                  "ORDER BY VariationID")
     .arg(infos.raceid)
     .arg(infos.sexid);
 
@@ -459,7 +462,8 @@ void CharDetails::fillCustomizationMap()
   
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                   "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                  "WHERE RaceID = %1 AND SexID = %2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4")
+                  "WHERE RaceID = %1 AND SexID = %2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
+                  "ORDER BY VariationIndex")
                   .arg(infos.raceid)
                   .arg(infos.sexid)
                   .arg(HairBaseType)
@@ -488,7 +492,8 @@ void CharDetails::fillCustomizationMap()
   {
     query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
                     "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                    "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5")
+                    "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
+                    "ORDER BY ColorIndex")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(*it)
@@ -554,7 +559,8 @@ void CharDetails::fillCustomizationMap()
     query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                     "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                     "WHERE RaceID = %1 AND SexID = %2 "
-                    "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4")
+                    "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                    "ORDER BY VariationIndex")
       .arg(infos.raceid)
       .arg(infos.sexid)
       .arg(Custom1BaseType)
@@ -578,7 +584,8 @@ void CharDetails::fillCustomizationMap()
       query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
                       "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                       "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 "
-                      "AND CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=%5")
+                      "AND CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=% 5 "
+                      "ORDER BY ColorIndex")
                       .arg(infos.raceid)
                       .arg(infos.sexid)
                       .arg(*it)
@@ -610,7 +617,8 @@ void CharDetails::fillCustomizationMap()
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 "
-                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4")
+                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                  "ORDER BY VariationIndex")
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(Custom2BaseType)
@@ -633,7 +641,8 @@ void CharDetails::fillCustomizationMap()
   query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 "
-                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4")
+                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                  "ORDER BY VariationIndex")
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(Custom3BaseType)
