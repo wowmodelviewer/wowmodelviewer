@@ -34,6 +34,7 @@ class _RACEINFOS_API_ RaceInfos
 
   private:
     static std::map< int, RaceInfos> RACES;
+    static std::map<int, int> SDReplacementModel;
 };
 
 
