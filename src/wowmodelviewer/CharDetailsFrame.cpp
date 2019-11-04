@@ -125,7 +125,10 @@ void CharDetailsFrame::randomiseChar()
   m_model->cd.setRandomValue(CharDetails::FACIAL_CUSTOMIZATION_COLOR);
   m_model->cd.setRandomValue(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION);
 
-  if (m_model->cd.isDemonHunter())
+  // Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
+  RaceInfos infos;
+  if (m_model->cd.isDemonHunter() || (RaceInfos::getCurrent(m_model, infos) &&
+      infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
   {
     m_model->cd.setRandomValue(CharDetails::CUSTOM1_STYLE);
     m_model->cd.setRandomValue(CharDetails::CUSTOM1_COLOR);
