@@ -80,11 +80,27 @@ public:
     CUSTOM3_STYLE = 7
   };
 
+  // Flags from CharSections.db2 that tell us what types of character (regular, death knight, demon hunter, etc.) the section is used for:
+  enum SectionFlags
+  {
+    SF_CHARACTER_CREATE  = 0x1,   // available on the character create screen of the client. Includes DK and DH skins
+    SF_BARBERSHOP        = 0x2,
+    SF_DEATH_KNIGHT      = 0x4,
+    SF_NPC_SPECIAL       = 0x8,   // a random bunch of things. Some Twilight skins, mummies, wooden dolls, etc.
+    SF_REGULAR           = 0x10,  // only used on regular appearances, sometimes also Demon Hunters
+    SF_DEMON_HUNTER      = 0x20,
+    SF_DEMON_HUNTER_FACE = 0x40,  // unsure why these have a different flag to other Demon Hunter skins
+    SF_DEMON_HUNTER_BFX  = 0x80,  // just for a couple of Demon Hunter blindfolds. Unsure why
+    SF_SILHOUETTE        = 0x100, // black / shadow, used for some in-game displays
+    SF_VOID_ELF_SPECIAL  = 0x200  // just the Void Elf saturated purple skin for Entropic Embrace
+  };
+
   class CustomizationParam
   {
   public:
     QString name;
     std::vector<int> possibleValues;
+    std::vector<int> flags;
   };
 
   EyeGlowTypes eyeGlowType;

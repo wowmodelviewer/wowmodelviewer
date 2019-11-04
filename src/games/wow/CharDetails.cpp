@@ -268,7 +268,7 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
                           "LEFT JOIN TextureFileData AS TFD2 ON TextureName2 = TFD2.ID "
                           "LEFT JOIN TextureFileData AS TFD3 ON TextureName3 = TFD3.ID "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                          "WHERE CharBaseSection.VariationEnum = %1 AND CharBaseSection.LayoutResType = %2 ")
+                          "WHERE CharBaseSection.VariationEnum = %1 AND CharBaseSection.LayoutResType = %2")
                           .arg(baseSection)
                           .arg(infos.isHD ? 1 : 0);
   switch (baseSection)
@@ -373,7 +373,7 @@ void CharDetails::fillCustomizationMap()
   // SECTION 0 (= Sections 0 & 5) : skin
   CustomizationParam skin;
   skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
-  QString query = QString("SELECT ColorIndex FROM CharSections "
+  QString query = QString("SELECT ColorIndex, Flags FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                           "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                           "ORDER BY ColorIndex")
@@ -387,7 +387,10 @@ void CharDetails::fillCustomizationMap()
   if (vals.valid && !vals.values.empty())
   {
     for (uint i = 0; i < vals.values.size(); i++)
+    {
       skin.possibleValues.push_back(vals.values[i][0].toInt());
+      skin.flags.push_back(vals.values[i][1].toInt());
+    }
   }
   else
   {
@@ -403,10 +406,11 @@ void CharDetails::fillCustomizationMap()
   QString faceName = getCustomizationName(FaceBaseType, infos.raceid, infos.sexid);
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
-    query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
+    query = QString("SELECT VariationIndex, Flags FROM CharSections "
                     "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum " 
-                    "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
-                    "ORDER BY VariationIndex")
+                    "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND "
+                    "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
+                    "GROUP BY VariationIndex ORDER BY VariationIndex")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(*it)
@@ -420,7 +424,10 @@ void CharDetails::fillCustomizationMap()
     if (faces.valid && !faces.values.empty())
     {
       for (uint i = 0; i < faces.values.size(); i++)
+      {
         face.possibleValues.push_back(faces.values[i][0].toInt());
+        face.flags.push_back(faces.values[i][1].toInt());
+      }
     }
     else
     {
@@ -435,10 +442,17 @@ void CharDetails::fillCustomizationMap()
 
   // BASE SECTION 2 (= Sections 2 & 7) : Additional facial customization - facial hair, earrings, horns, tusks, depending on model:
   
-  query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles WHERE RaceID = %1 AND SexID = %2 "
-                  "ORDER BY VariationID")
-    .arg(infos.raceid)
-    .arg(infos.sexid);
+  // Preferentially get info from CharSections, since it also has flags, but if it can't find any (e.g. female trolls) then
+  // fall back to getting info from CharacterFacialHairStyles.
+  query = QString("SELECT VariationIndex, Flags FROM CharSections "
+                  "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
+                  "WHERE RaceID = %1 AND SexID = %2 AND "
+                  "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
+                  "GROUP BY VariationIndex ORDER BY VariationIndex")
+                  .arg(infos.raceid)
+                  .arg(infos.sexid)
+                  .arg(FacialHairBaseType)
+                  .arg(infos.isHD ? 1 : 0);
 
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
@@ -448,11 +462,33 @@ void CharDetails::fillCustomizationMap()
   if (additional.valid && !additional.values.empty())
   {
     for (uint i = 0; i < additional.values.size(); i++)
+    {
       additionalCustomization.possibleValues.push_back(additional.values[i][0].toInt());
+      additionalCustomization.flags.push_back(additional.values[i][1].toInt());
+    }
   }
   else
   {
-    LOG_ERROR << "Unable to collect additional facial customization parameters for model" << m_model->name();
+    query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles "
+                    "WHERE RaceID = %1 AND SexID = %2 "
+                    "ORDER BY VariationID")
+                    .arg(infos.raceid)
+                    .arg(infos.sexid);
+
+    additional = GAMEDATABASE.sqlQuery(query);
+  
+    if (additional.valid && !additional.values.empty())
+    {
+      for (uint i = 0; i < additional.values.size(); i++)
+      {
+        additionalCustomization.possibleValues.push_back(additional.values[i][0].toInt());
+        additionalCustomization.flags.push_back(0);  // No flags in this database, so we'll just call it flag 0.
+      }
+    }
+    else
+    {
+      LOG_ERROR << "Unable to collect additional facial customization parameters for model" << m_model->name();
+    }
   }
 
   m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
@@ -460,10 +496,11 @@ void CharDetails::fillCustomizationMap()
 
   // BASE SECTION 3 (= Sections 3 & 8) : Hair style customization (horn style for some races)
   
-  query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
+  query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                  "WHERE RaceID = %1 AND SexID = %2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
-                  "ORDER BY VariationIndex")
+                  "WHERE RaceID = %1 AND SexID = %2 AND "
+                  "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
+                  "GROUP BY VariationIndex ORDER BY VariationIndex")
                   .arg(infos.raceid)
                   .arg(infos.sexid)
                   .arg(HairBaseType)
@@ -479,7 +516,10 @@ void CharDetails::fillCustomizationMap()
   if (styles.valid && !styles.values.empty())
   {
     for (uint i = 0; i < styles.values.size(); i++)
+    {
       hairCustomizationStyle.possibleValues.push_back(styles.values[i][0].toInt());
+      hairCustomizationStyle.flags.push_back(styles.values[i][1].toInt());
+    }
   }
   else
   {
@@ -490,10 +530,11 @@ void CharDetails::fillCustomizationMap()
 
   for (auto it = hairCustomizationStyle.possibleValues.begin(), itEnd = hairCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
   {
-    query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
+    query = QString("SELECT ColorIndex, Flags FROM CharSections "
                     "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                    "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
-                    "ORDER BY ColorIndex")
+                    "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
+                    "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
+                    "GROUP BY ColorIndex ORDER BY ColorIndex")
                     .arg(infos.raceid)
                     .arg(infos.sexid)
                     .arg(*it)
@@ -507,7 +548,10 @@ void CharDetails::fillCustomizationMap()
     if (colors.valid && !colors.values.empty())
     {
       for (uint i = 0; i < colors.values.size(); i++)
+      {
         hairColor.possibleValues.push_back(colors.values[i][0].toInt());
+        hairColor.flags.push_back(colors.values[i][1].toInt());
+      }
     }
     else
     {
@@ -536,6 +580,7 @@ void CharDetails::fillCustomizationMap()
   if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF)
   {
     custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
+    custom1.flags = { 33, 33, 33, 33, 33, 33 };
     m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
  
     for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
@@ -544,7 +589,7 @@ void CharDetails::fillCustomizationMap()
       CustomizationParam custom1Color;
       custom1Color.name = custom1ColName;
       custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
- 
+      custom1Color.flags = { 33, 33, 33, 33, 33, 33 };
       m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
     m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
@@ -556,11 +601,11 @@ void CharDetails::fillCustomizationMap()
   // added next.
   else
   {
-    query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
+    query = QString("SELECT VariationIndex, Flags FROM CharSections "
                     "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                    "WHERE RaceID = %1 AND SexID = %2 "
-                    "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
-                    "ORDER BY VariationIndex")
+                    "WHERE RaceID = %1 AND SexID = %2 AND "
+                    "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                    "GROUP BY VariationIndex ORDER BY VariationIndex")
       .arg(infos.raceid)
       .arg(infos.sexid)
       .arg(Custom1BaseType)
@@ -569,7 +614,10 @@ void CharDetails::fillCustomizationMap()
     if (vals.valid && !vals.values.empty())
     {
       for (uint i = 0; i < vals.values.size(); i++)
+      {
         custom1.possibleValues.push_back(vals.values[i][0].toInt());
+        custom1.flags.push_back(vals.values[i][1].toInt());
+      }
     }
     else
     {
@@ -581,11 +629,11 @@ void CharDetails::fillCustomizationMap()
     // Tattoo color customization depends on current tattoo style. We fill m_multiCustomizationMap first
     for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
     {
-      query = QString("SELECT DISTINCT ColorIndex FROM CharSections "
+      query = QString("SELECT ColorIndex, Flags FROM CharSections "
                       "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                      "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 "
-                      "AND CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=% 5 "
-                      "ORDER BY ColorIndex")
+                      "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
+                      "CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=%5 "
+                      "GROUP BY ColorIndex ORDER BY ColorIndex")
                       .arg(infos.raceid)
                       .arg(infos.sexid)
                       .arg(*it)
@@ -601,7 +649,10 @@ void CharDetails::fillCustomizationMap()
       if (colors.valid && (colors.values.size() > 1))
       {
         for (uint i = 0; i < colors.values.size(); i++)
+        {
           custom1Color.possibleValues.push_back(colors.values[i][0].toInt());
+          custom1Color.flags.push_back(colors.values[i][1].toInt());
+        }
       }
       m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
@@ -614,11 +665,11 @@ void CharDetails::fillCustomizationMap()
   custom2.name = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid);
   QString custom2ColName = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid, true);
 
-  query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
+  query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                  "WHERE RaceID = %1 AND SexID = %2 "
-                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
-                  "ORDER BY VariationIndex")
+                  "WHERE RaceID = %1 AND SexID = %2 AND "
+                  "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                  "GROUP BY VariationIndex ORDER BY VariationIndex")
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(Custom2BaseType)
@@ -627,7 +678,10 @@ void CharDetails::fillCustomizationMap()
   if (vals.valid && !vals.values.empty())
   {
     for (uint i = 0; i < vals.values.size(); i++)
+    {
       custom2.possibleValues.push_back(vals.values[i][0].toInt());
+      custom2.flags.push_back(vals.values[i][1].toInt());
+    }
   }
   m_customizationParamsMap.insert({ CUSTOM2_STYLE, custom2 });
 
@@ -638,11 +692,11 @@ void CharDetails::fillCustomizationMap()
   custom3.name = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid);
   QString custom3ColName = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid, true);
 
-  query = QString("SELECT DISTINCT VariationIndex FROM CharSections "
+  query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
-                  "WHERE RaceID = %1 AND SexID = %2 "
-                  "AND CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
-                  "ORDER BY VariationIndex")
+                  "WHERE RaceID = %1 AND SexID = %2 AND "
+                  "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
+                  "GROUP BY VariationIndex ORDER BY VariationIndex")
     .arg(infos.raceid)
     .arg(infos.sexid)
     .arg(Custom3BaseType)
@@ -651,7 +705,10 @@ void CharDetails::fillCustomizationMap()
   if (vals.valid && !vals.values.empty())
   {
     for (uint i = 0; i < vals.values.size(); i++)
+    {
       custom3.possibleValues.push_back(vals.values[i][0].toInt());
+      custom3.flags.push_back(vals.values[i][1].toInt());
+    }
   }
   m_customizationParamsMap.insert({ CUSTOM3_STYLE, custom3 });
 }
@@ -733,8 +790,41 @@ uint CharDetails::get(CustomizationType type) const
 
 void CharDetails::setRandomValue(CustomizationType type)
 {
-  uint maxVal = m_customizationParamsMap[type].possibleValues.size() - 1;
-  set(type, randint(0, maxVal));
+  std::vector<int> allValues = m_customizationParamsMap[type].possibleValues;
+  if (allValues.size() == 0)
+    return;
+  std::vector<int> flags = m_customizationParamsMap[type].flags;
+  std::vector<int> filteredIndices;
+  for (uint i = 0; i < allValues.size(); i++)
+  {
+    int flag = flags[i];
+    if (m_isDemonHunter)
+    {
+      if ((flag & SF_DEMON_HUNTER) || (flag & SF_DEMON_HUNTER_FACE) || (flag & SF_DEMON_HUNTER_BFX) || (flag & SF_REGULAR) || flag == 0)
+      {
+        filteredIndices.push_back(i);
+      }
+    }
+    else  // only select regular, mundane skins for the random display
+    {
+      if ((flag & SF_REGULAR) || flag == SF_BARBERSHOP || flag == SF_CHARACTER_CREATE || flag == 0)
+      {
+        filteredIndices.push_back(i);
+      }
+    }
+  }
+  if (filteredIndices.size() > 0)
+  {
+    uint maxVal = filteredIndices.size() - 1;
+    int randval = filteredIndices[randint(0, maxVal)];
+    set(type, randval);
+  }
+  else // ok, filtering left us with nothing...
+  {
+    uint maxVal = allValues.size() - 1;
+    int randval = randint(0, maxVal);
+    set(type, randval);
+  }
 }
 
 std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions() const
@@ -753,7 +843,10 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
   // pandaren male hair color can't be defined
   if (!((infos.raceid == 24) && (infos.sexid == 0)))
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
-  result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
+  
+  if (m_customizationParamsMap.find(ADDITIONAL_FACIAL_CUSTOMIZATION) != m_customizationParamsMap.end() &&
+      m_customizationParamsMap.at(ADDITIONAL_FACIAL_CUSTOMIZATION).possibleValues.size() > 1)
+    result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
   // For Night Elves and Blood Elves, Custom 1-3 options are only used by demon hunters:
   if (m_isDemonHunter || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
@@ -790,12 +883,14 @@ QString CharDetails::getCustomizationName(BaseSectionType section, uint raceID, 
   // style and the higher one is for colour variation.
   QString query = QString("SELECT Name, RaceId, Sex, UiCustomizationType FROM ChrCustomization "
                   "WHERE BaseSection = %1 "
-                  "AND (RaceId = %2 OR RaceId = 0) "
-                  "AND (Sex = %3 OR Sex = 3)"
+                  "AND (RaceId = %2 OR RaceId = %3) "
+                  "AND (Sex = %4 OR Sex = %5) "
                   "ORDER BY RaceId DESC, Sex, UiCustomizationType")
                   .arg(section)
                   .arg(raceID)
-                  .arg(sexID);
+                  .arg(RACE_ANY)
+                  .arg(sexID)
+                  .arg(GENDER_ANY);
   
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
@@ -828,12 +923,14 @@ std::vector<int> CharDetails::getRegionForSection(BaseSectionType section)
     return result;
   QString query = QString("SELECT ComponentSection1, ComponentSection2, ComponentSection3 FROM ChrCustomization "
                   "WHERE BaseSection = %1 "
-                  "AND (RaceId = %2 OR RaceId = 0) "
-                  "AND (Sex = %3 OR Sex = 3)"
+                  "AND (RaceId = %2 OR RaceId = %3) "
+                  "AND (Sex = %4 OR Sex = %5) "
                   "ORDER BY RaceId DESC, Sex, UiCustomizationType")
                   .arg(section)
                   .arg(infos.raceid)
-                  .arg(infos.sexid);
+                  .arg(RACE_ANY)
+                  .arg(infos.sexid)
+                  .arg(GENDER_ANY);
   
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
 

@@ -304,12 +304,14 @@ enum Gender
 {
   GENDER_MALE = 0,
   GENDER_FEMALE = 1,
-  GENDER_NONE = 2
+  GENDER_NONE = 2,
+  GENDER_ANY = 3     // used in some database tables
 };
 
 // Race value is index in ChrRaces.dbc
 enum Races
 {
+  RACE_ANY = 0,  // used in some database tables
   RACE_HUMAN = 1,
   RACE_ORC = 2,
   RACE_DWARF = 3,
@@ -333,7 +335,7 @@ enum Races
   RACE_ICE_TROLL = 21,
   RACE_WORGEN = 22,
   RACE_GILNEAN = 23,
-  RACE_PANDAREN = 24,	// Pandaren #1
+  RACE_PANDAREN = 24,	  // Pandaren #1
   RACE_PANDAREN2 = 25,	// Pandaren #2
   RACE_PANDAREN3 = 26,	// Pandaren #3
   RACE_NIGHTBORNE = 27,
