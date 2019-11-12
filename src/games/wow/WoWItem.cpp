@@ -267,8 +267,10 @@ void WoWItem::load()
   {
     case CS_HEAD:
     {
-      // attachements
+      // attachments
       updateItemModel(ATT_HELMET, model[0], texture[0]);
+      if (model[1] != 0)
+        mergeModel(CS_HEAD, model[1], texture[1]);
 
       // geosets
       // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
