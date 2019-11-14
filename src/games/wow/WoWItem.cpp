@@ -926,7 +926,10 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
+    {
       m_mergedModel->updateTextureList(texture, TEXTURE_ITEM);
+      m_charModel->updateTextureList(texture, TEXTURE_ITEM);
+    }
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
 
