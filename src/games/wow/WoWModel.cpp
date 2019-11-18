@@ -898,8 +898,13 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
   }
 }
 
+#ifdef _NEW_ANIM_LOADING_
+void WoWModel::loadAnimations(GameFile * f)
+{
 
-void WoWModel::initAnimated(GameFile * f)
+}
+#else
+void WoWModel::initAnimations(GameFile * f)
 {
   modelAnimData data;
   data.globalSequences = globalSequences;
@@ -951,7 +956,7 @@ void WoWModel::initAnimated(GameFile * f)
         }
 
         animManager = new AnimManager(*this);
-        
+
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
@@ -1035,6 +1040,12 @@ void WoWModel::initAnimated(GameFile * f)
     if (it.second.first != 0)
       it.second.first->close();
   }
+}
+#endif
+
+void WoWModel::initAnimated(GameFile * f)
+{
+  initAnimations(f);
 
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
