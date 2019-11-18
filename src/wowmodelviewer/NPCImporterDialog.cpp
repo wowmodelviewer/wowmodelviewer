@@ -32,7 +32,7 @@ NPCimporterDialog::NPCimporterDialog(wxWindow * parent /* = NULL */, wxWindowID 
 
 	// up part : some explanation + url import choice
 	wxStaticBoxSizer *topSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Import parameters"));
-	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Put in the field below wowhead page of wanted NPC.\nSearch NPC you want on wowhead, then copy and paste URL of this item.\nWhen done, click import. If everything succeed, just click on Display button to show model in viewer."));
+	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Paste a Wowhead link for the desired NPC in the field below, then click Import.\nWait a few seconds. If it succeeds, click on the Display button to display the model."));
 	topSizer->Add(explain, 0, wxALL, 5);
 	wxStaticText *label = new wxStaticText(this, wxID_ANY, _T("URL :"));
 	topSizer->Add(label, 0, wxLEFT|wxRIGHT|wxTOP, 5);
@@ -98,7 +98,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 {
 	if(m_URLname->IsEmpty())
 	{
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("You must enter an URL before clicking Import !"),
+		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("You must enter a URL before clicking Import !"),
 				wxT("No URL given"), wxOK | wxICON_WARNING);
 		dial->ShowModal();
 	}
@@ -128,7 +128,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 		}
 		else
 		{
-			wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("URL you entered cannot be reached. Please verify your syntax and your network connection."),
+			wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("The URL you entered cannot be reached. Please verify your syntax and check your network connection."),
 					wxT("URL Error"), wxOK | wxICON_WARNING);
 			dial->ShowModal();
 		}

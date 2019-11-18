@@ -95,7 +95,7 @@ NPCInfos * WowheadImporter::importNPC(QString urlToGrab) const
 
 	// display id
   QString NPCDispIdstr = extractSubString(htmldata, "ModelViewer.show({");
-  NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId: ", "}");
+  NPCDispIdstr = extractSubString(NPCDispIdstr, "displayId&quot;:", "}");
 
 	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
 		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
