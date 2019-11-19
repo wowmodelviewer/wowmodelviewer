@@ -32,7 +32,10 @@ ItemImporterDialog::ItemImporterDialog(wxWindow * parent /* = NULL */, wxWindowI
 
 	// up part : some explanation + url import choice
 	wxStaticBoxSizer *topSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Import parameters"));
-	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Put in the field below wowhead or wow armory page of wanted item.\nSearch iteam you want on wowhead, then copy and paste URL of this item for wowhead query.\nhttp://XXX.battle.net/wow/YYY/item/number (where XXX = your corresponding area (eu, us, etc.) and YYY corresponds to your locale) for wow armory query\nWhen done, click import. If everything succeed, just click on Display button to show item in viewer."));
+	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T(
+    "Paste a Wowhead link for the desired item in the field below and click 'Import'.\n"
+    "Wait a few seconds for the import to complete, then click 'Display' to view the model.\n"
+    "Note: if the link contains an '&&' then delete it, and everything after it.\n"));
 	topSizer->Add(explain, 0, wxALL, 5);
 	wxStaticText *label = new wxStaticText(this, wxID_ANY, _T("URL :"));
 	topSizer->Add(label, 0, wxLEFT|wxRIGHT|wxTOP, 5);
@@ -102,7 +105,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	m_importedItem = 0;
 	if(m_URLname->IsEmpty())
 	{
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("You must enter an URL before clicking Import !"),
+		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("You must enter a URL before clicking Import !"),
 				wxT("No URL given"), wxOK | wxICON_WARNING);
 		dial->ShowModal();
 	}
@@ -131,7 +134,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent &event)
 	}
 	else
 	{
-		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("URL you entered cannot be reached. Please verify your syntax and your network connection."),
+		wxMessageDialog *dial = new wxMessageDialog(NULL, wxT("The URL you entered cannot be reached. Please verify your syntax and check your network connection."),
 				wxT("URL Error"), wxOK | wxICON_WARNING);
 		dial->ShowModal();
 	}
