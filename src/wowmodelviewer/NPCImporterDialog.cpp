@@ -32,7 +32,9 @@ NPCimporterDialog::NPCimporterDialog(wxWindow * parent /* = NULL */, wxWindowID 
 
 	// up part : some explanation + url import choice
 	wxStaticBoxSizer *topSizer = new wxStaticBoxSizer(wxVERTICAL, this, _T("Import parameters"));
-	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T("Paste a Wowhead link for the desired NPC in the field below, then click Import.\nWait a few seconds. If it succeeds, click on the Display button to display the model."));
+	wxStaticText * explain =  new wxStaticText(this, wxID_ANY, _T(
+    "Paste a Wowhead link for the desired NPC in the field below and click 'Import'.\n"
+    "Wait a few seconds for the import to complete, then click 'Display' to view the model."));
 	topSizer->Add(explain, 0, wxALL, 5);
 	wxStaticText *label = new wxStaticText(this, wxID_ANY, _T("URL :"));
 	topSizer->Add(label, 0, wxLEFT|wxRIGHT|wxTOP, 5);
