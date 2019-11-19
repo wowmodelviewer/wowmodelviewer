@@ -1138,8 +1138,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
       {
         g_charControl->model->cd.set(CharDetails::SKIN_COLOR, r.values[0][0].toInt());
         g_charControl->model->cd.set(CharDetails::FACE, r.values[0][1].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][2].toInt());
-        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][3].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, r.values[0][2].toInt());
+        g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, r.values[0][3].toInt());
         g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
       }
 
