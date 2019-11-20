@@ -1018,50 +1018,61 @@ int WoWItem::getCustomModelId(size_t index)
                      infos))
     return 0;
 
-  // if there is only one result, return directly model id
+  // if there is only one result, return model id:
   if (infos.values.size() == 1)
     return infos.values[0][0].toInt();
 
-  // if there are multiple values, filter them based on ComponentModelFileData table
-  std::vector<QString> ids;
-  for (size_t i = 0; i < infos.values.size(); i++)
-    ids.push_back(infos.values[i][0]);
-
-  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
-  query += "FROM ComponentModelFileData WHERE ID IN(";
-  for (size_t i = 0; i < ids.size() - 1; i++)
-  {
-    query += ids[i];
-    query += ",";
-  }
-  query += ids[ids.size() - 1];
-  query += ")";
-
+  // if there are multiple values, check by race and sex:
+  QStringList idList;
+  for (auto it : infos.values)
+    idList << it[0];
+  QString idListStr = idList.join(", ");
+  idListStr = "(" + idListStr + ")";
+  
+  RaceInfos charInfos;
+  RaceInfos::getCurrent(m_charModel, charInfos);
+  
+  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones:
   sqlResult iteminfos;
+  QString query = QString("SELECT ID FROM ComponentModelFileData "
+                          "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                          "AND ID IN %4 ORDER BY GenderIndex")
+                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
   if (queryItemInfo(query, iteminfos))
-  {
-    RaceInfos charInfos;
-    RaceInfos::getCurrent(m_charModel, charInfos);
+    return iteminfos.values[0][0].toInt();
 
-    size_t i = 0;
-    for (auto it : iteminfos.values)
-    {
-      int gender = it[1].toInt();
-      int race = it[3].toInt();
-      // models are customized by race and gender
-      // if gender == 2, no customization
-      int fallbackRaceID = 0;
-      if (gender == 0)
-        fallbackRaceID = charInfos.MaleModelFallbackRaceID;
-      else if (gender == 1)
-        fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
-      if ((gender == charInfos.sexid) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
-      else if ((gender == 2) && (i == index))
-        return it[0].toInt();
-      i++;
-    }
+  // Failed to find model for that specific race and sex, so check fallback race:
+  int fallbackRaceID = 0;
+  int fallbackSex = -1;
+  if (charInfos.sexid == GENDER_MALE)
+  {
+    fallbackRaceID = charInfos.MaleModelFallbackRaceID;
+    fallbackSex = charInfos.MaleModelFallbackSex;
   }
+  else if (charInfos.sexid == GENDER_FEMALE)
+  {
+    fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
+    fallbackSex = charInfos.FemaleModelFallbackSex;
+  }
+  if (fallbackRaceID > 0)
+  {
+    query = QString("SELECT ID FROM ComponentModelFileData "
+                    "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                    "AND ID IN %4 ORDER BY GenderIndex")
+                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr);
+    if (queryItemInfo(query, iteminfos))
+      return iteminfos.values[0][0].toInt();
+  }
+  
+  // We still didn't find the model, so check for RACE_ANY (race = 0) items:
+  // Note: currently all race = 0 entries are also gender = 2, but we probably
+  // shouldn't assume it will stay that way, so check for both gender values:
+  query = QString("SELECT ID FROM ComponentModelFileData "
+                  "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                  "AND ID IN %4 ORDER BY GenderIndex")
+                  .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr);
+  if (queryItemInfo(query, iteminfos))
+    return iteminfos.values[0][0].toInt();
 
   return 0;
 }
@@ -1071,49 +1082,63 @@ int WoWItem::getCustomTextureId(size_t index)
   sqlResult infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
                              "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
-                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0) ? "TextureItemID1" : "TextureItemID2").arg(m_displayId),
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"TextureItemID1":"TextureItemID2").arg(m_displayId),
                      infos))
     return 0;
 
-  // if there is only one result, return directly texture id
+  // if there is only one result, return texture id:
   if (infos.values.size() == 1)
     return infos.values[0][0].toInt();
 
-  // if there are multiple values, filter them based on ComponentTextureFileData table
-  std::vector<QString> ids;
-  for (size_t i = 0; i < infos.values.size(); i++)
-    ids.push_back(infos.values[i][0]);
-
-  QString query = "SELECT ID, GenderIndex, classID, RaceID ";
-  query += "FROM ComponentTextureFileData WHERE ID IN(";
-  for (size_t i = 0; i < ids.size() - 1; i++)
-  {
-    query += ids[i];
-    query += ",";
-  }
-  query += ids[ids.size() - 1];
-  query += ")";
-
-  sqlResult iteminfos;
+  // if there are multiple values, check by race and sex:
+  QStringList idList;
+  for (auto it : infos.values)
+    idList << it[0];
+  QString idListStr = idList.join(", ");
+  idListStr = "(" + idListStr + ")";
+  
+  RaceInfos charInfos;
+  RaceInfos::getCurrent(m_charModel, charInfos);
+  
+  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones:
+  sqlResult iteminfos; 
+  QString query = QString("SELECT ID FROM ComponentTextureFileData "
+                          "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                          "AND ID IN %4 ORDER BY GenderIndex")
+                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
   if (queryItemInfo(query, iteminfos))
-  {
-    RaceInfos charInfos;
-    RaceInfos::getCurrent(m_charModel, charInfos);
+    return iteminfos.values[0][0].toInt();
 
-    for (auto it : iteminfos.values)
-    {
-      int gender = it[1].toInt();
-      int race = it[3].toInt();
-      int fallbackRaceID = 0;
-      if (gender == 0)
-        fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
-      else if (gender == 1)
-        fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
-      // models are customized by race and gender (gender == 3 means both sex)
-      if (((gender == charInfos.sexid) || (gender == 3)) && ((race == charInfos.raceid) || (fallbackRaceID > 0 && (race == fallbackRaceID))))
-        return it[0].toInt();
-    }
+  // Failed to find model for that specific race and sex, so check fallback race:
+  int fallbackRaceID = 0;
+  int fallbackSex = -1;
+  if (charInfos.sexid == GENDER_MALE)
+  {
+    fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
+    fallbackSex = charInfos.MaleTextureFallbackSex;
   }
+  else if (charInfos.sexid == GENDER_FEMALE)
+  {
+    fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
+    fallbackSex = charInfos.FemaleTextureFallbackSex;
+  }
+  if (fallbackRaceID > 0)
+  {
+    query = QString("SELECT ID FROM ComponentTextureFileData "
+                    "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                    "AND ID IN %4 ORDER BY GenderIndex")
+                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_ANY).arg(idListStr);
+    if (queryItemInfo(query, iteminfos))
+      return iteminfos.values[0][0].toInt();
+  }
+  
+  // We still didn't find the model, so check for RACE_ANY (race = 0) items: 
+  query = QString("SELECT ID FROM ComponentTextureFileData "
+                  "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                  "AND ID IN %4 ORDER BY GenderIndex")
+                  .arg(RACE_ANY).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
+  if (queryItemInfo(query, iteminfos))
+    return iteminfos.values[0][0].toInt();
 
   return 0;
 }

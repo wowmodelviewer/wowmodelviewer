@@ -22,7 +22,7 @@ std::map<int, int> RaceInfos::SDReplacementModel = // {SDFileID , HDFileID}
    {1838385, 1011653}, {1838588, 1018060}, {1822372, 1022598}, {1838590, 1022938}, {1853408, 1100087},
    {1839709, 1100258}, {1825438, 1593999}, {1839042, 1620605}, {1858265, 1630218}, {1859379, 1630402},
    {1900779, 1630447}, {1894572, 1662187}, {1859345, 1733758}, {1858367, 1734034}, {1858099, 1810676},
-   {1857801, 1814471}, {1892825, 1890763}, {1892543, 1890765}, {1968838, 1968587}};
+   {1857801, 1814471}, {1892825, 1890763}, {1892543, 1890765}, {1968838, 1968587}, {1842700, 1000764}};
            
 bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
 {
@@ -53,7 +53,9 @@ void RaceInfos::init()
                           "CMDF.FileID AS femalemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
                           "CMDMHD.FileID as malemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
                           "CMDFHD.FileID AS femalemodelHD, lower(ClientPrefix), CharComponentTexLayoutHiResID, "
-                          "ChrRaces.ID, BaseRaceID, Flags, MaleModelFallbackRaceID, FemaleModelFallbackRaceID, MaleTextureFallbackRaceID, FemaleTextureFallbackRaceID FROM ChrRaces "
+                          "ChrRaces.ID, BaseRaceID, Flags, MaleModelFallbackRaceID, MaleModelFallbackSex, "
+                          "FemaleModelFallbackRaceID, FemaleModelFallbackSex, MaleTextureFallbackRaceID, MaleTextureFallbackSex, "
+                          "FemaleTextureFallbackRaceID, FemaleTextureFallbackSex FROM ChrRaces "
                           "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
                           "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
@@ -82,31 +84,13 @@ void RaceInfos::init()
         // Get fallback display race ID (this is mostly for allied races and others that rely on
         // item display info from other race models):
         infos.MaleModelFallbackRaceID = value[15].toInt();
-        infos.FemaleModelFallbackRaceID = value[16].toInt();
-        infos.MaleTextureFallbackRaceID = value[17].toInt();
-        infos.FemaleTextureFallbackRaceID = value[18].toInt();
-
- /*      
-        // workaround - manually associate display race id with related race - info not in db ?
-        switch (infos.raceid)
-        {
-          case 25: // pandaren 2
-          case 26: // pandaren 3
-            infos.displayRaceid = 24; // pandaren 1
-            break;
-          case 28: // High Roc Tauren
-            infos.displayRaceid = 6; // Tauren
-            break;
-          case 29: // Void Elf
-            infos.displayRaceid = 10; // Blood elf
-            break;
-          case 30: // Sancteforge Draenei
-            infos.displayRaceid = 11; // Draenei
-            break;
-          default:
-            break;
-        }
-*/
+        infos.MaleModelFallbackSex = value[16].toInt();
+        infos.FemaleModelFallbackRaceID = value[17].toInt();
+        infos.FemaleModelFallbackSex = value[18].toInt();
+        infos.MaleTextureFallbackRaceID = value[19].toInt();
+        infos.MaleTextureFallbackSex = value[20].toInt();
+        infos.FemaleTextureFallbackRaceID = value[21].toInt();
+        infos.FemaleTextureFallbackSex = value[22].toInt();
 
         int modelfileid = value[r].toInt();
         
