@@ -1032,12 +1032,18 @@ int WoWItem::getCustomModelId(size_t index)
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
   
+  // It looks like shoulders are always in pairs, with PositionIndex values 0 and 1.
+  // Depending on index (model 1 or 2) we sort the PositionIndex differently so one will
+  // return left and one right shoulder. Noting this in case in the future it turns out
+  // this assumption isn't always right - Wain
+  QString positionSort = ((index == 0) ? "" : "DESC");
+  
   // Order all queries by GenderIndex to ensure definite genders have priority over generic ones:
   sqlResult iteminfos;
-  QString query = QString("SELECT ID FROM ComponentModelFileData "
+  QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                          "AND ID IN %4 ORDER BY GenderIndex")
-                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
+                          "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
+                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1056,10 +1062,10 @@ int WoWItem::getCustomModelId(size_t index)
   }
   if (fallbackRaceID > 0)
   {
-    query = QString("SELECT ID FROM ComponentModelFileData "
+    query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                     "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                    "AND ID IN %4 ORDER BY GenderIndex")
-                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr);
+                    "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
+                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(positionSort);
     if (queryItemInfo(query, iteminfos))
       return iteminfos.values[0][0].toInt();
   }
@@ -1067,10 +1073,10 @@ int WoWItem::getCustomModelId(size_t index)
   // We still didn't find the model, so check for RACE_ANY (race = 0) items:
   // Note: currently all race = 0 entries are also gender = 2, but we probably
   // shouldn't assume it will stay that way, so check for both gender values:
-  query = QString("SELECT ID FROM ComponentModelFileData "
+  query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                   "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                  "AND ID IN %4 ORDER BY GenderIndex")
-                  .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr);
+                  "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
+                  .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
