@@ -344,7 +344,12 @@ void WoWItem::load()
       // geosets
       // Boots: {geosetGroup[0] = 501, geosetGroup[1] = 2000*}
       m_itemGeosets[CG_BOOTS] = 1 + geosetGroup[0];
-      m_itemGeosets[CG_HDFEET] = 1 + geosetGroup[1];
+      // geoset group 20 (CG_HDFEET) is handled a bit differently, according to wowdev.wiki:
+      if (geosetGroup[1] == 0)
+        m_itemGeosets[CG_HDFEET] = 2;
+      else if (geosetGroup[1] > 0)
+        m_itemGeosets[CG_HDFEET] = geosetGroup[1];
+      // else ? should we do anything if geosetGroup[1] < 0?
 
       // models
       mergeModel(CS_BOOTS, model[0], texture[0]);
