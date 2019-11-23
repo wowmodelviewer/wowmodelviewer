@@ -57,23 +57,23 @@
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="ClientPrefix" pos="0" />
     <field type="uint" name="Flags" pos="7" />
     <field type="uint" name="MaleDisplayID" pos="8" />
     <field type="uint" name="FemaleDisplayID" pos="9" />
-    <field type="byte" name="CharComponentTexLayoutID" pos="34" />
-    <field type="text" name="ClientPrefix" pos="0" />
     <field type="uint" name="HighResMaleDisplayId" pos="10" />
     <field type="uint" name="HighResFemaleDisplayId" pos="11" />
-    <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
     <field type="int"  name="BaseRaceID" pos="24" />
-    <field type="int"  name="MaleModelFallbackRaceID" pos="38" />
-    <field type="int"  name="MaleModelFallbackSex" pos="39" />
-    <field type="int"  name="FemaleModelFallbackRaceID" pos="40" />
-    <field type="int"  name="FemaleModelFallbackSex" pos="41" />
-    <field type="int"  name="MaleTextureFallbackRaceID" pos="42" />
-    <field type="int"  name="MaleTextureFallbackSex" pos="43" />
-    <field type="int"  name="FemaleTextureFallbackRaceID" pos="44" />
-    <field type="int"  name="FemaleTextureFallbackSex" pos="45" />
+    <field type="byte" name="CharComponentTexLayoutID" pos="35" />
+    <field type="byte" name="CharComponentTexLayoutHiResID" pos="36" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="39" />
+    <field type="int"  name="MaleModelFallbackSex" pos="40" />
+    <field type="int"  name="FemaleModelFallbackRaceID" pos="41" />
+    <field type="int"  name="FemaleModelFallbackSex" pos="42" />
+    <field type="int"  name="MaleTextureFallbackRaceID" pos="43" />
+    <field type="int"  name="MaleTextureFallbackSex" pos="44" />
+    <field type="int"  name="FemaleTextureFallbackRaceID" pos="45" />
+    <field type="int"  name="FemaleTextureFallbackSex" pos="46" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
