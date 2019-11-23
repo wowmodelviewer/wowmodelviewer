@@ -67,9 +67,13 @@
     <field type="byte" name="CharComponentTexLayoutHiResID" pos="35" />
     <field type="int"  name="BaseRaceID" pos="24" />
     <field type="int"  name="MaleModelFallbackRaceID" pos="38" />
+    <field type="int"  name="MaleModelFallbackSex" pos="39" />
     <field type="int"  name="FemaleModelFallbackRaceID" pos="40" />
+    <field type="int"  name="FemaleModelFallbackSex" pos="41" />
     <field type="int"  name="MaleTextureFallbackRaceID" pos="42" />
+    <field type="int"  name="MaleTextureFallbackSex" pos="43" />
     <field type="int"  name="FemaleTextureFallbackRaceID" pos="44" />
+    <field type="int"  name="FemaleTextureFallbackSex" pos="45" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
