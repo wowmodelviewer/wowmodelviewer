@@ -165,8 +165,9 @@ struct M2Array
 
 #define	MODELBONE_BILLBOARD	8
 #define	MODELBONE_TRANSFORM	512
+
 // block E - bones
-struct ModelBoneDef {
+struct M2CompBone {
 	int32 keyboneid; // Back-reference to the key bone lookup table. -1 if this is no key bone.
 	int32 flags; // Only known flags: 8 - billboarded and 512 - transformed
 	int16 parent; // parent bone index
@@ -195,16 +196,16 @@ struct ModelVertex {
 
 /// Lod part, 
 struct ModelView {
-	char id[4];				 // Signature
-    uint32 nIndex;
-    uint32 ofsIndex; // int16, Vertices in this model (index into vertices[])
-    uint32 nTris;
+  char id[4];				 // Signature
+  uint32 nIndex;
+  uint32 ofsIndex; // int16, Vertices in this model (index into vertices[])
+  uint32 nTris;
 	uint32 ofsTris;	 // int16[3], indices
-    uint32 nProps;
+  uint32 nProps;
 	uint32 ofsProps; // int32, additional vtx properties
-    uint32 nSub;
+  uint32 nSub;
 	uint32 ofsSub;	 // ModelGeoset, materials/renderops/submeshes
-    uint32 nTex;
+  uint32 nTex;
 	uint32 ofsTex;	 // ModelTexUnit, material properties/textures
 	int32 lod;				 // LOD bias?
 };

@@ -304,7 +304,7 @@ void WoWModel::displayHeader(ModelHeader & a_header)
 bool WoWModel::isAnimated(GameFile * f)
 {
   // see if we have any animated bones
-  ModelBoneDef *bo = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+  M2CompBone *bo = (M2CompBone*)(f->getBuffer() + header.ofsBones);
 
   animGeometry = false;
   animBones = false;
@@ -316,7 +316,7 @@ bool WoWModel::isAnimated(GameFile * f)
     {
       if (ov_it->weights[b]>0)
       {
-        ModelBoneDef &bb = bo[ov_it->bones[b]];
+        M2CompBone &bb = bo[ov_it->bones[b]];
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
         {
           if (bb.flags & MODELBONE_BILLBOARD)
@@ -339,7 +339,7 @@ bool WoWModel::isAnimated(GameFile * f)
   {
     for (uint i = 0; i < bones.size() ; i++)
     {
-      ModelBoneDef &bb = bo[i];
+      M2CompBone &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type)
       {
         animBones = true;
@@ -973,7 +973,7 @@ void WoWModel::initAnimations(GameFile * f)
           fileToUse->read(&skb1, sizeof(skb1));
           memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
           bones.resize(skb1.nBones);
-          ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
+          M2CompBone *mb = (M2CompBone*)(fileToUse->getBuffer() + skb1.ofsBones);
 
           for (uint i = 0; i < anims.size(); i++)
             data.animIndexToAnimId[i] = anims[i].animID;
@@ -1014,7 +1014,7 @@ void WoWModel::initAnimations(GameFile * f)
 
     // init bones...
     bones.resize(header.nBones);
-    ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+    M2CompBone *mb = (M2CompBone*)(f->getBuffer() + header.ofsBones);
 
     for (uint i = 0; i < anims.size(); i++)
       data.animIndexToAnimId[i] = anims[i].animID;
