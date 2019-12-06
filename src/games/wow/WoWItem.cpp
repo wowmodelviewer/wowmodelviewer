@@ -432,7 +432,10 @@ void WoWItem::load()
         TEXTUREMANAGER.add(tex);
         m_itemTextures[getRegionForTexture(tex)] = tex;
       }
-
+      
+      // model
+      mergeModel(CS_CAPE, model[0], texture[0]);
+      
       // Cape: {geosetGroup[0] = 1501}
       m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
 
