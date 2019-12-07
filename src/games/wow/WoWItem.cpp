@@ -225,7 +225,9 @@ void WoWItem::load()
   sqlResult iteminfos;
 
   // query geosets infos
-  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
+  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6, "
+                             "AttachmentGeoSetGroup1, AttachmentGeoSetGroup2, AttachmentGeoSetGroup3, "
+                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6 "
                              "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
                      iteminfos))
     return;
