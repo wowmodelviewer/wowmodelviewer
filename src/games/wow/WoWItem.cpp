@@ -225,7 +225,9 @@ void WoWItem::load()
   sqlResult iteminfos;
 
   // query geosets infos
-  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6 "
+  if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6, "
+                             "AttachmentGeoSetGroup1, AttachmentGeoSetGroup2, AttachmentGeoSetGroup3, "
+                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6 "
                              "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
                      iteminfos))
     return;
@@ -432,7 +434,10 @@ void WoWItem::load()
         TEXTUREMANAGER.add(tex);
         m_itemTextures[getRegionForTexture(tex)] = tex;
       }
-
+      
+      // model
+      mergeModel(CS_CAPE, model[0], texture[0]);
+      
       // Cape: {geosetGroup[0] = 1501}
       m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
 
