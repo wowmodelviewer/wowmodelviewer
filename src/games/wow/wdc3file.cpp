@@ -642,7 +642,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     case FIELD_COMPRESSION::NONE:
     {
       uint fieldSize = info.field_size_bits / 8;
-      unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
+      unsigned char * fieldOffset = recordOffset + getFieldOffset(fieldIndex);
   
       if (arraySize != 1)
       {
@@ -730,6 +730,10 @@ uint32 WDC3File::readBitpackedValue(field_storage_info & info, unsigned char * r
   return result;
 }
 
+uint32 WDC3File::getFieldOffset(unsigned int fieldIndex) const
+{
+  return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+}
 
 
 
