@@ -716,7 +716,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
   return true;
 }
 
-uint32 WDC3File::readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const
+uint32 WDC3File::readBitpackedValue(field_storage_info & info, unsigned char * recordOffset) const
 {
   unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
   unsigned int offset = info.field_offset_bits / 8;
@@ -729,6 +729,7 @@ uint32 WDC3File::readBitpackedValue(field_storage_info info, unsigned char * rec
   result = result & ((1ull << info.field_size_bits) - 1);
   return result;
 }
+
 
 
 
