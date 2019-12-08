@@ -516,12 +516,12 @@ bool WDC3File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDC3File::get(unsigned int recordIndex) const
 {
   std::vector<std::string> result;
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
@@ -559,10 +559,10 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
           // iterate along record to get right position
           for (int f = 0; f <= field->pos; f++)
           {
-            if (structure->fields[f]->isKey)
+            if (tableStructure->fields[f]->isKey)
               continue;
 
-            if (structure->fields[f]->type == "uint64")
+            if (tableStructure->fields[f]->type == "uint64")
             {
               ptr += 8;
             }
@@ -732,7 +732,15 @@ uint32 WDC3File::readBitpackedValue(field_storage_info & info, unsigned char * r
 
 uint32 WDC3File::getFieldOffset(unsigned int fieldIndex) const
 {
-  return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+  if(!m_isSparseTable)
+  {
+    return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+  }
+  else // if sparse table, iterate along fields to get field position
+  {
+    // TODO
+    return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+  }
 }
 
 

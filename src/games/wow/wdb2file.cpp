@@ -94,12 +94,12 @@ WDB2File::~WDB2File()
   close();
 }
 
-std::vector<std::string> WDB2File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDB2File::get(unsigned int recordIndex) const
 {
   unsigned char * recordOffset = data + (recordIndex * recordSize);
   std::vector<std::string> result;
   unsigned int offset = 0; // to handle byte reading, incremented each time a byte member is read
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     // std::cout << it->second.first << " => ";
     if (it->type == "uint")

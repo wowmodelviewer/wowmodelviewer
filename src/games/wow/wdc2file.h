@@ -65,7 +65,7 @@ public:
 
   bool close();
 
-  std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
+  std::vector<std::string> get(unsigned int recordIndex) const;
 
 private:
   enum FIELD_COMPRESSION

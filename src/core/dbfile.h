@@ -42,9 +42,9 @@ public:
 			  return *this; 
 		  }	
 		
-      std::vector<std::string> get(const core::TableStructure * structure) const
+      std::vector<std::string> get() const
       {
-        return file.get(recordIndex, structure);
+        return file.get(recordIndex);
       }
 	
 		  /// Comparison
@@ -71,8 +71,11 @@ public:
 	/// Trivial
 	size_t getRecordCount() const { return recordCount; }
 
+  /// Set table structure for further reading
+  void setTableStructure(core::TableStructure * structure) { tableStructure = structure; }
+
   // to be implemented in inherited classes to get actual record values (specified by recordOffset), following "structure" format
-  virtual std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const = 0;
+  virtual std::vector<std::string> get(unsigned int recordIndex) const = 0;
 
 protected:
 	size_t recordSize;
@@ -81,6 +84,7 @@ protected:
 	size_t stringSize;
 	unsigned char *data;
 	unsigned char *stringTable;
+  core::TableStructure * tableStructure;
 
   private:
   DBFile(const DBFile &);

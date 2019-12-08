@@ -299,6 +299,8 @@ bool core::TableStructure::fill()
   if (!dbc || !dbc->open())
     return false;
 
+  dbc->setTableStructure(this);
+
   QString query = "INSERT INTO ";
   query += name;
   query += "(";
@@ -334,7 +336,7 @@ bool core::TableStructure::fill()
 
   for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
   {
-    std::vector<std::string> fields = it.get(this);
+    std::vector<std::string> fields = it.get();
 
     for (int field = 0, nbfield = fields.size(); field < nbfield; field++)
     {

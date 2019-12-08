@@ -216,13 +216,13 @@ WDB5File::~WDB5File()
   close();
 }
 
-std::vector<std::string> WDB5File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDB5File::get(unsigned int recordIndex) const
 {
   std::vector<std::string> result;
 
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
