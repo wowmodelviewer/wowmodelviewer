@@ -263,9 +263,9 @@ public:
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
 
-  void mergeModel(QString & name);
-  void mergeModel(uint fileID);
-  void mergeModel(WoWModel * model);
+  WoWModel* mergeModel(QString & name);
+  WoWModel* mergeModel(uint fileID);
+  WoWModel* mergeModel(WoWModel * model);
   void unmergeModel(QString & name);
   void unmergeModel(uint fileID);
   void unmergeModel(WoWModel * model);

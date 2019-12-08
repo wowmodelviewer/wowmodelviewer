@@ -234,8 +234,13 @@ void WoWItem::load()
 
   int geosetGroup[6] = { iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt() ,
                          iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt() ,
-                         iteminfos.values[0][5].toInt(), iteminfos.values[0][5].toInt()};
+                         iteminfos.values[0][4].toInt(), iteminfos.values[0][5].toInt() };
 
+  int attachmentGeosetGroup[6] =
+                       { iteminfos.values[0][6].toInt(), iteminfos.values[0][7].toInt() ,
+                         iteminfos.values[0][8].toInt(), iteminfos.values[0][9].toInt() ,
+                         iteminfos.values[0][10].toInt(), iteminfos.values[0][11].toInt() };
+                         
   // query models
   int model[2] = { getCustomModelId(0), getCustomModelId(1) };
 
@@ -271,18 +276,25 @@ void WoWItem::load()
     {
       // attachments
       updateItemModel(ATT_HELMET, model[0], texture[0]);
-      if (model[1] != 0)
-        mergeModel(CS_HEAD, model[1], texture[1]);
 
       // geosets
       // Head: {geosetGroup[0] = 2700**, geosetGroup[1] = 2101 }
       m_itemGeosets[CG_GEOSET2700] = 1 + geosetGroup[0];
       m_itemGeosets[CG_GEOSET2100] = 1 + geosetGroup[1];
+      
+      // 'collections' models:
+      if (model[1] != 0)
+      {
+        mergeModel(CS_HEAD, model[1], texture[1]);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2700, 1 + attachmentGeosetGroup[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2100, 1 + attachmentGeosetGroup[1]);
+      }
+      
       break;
     }
     case CS_SHOULDER:
     {
-      //geosets
+      // geosets
       // Shoulder: {geosetGroup[0] = 2601}
       m_itemGeosets[CG_GEOSET2600] = 1 + geosetGroup[0];
 
@@ -353,8 +365,13 @@ void WoWItem::load()
         m_itemGeosets[CG_HDFEET] = geosetGroup[1];
       // else ? should we do anything if geosetGroup[1] < 0?
 
-      // models
-      mergeModel(CS_BOOTS, model[0], texture[0]);
+      // 'collections' models:
+      if (model[0] != 0)
+      {
+        mergeModel(CS_BOOTS, model[0], texture[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1 + attachmentGeosetGroup[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_HDFEET, 1 + attachmentGeosetGroup[1]);
+      }
 
       break;
     }
@@ -368,8 +385,12 @@ void WoWItem::load()
       // buckle model
       updateItemModel(ATT_BELT_BUCKLE, model[0], texture[0]);
       
-      // belt model
-      mergeModel(CS_BELT, model[1], texture[1]);
+      // 'collections' models:
+      if (model[1] != 0)
+      {
+        mergeModel(CS_BELT, model[1], texture[1]);
+        m_mergedModel->setGeosetGroupDisplay(CG_BELT, 1 + attachmentGeosetGroup[0]);
+      }
      
       break;
     }
@@ -380,10 +401,15 @@ void WoWItem::load()
       m_itemGeosets[CG_PANTS2] = 1 + geosetGroup[0];
       m_itemGeosets[CG_KNEEPADS] = 1 + geosetGroup[1];
       m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
-
-     
-      //model
-      mergeModel(CS_PANTS, model[0], texture[0]);
+      
+      // 'collections' models:
+      if (model[0] != 0)
+      {
+        mergeModel(CS_PANTS, model[0], texture[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_PANTS2, 1 + attachmentGeosetGroup[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_KNEEPADS, 1 + attachmentGeosetGroup[1]);
+        m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1 + attachmentGeosetGroup[2]);
+      }
 
       break;
     }
@@ -397,10 +423,18 @@ void WoWItem::load()
       m_itemGeosets[CG_TROUSERS] = 1 + geosetGroup[2];
       m_itemGeosets[CG_GEOSET2200] = 1 + geosetGroup[3];
       m_itemGeosets[CG_GEOSET2800] = 1 + geosetGroup[4];
-
-      // model
-      mergeModel(CS_CHEST, model[0], texture[0]);
-
+      
+      // 'collections' models:
+      if (model[0] != 0)
+      {
+        mergeModel(CS_CHEST, model[0], texture[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_WRISTBANDS, 1 + attachmentGeosetGroup[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_PANTS, 1 + attachmentGeosetGroup[1]);
+        m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1 + attachmentGeosetGroup[2]);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2200, 1 + attachmentGeosetGroup[3]);
+        m_mergedModel->setGeosetGroupDisplay(CG_GEOSET2800, 1 + attachmentGeosetGroup[4]);
+      }
+      
       break;
     }
     case CS_BRACERS:
@@ -414,9 +448,14 @@ void WoWItem::load()
       // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
       m_itemGeosets[CG_GLOVES] = 1 + geosetGroup[0];
       m_itemGeosets[CG_HANDS] = 1 + geosetGroup[1];
-
-      // model
-      mergeModel(CS_GLOVES, model[0], texture[0]);
+      
+      // 'collections' models:
+      if (model[0] != 0)
+      {
+        mergeModel(CS_GLOVES, model[0], texture[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_GLOVES, 1 + attachmentGeosetGroup[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_HANDS, 1 + attachmentGeosetGroup[1]);
+      }
     
       break;
     }
@@ -435,12 +474,17 @@ void WoWItem::load()
         m_itemTextures[getRegionForTexture(tex)] = tex;
       }
       
-      // model
-      mergeModel(CS_CAPE, model[0], texture[0]);
-      
+      // geosets
       // Cape: {geosetGroup[0] = 1501}
       m_itemGeosets[CG_CAPE] = 1 + geosetGroup[0];
-
+      
+      // 'collections' models:
+      if (model[0] != 0)
+      {
+        mergeModel(CS_CAPE, model[0], texture[0]);
+        m_mergedModel->setGeosetGroupDisplay(CG_CAPE, 1 + attachmentGeosetGroup[0]);
+      }
+      
       break;
     }
     case CS_TABARD:
@@ -526,9 +570,10 @@ void WoWItem::refresh()
         (m_slot != CS_PANTS)) // treat trousers geoset in a special case - cf CS_PANTS
     {
       m_charModel->cd.geosets[it.first] = it.second;
-
+      /*
       if (m_mergedModel != 0)
         m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+      */
     }
   }
 
@@ -647,9 +692,10 @@ void WoWItem::refresh()
         if (it.first != CG_BOOTS)
         {
           m_charModel->cd.geosets[it.first] = it.second;
-
+          /*
           if (m_mergedModel != 0)
             m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+          */
         }
       }
 
@@ -662,8 +708,10 @@ void WoWItem::refresh()
         if (chestItem->m_type != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
         {
           m_charModel->cd.geosets[CG_BOOTS] = geoIt->second;
+          /*
           if (m_mergedModel != 0)
             m_mergedModel->setGeosetGroupDisplay(CG_BOOTS, 1);
+          */
         }
       }
 
@@ -686,9 +734,10 @@ void WoWItem::refresh()
         if (it.first != CG_TROUSERS)
         {
           m_charModel->cd.geosets[it.first] = it.second;
-
+          /*
           if (m_mergedModel != 0)
             m_mergedModel->setGeosetGroupDisplay(it.first, 1);
+          */
         }
       }
       
@@ -702,8 +751,10 @@ void WoWItem::refresh()
         if (item.type != IT_ROBE)
         {
           m_charModel->cd.geosets[CG_TROUSERS] = geoIt->second;
+          /*
           if (m_mergedModel)
             m_mergedModel->setGeosetGroupDisplay(CG_TROUSERS, 1);
+          */
         }
       }
 
