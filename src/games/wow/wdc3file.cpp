@@ -642,7 +642,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     case FIELD_COMPRESSION::NONE:
     {
       uint fieldSize = info.field_size_bits / 8;
-      unsigned char * fieldOffset = recordOffset + getFieldOffset(fieldIndex);
+      unsigned char * fieldOffset = getFieldOffset(recordOffset, fieldIndex);
   
       if (arraySize != 1)
       {
@@ -730,16 +730,36 @@ uint32 WDC3File::readBitpackedValue(field_storage_info & info, unsigned char * r
   return result;
 }
 
-uint32 WDC3File::getFieldOffset(unsigned int fieldIndex) const
+unsigned char * WDC3File::getFieldOffset(unsigned char * recordOffset, unsigned int fieldIndex) const
 {
   if(!m_isSparseTable)
   {
-    return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+    return recordOffset + m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
   }
   else // if sparse table, iterate along fields to get field position
   {
-    // TODO
-    return m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+    unsigned char * ptr = recordOffset;
+  // wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(tableStructure->fields[fieldIndex]);
+
+    for (uint f = 0; f <= fieldIndex; f++)
+    {
+      if (tableStructure->fields[f]->isKey)
+        continue;
+
+      QString type = tableStructure->fields[f]->type;
+
+      if(type == "text")
+      {
+        std::string val(reinterpret_cast<char *>(ptr));
+        ptr = ptr + val.size() + 1;
+      }
+      else
+      {
+        ptr += (m_fieldStorageInfo[fieldIndex].field_size_bits / 8);
+      }
+    }
+    
+    return ptr;
   }
 }
 

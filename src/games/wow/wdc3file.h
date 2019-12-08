@@ -118,7 +118,7 @@ private:
 
   bool readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize, unsigned int & result) const;
   uint32 readBitpackedValue(field_storage_info & info, unsigned char * recordOffset) const;
-  uint32 getFieldOffset(unsigned int fieldIndex) const;
+  unsigned char * getFieldOffset(unsigned char * recordOffset, unsigned int fieldIndex) const;
 
   header m_header;
   section_header * m_sectionHeader;
