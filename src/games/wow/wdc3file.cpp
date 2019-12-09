@@ -739,19 +739,21 @@ unsigned char * WDC3File::getFieldOffset(unsigned char * recordOffset, unsigned 
   else // if sparse table, iterate along fields to get field position
   {
     unsigned char * ptr = recordOffset;
-  // wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(tableStructure->fields[fieldIndex]);
-
+ 
     for (uint f = 0; f <= fieldIndex; f++)
     {
-      if (tableStructure->fields[f]->isKey)
-        continue;
-
-      QString type = tableStructure->fields[f]->type;
-
-      if(type == "text")
+      
+      if (f < tableStructure->fields.size())
       {
-        std::string val(reinterpret_cast<char *>(ptr));
-        ptr = ptr + val.size() + 1;
+        if (tableStructure->fields[f]->isKey)
+          continue;
+
+        if(tableStructure->fields[f]->type == "text")
+        {
+          std::string val(reinterpret_cast<char *>(ptr));
+          ptr = ptr + val.size() + 1;
+        }
+
       }
       else
       {
