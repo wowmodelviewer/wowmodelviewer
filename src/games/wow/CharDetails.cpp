@@ -369,25 +369,17 @@ void CharDetails::fillCustomizationMap()
   m_customizationParamsMap.clear();
   m_multiCustomizationMap.clear();
   
-  QString dhFilter = "";
-  if (m_isDemonHunter)
-    dhFilter = QString("AND ((Flags & %1) OR (Flags & %2) OR (Flags & %3) OR (Flags & %4) OR (Flags = 0))")
-                      .arg(SF_DEMON_HUNTER).arg(SF_DEMON_HUNTER_FACE).arg(SF_DEMON_HUNTER_BFX).arg(SF_REGULAR);
-
-  
   // SECTION 0 (= Sections 0 & 5) : skin
   CustomizationParam skin;
   skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
   QString query = QString("SELECT ColorIndex, Flags FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                           "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
-                          "%5 "
                           "ORDER BY ColorIndex")
                          .arg(infos.raceid)
                          .arg(infos.sexid)
                          .arg(SkinBaseType)
-                         .arg(infos.isHD ? 1 : 0)
-                         .arg(dhFilter);
+                         .arg(infos.isHD ? 1 : 0);
 
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
 
