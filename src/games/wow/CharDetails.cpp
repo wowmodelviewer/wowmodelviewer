@@ -20,7 +20,7 @@
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel("")
+isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel(0)
 {
 
 }
@@ -368,8 +368,7 @@ void CharDetails::fillCustomizationMap()
   // clear any previous value found
   m_customizationParamsMap.clear();
   m_multiCustomizationMap.clear();
-
-
+  
   // SECTION 0 (= Sections 0 & 5) : skin
   CustomizationParam skin;
   skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
@@ -950,22 +949,36 @@ void CharDetails::setDemonHunterMode(bool val)
     m_isDemonHunter = val;
     if (m_isDemonHunter)
     {
-      if (m_model->name().contains("bloodelfmale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_be_m.m2";
-      else if (m_model->name().contains("bloodelffemale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_be_f.m2";
-      else if (m_model->name().contains("nightelfmale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_ni_m.m2";
-      else if (m_model->name().contains("nightelffemale_hd"))
-        m_dhModel = "item\\objectcomponents\\collections\\demonhuntergeosets_ni_f.m2";
-
-      m_model->mergeModel(m_dhModel);
+      RaceInfos infos;
+      
+      if (RaceInfos::getCurrent(m_model, infos))
+      {
+        if (infos.raceid == RACE_NIGHTELF)
+        {
+          if (infos.sexid == GENDER_MALE)
+            m_dhModel = 2763975;
+          else if (infos.sexid == GENDER_FEMALE)
+            m_dhModel = 2763974;
+        }
+        else if (infos.raceid == RACE_BLOODELF)
+        {
+          if (infos.sexid == GENDER_MALE)
+            m_dhModel = 2763973;
+          else if (infos.sexid == GENDER_FEMALE)
+            m_dhModel = 2763972;
+        }
+        if (m_dhModel != 0)
+          m_model->mergeModel(m_dhModel);
+        setRandomValue(CUSTOM1_STYLE);
+        setRandomValue(CUSTOM1_COLOR);
+        setRandomValue(CUSTOM2_STYLE);
+        setRandomValue(CUSTOM3_STYLE);
+      }
     }
     else
     {
       m_model->unmergeModel(m_dhModel);
     }
-
     fillCustomizationMap();
     CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED);
     notify(event);

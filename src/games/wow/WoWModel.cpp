@@ -1982,9 +1982,10 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
     if (id > a && id < b)
       showGeoset(i, (id == geosetID));
   }
-
+  /*
   for (auto it : mergedModels)
     it->setGeosetGroupDisplay(group, val);
+  */
 }
 
 void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
@@ -2019,44 +2020,48 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 }
 
 
-void WoWModel::mergeModel(QString & name)
+WoWModel* WoWModel::mergeModel(QString & name)
 {
+  name = name.replace("\\", "/");
+  
   LOG_INFO << __FUNCTION__ << name;
-  if(mergedModels.end() != std::find_if(std::begin(mergedModels),
-                                        std::end(mergedModels),
-                                        [&](const WoWModel * m){ return m->gamefile->fullname() == name.replace("\\", "/"); }))
-    return;
+  auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
+                         [&](const WoWModel * m) { return m->gamefile->fullname() == name; });
+                         
+  if(it != mergedModels.end())
+    return *it;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
 
   if (!m->ok)
-    return;
+    return NULL;
 
-  mergeModel(m);
+  return mergeModel(m);
 }
 
-void WoWModel::mergeModel(uint fileID)
+WoWModel* WoWModel::mergeModel(uint fileID)
 {
   LOG_INFO << __FUNCTION__ << fileID;
-  if(mergedModels.end() != std::find_if(std::begin(mergedModels),
-                                        std::end(mergedModels),
-                                        [&](const WoWModel * m){ return m->gamefile->fileDataId() == fileID; }))
-    return;
+  auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
+                         [&](const WoWModel * m){ return m->gamefile->fileDataId() == fileID; });
+  if(it != mergedModels.end())
+    return *it;
 
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(fileID), true);
 
   if (!m->ok)
-    return;
+    return NULL;
 
-  mergeModel(m);
+  return mergeModel(m);
 }
 
-void WoWModel::mergeModel(WoWModel * m)
+WoWModel* WoWModel::mergeModel(WoWModel * m)
 {
   LOG_INFO << __FUNCTION__ << m;
   auto it = mergedModels.insert(m);
   if (it.second == true) // new element inserted
     refreshMerging();
+  return m;
 }
 
 WoWModel* WoWModel::getMergedModel(uint fileID)
@@ -2106,7 +2111,7 @@ void WoWModel::refreshMerging()
       geosets.push_back(it);
     }
 
-    // build bone corresponsance table
+    // build bone correspondence table
     uint32 nbBonesInNewModel = modelsIt->header.nBones;
     int16 * boneConvertTable = new int16[nbBonesInNewModel];
 
@@ -2425,12 +2430,15 @@ void WoWModel::refresh()
     {
       for (auto it : custom1Style.values)
       {
-        uint customGeoFile = it[2].toInt();
-        if (customGeoFile > 0)
-          mergeModel(customGeoFile);
+        WoWModel* custommodel = NULL; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          custommodel = mergeModel(customGeoFile);
         cd.geosets[geoType] = geoId;
+        if (custommodel != NULL)
+          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
       }
     }  
     // Textures (tattoos):
@@ -2467,11 +2475,15 @@ void WoWModel::refresh()
     {
      for (auto it : custom2Style.values)
       {
-        uint customGeoFile = it[2].toInt();
-        if (customGeoFile > 0)
-          mergeModel(customGeoFile);
+        WoWModel* custommodel = NULL; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          custommodel = mergeModel(customGeoFile);
+        cd.geosets[geoType] = geoId;
+        if (custommodel != NULL)
+          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
         cd.geosets[geoType] = geoId;
       }
     }
@@ -2509,12 +2521,15 @@ void WoWModel::refresh()
     {
       for (auto it : custom3Style.values)
       {
-        uint customGeoFile = it[2].toInt();
-        if (customGeoFile > 0)
-          mergeModel(customGeoFile);
+        WoWModel* custommodel = NULL; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
+        uint customGeoFile = it[2].toInt();
+        if (customGeoFile > 0)
+          custommodel = mergeModel(customGeoFile);
         cd.geosets[geoType] = geoId;
+        if (custommodel != NULL)
+          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
       }
     }
     // Textures (markings/tattoos):
