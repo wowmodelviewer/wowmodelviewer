@@ -251,11 +251,17 @@ void WoWItem::load()
   sqlResult texinfos = GAMEDATABASE.sqlQuery(QString("SELECT * FROM ItemDisplayInfoMaterialRes WHERE ItemDisplayInfoID = %1").arg(m_displayId));
   if (texinfos.valid && !texinfos.empty())
   {
+    QString classFilter = QString("ComponentTextureFileData.ClassID = %1").arg(CLASS_ANY);
+    if (m_charModel && m_charModel->cd.isDemonHunter())
+      classFilter = QString("(ComponentTextureFileData.ClassID = %1 OR ComponentTextureFileData.ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
+    
     if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
                               "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
                               "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
-                              "AND (ComponentTextureFileData.GenderIndex = 3 OR ComponentTextureFileData.GenderIndex = %1) "
-                              "WHERE ItemDisplayInfoID = %2").arg(charInfos.sexid).arg(m_displayId),
+                              "WHERE (ComponentTextureFileData.GenderIndex = %1 OR ComponentTextureFileData.GenderIndex = %2) "
+                              "AND ItemDisplayInfoID = %3 AND %4 "
+                              "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC")
+                              .arg(GENDER_ANY).arg(charInfos.sexid).arg(m_displayId).arg(classFilter),
                       iteminfos))
     {
       for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -263,8 +269,13 @@ void WoWItem::load()
         GameFile * tex = GAMEDIRECTORY.getFile(iteminfos.values[i][0].toInt());
         if (tex)
         {
-          TEXTUREMANAGER.add(tex);
-          m_itemTextures[getRegionForTexture(tex)] = tex;
+          CharRegions texRegion = getRegionForTexture(tex);
+          // Only add one texture per region (first one in sort order):
+          if (m_itemTextures.count(texRegion) < 1)
+          {
+            TEXTUREMANAGER.add(tex);
+            m_itemTextures[texRegion] = tex;
+          }
         }
       }
     }
@@ -1092,6 +1103,10 @@ int WoWItem::getCustomModelId(size_t index)
   
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
+
+  QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
+  if (m_charModel && m_charModel->cd.isDemonHunter())
+    classFilter = QString("(ClassID = %1 OR ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
   
   // It looks like shoulders are always in pairs, with PositionIndex values 0 and 1.
   // Depending on index (model 1 or 2) we sort the PositionIndex differently so one will
@@ -1099,12 +1114,14 @@ int WoWItem::getCustomModelId(size_t index)
   // this assumption isn't always right - Wain
   QString positionSort = ((index == 0) ? "" : "DESC");
   
-  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones:
+  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
+  // and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
   sqlResult iteminfos;
   QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                          "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
-                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(positionSort);
+                          "AND ID IN %4 AND %5 "
+                          "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1125,8 +1142,9 @@ int WoWItem::getCustomModelId(size_t index)
   {
     query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                     "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                    "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
-                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(positionSort);
+                    "AND ID IN %4 AND %5 "
+                    "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort);
     if (queryItemInfo(query, iteminfos))
       return iteminfos.values[0][0].toInt();
   }
@@ -1136,8 +1154,9 @@ int WoWItem::getCustomModelId(size_t index)
   // shouldn't assume it will stay that way, so check for both gender values:
   query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
                   "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                  "AND ID IN %4 ORDER BY GenderIndex, PositionIndex %5")
-                  .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(positionSort);
+                  "AND ID IN %4 AND %5 "
+                  "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                  .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1167,12 +1186,18 @@ int WoWItem::getCustomTextureId(size_t index)
   RaceInfos charInfos;
   RaceInfos::getCurrent(m_charModel, charInfos);
   
-  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones:
+  QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
+  if (m_charModel && m_charModel->cd.isDemonHunter())
+    classFilter = QString("(ClassID = %1 OR ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
+  
+  // Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
+  // and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
   sqlResult iteminfos; 
   QString query = QString("SELECT ID FROM ComponentTextureFileData "
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                          "AND ID IN %4 ORDER BY GenderIndex")
-                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
+                          "AND ID IN %4 AND %5 "
+                          "ORDER BY GenderIndex, ClassID DESC")
+                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
@@ -1193,8 +1218,9 @@ int WoWItem::getCustomTextureId(size_t index)
   {
     query = QString("SELECT ID FROM ComponentTextureFileData "
                     "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                    "AND ID IN %4 ORDER BY GenderIndex")
-                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_ANY).arg(idListStr);
+                    "AND ID IN %4 AND %5 "
+                    "ORDER BY GenderIndex, ClassID DESC")
+                    .arg(fallbackRaceID).arg(fallbackSex).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
     if (queryItemInfo(query, iteminfos))
       return iteminfos.values[0][0].toInt();
   }
@@ -1202,8 +1228,9 @@ int WoWItem::getCustomTextureId(size_t index)
   // We still didn't find the model, so check for RACE_ANY (race = 0) items: 
   query = QString("SELECT ID FROM ComponentTextureFileData "
                   "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                  "AND ID IN %4 ORDER BY GenderIndex")
-                  .arg(RACE_ANY).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr);
+                  "AND ID IN %4 AND %5 "
+                  "ORDER BY GenderIndex, ClassID DESC")
+                  .arg(RACE_ANY).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
