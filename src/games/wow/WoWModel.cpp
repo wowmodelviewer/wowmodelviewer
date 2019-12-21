@@ -2545,22 +2545,26 @@ void WoWModel::refresh()
     }
   }
 
-  // Display underwear on the model?
-  if (cd.showUnderwear)
+  foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
+  
+  // only show underwear tops/bras if the character isn't wearing a shirt or chest:
+  if (cd.showUnderwear && foundTextures.size() > 1 &&
+      getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2);
+    
+  // only show underwear bottoms if the character isn't wearing pants:
+  if (cd.showUnderwear && getItem(CS_PANTS)->id() < 1)
   {
-    foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
     if (foundTextures.size() > 0)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2); // pants
-
-    if (foundTextures.size() > 1)
-      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2); // top
-
-    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+      tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2);
+    // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
+    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 1;
-  }
-  else
+  } 
+  else  // hide underwear
   {
-    if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE))
+    // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
+    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 0;
   }
   
@@ -2594,12 +2598,7 @@ void WoWModel::refresh()
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
     cd.geosets[CG_WRISTBANDS] = 0;
-
-  // pandaren female -> hide tabard geoset if TROUSERS geosets are displayed
-  if ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE) 
-      && (cd.geosets[CG_TROUSERS] > 1))
-    cd.geosets[CG_TABARD2] = 0;
-
+  
   // reset geosets
   for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
