@@ -183,6 +183,9 @@
     <field type="text" name="DisplayLang2" pos="3" />
     <field type="text" name="DisplayLang1" pos="4" />
     <field type="text" name="Name" pos="5" />
+    <field type="float" name="DmgVariance" pos="6" />
+    <field type="uint" name="DurationInventory" pos="7" />
+    <field type="byte" name="Material" pos="49" />
   </table>
   <table name="ItemAppearance">
     <field type="uint" name="ID" primary="yes" />
