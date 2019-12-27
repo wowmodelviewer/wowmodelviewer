@@ -696,7 +696,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     for(size_t i = 0 ; i < r.values.size() ; i++)
     {
       TextureGroup grp;
-      grp.base = TEXTURE_ITEM;
+      grp.base = TEXTURE_OBJECT_SKIN;
       grp.definedTexture = true;
       grp.count = 1;
       GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
@@ -745,7 +745,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     for(size_t i = 0 ; i < r.values.size() ; i++)
     {
       TextureGroup grp;
-      grp.base = TEXTURE_ITEM;
+      grp.base = TEXTURE_OBJECT_SKIN;
       grp.definedTexture = true;
       grp.count = 1;
       GameFile * tex = GAMEDIRECTORY.getFile(r.values[i][0].toInt());
@@ -793,7 +793,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   if (files.size() != 0)
   {
     TextureGroup grp;
-    grp.base = TEXTURE_ITEM;
+    grp.base = TEXTURE_OBJECT_SKIN;
     grp.definedTexture = false;
     grp.count = 1;
     for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
@@ -820,7 +820,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
     for (std::vector<GameFile *>::iterator it = folderFiles.begin(); it != folderFiles.end(); ++it)
     {
       TextureGroup grp;
-      grp.base = TEXTURE_ITEM;
+      grp.base = TEXTURE_OBJECT_SKIN;
       grp.count = 1;
       GameFile * tex = *it;
       grp.tex[0] =  tex;
@@ -833,7 +833,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   // Creatures can have 1-3 textures that can be taken from game files.
   // But it varies from model to model which of the three textures can
   // be set this way.
-  if (m->canSetTextureFromFile(TEXTURE_ITEM))
+  if (m->canSetTextureFromFile(TEXTURE_OBJECT_SKIN))
   {
     // if there's loads of skins in the folder then filling the selector becomes slow and
     // costly, so instead show a button to give users the option of filling the selector:

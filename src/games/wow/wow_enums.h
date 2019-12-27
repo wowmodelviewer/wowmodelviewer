@@ -275,23 +275,27 @@ DBFilesClient\CreatureDisplayInfo.dbc
 DBFilesClient\ItemDisplayInfo.dbc
 (possibly more)
 */
-enum TextureTypes {
-  TEXTURE_FILENAME = 0,			// Texture given in filename
-  TEXTURE_BODY,				// Body + clothes
-  TEXTURE_CAPE,				// Item, Capes ("Item\ObjectComponents\Cape\*.blp")
-  TEXTURE_ITEM = TEXTURE_CAPE,
-  TEXTURE_ARMORREFLECT,		//
-  TEXTURE_HAIR = 6,				// Hair, bear
-  TEXTURE_FUR = 8,				// Tauren fur
-  TEXTURE_INVENTORY_ART1,		// Used on inventory art M2s (1): inventoryartgeometry.m2 and inventoryartgeometryold.m2
-  TEXTURE_QUILL,				// Only used in quillboarpinata.m2. I can't even find something referencing that file. Oo Is it used?
-  TEXTURE_GAMEOBJECT1,		// Skin for creatures or gameobjects #1
-  TEXTURE_GAMEOBJECT2,		// Skin for creatures or gameobjects #2
-  TEXTURE_GAMEOBJECT3,		// Skin for creatures or gameobjects #3
-  TEXTURE_INVENTORY_ART2,		// Used on inventory art M2s (2): ui-buffon.m2 and forcedbackpackitem.m2 (LUA::Model:ReplaceIconTexture("texture"))
-  TEXTURE_15,					// Patch 12857, Unknown
-  TEXTURE_16,					//
-  TEXTURE_17,					//
+enum TextureTypes
+{
+  TEXTURE_FILENAME = 0,         // Texture given in filename
+  TEXTURE_SKIN = 1,             // Body + clothes
+  TEXTURE_OBJECT_SKIN = 2,      // Item, Capes ("Item\ObjectComponents\Cape\*.blp")
+  TEXTURE_WEAPON_BLADE = 3,     //
+  TEXTURE_WEAPON_HANDLE = 4,    //
+  TEXTURE_ENVIRONMENT = 5,      // OBSOLETE
+  TEXTURE_CHAR_HAIR = 6,        // Hair, bear
+  TEXTURE_CHAR_FACIAL_HAIR = 7, // OBSOLETE
+  TEXTURE_SKIN_EXTRA = 8,       // Used for component models for character customization (which we merge)
+  TEXTURE_UI_SKIN = 9,          // Used on inventory art M2s (1): inventoryartgeometry.m2 and inventoryartgeometryold.m2
+  TEXTURE_TAUREN_MANE = 10,     // OBSOLETE
+  TEXTURE_GAMEOBJECT1 = 11,     // Skin for creatures or gameobjects #1
+  TEXTURE_GAMEOBJECT2 = 12,     // Skin for creatures or gameobjects #2
+  TEXTURE_GAMEOBJECT3 = 13,     // Skin for creatures or gameobjects #3
+  TEXTURE_ITEM_ICON = 14,       // Used on inventory art M2s (2): ui-buffon.m2 and forcedbackpackitem.m2 (LUA::Model:ReplaceIconTexture("texture"))
+  TEXTURE_15 = 15,              // Guild Background Color
+  TEXTURE_16 = 16,              // Guild Emblem Color
+  TEXTURE_17 = 17,              // Guild Border Color 
+  TEXTURE_18 = 18               // Guild Emblem 
 };
 
 enum EyeGlowTypes {
