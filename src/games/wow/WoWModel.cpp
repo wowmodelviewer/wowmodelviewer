@@ -2196,9 +2196,13 @@ void WoWModel::refreshMerging()
         textures.push_back(ModelRenderPass::INVALID_TEX);
     }
 
-    uint tmax = specialTextures.size();
     for (auto it : modelsIt->specialTextures)
-      specialTextures.push_back(it);
+    {
+      if (it == -1 || it == TEXTURE_SKIN_EXTRA) // if texture type is TEXTURE_SKIN_EXTRA use parent texture
+        specialTextures.push_back(it);
+      else
+        specialTextures.push_back(it + (mergeIndex * TEXTURE_MAX));
+    }
 
     for (auto it : modelsIt->replaceTextures)
       replaceTextures.push_back(it);
