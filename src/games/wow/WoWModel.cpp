@@ -666,7 +666,7 @@ void WoWModel::initCommon(GameFile * f)
         // special texture - only on characters and such...
         specialTextures[i] = texdef[i].type;
 
-        if (texdef[i].type == TEXTURE_ARMORREFLECT) // a fix for weapons with type-3 textures.
+        if (texdef[i].type == TEXTURE_WEAPON_BLADE) // a fix for weapons with type-3 textures.
           replaceTextures[texdef[i].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
       }
     }
@@ -2320,7 +2320,7 @@ void WoWModel::refresh()
   if (foundTextures.size() > 1)
   {
     GameFile * tex = GAMEDIRECTORY.getFile(foundTextures[1]);
-    updateTextureList(tex, TEXTURE_FUR);
+    updateTextureList(tex, TEXTURE_SKIN_EXTRA);
   }
 
   // face
@@ -2365,7 +2365,7 @@ void WoWModel::refresh()
   if (foundTextures.size() > 0)
   {
     GameFile * texture = GAMEDIRECTORY.getFile(foundTextures[0]);
-    updateTextureList(texture, TEXTURE_HAIR);
+    updateTextureList(texture, TEXTURE_CHAR_HAIR);
 
     if (infos.isHD)
     {
@@ -2632,7 +2632,7 @@ void WoWModel::refresh()
   tex.compose(charTex);
 
   // set replacable textures
-  replaceTextures[TEXTURE_BODY] = charTex;
+  replaceTextures[TEXTURE_SKIN] = charTex;
 
   // If model is one of these races, show the feet (don't wear boots)
   cd.showFeet = infos.barefeet;
@@ -2650,7 +2650,7 @@ void WoWModel::refresh()
 
 QString WoWModel::getNameForTex(uint16 tex)
 {
-  if (specialTextures[tex] == TEXTURE_BODY)
+  if (specialTextures[tex] == TEXTURE_SKIN)
     return "Body.blp";
   else
     return TEXTUREMANAGER.get(getGLTexture(tex));

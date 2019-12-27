@@ -1200,7 +1200,7 @@ void ModelViewer::LoadItem(unsigned int id)
       {
         LoadModel(GAMEDIRECTORY.getFile(itemInfos.values[0][0].toInt()));
         TextureGroup grp;
-        grp.base = TEXTURE_ITEM;
+        grp.base = TEXTURE_OBJECT_SKIN;
         grp.count = 1;
         grp.tex[0] = GAMEDIRECTORY.getFile(itemInfos.values[0][1].toInt());
         if (grp.tex[0])

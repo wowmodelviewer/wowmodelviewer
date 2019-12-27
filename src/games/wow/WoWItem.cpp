@@ -806,7 +806,7 @@ void WoWItem::refresh()
     {
       std::map<CharRegions, GameFile *>::iterator it = m_itemTextures.find(CR_CAPE);
       if (it != m_itemTextures.end())
-        m_charModel->updateTextureList(it->second, TEXTURE_CAPE);
+        m_charModel->updateTextureList(it->second, TEXTURE_OBJECT_SKIN);
       break;
     }
     case CS_TABARD:
@@ -977,7 +977,7 @@ void WoWItem::updateItemModel(POSITION_SLOTS pos, int modelId, int textureId)
     m_itemModels[pos] = m;
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
-      m->updateTextureList(texture, TEXTURE_ITEM);
+      m->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
   }
@@ -999,8 +999,8 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
     GameFile * texture = GAMEDIRECTORY.getFile(textureId);
     if (texture)
     {
-      m_mergedModel->updateTextureList(texture, TEXTURE_ITEM);
-      m_charModel->updateTextureList(texture, TEXTURE_ITEM);
+      m_mergedModel->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
+      m_charModel->updateTextureList(texture, TEXTURE_OBJECT_SKIN);
     }
     else
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
