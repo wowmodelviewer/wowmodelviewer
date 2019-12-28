@@ -68,12 +68,13 @@ bool CASCFolder::setConfig(core::GameConfig config)
     if (it != locales.end())
     {
       HANDLE dummy;
-      LOG_INFO << "Loading Game Folder:" << m_folder;
+      QString cascParams = m_folder + ":" + m_currentConfig.product;
+      LOG_INFO << "Loading Game Folder:" << cascParams;
       // locale found => try to open it
-      if (!CascOpenStorage(m_folder.toStdWString().c_str(), it->second, &hStorage))
+      if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))
       {
         m_openError = GetLastError();
-        LOG_ERROR << "CASCFolder: Opening" << m_folder << "failed." << "Error" << m_openError;
+        LOG_ERROR << "CASCFolder: Opening" << cascParams << "failed." << "Error" << m_openError;
         return false;
       }
 
@@ -145,7 +146,7 @@ void CASCFolder::initBuildInfo()
     QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
     QRegularExpressionMatch result = re.match(values[versionIndex]);
     if (result.hasMatch())
-      version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + " (" + result.captured(4) + ")";
+      version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + "." + result.captured(4);
 
     // grab product name for this line
     product = values[productIndex];

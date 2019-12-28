@@ -1758,7 +1758,9 @@ void ModelViewer::LoadWoW()
     wxString * availableConfigs = new wxString[nbConfigs];
     for (size_t i = 0; i < nbConfigs; i++)
     {
-      QString label = configsFound[i].locale + " (" + configsFound[i].version + ")";
+      QString label = configsFound[i].locale + " - " + configsFound[i].product;
+      if (configsFound[i].version != "")
+        label = label + " (" + configsFound[i].version + ")";
       availableConfigs[i] = wxString(label.toStdWString().c_str());
     }
 
