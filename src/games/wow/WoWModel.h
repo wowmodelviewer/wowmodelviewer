@@ -124,7 +124,9 @@ public:
 
   std::vector<uint> replacableParticleColorIDs;
   bool replaceParticleColors;
-
+  
+  int mergedModelType; // 1 for customization models (e.g. body parts) / -1 for gear (armour sections)
+  
   uint nbLights() const
   {
     return lights.size();
@@ -258,21 +260,23 @@ public:
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector
-  void showGeoset(uint geosetindex, bool value);
+  void showGeoset(uint geosetindex, bool value);  
+  void hideAllGeosets();
   bool isGeosetDisplayed(uint geosetindex);
   void setGeosetGroupDisplay(CharGeosets group, int val);
   void setCreatureGeosetData(std::set<GeosetNum> cgd);
 
-  WoWModel* mergeModel(QString & name);
-  WoWModel* mergeModel(uint fileID);
-  WoWModel* mergeModel(WoWModel * model);
+  WoWModel* mergeModel(QString & name, int type = 1, bool noRefresh = false);
+  WoWModel* mergeModel(uint fileID, int type = 1, bool noRefresh = false);
+  WoWModel* mergeModel(WoWModel * model, int type = 1, bool noRefresh = false);
   void unmergeModel(QString & name);
   void unmergeModel(uint fileID);
   void unmergeModel(WoWModel * model);
   WoWModel* getMergedModel(uint fileID);
 
   void refresh();
-
+  void refreshCustomSection(CharDetails::BaseSectionType section, CharDetails::CustomizationType customType);
+  
   QString getNameForTex(uint16 tex);
   GLuint getGLTexture(uint16 tex) const;
   void dumpTextureStatus();

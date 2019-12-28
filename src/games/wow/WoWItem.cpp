@@ -572,7 +572,7 @@ void WoWItem::refresh()
 
   // merge model if any
   if (m_mergedModel != 0)
-    m_charModel->mergeModel(m_mergedModel);
+    m_charModel->mergeModel(m_mergedModel, -1);
 
   // update geoset values
   for (auto it : m_itemGeosets)
@@ -1006,7 +1006,7 @@ void WoWItem::mergeModel(CharSlots slot, int modelId, int textureId)
       LOG_ERROR << "Error during item update" << m_id << "(display id" << m_displayId << "). Texture" << textureId << "can't be loaded";
 
     for (uint i = 0; i < m_mergedModel->geosets.size(); i++)
-      m_mergedModel->showGeoset(i, false);
+      m_mergedModel->hideAllGeosets();
   }
   else
   {

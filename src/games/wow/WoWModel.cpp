@@ -163,6 +163,8 @@ gamefile(file)
   rawPasses.clear();
   rawGeosets.clear();
 
+  mergedModelType = 0;
+
   initCommon(file);
 }
 
@@ -2020,7 +2022,7 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
 }
 
 
-WoWModel* WoWModel::mergeModel(QString & name)
+WoWModel* WoWModel::mergeModel(QString & name, int type, bool noRefresh)
 {
   name = name.replace("\\", "/");
   
@@ -2034,12 +2036,13 @@ WoWModel* WoWModel::mergeModel(QString & name)
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(name), true);
 
   if (!m->ok)
-    return NULL;
+    return nullptr;
 
-  return mergeModel(m);
+  m->mergedModelType = type;
+  return mergeModel(m, type, noRefresh);
 }
 
-WoWModel* WoWModel::mergeModel(uint fileID)
+WoWModel* WoWModel::mergeModel(uint fileID, int type, bool noRefresh)
 {
   LOG_INFO << __FUNCTION__ << fileID;
   auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
@@ -2050,16 +2053,18 @@ WoWModel* WoWModel::mergeModel(uint fileID)
   WoWModel * m = new WoWModel(GAMEDIRECTORY.getFile(fileID), true);
 
   if (!m->ok)
-    return NULL;
+    return nullptr;
 
-  return mergeModel(m);
+  m->mergedModelType = type;
+  return mergeModel(m, type, noRefresh);
 }
 
-WoWModel* WoWModel::mergeModel(WoWModel * m)
+WoWModel* WoWModel::mergeModel(WoWModel * m, int type, bool noRefresh)
 {
   LOG_INFO << __FUNCTION__ << m;
+  m->mergedModelType = type;
   auto it = mergedModels.insert(m);
-  if (it.second == true) // new element inserted
+  if (it.second == true && !noRefresh) // new element inserted
     refreshMerging();
   return m;
 }
@@ -2071,7 +2076,7 @@ WoWModel* WoWModel::getMergedModel(uint fileID)
     if (it->gamefile->fileDataId() == fileID)
       return it;
   }
-  return NULL;
+  return nullptr;
 }
 
 void WoWModel::refreshMerging()
@@ -2246,8 +2251,6 @@ void WoWModel::refreshMerging()
     // clean bind
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
-
-  refresh();
 }
 
 void WoWModel::unmergeModel(QString & name)
@@ -2292,7 +2295,7 @@ void WoWModel::refresh()
 {
   TextureID charTex = 0;
   bool showScalp = true;
-
+  
   // Reset geosets
   for (size_t i = 0; i < NUM_GEOSETS; i++)
     cd.geosets[i] = 1;
@@ -2303,10 +2306,16 @@ void WoWModel::refresh()
     // reset geosets
     for (uint i = 0; i < NUM_GEOSETS; i++)
       setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
-
     return;
   }
-   
+  
+  for (auto it : mergedModels)
+  {
+    // hide all geosets of customization models. The correct ones will be set later
+    if (it->mergedModelType == 1)
+      it->hideAllGeosets();
+  }
+
   cd.geosets[CG_GEOSET100] = cd.geosets[CG_GEOSET200] = cd.geosets[CG_GEOSET300] = 0;
 
   // show ears, if toggled
@@ -2316,7 +2325,7 @@ void WoWModel::refresh()
   tex.reset(infos.textureLayoutID);
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
-  std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
+  // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
   
   if (foundTextures.size() > 0)
     tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
@@ -2420,6 +2429,8 @@ void WoWModel::refresh()
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
   if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
   {
+    refreshCustomSection(CharDetails::Custom1BaseType, CharDetails::CUSTOM1_STYLE);
+    /*
     // Geoset modifications, e.g. Piercings for male Dark Irons:
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
@@ -2430,19 +2441,32 @@ void WoWModel::refresh()
         .arg(CharDetails::Custom1BaseType);
     sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
     LOG_INFO << query;
+    std::unordered_set<WoWModel *> custom1Models;
     if (custom1Style.valid && !custom1Style.values.empty())
     {
       for (auto it : custom1Style.values)
       {
-        WoWModel* custommodel = NULL; 
+        WoWModel* custommodel = nullptr; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
+        
         if (customGeoFile > 0)
-          custommodel = mergeModel(customGeoFile);
-        cd.geosets[geoType] = geoId;
-        if (custommodel != NULL)
-          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+        {
+          custommodel = getMergedModel(customGeoFile);
+          if (custommodel == nullptr)
+          {
+            custommodel = mergeModel(customGeoFile, 1, true);
+            if (custommodel != nullptr && custommodel->ok)
+              custommodel->hideAllGeosets();
+          }
+          if (custommodel != nullptr && custommodel->ok)
+          {
+            custom1Models.insert(custommodel);
+            cd.geosets[geoType] = geoId;
+            custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+          }
+        }
       }
     }  
     // Textures (tattoos):
@@ -2453,9 +2477,14 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
+        {
           tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
+          for (auto it : custom1Models)
+            it->updateTextureList(GAMEDIRECTORY.getFile(foundTextures[i]), TEXTURE_SKIN_EXTRA);
+        }
       }
     }
+    */
   }
 
   // CUSTOM2 - Tattoos for male Dark Iron Dwarves, Snouts for Vulpera, Earrings for female Kul Tiran,
@@ -2465,9 +2494,11 @@ void WoWModel::refresh()
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
   if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
   {
+    refreshCustomSection(CharDetails::Custom2BaseType, CharDetails::CUSTOM2_STYLE);
+    /*
     // Geoset modifications:
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
-                    "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
+                  "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
         .arg(infos.raceid)
         .arg(infos.sexid)
@@ -2475,22 +2506,34 @@ void WoWModel::refresh()
         .arg(CharDetails::Custom2BaseType);
     sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
     LOG_INFO << query;
+    std::unordered_set<WoWModel *> custom2Models;
     if (custom2Style.valid && !custom2Style.values.empty())
     {
-     for (auto it : custom2Style.values)
+      for (auto it : custom2Style.values)
       {
-        WoWModel* custommodel = NULL; 
+        WoWModel* custommodel = nullptr; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
+        
         if (customGeoFile > 0)
-          custommodel = mergeModel(customGeoFile);
-        cd.geosets[geoType] = geoId;
-        if (custommodel != NULL)
-          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
-        cd.geosets[geoType] = geoId;
+        {
+          custommodel = getMergedModel(customGeoFile);
+          if (custommodel == nullptr)
+          {
+            custommodel = mergeModel(customGeoFile, 1, true);
+            if (custommodel != nullptr && custommodel->ok)
+              custommodel->hideAllGeosets();
+          }
+          if (custommodel != nullptr && custommodel->ok)
+          {
+            custom2Models.insert(custommodel);
+            cd.geosets[geoType] = geoId;
+            custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+          }
+        }
       }
-    }
+    }  
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom2BaseType);
@@ -2499,9 +2542,14 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
+        {
           tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
+          for (auto it : custom2Models)
+            it->updateTextureList(GAMEDIRECTORY.getFile(foundTextures[i]), TEXTURE_SKIN_EXTRA);
+        }
       }
     }
+    */
   }
 
   // CUSTOM3 - Blindfolds for Demon Hunters, Posture for Orc males, Runes for Lightforged,
@@ -2511,6 +2559,9 @@ void WoWModel::refresh()
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
   if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
   {
+    
+    refreshCustomSection(CharDetails::Custom3BaseType, CharDetails::CUSTOM3_STYLE);
+    /*
     // Geoset modifications:
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
@@ -2521,22 +2572,35 @@ void WoWModel::refresh()
         .arg(CharDetails::Custom3BaseType);
     sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
     LOG_INFO << query;
+    std::unordered_set<WoWModel *> custom3Models;
     if (custom3Style.valid && !custom3Style.values.empty())
     {
       for (auto it : custom3Style.values)
       {
-        WoWModel* custommodel = NULL; 
+        WoWModel* custommodel = nullptr; 
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
+        
         if (customGeoFile > 0)
-          custommodel = mergeModel(customGeoFile);
-        cd.geosets[geoType] = geoId;
-        if (custommodel != NULL)
-          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+        {
+          custommodel = getMergedModel(customGeoFile);
+          if (custommodel == nullptr)
+          {
+            custommodel = mergeModel(customGeoFile, 1, true);
+            if (custommodel != nullptr && custommodel->ok)
+              custommodel->hideAllGeosets();
+          }
+          if (custommodel != nullptr && custommodel->ok)
+          {
+            custom3Models.insert(custommodel);
+            cd.geosets[geoType] = geoId;
+            custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+          }
+        }
       }
-    }
-    // Textures (markings/tattoos):
+    }  
+    // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom3BaseType);
     if (foundTextures.size() > 0)
@@ -2544,9 +2608,14 @@ void WoWModel::refresh()
       for (uint i = 0; i < foundTextures.size(); i++)
       {
         if (foundTextures[i] > 0 && foundRegions[i] > 0)
+        {
           tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
+          for (auto it : custom3Models)
+            it->updateTextureList(GAMEDIRECTORY.getFile(foundTextures[i]), TEXTURE_SKIN_EXTRA);
+        }
       }
     }
+    */
   }
 
   foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
@@ -2650,6 +2719,70 @@ void WoWModel::refresh()
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
       showGeoset(i, (id == egtId));
   }
+  refreshMerging();
+}
+
+void WoWModel::refreshCustomSection(CharDetails::BaseSectionType section, CharDetails::CustomizationType customType)
+{
+  // configure customization data for the Custom1, Custom2 & Custom3 sections (base sections 5, 6 & 7)
+  RaceInfos infos;
+  RaceInfos::getCurrent(this, infos);
+  
+  // Geoset modifications:
+  QString query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
+                          "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
+      .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
+      .arg(infos.raceid)
+      .arg(infos.sexid)
+      .arg(cd.get(customType))
+      .arg(section);
+  sqlResult customStyle = GAMEDATABASE.sqlQuery(query);
+  LOG_INFO << query;
+  std::unordered_set<WoWModel *> customModels;
+  if (customStyle.valid && !customStyle.values.empty())
+  {
+    for (auto it : customStyle.values)
+    {
+      WoWModel* custommodel = nullptr;
+      
+      uint geoId = it[0].toInt();
+      uint geoType = it[1].toInt();
+      cd.geosets[geoType] = geoId;
+      
+      uint customGeoFile = it[2].toInt();
+      if (customGeoFile > 0)
+      {
+        custommodel = getMergedModel(customGeoFile);
+        if (custommodel == nullptr)
+        {
+          custommodel = mergeModel(customGeoFile, 1, true);  // use 'no refresh' flag because we call refreshMerging() at the end of refresh(), after all merging is done.
+          if (custommodel != nullptr && custommodel->ok)
+            custommodel->hideAllGeosets();
+        }
+        if (custommodel != nullptr && custommodel->ok)
+        {
+          customModels.insert(custommodel);
+          custommodel->setGeosetGroupDisplay((CharGeosets)geoType, geoId);
+        }
+      }
+    }
+  }  
+  // Textures (tattoos):
+  
+  std::vector<int> foundTextures = cd.getTextureForSection(section);
+  std::vector<int> foundRegions = cd.getRegionForSection(section);
+  if (foundTextures.size() > 0)
+  {
+    for (uint i = 0; i < foundTextures.size(); i++)
+    {
+      if (foundTextures[i] > 0 && foundRegions[i] > 0)
+      {
+        tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[i]), foundRegions[i], 1);
+        for (auto it : customModels)
+          it->updateTextureList(GAMEDIRECTORY.getFile(foundTextures[i]), TEXTURE_SKIN_EXTRA);
+      }
+    }
+  }
 }
 
 QString WoWModel::getNameForTex(uint16 tex)
@@ -2697,6 +2830,11 @@ void WoWModel::restoreRawGeosets()
   }
 }
 
+void WoWModel::hideAllGeosets()
+{
+  for (uint i = 0; i < geosets.size(); i++)
+    showGeoset(i, false);
+}
 
 std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 {

@@ -947,40 +947,19 @@ void CharDetails::setDemonHunterMode(bool val)
   if (val != m_isDemonHunter)
   {
     m_isDemonHunter = val;
+    // All we need to do is toggle DH customization options, then let
+    // WoWModel::refresh() add/remove the DH component models for us.
     if (m_isDemonHunter)
     {
-      RaceInfos infos;
-      
-      if (RaceInfos::getCurrent(m_model, infos))
-      {
-        if (infos.raceid == RACE_NIGHTELF)
-        {
-          if (infos.sexid == GENDER_MALE)
-            m_dhModel = 2763975;
-          else if (infos.sexid == GENDER_FEMALE)
-            m_dhModel = 2763974;
-        }
-        else if (infos.raceid == RACE_BLOODELF)
-        {
-          if (infos.sexid == GENDER_MALE)
-            m_dhModel = 2763973;
-          else if (infos.sexid == GENDER_FEMALE)
-            m_dhModel = 2763972;
-        }
-        if (m_dhModel != 0)
-          m_model->mergeModel(m_dhModel);
-        setRandomValue(CUSTOM1_STYLE);
-        setRandomValue(CUSTOM1_COLOR);
-        setRandomValue(CUSTOM2_STYLE);
-        setRandomValue(CUSTOM3_STYLE);
-      }
+      setRandomValue(CUSTOM1_STYLE);
+      setRandomValue(CUSTOM1_COLOR);
+      setRandomValue(CUSTOM2_STYLE);
+      setRandomValue(CUSTOM3_STYLE);
     }
-    else
-    {
-      m_model->unmergeModel(m_dhModel);
-    }
+
     fillCustomizationMap();
     CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED);
     notify(event);
+    m_model->refresh();
   }
 }
