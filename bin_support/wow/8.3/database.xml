@@ -197,6 +197,7 @@
   <table name="ItemDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="ParticleColorID" pos="1"/>
+    <field type="int"  name="DisplayFlags" pos="8" />
     <field type="uint" name="Model" arraySize="2" pos="9" />
     <field type="uint" name="TextureItemID" arraySize="2" pos="10" />
     <field type="byte" name="GeosetGroup" arraySize="6" pos="12" />

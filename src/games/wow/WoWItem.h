@@ -91,6 +91,7 @@ class _WOWITEM_API_ WoWItem : public Component
     int m_quality;
     int m_level;
     int m_type;
+    int display_flags;
     unsigned int m_nbLevels;
 
     CharSlots m_slot;

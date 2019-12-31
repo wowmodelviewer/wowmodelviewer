@@ -51,7 +51,7 @@ map<CharSlots, int> WoWItem::SLOT_LAYERS = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, 
 WoWItem::WoWItem(CharSlots slot)
   : m_charModel(nullptr), m_id(-1), m_displayId(-1),
   m_quality(0), m_level(0), m_type(0),
-  m_nbLevels(0), m_slot(slot), m_mergedModel(0)
+  m_nbLevels(0), m_slot(slot), m_mergedModel(0), display_flags(0)
 {
   setName("---- None ----");
 }
@@ -227,7 +227,7 @@ void WoWItem::load()
   // query geosets infos
   if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6, "
                              "AttachmentGeoSetGroup1, AttachmentGeoSetGroup2, AttachmentGeoSetGroup3, "
-                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6 "
+                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6, DisplayFlags "
                              "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(m_displayId), 
                      iteminfos))
     return;
@@ -240,6 +240,8 @@ void WoWItem::load()
                        { iteminfos.values[0][6].toInt(), iteminfos.values[0][7].toInt() ,
                          iteminfos.values[0][8].toInt(), iteminfos.values[0][9].toInt() ,
                          iteminfos.values[0][10].toInt(), iteminfos.values[0][11].toInt() };
+  
+  display_flags = iteminfos.values[0][12].toInt();
                          
   // query models
   int model[2] = { getCustomModelId(0), getCustomModelId(1) };
@@ -678,15 +680,14 @@ void WoWItem::refresh()
           else
             m_charModel->charModelDetails.closeLHand = true;
 
-          Vec3D rot(0., 0., 0.);
+          Vec3D rot(0.0f, 0.0f, 0.0f);
+          Vec3D pos(0.0f, 0.0f, 0.0f);
 
-          // if item is a warglaive, mirror it in hand
-          if (((item.itemclass == 2) && (item.subclass == 9) && (item.sheath == 27)) ||
-              // and same if it's a fist
-              ((item.itemclass == 2) && (item.subclass == 13)))
-            rot.y = 180.;
-
-          m_charModel->attachment->addChild(it->second, attachement, m_slot, 1., rot);
+          // if (display_flags & 0x100) then item should be mirrored when in left hand:
+          bool mirror = false;
+          if (display_flags & 0x100)
+            mirror = true;
+          m_charModel->attachment->addChild(it->second, attachement, m_slot, 1.0f, rot, pos, mirror);
         }
       }
       break;
