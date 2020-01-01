@@ -59,7 +59,7 @@ void Attachment::draw(BaseCanvas *c)
       Vec3D scaling = Vec3D(scale, scale, scale);
       if (mirror)
       {
-        glFrontFace(GL_CW);
+        glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
         scaling.z *= -1.0f;
       }
       
@@ -203,7 +203,8 @@ void Attachment::drawParticles(bool force)
     children[i]->drawParticles();
 
   glPopMatrix();
-  glFrontFace(GL_CCW);
+  if (mirror)
+    glFrontFace(GL_CCW);  // mirrored object handling is over, so switch back to normal mode
 }
 
 

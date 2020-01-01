@@ -684,9 +684,7 @@ void WoWItem::refresh()
           Vec3D pos(0.0f, 0.0f, 0.0f);
 
           // if (display_flags & 0x100) then item should be mirrored when in left hand:
-          bool mirror = false;
-          if (display_flags & 0x100)
-            mirror = true;
+          bool mirror = (display_flags & 0x100);
           m_charModel->attachment->addChild(it->second, attachement, m_slot, 1.0f, rot, pos, mirror);
         }
       }
