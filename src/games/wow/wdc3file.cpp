@@ -516,12 +516,12 @@ bool WDC3File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDC3File::get(unsigned int recordIndex) const
 {
   std::vector<std::string> result;
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
@@ -559,10 +559,10 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
           // iterate along record to get right position
           for (int f = 0; f <= field->pos; f++)
           {
-            if (structure->fields[f]->isKey)
+            if (tableStructure->fields[f]->isKey)
               continue;
 
-            if (structure->fields[f]->type == "uint64")
+            if (tableStructure->fields[f]->type == "uint64")
             {
               ptr += 8;
             }
@@ -642,7 +642,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
     case FIELD_COMPRESSION::NONE:
     {
       uint fieldSize = info.field_size_bits / 8;
-      unsigned char * fieldOffset = recordOffset + info.field_offset_bits / 8;
+      unsigned char * fieldOffset = getFieldOffset(recordOffset, fieldIndex);
   
       if (arraySize != 1)
       {
@@ -716,7 +716,7 @@ bool WDC3File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
   return true;
 }
 
-uint32 WDC3File::readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const
+uint32 WDC3File::readBitpackedValue(field_storage_info & info, unsigned char * recordOffset) const
 {
   unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
   unsigned int offset = info.field_offset_bits / 8;
@@ -728,6 +728,41 @@ uint32 WDC3File::readBitpackedValue(field_storage_info info, unsigned char * rec
   result = result >> (info.field_offset_bits & 7);
   result = result & ((1ull << info.field_size_bits) - 1);
   return result;
+}
+
+unsigned char * WDC3File::getFieldOffset(unsigned char * recordOffset, unsigned int fieldIndex) const
+{
+  if(!m_isSparseTable)
+  {
+    return recordOffset + m_fieldStorageInfo[fieldIndex].field_offset_bits / 8;
+  }
+  else // if sparse table, iterate along fields to get field position
+  {
+    unsigned char * ptr = recordOffset;
+ 
+    for (uint f = 0; f <= fieldIndex; f++)
+    {
+      
+      if (f < tableStructure->fields.size())
+      {
+        if (tableStructure->fields[f]->isKey)
+          continue;
+
+        if(tableStructure->fields[f]->type == "text")
+        {
+          std::string val(reinterpret_cast<char *>(ptr));
+          ptr = ptr + val.size() + 1;
+        }
+
+      }
+      else
+      {
+        ptr += (m_fieldStorageInfo[fieldIndex].field_size_bits / 8);
+      }
+    }
+    
+    return ptr;
+  }
 }
 
 

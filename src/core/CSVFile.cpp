@@ -54,11 +54,11 @@ CSVFile::~CSVFile()
   close();
 }
 
-std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> CSVFile::get(unsigned int recordIndex) const
 {
   std::vector<std::string> result;
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     uint fieldIndex = 0;
     

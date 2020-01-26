@@ -500,12 +500,12 @@ bool WDC2File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDC2File::get(unsigned int recordIndex) const
 {
   std::vector<std::string> result;
   unsigned char * recordOffset = m_recordOffsets[recordIndex];
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
@@ -543,10 +543,10 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
           // iterate along record to get right position
           for (int f = 0; f <= field->pos; f++)
           {
-            if (structure->fields[f]->isKey)
+            if (tableStructure->fields[f]->isKey)
               continue;
 
-            if (structure->fields[f]->type == "uint64")
+            if (tableStructure->fields[f]->type == "uint64")
             {
               ptr += 8;
             }

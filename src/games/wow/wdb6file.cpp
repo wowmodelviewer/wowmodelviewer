@@ -103,11 +103,11 @@ bool WDB6File::close()
   return WDB5File::close();
 }
 
-std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::TableStructure * structure) const
+std::vector<std::string> WDB6File::get(unsigned int recordIndex) const
 {
-  std::vector<std::string> result = WDB5File::get(recordIndex, structure);
+  std::vector<std::string> result = WDB5File::get(recordIndex);
 
-  for (auto it : structure->fields)
+  for (auto it : tableStructure->fields)
   {
     wow::FieldStructure * field = dynamic_cast<wow::FieldStructure *>(it);
 
