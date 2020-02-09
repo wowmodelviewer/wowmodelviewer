@@ -3,9 +3,11 @@ image: Visual Studio 2017
 
 before_build:
 - cmd: >-
-    hg clone https://bitbucket.org/wowmodelviewer/wmv_sdk -r de97ca8
+    git clone https://bitbucket.org/wowmodelviewer/wmv_sdk
     
     cd wmv_sdk
+
+    git reset --hard b875dbd 
 
     .\wmv_set_env.bat
 
