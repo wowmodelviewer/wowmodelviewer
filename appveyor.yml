@@ -11,9 +11,9 @@ before_build:
 
     .\wmv_set_env.bat
 
-    mkdir C:\projects\wowmodelviewer-git\build
+    mkdir C:\projects\wowmodelviewer\build
 
-    cd C:\projects\wowmodelviewer-git\build
+    cd C:\projects\wowmodelviewer\build
 
     cmake -G "Visual Studio 15 2017" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER% ..\src
 
@@ -21,7 +21,7 @@ build_script:
 - cmd: >-
     cmake --build . --target release --config Release
     
-    cd C:\projects\wowmodelviewer-git\bin
+    cd C:\projects\wowmodelviewer\bin
 
     ren WMV_Installer.exe WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
 
