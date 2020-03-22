@@ -110,7 +110,8 @@ set(RES_FILES "wmv.rc")
 # extra useful files for visual studio project
 set(common_files wowmodelviewer.json
 				 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
-				 ${WMV_BASE_PATH}/appveyor.yml)
+				 ${WMV_BASE_PATH}/appveyor.yml
+				 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(wow8_2_files 
 				 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
