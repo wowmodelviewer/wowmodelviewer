@@ -113,14 +113,6 @@ set(common_files wowmodelviewer.json
 				 ${WMV_BASE_PATH}/appveyor.yml
 				 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
-set(wow8_2_files 
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
-
-source_group("wow8.2" FILES ${wow8_2_files})
-
 set(wow8_3_files 
 				 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
 				 ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
@@ -129,7 +121,7 @@ set(wow8_3_files
 
 source_group("wow8.3" FILES ${wow8_3_files})
 
-set(useful_files ${common_files} ${wow8_2_files} ${wow8_3_files})
+set(useful_files ${common_files} ${wow8_3_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -186,12 +178,6 @@ set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
                 $ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
                 $ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
-
-set(GAMEFILES_WOW8_2 
-                 ${WMV_BASE_PATH}/bin_support/wow/8.2/listfile.csv
-        		 ${WMV_BASE_PATH}/bin_support/wow/8.2/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.2/ChrRacesCustomization.csv)
  
 set(GAMEFILES_WOW8_3
                  ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
@@ -205,5 +191,4 @@ install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 
-install(FILES ${GAMEFILES_WOW8_2} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.2)
 install(FILES ${GAMEFILES_WOW8_3} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/8.3)

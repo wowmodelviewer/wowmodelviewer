@@ -49,8 +49,6 @@ SetOutPath $INSTDIR\plugins\imageformats
 File "${wmvroot}\bin\plugins\imageformats\*"
 
 CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\8.2
-File "${wmvroot}\bin_support\wow\8.2\*"
 SetOutPath $INSTDIR\games\wow\8.3
 File "${wmvroot}\bin_support\wow\8.3\*"
 
