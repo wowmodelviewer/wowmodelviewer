@@ -56,6 +56,8 @@
 // Namespaces used
 //--------------------------------------------------------------------
 
+#define DEBUG_RESULTS
+
 // Beginning of implementation
 //--------------------------------------------------------------------
 
@@ -75,6 +77,36 @@ bool ArmoryImporter::acceptURL(QString url) const
 }
 
 
+CharSlots armorySlotToCharSlot(int slot)
+{
+  if (slot == 0)
+    return CS_HEAD;
+  else if (slot == 2)
+    return CS_SHOULDER;
+  else if (slot == 3)
+    return CS_SHIRT;
+  else if (slot == 4)
+    return CS_CHEST;
+  else if (slot == 5)
+    return CS_BELT;
+  else if (slot == 6)
+    return CS_PANTS;
+  else if (slot == 7)
+    return CS_BOOTS;
+  else if (slot == 8)
+    return CS_BRACERS;
+  else if (slot == 9)
+    return CS_GLOVES;
+  else if (slot == 14)
+    return CS_CAPE;
+  else if (slot == 15)
+    return CS_HAND_RIGHT;
+  else if (slot == 16)
+    return CS_HAND_LEFT;
+  else if (slot == 18)
+    return CS_TABARD;
+}
+
 CharInfos * ArmoryImporter::importChar(QString url) const
 {
 	CharInfos * result = new CharInfos();
@@ -89,22 +121,35 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 		// No Gathering Errors Detected.
 		result->equipment.resize(NUM_CHAR_SLOTS);
+    result->itemlevels.resize(NUM_CHAR_SLOTS);
 
 		// Gather Race & Gender
-		result->raceId = root.value("race").toInt();
-		result->gender = (root.value("gender").toInt() == 0) ? "Male" : "Female";
+    QJsonObject obj = root.value("playable_race").toObject();
+		result->raceId = obj.value("id").toInt();
+    obj = root.value("gender").toObject();
+    result->gender = obj.value("name").toString().toStdString();
 
 		QJsonObject app = root.value("appearance").toObject();
-		result->skinColor = app.value("skinColor").toInt();
-		result->faceType = app.value("faceVariation").toInt();
-		result->hairColor = app.value("hairColor").toInt();
-		result->hairStyle = app.value("hairVariation").toInt();
-		result->facialHair = app.value("featureVariation").toInt();
+		result->skinColor = app.value("skin_color").toInt();
+		result->faceType = app.value("face_variation").toInt();
+		result->hairColor = app.value("hair_color").toInt();
+		result->hairStyle = app.value("hair_variation").toInt();
+		result->facialHair = app.value("feature_variation").toInt();
+
+#ifdef DEBUG_RESULTS
+    LOG_INFO << "result->raceId" << result->raceId;
+    LOG_INFO << "result->gender" << result->gender.c_str();
+    LOG_INFO << "result->skinColor" << result->skinColor;
+    LOG_INFO << "result->faceType" << result->faceType;
+    LOG_INFO << "result->hairColor" << result->hairColor;
+    LOG_INFO << "result->hairStyle" << result->hairStyle;
+    LOG_INFO << "result->facialHair" << result->facialHair;
+#endif
 
 		// Gather Demon Hunter options if present
-		if (!app.value("customDisplayOptions").isUndefined() && !app.value("customDisplayOptions").isNull())
+		if (!app.value("custom_display_options").isUndefined() && !app.value("custom_display_options").isNull())
 		{
-			QJsonArray custom = app.value("customDisplayOptions").toArray();
+			QJsonArray custom = app.value("custom_display_options").toArray();
 			result->isDemonHunter = true;
 			result->DHHorns = custom.at(1).toInt();
 			result->DHBlindfolds = custom.at(2).toInt();
@@ -124,152 +169,51 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 				result->DHTattooStyle = tattooStyle;
 				result->DHTattooColor = tattooColor;
+
+#ifdef DEBUG_RESULTS
+        LOG_INFO << "Reading demon hunter values";
+        LOG_INFO << custom.at(0).toInt() << custom.at(1).toInt() << custom.at(2).toInt();
+        LOG_INFO << "result->DHHorns" << result->DHHorns;
+        LOG_INFO << "result->DHBlindfolds" << result->DHBlindfolds;
+        LOG_INFO << "result->DHTattooStyle" << result->DHTattooStyle;
+        LOG_INFO << "result->DHTattooColor" << result->DHTattooColor;
+#endif
+
 			}
 		}
 
 		// Gather Items
 		result->hasTransmogGear = false;
-		QJsonObject items = root.value("items").toObject();
+		QJsonArray items = root.value("items").toArray();
 		
-		if (!items["back"].isUndefined() && !items["back"].isNull())
-		{
-			result->equipment[CS_CAPE] = items["back"].toObject()["id"].toInt();
-			if (hasTransmog(items["back"]))
-			{
-				result->equipment[CS_CAPE] = items["back"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["chest"].isUndefined() && !items["chest"].isNull())
-		{
-			result->equipment[CS_CHEST] = items["chest"].toObject()["id"].toInt();
-			if (hasTransmog(items["chest"]))
-			{
-				result->equipment[CS_CHEST] = items["chest"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["feet"].isUndefined() && !items["feet"].isNull())
-		{
-			result->equipment[CS_BOOTS] = items["feet"].toObject()["id"].toInt();
-			if (hasTransmog(items["feet"]))
-			{
-				result->equipment[CS_BOOTS] = items["feet"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["hands"].isUndefined() && !items["hands"].isNull())
-		{
-			result->equipment[CS_GLOVES] = items["hands"].toObject()["id"].toInt();
-			if (hasTransmog(items["hands"]))
-			{
-				result->equipment[CS_GLOVES] = items["hands"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["head"].isUndefined() && !items["head"].isNull())
-		{
-			result->equipment[CS_HEAD] = items["head"].toObject()["id"].toInt();
-			if (hasTransmog(items["head"]))
-			{
-				result->equipment[CS_HEAD] = items["head"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["legs"].isUndefined() && !items["legs"].isNull())
-		{
-			result->equipment[CS_PANTS] = items["legs"].toObject()["id"].toInt();
-			if (hasTransmog(items["legs"]))
-			{
-				result->equipment[CS_PANTS] = items["legs"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["mainHand"].isUndefined() && !items["mainHand"].isNull())
-		{
-			result->equipment[CS_HAND_RIGHT] = items["mainHand"].toObject()["id"].toInt();
-			if (hasTransmog(items["mainHand"]))
-			{
-				result->equipment[CS_HAND_RIGHT] = items["mainHand"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["offHand"].isUndefined() && !items["offHand"].isNull())
-		{
-			result->equipment[CS_HAND_LEFT] = items["offHand"].toObject()["id"].toInt();
-			if (hasTransmog(items["offHand"]))
-			{
-				result->equipment[CS_HAND_LEFT] = items["offHand"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["shirt"].isUndefined() && !items["shirt"].isNull())
-		{
-			result->equipment[CS_SHIRT] = items["shirt"].toObject()["id"].toInt();
-			if (hasTransmog(items["shirt"]))
-			{
-				result->equipment[CS_SHIRT] = items["shirt"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["shoulder"].isUndefined() && !items["shoulder"].isNull())
-		{
-			result->equipment[CS_SHOULDER] = items["shoulder"].toObject()["id"].toInt();
-			if (hasTransmog(items["shoulder"]))
-			{
-				result->equipment[CS_SHOULDER] = items["shoulder"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["tabard"].isUndefined() && !items["tabard"].isNull())
-		{
-			result->equipment[CS_TABARD] = items["tabard"].toObject()["id"].toInt();
-			if (hasTransmog(items["tabard"]))
-			{
-				result->equipment[CS_TABARD] = items["tabard"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["waist"].isUndefined() && !items["waist"].isNull())
-		{
-			result->equipment[CS_BELT] = items["waist"].toObject()["id"].toInt();
-			if (hasTransmog(items["waist"]))
-			{
-				result->equipment[CS_BELT] = items["waist"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		if (!items["wrist"].isUndefined() && !items["wrist"].isNull())
-		{
-			result->equipment[CS_BRACERS] = items["wrist"].toObject()["id"].toInt();
-			if (hasTransmog(items["wrist"]))
-			{
-				result->equipment[CS_BRACERS] = items["wrist"].toObject()["tooltipParams"].toObject()["transmogItem"].toInt();
-				result->hasTransmogGear = true;
-			}
-		}
-		
+    for (int i = 0; i < items.size(); ++i)
+    {
+      CharSlots slot = armorySlotToCharSlot(items.at(i)["internal_slot_id"].toInt());
+      result->equipment[slot] = items.at(i)["id"].toInt();
+      result->itemlevels[slot] = items.at(i)["item_appearance_modifier_id"].toInt();
+    }
+
+   
 		// Set proper eyeglow
 		if (root.value("class").toInt() == 6) // 6 = DEATH KNIGHT
 			result->eyeGlowType = EGT_DEATHKNIGHT;
 		else
 			result->eyeGlowType = EGT_DEFAULT;
 		
+    
 		// tabard (useful if guild tabard)
-		QJsonObject guild = root.value("guild").toObject();
-		if(guild.size() > 0)
-		{
-			QJsonObject tabard = guild["emblem"].toObject();
-			if(tabard.size() > 0)
-			{
-				result->tabardIcon = tabard["icon"].toInt();
-				result->tabardBorder = tabard["border"].toInt();
-				result->BorderColor = tabard["borderColorId"].toInt();
-				result->Background = tabard["backgroundColorId"].toInt();
-				result->IconColor = tabard["iconColorId"].toInt();
-				result->customTabard = true;
-			}
-		}
+    QJsonObject guildTabard = root.value("guild_crest").toObject();
+
+    if (!guildTabard.isEmpty())
+    {
+      result->tabardIcon = guildTabard.value("emblem").toObject().value("id").toInt();
+      result->IconColor = guildTabard.value("emblem").toObject().value("color").toObject().value("id").toInt();
+      result->tabardBorder = guildTabard.value("border").toObject().value("id").toInt();
+      result->BorderColor = guildTabard.value("border").toObject().value("color").toObject().value("id").toInt();
+      result->Background = guildTabard.value("background").toObject().value("id").toInt();
+     
+      result->customTabard = true;
+    }
 
 		result->valid = true;
 	}
@@ -452,7 +396,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 				<< ", Realm:" << qPrintable(realm)
 				<< ", Character:" << qPrintable(charName);
 
-			apiPage = QString("https://wowmodelviewer.net/armory.php?region=%1&realm=%2&char=%3").arg(region).arg(realm).arg(charName);
+			apiPage = QString("https://wowmodelviewer.net/armory2.php?region=%1&realm=%2&char=%3").arg(region).arg(realm).arg(charName);
 			break;
 		}
 		case ITEM:
@@ -483,7 +427,7 @@ int ArmoryImporter::readJSONValues(ImportType type, QString url, QJsonObject & r
 	LOG_INFO << "Final API Page:" << qPrintable(apiPage);
 
 	QByteArray bts = getURLData(apiPage);
-
+  LOG_INFO << bts;
 	result = QJsonDocument::fromJson(bts).object();
 	return 0;
 }

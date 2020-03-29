@@ -96,7 +96,9 @@ class _CHARINFOS_API_ CharInfos
     int BorderColor;
     int Background;
 
+    // TODO refactor this part to associate slots, id and level
     std::vector<int> equipment;
+    std::vector<int> itemlevels;
 
   protected :
     // Constants / Enums

@@ -2508,7 +2508,10 @@ void ModelViewer::ImportArmoury(wxString strURL)
     {
       WoWItem * item = g_charControl->model->getItem((CharSlots)i);
       if (item)
+      {
         item->setId(result->equipment[i]);
+        item->setLevel(result->itemlevels[i]);
+      }
     }
 
     g_charControl->RefreshModel();
