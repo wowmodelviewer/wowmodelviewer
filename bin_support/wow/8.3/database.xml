@@ -191,6 +191,7 @@
   <table name="ItemModifiedAppearance">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="ItemID" pos="1" />
+    <field type="byte" name="ItemAppearanceModifierID" pos="2" />
     <field type="uint" name="ItemAppearanceID" pos="3" />
     <field type="byte" name="ItemLevel" pos="4" />
   </table>

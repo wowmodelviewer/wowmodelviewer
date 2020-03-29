@@ -61,6 +61,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     void setDisplayId(int id);
     void setLevel(int level);
+    void setModifierId(int id);
 
     CharSlots slot() { return m_slot; }
 
@@ -102,6 +103,7 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<CharRegions, GameFile *> m_itemTextures;
     std::map<CharGeosets, int> m_itemGeosets;
     std::map<int, int> m_levelDisplayMap;
+    std::map<int, int> m_modifierIdDisplayMap;
     std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
     WoWModel * m_mergedModel;
 

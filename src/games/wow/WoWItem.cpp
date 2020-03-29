@@ -79,7 +79,7 @@ void WoWItem::setId(int id)
       return;
     }
 
-    QString query = QString("SELECT ItemLevel, ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id);
+    QString query = QString("SELECT ItemLevel, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id);
     sqlResult itemlevels = GAMEDATABASE.sqlQuery(query);
 
     if (itemlevels.valid && !itemlevels.values.empty())
@@ -90,7 +90,7 @@ void WoWItem::setId(int id)
       for (unsigned int i = 0; i < itemlevels.values.size(); i++)
       {
         int curid = itemlevels.values[i][1].toInt();
-
+        m_modifierIdDisplayMap[itemlevels.values[i][2].toInt()] = curid;
         // if display id is null (case when item's look doesn't change with level)
         if (curid == 0)
           continue;
@@ -163,6 +163,26 @@ void WoWItem::setLevel(int level)
   }
 }
 
+void WoWItem::setModifierId(int id)
+{
+  auto it = m_modifierIdDisplayMap.find(id);
+  if (it != m_modifierIdDisplayMap.end())
+  {
+    QString query = QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+      .arg(it->second);
+
+    sqlResult iteminfos = GAMEDATABASE.sqlQuery(query);
+
+    if (iteminfos.valid && !iteminfos.values.empty())
+      m_displayId = iteminfos.values[0][0].toInt();
+
+    ItemRecord itemRcd = items.getById(m_id);
+    setName(itemRcd.name);
+    m_quality = itemRcd.quality;
+    m_type = itemRcd.type;
+    load();
+  }
+}
 
 void WoWItem::onParentSet(Component * parent)
 {

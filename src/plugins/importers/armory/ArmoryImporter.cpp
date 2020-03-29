@@ -121,7 +121,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
 		// No Gathering Errors Detected.
 		result->equipment.resize(NUM_CHAR_SLOTS);
-    result->itemlevels.resize(NUM_CHAR_SLOTS);
+    result->itemModifierIds.resize(NUM_CHAR_SLOTS);
 
 		// Gather Race & Gender
     QJsonObject obj = root.value("playable_race").toObject();
@@ -190,7 +190,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
     {
       CharSlots slot = armorySlotToCharSlot(items.at(i)["internal_slot_id"].toInt());
       result->equipment[slot] = items.at(i)["id"].toInt();
-      result->itemlevels[slot] = items.at(i)["item_appearance_modifier_id"].toInt();
+      result->itemModifierIds[slot] = items.at(i)["item_appearance_modifier_id"].toInt();
     }
 
    

@@ -98,7 +98,7 @@ class _CHARINFOS_API_ CharInfos
 
     // TODO refactor this part to associate slots, id and level
     std::vector<int> equipment;
-    std::vector<int> itemlevels;
+    std::vector<int> itemModifierIds;
 
   protected :
     // Constants / Enums

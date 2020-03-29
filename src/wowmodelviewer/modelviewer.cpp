@@ -2510,7 +2510,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
       if (item)
       {
         item->setId(result->equipment[i]);
-        item->setLevel(result->itemlevels[i]);
+        item->setModifierId(result->itemModifierIds[i]);
       }
     }
 
