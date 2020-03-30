@@ -13,6 +13,7 @@
 class QXmlStreamReader;
 class QXmlStreamWriter;
 
+#include <map>
 #include <vector>
 
 #ifdef _WIN32
@@ -25,19 +26,17 @@ class QXmlStreamWriter;
 #    define _TABARDDETAILS_API_
 #endif
 
-struct _TABARDDETAILS_API_ TabardDetails
+class _TABARDDETAILS_API_ TabardDetails
 {
+  public:
+
+    TabardDetails();
+
     int Icon;
     int IconColor;
     int Border;
     int BorderColor;
     int Background;
-
-    int maxIcon;
-    int maxIconColor;
-    int maxBorder;
-    int maxBorderColor;
-    int maxBackground;
 
     bool showCustom;
 
@@ -58,6 +57,12 @@ struct _TABARDDETAILS_API_ TabardDetails
 	  static const std::vector<QString> ICON_COLOR_VECTOR;
 	  static const std::vector<QString> BORDER_COLOR_VECTOR;
 	  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
+
+    int maxIcon;
+    std::map<int, int> maxIconColorMap;
+    int maxBorder;
+    std::map<int, int> maxBorderColorMap;
+    int maxBackground;
 };
 
 

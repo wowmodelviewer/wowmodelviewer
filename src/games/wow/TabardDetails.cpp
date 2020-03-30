@@ -12,6 +12,13 @@
 
 #include <QXmlStreamWriter>
 
+TabardDetails::TabardDetails()
+  : maxIcon(-1), maxBorder(-1), maxBackground(-1)
+{
+
+}
+
+
 QString TabardDetails::GetBackgroundTex(int slot)
 {
 	if (slot == CR_TORSO_UPPER)
@@ -38,42 +45,69 @@ QString TabardDetails::GetIconTex(int slot)
 
 int TabardDetails::GetMaxBackground()
 {
-	int i = 0;
-	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(i,2,10,QChar('0'))))
-		i++;
-	return i;
+  if (maxBackground == -1)
+  {
+    int i = 0;
+    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(i, 2, 10, QChar('0'))))
+      i++;
+    maxBackground = i;
+  }
+	return maxBackground;
 }
 
 int TabardDetails::GetMaxIcon()
 {
-	int i = 0;
-	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_00_TU_U.blp").arg(i,2,10,QChar('0'))))
-		i++;
-	return i;
+  if (maxIcon == -1)
+  {
+    int i = 0;
+    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_00_TU_U.blp").arg(i, 2, 10, QChar('0'))))
+      i++;
+    maxIcon = i;
+  }
+	return maxIcon;
 }
 
 int TabardDetails::GetMaxIconColor(int icon)
 {
-	int i = 0;
-	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(icon,2,10,QChar('0')).arg(i,2,10,QChar('0'))))
-		i++;
-	return i;
+  auto it = maxIconColorMap.find(icon);
+
+  if (it == maxIconColorMap.end())
+  {
+    int i = 0;
+    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(icon, 2, 10, QChar('0')).arg(i, 2, 10, QChar('0'))))
+      i++;
+    maxIconColorMap[icon] = i;
+    return i;
+  }
+	return it->second;
 }
 
 int TabardDetails::GetMaxBorder()
 {
-	int i = 0;
-	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_00_TU_U.blp").arg(i,2,10,QChar('0'))))
-		i++;
-	return i;
+  if (maxBorder == -1)
+  {
+    int i = 0;
+    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_00_TU_U.blp").arg(i, 2, 10, QChar('0'))))
+      i++;
+    maxBorder = i;
+  }
+	return maxBorder;
 }
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
-	int i = 0;
-	while(GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(border,2,10,QChar('0')).arg(i,2,10,QChar('0'))))
-		i++;
-	return i;
+  auto it = maxBorderColorMap.find(border);
+
+  if (it == maxBorderColorMap.end())
+  {
+    int i = 0;
+    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(border, 2, 10, QChar('0')).arg(i, 2, 10, QChar('0'))))
+      i++;
+    maxBorderColorMap[border] = i;
+    return i;
+  }
+
+	return it->second;
 }
 
 void TabardDetails::save(QXmlStreamWriter & stream)

@@ -163,13 +163,6 @@ bool CharControl::Init()
   model->td.showCustom = false;
   model->bSheathe = false;
 
-  // set max values for custom tabard
-  model->td.maxBackground = model->td.GetMaxBackground();
-  model->td.maxBorder = model->td.GetMaxBorder();
-  model->td.maxBorderColor = model->td.GetMaxBorderColor(0);
-  model->td.maxIcon = model->td.GetMaxIcon();
-  model->td.maxIconColor = model->td.GetMaxIconColor(0);
-
   // Set default eyeglow
   model->cd.eyeGlowType = EGT_DEFAULT;
 
@@ -211,12 +204,12 @@ void CharControl::UpdateModel(Attachment *a)
 
     g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
-    model->td.Icon = randint(0, model->td.maxIcon);
-    model->td.IconColor = randint(0, model->td.maxIconColor);
-    model->td.Border = randint(0, model->td.maxBorder);
+    model->td.Icon = randint(0, model->td.GetMaxIcon());
+    model->td.IconColor = randint(0, model->td.GetMaxIconColor(model->td.Icon));
+    model->td.Border = randint(0, model->td.GetMaxBorder());
     int maxColor = model->td.GetMaxBorderColor(model->td.Border);
     model->td.BorderColor = randint(0, maxColor);
-    model->td.Background = randint(0, model->td.maxBackground);
+    model->td.Background = randint(0, model->td.GetMaxBackground());
 
     tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.Icon);
     tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.IconColor);
@@ -224,11 +217,11 @@ void CharControl::UpdateModel(Attachment *a)
     tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
     tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.Background);
 
-    tabardSpins[SPIN_TABARD_ICON]->SetRange(0, model->td.maxIcon);
-    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, model->td.maxIconColor);
-    tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, model->td.maxBorder);
+    tabardSpins[SPIN_TABARD_ICON]->SetRange(0, model->td.GetMaxIcon());
+    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, model->td.GetMaxIconColor(model->td.Icon));
+    tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, model->td.GetMaxBorder());
     tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
-    tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, model->td.maxBackground);
+    tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, model->td.GetMaxBackground());
 
     //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
     //	spins[i]->Refresh(false);
