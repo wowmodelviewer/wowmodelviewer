@@ -221,7 +221,7 @@
     <field type="text" name="Name" pos="0" />
     <field type="int" name="Item" arraySize="17" pos="4" />
   </table>
-  
+
   <!-- Item tables - END -->
   
   <!-- Misc tables - BEGIN -->
@@ -252,7 +252,36 @@
     <field type="uint" name="MountID" relationshipData="yes" createIndex="yes" />
     <field type="uint" name="DisplayID" pos="0" />
   </table>
+  
   <!-- Misc tables - END -->
+
+  <!-- Guild tabard tables - BEGIN -->
+  <table name="GuildTabardBackground">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Tier" pos="0" />
+    <field type="uint" name="Component" pos="1" />
+    <field type="uint" name="FileDataID" pos="2" />
+    <field type="uint" name="Color" relationshipData="yes" createIndex="yes" />
+  </table>
+  
+  <table name="GuildTabardBorder">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="BorderID" pos="0" />
+    <field type="uint" name="Tier" pos="1" />
+    <field type="uint" name="Component" pos="2" />
+    <field type="uint" name="FileDataID" pos="3" />
+    <field type="uint" name="Color" relationshipData="yes" createIndex="yes" />
+  </table>
+  
+  <table name="GuildTabardEmblem">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="Component" pos="0" />
+    <field type="uint" name="Color" pos="1" />
+    <field type="uint" name="FileDataID" pos="2" />
+    <field type="uint" name="EmblemID" relationshipData="yes" createIndex="yes" />
+  </table>
+  
+  <!-- Guild tabard tables - END -->  
 
   <!-- BEBUG PURPOSE -->
   <!--

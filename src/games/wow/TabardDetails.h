@@ -8,12 +8,12 @@
 #ifndef _TABARDDETAILS_H_
 #define _TABARDDETAILS_H_
 
-#include <QString>
+class GameFile;
 
+#include <QString>
 class QXmlStreamReader;
 class QXmlStreamWriter;
 
-#include <map>
 #include <vector>
 
 #ifdef _WIN32
@@ -40,9 +40,9 @@ class _TABARDDETAILS_API_ TabardDetails
 
     bool showCustom;
 
-    QString GetIconTex(int slot);
-    QString GetBorderTex(int slot);
-    QString GetBackgroundTex(int slot);
+    GameFile * GetIconTex(int slot);
+    GameFile * GetBorderTex(int slot);
+    GameFile * GetBackgroundTex(int slot);
 
     int GetMaxIcon();
     int GetMaxIconColor(int icon);
@@ -58,11 +58,9 @@ class _TABARDDETAILS_API_ TabardDetails
 	  static const std::vector<QString> BORDER_COLOR_VECTOR;
 	  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
 
-    int maxIcon;
-    std::map<int, int> maxIconColorMap;
-    int maxBorder;
-    std::map<int, int> maxBorderColorMap;
-    int maxBackground;
+    std::vector<int> backgrounds;
+    std::vector<int> icons;
+    std::vector<int> borders;
 };
 
 

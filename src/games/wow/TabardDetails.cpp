@@ -10,104 +10,113 @@
 #include "Game.h"
 #include "wow_enums.h"
 
+#include "logger/Logger.h"
+
 #include <QXmlStreamWriter>
 
 TabardDetails::TabardDetails()
-  : maxIcon(-1), maxBorder(-1), maxBackground(-1)
 {
+  QString query = QString("SELECT DISTINCT Color FROM GuildTabardBackground");
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
+  if (r.valid && !r.values.empty())
+    for (auto& v : r.values)
+      backgrounds.push_back(v[0].toInt());
+
+  query = QString("SELECT DISTINCT EmblemID FROM GuildTabardEmblem");
+  r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    for (auto& v : r.values)
+      icons.push_back(v[0].toInt());
+
+  query = QString("SELECT DISTINCT BorderID FROM GuildTabardBorder");
+  r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    for (auto& v : r.values)
+      borders.push_back(v[0].toInt());
 }
 
-
-QString TabardDetails::GetBackgroundTex(int slot)
+GameFile * TabardDetails::GetBackgroundTex(int slot)
 {
-	if (slot == CR_TORSO_UPPER)
-		return QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(Background,2,10,QChar('0'));
-	else
-		return QString("Textures\\GuildEmblems\\Background_%1_TL_U.blp").arg(Background,2,10,QChar('0'));
+  GameFile * result = nullptr;
+  QString query = QString("SELECT FileDataID FROM GuildTabardBackground WHERE Color=%1 AND Tier=%2 AND Component=%3")
+                         .arg(backgrounds[Background]).arg(0).arg(slot);
+
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());
+
+  return result;
 }
 
-QString TabardDetails::GetBorderTex(int slot)
+GameFile * TabardDetails::GetBorderTex(int slot)
 {
-	if (slot == CR_TORSO_UPPER)
-		return QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(Border,2,10,QChar('0')).arg(BorderColor,2,10,QChar('0'));
-	else
-		return QString("Textures\\GuildEmblems\\Border_%1_%2_TL_U.blp").arg(Border,2,10,QChar('0')).arg(BorderColor,2,10,QChar('0'));
+  GameFile * result = nullptr;
+  QString query = QString("SELECT FileDataID FROM GuildTabardBorder WHERE BorderID=%1 AND Color=%2 AND Tier=%3 AND Component=%4")
+    .arg(borders[Border]).arg(BorderColor).arg(0).arg(slot);
+
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());
+
+  return result;
 }
 
-QString TabardDetails::GetIconTex(int slot)
+GameFile * TabardDetails::GetIconTex(int slot)
 {
-	if(slot == CR_TORSO_UPPER)
-		return QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(Icon,2,10,QChar('0')).arg(IconColor,2,10,QChar('0'));
-	else
-		return QString("Textures\\GuildEmblems\\Emblem_%1_%2_TL_U.blp").arg(Icon,2,10,QChar('0')).arg(IconColor,2,10,QChar('0'));
+  GameFile * result = nullptr;
+  QString query = QString("SELECT FileDataID FROM GuildTabardEmblem WHERE EmblemID=%1 AND Color=%2 AND Component=%3")
+    .arg(icons[Icon]).arg(IconColor).arg(slot);
+
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());
+
+  return result;
 }
 
 int TabardDetails::GetMaxBackground()
 {
-  if (maxBackground == -1)
-  {
-    int i = 0;
-    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Background_%1_TU_U.blp").arg(i, 2, 10, QChar('0'))))
-      i++;
-    maxBackground = i;
-  }
-	return maxBackground;
+  return backgrounds.size();
 }
 
 int TabardDetails::GetMaxIcon()
 {
-  if (maxIcon == -1)
-  {
-    int i = 0;
-    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_00_TU_U.blp").arg(i, 2, 10, QChar('0'))))
-      i++;
-    maxIcon = i;
-  }
-	return maxIcon;
+  return icons.size();
 }
 
 int TabardDetails::GetMaxIconColor(int icon)
 {
-  auto it = maxIconColorMap.find(icon);
+  QString query = QString("SELECT COUNT(*) FROM(SELECT DISTINCT Color FROM GuildTabardEmblem WHERE EmblemID = %1)").arg(icon);
 
-  if (it == maxIconColorMap.end())
-  {
-    int i = 0;
-    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Emblem_%1_%2_TU_U.blp").arg(icon, 2, 10, QChar('0')).arg(i, 2, 10, QChar('0'))))
-      i++;
-    maxIconColorMap[icon] = i;
-    return i;
-  }
-	return it->second;
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+
+  if (r.valid && !r.values.empty())
+    return r.values[0][0].toInt();
+
+  return -1;
 }
 
 int TabardDetails::GetMaxBorder()
 {
-  if (maxBorder == -1)
-  {
-    int i = 0;
-    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_00_TU_U.blp").arg(i, 2, 10, QChar('0'))))
-      i++;
-    maxBorder = i;
-  }
-	return maxBorder;
+  return borders.size();
 }
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
-  auto it = maxBorderColorMap.find(border);
+  QString query = QString("SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = 5)").arg(border);
 
-  if (it == maxBorderColorMap.end())
-  {
-    int i = 0;
-    while (GAMEDIRECTORY.getFile(QString("Textures\\GuildEmblems\\Border_%1_%2_TU_U.blp").arg(border, 2, 10, QChar('0')).arg(i, 2, 10, QChar('0'))))
-      i++;
-    maxBorderColorMap[border] = i;
-    return i;
-  }
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
 
-	return it->second;
+  if (r.valid && !r.values.empty())
+    return r.values[0][0].toInt();
+
+  return -1;
 }
 
 void TabardDetails::save(QXmlStreamWriter & stream)

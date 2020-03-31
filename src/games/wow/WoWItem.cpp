@@ -527,42 +527,42 @@ void WoWItem::load()
         m_charModel->td.showCustom = true;
         m_itemGeosets[CG_TABARD] = 2;
 
-        GameFile * texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER));
+        GameFile * texture = m_charModel->td.GetBackgroundTex(CR_TORSO_UPPER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_1] = texture;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER));
+        texture = m_charModel->td.GetBackgroundTex(CR_TORSO_LOWER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_2] = texture;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_UPPER));
+        texture = m_charModel->td.GetIconTex(CR_TORSO_UPPER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_3] = texture;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetIconTex(CR_TORSO_LOWER));
+        texture = m_charModel->td.GetIconTex(CR_TORSO_LOWER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_4] = texture;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_UPPER));
+        texture = m_charModel->td.GetBorderTex(CR_TORSO_UPPER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
           m_itemTextures[CR_TABARD_5] = texture;
         }
 
-        texture = GAMEDIRECTORY.getFile(m_charModel->td.GetBorderTex(CR_TORSO_LOWER));
+        texture = m_charModel->td.GetBorderTex(CR_TORSO_LOWER);
         if (texture)
         {
           TEXTUREMANAGER.add(texture);
