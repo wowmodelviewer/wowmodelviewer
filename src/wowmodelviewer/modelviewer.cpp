@@ -2180,11 +2180,11 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
           multiVal = values[lineIndex].split(" ");
           if (multiVal.size() >= 5)
           {
-            charControl->model->td.Background = multiVal[0].toInt();
-            charControl->model->td.Border = multiVal[1].toInt();
-            charControl->model->td.BorderColor = multiVal[2].toInt();
-            charControl->model->td.Icon = multiVal[3].toInt();
-            charControl->model->td.IconColor = multiVal[4].toInt();
+            charControl->model->td.setBackground(multiVal[0].toInt());
+            charControl->model->td.setBorder(multiVal[1].toInt());
+            charControl->model->td.setBorderColor(multiVal[2].toInt());
+            charControl->model->td.setIcon(multiVal[3].toInt());
+            charControl->model->td.setIconColor(multiVal[4].toInt());
             charControl->model->td.showCustom = true;
           }
         }
@@ -2497,11 +2497,11 @@ void ModelViewer::ImportArmoury(wxString strURL)
     if (result->customTabard)
     {
       g_charControl->model->td.showCustom = true;
-      g_charControl->model->td.Icon = result->tabardIcon;
-      g_charControl->model->td.IconColor = result->IconColor;
-      g_charControl->model->td.Border = result->tabardBorder;
-      g_charControl->model->td.BorderColor = result->BorderColor;
-      g_charControl->model->td.Background = result->Background;
+      g_charControl->model->td.setIcon(result->tabardIcon);
+      g_charControl->model->td.setIconColor(result->IconColor);
+      g_charControl->model->td.setBorder(result->tabardBorder);
+      g_charControl->model->td.setBorderColor(result->BorderColor);
+      g_charControl->model->td.setBackground(result->Background);
     }
 
     for (unsigned int i = 0; i < NUM_CHAR_SLOTS; i++)

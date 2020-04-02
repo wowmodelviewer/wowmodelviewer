@@ -204,21 +204,21 @@ void CharControl::UpdateModel(Attachment *a)
 
     g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
 
-    model->td.Icon = randint(0, model->td.GetMaxIcon());
-    model->td.IconColor = randint(0, model->td.GetMaxIconColor(model->td.Icon));
-    model->td.Border = randint(0, model->td.GetMaxBorder());
-    int maxColor = model->td.GetMaxBorderColor(model->td.Border);
-    model->td.BorderColor = randint(0, maxColor);
-    model->td.Background = randint(0, model->td.GetMaxBackground());
+    model->td.setIcon(randint(0, model->td.GetMaxIcon()));
+    model->td.setIconColor(randint(0, model->td.GetMaxIconColor(model->td.getIcon())));
+    model->td.setBorder(randint(0, model->td.GetMaxBorder()));
+    int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
+    model->td.setBorderColor(randint(0, maxColor));
+    model->td.setBackground(randint(0, model->td.GetMaxBackground()));
 
-    tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.Icon);
-    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.IconColor);
-    tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.Border);
-    tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
-    tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.Background);
+    tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.getIcon());
+    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.getIconColor());
+    tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.getBorder());
+    tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.getBorderColor());
+    tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.getBackground());
 
     tabardSpins[SPIN_TABARD_ICON]->SetRange(0, model->td.GetMaxIcon());
-    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, model->td.GetMaxIconColor(model->td.Icon));
+    tabardSpins[SPIN_TABARD_ICONCOLOR]->SetRange(0, model->td.GetMaxIconColor(model->td.getIcon()));
     tabardSpins[SPIN_TABARD_BORDER]->SetRange(0, model->td.GetMaxBorder());
     tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
     tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, model->td.GetMaxBackground());
@@ -334,11 +334,11 @@ void CharControl::RefreshEquipment()
 
       if (item && (i == CS_TABARD) && (model->td.showCustom == true))
       {
-        tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.Icon);
-        tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.IconColor);
-        tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.Border);
-        tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
-        tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.Background);
+        tabardSpins[SPIN_TABARD_ICON]->SetValue(model->td.getIcon());
+        tabardSpins[SPIN_TABARD_ICONCOLOR]->SetValue(model->td.getIconColor());
+        tabardSpins[SPIN_TABARD_BORDER]->SetValue(model->td.getBorder());
+        tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.getBorderColor());
+        tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.getBackground());
 
         for (size_t i = 0; i < NUM_TABARD_BTNS; i++) {
           tabardSpins[i]->Refresh(false);
@@ -975,32 +975,32 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
   {
     case ID_TABARD_ICON:
       LOG_INFO << "Tabard Notice: Icon Change.";
-      model->td.Icon = event.GetPosition();
+      model->td.setIcon(event.GetPosition());
       break;
     case ID_TABARD_ICONCOLOR:
       LOG_INFO << "Tabard Notice: Icon Color Change.";
-      model->td.IconColor = event.GetPosition();
+      model->td.setIconColor(event.GetPosition());
       break;
     case ID_TABARD_BORDER:
     {
       LOG_INFO << "Tabard Notice: Border Change.";
-      model->td.Border = event.GetPosition();
-      int maxColor = model->td.GetMaxBorderColor(model->td.Border);
-      if (maxColor < model->td.BorderColor)
+      model->td.setBorder(event.GetPosition());
+      int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
+      if (maxColor < model->td.getBorderColor())
       {
-        model->td.BorderColor = 0;
-        tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.BorderColor);
+        model->td.setBorderColor(0);
+        tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.getBorderColor());
       }
       tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetRange(0, maxColor);
     }
     break;
     case ID_TABARD_BORDERCOLOR:
       LOG_INFO << "Tabard Notice: Border Color Change.";
-      model->td.BorderColor = event.GetPosition();
+      model->td.setBorderColor(event.GetPosition());
       break;
     case ID_TABARD_BACKGROUND:
       LOG_INFO << "Tabard Notice: Background Color Change.";
-      model->td.Background = event.GetPosition();
+      model->td.setBackground(event.GetPosition());
       break;
   }
 
@@ -1008,11 +1008,11 @@ void CharControl::OnTabardSpin(wxSpinEvent &event)
     spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
 
   LOG_INFO << "Current tabard config :"
-    << "Icon" << model->td.Icon
-    << "IconColor" << model->td.IconColor
-    << "Border" << model->td.Border
-    << "BorderColor" << model->td.BorderColor
-    << "Background" << model->td.Background;
+    << "Icon" << model->td.getIcon()
+    << "IconColor" << model->td.getIconColor()
+    << "Border" << model->td.getBorder()
+    << "BorderColor" << model->td.getBorderColor()
+    << "Background" << model->td.getBackground();
 
   WoWItem * tabardModel = model->getItem(CS_TABARD);
   if (tabardModel)

@@ -32,12 +32,6 @@ class _TABARDDETAILS_API_ TabardDetails
 
     TabardDetails();
 
-    int Icon;
-    int IconColor;
-    int Border;
-    int BorderColor;
-    int Background;
-
     bool showCustom;
 
     GameFile * GetIconTex(int slot);
@@ -53,10 +47,28 @@ class _TABARDDETAILS_API_ TabardDetails
     void save(QXmlStreamWriter &);
     void load(QXmlStreamReader &);
 
+    int getIcon();
+    int getIconColor();
+    int getBorder();
+    int getBorderColor();
+    int getBackground();
+
+    void setIcon(int icon);
+    void setIconColor(int color);
+    void setBorder(int border);
+    void setBorderColor(int color);
+    void setBackground(int background);
+
   private:
 	  static const std::vector<QString> ICON_COLOR_VECTOR;
 	  static const std::vector<QString> BORDER_COLOR_VECTOR;
 	  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
+
+    int Icon;
+    int IconColor;
+    int Border;
+    int BorderColor;
+    int Background;
 
     std::vector<int> backgrounds;
     std::vector<int> icons;

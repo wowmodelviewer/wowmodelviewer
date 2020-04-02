@@ -186,3 +186,55 @@ void TabardDetails::load(QXmlStreamReader & reader)
     reader.readNext();
   }
 }
+
+int TabardDetails::getIcon()
+{
+  return Icon;
+}
+
+int TabardDetails::getIconColor()
+{
+  return IconColor;
+}
+
+int TabardDetails::getBorder()
+{
+  return Border;
+}
+
+int TabardDetails::getBorderColor()
+{
+  return BorderColor;
+}
+
+int TabardDetails::getBackground()
+{
+  return Background;
+}
+
+void TabardDetails::setIcon(int icon)
+{
+  Icon = icon;
+}
+
+void TabardDetails::setIconColor(int color)
+{
+  IconColor = color;
+}
+
+void TabardDetails::setBorder(int border)
+{
+  border = border;
+}
+
+void TabardDetails::setBorderColor(int color)
+{
+  BorderColor = color;
+}
+
+void TabardDetails::setBackground(int background)
+{
+  Background = background;
+}
+
+
