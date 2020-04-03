@@ -56,7 +56,7 @@
 // Namespaces used
 //--------------------------------------------------------------------
 
-#define DEBUG_RESULTS
+#define DEBUG_RESULTS 0
 
 // Beginning of implementation
 //--------------------------------------------------------------------
@@ -136,7 +136,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 		result->hairStyle = app.value("hair_variation").toInt();
 		result->facialHair = app.value("feature_variation").toInt();
 
-#ifdef DEBUG_RESULTS
+#if DEBUG_RESULTS > 0
     LOG_INFO << "result->raceId" << result->raceId;
     LOG_INFO << "result->gender" << result->gender.c_str();
     LOG_INFO << "result->skinColor" << result->skinColor;
@@ -210,7 +210,7 @@ CharInfos * ArmoryImporter::importChar(QString url) const
       result->IconColor = guildTabard.value("emblem").toObject().value("color").toObject().value("id").toInt();
       result->tabardBorder = guildTabard.value("border").toObject().value("id").toInt();
       result->BorderColor = guildTabard.value("border").toObject().value("color").toObject().value("id").toInt();
-      result->Background = guildTabard.value("background").toObject().value("id").toInt();
+      result->Background = guildTabard.value("background").toObject().value("color").toObject().value("id").toInt();
      
       result->customTabard = true;
     }

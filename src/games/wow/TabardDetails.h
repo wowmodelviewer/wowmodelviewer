@@ -59,16 +59,24 @@ class _TABARDDETAILS_API_ TabardDetails
     void setBorderColor(int color);
     void setBackground(int background);
 
+    void setTabardId(int itemid);
+
+    void setIconId(int id);
+    void setBorderId(int id);
+    void setBackgroundId(int id);
+
   private:
 	  static const std::vector<QString> ICON_COLOR_VECTOR;
 	  static const std::vector<QString> BORDER_COLOR_VECTOR;
 	  static const std::vector<QString> BACKGROUND_COLOR_VECTOR;
 
-    int Icon;
-    int IconColor;
-    int Border;
-    int BorderColor;
-    int Background;
+    int iconId;
+    int iconColor;
+    int borderId;
+    int borderColor;
+    int backgroundId;
+
+    int tier;
 
     std::vector<int> backgrounds;
     std::vector<int> icons;

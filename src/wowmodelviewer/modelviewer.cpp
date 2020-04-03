@@ -2497,11 +2497,12 @@ void ModelViewer::ImportArmoury(wxString strURL)
     if (result->customTabard)
     {
       g_charControl->model->td.showCustom = true;
-      g_charControl->model->td.setIcon(result->tabardIcon);
+      g_charControl->model->td.setIconId(result->tabardIcon);
       g_charControl->model->td.setIconColor(result->IconColor);
-      g_charControl->model->td.setBorder(result->tabardBorder);
+      g_charControl->model->td.setBorderId(result->tabardBorder);
       g_charControl->model->td.setBorderColor(result->BorderColor);
-      g_charControl->model->td.setBackground(result->Background);
+      g_charControl->model->td.setBackgroundId(result->Background);
+      g_charControl->model->td.setTabardId(result->equipment[CS_TABARD]);
     }
 
     for (unsigned int i = 0; i < NUM_CHAR_SLOTS; i++)

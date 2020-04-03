@@ -10,8 +10,6 @@
 #include "Game.h"
 #include "wow_enums.h"
 
-#include "logger/Logger.h"
-
 #include <QXmlStreamWriter>
 
 TabardDetails::TabardDetails()
@@ -42,7 +40,7 @@ GameFile * TabardDetails::GetBackgroundTex(int slot)
 {
   GameFile * result = nullptr;
   QString query = QString("SELECT FileDataID FROM GuildTabardBackground WHERE Color=%1 AND Tier=%2 AND Component=%3")
-                         .arg(backgrounds[Background]).arg(0).arg(slot);
+                         .arg(backgroundId).arg(tier).arg(slot);
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -56,7 +54,7 @@ GameFile * TabardDetails::GetBorderTex(int slot)
 {
   GameFile * result = nullptr;
   QString query = QString("SELECT FileDataID FROM GuildTabardBorder WHERE BorderID=%1 AND Color=%2 AND Tier=%3 AND Component=%4")
-    .arg(borders[Border]).arg(BorderColor).arg(0).arg(slot);
+    .arg(borderId).arg(borderColor).arg(tier).arg(slot);
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -70,7 +68,7 @@ GameFile * TabardDetails::GetIconTex(int slot)
 {
   GameFile * result = nullptr;
   QString query = QString("SELECT FileDataID FROM GuildTabardEmblem WHERE EmblemID=%1 AND Color=%2 AND Component=%3")
-    .arg(icons[Icon]).arg(IconColor).arg(slot);
+    .arg(iconId).arg(iconColor).arg(slot);
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -109,7 +107,7 @@ int TabardDetails::GetMaxBorder()
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
-  QString query = QString("SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = 5)").arg(border);
+  QString query = QString("SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = %1)").arg(border);
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -124,23 +122,23 @@ void TabardDetails::save(QXmlStreamWriter & stream)
   stream.writeStartElement("TabardDetails");
 
   stream.writeStartElement("Icon");
-  stream.writeAttribute("value", QString::number(Icon));
+  stream.writeAttribute("value", QString::number(iconId));
   stream.writeEndElement();
 
   stream.writeStartElement("IconColor");
-  stream.writeAttribute("value", QString::number(IconColor));
+  stream.writeAttribute("value", QString::number(iconColor));
   stream.writeEndElement();
 
   stream.writeStartElement("Border");
-  stream.writeAttribute("value", QString::number(Border));
+  stream.writeAttribute("value", QString::number(borderId));
   stream.writeEndElement();
 
   stream.writeStartElement("BorderColor");
-  stream.writeAttribute("value", QString::number(BorderColor));
+  stream.writeAttribute("value", QString::number(borderColor));
   stream.writeEndElement();
 
   stream.writeStartElement("Background");
-  stream.writeAttribute("value", QString::number(Background));
+  stream.writeAttribute("value", QString::number(backgroundId));
   stream.writeEndElement();
 
   stream.writeEndElement(); // TabardDetails
@@ -155,31 +153,31 @@ void TabardDetails::load(QXmlStreamReader & reader)
     {
       if(reader.name() == "Icon")
       {
-        Icon = reader.attributes().value("value").toString().toInt();
+        iconId = reader.attributes().value("value").toString().toInt();
         nbValuesRead++;
       }
 
       if(reader.name() == "IconColor")
       {
-        IconColor = reader.attributes().value("value").toString().toInt();
+        iconColor = reader.attributes().value("value").toString().toInt();
         nbValuesRead++;
       }
 
       if(reader.name() == "Border")
       {
-        Border = reader.attributes().value("value").toString().toInt();
+        borderId = reader.attributes().value("value").toString().toInt();
         nbValuesRead++;
       }
 
       if(reader.name() == "BorderColor")
       {
-        BorderColor = reader.attributes().value("value").toString().toInt();
+        borderColor = reader.attributes().value("value").toString().toInt();
         nbValuesRead++;
       }
 
       if(reader.name() == "Background")
       {
-        Background = reader.attributes().value("value").toString().toInt();
+        backgroundId = reader.attributes().value("value").toString().toInt();
         nbValuesRead++;
       }
     }
@@ -189,52 +187,77 @@ void TabardDetails::load(QXmlStreamReader & reader)
 
 int TabardDetails::getIcon()
 {
-  return Icon;
+  return std::distance(icons.begin(), std::find(icons.begin(), icons.end(),iconId));
 }
 
 int TabardDetails::getIconColor()
 {
-  return IconColor;
+  return iconColor;
 }
 
 int TabardDetails::getBorder()
 {
-  return Border;
+  return std::distance(borders.begin(), std::find(borders.begin(), borders.end(), borderId));
 }
 
 int TabardDetails::getBorderColor()
 {
-  return BorderColor;
+  return borderColor;
 }
 
 int TabardDetails::getBackground()
 {
-  return Background;
+  return std::distance(backgrounds.begin(), std::find(backgrounds.begin(), backgrounds.end(), backgroundId));
 }
 
 void TabardDetails::setIcon(int icon)
 {
-  Icon = icon;
+  iconId = icons[icon];
 }
 
 void TabardDetails::setIconColor(int color)
 {
-  IconColor = color;
+  iconColor = color;
 }
 
 void TabardDetails::setBorder(int border)
 {
-  border = border;
+  borderId = borders[border];
 }
 
 void TabardDetails::setBorderColor(int color)
 {
-  BorderColor = color;
+  borderColor = color;
 }
 
 void TabardDetails::setBackground(int background)
 {
-  Background = background;
+  backgroundId = backgrounds[background];
 }
 
+void TabardDetails::setTabardId(int itemid)
+{
+  if (itemid == 69210) // Renowned Guild Tabard
+    tier = 2;
+  else if (itemid == 69209) // Illustrious Guild Tabard
+    tier = 1;
+  else  // regular Guild Tabard
+    tier = 0;
+
+}
+
+void TabardDetails::setIconId(int id)
+{
+  iconId = id;
+}
+
+void TabardDetails::setBorderId(int id)
+{
+  borderId = id;
+}
+
+void TabardDetails::setBackgroundId(int id)
+{
+  backgroundId = id;
+}
 
