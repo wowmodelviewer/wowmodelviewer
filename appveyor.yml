@@ -31,7 +31,7 @@ for:
 -
   branches:
     only:
-      - default
+      - master
   
   artifacts:
     - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
