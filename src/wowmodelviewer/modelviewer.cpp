@@ -2285,7 +2285,7 @@ void ModelViewer::OnAbout(wxCommandEvent &event)
   info.AddTranslator(wxT("Tigurius (Deutsch)"));
   info.AddTranslator(wxT("Kurax (Chinese)"));
 
-  info.SetWebSite(wxT("http://wowmodelviewer.net/forum/"));
+  info.SetWebSite(wxT("https://wowmodelviewer.net"));
   info.SetCopyright(
     wxString(wxT("World of Warcraft(R) is a Registered trademark of\n\
                  Blizzard Entertainment(R). All game assets and content\n\
