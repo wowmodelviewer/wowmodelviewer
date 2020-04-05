@@ -51,6 +51,7 @@ class _GAMEFILE_API_ GameFile : public Component
 
     void allocate(unsigned long long size);
     bool setChunk(std::string chunkName, bool resetToStart = true);
+    std::string getCurChunk() { return curChunk; }
     bool isChunked() { return chunks.size() > 0; }
 
     virtual void dumpStructure();
