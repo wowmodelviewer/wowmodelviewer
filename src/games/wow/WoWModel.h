@@ -115,7 +115,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   bool animGeometry, animBones;
 
   vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
+  void readAnimDataFromFile(GameFile * animFile, GameFile * boneFile, modelAnimData & result);
   vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:

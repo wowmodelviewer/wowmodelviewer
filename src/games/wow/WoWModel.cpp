@@ -487,22 +487,22 @@ void WoWModel::initCommon(GameFile * f)
           SKPD skpd;
           memcpy(&skpd, skelFile->getBuffer(), sizeof(SKPD));
 
-          GameFile * parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
+          GameFile * parentSkelFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
 
-          if (parentFile && parentFile->open() && parentFile->setChunk("SKS1"))
+          if (parentSkelFile && parentSkelFile->open() && parentSkelFile->setChunk("SKS1"))
           {
             SKS1 sks1;
-            memcpy(&sks1, parentFile->getBuffer(), sizeof(SKS1));
+            memcpy(&sks1, parentSkelFile->getBuffer(), sizeof(SKS1));
 
             if (sks1.nGlobalSequences > 0)
             {
               uint32 * buffer = new uint32[sks1.nGlobalSequences];
-              memcpy(buffer, parentFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
+              memcpy(buffer, parentSkelFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
               for (uint i = 0; i < sks1.nGlobalSequences; i++)
                 globalSequences.push_back(buffer[i]);
             }
 
-            parentFile->close();
+            parentSkelFile->close();
           }
         }
 
@@ -829,6 +829,8 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
   vector<AFID> afids;
 
+  std::string curChunk = f->getCurChunk();
+
   if (f->setChunk("AFID"))
   {
     AFID afid;
@@ -840,15 +842,35 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
     }
   }
 
+  f->setChunk(curChunk, false);
+
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimDataFromFile(GameFile * animFile, GameFile * boneFile, modelAnimData & result)
 {
+  // header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup
+  vector<AFID> afids = readAFIDSFromFile(animFile);
+
+  uint32 nAnimations = header.nAnimations;
+  uint32 ofsAnimations = header.ofsAnimations;
+  uint32 nAnimationLookup = header.nAnimationLookup;
+  uint32 ofsAnimationLookup = header.ofsAnimationLookup;
+
+  if (!animFile->fullname().endsWith(".m2") && animFile->setChunk("SKS1"))
+  {
+    SKS1 sks1;
+    animFile->read(&sks1, sizeof(sks1));
+    nAnimations = sks1.nAnimations;
+    ofsAnimations = sks1.ofsAnimations;
+    nAnimationLookup = sks1.nAnimationLookup;
+    ofsAnimationLookup = sks1.ofsAnimationLookup;
+  }
+
   for (uint i = 0; i < nAnimations; i++)
   {
     ModelAnimation a;
-    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+    memcpy(&a, animFile->getBuffer() + ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
 
     anims.push_back(a);
 
@@ -877,14 +899,18 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
     {
       anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
       {     
-        auto animIt = data.animfiles.find(anims[i].animID);
-        if (animIt != data.animfiles.end())
-          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
+        auto animIt = result.animfiles.find(anims[i].animID);
+        if (animIt != result.animfiles.end())
+          LOG_INFO << "WARNING - replacing" << result.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
       }
       
-      data.animfiles[anims[i].animID] = std::make_pair(anim, f);
+      result.animfiles[anims[i].animID] = std::make_pair(anim, boneFile);
     }
   }
+
+  // fill correspondance table for animated.h
+  for (uint i = 0; i < anims.size(); i++)
+    result.animIndexToAnimId[i] = anims[i].animID;
 
   // Index at ofsAnimations which represents the animation in AnimationData.dbc. -1 if none.
   if (nAnimationLookup > 0)
@@ -892,7 +918,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
     // for unknown reason, using assign() on vector doesn't work
     // use intermediate buffer and push back instead...
     int16 * buffer = new int16[nAnimationLookup];
-    memcpy(buffer, f->getBuffer() + ofsAnimationLookup, sizeof(int16)*nAnimationLookup);
+    memcpy(buffer, animFile->getBuffer() + ofsAnimationLookup, sizeof(int16)*nAnimationLookup);
     for (uint i = 0; i < nAnimationLookup; i++)
       animLookups.push_back(buffer[i]);
 
@@ -900,12 +926,6 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
   }
 }
 
-#ifdef _NEW_ANIM_LOADING_
-void WoWModel::loadAnimations(GameFile * f)
-{
-
-}
-#else
 void WoWModel::initAnimations(GameFile * f)
 {
   modelAnimData data;
@@ -919,82 +939,58 @@ void WoWModel::initAnimations(GameFile * f)
 
     if (skelFile->open())
     {
-      // skelFile->dumpStructure();
-      vector<AFID> afids = readAFIDSFromFile(skelFile);
-
       if (skelFile->setChunk("SKS1"))
       {
-        SKS1 sks1;
-
         // let's try if there is a parent skel file to read
-        GameFile * parentFile = 0;
+        GameFile * parentSkelFile = 0;
+        GameFile * fileForAnims = skelFile;
+
         if (skelFile->setChunk("SKPD"))
         {
           SKPD skpd;
           skelFile->read(&skpd, sizeof(skpd));
-
-          parentFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
-
-          if (parentFile && parentFile->open())
-          {
-            // parentFile->dumpStructure();
-            afids = readAFIDSFromFile(parentFile);
-
-            if (parentFile->setChunk("SKS1"))
-            {
-              SKS1 sks1;
-              parentFile->read(&sks1, sizeof(sks1));
-              readAnimsFromFile(parentFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
-            }
-
-            parentFile->close();
-          }
+          parentSkelFile = GAMEDIRECTORY.getFile(skpd.parentFileId);
         }
-        else
+
+        if (parentSkelFile && parentSkelFile->open())
         {
-          skelFile->read(&sks1, sizeof(sks1));
-          memcpy(&sks1, skelFile->getBuffer(), sizeof(SKS1));
-          readAnimsFromFile(skelFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+          if (parentSkelFile->setChunk("SKS1"))
+            fileForAnims = parentSkelFile;
         }
+
+        LOG_INFO << "Reading anims from" << fileForAnims->fullname();
+        readAnimDataFromFile(fileForAnims, skelFile, data);
 
         animManager = new AnimManager(*this);
 
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
-          GameFile * fileToUse = skelFile;
-          if (parentFile)
-          {
-            parentFile->open();
-            parentFile->setChunk("SKB1");
-            skelFile->close();
-            fileToUse = parentFile;
-          }
-
           SKB1 skb1;
-          fileToUse->read(&skb1, sizeof(skb1));
-          memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
-          bones.resize(skb1.nBones);
-          M2CompBone *mb = (M2CompBone*)(fileToUse->getBuffer() + skb1.ofsBones);
+          LOG_INFO << "Reading bones from" << skelFile->fullname();
 
-          for (uint i = 0; i < anims.size(); i++)
-            data.animIndexToAnimId[i] = anims[i].animID;
+          skelFile->read(&skb1, sizeof(skb1));
+          memcpy(&skb1, skelFile->getBuffer(), sizeof(SKB1));
+          bones.resize(skb1.nBones);
+          M2CompBone *mb = (M2CompBone*)(skelFile->getBuffer() + skb1.ofsBones);
 
           for (size_t i = 0; i < skb1.nBones; i++)
-            bones[i].initV3(*fileToUse, mb[i], data);
+            bones[i].initV3(*skelFile, mb[i], data);
 
           // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
           if (skb1.nKeyBoneLookup < BONE_MAX)
           {
-            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
+            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*skb1.nKeyBoneLookup);
           }
           else
           {
-            memcpy(keyBoneLookup, fileToUse->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
+            memcpy(keyBoneLookup, skelFile->getBuffer() + skb1.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
             LOG_ERROR << "KeyBone number" << skb1.nKeyBoneLookup << "over" << BONE_MAX;
           }
-          fileToUse->close();
+          skelFile->close();
         }
+        if (parentSkelFile)
+          parentSkelFile->close();
       }
       skelFile->close();
     }
@@ -1002,16 +998,8 @@ void WoWModel::initAnimations(GameFile * f)
   }
   else if (header.nAnimations > 0)
   {
-    vector<AFID> afids;
-
-    if (f->isChunked() && f->setChunk("AFID"))
-    {
-      afids = readAFIDSFromFile(f);
-      f->setChunk("MD21", false);
-    }
-
-    readAnimsFromFile(f, afids, data, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
-
+    readAnimDataFromFile(f, f, data);
+    f->setChunk("MD21", false);
     animManager = new AnimManager(*this);
 
     // init bones...
@@ -1043,7 +1031,6 @@ void WoWModel::initAnimations(GameFile * f)
       it.second.first->close();
   }
 }
-#endif
 
 void WoWModel::initAnimated(GameFile * f)
 {

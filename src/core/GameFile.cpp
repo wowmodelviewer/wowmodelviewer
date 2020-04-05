@@ -123,11 +123,10 @@ bool GameFile::setChunk(std::string chunkName, bool resetToStart)
       size = it.size;
       result = true;
       eof = (pointer >= size);
+      curChunk = chunkName;
       break;
     }
   }
-  
-  curChunk = chunkName;
 
   return result;
 }
