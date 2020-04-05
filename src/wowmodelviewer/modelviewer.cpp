@@ -609,7 +609,7 @@ void ModelViewer::InitDatabase()
   if (!GAMEDATABASE.initFromXML("database.xml"))
   {
     initDB = false;
-    LOG_ERROR << "Initializing failed!";
+    LOG_ERROR << "Initializing failed!" << __FUNCTION__;
     SetStatusText(wxT("Initializing failed!"));
     return;
   }

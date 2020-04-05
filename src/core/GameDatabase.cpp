@@ -49,7 +49,11 @@ bool core::GameDatabase::initFromXML(const QString & file)
    }
 
    sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
-   return createDatabaseFromXML(core::Game::instance().configFolder() + file);
+
+   if (!m_fastMode)
+     return createDatabaseFromXML(core::Game::instance().configFolder() + file);
+   else
+     return true;
 }
 
 sqlResult core::GameDatabase::sqlQuery(const QString & query)
