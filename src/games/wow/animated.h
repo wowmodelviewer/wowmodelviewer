@@ -228,7 +228,7 @@ public:
 
 	}
 
-	void init(AnimationBlock &b, GameFile * f, std::vector<uint32> & gs)
+	void init(M2Track &b, GameFile * f, std::vector<uint32> & gs)
 	{
 		globals = gs;
 		type = b.type;
@@ -243,7 +243,7 @@ public:
 			return;
 
 		for(size_t j=0; j < b.nTimes; j++) {
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+			M2Array* pHeadTimes = (M2Array*)(f->getBuffer() + b.ofsTimes + j*sizeof(M2Array));
 		
 			unsigned int *ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
@@ -252,7 +252,7 @@ public:
 
 		// keyframes
 		for(size_t j=0; j < b.nKeys; j++) {
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+      M2Array* pHeadKeys = (M2Array*)(f->getBuffer() + b.ofsKeys + j*sizeof(M2Array));
 
 			D *keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type) {
@@ -280,7 +280,7 @@ public:
 		}
 	}
 
-  void init(AnimationBlock &b, GameFile & f, const modelAnimData & modelData)
+  void init(M2Track &b, GameFile & f, const modelAnimData & modelData)
 	{
 		globals = modelData.globalSequences;
 		type = b.type;
@@ -297,21 +297,21 @@ public:
 		for(size_t j=0; j < b.nTimes; j++) 
     {
       uint32 *ptimes;
-      AnimationBlockHeader* pHeadTimes;
+      M2Array* pHeadTimes;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        pHeadTimes = (M2Array*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(M2Array));
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
         if (animfile->getSize() < pHeadTimes->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        pHeadTimes = (M2Array*)(f.getBuffer() + b.ofsTimes + j*sizeof(M2Array));
         ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
         if (f.getSize() < pHeadTimes->ofsEntrys)
           continue;
@@ -325,21 +325,21 @@ public:
 		for(size_t j=0; j < b.nKeys; j++) 
     {
 			D *keys;
-      AnimationBlockHeader* pHeadKeys;
+      M2Array* pHeadKeys;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        pHeadKeys = (M2Array*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(M2Array));
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
         if (animfile->getSize() < pHeadKeys->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        pHeadKeys = (M2Array*)(f.getBuffer() + b.ofsKeys + j*sizeof(M2Array));
         keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
         if (f.getSize() < pHeadKeys->ofsEntrys)
           continue;

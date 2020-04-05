@@ -10,7 +10,7 @@
 
 #include "animated.h"
 #include "matrix.h"
-#include "modelheaders.h" // ModelBoneDef
+#include "modelheaders.h" // M2CompBone
 #include "vec3d.h"
 
 class GameFile;
@@ -32,11 +32,11 @@ public:
 	Matrix mat;
 	Matrix mrot;
 
-	ModelBoneDef boneDef;
+	M2CompBone boneDef;
 
 	bool calc;
 	void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
-  void initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data);
+  void initV3(GameFile & f, M2CompBone &b, const modelAnimData & data);
 };
 
 

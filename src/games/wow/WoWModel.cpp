@@ -306,7 +306,7 @@ void WoWModel::displayHeader(ModelHeader & a_header)
 bool WoWModel::isAnimated(GameFile * f)
 {
   // see if we have any animated bones
-  ModelBoneDef *bo = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+  M2CompBone *bo = (M2CompBone*)(f->getBuffer() + header.ofsBones);
 
   animGeometry = false;
   animBones = false;
@@ -318,7 +318,7 @@ bool WoWModel::isAnimated(GameFile * f)
     {
       if (ov_it->weights[b]>0)
       {
-        ModelBoneDef &bb = bo[ov_it->bones[b]];
+        M2CompBone &bb = bo[ov_it->bones[b]];
         if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
         {
           if (bb.flags & MODELBONE_BILLBOARD)
@@ -341,7 +341,7 @@ bool WoWModel::isAnimated(GameFile * f)
   {
     for (uint i = 0; i < bones.size() ; i++)
     {
-      ModelBoneDef &bb = bo[i];
+      M2CompBone &bb = bo[i];
       if (bb.translation.type || bb.rotation.type || bb.scaling.type)
       {
         animBones = true;
@@ -900,8 +900,13 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
   }
 }
 
+#ifdef _NEW_ANIM_LOADING_
+void WoWModel::loadAnimations(GameFile * f)
+{
 
-void WoWModel::initAnimated(GameFile * f)
+}
+#else
+void WoWModel::initAnimations(GameFile * f)
 {
   modelAnimData data;
   data.globalSequences = globalSequences;
@@ -953,7 +958,7 @@ void WoWModel::initAnimated(GameFile * f)
         }
 
         animManager = new AnimManager(*this);
-        
+
         // init bones...
         if (skelFile->setChunk("SKB1"))
         {
@@ -970,7 +975,7 @@ void WoWModel::initAnimated(GameFile * f)
           fileToUse->read(&skb1, sizeof(skb1));
           memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
           bones.resize(skb1.nBones);
-          ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
+          M2CompBone *mb = (M2CompBone*)(fileToUse->getBuffer() + skb1.ofsBones);
 
           for (uint i = 0; i < anims.size(); i++)
             data.animIndexToAnimId[i] = anims[i].animID;
@@ -1011,7 +1016,7 @@ void WoWModel::initAnimated(GameFile * f)
 
     // init bones...
     bones.resize(header.nBones);
-    ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+    M2CompBone *mb = (M2CompBone*)(f->getBuffer() + header.ofsBones);
 
     for (uint i = 0; i < anims.size(); i++)
       data.animIndexToAnimId[i] = anims[i].animID;
@@ -1037,6 +1042,12 @@ void WoWModel::initAnimated(GameFile * f)
     if (it.second.first != 0)
       it.second.first->close();
   }
+}
+#endif
+
+void WoWModel::initAnimated(GameFile * f)
+{
+  initAnimations(f);
 
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex

@@ -78,6 +78,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void initCommon(GameFile * f);
   bool isAnimated(GameFile * f);
   void initAnimated(GameFile * f);
+  void initAnimations(GameFile * f);
   void initStatic(GameFile * f);
 
   void animate(ssize_t anim);
