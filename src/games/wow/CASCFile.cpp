@@ -234,6 +234,8 @@ bool CASCFile::doPostCloseOperation()
 
 void CASCFile::dumpStructure()
 {
+  std::string savedChunk = getCurChunk();
+
   LOG_INFO << "Structure for file" << filepath;
   for (auto it : chunks)
   {
@@ -296,4 +298,6 @@ void CASCFile::dumpStructure()
       LOG_INFO << "Chunk :" << it.magic.c_str() << it.start << it.size;
     }
   }
+
+  setChunk(savedChunk, false);
 }
