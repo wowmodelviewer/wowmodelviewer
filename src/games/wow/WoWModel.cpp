@@ -849,14 +849,21 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 
 void WoWModel::readAnimDataFromFile(GameFile * animFile, GameFile * boneFile, modelAnimData & result)
 {
-  // header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup
+  LOG_INFO << __FUNCTION__;
+  LOG_INFO << "Reading anim info from" << animFile->fullname();
+  animFile->dumpStructure();
+
   vector<AFID> afids = readAFIDSFromFile(animFile);
 
+  // rely on model header info by default
   uint32 nAnimations = header.nAnimations;
   uint32 ofsAnimations = header.ofsAnimations;
   uint32 nAnimationLookup = header.nAnimationLookup;
   uint32 ofsAnimationLookup = header.ofsAnimationLookup;
 
+  // if we are not directly reading a m2 file here (old models without skel file)
+  // and if we are able to read SKS1 chunk
+  // then use sks1 chunk info
   if (!animFile->fullname().endsWith(".m2") && animFile->setChunk("SKS1"))
   {
     SKS1 sks1;
@@ -877,7 +884,7 @@ void WoWModel::readAnimDataFromFile(GameFile * animFile, GameFile * boneFile, mo
     GameFile * anim = 0;
 
     // if we have animation file ids from AFID chunk, use them
-    if (afids.size() > 0)
+    if (!afids.empty())
     {
       for (auto it : afids)
       {
@@ -942,7 +949,7 @@ void WoWModel::initAnimations(GameFile * f)
       if (skelFile->setChunk("SKS1"))
       {
         // let's try if there is a parent skel file to read
-        GameFile * parentSkelFile = 0;
+        GameFile * parentSkelFile = nullptr;
         GameFile * fileForAnims = skelFile;
 
         if (skelFile->setChunk("SKPD"))
@@ -958,7 +965,6 @@ void WoWModel::initAnimations(GameFile * f)
             fileForAnims = parentSkelFile;
         }
 
-        LOG_INFO << "Reading anims from" << fileForAnims->fullname();
         readAnimDataFromFile(fileForAnims, skelFile, data);
 
         animManager = new AnimManager(*this);
@@ -968,6 +974,7 @@ void WoWModel::initAnimations(GameFile * f)
         {
           SKB1 skb1;
           LOG_INFO << "Reading bones from" << skelFile->fullname();
+          skelFile->dumpStructure();
 
           skelFile->read(&skb1, sizeof(skb1));
           memcpy(&skb1, skelFile->getBuffer(), sizeof(SKB1));
