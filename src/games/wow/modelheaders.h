@@ -120,7 +120,7 @@ struct ModelHeader {
 #define	ANIMATION_MOUNT			91
 #define	ANIMATION_LOOPED		0x20 // flags
 // block B - animations, size 68 bytes, WotLK 64 bytes
-struct ModelAnimation {
+struct M2Sequence {
 	int16 animID; // AnimationDataDB.ID
 	int16 subAnimID;
 	uint32 length;

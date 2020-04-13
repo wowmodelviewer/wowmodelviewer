@@ -8,7 +8,7 @@
 #ifndef _ANIMMANAGER_H_
 #define _ANIMMANAGER_H_
 
-#include "modelheaders.h" // ModelAnimation
+#include "modelheaders.h" // M2Sequence
 
 // This will be our animation manager
 // instead of using a STL vector or list or table, etc.

@@ -876,8 +876,8 @@ void WoWModel::readAnimDataFromFile(GameFile * animFile, GameFile * boneFile, mo
 
   for (uint i = 0; i < nAnimations; i++)
   {
-    ModelAnimation a;
-    memcpy(&a, animFile->getBuffer() + ofsAnimations + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+    M2Sequence a;
+    memcpy(&a, animFile->getBuffer() + ofsAnimations + i*sizeof(M2Sequence), sizeof(M2Sequence));
 
     anims.push_back(a);
 
@@ -1532,7 +1532,7 @@ void WoWModel::animate(ssize_t anim)
 {
   size_t t = 0;
 
-  ModelAnimation &a = anims[anim];
+  M2Sequence &a = anims[anim];
   int tmax = a.length;
   if (tmax == 0)
     tmax = 1;

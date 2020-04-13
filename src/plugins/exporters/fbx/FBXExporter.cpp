@@ -359,7 +359,7 @@ bool FBXExporter::createAnimationFiles()
   for (auto it : m_animsToExport)
   {
     QMutexLocker locker(&m_mutex);
-    ModelAnimation curAnimation = m_p_model->anims[it];
+    M2Sequence curAnimation = m_p_model->anims[it];
     FBXAnimExporter *exporter = new FBXAnimExporter();
     exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters, m_p_meshNode, it);
     exporter->setAutoDelete(true);

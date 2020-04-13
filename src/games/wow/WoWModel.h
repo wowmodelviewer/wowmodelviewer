@@ -193,7 +193,7 @@ public:
   // ===============================
   // Bone & Animation data
   // ===============================
-  std::vector<ModelAnimation> anims;
+  std::vector<M2Sequence> anims;
   std::vector<int16> animLookups;
   AnimManager *animManager;
   std::vector<Bone> bones;

@@ -61,7 +61,7 @@ namespace FBXHeaders
   void createSkeleton(WoWModel* l_model, FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes);
   void storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_boneClusters, FbxNode* l_meshNode);
   void storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot);
-  void createAnimation(WoWModel *l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton);
+  void createAnimation(WoWModel *l_model, FbxScene *& l_scene, QString animName, M2Sequence cur_anim, std::map<int, FbxNode*>& skeleton);
 }
 
 // static members definition

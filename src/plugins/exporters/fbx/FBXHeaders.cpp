@@ -339,7 +339,7 @@ void FBXHeaders::storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot)
   l_scene->AddPose(pose);
 }
 
-void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton)
+void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, M2Sequence cur_anim, std::map<int, FbxNode*>& skeleton)
 {
   if (skeleton.empty())
   {
