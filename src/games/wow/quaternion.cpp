@@ -9,7 +9,7 @@
 
 #include "matrix.h"
 
-const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Quaternion &v2)
+Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Quaternion &v2)
 {
   // SLERP
   float dot = v1*v2;
@@ -27,10 +27,19 @@ const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Qu
   return v1 * cosf(a) + q * sinf(a);
 }
 
-const Quaternion Quaternion::lerp(const float r, const Quaternion &v1, const Quaternion &v2)
+Quaternion Quaternion::lerp(const float r, const Quaternion &v1, const Quaternion &v2)
 {
   return v1*(1.0f-r) + v2*r;
 }
+
+
+Quaternion Quaternion::nlerp(const float r, const Quaternion &v1, const Quaternion &v2)
+{
+  Quaternion q = Quaternion::lerp(r, v1, v2);
+  q.normalize();
+  return q;
+}
+
 
 Vec3D Quaternion::GetHPB()
 {

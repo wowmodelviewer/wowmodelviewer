@@ -66,11 +66,17 @@ inline T interpolateBezier(const float r, const T &v1, const T &v2, const T &in,
 	return static_cast<T>(v1*h1 + v2*h2 + in*h3 + out*h4);
 }
 
-// "linear" interpolation for quaternions should be slerp by default
+// "linear" interpolation for quaternions should be nlerp by default (https://wowdev.wiki/M2#Interpolation)
 template<>
 inline Quaternion interpolate<Quaternion>(const float r, const Quaternion &v1, const Quaternion &v2)
 {
-	return Quaternion::slerp(r, v1, v2);
+	return Quaternion::nlerp(r, v1, v2);
+}
+
+template<>
+inline Vec3D interpolate<Vec3D>(const float r, const Vec3D &v1, const Vec3D &v2)
+{
+  return v1.interpolate(v2, r);
 }
 
 
@@ -228,22 +234,22 @@ public:
 
 	}
 
-	void init(M2Track &b, GameFile * f, std::vector<uint32> & gs)
+	void init(M2TrackDef &b, GameFile * f, std::vector<uint32> & gs)
 	{
 		globals = gs;
 		type = b.type;
 		seq = b.seq;
 
 		// times
-		if (b.nTimes != b.nKeys)
+		if (b.nTimestamps != b.nKeys)
 			return;
-		//assert(b.nTimes == b.nKeys);
-		sizes = b.nTimes;
-		if( b.nTimes == 0 )
+		//assert(b.nTimestamps == b.nKeys);
+		sizes = b.nTimestamps;
+		if( b.nTimestamps == 0 )
 			return;
 
-		for(size_t j=0; j < b.nTimes; j++) {
-			M2Array* pHeadTimes = (M2Array*)(f->getBuffer() + b.ofsTimes + j*sizeof(M2Array));
+		for(size_t j=0; j < b.nTimestamps; j++) {
+			M2ArrayDef* pHeadTimes = (M2ArrayDef*)(f->getBuffer() + b.ofsTimestamps + j*sizeof(M2ArrayDef));
 		
 			unsigned int *ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i=0; i < pHeadTimes->nEntrys; i++)
@@ -252,7 +258,7 @@ public:
 
 		// keyframes
 		for(size_t j=0; j < b.nKeys; j++) {
-      M2Array* pHeadKeys = (M2Array*)(f->getBuffer() + b.ofsKeys + j*sizeof(M2Array));
+      M2ArrayDef* pHeadKeys = (M2ArrayDef*)(f->getBuffer() + b.ofsKeys + j*sizeof(M2ArrayDef));
 
 			D *keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type) {
@@ -280,38 +286,38 @@ public:
 		}
 	}
 
-  void init(M2Track &b, GameFile & f, const modelAnimData & modelData)
+  void init(M2TrackDef &b, GameFile & f, const modelAnimData & modelData)
 	{
 		globals = modelData.globalSequences;
 		type = b.type;
 		seq = b.seq;
 
 		// times
-		if (b.nTimes != b.nKeys)
+		if (b.nTimestamps != b.nKeys)
 			return;
-		//assert(b.nTimes == b.nKeys);
-		sizes = b.nTimes;
-		if( b.nTimes == 0 )
+		//assert(b.nTimestamps == b.nKeys);
+		sizes = b.nTimestamps;
+		if( b.nTimestamps == 0 )
 			return;
 
-		for(size_t j=0; j < b.nTimes; j++) 
+		for(size_t j=0; j < b.nTimestamps; j++) 
     {
       uint32 *ptimes;
-      M2Array* pHeadTimes;
+      M2ArrayDef* pHeadTimes;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadTimes = (M2Array*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(M2Array));
+        pHeadTimes = (M2ArrayDef*)(skelfile->getBuffer() + b.ofsTimestamps + j*sizeof(M2ArrayDef));
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
         if (animfile->getSize() < pHeadTimes->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadTimes = (M2Array*)(f.getBuffer() + b.ofsTimes + j*sizeof(M2Array));
+        pHeadTimes = (M2ArrayDef*)(f.getBuffer() + b.ofsTimestamps + j*sizeof(M2ArrayDef));
         ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
         if (f.getSize() < pHeadTimes->ofsEntrys)
           continue;
@@ -325,21 +331,21 @@ public:
 		for(size_t j=0; j < b.nKeys; j++) 
     {
 			D *keys;
-      M2Array* pHeadKeys;
+      M2ArrayDef* pHeadKeys;
       auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(j));
       if (it != modelData.animfiles.end())
       {
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadKeys = (M2Array*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(M2Array));
+        pHeadKeys = (M2ArrayDef*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(M2ArrayDef));
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
         if (animfile->getSize() < pHeadKeys->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadKeys = (M2Array*)(f.getBuffer() + b.ofsKeys + j*sizeof(M2Array));
+        pHeadKeys = (M2ArrayDef*)(f.getBuffer() + b.ofsKeys + j*sizeof(M2ArrayDef));
         keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
         if (f.getSize() < pHeadKeys->ofsEntrys)
           continue;

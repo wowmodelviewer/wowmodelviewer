@@ -132,9 +132,11 @@ class _QUATERNION_API_ Quaternion: public Vec4D
 
     Quaternion(const Vec3D& v, const float w0) : Vec4D(v, w0) {}
 
-    static const Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2);
+    static Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2);
 
-    static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2);
+    static Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2);
+
+    static Quaternion nlerp(const float r, const Quaternion &v1, const Quaternion &v2);
 
     Vec3D GetHPB();
 

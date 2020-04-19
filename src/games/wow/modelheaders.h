@@ -119,6 +119,7 @@ struct ModelHeader {
 #define	ANIMATION_HANDSCLOSED	15
 #define	ANIMATION_MOUNT			91
 #define	ANIMATION_LOOPED		0x20 // flags
+
 // block B - animations, size 68 bytes, WotLK 64 bytes
 struct M2Sequence {
 	int16 animID; // AnimationDataDB.ID
@@ -140,24 +141,16 @@ struct M2Sequence {
 	int16 Index;
 };
 
-// sub-block in block E - animation data, size 28 bytes, WotLK 20 bytes
-struct M2Track {
-	int16 type;		// interpolation type (0=none, 1=linear, 2=hermite)
-	int16 seq;		// global sequence id or -1
-	uint32 nTimes;
-	uint32 ofsTimes;
+struct M2TrackDef {
+  int16 type;
+  int16 seq;
+	uint32 nTimestamps;
+	uint32 ofsTimestamps;
 	uint32 nKeys;
 	uint32 ofsKeys;
 };
 
-struct FakeM2Track {
-	uint32 nTimes;
-	uint32 ofsTimes;
-	uint32 nKeys;
-	uint32 ofsKeys;
-};
-
-struct M2Array
+struct M2ArrayDef
 {
 	uint32 nEntrys;
 	uint32 ofsEntrys;
@@ -173,16 +166,16 @@ struct M2CompBone {
 	int16 parent; // parent bone index
 	int16 geoid; // A geoset for this bone.
 	int32 unknown; // new int added to the bone definitions.  Added in WoW 2.0
-	M2Track translation; // (Vec3D)
-	M2Track rotation; // (QuatS)
-	M2Track scaling; // (Vec3D)
+	M2TrackDef translation; // (Vec3D)
+	M2TrackDef rotation; // (QuatS)
+	M2TrackDef scaling; // (Vec3D)
 	Vec3D pivot;
 };
 
 struct ModelTexAnimDef {
-	M2Track trans; // (Vec3D)
-	M2Track rot; // (QuatS)
-	M2Track scale; // (Vec3D)
+	M2TrackDef trans; // (Vec3D)
+	M2TrackDef rot; // (QuatS)
+	M2TrackDef scale; // (Vec3D)
 };
 
 struct ModelVertex {
@@ -352,13 +345,13 @@ struct ModelRenderFlags {
 // Referenced from the Texture Unit blocks in the LOD part. Contains a separate timeline for transparency values. 
 // If no animation is used, the given value is constant.
 struct ModelColorDef {
-	M2Track color; // (Vec3D) Three floats. One for each color.
-	M2Track opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
+	M2TrackDef color; // (Vec3D) Three floats. One for each color.
+	M2TrackDef opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
 };
 
 // block H - transparency defs
 struct ModelTransDef {
-	M2Track trans; // (UInt16)
+	M2TrackDef trans; // (UInt16)
 };
 
 struct ModelTextureDef {
@@ -372,13 +365,13 @@ struct ModelLightDef {
 	int16 type; // 0: Directional, 1: Point light
 	int16 bone; // If its attached to a bone, this is the bone. Else here is a nice -1.
 	Vec3D pos; // Position, Where is this light?
-	M2Track ambientColor; // (Vec3D) The ambient color. Three floats for RGB.
-	M2Track ambientIntensity; // (Float) A float for the intensity.
-	M2Track diffuseColor; // (Vec3D) The diffuse color. Three floats for RGB.
-	M2Track diffuseIntensity; // (Float) A float for the intensity again.
-	M2Track attenuationStart; // (Float) This defines, where the light starts to be.
-	M2Track attenuationEnd; // (Float) And where it stops.
-	M2Track useAttenuation; // (Uint32) Its an integer and usually 1.
+	M2TrackDef ambientColor; // (Vec3D) The ambient color. Three floats for RGB.
+	M2TrackDef ambientIntensity; // (Float) A float for the intensity.
+	M2TrackDef diffuseColor; // (Vec3D) The diffuse color. Three floats for RGB.
+	M2TrackDef diffuseIntensity; // (Float) A float for the intensity again.
+	M2TrackDef attenuationStart; // (Float) This defines, where the light starts to be.
+	M2TrackDef attenuationEnd; // (Float) And where it stops.
+	M2TrackDef useAttenuation; // (Uint32) Its an integer and usually 1.
 };
 
 struct ModelCameraDef {
@@ -386,32 +379,32 @@ struct ModelCameraDef {
 	float fov; // No radians, no degrees. Multiply by 35 to get degrees.
 	float farclip; // Where it stops to be drawn.
 	float nearclip; // Far and near. Both of them.
-	M2Track transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+	M2TrackDef transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
 	Vec3D pos; // float, Where the camera is located.
-	M2Track transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+	M2TrackDef transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
 	Vec3D target; // float, Where the camera points to.
-	M2Track rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
+	M2TrackDef rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
 };
 
 struct ModelCameraDefV10 {
 	int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
 	float farclip; // Where it stops to be drawn.
 	float nearclip; // Far and near. Both of them.
-	M2Track transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+	M2TrackDef transPos; // (Vec3D) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
 	Vec3D pos; // float, Where the camera is located.
-	M2Track transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
+	M2TrackDef transTarget; // (Vec3D) How the target moves. Should be 3*3 floats. (?)
 	Vec3D target; // float, Where the camera points to.
-	M2Track rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
-	M2Track AnimBlock4; // (Float) One Float. cataclysm
+	M2TrackDef rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
+	M2TrackDef AnimBlock4; // (Float) One Float. cataclysm
 };
 
 struct ModelParticleParams {
-	FakeM2Track colors; 	// (Vec3D)	This one points to 3 floats defining red, green and blue.
-	FakeM2Track opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
-	FakeM2Track sizes; 		// (Vec2D)	It carries two floats per key. (x and y scale)
+	M2TrackDef colors; 	// (Vec3D)	This one points to 3 floats defining red, green and blue.
+	M2TrackDef opacity;      // (UInt16)		Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
+	M2TrackDef sizes; 		// (Vec2D)	It carries two floats per key. (x and y scale)
 	int32 d[2];
-	FakeM2Track Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
-	FakeM2Track unk2; 		// (UInt16)
+	M2TrackDef Intensity; 	// (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
+	M2TrackDef unk2; 		// (UInt16)
 	float unk[3];
 	Vec3D scales;
 	float slowdown;
@@ -478,20 +471,20 @@ struct M2ParticleDef
   int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
   uint16 rows; // How many different frames are on that texture? People should learn what rows and cols are.
   uint16 cols; // (2, 2) means slice texture to 2*2 pieces
-  M2Track EmissionSpeed; // (Float) All of the following blocks should be floats.
-  M2Track SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
-  M2Track VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
-  M2Track HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
-  M2Track Gravity; // (Float)
-  M2Track Lifespan; // (Float)
+  M2TrackDef EmissionSpeed; // (Float) All of the following blocks should be floats.
+  M2TrackDef SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
+  M2TrackDef VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
+  M2TrackDef HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
+  M2TrackDef Gravity; // (Float)
+  M2TrackDef Lifespan; // (Float)
   int32 unknown;
-  M2Track EmissionRate; // (Float) Spread your particles, emitter.
+  M2TrackDef EmissionRate; // (Float) Spread your particles, emitter.
   int32 unknown2;
-  M2Track EmissionAreaLength; // (Float) Well, you can do that in this area.
-  M2Track EmissionAreaWidth; // (Float)
-  M2Track zSource; // When greater than 0, the initial velocity of the particle is (particle.position - C3Vector(0, 0, zSource)).Normalize()
+  M2TrackDef EmissionAreaLength; // (Float) Well, you can do that in this area.
+  M2TrackDef EmissionAreaWidth; // (Float)
+  M2TrackDef zSource; // When greater than 0, the initial velocity of the particle is (particle.position - C3Vector(0, 0, zSource)).Normalize()
   ModelParticleParams p;
-  M2Track EnabledIn; // (UInt16)
+  M2TrackDef EnabledIn; // (UInt16)
   vector_2fp_6_9 multiTextureParam0[2];
   vector_2fp_6_9 multiTextureParam1[2];
 };
@@ -504,16 +497,16 @@ struct ModelRibbonEmitterDef {
 	int32 ofsTextures;
 	int32 nUnknown;
 	int32 ofsUnknown;
-	M2Track color; // (Vec3D)
-	M2Track opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
-	M2Track above; // (Float) The height above.
-	M2Track below; // (Float) The height below. Do not set these to the same!
+	M2TrackDef color; // (Vec3D)
+	M2TrackDef opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
+	M2TrackDef above; // (Float) The height above.
+	M2TrackDef below; // (Float) The height below. Do not set these to the same!
 	float res; // This defines how smooth the ribbon is. A low value may produce a lot of edges.
 	float length; // The length aka Lifespan.
 	float Emissionangle; // use arcsin(val) to get the angle in degree
 	int16 s1, s2;
-	M2Track unk1; // (short)
-	M2Track unk2; // (boolean)
+	M2TrackDef unk1; // (short)
+	M2TrackDef unk2; // (boolean)
 	int32 unknown; // This looks much like just some Padding to the fill up the 0x10 Bytes, always 0
 };
 
@@ -527,9 +520,9 @@ struct ModelEventDef {
 	int32 dbid; // This data is passed when the event is fired.
 	int32 bone; // Somewhere it has to be attached.
 	Vec3D pos; // Relative to that bone of course.
-	int16 type; // This is some fake-M2Track.
+	int16 type; // This is some fake-M2TrackDef.
 	int16 seq; // Built up like a real one but without timestamps(?). What the fuck?
-	uint32 nTimes; // See the documentation on M2Tracks at this topic.
+	uint32 nTimes; // See the documentation on M2TrackDefs at this topic.
 	uint32 ofsTimes; // This points to a list of timestamps for each animation given.
 };
 /*
@@ -596,7 +589,7 @@ struct ModelAttachmentDef {
 	uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.
 	uint32 bone; // Somewhere it has to be attached.
 	Vec3D pos; // Relative to that bone of course.
-	M2Track unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
+	M2TrackDef unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
 };
 
 #pragma pack(pop)

@@ -175,6 +175,12 @@ public:
 	  Vec3D result;
 	  return result;
 	}
+
+  Vec3D interpolate(const Vec3D &v2, const float r) const
+  {
+    return (*this*(1.0f - r) + v2 * r);
+	}
+
 };
 
 
