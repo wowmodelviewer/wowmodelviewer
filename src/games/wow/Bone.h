@@ -12,6 +12,7 @@
 #include "matrix.h"
 #include "modelheaders.h" // M2CompBone
 #include "vec3d.h"
+#include <M2Track.h>
 
 class GameFile;
 class WoWModel;
@@ -20,12 +21,13 @@ class WoWModel;
 
 class Bone {
 public:
-	Animated<Vec3D> trans;
-	//Animated<Quaternion> rot;
-	Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
+  Animated<Vec3D> transOld;
+  Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rotOld;
+  M2Track<Vec3D> trans;
+	M2Track<Quaternion> rot;
 	Animated<Vec3D> scale;
 
-	Vec3D pivot, transPivot;
+  Vec3D pivot, transPivot;
 	int16 parent;
 
 	bool billboard;

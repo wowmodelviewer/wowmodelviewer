@@ -397,19 +397,19 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         t_curve_x->KeyModifyBegin();
         int key_index = t_curve_x->KeyAdd(time);
         t_curve_x->KeySetValue(key_index, v.x * SCALE_FACTOR);
-        t_curve_x->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        t_curve_x->KeySetInterpolation(key_index, bone.trans.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         t_curve_x->KeyModifyEnd();
 
         t_curve_y->KeyModifyBegin();
         key_index = t_curve_y->KeyAdd(time);
         t_curve_y->KeySetValue(key_index, v.y * SCALE_FACTOR);
-        t_curve_y->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        t_curve_y->KeySetInterpolation(key_index, bone.trans.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         t_curve_y->KeyModifyEnd();
 
         t_curve_z->KeyModifyBegin();
         key_index = t_curve_z->KeyAdd(time);
         t_curve_z->KeySetValue(key_index, v.z * SCALE_FACTOR);
-        t_curve_z->KeySetInterpolation(key_index, bone.trans.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        t_curve_z->KeySetInterpolation(key_index, bone.trans.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         t_curve_z->KeyModifyEnd();
       }
 
@@ -434,19 +434,19 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         r_curve_x->KeyModifyBegin();
         int key_index = r_curve_x->KeyAdd(time);
         r_curve_x->KeySetValue(key_index, x);
-        r_curve_x->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        r_curve_x->KeySetInterpolation(key_index, bone.rot.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         r_curve_x->KeyModifyEnd();
 
         r_curve_y->KeyModifyBegin();
         key_index = r_curve_y->KeyAdd(time);
         r_curve_y->KeySetValue(key_index, y);
-        r_curve_y->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        r_curve_y->KeySetInterpolation(key_index, bone.rot.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         r_curve_y->KeyModifyEnd();
 
         r_curve_z->KeyModifyBegin();
         key_index = r_curve_z->KeyAdd(time);
         r_curve_z->KeySetValue(key_index, z);
-        r_curve_z->KeySetInterpolation(key_index, bone.rot.type == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
+        r_curve_z->KeySetInterpolation(key_index, bone.rot.interpolation() == INTERPOLATION_LINEAR ? FbxAnimCurveDef::eInterpolationLinear : FbxAnimCurveDef::eInterpolationCubic);
         r_curve_z->KeyModifyEnd();
       }
 

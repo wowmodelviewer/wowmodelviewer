@@ -27,6 +27,8 @@ set(src animated.cpp
         ddslib.cpp
         globalvars.cpp
         HardDriveFile.cpp
+		Interpolated.cpp
+		M2Track.cpp
         ModelAttachment.cpp
         ModelCamera.cpp
         ModelColor.cpp

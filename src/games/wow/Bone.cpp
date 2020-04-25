@@ -9,7 +9,9 @@
 
 #include "GL/glew.h"
 
-#include "logger/logger.h"
+#include "logger/Logger.h"
+
+#define USE_ANIMATED 0
 
 void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate)
 {
@@ -17,26 +19,42 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 		return;
 
 	Matrix m;
-	Quaternion q;
+  Quaternion q;
 
-	bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
-	if (tr) {
+#if USE_ANIMATED > 0
+	if (rotOld.uses(anim) || scale.uses(anim) || transOld.uses(anim) || billboard) {
+#else
+  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard) {
+#endif
 		m.translation(pivot);
 
-		if (trans.uses(anim)) {
-			Vec3D tr = trans.getValue(anim, time);
-			m *= Matrix::newTranslation(tr);
+#if USE_ANIMATED > 0
+    if (transOld.uses(anim))
+    {
+      Vec3D t = trans.getValue(anim, time);
+#else
+    if (trans.uses(anim))
+    {
+      Vec3D t = trans.getValue(anim, time);
+      //t = transOld.getValue(anim, time);
+#endif
+      //LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
+      m *= Matrix::newTranslation(t);
+    }
+
+#if USE_ANIMATED > 0
+		if (rotOld.uses(anim) && rotate) {
+      q = rotOld.getValue(anim, time);
+#else
+    if (rot.uses(anim) && rotate) {
+      q = rot.getValue(anim, time);
+#endif
+     // LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
+		  m *= Matrix::newQuatRotate(q);
 		}
 
-		if (rot.uses(anim) && rotate) {
-			q = rot.getValue(anim, time);
-			m *= Matrix::newQuatRotate(q);
-		}
-
-		if (scale.uses(anim)) {
-			Vec3D sc = scale.getValue(anim, time);
-			m *= Matrix::newScale(sc);
-		}
+		if (scale.uses(anim))
+			m *= Matrix::newScale(scale.getValue(anim, time));
 
 		if (billboard) {
 			float modelview[16];
@@ -85,12 +103,19 @@ void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
 	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
 
 	boneDef = b;
+  LOG_INFO << "b.translation.seq" << b.translation.seq;
+  LOG_INFO << "b.rotation.seq" << b.rotation.seq;
+  LOG_INFO << "b.scaling.seq" << b.scaling.seq;
 
-	trans.init(b.translation, f, data);
-	rot.init(b.rotation, f, data);
-	scale.init(b.scaling, f, data);
-	trans.fix(fixCoordSystem);
-	rot.fix(fixCoordSystemQuat);
+  transOld.init(b.translation, f, data);
+  transOld.fix(fixCoordSystem);
+  rotOld.init(b.rotation, f, data);
+  rotOld.fix(fixCoordSystemQuat);
+
+  trans.init(f, b.translation, data);
+  rot.init(f, b.rotation, data);
+
+  scale.init(b.scaling, f, data);
 	scale.fix(fixCoordSystem2);
 }
 
