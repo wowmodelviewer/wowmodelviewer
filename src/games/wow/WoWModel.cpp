@@ -2973,20 +2973,6 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <parent>" << m.bones[i].boneDef.parent << "</parent>" << endl;
     out << "      <geoid>" << m.bones[i].boneDef.geoid << "</geoid>" << endl;
     out << "      <unknown>" << m.bones[i].boneDef.unknown << "</unknown>" << endl;
-#if 1 // too huge
-    // AB translation
-    out << "      <trans>" << endl;
-    out << m.bones[i].trans;
-    out << "      </trans>" << endl;
-    // AB rotation
-    out << "      <rot>" << endl;
-    out << m.bones[i].rot;
-    out << "      </rot>" << endl;
-    // AB scaling
-    out << "      <scale>" << endl;
-    out << m.bones[i].scale;
-    out << "      </scale>" << endl;
-#endif
     out << "      <pivot>" << m.bones[i].boneDef.pivot << "</pivot>" << endl;
     out << "    </Bone>" << endl;
   }
