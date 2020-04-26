@@ -56,11 +56,8 @@ class Interpolated
 {
 public:
   Interpolated(const std::vector<uint32> & timestamps, const std::vector<T> & values, InterpolationType type)
+    : timestamps_(timestamps), values_(values), interpolation_(type)
   {
-    timestamps_ = timestamps;
-    values_ = values;
-    interpolation_ = type;
-
     // if timestamps & values sizes are different, shrink to the smallest one
     if (timestamps_.size() < values_.size())
       values_.resize(timestamps_.size());
