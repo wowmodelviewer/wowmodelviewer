@@ -99,12 +99,7 @@ public:
 
     // otherwise, interpolate
     // find corresponding index in timestamps
-    
-    if (time <= timestamps_[0])
-    {
-      return values_[0];
-    }
-    else if(time >= timestamps_[timestamps_.size()-1])
+    if(time >= timestamps_[timestamps_.size()-1])
     {
       return values_[values_.size() - 1];
     }
