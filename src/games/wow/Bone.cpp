@@ -11,7 +11,7 @@
 
 #include "logger/Logger.h"
 
-#define USE_ANIMATED 0
+#define USE_ANIMATED 1
 
 void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate)
 {
@@ -22,9 +22,11 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
   Quaternion q;
 
 #if USE_ANIMATED > 0
-	if (rotOld.uses(anim) || scale.uses(anim) || transOld.uses(anim) || billboard) {
+	if (rotOld.uses(anim) || scaleOld.uses(anim) || transOld.uses(anim) || billboard) 
+  {
 #else
-  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard) {
+  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard) 
+  {
 #endif
 		m.translation(pivot);
 
@@ -43,20 +45,32 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
     }
 
 #if USE_ANIMATED > 0
-		if (rotOld.uses(anim) && rotate) {
+		if (rotOld.uses(anim) && rotate) 
+    {
       q = rotOld.getValue(anim, time);
 #else
-    if (rot.uses(anim) && rotate) {
+    if (rot.uses(anim) && rotate)
+    {
       q = rot.getValue(anim, time);
 #endif
      // LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
 		  m *= Matrix::newQuatRotate(q);
 		}
 
-		if (scale.uses(anim))
-			m *= Matrix::newScale(scale.getValue(anim, time));
+#if USE_ANIMATED > 0
+    if (scaleOld.uses(anim))
+    {
+      Vec3D s = scaleOld.getValue(anim, time);
+#else
+    if (scale.uses(anim))
+    {
+      Vec3D s = scale.getValue(anim, time);
+#endif
+      m *= Matrix::newScale(s);
+    }
 
-		if (billboard) {
+		if (billboard)
+    {
 			float modelview[16];
 			glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
@@ -76,18 +90,24 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 
 	} else m.unit();
 
-	if (parent > -1) {
+	if (parent > -1)
+  {
 		allbones[parent].calcMatrix(allbones, anim, time, rotate);
 		mat = allbones[parent].mat * m;
 	} else mat = m;
 
 	// transform matrix for normal vectors ... ??
-	if (rot.uses(anim) && rotate) {
+	if (rot.uses(anim) && rotate)
+  {
 		if (parent>=0)
 			mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
 		else
 			mrot = Matrix::newQuatRotate(q);
-	} else mrot.unit();
+	}
+  else
+  {
+    mrot.unit();
+  }
 
 	transPivot = mat * pivot;
 
@@ -103,19 +123,18 @@ void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
 	billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
 
 	boneDef = b;
-  LOG_INFO << "b.translation.seq" << b.translation.seq;
-  LOG_INFO << "b.rotation.seq" << b.rotation.seq;
-  LOG_INFO << "b.scaling.seq" << b.scaling.seq;
 
+#if USE_ANIMATED > 0
   transOld.init(b.translation, f, data);
   transOld.fix(fixCoordSystem);
   rotOld.init(b.rotation, f, data);
   rotOld.fix(fixCoordSystemQuat);
-
+  scaleOld.init(b.scaling, f, data);
+  scaleOld.fix(fixCoordSystem2);
+#else
   trans.init(f, b.translation, data);
   rot.init(f, b.rotation, data);
-
-  scale.init(b.scaling, f, data);
-	scale.fix(fixCoordSystem2);
+  trans.init(f, b.scaling, data);
+#endif
 }
 

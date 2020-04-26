@@ -19,13 +19,16 @@ class WoWModel;
 
 
 
-class Bone {
+class Bone
+{
 public:
   Animated<Vec3D> transOld;
   Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rotOld;
+  Animated<Vec3D> scaleOld;
+
   M2Track<Vec3D> trans;
 	M2Track<Quaternion> rot;
-	Animated<Vec3D> scale;
+  M2Track<Vec3D> scale;
 
   Vec3D pivot, transPivot;
 	int16 parent;
