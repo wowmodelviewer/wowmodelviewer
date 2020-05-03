@@ -51,9 +51,10 @@ struct Pack_quaternion {
 // Beginning of implementation
 //====================================================================
 template <>
-std::vector<Vec3D> M2Track<Vec3D>::readValues(const uint32 index, Vec3D * vals, const uint32 nbVals) const
+std::vector<Vec3D> M2Track<Vec3D>::readValues(Vec3D * vals, const uint32 nbVals) const
 {
-  std::vector<Vec3D> result(nbVals);
+  std::vector<Vec3D> result;
+  result.reserve(nbVals);
 
   for (uint32 i = 0; i < nbVals; i++)
     result.emplace_back(vals[i].x, vals[i].z, -vals[i].y);
@@ -61,9 +62,11 @@ std::vector<Vec3D> M2Track<Vec3D>::readValues(const uint32 index, Vec3D * vals, 
   return result;
 }
 
-std::vector<Quaternion> M2Track<Quaternion>::readValues(const uint32 index, Quaternion * vals, const uint32 nbVals) const
+template <>
+std::vector<Quaternion> M2Track<Quaternion>::readValues(Quaternion * vals, const uint32 nbVals) const
 {
-  std::vector<Quaternion> result(nbVals);
+  std::vector<Quaternion> result;
+  result.reserve(nbVals);
 
   const auto packVals = reinterpret_cast<Pack_quaternion *>(vals);
 

@@ -59,19 +59,32 @@ public:
 
     for (uint32 t = 0; t < def.nTimestamps; t++)
     {
-      uint32 *ptimes;
-      M2ArrayDef *pArrayDef = (M2ArrayDef*)(f.getBuffer() + def.ofsTimestamps + t * sizeof(M2ArrayDef));
-      ptimes = (uint32*)(f.getBuffer() + pArrayDef->ofsEntrys);
+      GameFile * animfile = &f;
+      GameFile * skelfile = &f;
 
-      std::vector<uint32> timestamps(pArrayDef->nEntrys);
+      auto it = modelData.animfiles.find(modelData.animIndexToAnimId.at(t));
+      if (it != modelData.animfiles.end())
+      {
+        animfile = it->second.first;
+        skelfile = it->second.second;
+        skelfile->setChunk("SKB1");
+      }
+      
+      uint32 *ptimes;
+      M2ArrayDef *pArrayDef = (M2ArrayDef*)(skelfile->getBuffer() + def.ofsTimestamps + t * sizeof(M2ArrayDef));
+      ptimes = (uint32*)(animfile->getBuffer() + pArrayDef->ofsEntrys);
+
+      std::vector<uint32> timestamps;
+      timestamps.reserve(pArrayDef->nEntrys);
 
       for (uint32 i = 0; i < pArrayDef->nEntrys; i++)
         timestamps.push_back(ptimes[i]);
 
-      pArrayDef = (M2ArrayDef*)(f.getBuffer() + def.ofsKeys + t * sizeof(M2ArrayDef));
+      pArrayDef = (M2ArrayDef*)(skelfile->getBuffer() + def.ofsKeys + t * sizeof(M2ArrayDef));
 
-      values_.push_back(Interpolated<T>(timestamps, readValues(t, (T*)(f.getBuffer() + pArrayDef->ofsEntrys), pArrayDef->nEntrys), (InterpolationType)interpolation_));
+      values_.emplace_back(timestamps, readValues((T*)(animfile->getBuffer() + pArrayDef->ofsEntrys), pArrayDef->nEntrys), (InterpolationType)interpolation_);
     }
+
   }
 
   bool uses(ssize_t anim) const
@@ -109,8 +122,26 @@ public:
     return interpolation_;
   }
 
+  void dump()
+  {
+    LOG_INFO << "==== M2Track ====";
+    LOG_INFO << "globalSequenceId" << globalSequenceId_;
+    LOG_INFO << "--- global sequences ---";
+    LOG_INFO << "nb global sequences" << globalSequences_.size();
+    for (uint i = 0; i < globalSequences_.size(); i++)
+      LOG_INFO << i << globalSequences_[i];
+    LOG_INFO << "------ values ------";
+    LOG_INFO << "nb values" << values_.size();
+    for (uint i = 0; i < values_.size(); i++)
+    {
+      LOG_INFO << "---- Interpolated" << i << "----";
+      values_[i].dump();
+    }
+    LOG_INFO << "=================";
+  }
+
 private:
-  std::vector<T> readValues(const uint32 index, T * vals, const uint32 nbVals) const;
+  std::vector<T> readValues(T * vals, const uint32 nbVals) const;
 
   int16 interpolation_;
   int16 globalSequenceId_;

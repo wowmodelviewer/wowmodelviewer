@@ -70,7 +70,6 @@ public:
   Interpolated(const Interpolated & in)
     : timestamps_(in.timestamps_), values_(in.values_), interpolation_(in.interpolation_)
   {
-    
   }
 
   Interpolated& operator=(const Interpolated& in)
@@ -81,6 +80,7 @@ public:
       values_ = in.values_;
       interpolation_ = in.interpolation_;
     }
+
     return *this;
   }
 
@@ -121,6 +121,20 @@ public:
   bool empty() const
   {
     return timestamps_.empty();
+  }
+
+  void dump() const
+  {
+    LOG_INFO << "Interpolation type (0=NONE, 1=LINEAR, 2=HERMITE, 3=BEZIER) ->" << interpolation_;
+    LOG_INFO << "--- timestamps ---";
+    LOG_INFO << "nb timestamps" << timestamps_.size();
+    for(size_t i = 0 ; i < timestamps_.size() ; i++)
+      LOG_INFO << i << timestamps_[i];
+    LOG_INFO << "--- values ---";
+    LOG_INFO << "nb values" << values_.size();
+    for (size_t i = 0; i < values_.size(); i++)
+      dump(i, values_[i]);
+    LOG_INFO << "--------------";
   }
 
 private:
@@ -175,6 +189,9 @@ private:
     }
     return result;
   }
+
+  void dump(size_t i, const T& val) const;
+
 };
 
 #endif

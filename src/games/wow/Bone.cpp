@@ -42,7 +42,6 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time)
 #else
       const auto t = trans.getValue(anim, time);
 #endif
-      //LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
       m *= Matrix::newTranslation(t);
     }
 
@@ -53,7 +52,6 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time)
 #else
       q = rot.getValue(anim, time);
 #endif
-      // LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
       m *= Matrix::newQuatRotate(q);
     }
 
@@ -121,17 +119,17 @@ void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
 
 	boneDef = b;
 
-//#if USE_ANIMATED > 0
+#if USE_ANIMATED > 0
   transOld.init(b.translation, f, data);
   transOld.fix(fixCoordSystem);
   rotOld.init(b.rotation, f, data);
   rotOld.fix(fixCoordSystemQuat);
   scaleOld.init(b.scaling, f, data);
   scaleOld.fix(fixCoordSystem2);
-//#else
+#else
   trans.init(f, b.translation, data);
   rot.init(f, b.rotation, data);
   scale.init(f, b.scaling, data);
-//#endif
+#endif
 }
 

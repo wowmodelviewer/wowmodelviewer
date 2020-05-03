@@ -32,12 +32,26 @@
 // Externals
 
 // Other libraries
+#include "logger/Logger.h"
 
 // Current library
+#include "quaternion.h"
+#include "vec3d.h"
+
 
 // Namespaces used
 //--------------------------------------------------------------------
 
 // Beginning of implementation
 //====================================================================
+template <>
+void Interpolated<Vec3D>::dump(size_t i, const Vec3D & val) const
+{
+  LOG_INFO << i << val.x << val.y << val.z;
+}
 
+template <>
+void Interpolated<Quaternion>::dump(size_t i, const Quaternion & val) const
+{
+  LOG_INFO << i << val.x << val.y << val.z << val.w;
+}
