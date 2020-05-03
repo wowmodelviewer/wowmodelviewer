@@ -77,7 +77,7 @@ class _WOWITEM_API_ WoWItem : public Component
 
     std::map<POSITION_SLOTS, WoWModel *> models() const { return itemModels_; }
 
-    void save(QXmlStreamWriter &);
+    void save(QXmlStreamWriter &) const ;
     void load(QString &);
 
   private:
@@ -85,15 +85,15 @@ class _WOWITEM_API_ WoWItem : public Component
 
     bool isCustomizableTabard() const;
 
-    WoWModel * charModel_;
+    WoWModel * charModel_ = nullptr;
 
-    int id_;
-    int displayId_;
-    int quality_;
-    int level_;
-    int type_;
-    int displayFlags_;
-    unsigned int nbLevels_;
+    int id_ = -1;
+    int displayId_ = -1;
+    int quality_ = 0;
+    int level_ = 0;
+    int type_ = 0;
+    int displayFlags_ = 0;
+    unsigned int nbLevels_ = 0;
 
     CharSlots slot_;
 
@@ -105,7 +105,7 @@ class _WOWITEM_API_ WoWItem : public Component
     std::map<int, int> levelDisplayMap_;
     std::map<int, int> modifierIdDisplayMap_;
     std::map<POSITION_SLOTS, WoWModel *> itemModels_;
-    WoWModel * mergedModel_;
+    WoWModel * mergedModel_ = nullptr;
 
     void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
     void mergeModel(CharSlots slot, int modelId, int textureId);
