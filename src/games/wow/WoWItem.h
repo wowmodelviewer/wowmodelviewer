@@ -57,25 +57,25 @@ class _WOWITEM_API_ WoWItem : public Component
     WoWItem(CharSlots slot);
 
     void setId(int id);
-    int id() { return m_id; }
+    int id() const { return id_; }
 
     void setDisplayId(int id);
     void setLevel(int level);
     void setModifierId(int id);
 
-    CharSlots slot() { return m_slot; }
+    CharSlots slot() const { return slot_; }
 
-    int quality() { return m_quality; }
+    int quality() const { return quality_; }
 
     void refresh();
 
-    void onParentSet(Component *);
+    void onParentSet(Component *) override;
 
     void load();
 
-    unsigned int nbLevels() { return m_nbLevels; }
+    unsigned int nbLevels() const { return nbLevels_; }
 
-    std::map<POSITION_SLOTS, WoWModel *> models() { return m_itemModels; }
+    std::map<POSITION_SLOTS, WoWModel *> models() const { return itemModels_; }
 
     void save(QXmlStreamWriter &);
     void load(QString &);
@@ -85,27 +85,27 @@ class _WOWITEM_API_ WoWItem : public Component
 
     bool isCustomizableTabard() const;
 
-    WoWModel * m_charModel;
+    WoWModel * charModel_;
 
-    int m_id;
-    int m_displayId;
-    int m_quality;
-    int m_level;
-    int m_type;
-    int display_flags;
-    unsigned int m_nbLevels;
+    int id_;
+    int displayId_;
+    int quality_;
+    int level_;
+    int type_;
+    int displayFlags_;
+    unsigned int nbLevels_;
 
-    CharSlots m_slot;
+    CharSlots slot_;
 
-    static std::map<CharSlots,int> SLOT_LAYERS;
-    static std::map<std::string, int> MODELID_OFFSETS;
+    static std::map<CharSlots,int> SLOT_LAYERS_;
+    static std::map<std::string, int> MODELID_OFFSETS_;
 
-    std::map<CharRegions, GameFile *> m_itemTextures;
-    std::map<CharGeosets, int> m_itemGeosets;
-    std::map<int, int> m_levelDisplayMap;
-    std::map<int, int> m_modifierIdDisplayMap;
-    std::map<POSITION_SLOTS, WoWModel *> m_itemModels;
-    WoWModel * m_mergedModel;
+    std::map<CharRegions, GameFile *> itemTextures_;
+    std::map<CharGeosets, int> itemGeosets_;
+    std::map<int, int> levelDisplayMap_;
+    std::map<int, int> modifierIdDisplayMap_;
+    std::map<POSITION_SLOTS, WoWModel *> itemModels_;
+    WoWModel * mergedModel_;
 
     void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
     void mergeModel(CharSlots slot, int modelId, int textureId);
