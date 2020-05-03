@@ -13,7 +13,7 @@
 #        define _WDB5FILE_API_ __declspec(dllimport)
 #    endif
 #else
-#    define _DBCFILE_API_
+#    define _WDB5FILE_API_
 #endif
 
 
