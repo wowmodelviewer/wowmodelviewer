@@ -112,10 +112,10 @@ class _WOWITEM_API_ WoWItem : public Component
 
     CharRegions getRegionForTexture(GameFile * file) const;
 
-    bool queryItemInfo(QString & query, sqlResult & result) const;
+    bool queryItemInfo(const QString & query, sqlResult & result) const;
 
-    int getCustomModelId(size_t index);
-    int getCustomTextureId(size_t index);
+    int getCustomModelId(size_t index) const;
+    int getCustomTextureId(size_t index) const;
 };
 
 

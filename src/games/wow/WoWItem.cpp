@@ -1086,7 +1086,7 @@ CharRegions WoWItem::getRegionForTexture(GameFile * file) const
   return result;
 }
 
-bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
+bool WoWItem::queryItemInfo(const QString & query, sqlResult & result) const
 {
   result = GAMEDATABASE.sqlQuery(query);
  
@@ -1100,7 +1100,7 @@ bool WoWItem::queryItemInfo(QString & query, sqlResult & result) const
   return true;
 }
 
-int WoWItem::getCustomModelId(size_t index)
+int WoWItem::getCustomModelId(size_t index) const 
 {
   sqlResult infos;
   if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
@@ -1182,7 +1182,7 @@ int WoWItem::getCustomModelId(size_t index)
   return 0;
 }
 
-int WoWItem::getCustomTextureId(size_t index)
+int WoWItem::getCustomTextureId(size_t index) const
 {
   sqlResult infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
