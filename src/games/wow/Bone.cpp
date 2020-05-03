@@ -11,9 +11,9 @@
 
 #include "logger/Logger.h"
 
-#define USE_ANIMATED 1
+#define USE_ANIMATED 0
 
-void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate)
+void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time)
 {
 	if (calc)
 		return;
@@ -22,49 +22,47 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
   Quaternion q;
 
 #if USE_ANIMATED > 0
-	if (rotOld.uses(anim) || scaleOld.uses(anim) || transOld.uses(anim) || billboard) 
-  {
+  const auto useRot = rotOld.uses(anim);
+  const auto useTrans = transOld.uses(anim);
+  const auto useScale = scaleOld.uses(anim);
 #else
-  if (rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard) 
-  {
+  const auto useRot = rot.uses(anim);
+  const auto useTrans = trans.uses(anim);
+  const auto useScale = scale.uses(anim);
 #endif
+  
+  if (useRot || useScale || useTrans || billboard)
+  {
 		m.translation(pivot);
 
+    if(useTrans)
+    {
 #if USE_ANIMATED > 0
-    if (transOld.uses(anim))
-    {
-      Vec3D t = trans.getValue(anim, time);
+      const auto t = transOld.getValue(anim, time);
 #else
-    if (trans.uses(anim))
-    {
-      Vec3D t = trans.getValue(anim, time);
-      //t = transOld.getValue(anim, time);
+      const auto t = trans.getValue(anim, time);
 #endif
       //LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
       m *= Matrix::newTranslation(t);
     }
 
-#if USE_ANIMATED > 0
-		if (rotOld.uses(anim) && rotate) 
+    if(useRot)
     {
+#if USE_ANIMATED > 0
       q = rotOld.getValue(anim, time);
 #else
-    if (rot.uses(anim) && rotate)
-    {
       q = rot.getValue(anim, time);
 #endif
-     // LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
-		  m *= Matrix::newQuatRotate(q);
-		}
+      // LOG_INFO << boneDef.pivot.x << boneDef.pivot.y << boneDef.pivot.z << "-" << anim << time << "->" << q.x << q.y << q.z << q.w;
+      m *= Matrix::newQuatRotate(q);
+    }
 
+    if(useScale)
+    {
 #if USE_ANIMATED > 0
-    if (scaleOld.uses(anim))
-    {
-      Vec3D s = scaleOld.getValue(anim, time);
+      const auto s = scaleOld.getValue(anim, time);
 #else
-    if (scale.uses(anim))
-    {
-      Vec3D s = scale.getValue(anim, time);
+      const auto s = scale.getValue(anim, time);
 #endif
       m *= Matrix::newScale(s);
     }
@@ -74,10 +72,9 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 			float modelview[16];
 			glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
-			Vec3D vRight = Vec3D(modelview[0], modelview[4], modelview[8]);
-			Vec3D vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
-			//Vec3D vUp = Vec3D(0,1,0); // Cylindrical billboarding
-			vRight = vRight * -1;
+			const auto vRight = Vec3D(modelview[0], modelview[4], modelview[8]) * -1;
+			const auto vUp = Vec3D(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+			//const auto vUp = Vec3D(0,1,0); // Cylindrical billboarding
 			m.m[0][2] = vRight.x;
 			m.m[1][2] = vRight.y;
 			m.m[2][2] = vRight.z;
@@ -92,18 +89,18 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
 
 	if (parent > -1)
   {
-		allbones[parent].calcMatrix(allbones, anim, time, rotate);
+		allbones[parent].calcMatrix(allbones, anim, time);
 		mat = allbones[parent].mat * m;
 	} else mat = m;
 
 	// transform matrix for normal vectors ... ??
-	if (rot.uses(anim) && rotate)
+	if (useRot)
   {
-		if (parent>=0)
-			mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
-		else
-			mrot = Matrix::newQuatRotate(q);
-	}
+    if (parent>=0)
+      mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
+    else
+      mrot = Matrix::newQuatRotate(q);
+  }
   else
   {
     mrot.unit();
@@ -124,17 +121,17 @@ void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
 
 	boneDef = b;
 
-#if USE_ANIMATED > 0
+//#if USE_ANIMATED > 0
   transOld.init(b.translation, f, data);
   transOld.fix(fixCoordSystem);
   rotOld.init(b.rotation, f, data);
   rotOld.fix(fixCoordSystemQuat);
   scaleOld.init(b.scaling, f, data);
   scaleOld.fix(fixCoordSystem2);
-#else
+//#else
   trans.init(f, b.translation, data);
   rot.init(f, b.rotation, data);
-  trans.init(f, b.scaling, data);
-#endif
+  scale.init(f, b.scaling, data);
+//#endif
 }
 

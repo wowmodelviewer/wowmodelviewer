@@ -40,7 +40,7 @@ public:
 	M2CompBone boneDef;
 
 	bool calc;
-	void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
+	void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time);
   void initV3(GameFile & f, M2CompBone &b, const modelAnimData & data);
 };
 
