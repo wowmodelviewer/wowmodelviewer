@@ -45,6 +45,17 @@
 // Beginning of implementation
 //====================================================================
 template <>
+void Interpolated<Vec3D>::transform(const Vec3D& v)
+{
+  for (auto & it : values_)
+  {
+    it.x = it.x *v.x;
+    it.y = it.y *v.y;
+    it.z = it.z *v.z;
+  }
+}
+
+template <>
 void Interpolated<Vec3D>::dump(size_t i, const Vec3D & val) const
 {
   LOG_INFO << i << val.x << val.y << val.z;
@@ -55,3 +66,4 @@ void Interpolated<Quaternion>::dump(size_t i, const Quaternion & val) const
 {
   LOG_INFO << i << val.x << val.y << val.z << val.w;
 }
+

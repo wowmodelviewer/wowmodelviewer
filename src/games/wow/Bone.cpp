@@ -30,7 +30,7 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time)
   const auto useTrans = trans.uses(anim);
   const auto useScale = scale.uses(anim);
 #endif
-  
+
   if (useRot || useScale || useTrans || billboard)
   {
 		m.translation(pivot);
@@ -130,6 +130,7 @@ void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
   trans.init(f, b.translation, data);
   rot.init(f, b.rotation, data);
   scale.init(f, b.scaling, data);
+  scale.transform(Vec3D(1.0, 1.0, -1.0));
 #endif
 }
 

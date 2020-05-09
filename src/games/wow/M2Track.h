@@ -122,6 +122,12 @@ public:
     return interpolation_;
   }
 
+  void transform(const T & v)
+  {
+    for (auto & it : values_)
+      it.transform(v);
+  }
+
   void dump()
   {
     LOG_INFO << "==== M2Track ====";

@@ -80,9 +80,11 @@ public:
       values_ = in.values_;
       interpolation_ = in.interpolation_;
     }
-
     return *this;
   }
+
+  void transform(const T & v);
+  
 
   T getValue(uint32 time) const
   {
