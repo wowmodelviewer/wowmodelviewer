@@ -1093,7 +1093,8 @@ void WoWModel::initAnimated(GameFile * f)
   }
 
   // particle systems
-  if (header.nParticleEmitters)
+  //if (header.nParticleEmitters)
+  if(false)
   {
     M2ParticleDef *pdefs = (M2ParticleDef *)(f->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
