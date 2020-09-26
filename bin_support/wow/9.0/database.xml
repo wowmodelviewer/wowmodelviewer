@@ -58,22 +58,29 @@
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="ClientPrefix" pos="0" />
-    <field type="uint" name="Flags" pos="15" />
-    <field type="uint" name="MaleDisplayID" pos="16" />
-    <field type="uint" name="FemaleDisplayID" pos="17" />
-    <field type="uint" name="HighResMaleDisplayId" pos="18" />
-    <field type="uint" name="HighResFemaleDisplayId" pos="19" />
-    <field type="int"  name="BaseRaceID" pos="33" />
-    <field type="byte" name="CharComponentTexLayoutID" pos="44" />
-    <field type="byte" name="CharComponentTexLayoutHiResID" pos="45" />
-    <field type="int"  name="MaleModelFallbackRaceID" pos="48" />
-    <field type="int"  name="MaleModelFallbackSex" pos="49" />
-    <field type="int"  name="FemaleModelFallbackRaceID" pos="50" />
-    <field type="int"  name="FemaleModelFallbackSex" pos="51" />
-    <field type="int"  name="MaleTextureFallbackRaceID" pos="52" />
-    <field type="int"  name="MaleTextureFallbackSex" pos="53" />
-    <field type="int"  name="FemaleTextureFallbackRaceID" pos="54" />
-    <field type="int"  name="FemaleTextureFallbackSex" pos="55" />
+    <field type="uint" name="Flags" pos="16" />
+    <field type="int"  name="BaseRaceID" pos="29" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="41" />
+    <field type="int"  name="MaleModelFallbackSex" pos="42" />
+    <field type="int"  name="FemaleModelFallbackRaceID" pos="43" />
+    <field type="int"  name="FemaleModelFallbackSex" pos="44" />
+    <field type="int"  name="MaleTextureFallbackRaceID" pos="45" />
+    <field type="int"  name="MaleTextureFallbackSex" pos="46" />
+    <field type="int"  name="FemaleTextureFallbackRaceID" pos="47" />
+    <field type="int"  name="FemaleTextureFallbackSex" pos="48" />
+  </table>
+  <table name="ChrRaceXChrModel">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int"  name="ChrRacesID" relationshipData="yes" />
+    <field type="int"  name="ChrModelID" pos="1" />
+  </table>
+  <table name="ChrModel">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="int"  name="Sex" pos="3" />
+    <field type="int"  name="DisplayID" pos="4" />
+    <field type="int"  name="CharComponentTextureLayoutID" pos="5" />
+    <field type="int"  name="Flags" pos="6" />
+    <field type="int"  name="SkeletonFileDataID" pos="7" />
   </table>
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
@@ -126,6 +133,7 @@
     <field type="uint" name="Texture" arraySize="3" pos="24" />
     <field type="unit16" name="ParticleColorID" pos="9" />
   </table>
+  <!--
   <table name="CreatureDisplayInfoExtra">
     <field type="uint" name="ID" primary="yes" />
     <field type="byte" name="Skin" pos="3" />
@@ -134,6 +142,7 @@
     <field type="byte" name="HairColor" pos="6" />
     <field type="byte" name="FacialHair" pos="7" />
   </table>
+  -->
 
   <table name="CreatureDisplayInfoGeosetData">
     <field type="uint" name="ID" primary="yes" />
