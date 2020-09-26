@@ -122,9 +122,6 @@ void RaceInfos::init()
         LOG_INFO << "infos.textureLayoutID =" << infos.textureLayoutID;
         LOG_INFO << "infos.raceID =" << infos.raceID;
         LOG_INFO << "infos.sexID =" << infos.sexID;
-        LOG_INFO << "infos.customization[0] =" << infos.customization[0].c_str();
-        LOG_INFO << "infos.customization[1] =" << infos.customization[1].c_str();
-        LOG_INFO << "infos.customization[2] =" << infos.customization[2].c_str();
         LOG_INFO << "infos.isHD =" << infos.isHD;
         LOG_INFO << "infos.modelFallbackRaceID =" << infos.modelFallbackRaceID;
         LOG_INFO << "infos.modelFallbackSexID =" << infos.modelFallbackSexID;

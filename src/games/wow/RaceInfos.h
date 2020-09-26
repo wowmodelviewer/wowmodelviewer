@@ -25,7 +25,6 @@ class _RACEINFOS_API_ RaceInfos
     bool isHD;
     bool barefeet;
     std::string prefix;
-    std::string customization[3];
 	  int modelFallbackRaceID;
 	  int modelFallbackSexID;
 	  int textureFallbackRaceID;
