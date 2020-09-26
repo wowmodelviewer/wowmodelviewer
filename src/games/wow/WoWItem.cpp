@@ -283,7 +283,7 @@ void WoWItem::load()
                               "WHERE (ComponentTextureFileData.GenderIndex = %1 OR ComponentTextureFileData.GenderIndex = %2) "
                               "AND ItemDisplayInfoID = %3 AND %4 "
                               "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC")
-                              .arg(GENDER_ANY).arg(charInfos.sexid).arg(m_displayId).arg(classFilter),
+                              .arg(GENDER_ANY).arg(charInfos.sexID).arg(m_displayId).arg(classFilter),
                       iteminfos))
     {
       for (uint i = 0; i < iteminfos.values.size(); i++)
@@ -1140,19 +1140,19 @@ int WoWItem::getCustomModelId(size_t index)
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                           "AND ID IN %4 AND %5 "
                           "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
+                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   // Failed to find model for that specific race and sex, so check fallback race:
   int fallbackRaceID = 0;
   int fallbackSex = -1;
-  if (charInfos.sexid == GENDER_MALE)
+  if (charInfos.sexID == GENDER_MALE)
   {
     fallbackRaceID = charInfos.MaleModelFallbackRaceID;
     fallbackSex = charInfos.MaleModelFallbackSex;
   }
-  else if (charInfos.sexid == GENDER_FEMALE)
+  else if (charInfos.sexID == GENDER_FEMALE)
   {
     fallbackRaceID = charInfos.FemaleModelFallbackRaceID;
     fallbackSex = charInfos.FemaleModelFallbackSex;
@@ -1216,19 +1216,19 @@ int WoWItem::getCustomTextureId(size_t index)
                           "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                           "AND ID IN %4 AND %5 "
                           "ORDER BY GenderIndex, ClassID DESC")
-                          .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   // Failed to find model for that specific race and sex, so check fallback race:
   int fallbackRaceID = 0;
   int fallbackSex = -1;
-  if (charInfos.sexid == GENDER_MALE)
+  if (charInfos.sexID == GENDER_MALE)
   {
     fallbackRaceID = charInfos.MaleTextureFallbackRaceID;
     fallbackSex = charInfos.MaleTextureFallbackSex;
   }
-  else if (charInfos.sexid == GENDER_FEMALE)
+  else if (charInfos.sexID == GENDER_FEMALE)
   {
     fallbackRaceID = charInfos.FemaleTextureFallbackRaceID;
     fallbackSex = charInfos.FemaleTextureFallbackSex;
@@ -1249,7 +1249,7 @@ int WoWItem::getCustomTextureId(size_t index)
                   "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
                   "AND ID IN %4 AND %5 "
                   "ORDER BY GenderIndex, ClassID DESC")
-                  .arg(RACE_ANY).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+                  .arg(RACE_ANY).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
   if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 

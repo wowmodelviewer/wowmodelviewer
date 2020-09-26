@@ -254,8 +254,8 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
   /*
   LOG_INFO << __FUNCTION__;
   LOG_INFO << "----------------------------------------------";
-  LOG_INFO << "infos.raceid = " << infos.raceid;
-  LOG_INFO << "infos.sexid = " << infos.sexid;
+  LOG_INFO << "infos.raceID = " << infos.raceID;
+  LOG_INFO << "infos.sexID = " << infos.sexID;
   LOG_INFO << "infos.textureLayoutID = " << infos.textureLayoutID;
   LOG_INFO << "infos.isHD = " << infos.isHD;
   LOG_INFO << "cd.skinColor() = " << skinColor();
@@ -276,62 +276,62 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
     case SkinBaseType:
     case UnderwearBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND ColorIndex=%3)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(m_currentCustomization[SKIN_COLOR]);
       break;
     case FaceBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(m_currentCustomization[SKIN_COLOR])
         .arg(m_currentCustomization[FACE]);
       break;
     case HairBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
         .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]);
       break;
     case FacialHairBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
         .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]);
       break;
     case Custom1BaseType:
-      if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF) // for Night Elves and Blood Elves - Demon Hunter Tattoos are handled strangely:
+      if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF) // for Night Elves and Blood Elves - Demon Hunter Tattoos are handled strangely:
       {
         uint tattvar = 0;
         if (m_currentCustomization[CUSTOM1_STYLE] > 0)  // style = 0 means no tattoos, so variation is always 0
           tattvar = (m_customizationParamsMap[CUSTOM1_STYLE].possibleValues.size() - 1) * m_currentCustomization[CUSTOM1_COLOR]
                     + m_currentCustomization[CUSTOM1_STYLE];
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
+          .arg(infos.raceID)
+          .arg(infos.sexID)
           .arg(tattvar);
       }
       else
       {
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex = %4)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
+          .arg(infos.raceID)
+          .arg(infos.sexID)
           .arg(m_currentCustomization[CUSTOM1_STYLE])
           .arg(m_currentCustomization[CUSTOM1_COLOR]);
       }
       break;
     case Custom2BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
+          .arg(infos.raceID)
+          .arg(infos.sexID)
           .arg(m_currentCustomization[CUSTOM2_STYLE]);
       break;
     case Custom3BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
+          .arg(infos.raceID)
+          .arg(infos.sexID)
           .arg(m_currentCustomization[CUSTOM3_STYLE]);
       break;
     default:
@@ -371,13 +371,13 @@ void CharDetails::fillCustomizationMap()
   
   // SECTION 0 (= Sections 0 & 5) : skin
   CustomizationParam skin;
-  skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
+  skin.name = getCustomizationName(SkinBaseType, infos.raceID, infos.sexID);
   QString query = QString("SELECT ColorIndex, Flags FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                           "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                           "ORDER BY ColorIndex")
-                         .arg(infos.raceid)
-                         .arg(infos.sexid)
+                         .arg(infos.raceID)
+                         .arg(infos.sexID)
                          .arg(SkinBaseType)
                          .arg(infos.isHD ? 1 : 0);
 
@@ -402,7 +402,7 @@ void CharDetails::fillCustomizationMap()
   // BASE SECTION 1 (= Sections 1 & 6) : face customization
 
   // face possible customization depends on current skin color. We fill m_multiCustomizationMap first
-  QString faceName = getCustomizationName(FaceBaseType, infos.raceid, infos.sexid);
+  QString faceName = getCustomizationName(FaceBaseType, infos.raceID, infos.sexID);
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT VariationIndex, Flags FROM CharSections "
@@ -410,8 +410,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND "
                     "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
                     "GROUP BY VariationIndex ORDER BY VariationIndex")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
+                    .arg(infos.raceID)
+                    .arg(infos.sexID)
                     .arg(*it)
                     .arg(FaceBaseType)
                     .arg(infos.isHD ? 1 : 0);
@@ -448,15 +448,15 @@ void CharDetails::fillCustomizationMap()
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
+                  .arg(infos.raceID)
+                  .arg(infos.sexID)
                   .arg(FacialHairBaseType)
                   .arg(infos.isHD ? 1 : 0);
 
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
   CustomizationParam additionalCustomization;
-  additionalCustomization.name = getCustomizationName(FacialHairBaseType, infos.raceid, infos.sexid);
+  additionalCustomization.name = getCustomizationName(FacialHairBaseType, infos.raceID, infos.sexID);
   
   if (additional.valid && !additional.values.empty())
   {
@@ -471,8 +471,8 @@ void CharDetails::fillCustomizationMap()
     query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles "
                     "WHERE RaceID = %1 AND SexID = %2 "
                     "ORDER BY VariationID")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid);
+                    .arg(infos.raceID)
+                    .arg(infos.sexID);
 
     additional = GAMEDATABASE.sqlQuery(query);
   
@@ -500,15 +500,15 @@ void CharDetails::fillCustomizationMap()
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
+                  .arg(infos.raceID)
+                  .arg(infos.sexID)
                   .arg(HairBaseType)
                   .arg(infos.isHD ? 1 : 0);
 
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
-  QString hairName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid);
-  QString hairColName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid, true);
+  QString hairName = getCustomizationName(HairBaseType, infos.raceID, infos.sexID);
+  QString hairColName = getCustomizationName(HairBaseType, infos.raceID, infos.sexID, true);
   
   CustomizationParam hairCustomizationStyle;
   hairCustomizationStyle.name = hairName;
@@ -534,8 +534,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
                     "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
                     "GROUP BY ColorIndex ORDER BY ColorIndex")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
+                    .arg(infos.raceID)
+                    .arg(infos.sexID)
                     .arg(*it)
                     .arg(HairBaseType)
                     .arg(infos.isHD ? 1 : 0);
@@ -569,14 +569,14 @@ void CharDetails::fillCustomizationMap()
   // BASE SECTION 5 (= Sections 10 & 11) : Custom1 Section (tattoos and some other things, depending on race)
   
   CustomizationParam custom1;
-  custom1.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid);
-  QString custom1ColName = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
+  custom1.name = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID);
+  QString custom1ColName = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID, true);
     
   // Night Elf & Blood Elf (Demon Hunters) only:
   // For some reason tattoo colour indices aren't used in CharDetails.db2.
   // Instead the variation index goes from 0-36, even though there are actually 6
   // colours of 6 tattoo types (plus 0 = no tattoo). So we have to hardcode this instead:
-  if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF)
+  if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
   {
     custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
     custom1.flags = { 33, 33, 33, 33, 33, 33 };
@@ -605,8 +605,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID = %1 AND SexID = %2 AND "
                     "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                     "GROUP BY VariationIndex ORDER BY VariationIndex")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
+      .arg(infos.raceID)
+      .arg(infos.sexID)
       .arg(Custom1BaseType)
       .arg(infos.isHD ? 1 : 0);
     vals = GAMEDATABASE.sqlQuery(query);
@@ -633,8 +633,8 @@ void CharDetails::fillCustomizationMap()
                       "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
                       "CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=%5 "
                       "GROUP BY ColorIndex ORDER BY ColorIndex")
-                      .arg(infos.raceid)
-                      .arg(infos.sexid)
+                      .arg(infos.raceID)
+                      .arg(infos.sexID)
                       .arg(*it)
                       .arg(Custom1BaseType)
                       .arg(infos.isHD ? 1 : 0);
@@ -643,7 +643,7 @@ void CharDetails::fillCustomizationMap()
   
       CustomizationParam custom1Color;
 
-      custom1Color.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
+      custom1Color.name = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID, true);
   
       if (colors.valid && (colors.values.size() > 1))
       {
@@ -661,16 +661,16 @@ void CharDetails::fillCustomizationMap()
   // BASE SECTION 6 (= Sections 12 & 13) : Custom2 Section (tusk, tattoos, snouts, earrings and some other things, depending on race)
   
   CustomizationParam custom2;
-  custom2.name = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid);
-  QString custom2ColName = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid, true);
+  custom2.name = getCustomizationName(Custom2BaseType, infos.raceID, infos.sexID);
+  QString custom2ColName = getCustomizationName(Custom2BaseType, infos.raceID, infos.sexID, true);
 
   query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(Custom2BaseType)
     .arg(infos.isHD ? 1 : 0);
   vals = GAMEDATABASE.sqlQuery(query);
@@ -688,16 +688,16 @@ void CharDetails::fillCustomizationMap()
   // BASE SECTION 7 (= Sections 14 & 15) : Custom3 Section (various things, depending on race)
   
   CustomizationParam custom3;
-  custom3.name = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid);
-  QString custom3ColName = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid, true);
+  custom3.name = getCustomizationName(Custom3BaseType, infos.raceID, infos.sexID);
+  QString custom3ColName = getCustomizationName(Custom3BaseType, infos.raceID, infos.sexID, true);
 
   query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(Custom3BaseType)
     .arg(infos.isHD ? 1 : 0);
   vals = GAMEDATABASE.sqlQuery(query);
@@ -834,13 +834,13 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
   if (!RaceInfos::getCurrent(m_model, infos))
     return result;
 
-  LOG_INFO << __FUNCTION__ << infos.raceid << infos.sexid;
+  LOG_INFO << __FUNCTION__ << infos.raceID << infos.sexID;
 
   result.push_back(SKIN_COLOR);
   result.push_back(FACE);
   result.push_back(FACIAL_CUSTOMIZATION_STYLE);
   // pandaren male hair color can't be defined
-  if (!((infos.raceid == 24) && (infos.sexid == 0)))
+  if (!((infos.raceID == 24) && (infos.sexID == 0)))
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   
   if (m_customizationParamsMap.find(ADDITIONAL_FACIAL_CUSTOMIZATION) != m_customizationParamsMap.end() &&
@@ -848,7 +848,7 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
     result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
   // For Night Elves and Blood Elves, Custom 1-3 options are only used by demon hunters:
-  if (m_isDemonHunter || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (m_isDemonHunter || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     if (m_customizationParamsMap.find(CUSTOM1_STYLE) != m_customizationParamsMap.end() &&
         m_customizationParamsMap.at(CUSTOM1_STYLE).possibleValues.size() > 1)
@@ -866,7 +866,7 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
         m_customizationParamsMap.at(CUSTOM3_STYLE).possibleValues.size() > 1)
     {
       // workaround to hide male orc "posture" setting, since it doesn't work:
-      if ((infos.sexid != GENDER_MALE) || (infos.raceid != RACE_ORC && infos.raceid != RACE_MAGHAR_ORC))  
+      if ((infos.sexID != GENDER_MALE) || (infos.raceID != RACE_ORC && infos.raceID != RACE_MAGHAR_ORC))  
       result.push_back(CUSTOM3_STYLE);
     }
   }
@@ -926,9 +926,9 @@ std::vector<int> CharDetails::getRegionForSection(BaseSectionType section)
                   "AND (Sex = %4 OR Sex = %5) "
                   "ORDER BY RaceId DESC, Sex, UiCustomizationType")
                   .arg(section)
-                  .arg(infos.raceid)
+                  .arg(infos.raceID)
                   .arg(RACE_ANY)
-                  .arg(infos.sexid)
+                  .arg(infos.sexID)
                   .arg(GENDER_ANY);
   
   sqlResult vals = GAMEDATABASE.sqlQuery(query);

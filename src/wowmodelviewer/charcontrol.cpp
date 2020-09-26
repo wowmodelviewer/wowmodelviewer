@@ -582,11 +582,11 @@ void CharControl::selectStart()
   numbers.clear();
   choices.Clear();
 
-  LOG_INFO << "race =" << infos.raceid << "sex = " << infos.sexid;
+  LOG_INFO << "race =" << infos.raceID << "sex = " << infos.sexID;
 
   QString query = QString("SELECT ChrClasses.name, CSO.ID "
                           "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
-                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid);
+                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
 
   sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
 

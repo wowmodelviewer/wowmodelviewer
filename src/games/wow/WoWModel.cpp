@@ -2354,8 +2354,8 @@ void WoWModel::refresh()
 
   // select hairstyle geoset(s)
   QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
   sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
@@ -2400,8 +2400,8 @@ void WoWModel::refresh()
 
   // select facial geoset(s)
   query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION));
 
   sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
@@ -2427,7 +2427,7 @@ void WoWModel::refresh()
   // CUSTOM1 - Tattoos for Demon Hunters, Markings for Vulpera, Piercings for Male Dark Iron Dwarves.
   // Because custom sections could deal with textures or geosets, we check both.
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     refreshCustomSection(CharDetails::Custom1BaseType, CharDetails::CUSTOM1_STYLE);
     /*
@@ -2435,8 +2435,8 @@ void WoWModel::refresh()
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(cd.get(CharDetails::CUSTOM1_STYLE))
         .arg(CharDetails::Custom1BaseType);
     sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
@@ -2492,7 +2492,7 @@ void WoWModel::refresh()
   // Because custom sections could deal with textures or geosets, we check both.
 
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     refreshCustomSection(CharDetails::Custom2BaseType, CharDetails::CUSTOM2_STYLE);
     /*
@@ -2500,8 +2500,8 @@ void WoWModel::refresh()
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(cd.get(CharDetails::CUSTOM2_STYLE))
         .arg(CharDetails::Custom2BaseType);
     sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
@@ -2557,7 +2557,7 @@ void WoWModel::refresh()
   //           Leg Upgrades for Mechagnomes.
   // Because custom sections could deal with textures or geosets, we check both.
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     
     refreshCustomSection(CharDetails::Custom3BaseType, CharDetails::CUSTOM3_STYLE);
@@ -2566,8 +2566,8 @@ void WoWModel::refresh()
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
+        .arg(infos.raceID)
+        .arg(infos.sexID)
         .arg(cd.get(CharDetails::CUSTOM3_STYLE))
         .arg(CharDetails::Custom3BaseType);
     sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
@@ -2631,13 +2631,13 @@ void WoWModel::refresh()
     if (foundTextures.size() > 0)
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2);
     // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
-    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
+    if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 1;
   } 
   else  // hide underwear
   {
     // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
-    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
+    if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 0;
   }
   
@@ -2684,8 +2684,8 @@ void WoWModel::refresh()
     QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
                             "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
                             "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-                            .arg(infos.raceid)
-                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+                            .arg(infos.raceID)
+                            .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
                             .arg(headItem->id());
 
 
@@ -2732,8 +2732,8 @@ void WoWModel::refreshCustomSection(CharDetails::BaseSectionType section, CharDe
   QString query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                           "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
       .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
+      .arg(infos.raceID)
+      .arg(infos.sexID)
       .arg(cd.get(customType))
       .arg(section);
   sqlResult customStyle = GAMEDATABASE.sqlQuery(query);

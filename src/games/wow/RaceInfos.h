@@ -19,8 +19,8 @@ class WoWModel;
 class _RACEINFOS_API_ RaceInfos
 {
   public:
-    int raceid;
-    int sexid; // 0 male / 1 female
+    int raceID;
+    int sexID; // 0 male / 1 female
     int textureLayoutID;
     bool isHD;
     bool barefeet;

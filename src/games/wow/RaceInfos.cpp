@@ -78,8 +78,8 @@ void RaceInfos::init()
         RaceInfos infos;
         infos.prefix = !displayPrefix.empty() ? displayPrefix : value[r + 1].toStdString();
         infos.textureLayoutID = value[r+2].toInt();
-        infos.raceid = value[12].toInt();
-        infos.sexid = (r == 0 || r == 6)?0:1;
+        infos.raceID = value[12].toInt();
+        infos.sexID = (r == 0 || r == 6)?0:1;
         infos.barefeet = (value[14].toInt() & 0x2);
         // Get fallback display race ID (this is mostly for allied races and others that rely on
         // item display info from other race models):
@@ -104,7 +104,7 @@ void RaceInfos::init()
         
          // cheap workaround to include the upright male orc model, because I
          // can't find anything in the database that links it to the orc races:
-        if (infos.raceid == RACE_ORC && infos.sexid == GENDER_MALE && infos.isHD)
+        if (infos.raceID == RACE_ORC && infos.sexID == GENDER_MALE && infos.isHD)
         {
           RACES[1968587] = infos;
         }
@@ -114,8 +114,8 @@ void RaceInfos::init()
         LOG_INFO << "modelfileid ->" << modelfileid;
         LOG_INFO << "infos.prefix =" << infos.prefix.c_str();
         LOG_INFO << "infos.textureLayoutID =" << infos.textureLayoutID;
-        LOG_INFO << "infos.raceid =" << infos.raceid;
-        LOG_INFO << "infos.sexid =" << infos.sexid;
+        LOG_INFO << "infos.raceID =" << infos.raceID;
+        LOG_INFO << "infos.sexID =" << infos.sexID;
         LOG_INFO << "infos.customization[0] =" << infos.customization[0].c_str();
         LOG_INFO << "infos.customization[1] =" << infos.customization[1].c_str();
         LOG_INFO << "infos.customization[2] =" << infos.customization[2].c_str();
@@ -135,12 +135,12 @@ int RaceInfos::getHDModelForFileID(int fileid)
   const auto it = RACES.find(fileid);
   if (it != RACES.end() && !it->second.isHD)
   {
-    const auto raceid = it->second.raceid;
-    const auto sexid = it->second.sexid;
+    const auto raceID = it->second.raceID;
+    const auto sexID = it->second.sexID;
 
     for (auto &r : RACES)
     {
-      if (r.second.raceid == raceid && r.second.sexid == sexid && r.second.isHD)
+      if (r.second.raceID == raceID && r.second.sexID == sexID && r.second.isHD)
       {
         result = r.first;
         break;
