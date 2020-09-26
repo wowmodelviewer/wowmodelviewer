@@ -79,18 +79,24 @@ void RaceInfos::init()
         infos.prefix = !displayPrefix.empty() ? displayPrefix : value[r + 1].toStdString();
         infos.textureLayoutID = value[r+2].toInt();
         infos.raceID = value[12].toInt();
-        infos.sexID = (r == 0 || r == 6)?0:1;
+        infos.sexID = (r == 0 || r == 6)?GENDER_MALE:GENDER_FEMALE;
         infos.barefeet = (value[14].toInt() & 0x2);
         // Get fallback display race ID (this is mostly for allied races and others that rely on
         // item display info from other race models):
-        infos.MaleModelFallbackRaceID = value[15].toInt();
-        infos.MaleModelFallbackSex = value[16].toInt();
-        infos.FemaleModelFallbackRaceID = value[17].toInt();
-        infos.FemaleModelFallbackSex = value[18].toInt();
-        infos.MaleTextureFallbackRaceID = value[19].toInt();
-        infos.MaleTextureFallbackSex = value[20].toInt();
-        infos.FemaleTextureFallbackRaceID = value[21].toInt();
-        infos.FemaleTextureFallbackSex = value[22].toInt();
+      	if(infos.sexID == GENDER_MALE)
+      	{
+      		infos.modelFallbackRaceID = value[15].toInt();
+          infos.modelFallbackSexID = value[16].toInt();
+          infos.textureFallbackRaceID = value[19].toInt();
+          infos.textureFallbackSexID = value[20].toInt();
+      	}
+        else
+        {
+          infos.modelFallbackRaceID = value[17].toInt();
+          infos.modelFallbackSexID = value[18].toInt();
+          infos.textureFallbackRaceID = value[21].toInt();
+          infos.textureFallbackSexID = value[22].toInt();
+        }
 
         int modelfileid = value[r].toInt();
         
@@ -120,6 +126,10 @@ void RaceInfos::init()
         LOG_INFO << "infos.customization[1] =" << infos.customization[1].c_str();
         LOG_INFO << "infos.customization[2] =" << infos.customization[2].c_str();
         LOG_INFO << "infos.isHD =" << infos.isHD;
+        LOG_INFO << "infos.modelFallbackRaceID =" << infos.modelFallbackRaceID;
+        LOG_INFO << "infos.modelFallbackSexID =" << infos.modelFallbackSexID;
+        LOG_INFO << "infos.textureFallbackRaceID =" << infos.textureFallbackRaceID;
+        LOG_INFO << "infos.textureFallbackSexID =" << infos.textureFallbackSexID;
         LOG_INFO << "---------------------------";
 #endif
       }

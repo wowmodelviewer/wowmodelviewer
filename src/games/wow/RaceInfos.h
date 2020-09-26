@@ -26,8 +26,11 @@ class _RACEINFOS_API_ RaceInfos
     bool barefeet;
     std::string prefix;
     std::string customization[3];
-    int MaleModelFallbackRaceID, MaleModelFallbackSex, FemaleModelFallbackRaceID, FemaleModelFallbackSex, MaleTextureFallbackRaceID, MaleTextureFallbackSex, FemaleTextureFallbackRaceID, FemaleTextureFallbackSex;
-
+	  int modelFallbackRaceID;
+	  int modelFallbackSexID;
+	  int textureFallbackRaceID;
+	  int textureFallbackSexID;
+   
     static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();
     static int getHDModelForFileID(int);
