@@ -151,7 +151,7 @@
     <field type="uint16" name="ModelID" pos="1" />
     <field type="uint" name="ExtendedDisplayInfoID" pos="7" />
     <field type="uint" name="Texture" arraySize="3" pos="24" />
-    <field type="unit16" name="ParticleColorID" pos="9" />
+    <field type="uint16" name="ParticleColorID" pos="9" />
   </table>
   <!--
   <table name="CreatureDisplayInfoExtra">
