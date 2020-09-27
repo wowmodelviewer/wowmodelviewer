@@ -92,6 +92,26 @@
     <field type="int"  name="ComponentSection" arraySize="3" pos="5" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
+  <table name="ChrCustomizationOption">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="uint" name="Flags" pos="3" />
+    <field type="uint" name="ChrModelID" pos="4"  relationshipData="yes" />
+    <field type="uint" name="OrderIndex" pos="5" />
+    <field type="uint" name="ChrCustomizationCategoryID" pos="6" />
+    <field type="uint" name="OptionType" pos="7" />
+    <field type="uint" name="ChrCustomizationID" pos="9" />
+  </table>
+  <table name="ChrCustomizationChoice">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+    <field type="uint" name="ChrCustomizationOptionID" pos="2"  relationshipData="yes" />
+    <field type="uint16" name="OrderIndex" pos="4" />
+    <field type="uint" name="Color" pos="5" />
+    <field type="uint" name="Color2" pos="6" />
+    <field type="uint16" name="OrderIndex2" pos="7" />
+    <field type="uint" name="Flags" pos="8" />
+  </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="FacialHairCustomization1" />
