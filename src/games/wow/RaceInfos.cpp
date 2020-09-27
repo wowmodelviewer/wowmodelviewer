@@ -6,7 +6,7 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_RACEINFOS 1
+#define DEBUG_RACEINFOS 0
 
 std::map<int, RaceInfos> RaceInfos::RACES;
 
