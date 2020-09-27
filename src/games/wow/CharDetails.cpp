@@ -738,7 +738,7 @@ void CharDetails::set(CustomizationType type, unsigned int val)
         // reset current face if not available for this skin color
         std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
         if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
-          m_currentCustomization[FACE] = vec[0];
+          set(FACE, vec[0]);
 
         event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
         break;
@@ -753,7 +753,7 @@ void CharDetails::set(CustomizationType type, unsigned int val)
         // reset current hair color if not available for this hair style
         std::vector<int> & vec = m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
         if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
-          m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
+          set(FACIAL_CUSTOMIZATION_COLOR, vec[0]);
 
         event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
         break;

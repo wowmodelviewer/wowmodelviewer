@@ -32,6 +32,7 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
     virtual void onEvent(Event *);
 
     void refresh();
+    void buildList();
 
     CharDetails::CustomizationType m_type;
     std::vector<int> m_values;
@@ -39,7 +40,6 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
     CharDetails::CustomizationParam m_params;
 
     wxChoice * m_choice;
-
 };
 
 
