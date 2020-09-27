@@ -167,7 +167,7 @@ void RaceInfos::init()
         infos.textureFallbackSexID = race[13].toInt();
       }
 
-      infos.isHD = true; // todo
+      infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().contains("_hd") ? true : false;
 
       if (RACES.find(modelfileid) == RACES.end())
         RACES[modelfileid] = infos;
