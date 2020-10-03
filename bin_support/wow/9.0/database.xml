@@ -85,11 +85,11 @@
   <table name="ChrCustomization">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
-    <field type="uint" name="Sex" pos="1" />
-    <field type="uint" name="BaseSection" pos="2" />
-    <field type="uint" name="UiCustomizationType" pos="3" />
-    <field type="uint" name="Flags" pos="4" />
-    <field type="int"  name="ComponentSection" arraySize="3" pos="5" />
+    <field type="uint" name="Sex" pos="2" />
+    <field type="uint" name="BaseSection" pos="3" />
+    <field type="uint" name="UiCustomizationType" pos="4" />
+    <field type="uint" name="Flags" pos="5" />
+    <field type="int"  name="ComponentSection" arraySize="3" pos="6" />
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
   <table name="ChrCustomizationOption">
@@ -111,6 +111,28 @@
     <field type="uint" name="Color2" pos="6" />
     <field type="uint16" name="OrderIndex2" pos="7" />
     <field type="uint" name="Flags" pos="8" />
+  </table>
+  <table name="ChrCustomizationElement">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ChrCustomizationChoiceID" pos="1" />
+    <field type="uint" name="RelatedChrCustomizationChoiceID" pos="2" />
+    <field type="uint" name="ChrCustomizationGeosetID" pos="3" />
+    <field type="uint" name="ChrCustomizationSkinnedModelID" pos="4" />
+    <field type="uint" name="ChrCustomizationMaterialID" pos="5" />
+    <field type="uint" name="ChrCustomizationBoneSetID" pos="6" />
+    <field type="uint" name="ChrCustomizationCondModelID" pos="7" />
+    <field type="uint" name="ChrCustomizationDisplayInfoID" pos="8" />
+  </table>
+  <table name="ChrCustomizationGeoset">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="GeosetType" pos="0" />
+    <field type="uint" name="GeosetID" pos="1" />
+    <field type="uint" name="Modifier" pos="2" />
+  </table>
+  <table name="ChrCustomizationMaterial">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ChrModelTextureTargetID" pos="1" />
+    <field type="uint" name="MaterialResourcesID" pos="2" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
     <field primary="yes" type="uint" name="ID" />
@@ -260,7 +282,7 @@
   </table>
   <table name="TextureFileData">
     <field type="uint" name="TextureID" primary="yes" />
-    <field type="uint" name="ID" pos="2" createIndex="yes" />
+    <field type="uint" name="MaterialResourcesID" relationshipData="yes" createIndex="yes" />
   </table>
   <table name="ModelFileData">
     <field type="uint" name="ModelID" primary="yes" />
