@@ -6,7 +6,7 @@
 
 #include "logger/Logger.h"
 
-#define DEBUG_RACEINFOS 0
+#define DEBUG_RACEINFOS 1
 
 std::map<int, RaceInfos> RaceInfos::RACES;
 
@@ -123,7 +123,8 @@ void RaceInfos::init()
     auto races =
       GAMEDATABASE.sqlQuery("SELECT ChrRaces.ClientPrefix, ChrRaces.ID, ChrRaces.Flags, ChrModel.Sex, CreatureModelData.FileID, ChrModel.CharComponentTextureLayoutID, "
                             "ChrRaces.MaleModelFallbackRaceID, ChrRaces.MaleModelFallbackSex, ChrRaces.MaleTextureFallbackRaceID, ChrRaces.MaleTextureFallbackSex, "
-                            "ChrRaces.FemaleModelFallbackRaceID, ChrRaces.FemaleModelFallbackSex, ChrRaces.FemaleTextureFallbackRaceID, ChrRaces.FemaleTextureFallbackSex "
+                            "ChrRaces.FemaleModelFallbackRaceID, ChrRaces.FemaleModelFallbackSex, ChrRaces.FemaleTextureFallbackRaceID, ChrRaces.FemaleTextureFallbackSex, "
+                            "ChrRaceXChrModel.ChrModelID"
                             "FROM ChrRaceXChrModel "
                             "LEFT JOIN ChrRaces ON ChrRaces.ID = ChrRaceXChrModel.ChrRacesID "
                             "LEFT JOIN ChrModel ON ChrModel.ID = ChrRaceXChrModel.ChrModelID "
@@ -163,6 +164,8 @@ void RaceInfos::init()
         infos.textureFallbackSexID = race[13].toInt();
       }
 
+      infos.ChrModelID = race[14].toInt();
+
       infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().contains("_hd") ? true : false;
 
       if (RACES.find(modelfileid) == RACES.end())
@@ -184,6 +187,7 @@ void RaceInfos::init()
     LOG_INFO << "infos.modelFallbackSexID =" << r.second.modelFallbackSexID;
     LOG_INFO << "infos.textureFallbackRaceID =" << r.second.textureFallbackRaceID;
     LOG_INFO << "infos.textureFallbackSexID =" << r.second.textureFallbackSexID;
+    LOG_INFO << "infos.ChrModelID =" << r.second.ChrModelID;
     LOG_INFO << "---------------------------";
   }
 #endif
