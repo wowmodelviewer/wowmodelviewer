@@ -13,6 +13,7 @@
 #include "CharDetailsCustomizationChoice.h"
 #include "CharDetailsCustomizationSpin.h"
 #include "CharDetailsEvent.h"
+#include "Game.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
@@ -59,24 +60,34 @@ void CharDetailsFrame::setModel(WoWModel * model)
 
   charCustomizationGS->Clear(true);
 
-  std::vector<CharDetails::CustomizationType> options = m_model->cd.getCustomizationOptions();
-
-  for (auto it = options.begin(), itEnd = options.end(); it != itEnd; ++it)
-  {
-    if(m_model->cd.getParams(*it).possibleValues.size() > 1)
-      //charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, *it), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-      charCustomizationGS->Add(new CharDetailsCustomizationChoice(this, m_model->cd, *it), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-  }
-
   RaceInfos infos;
-  if (RaceInfos::getCurrent(model, infos))
+  RaceInfos::getCurrent(model, infos);
+
+  if(GAMEDIRECTORY.majorVersion() < 9)
   {
-    if ((infos.raceID == RACE_NIGHTELF) ||
-        (infos.raceID == RACE_BLOODELF))
-        dhMode->Enable(true);
-    else
-      dhMode->Enable(false);
+    auto options = m_model->cd.getCustomizationOptions();
+
+    for (auto& option : options)
+    {
+      if (m_model->cd.getParams(option).possibleValues.size() > 1)
+        charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    }
   }
+  else
+  {
+    auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 ORDER BY OrderIndex").arg(infos.ChrModelID));
+
+    if(options.valid && !options.values.empty())
+    {
+      for(auto& option : options.values)
+        charCustomizationGS->Add(new CharDetailsCustomizationChoice(this, m_model->cd, option[0].toInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    }
+  }
+
+  if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
+    dhMode->Enable(true);
+  else
+    dhMode->Enable(false);
 
   dhMode->SetValue(model->cd.isDemonHunter());
 

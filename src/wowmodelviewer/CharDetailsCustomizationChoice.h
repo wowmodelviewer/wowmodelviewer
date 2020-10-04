@@ -22,19 +22,19 @@
 class CharDetailsCustomizationChoice : public wxWindow, public Observer
 {
   public:
-    CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type);
+    CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, int chrCustomizationChoiceID);
 
   private:
     DECLARE_CLASS(CharDetailsCustomizationChoice)
     DECLARE_EVENT_TABLE()
 
     void onChoice(wxCommandEvent& event);
-    virtual void onEvent(Event *);
+    void onEvent(Event *) override;
 
     void refresh();
     void buildList();
 
-    CharDetails::CustomizationType m_type;
+    int m_ID;
     std::vector<int> m_values;
     CharDetails & m_details;
     CharDetails::CustomizationParam m_params;
