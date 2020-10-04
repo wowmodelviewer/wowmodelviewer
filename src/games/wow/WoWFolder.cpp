@@ -167,6 +167,12 @@ QString wow::WoWFolder::version()
   return m_CASCFolder.version();
 }
 
+int wow::WoWFolder::majorVersion()
+{
+  auto v = m_CASCFolder.version().split(QLatin1Char('.'));
+  return v[0].toInt();
+}
+
 QString wow::WoWFolder::locale()
 {
    return m_CASCFolder.locale();
