@@ -48,11 +48,7 @@ bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
 
 void RaceInfos::init()
 {
-  // check database version (8.x is different from 9.x on races management)
-  auto checkVersion = GAMEDATABASE.sqlQuery("SELECT * FROM sqlite_master WHERE type='table' AND name='ChrModel'");
-
-  // if 'ChrModel' table does not exist, it's a 8.x game, otherwise, it's a 9.x
-  if (checkVersion.empty())
+  if (GAMEDIRECTORY.majorVersion() < 9)
   {
     auto races =
       GAMEDATABASE.sqlQuery("SELECT CMDM.FileID as malemodel, lower(ClientPrefix), CharComponentTexLayoutID, "
