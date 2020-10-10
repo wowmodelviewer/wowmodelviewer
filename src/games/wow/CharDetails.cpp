@@ -15,14 +15,16 @@
 
 #include <QFile>
 #include <QXmlStreamReader>
-#include <QXmlStreamReader>
 
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
 isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel(0)
 {
+  for(auto i = 0 ; i < NUM_GEOSETS; i++)
+    geosets[i] = 1;
 
+//  geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -723,7 +725,7 @@ CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
   return dummy;
 }
 
-void CharDetails::set(CustomizationType type, unsigned int val)
+void CharDetails::set(CustomizationType type, unsigned int val) // wow version < 9.x
 {
   if (val != m_currentCustomization.at(type))
   {
@@ -781,6 +783,62 @@ void CharDetails::set(CustomizationType type, unsigned int val)
     notify(event);
   }
 }
+
+void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
+{
+  m_customizationMap[chrCustomizationOptionID] = chrCustomizationChoiceID;
+
+  // query related ChrCustomizationElements
+  auto elements = GAMEDATABASE.sqlQuery(QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+                                                        "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+                                                        "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = 0").arg(chrCustomizationChoiceID));
+
+  if (elements.valid && !elements.values.empty())
+  {
+    LOG_INFO << __FUNCTION__ << "Found" << elements.values.size() << "customization entries for" << chrCustomizationOptionID << chrCustomizationChoiceID;
+
+    for(auto elt :elements.values) // treat each line
+    {
+      if (elt[0].toUInt() != 0) // geoset customization
+      {
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeoSetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
+
+        if(vals.valid)
+        {
+          for (auto geo : vals.values)
+            geosets[geo[0].toUInt()] = geo[1].toUInt();
+        }
+        m_model->refresh();
+      }
+      else if (elt[1].toUInt() != 0) // added model customization
+      {
+        LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6];
+      }
+      else if (elt[2].toUInt() != 0) // texture customization
+      {
+        LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6];
+      }
+      else if (elt[3].toUInt() != 0) // boneset customization ??
+      {
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+      }
+      else if (elt[4].toUInt() != 0) // cond model customization ??
+      {
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+      }
+      else if (elt[5].toUInt() != 0) // display info customization ??
+      {
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+      }
+    }
+
+
+  }
+
+}
+
 
 uint CharDetails::get(CustomizationType type) const
 {

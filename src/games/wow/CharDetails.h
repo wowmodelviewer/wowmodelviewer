@@ -111,12 +111,11 @@ public:
 
   RaceInfos infos;
 
-  int geosets[NUM_GEOSETS];
+  std::map <uint, uint> geosets; // map <geoset type, geosetid>
 
   // save + load
   void save(QXmlStreamWriter &);
   void load(QString &);
-
 
   void reset(WoWModel *);
 
@@ -126,7 +125,9 @@ public:
   std::vector<int> getRegionForSection(BaseSectionType);
 
   // accessors to customization
-  void set(CustomizationType type, uint val);
+  void set(CustomizationType type, uint val); // wow version < 9.x
+  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); // wow version >= 9.x
+
   uint get(CustomizationType type) const;
 
   CustomizationParam getParams(CustomizationType type);
@@ -147,7 +148,9 @@ private:
   std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 
 
-  std::map<CustomizationType, uint> m_currentCustomization;
+  std::map<CustomizationType, uint> m_currentCustomization; // wow version < 9.x
+
+  std::map<uint, uint> m_customizationMap; // wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
 
   bool m_isDemonHunter;
   uint m_dhModel;

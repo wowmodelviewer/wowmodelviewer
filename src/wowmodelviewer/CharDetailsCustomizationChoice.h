@@ -22,7 +22,7 @@
 class CharDetailsCustomizationChoice : public wxWindow, public Observer
 {
   public:
-    CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, int chrCustomizationChoiceID);
+    CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, uint chrCustomizationChoiceID);
 
   private:
     DECLARE_CLASS(CharDetailsCustomizationChoice)
@@ -34,10 +34,11 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
     void refresh();
     void buildList();
 
-    int m_ID;
-    std::vector<int> m_values;
+    uint m_ID;
+    std::vector<uint> m_values;
+
     CharDetails & m_details;
-    CharDetails::CustomizationParam m_params;
+    
 
     wxChoice * m_choice;
 };

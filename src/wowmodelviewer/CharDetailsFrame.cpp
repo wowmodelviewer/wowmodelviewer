@@ -80,7 +80,7 @@ void CharDetailsFrame::setModel(WoWModel * model)
     if(options.valid && !options.values.empty())
     {
       for(auto& option : options.values)
-        charCustomizationGS->Add(new CharDetailsCustomizationChoice(this, m_model->cd, option[0].toInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+        charCustomizationGS->Add(new CharDetailsCustomizationChoice(this, m_model->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     }
   }
 

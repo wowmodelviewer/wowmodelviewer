@@ -1955,6 +1955,7 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
 
 void WoWModel::showGeoset(uint geosetindex, bool value)
 {
+  LOG_INFO << __FUNCTION__ << geosetindex << value;
   if (geosetindex < geosets.size())
     geosets[geosetindex]->display = value;
 }
@@ -1971,6 +1972,7 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
+  LOG_INFO << __FUNCTION__ << group << val;
   int a = (int)group * 100;
   int b = ((int)group + 1) * 100;
   int geosetID = a + val;
@@ -2297,15 +2299,18 @@ void WoWModel::refresh()
   bool showScalp = true;
   
   // Reset geosets
-  for (size_t i = 0; i < NUM_GEOSETS; i++)
-    cd.geosets[i] = 1;
+  for (auto geo : cd.geosets)
+    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+  return;
 
   RaceInfos infos;
   if (!RaceInfos::getCurrent(this, infos)) // if no race info found, simply update geosets
   {
     // reset geosets
-    for (uint i = 0; i < NUM_GEOSETS; i++)
-      setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
+    for(auto geo: cd.geosets)
+      setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
     return;
   }
   

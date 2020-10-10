@@ -20,7 +20,7 @@ BEGIN_EVENT_TABLE(CharDetailsCustomizationChoice, wxWindow)
 END_EVENT_TABLE()
 
 
-CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, int chrCustomizationChoiceID)
+CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, uint chrCustomizationChoiceID)
 : wxWindow(parent, wxID_ANY), m_ID(chrCustomizationChoiceID), m_details(details)
 {
   wxFlexGridSizer *top = new wxFlexGridSizer(2, 0, 5);
@@ -53,6 +53,9 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 
 void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 {
+  LOG_INFO << __FUNCTION__ << event.GetSelection();
+  m_details.set(m_ID, m_values[event.GetSelection()]);
+
  // m_details.set(m_type, m_params.possibleValues[event.GetSelection()]);
 }
 
@@ -90,12 +93,13 @@ void CharDetailsCustomizationChoice::buildList()
   {
     // clear list and re add possible choices
     m_choice->Clear();
+    m_values.clear();
 
-    auto choices = GAMEDATABASE.sqlQuery(QString("SELECT OrderIndex,Name FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(m_ID));
+    auto choices = GAMEDATABASE.sqlQuery(QString("SELECT OrderIndex,Name,ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(m_ID));
 
     if(choices.valid && !choices.values.empty())
     {
-      auto useName = !choices.values[0][1].isEmpty();
+      const auto useName = !choices.values[0][1].isEmpty();
 
       for(auto v:choices.values)
       {
@@ -103,6 +107,8 @@ void CharDetailsCustomizationChoice::buildList()
           m_choice->Append(wxString(v[1].toStdString().c_str(), wxConvUTF8));
         else
           m_choice->Append(wxString::Format(wxT(" %i "), v[0].toInt()));
+
+        m_values.push_back(v[2].toUInt());
       }
     }
   }
