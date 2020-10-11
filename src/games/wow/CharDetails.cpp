@@ -243,6 +243,11 @@ void CharDetails::reset(WoWModel * model)
   m_isDemonHunter = false;
 
   fillCustomizationMap();
+
+  for (auto i = 0; i < NUM_GEOSETS; i++)
+    geosets[i] = 1;
+
+  textures.clear();
 }
 
 std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
@@ -786,6 +791,9 @@ void CharDetails::set(CustomizationType type, unsigned int val) // wow version <
 
 void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
 {
+  RaceInfos infos;
+  RaceInfos::getCurrent(m_model, infos);
+
   m_customizationMap[chrCustomizationOptionID] = chrCustomizationChoiceID;
 
   // query related ChrCustomizationElements
@@ -797,7 +805,7 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
   {
     LOG_INFO << __FUNCTION__ << "Found" << elements.values.size() << "customization entries for" << chrCustomizationOptionID << chrCustomizationChoiceID;
 
-    for(auto elt :elements.values) // treat each line
+    for (auto elt : elements.values) // treat each line
     {
       if (elt[0].toUInt() != 0) // geoset customization
       {
@@ -805,7 +813,7 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 
         auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeoSetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
 
-        if(vals.valid)
+        if (vals.valid)
         {
           for (auto geo : vals.values)
             geosets[geo[0].toUInt()] = geo[1].toUInt();
@@ -819,6 +827,14 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
       else if (elt[2].toUInt() != 0) // texture customization
       {
         LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6];
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, TextureID FROM ChrCustomizationMaterial "
+                                                          "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
+                                                          "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
+                                                          "AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
+                                                          "WHERE ChrCustomizationMaterial.ID = %2").arg(infos.textureLayoutID).arg(elt[2].toUInt()));
+
+        if (vals.valid)
+          textures[vals.values[0][0].toUInt()] = { bitMaskToSectionType(vals.values[0][1].toInt()), vals.values[0][2].toUInt(), vals.values[0][3].toUInt() };
       }
       else if (elt[3].toUInt() != 0) // boneset customization ??
       {
@@ -833,10 +849,10 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
         LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
       }
     }
-
-
   }
-
+ 
+  m_model->refresh();
+  TEXTUREMANAGER.dump();
 }
 
 
@@ -1021,3 +1037,21 @@ void CharDetails::setDemonHunterMode(bool val)
     m_model->refresh();
   }
 }
+
+int CharDetails::bitMaskToSectionType(int mask)
+{
+  if (mask == -1)
+    return -1;
+
+  if (mask == 0)
+    return 0;
+
+  auto val = 1;
+
+  while (((mask = mask >> 1) & 0x01) == 0)
+    val++;
+
+  return val;
+}
+
+

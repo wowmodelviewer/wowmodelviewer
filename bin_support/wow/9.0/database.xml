@@ -134,6 +134,15 @@
     <field type="uint" name="ChrModelTextureTargetID" pos="1" />
     <field type="uint" name="MaterialResourcesID" pos="2" />
   </table>
+  <table name="ChrModelTextureLayer">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="TextureType" pos="1" />
+    <field type="uint" name="Layer" pos="2" />
+    <field type="uint" name="Flags" pos="3" />
+    <field type="int" name="TextureSectionTypeBitMask" pos="5" />
+    <field type="uint" name="ChrModelTextureTargetID" arraySize="2" pos="7" />
+    <field type="uint" name="CharComponentTextureLayoutsID" pos="8"  relationshipData="yes" />
+  </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
     <field primary="yes" type="uint" name="ID" />
     <field type="text" name="FacialHairCustomization1" />

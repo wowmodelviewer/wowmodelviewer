@@ -22,17 +22,14 @@
 #include "logger/Logger.h"
 
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
-#define LAYOUT_BASE_REGION -1
+constexpr int LAYOUT_BASE_REGION = -1;
 
 void CharTexture::addLayer(GameFile * file, int region, int layer)
 {
   if (!file)
     return;
 
-  CharTextureComponent ct;
-  ct.file = file;
-  ct.region = region;
-  ct.layer = layer;
+  const CharTextureComponent ct = { file, region, layer };
   m_components.push_back(ct);
 }
 
@@ -46,22 +43,16 @@ void CharTexture::reset(unsigned int _layoutSizeId)
 
 void CharTexture::compose(TextureID texID)
 {
-  if (baseImage == 0)
+  if (m_components.empty())
     return;
-
-  std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
 	std::sort(m_components.begin(), m_components.end());
 
-  // burn base image
-  const CharRegionCoords &coords = CharTexture::LAYOUTS[layoutSizeId].second[LAYOUT_BASE_REGION];
-  QImage * baseImg = gameFileToQImage(baseImage);
-  QImage img = baseImg->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+  QImage img;
 
 #if DEBUG_TEXTURE > 1
-  static int baseidx = 0;
-  int cmpidx = 0;
-  img.save(QString("./ComposedTexture%1_%2.png").arg(++baseidx).arg(cmpidx++));
+  static auto baseidx = 0;
+  auto cmpidx = 0;
 #endif
 
   for (auto it : m_components)
@@ -77,13 +68,11 @@ void CharTexture::compose(TextureID texID)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
-  delete baseImg;
 }
 
 void CharTexture::initRegions()
 {
-  sqlResult layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
+  auto layouts = GAMEDATABASE.sqlQuery("SELECT ID, Width, Height FROM CharComponentTextureLayouts");
 
   if(!layouts.valid || layouts.empty())
   {
@@ -92,16 +81,13 @@ void CharTexture::initRegions()
   }
 
   // Iterate on layout to initialize our members (sections informations)
-  for(int i=0, imax=layouts.values.size() ; i < imax ; i++)
+  for (auto& value : layouts.values)
   {
-    LayoutSize texLayout;
-    int curLayout = layouts.values[i][0].toInt();
-    texLayout.width = layouts.values[i][1].toInt();
-    texLayout.height = layouts.values[i][2].toInt();
+    LayoutSize texLayout = { value[1].toInt() , value[2].toInt() };
+    auto curLayout = value[0].toInt();
 
     // search all regions for this layout
-    QString query = QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout);
-    sqlResult regions = GAMEDATABASE.sqlQuery(query);
+    auto regions = GAMEDATABASE.sqlQuery(QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout));
 
     if(!regions.valid || regions.empty())
     {
@@ -110,22 +96,14 @@ void CharTexture::initRegions()
     }
 
     std::map<int,CharRegionCoords> regionCoords;
-    CharRegionCoords base;
-    base.xpos = 0;
-    base.ypos = 0;
-    base.width = texLayout.width;
-    base.height = texLayout.height;
+    const CharRegionCoords base = { 0, 0, texLayout.width, texLayout.height };
     regionCoords[LAYOUT_BASE_REGION] = base;
 
-    for(int r=0, rmax=regions.values.size() ; r < rmax ; r++)
+    for (auto& r : regions.values)
     {
-      CharRegionCoords coords;
-      coords.xpos = regions.values[r][1].toInt();
-      coords.ypos = regions.values[r][2].toInt();
-      coords.width = regions.values[r][3].toInt();
-      coords.height = regions.values[r][4].toInt();
+      const CharRegionCoords coords = { r[1].toInt(), r[2].toInt(), r[3].toInt(), r[4].toInt() };
       //LOG_INFO << regions.values[r][0].toInt()+1 << " " << coords.xpos << " " << coords.ypos << " " << coords.width << " " << coords.height << std::endl;
-      regionCoords[regions.values[r][0].toInt()] = coords;
+      regionCoords[r[0].toInt()] = coords;
     }
     LOG_INFO << "Found" << regionCoords.size() << "regions for layout" << curLayout;
     CharTexture::LAYOUTS[curLayout] = make_pair(texLayout,regionCoords);
@@ -133,35 +111,42 @@ void CharTexture::initRegions()
 
 }
 
-void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct)
+void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct) const
 {
-  std::pair<LayoutSize, std::map<int, CharRegionCoords> > layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
+  auto layoutInfos = CharTexture::LAYOUTS[layoutSizeId];
 
-  const CharRegionCoords &coords = layoutInfos.second[ct.region];
+  const auto &coords = layoutInfos.second[ct.region];
 
-  QImage * tmp = gameFileToQImage(ct.file);
+  auto * tmp = gameFileToQImage(ct.file);
 
   if (!tmp)
     return;
 
-  QImage newImage = tmp->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+  const auto newImage = tmp->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 
 #if DEBUG_TEXTURE > 1
-  int region = ct.region;
-  int x = coords.xpos;
-  int y = coords.ypos;
-  int width = coords.width;
-  int height = coords.height;
-  LOG_INFO << __FUNCTION__ << region << x << y << width << height;
+  const auto region = ct.region;
+  const auto x = coords.xpos;
+  const auto y = coords.ypos;
+  const auto width = coords.width;
+  const auto height = coords.height;
+  LOG_INFO << __FUNCTION__ << ct.file->fullname() << region << x << y << width << height;
   newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
 #endif
 
-  QPoint destPos = QPoint(coords.xpos, coords.ypos);
-  QPainter painter(&destImage);
-  painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-  painter.drawImage(destPos, newImage);
-  painter.end();
+  if (ct.region == LAYOUT_BASE_REGION)
+  {
+    destImage = newImage;
+  }
+  else
+  {
+    const auto destPos = QPoint(coords.xpos, coords.ypos);
+    QPainter painter(&destImage);
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    painter.drawImage(destPos, newImage);
+    painter.end();
+  }
 
   delete tmp;
 }
@@ -173,9 +158,9 @@ void imageCleanUpHandler(void * ptr)
 
 QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
-  QImage * result = 0;
-  TextureID temptex = TEXTUREMANAGER.add(file);
-  Texture * tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
+  QImage * result = nullptr;
+  const auto temptex = TEXTUREMANAGER.add(file);
+  auto * tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 
   // Alfred 2009.07.03, tex width or height can't be zero
   if (tex->w == 0 || tex->h == 0)
@@ -184,7 +169,7 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
     return result;
   }
 
-  unsigned char * tempbuf = (unsigned char*)malloc(tex->w*tex->h * 4);
+  auto * tempbuf = (unsigned char*)malloc(tex->w*tex->h * 4);
 
   tex->getPixels(tempbuf, GL_BGRA_EXT);
   result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);

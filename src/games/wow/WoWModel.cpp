@@ -1955,7 +1955,6 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
 
 void WoWModel::showGeoset(uint geosetindex, bool value)
 {
-  LOG_INFO << __FUNCTION__ << geosetindex << value;
   if (geosetindex < geosets.size())
     geosets[geosetindex]->display = value;
 }
@@ -1972,7 +1971,6 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
-  LOG_INFO << __FUNCTION__ << group << val;
   int a = (int)group * 100;
   int b = ((int)group + 1) * 100;
   int geosetID = a + val;
@@ -2297,22 +2295,54 @@ void WoWModel::refresh()
 {
   TextureID charTex = 0;
   bool showScalp = true;
-  
-  // Reset geosets
-  for (auto geo : cd.geosets)
-    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
-
-  return;
 
   RaceInfos infos;
   if (!RaceInfos::getCurrent(this, infos)) // if no race info found, simply update geosets
   {
     // reset geosets
-    for(auto geo: cd.geosets)
+    for (auto geo : cd.geosets)
       setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
 
     return;
   }
+
+  // Reset geosets
+  for (auto geo : cd.geosets)
+    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+  // reset char texture
+  tex.reset(infos.textureLayoutID);
+  for (auto t : cd.textures)
+  {
+    if(t.second.type != 1)
+    {
+      updateTextureList(GAMEDIRECTORY.getFile(t.second.fileId), t.second.type); 
+    }
+    else
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(t.second.fileId), t.second.region, t.first);
+    }    
+  }
+
+  tex.compose(charTex);
+
+  // set replacable textures
+  replaceTextures[TEXTURE_SKIN] = charTex;
+
+
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  size_t egt = cd.eyeGlowType;
+  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i = 0; i < rawGeosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
+      showGeoset(i, (id == egtId));
+  }
+
+  return;
+
+  
   
   for (auto it : mergedModels)
   {
@@ -2333,7 +2363,7 @@ void WoWModel::refresh()
   // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
   
   if (foundTextures.size() > 0)
-    tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]),-1,0);
 
   if (foundTextures.size() > 1)
   {
@@ -2715,15 +2745,6 @@ void WoWModel::refresh()
   // If model is one of these races, show the feet (don't wear boots)
   cd.showFeet = infos.barefeet;
 
-  // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = cd.eyeGlowType;
-  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
-  for (size_t i = 0; i < rawGeosets.size(); i++)
-  {
-    int id = geosets[i]->id;
-    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
-      showGeoset(i, (id == egtId));
-  }
   refreshMerging();
 }
 

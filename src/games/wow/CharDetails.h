@@ -8,9 +8,11 @@
 #ifndef _CHARDETAILS_H_
 #define _CHARDETAILS_H_
 
+#include "CharTexture.h"
 #include "database.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
+
 #include "metaclasses/Observable.h"
 
 class WoWModel;
@@ -103,6 +105,14 @@ public:
     std::vector<int> flags;
   };
 
+  class TextureCustomization
+  {
+  public:
+    int region;
+    uint type;
+    uint fileId;
+  };
+
   EyeGlowTypes eyeGlowType;
 
   bool showUnderwear, showEars, showHair, showFacialHair, showFeet, autoHideGeosetsForHeadItems;
@@ -112,6 +122,7 @@ public:
   RaceInfos infos;
 
   std::map <uint, uint> geosets; // map <geoset type, geosetid>
+  std::map <uint, TextureCustomization> textures; // map <layer, TextureCustomization>
 
   // save + load
   void save(QXmlStreamWriter &);
@@ -151,6 +162,8 @@ private:
   std::map<CustomizationType, uint> m_currentCustomization; // wow version < 9.x
 
   std::map<uint, uint> m_customizationMap; // wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+
+  static int bitMaskToSectionType(int mask);
 
   bool m_isDemonHunter;
   uint m_dhModel;
