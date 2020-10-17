@@ -140,6 +140,7 @@ public:
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); // wow version >= 9.x
 
   uint get(CustomizationType type) const;
+  uint get(uint chrCustomizationOptionID) const;
 
   CustomizationParam getParams(CustomizationType type);
 

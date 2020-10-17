@@ -796,6 +796,8 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
 
   m_customizationMap[chrCustomizationOptionID] = chrCustomizationChoiceID;
 
+  LOG_INFO << __FUNCTION__ << chrCustomizationOptionID << chrCustomizationChoiceID;
+
   // query related ChrCustomizationElements
   auto elements = GAMEDATABASE.sqlQuery(QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
                                                         "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
@@ -860,6 +862,12 @@ uint CharDetails::get(CustomizationType type) const
 {
   return m_currentCustomization.at(type);
 }
+
+uint CharDetails::get(uint chrCustomizationOptionID) const
+{
+  return m_customizationMap.at(chrCustomizationOptionID);
+}
+
 
 void CharDetails::setRandomValue(CustomizationType type)
 {

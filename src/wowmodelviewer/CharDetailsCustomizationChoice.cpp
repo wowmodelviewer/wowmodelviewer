@@ -44,12 +44,10 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
     SetSizer(top);
 
     buildList();
-
-    refresh();
   }
 
-  refresh();
   m_details.set(m_ID, m_values[0]);
+  refresh();
   Layout();
 }
 
@@ -57,8 +55,6 @@ void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 {
   LOG_INFO << __FUNCTION__ << event.GetSelection();
   m_details.set(m_ID, m_values[event.GetSelection()]);
-
- // m_details.set(m_type, m_params.possibleValues[event.GetSelection()]);
 }
 
 void CharDetailsCustomizationChoice::onEvent(Event * e)
@@ -119,19 +115,17 @@ void CharDetailsCustomizationChoice::buildList()
 
 void CharDetailsCustomizationChoice::refresh()
 {
-  /*
   if (m_choice)
   {
     uint pos = 0;
 
-    const int currentValue = static_cast<int>(m_details.get(m_type));
+    const auto currentValue = m_details.get(m_ID);
 
-    for (; pos < m_params.possibleValues.size(); pos++)
-      if (m_params.possibleValues[pos] == currentValue) break;
+    for (; pos < m_values.size(); pos++)
+      if (currentValue == m_values[pos]) break;
 
     m_choice->SetSelection(pos);
   }
-  */
 }
 
 
