@@ -44,10 +44,12 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
     SetSizer(top);
 
     buildList();
+
     refresh();
   }
 
   refresh();
+  m_details.set(m_ID, m_values[0]);
   Layout();
 }
 
