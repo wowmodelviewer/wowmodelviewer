@@ -97,11 +97,9 @@ void CharDetailsCustomizationChoice::buildList()
 
     if(choices.valid && !choices.values.empty())
     {
-      const auto useName = !choices.values[0][1].isEmpty();
-
       for(auto v:choices.values)
       {
-        if(useName)
+        if(!v[1].isEmpty())
           m_choice->Append(wxString(v[1].toStdString().c_str(), wxConvUTF8));
         else
           m_choice->Append(wxString::Format(wxT(" %i "), v[0].toInt()));
