@@ -159,12 +159,12 @@ private:
   std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
   std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 
-
   std::map<CustomizationType, uint> m_currentCustomization; // wow version < 9.x
 
   std::map<uint, uint> m_customizationMap; // wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
 
   static int bitMaskToSectionType(int mask);
+  static int getLinkedOption(uint chrCustomizationOption);
 
   bool m_isDemonHunter;
   uint m_dhModel;

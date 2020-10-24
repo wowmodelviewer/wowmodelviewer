@@ -797,15 +797,19 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
   m_customizationMap[chrCustomizationOptionID] = chrCustomizationChoiceID;
 
   LOG_INFO << __FUNCTION__ << chrCustomizationOptionID << chrCustomizationChoiceID;
+  LOG_INFO << "Linked option for" << chrCustomizationOptionID << "->" << getLinkedOption(chrCustomizationOptionID);
 
   // query related ChrCustomizationElements
-  auto elements = GAMEDATABASE.sqlQuery(QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
-                                                        "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-                                                        "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = 0").arg(chrCustomizationChoiceID));
+  const auto query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+                                        "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+                                        "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(chrCustomizationChoiceID)
+                                        .arg((getLinkedOption(chrCustomizationOptionID)!=-1)? m_customizationMap[getLinkedOption(chrCustomizationOptionID)]:0);
+
+  auto elements = GAMEDATABASE.sqlQuery(query);
 
   if (elements.valid && !elements.values.empty())
   {
-    LOG_INFO << __FUNCTION__ << "Found" << elements.values.size() << "customization entries for" << chrCustomizationOptionID << chrCustomizationChoiceID;
+    LOG_INFO << __FUNCTION__ << "Found" << elements.values.size() << "customization entries for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
 
     for (auto elt : elements.values) // treat each line
     {
@@ -851,10 +855,15 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
         LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
       }
     }
+
+    m_model->refresh();
+    TEXTUREMANAGER.dump();
   }
- 
-  m_model->refresh();
-  TEXTUREMANAGER.dump();
+  else
+  {
+    LOG_ERROR << __FUNCTION__ << "No customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+    LOG_ERROR << query;
+  }
 }
 
 
@@ -1048,6 +1057,7 @@ void CharDetails::setDemonHunterMode(bool val)
 
 int CharDetails::bitMaskToSectionType(int mask)
 {
+  LOG_INFO << __FUNCTION__ << mask;
   if (mask == -1)
     return -1;
 
@@ -1059,7 +1069,28 @@ int CharDetails::bitMaskToSectionType(int mask)
   while (((mask = mask >> 1) & 0x01) == 0)
     val++;
 
+  LOG_INFO << __FUNCTION__ << val;
+
   return val;
 }
 
+int CharDetails::getLinkedOption(uint chrCustomizationOption)
+{
+  // hardcoded values (need to figure out how to find this from DB - if possible ?)
+  if (chrCustomizationOption == 726) return 724; // veins color linked to veins for BE male
+  if (chrCustomizationOption == 730) return 728; // veins color linked to veins for BE female
+
+  const auto query = QString("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
+                                        "(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID = "
+                                        "(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 AND OrderIndex = 1))").arg(chrCustomizationOption);
+
+  auto link = GAMEDATABASE.sqlQuery(query);
+
+  if (link.valid && !link.values.empty())
+  {
+    return link.values[0][0].toInt();
+  }
+
+  return -1; // no option associated
+}
 
