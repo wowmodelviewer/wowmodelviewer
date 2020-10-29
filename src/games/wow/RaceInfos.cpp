@@ -164,12 +164,20 @@ void RaceInfos::init()
         infos.textureFallbackSexID = race[13].toInt();
       }
 
-      infos.ChrModelID = race[14].toInt();
+      infos.ChrModelID.push_back(race[14].toInt());
 
       infos.isHD = GAMEDIRECTORY.getFile(modelfileid)->fullname().contains("_hd") ? true : false;
 
       if (RACES.find(modelfileid) == RACES.end())
+      {
         RACES[modelfileid] = infos;
+      }
+      else // if a race is already inserted, capture any additional ChrModelID
+      {
+        auto id = race[14].toInt();
+        if (std::find(RACES[modelfileid].ChrModelID.begin(), RACES[modelfileid].ChrModelID.end(), id) == RACES[modelfileid].ChrModelID.end())
+          RACES[modelfileid].ChrModelID.push_back(id);
+      }
     }
   }
 
@@ -187,7 +195,8 @@ void RaceInfos::init()
     LOG_INFO << "infos.modelFallbackSexID =" << r.second.modelFallbackSexID;
     LOG_INFO << "infos.textureFallbackRaceID =" << r.second.textureFallbackRaceID;
     LOG_INFO << "infos.textureFallbackSexID =" << r.second.textureFallbackSexID;
-    LOG_INFO << "infos.ChrModelID =" << r.second.ChrModelID;
+    for(const auto & it : r.second.ChrModelID)
+      LOG_INFO << "infos.ChrModelID ->" << it;
     LOG_INFO << "---------------------------";
   }
 #endif
