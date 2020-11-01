@@ -10,42 +10,6 @@
 
 std::map<int, RaceInfos> RaceInfos::RACES;
 
-// This mapping links *_sdr character models to their HD equivalents, so they can get race info for display.
-// *_sdr models are actually now obsolete and the database that used to provide this info is now empty,
-// but while the models are still appearing in the model tree we may as well keep them working, so they
-// don't look broken:
-std::map<int, int> RaceInfos::SDReplacementModel = // {SDFileID , HDFileID}
-  {{1838568, 119369},  {1838570, 119376},  {1838201, 307453},  {1838592, 307454},  {1853956, 535052},
-   {1853610, 589715},  {1838560, 878772},  {1838566, 900914},  {1838578, 917116},  {1838574, 921844},
-   {1838564, 940356},  {1838580, 949470},  {1838562, 950080},  {1838584, 959310},  {1838586, 968705},
-   {1838576, 974343},  {1839008, 986648},  {1838582, 997378},  {1838572, 1000764}, {1839253, 1005887},
-   {1838385, 1011653}, {1838588, 1018060}, {1822372, 1022598}, {1838590, 1022938}, {1853408, 1100087},
-   {1839709, 1100258}, {1825438, 1593999}, {1839042, 1620605}, {1858265, 1630218}, {1859379, 1630402},
-   {1900779, 1630447}, {1894572, 1662187}, {1859345, 1733758}, {1858367, 1734034}, {1858099, 1810676},
-   {1857801, 1814471}, {1892825, 1890763}, {1892543, 1890765}, {1968838, 1968587}, {1842700, 1000764}};
-           
-bool RaceInfos::getCurrent(WoWModel * model, RaceInfos & result)
-{
-  if (!model)
-  {
-    LOG_ERROR << __FUNCTION__ << "model is null";
-    return false;
-  }
-  auto fdid = model->gamefile->fileDataId();
-  if (SDReplacementModel.count(fdid)) // if it's an old *_sdr model, use the file ID of its HD counterpart for race info
-    fdid = SDReplacementModel[fdid];
-  const auto raceInfosIt = RACES.find(fdid);
-  if(raceInfosIt != RACES.end())
-  {
-    result = raceInfosIt->second;
-    return true;
-  }
-
-  LOG_ERROR << "Unable to retrieve race infos for model" << model->gamefile->fullname() << model->gamefile->fileDataId();
- 
-  return false;
-}
-
 void RaceInfos::init()
 {
   if (GAMEDIRECTORY.majorVersion() < 9)
@@ -223,4 +187,17 @@ int RaceInfos::getHDModelForFileID(int fileid)
   }
 
   return result;
+}
+
+bool RaceInfos::getRaceInfosForFileID(int fileid, RaceInfos & infos)
+{
+  const auto raceInfosIt = RaceInfos::RACES.find(fileid);
+
+  if (raceInfosIt != RaceInfos::RACES.end())
+  {
+    infos = raceInfosIt->second;
+    return true;
+  }
+
+  return false;
 }

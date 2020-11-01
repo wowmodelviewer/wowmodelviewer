@@ -34,13 +34,13 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
     void refresh();
     void buildList();
 
-    uint m_ID;
-    std::vector<uint> m_values;
+    uint ID_;
+    std::vector<uint> values_;
 
-    CharDetails & m_details;
+    CharDetails & details_;
     
 
-    wxChoice * m_choice;
+    wxChoice * choice_;
 };
 
 

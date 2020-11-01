@@ -21,23 +21,23 @@ END_EVENT_TABLE()
 
 
 CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, uint chrCustomizationChoiceID)
-: wxWindow(parent, wxID_ANY), m_ID(chrCustomizationChoiceID), m_details(details)
+: wxWindow(parent, wxID_ANY), ID_(chrCustomizationChoiceID), details_(details)
 {
-  wxFlexGridSizer *top = new wxFlexGridSizer(2, 0, 5);
+  auto top = new wxFlexGridSizer(2, 0, 5);
   top->AddGrowableCol(2);
 
-  m_details.attach(this);
+  details_.attach(this);
 
-  auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name FROM ChrCustomizationOption WHERE ID = %1").arg(m_ID));
+  auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
 
   if(option.valid && !option.values.empty())
   {
     top->Add(new wxStaticText(this, wxID_ANY, option.values[0][0].toStdWString()),
       wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
-    m_choice = new wxChoice(this, wxID_ANY);
+    choice_ = new wxChoice(this, wxID_ANY);
 
-    top->Add(m_choice, wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
+    top->Add(choice_, wxSizerFlags().Align(wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL).Border(wxRIGHT, 5));
 
     SetAutoLayout(true);
     top->SetSizeHints(this);
@@ -46,15 +46,16 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
     buildList();
   }
 
-  m_details.set(m_ID, m_values[0]);
+  if(!values_.empty())
+    details_.set(ID_, values_[0]);
+  
   refresh();
-  Layout();
 }
 
 void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 {
   LOG_INFO << __FUNCTION__ << event.GetSelection();
-  m_details.set(m_ID, m_values[event.GetSelection()]);
+  details_.set(ID_, values_[event.GetSelection()]);
 }
 
 void CharDetailsCustomizationChoice::onEvent(Event * e)
@@ -87,24 +88,39 @@ void CharDetailsCustomizationChoice::onEvent(Event * e)
 
 void CharDetailsCustomizationChoice::buildList()
 {
-  if (m_choice)
+  if (choice_)
   {
     // clear list and re add possible choices
-    m_choice->Clear();
-    m_values.clear();
+    choice_->Clear();
+    values_.clear();
 
-    auto choices = GAMEDATABASE.sqlQuery(QString("SELECT OrderIndex,Name,ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(m_ID));
+    auto ids = details_.getCustomisationChoices(ID_);
+
+    if (ids.empty())
+      return;
+
+    auto query = QString("SELECT OrderIndex,Name,ID FROM ChrCustomizationChoice WHERE ID IN (");
+    for(auto id:ids)
+    {
+      query += QString::number(id);
+      query += ",";
+    }
+
+    query.chop(1);
+    query += ") ORDER BY OrderIndex";
+
+    auto choices = GAMEDATABASE.sqlQuery(query);
 
     if(choices.valid && !choices.values.empty())
     {
       for(auto v:choices.values)
       {
         if(!v[1].isEmpty())
-          m_choice->Append(wxString(v[1].toStdString().c_str(), wxConvUTF8));
+          choice_->Append(wxString(v[1].toStdString().c_str(), wxConvUTF8));
         else
-          m_choice->Append(wxString::Format(wxT(" %i "), v[0].toInt()));
+          choice_->Append(wxString::Format(wxT(" %i "), v[0].toInt()));
 
-        m_values.push_back(v[2].toUInt());
+        values_.push_back(v[2].toUInt());
       }
     }
   }
@@ -113,16 +129,18 @@ void CharDetailsCustomizationChoice::buildList()
 
 void CharDetailsCustomizationChoice::refresh()
 {
-  if (m_choice)
+  if (choice_)
   {
     uint pos = 0;
 
-    const auto currentValue = m_details.get(m_ID);
+    const auto currentValue = details_.get(ID_);
 
-    for (; pos < m_values.size(); pos++)
-      if (currentValue == m_values[pos]) break;
+    for (; pos < values_.size(); pos++)
+      if (currentValue == values_[pos]) break;
 
-    m_choice->SetSelection(pos);
+    choice_->SetSelection(pos);
+
+    Layout();
   }
 }
 

@@ -240,8 +240,7 @@ void WoWItem::load()
   if (m_id == 0 || m_displayId == 0) // no equipment, just return
     return;
 
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(m_charModel, charInfos);
+  const auto charInfos = m_charModel->infos;
   sqlResult iteminfos;
 
   // query geosets infos
@@ -1120,8 +1119,7 @@ int WoWItem::getCustomModelId(size_t index)
   QString idListStr = idList.join(", ");
   idListStr = "(" + idListStr + ")";
   
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(m_charModel, charInfos);
+  const auto charInfos = m_charModel->infos;
 
   QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
   if (m_charModel && m_charModel->cd.isDemonHunter())
@@ -1190,8 +1188,7 @@ int WoWItem::getCustomTextureId(size_t index)
   QString idListStr = idList.join(", ");
   idListStr = "(" + idListStr + ")";
   
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(m_charModel, charInfos);
+  const auto charInfos = m_charModel->infos;
   
   QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
   if (m_charModel && m_charModel->cd.isDemonHunter())

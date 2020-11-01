@@ -20,7 +20,7 @@ class WoWModel;
 class _RACEINFOS_API_ RaceInfos
 {
   public:
-    int raceID;
+    int raceID = -1; // -1 means invalid race (default value)
     int sexID; // 0 male / 1 female
     int textureLayoutID;
     bool isHD;
@@ -32,13 +32,12 @@ class _RACEINFOS_API_ RaceInfos
     int textureFallbackSexID;
     std::vector<int> ChrModelID;
    
-    static bool getCurrent(WoWModel * model, RaceInfos & result);
     static void init();
     static int getHDModelForFileID(int);
+    static bool getRaceInfosForFileID(int, RaceInfos &);
 
   private:
     static std::map<int, RaceInfos> RACES;
-    static std::map<int, int> SDReplacementModel;
 };
 
 

@@ -15,6 +15,7 @@
 
 #include "metaclasses/Observable.h"
 
+class sqlResult;
 class WoWModel;
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -119,8 +120,6 @@ public:
 
   bool isNPC;
 
-  RaceInfos infos;
-
   std::map <uint, uint> geosets; // map <geoset type, geosetid>
   std::map <uint, TextureCustomization> textures; // map <layer, TextureCustomization>
 
@@ -130,44 +129,57 @@ public:
 
   void reset(WoWModel *);
 
-  void print();
-
   std::vector<int> getTextureForSection(BaseSectionType);
   std::vector<int> getRegionForSection(BaseSectionType);
 
   // accessors to customization
-  void set(CustomizationType type, uint val); // wow version < 9.x
-  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); // wow version >= 9.x
-
+  // wow version < 9.x
+  void set(CustomizationType type, uint val); 
   uint get(CustomizationType type) const;
   uint get(uint chrCustomizationOptionID) const;
-
   CustomizationParam getParams(CustomizationType type);
-
-  void setRandomValue(CustomizationType type);
-
   std::vector<CustomizationType> getCustomizationOptions() const;
 
+  // wow version >= 9.x
+  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
+  std::vector<uint> getCustomisationChoices(const uint chrCustomizationOptionID);
+ 
+  void setRandomValue(CustomizationType type);
+
   void setDemonHunterMode(bool);
-  bool isDemonHunter() const { return m_isDemonHunter; }
+  bool isDemonHunter() const { return isDemonHunter_; }
 
 private:
-  WoWModel * m_model;
 
+  // wow version independant
   void fillCustomizationMap();
+
+  WoWModel * model_;
+  bool isDemonHunter_;
+
+  std::map<uint, uint> currentCustomization_; // wow version < 9.x : map<CustomizationType, value> -- wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+
+  // wow version < 9.x
+  void fillCustomizationMap8x();
+  
   QString getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization = false);
-  std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
-  std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 
-  std::map<CustomizationType, uint> m_currentCustomization; // wow version < 9.x
+  std::map<CustomizationType, CustomizationParam> customizationParamsMap_;
+  std::map<uint, std::map<int, CustomizationParam> > multiCustomizationMap_;
 
-  std::map<uint, uint> m_customizationMap; // wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+  // wow version > 9.x
+  void fillCustomizationMap9x();
 
+  bool applyChrCustomizationElements(sqlResult &);
   static int bitMaskToSectionType(int mask);
-  static int getLinkedOption(uint chrCustomizationOption);
+  int getParentOption(uint chrCustomizationOption);
+  int getChildOption(uint chrCustomizationOption);
 
-  bool m_isDemonHunter;
-  uint m_dhModel;
+  void initLinkedOptionsMap();
+
+
+  std::map<uint, std::vector<uint> > customizationMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
+  static std::map<uint, int> LINKED_OPTIONS_MAP_; // map < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID> (ie, <markings color, markings> or <tattoo color, tattoo>)
 };
 
 

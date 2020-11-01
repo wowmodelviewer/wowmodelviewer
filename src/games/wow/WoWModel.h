@@ -75,10 +75,12 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<GLuint> replaceTextures;
 
   inline void drawModel();
-  void initCommon(GameFile * f);
-  bool isAnimated(GameFile * f);
-  void initAnimated(GameFile * f);
-  void initStatic(GameFile * f);
+  void initCommon();
+  bool isAnimated();
+  void initAnimated();
+  void initStatic();
+  void initRaceInfos();
+
 
   void animate(ssize_t anim);
   void calcBones(ssize_t anim, size_t time);
@@ -226,7 +228,7 @@ public:
   // -------------------------------
 
   void updateEmitters(float dt);
-  void setLOD(GameFile * f, int index);
+  void setLOD(int index);
 
   void setupAtt(int id);
   void setupAtt2(int id);
@@ -239,6 +241,7 @@ public:
   ModelType modelType;
   CharModelDetails charModelDetails;
   CharDetails cd;
+  RaceInfos infos;
   TabardDetails td;
   ModelHeader header;
   std::set<GeosetNum> creatureGeosetData;

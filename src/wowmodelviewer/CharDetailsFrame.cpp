@@ -60,9 +60,8 @@ void CharDetailsFrame::setModel(WoWModel * model)
 
   charCustomizationGS->Clear(true);
 
-  RaceInfos infos;
-  RaceInfos::getCurrent(model, infos);
-
+  const auto infos = m_model->infos;
+  
   if(GAMEDIRECTORY.majorVersion() < 9)
   {
     auto options = m_model->cd.getCustomizationOptions();
@@ -139,8 +138,8 @@ void CharDetailsFrame::randomiseChar()
   m_model->cd.setRandomValue(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION);
 
   // Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
-  RaceInfos infos;
-  if (m_model->cd.isDemonHunter() || (RaceInfos::getCurrent(m_model, infos) &&
+  const auto infos = m_model->infos;
+  if (m_model->cd.isDemonHunter() || (infos.raceID != -1 &&
       infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     m_model->cd.setRandomValue(CharDetails::CUSTOM1_STYLE);

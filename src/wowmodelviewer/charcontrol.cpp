@@ -180,8 +180,8 @@ void CharControl::UpdateModel(Attachment *a)
 
   Init();
 
-  RaceInfos infos;
-  if (RaceInfos::getCurrent(model, infos)) // fails if it is a creature
+  const auto infos = model->infos;
+  if (infos.raceID != -1) // fails if it is a creature
   {
     cdFrame->Enable(true);
     tabardSpins[SPIN_TABARD_ICON]->Enable(true);
@@ -574,8 +574,8 @@ void CharControl::selectSet()
 
 void CharControl::selectStart()
 {
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(model, infos))
+  const auto infos = model->infos;
+  if (infos.raceID == -1)
     return;
 
   ClearItemDialog();
