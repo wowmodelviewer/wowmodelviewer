@@ -1187,7 +1187,7 @@ void ModelViewer::LoadItem(unsigned int id)
   {
     QString query = QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                             "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.ID "
+                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.MaterialResourcesID "
                             "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
                             "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 

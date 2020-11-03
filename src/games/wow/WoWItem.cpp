@@ -277,7 +277,7 @@ void WoWItem::load()
       classFilter = QString("(ComponentTextureFileData.ClassID = %1 OR ComponentTextureFileData.ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
     
     if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.MaterialResourcesID "
                               "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                               "WHERE (ComponentTextureFileData.GenderIndex = %1 OR ComponentTextureFileData.GenderIndex = %2) "
                               "AND ItemDisplayInfoID = %3 AND %4 "
@@ -1172,7 +1172,7 @@ int WoWItem::getCustomTextureId(size_t index)
 {
   sqlResult infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
-                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
+                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.MaterialResourcesID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"TextureItemID1":"TextureItemID2").arg(m_displayId),
                      infos))
     return 0;

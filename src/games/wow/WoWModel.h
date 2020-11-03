@@ -278,6 +278,8 @@ public:
   WoWModel* getMergedModel(uint fileID);
 
   void refresh();
+  void refresh8x();
+  void refresh9x();
   void refreshCustomSection(CharDetails::BaseSectionType section, CharDetails::CustomizationType customType);
   
   QString getNameForTex(uint16 tex);

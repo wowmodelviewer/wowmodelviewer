@@ -2324,56 +2324,29 @@ void WoWModel::unmergeModel(WoWModel * m)
 
 void WoWModel::refresh()
 {
+  if (GAMEDIRECTORY.majorVersion() < 9)
+    refresh8x();
+  else
+    refresh9x();
+}
+
+void WoWModel::refresh8x()
+{
   TextureID charTex = 0;
   bool showScalp = true;
+
+  // Reset geosets
+  for (size_t i = 0; i < NUM_GEOSETS; i++)
+    cd.geosets[i] = 1;
 
   if (infos.raceID == -1) // if no race info found, simply update geosets
   {
     // reset geosets
-    for (auto geo : cd.geosets)
-      setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
-
+    for (uint i = 0; i < NUM_GEOSETS; i++)
+      setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
     return;
   }
 
-  // Reset geosets
-  for (auto geo : cd.geosets)
-    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
-
-  // reset char texture
-  tex.reset(infos.textureLayoutID);
-  for (auto t : cd.textures)
-  {
-    if(t.second.type != 1)
-    {
-      updateTextureList(GAMEDIRECTORY.getFile(t.second.fileId), t.second.type); 
-    }
-    else
-    {
-      tex.addLayer(GAMEDIRECTORY.getFile(t.second.fileId), t.second.region, t.first);
-    }    
-  }
-
-  tex.compose(charTex);
-
-  // set replacable textures
-  replaceTextures[TEXTURE_SKIN] = charTex;
-
-
-  // Eye Glow Geosets are ID 1701, 1702, etc.
-  size_t egt = cd.eyeGlowType;
-  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
-  for (size_t i = 0; i < rawGeosets.size(); i++)
-  {
-    int id = geosets[i]->id;
-    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
-      showGeoset(i, (id == egtId));
-  }
-
-  return;
-
-  
-  
   for (auto it : mergedModels)
   {
     // hide all geosets of customization models. The correct ones will be set later
@@ -2391,9 +2364,9 @@ void WoWModel::refresh()
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
   // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
-  
+
   if (foundTextures.size() > 0)
-    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]),-1,0);
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), -1, 0);
 
   if (foundTextures.size() > 1)
   {
@@ -2488,7 +2461,7 @@ void WoWModel::refresh()
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
   }
 
-    
+
   // CUSTOM1 - Tattoos for Demon Hunters, Markings for Vulpera, Piercings for Male Dark Iron Dwarves.
   // Because custom sections could deal with textures or geosets, we check both.
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
@@ -2500,8 +2473,8 @@ void WoWModel::refresh()
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceID)
-        .arg(infos.sexID)
+        .arg(infos.raceid)
+        .arg(infos.sexid)
         .arg(cd.get(CharDetails::CUSTOM1_STYLE))
         .arg(CharDetails::Custom1BaseType);
     sqlResult custom1Style = GAMEDATABASE.sqlQuery(query);
@@ -2511,11 +2484,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom1Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2533,7 +2506,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom1BaseType);
@@ -2565,8 +2538,8 @@ void WoWModel::refresh()
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceID)
-        .arg(infos.sexID)
+        .arg(infos.raceid)
+        .arg(infos.sexid)
         .arg(cd.get(CharDetails::CUSTOM2_STYLE))
         .arg(CharDetails::Custom2BaseType);
     sqlResult custom2Style = GAMEDATABASE.sqlQuery(query);
@@ -2576,11 +2549,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom2Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2598,7 +2571,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom2BaseType);
@@ -2624,15 +2597,15 @@ void WoWModel::refresh()
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
   if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
-    
+
     refreshCustomSection(CharDetails::Custom3BaseType, CharDetails::CUSTOM3_STYLE);
     /*
     // Geoset modifications:
     query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                   "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
         .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-        .arg(infos.raceID)
-        .arg(infos.sexID)
+        .arg(infos.raceid)
+        .arg(infos.sexid)
         .arg(cd.get(CharDetails::CUSTOM3_STYLE))
         .arg(CharDetails::Custom3BaseType);
     sqlResult custom3Style = GAMEDATABASE.sqlQuery(query);
@@ -2642,11 +2615,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom3Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2664,7 +2637,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom3BaseType);
@@ -2684,12 +2657,12 @@ void WoWModel::refresh()
   }
 
   foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
-  
+
   // only show underwear tops/bras if the character isn't wearing a shirt or chest:
   if (cd.showUnderwear && foundTextures.size() > 1 &&
-      getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
+    getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2);
-    
+
   // only show underwear bottoms if the character isn't wearing pants:
   if (cd.showUnderwear && getItem(CS_PANTS)->id() < 1)
   {
@@ -2698,14 +2671,14 @@ void WoWModel::refresh()
     // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
     if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 1;
-  } 
+  }
   else  // hide underwear
   {
     // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
     if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 0;
   }
-  
+
   // horns
   // cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::CUSTOM2_STYLE);
 
@@ -2736,11 +2709,124 @@ void WoWModel::refresh()
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
     cd.geosets[CG_WRISTBANDS] = 0;
-  
+
   // reset geosets
   for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
 
+
+  WoWItem * headItem = getItem(CS_HEAD);
+
+  if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
+  {
+    QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+      "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+      "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+      .arg(infos.raceID)
+      .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg(headItem->id());
+
+
+
+    sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
+
+    if (helmetInfos.valid && !helmetInfos.values.empty())
+    {
+      for (auto it : helmetInfos.values)
+      {
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+      }
+    }
+  }
+
+  // finalize character texture
+  tex.compose(charTex);
+
+  // set replacable textures
+  replaceTextures[TEXTURE_SKIN] = charTex;
+
+  // If model is one of these races, show the feet (don't wear boots)
+  cd.showFeet = infos.barefeet;
+
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  size_t egt = cd.eyeGlowType;
+  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i = 0; i < rawGeosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
+      showGeoset(i, (id == egtId));
+  }
+  refreshMerging();
+}
+
+void WoWModel::refresh9x()
+{
+  TextureID charTex = 0;
+  bool showScalp = true;
+
+  for (auto it : mergedModels)
+  {
+    // hide all geosets of customization models. The correct ones will be set later
+    if (it->mergedModelType == 1)
+      it->hideAllGeosets();
+  }
+
+  // show ears, if toggled
+  if (cd.showEars)
+    cd.geosets[CG_EARS] = 2;
+
+  if (infos.raceID == -1) // if no race info found, simply update geosets
+  {
+    // reset geosets
+    for (auto geo : cd.geosets)
+      setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+    return;
+  }
+
+  // reset char texture
+  tex.reset(infos.textureLayoutID);
+  for (auto t : cd.textures)
+  {
+    if(t.second.type != 1)
+    {
+      updateTextureList(GAMEDIRECTORY.getFile(t.second.fileId), t.second.type); 
+    }
+    else
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(t.second.fileId), t.second.region, t.first);
+    }    
+  }
+
+  //refresh equipment
+
+  for (auto it : *this)
+    it->refresh();
+
+  LOG_INFO << "Current Equipment :"
+    << "Head" << getItem(CS_HEAD)->id()
+    << "Shoulder" << getItem(CS_SHOULDER)->id()
+    << "Shirt" << getItem(CS_SHIRT)->id()
+    << "Chest" << getItem(CS_CHEST)->id()
+    << "Belt" << getItem(CS_BELT)->id()
+    << "Legs" << getItem(CS_PANTS)->id()
+    << "Boots" << getItem(CS_BOOTS)->id()
+    << "Bracers" << getItem(CS_BRACERS)->id()
+    << "Gloves" << getItem(CS_GLOVES)->id()
+    << "Cape" << getItem(CS_CAPE)->id()
+    << "Right Hand" << getItem(CS_HAND_RIGHT)->id()
+    << "Left Hand" << getItem(CS_HAND_LEFT)->id()
+    << "Quiver" << getItem(CS_QUIVER)->id()
+    << "Tabard" << getItem(CS_TABARD)->id();
+
+  // gloves - this is so gloves have preference over shirt sleeves.
+  if (cd.geosets[CG_GLOVES] > 1)
+    cd.geosets[CG_WRISTBANDS] = 0;
+  
+  // Reset geosets
+  for (auto geo : cd.geosets)
+    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
 
   WoWItem * headItem = getItem(CS_HEAD);
 
@@ -2774,6 +2860,16 @@ void WoWModel::refresh()
 
   // If model is one of these races, show the feet (don't wear boots)
   cd.showFeet = infos.barefeet;
+
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  size_t egt = cd.eyeGlowType;
+  int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i = 0; i < rawGeosets.size(); i++)
+  {
+    int id = geosets[i]->id;
+    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
+      showGeoset(i, (id == egtId));
+  }
 
   refreshMerging();
 }
