@@ -43,7 +43,7 @@
 
 // if you need extra qualification on software version, move this to 1
 # define _BETAVERSION 0
-# define _ALPHAVERSION 0
+# define _ALPHAVERSION 1
 #ifndef _BUILDNUMBER
   #define _BUILDNUMBER 0
 #endif
