@@ -49,6 +49,7 @@ bool core::GameDatabase::initFromXML(const QString & file)
    }
 
    sqlite3_profile(m_db, GameDatabase::logQueryTime, m_db);
+
    return createDatabaseFromXML(core::Game::instance().configFolder() + file);
 }
 
@@ -111,7 +112,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
   {
     if ((*it)->create())
     {
-      if (!(*it)->fill())
+      if (!(*it)->fill() && !m_fastMode)
       {
         LOG_ERROR << "Error during table filling" << (*it)->name;
         result = false;
@@ -119,8 +120,11 @@ bool core::GameDatabase::createDatabaseFromXML(const QString & file)
     }
     else
     {
-      LOG_ERROR << "Error during table creation" << (*it)->name;
-      result = false;
+      if (!m_fastMode) // if table already exists in fast mode, continue
+      {
+        LOG_ERROR << "Error during table creation" << (*it)->name;
+        result = false;
+      }
     }
   }
 
