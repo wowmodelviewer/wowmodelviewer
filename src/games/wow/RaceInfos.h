@@ -35,6 +35,7 @@ class _RACEINFOS_API_ RaceInfos
     static void init();
     static int getHDModelForFileID(int);
     static bool getRaceInfosForFileID(int, RaceInfos &);
+    static int getFileIDForRaceSex(const int & race, const int & sex);
 
   private:
     static std::map<int, RaceInfos> RACES;

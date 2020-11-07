@@ -201,3 +201,14 @@ bool RaceInfos::getRaceInfosForFileID(int fileid, RaceInfos & infos)
 
   return false;
 }
+
+int RaceInfos::getFileIDForRaceSex(const int & race, const int & sex)
+{
+  for (auto &r : RACES)
+  {
+    if (r.second.raceID == race && r.second.sexID == sex)
+      return r.first;
+  }
+
+  return -1;
+}

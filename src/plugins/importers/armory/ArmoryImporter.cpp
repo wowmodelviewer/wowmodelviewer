@@ -131,58 +131,15 @@ CharInfos * ArmoryImporter::importChar(QString url) const
     obj = root.value("gender").toObject();
     result->gender = obj.value("name").toString().toStdString();
 
-    const auto app = root.value("appearance").toObject();
-    result->skinColor = app.value("skin_color").toInt();
-    result->faceType = app.value("face_variation").toInt();
-    result->hairColor = app.value("hair_color").toInt();
-    result->hairStyle = app.value("hair_variation").toInt();
-    result->facialHair = app.value("feature_variation").toInt();
-
-#if DEBUG_RESULTS > 0
-    LOG_INFO << "result->raceId" << result->raceId;
-    LOG_INFO << "result->gender" << result->gender.c_str();
-    LOG_INFO << "result->skinColor" << result->skinColor;
-    LOG_INFO << "result->faceType" << result->faceType;
-    LOG_INFO << "result->hairColor" << result->hairColor;
-    LOG_INFO << "result->hairStyle" << result->hairStyle;
-    LOG_INFO << "result->facialHair" << result->facialHair;
-#endif
-
-    // Gather Demon Hunter options if present
-    if (!app.value("custom_display_options").isUndefined() && !app.value("custom_display_options").isNull())
+    // Gather character customizations
+    const auto customizations = root.value("customizations").toArray();
+    for (const auto& customization : customizations)
     {
-      const auto custom = app.value("custom_display_options").toArray();
-      result->isDemonHunter = true;
-      result->DHHorns = custom.at(1).toInt();
-      result->DHBlindfolds = custom.at(2).toInt();
-
-      const auto tattoo = custom.at(0).toInt();
-
-      if (tattoo != 0)
-      {
-        auto tattooStyle = tattoo % 6;
-        auto tattooColor = tattoo / 6;
-
-        if (tattooStyle == 0)
-        {
-          tattooStyle = 6;
-          tattooColor--;
-        }
-
-        result->DHTattooStyle = tattooStyle;
-        result->DHTattooColor = tattooColor;
-
-#ifdef DEBUG_RESULTS
-        LOG_INFO << "Reading demon hunter values";
-        LOG_INFO << custom.at(0).toInt() << custom.at(1).toInt() << custom.at(2).toInt();
-        LOG_INFO << "result->DHHorns" << result->DHHorns;
-        LOG_INFO << "result->DHBlindfolds" << result->DHBlindfolds;
-        LOG_INFO << "result->DHTattooStyle" << result->DHTattooStyle;
-        LOG_INFO << "result->DHTattooColor" << result->DHTattooColor;
-#endif
-
-      }
+      auto optionid = customization.toObject().value("option").toObject().value("id").toInt();
+      auto choiceid = customization.toObject().value("choice").toObject().value("id").toInt();
+      result->customizations.emplace_back(optionid, choiceid);
     }
+
 
     // Gather Items
     result->hasTransmogGear = false;
@@ -209,10 +166,10 @@ CharInfos * ArmoryImporter::importChar(QString url) const
     if (!guildTabard.isEmpty())
     {
       result->tabardIcon = guildTabard.value("emblem").toObject().value("id").toInt();
-      result->IconColor = guildTabard.value("emblem").toObject().value("color").toObject().value("id").toInt();
+      result->iconColor = guildTabard.value("emblem").toObject().value("color").toObject().value("id").toInt();
       result->tabardBorder = guildTabard.value("border").toObject().value("id").toInt();
-      result->BorderColor = guildTabard.value("border").toObject().value("color").toObject().value("id").toInt();
-      result->Background = guildTabard.value("background").toObject().value("color").toObject().value("id").toInt();
+      result->borderColor = guildTabard.value("border").toObject().value("color").toObject().value("id").toInt();
+      result->background = guildTabard.value("background").toObject().value("color").toObject().value("id").toInt();
      
       result->customTabard = true;
     }

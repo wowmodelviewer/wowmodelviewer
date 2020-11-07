@@ -2429,7 +2429,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
        it != PLUGINMANAGER.end();
        ++it)
   {
-    ImporterPlugin * plugin = dynamic_cast<ImporterPlugin *>(*it);
+    const auto * plugin = dynamic_cast<ImporterPlugin *>(*it);
     if (plugin && plugin->acceptURL(url))
     {
       result = plugin->importChar(url);
@@ -2444,28 +2444,10 @@ void ModelViewer::ImportArmoury(wxString strURL)
       return;
     }
 
-    // retrieve model files id from DB
-    QString query = QString("SELECT CMDM.FileID as malemodel, CMDF.FileID AS femalemodel, CMDMHD.FileID as malemodelHD, CMDFHD.FileID AS femalemodelHD FROM ChrRaces "
-                            "LEFT JOIN CreatureDisplayInfo CDIM ON CDIM.ID = MaleDisplayID LEFT JOIN CreatureModelData CMDM ON CDIM.ModelID = CMDM.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIF ON CDIF.ID = FemaleDisplayID LEFT JOIN CreatureModelData CMDF ON CDIF.ModelID = CMDF.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIMHD ON CDIMHD.ID = HighResMaleDisplayId LEFT JOIN CreatureModelData CMDMHD ON CDIMHD.ModelID = CMDMHD.ID "
-                            "LEFT JOIN CreatureDisplayInfo CDIFHD ON CDIFHD.ID = HighResFemaleDisplayId LEFT JOIN CreatureModelData CMDFHD ON CDIFHD.ModelID = CMDFHD.ID "
-                            "WHERE ChrRaces.ID = %1").arg(result->raceId);
+    const auto sex = (result->gender == "Male") ? 0 : 1;
 
-    sqlResult r = GAMEDATABASE.sqlQuery(query);
-
-    if (!r.valid || r.values.empty())
-    {
-      LOG_ERROR << "Impossible to query model information from armory";
-      wxMessageBox(wxT("An error occured during Armory data interpretation."), wxT("Armory Error"));
-      return;
-    }
-
-    int baseIndex = (result->gender == "Male") ? 0 : 1;
-
-    int modelToLoad = (r.values[0][baseIndex + 2].toInt() != 0) ? r.values[0][baseIndex + 2].toInt() : r.values[0][baseIndex].toInt();
-
-    LoadModel(GAMEDIRECTORY.getFile(modelToLoad));
+    LOG_INFO << "file to load" << RaceInfos::getFileIDForRaceSex(result->raceId, sex);
+    LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
 
     if (!g_canvas->model())
       return;
@@ -2477,31 +2459,19 @@ void ModelViewer::ImportArmoury(wxString strURL)
     }
 
     // Update the model
-    g_charControl->model->cd.set(CharDetails::SKIN_COLOR, result->skinColor);
-    g_charControl->model->cd.set(CharDetails::FACE, result->faceType);
-    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_COLOR, result->hairColor);
-    g_charControl->model->cd.set(CharDetails::FACIAL_CUSTOMIZATION_STYLE, result->hairStyle);
-    g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, result->facialHair);
-    g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
+    for (const auto customization : result->customizations)
+      g_charControl->model->cd.set(customization.first, customization.second);
 
-    // deal with Demon hunter stuff
-    if (result->isDemonHunter == true)
-    {
-      g_charControl->model->cd.setDemonHunterMode(true);
-      g_charControl->model->cd.set(CharDetails::CUSTOM2_STYLE, result->DHHorns);
-      g_charControl->model->cd.set(CharDetails::CUSTOM3_STYLE, result->DHBlindfolds);
-      g_charControl->model->cd.set(CharDetails::CUSTOM1_STYLE, result->DHTattooStyle);
-      g_charControl->model->cd.set(CharDetails::CUSTOM1_COLOR, result->DHTattooColor);
-    }
+    g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
 
     if (result->customTabard)
     {
       g_charControl->model->td.showCustom = true;
       g_charControl->model->td.setIconId(result->tabardIcon);
-      g_charControl->model->td.setIconColor(result->IconColor);
+      g_charControl->model->td.setIconColor(result->iconColor);
       g_charControl->model->td.setBorderId(result->tabardBorder);
-      g_charControl->model->td.setBorderColor(result->BorderColor);
-      g_charControl->model->td.setBackgroundId(result->Background);
+      g_charControl->model->td.setBorderColor(result->borderColor);
+      g_charControl->model->td.setBackgroundId(result->background);
       g_charControl->model->td.setTabardId(result->equipment[CS_TABARD]);
     }
 
