@@ -2446,7 +2446,6 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
     const auto sex = (result->gender == "Male") ? 0 : 1;
 
-    LOG_INFO << "file to load" << RaceInfos::getFileIDForRaceSex(result->raceId, sex);
     LoadModel(GAMEDIRECTORY.getFile(RaceInfos::getFileIDForRaceSex(result->raceId, sex)));
 
     if (!g_canvas->model())
