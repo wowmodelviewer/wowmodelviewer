@@ -39,7 +39,7 @@ void CharTexture::reset(unsigned int _layoutSizeId)
   layoutSizeId = _layoutSizeId;
 }
 
-#define DEBUG_TEXTURE 0
+#define DEBUG_TEXTURE 0 // 1 output component names, 2 save intermediate images on disk
 
 void CharTexture::compose(TextureID texID)
 {
@@ -125,13 +125,16 @@ void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct) c
   const auto newImage = tmp->scaled(coords.width, coords.height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 
-#if DEBUG_TEXTURE > 1
+#if DEBUG_TEXTURE > 0
   const auto region = ct.region;
   const auto x = coords.xpos;
   const auto y = coords.ypos;
   const auto width = coords.width;
   const auto height = coords.height;
   LOG_INFO << __FUNCTION__ << ct.file->fullname() << region << x << y << width << height;
+#endif
+
+#if DEBUG_TEXTURE > 1
   newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
 #endif
 

@@ -994,7 +994,6 @@ void ModelViewer::LoadModel(GameFile * file)
     m->addChild(new WoWItem(CS_CAPE));
     m->addChild(new WoWItem(CS_QUIVER));
     m->modelType = MT_CHAR;
-    m->cd.reset(m);
   }
   else
   {

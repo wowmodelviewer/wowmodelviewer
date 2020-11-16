@@ -46,9 +46,6 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
     buildList();
   }
 
-  if(!values_.empty())
-    details_.set(ID_, values_[0]);
-  
   refresh();
 }
 
@@ -60,30 +57,12 @@ void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 
 void CharDetailsCustomizationChoice::onEvent(Event * e)
 {
-  /*
-  // update params for dynamically changing customization stuff (ie face type depends on skin color)
-  if ((e->type() == CharDetailsEvent::SKIN_COLOR_CHANGED && m_type == CharDetails::FACE) ||
-      (e->type() == CharDetailsEvent::FACE_CHANGED && m_type == CharDetails::SKIN_COLOR))
-  {
+  auto * event = dynamic_cast<CharDetailsEvent *>(e);
+  LOG_INFO << __FUNCTION__;
+  if (event)
+    LOG_INFO << event->type() << CharDetailsEvent::CHOICE_LIST_CHANGED << event->getCustomizationOptionId() << ID_;
+  if (event && (event->type() == CharDetailsEvent::CHOICE_LIST_CHANGED) && (event->getCustomizationOptionId() == ID_))
     buildList();
-    refresh();
-  }
-
-  // refesh only if event corresponds to current customization type (avoid flicker effect)
-  if((e->type() == CharDetailsEvent::SKIN_COLOR_CHANGED && m_type == CharDetails::SKIN_COLOR) ||
-     (e->type() == CharDetailsEvent::FACE_CHANGED && m_type == CharDetails::FACE) ||
-     (e->type() == CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED && m_type == CharDetails::FACIAL_CUSTOMIZATION_STYLE) ||
-     (e->type() == CharDetailsEvent::FACIAL_CUSTOMIZATION_COLOR_CHANGED && m_type == CharDetails::FACIAL_CUSTOMIZATION_COLOR) ||
-     (e->type() == CharDetailsEvent::ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED && m_type == CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) ||
-     (e->type() == CharDetailsEvent::CUSTOM1_STYLE_CHANGED && m_type == CharDetails::CUSTOM1_STYLE) ||
-     (e->type() == CharDetailsEvent::CUSTOM1_COLOR_CHANGED && m_type == CharDetails::CUSTOM1_COLOR) ||
-     (e->type() == CharDetailsEvent::CUSTOM2_STYLE_CHANGED && m_type == CharDetails::CUSTOM2_STYLE) ||
-     (e->type() == CharDetailsEvent::CUSTOM3_STYLE_CHANGED && m_type == CharDetails::CUSTOM3_STYLE))
-  {
-    refresh();
-  }
-  */
-
 }
 
 void CharDetailsCustomizationChoice::buildList()
@@ -94,7 +73,9 @@ void CharDetailsCustomizationChoice::buildList()
     choice_->Clear();
     values_.clear();
 
-    auto ids = details_.getCustomisationChoices(ID_);
+    auto ids = details_.getCustomizationChoices(ID_);
+
+    LOG_INFO << __FUNCTION__ << ID_;
 
     if (ids.empty())
       return;
@@ -108,6 +89,8 @@ void CharDetailsCustomizationChoice::buildList()
 
     query.chop(1);
     query += ") ORDER BY OrderIndex";
+
+    LOG_INFO << query;
 
     auto choices = GAMEDATABASE.sqlQuery(query);
 

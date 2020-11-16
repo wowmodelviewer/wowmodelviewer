@@ -126,6 +126,12 @@ void Texture::load()
         format = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
         blocksize = 16;
       }
+      /*
+      if(attr[1] == 0 && attr[2] == 0)
+      {
+        format = GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
+      }
+      */
 
       // Fix to the BLP2 format required in WoW 2.0 thanks to Linghuye (creator of MyWarCraftStudio)
       if (attr[1] == 8 && attr[2] == 7) 

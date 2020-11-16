@@ -52,48 +52,53 @@ class CharDetailsEvent : public Event
     // Constants / Enums
     enum EventType
     {
-      SKIN_COLOR_CHANGED = 0xFFFFF000,
-      FACE_CHANGED = 0xFFFFF001,
-      FACIAL_CUSTOMIZATION_STYLE_CHANGED = 0xFFFFF002,
-      FACIAL_CUSTOMIZATION_COLOR_CHANGED = 0xFFFFF003,
-      ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED = 0xFFFFF004,
-      CUSTOM1_STYLE_CHANGED = 0xFFFFF005,
-      CUSTOM1_COLOR_CHANGED = 0xFFFFF006,
-      CUSTOM2_STYLE_CHANGED = 0xFFFFF007,
-      CUSTOM3_STYLE_CHANGED = 0xFFFFF008,
-      DH_MODE_CHANGED = 0xFFFFF009
+      SKIN_COLOR_CHANGED = 0x10000000,
+      FACE_CHANGED = 0x10000001,
+      FACIAL_CUSTOMIZATION_STYLE_CHANGED = 0x10000002,
+      FACIAL_CUSTOMIZATION_COLOR_CHANGED = 0x10000003,
+      ADDITIONAL_FACIAL_CUSTOMIZATION_CHANGED = 0x10000004,
+      CUSTOM1_STYLE_CHANGED = 0x10000005,
+      CUSTOM1_COLOR_CHANGED = 0x10000006,
+      CUSTOM2_STYLE_CHANGED = 0x10000007,
+      CUSTOM3_STYLE_CHANGED = 0x10000008,
+      DH_MODE_CHANGED = 0x10000009,
+      CHOICE_LIST_CHANGED = 0x1000000A
     };
 
-	// Constructors
-	CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
+  // Constructors
+  CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
+  void setCustomizationOptionId(const uint id) { customizationOptionId_ = id; }
+  uint getCustomizationOptionId() const { return customizationOptionId_; }
+
 
   protected :
-	// Constants / Enums
+  // Constants / Enums
 
-	// Constructors
+  // Constructors
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
 
-	// Members
+  // Members
 
   private :
-	// Constants / Enums
+  // Constants / Enums
 
-	// Constructors
+  // Constructors
 
-	// Destructors
+  // Destructors
 
-	// Methods
+  // Methods
 
-	// Members
+  // Members
+    uint customizationOptionId_;
 
-	// friend class declarations
+  // friend class declarations
 };
 
 // static members definition

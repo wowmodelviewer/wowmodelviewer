@@ -58,51 +58,51 @@ class Observable;
 
 class _EVENT_API_ Event
 {
-	public :
-		// Constants / Enums
-		enum EventType
-		{
-      DESTROYED = 0xFFFFFF00
-		};
+  public :
+    // Constants / Enums
+    enum EventType
+    {
+      DESTROYED = 0x00000000
+    };
 
 
-		// Constructors
-		Event(Observable *, EventType);
+    // Constructors
+    Event(Observable *, EventType);
 
-		// Destructors
-		~Event();
+    // Destructors
+    virtual ~Event() = default;
 
-		// Methods
+    // Methods
     EventType type() const { return m_type; }
     void setType(EventType type) { m_type = type; }
 
-		Observable * sender() { return m_p_sender; }
+    Observable * sender() { return m_p_sender; }
 
-	protected :
-		// Constants / Enums
+  protected :
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
+    // Members
 
-	private :
-		// Constants / Enums
+  private :
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
+    // Methods
 
-		// Members
-		EventType m_type;
-		Observable * m_p_sender;
+    // Members
+    EventType m_type;
+    Observable * m_p_sender;
 
-		// friend class declarations
+    // friend class declarations
 };
 
 // static members definition

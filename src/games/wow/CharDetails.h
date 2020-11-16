@@ -109,6 +109,7 @@ public:
   class TextureCustomization
   {
   public:
+    uint layer;
     int region;
     uint type;
     uint fileId;
@@ -121,13 +122,14 @@ public:
   bool isNPC;
 
   std::map <uint, uint> geosets; // map <geoset type, geosetid>
-  std::map <uint, TextureCustomization> textures; // map <layer, TextureCustomization>
+  std::vector<TextureCustomization> textures;
 
   // save + load
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-  void reset(WoWModel *);
+  void reset(WoWModel * m = nullptr);
+  void randomise();
 
   std::vector<int> getTextureForSection(BaseSectionType);
   std::vector<int> getRegionForSection(BaseSectionType);
@@ -142,10 +144,8 @@ public:
 
   // wow version >= 9.x
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
-  std::vector<uint> getCustomisationChoices(const uint chrCustomizationOptionID);
+  std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
  
-  void setRandomValue(CustomizationType type);
-
   void setDemonHunterMode(bool);
   bool isDemonHunter() const { return isDemonHunter_; }
 
@@ -153,6 +153,7 @@ private:
 
   // wow version independant
   void fillCustomizationMap();
+  void setRandomValue(CustomizationType type);
 
   WoWModel * model_;
   bool isDemonHunter_;
@@ -168,18 +169,35 @@ private:
   std::map<uint, std::map<int, CustomizationParam> > multiCustomizationMap_;
 
   // wow version > 9.x
-  void fillCustomizationMap9x();
+  class CustomizationElements
+  {
+  public:
+    std::vector<std::pair<uint, uint> > geosets;
+    std::vector<TextureCustomization> textures;
+    void clear()
+    {
+      geosets.clear();
+      textures.clear();
+    }
+  };
 
-  bool applyChrCustomizationElements(sqlResult &);
+  void fillCustomizationMap9x();
+  void fillCustomizationMapForOption(uint chrCustomizationOption);
+
+  bool applyChrCustomizationElements(uint chrCustomizationOption, sqlResult &);
   static int bitMaskToSectionType(int mask);
-  int getParentOption(uint chrCustomizationOption);
+  std::vector<int> getParentOptions(uint chrCustomizationOption);
   int getChildOption(uint chrCustomizationOption);
 
   void initLinkedOptionsMap();
+  void resetGeosets();
 
+  std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
+  std::map<uint, CustomizationElements> customizationElementsPerOption_; // keep track of current elements applied for a given option
 
-  std::map<uint, std::vector<uint> > customizationMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
-  static std::map<uint, int> LINKED_OPTIONS_MAP_; // map < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID> (ie, <markings color, markings> or <tattoo color, tattoo>)
+  static std::multimap<uint, int> LINKED_OPTIONS_MAP_; // multimap < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID>
+                                                       // (ie, <markings color, markings> or <tattoo color, tattoo>)
+                                                       // some child options are multi parent (ie Tauren facial Markings & body markings are sharing same color)
 };
 
 

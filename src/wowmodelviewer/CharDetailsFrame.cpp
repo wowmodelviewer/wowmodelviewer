@@ -28,26 +28,26 @@ END_EVENT_TABLE()
 
 
 CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
-: wxWindow(parent, wxID_ANY), m_model(0)
+: wxWindow(parent, wxID_ANY), model_(nullptr)
 {
   LOG_INFO << "Creating CharDetailsFrame...";
 
-  wxFlexGridSizer *top = new wxFlexGridSizer(1);
+  auto top = new wxFlexGridSizer(1);
   top->AddGrowableCol(0);
 
-  charCustomizationGS = new wxFlexGridSizer(1);
-  charCustomizationGS->AddGrowableCol(0);
+  charCustomizationGS_ = new wxFlexGridSizer(1);
+  charCustomizationGS_->AddGrowableCol(0);
   top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1, 20), wxALIGN_CENTER),
            wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
 
-  top->Add(charCustomizationGS, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
+  top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
   top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
-  dhMode = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
-  top->Add(dhMode, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+  dhMode_ = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
+  top->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);
-  Layout();
+  wxWindowBase::Layout();
 }
 
 void CharDetailsFrame::setModel(WoWModel * model)
@@ -55,21 +55,21 @@ void CharDetailsFrame::setModel(WoWModel * model)
   if (!model)
     return;
 
-  m_model = model;
-  m_model->cd.attach(this);
+  model_ = model;
+  model_->cd.attach(this);
 
-  charCustomizationGS->Clear(true);
+  charCustomizationGS_->Clear(true);
 
-  const auto infos = m_model->infos;
+  const auto infos = model_->infos;
   
   if(GAMEDIRECTORY.majorVersion() < 9)
   {
-    auto options = m_model->cd.getCustomizationOptions();
+    auto options = model_->cd.getCustomizationOptions();
 
     for (auto& option : options)
     {
-      if (m_model->cd.getParams(option).possibleValues.size() > 1)
-        charCustomizationGS->Add(new CharDetailsCustomizationSpin(this, m_model->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+      if (model_->cd.getParams(option).possibleValues.size() > 1)
+        charCustomizationGS_->Add(new CharDetailsCustomizationSpin(this, model_->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     }
   }
   else
@@ -79,16 +79,16 @@ void CharDetailsFrame::setModel(WoWModel * model)
     if(options.valid && !options.values.empty())
     {
       for(auto& option : options.values)
-        charCustomizationGS->Add(new CharDetailsCustomizationChoice(this, m_model->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+        charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     }
   }
 
   if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
-    dhMode->Enable(true);
+    dhMode_->Enable(true);
   else
-    dhMode->Enable(false);
+    dhMode_->Enable(false);
 
-  dhMode->SetValue(model->cd.isDemonHunter());
+  dhMode_->SetValue(model->cd.isDemonHunter());
 
   SetAutoLayout(true);
   GetSizer()->SetSizeHints(this);
@@ -96,55 +96,34 @@ void CharDetailsFrame::setModel(WoWModel * model)
   GetParent()->Layout();
 }
 
-void CharDetailsFrame::onRandomise(wxCommandEvent &event)
+void CharDetailsFrame::onRandomise(wxCommandEvent &)
 {
-  randomiseChar();
+  if (!model_)
+    return;
+
+  model_->cd.randomise();
 }
 
 void CharDetailsFrame::onDHMode(wxCommandEvent &event)
 {
-  if (!m_model)
+  if (!model_)
     return;
 
   if (event.IsChecked())
-    m_model->cd.setDemonHunterMode(true);
+    model_->cd.setDemonHunterMode(true);
   else
-    m_model->cd.setDemonHunterMode(false);
+    model_->cd.setDemonHunterMode(false);
 
-  setModel(m_model);
-  m_model->refresh();
+  setModel(model_);
+  model_->refresh();
 }
 
 void CharDetailsFrame::onEvent(Event * event)
 {
   if (event->type() == CharDetailsEvent::DH_MODE_CHANGED)
   {
-    dhMode->SetValue(m_model->cd.isDemonHunter());
-    setModel(m_model);
+    dhMode_->SetValue(model_->cd.isDemonHunter());
+    setModel(model_);
   }
 }
 
-
-void CharDetailsFrame::randomiseChar()
-{
-  if (!m_model)
-    return;
-
-  // Choose random values for the looks! ^_^
-  m_model->cd.setRandomValue(CharDetails::SKIN_COLOR);
-  m_model->cd.setRandomValue(CharDetails::FACE);
-  m_model->cd.setRandomValue(CharDetails::FACIAL_CUSTOMIZATION_STYLE);
-  m_model->cd.setRandomValue(CharDetails::FACIAL_CUSTOMIZATION_COLOR);
-  m_model->cd.setRandomValue(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION);
-
-  // Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
-  const auto infos = m_model->infos;
-  if (m_model->cd.isDemonHunter() || (infos.raceID != -1 &&
-      infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
-  {
-    m_model->cd.setRandomValue(CharDetails::CUSTOM1_STYLE);
-    m_model->cd.setRandomValue(CharDetails::CUSTOM1_COLOR);
-    m_model->cd.setRandomValue(CharDetails::CUSTOM2_STYLE);
-    m_model->cd.setRandomValue(CharDetails::CUSTOM3_STYLE);
-  }
-}

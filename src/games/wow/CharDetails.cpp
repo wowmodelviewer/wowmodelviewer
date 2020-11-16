@@ -16,7 +16,7 @@
 #include <QFile>
 #include <QXmlStreamReader>
 
-std::map<uint, int> CharDetails::LINKED_OPTIONS_MAP_ = {
+std::multimap<uint, int> CharDetails::LINKED_OPTIONS_MAP_ = {
   // hardcoded values (need to figure out how to find this from DB - if possible ?)
   {726, 724}, // veins color linked to veins for BE male
   {730, 728} // veins color linked to veins for BE female
@@ -27,10 +27,7 @@ eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
 isNPC(true), model_(nullptr), isDemonHunter_(false)
 {
-  for(auto i = 0 ; i < NUM_GEOSETS; i++)
-    geosets[i] = 1;
-
-//  geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
+  resetGeosets();
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -225,18 +222,13 @@ void CharDetails::load(QString & f)
 
 void CharDetails::reset(WoWModel * model)
 {
-  model_ = model;
+  if ((model != nullptr) & (model != model_))
+  {
+    model_ = model;
+    fillCustomizationMap();
+  }
 
   currentCustomization_.clear();
-  currentCustomization_.insert({ SKIN_COLOR, 0 });
-  currentCustomization_.insert({ FACE, 0 });
-  currentCustomization_.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
-  currentCustomization_.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
-  currentCustomization_.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
-  currentCustomization_.insert({ CUSTOM1_STYLE, 0 });
-  currentCustomization_.insert({ CUSTOM1_COLOR, 0 });
-  currentCustomization_.insert({ CUSTOM2_STYLE, 0 });
-  currentCustomization_.insert({ CUSTOM3_STYLE, 0 });
 
   showUnderwear = true;
   showHair = true;
@@ -248,13 +240,52 @@ void CharDetails::reset(WoWModel * model)
 
   isDemonHunter_ = false;
 
-  fillCustomizationMap();
-
-  for (auto i = 0; i < NUM_GEOSETS; i++)
-    geosets[i] = 1;
+  resetGeosets();
 
   textures.clear();
+
+  if (GAMEDIRECTORY.majorVersion() < 9)
+  {
+    currentCustomization_.insert({ SKIN_COLOR, 0 });
+    currentCustomization_.insert({ FACE, 0 });
+    currentCustomization_.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
+    currentCustomization_.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
+    currentCustomization_.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
+    currentCustomization_.insert({ CUSTOM1_STYLE, 0 });
+    currentCustomization_.insert({ CUSTOM1_COLOR, 0 });
+    currentCustomization_.insert({ CUSTOM2_STYLE, 0 });
+    currentCustomization_.insert({ CUSTOM3_STYLE, 0 });
+  }
+  else
+  {
+    for (const auto &c : choicesPerOptionMap_)
+      set(c.first, c.second[0]);
+  }
 }
+
+void CharDetails::randomise()
+{
+  // TODO repair randomise
+  reset();
+  /*
+  // Choose random values for the looks! ^_^
+  setRandomValue(SKIN_COLOR);
+  setRandomValue(FACE);
+  setRandomValue(FACIAL_CUSTOMIZATION_STYLE);
+  setRandomValue(FACIAL_CUSTOMIZATION_COLOR);
+  setRandomValue(ADDITIONAL_FACIAL_CUSTOMIZATION);
+
+  // Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
+  if(isDemonHunter_)
+  {
+    setRandomValue(CUSTOM1_STYLE);
+    setRandomValue(CUSTOM1_COLOR);
+    setRandomValue(CUSTOM2_STYLE);
+    setRandomValue(CUSTOM3_STYLE);
+  }
+  */
+}
+
 
 std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
 {
@@ -741,7 +772,7 @@ void CharDetails::fillCustomizationMap8x()
 void CharDetails::fillCustomizationMap9x()
 {
   // clear any previous value found
-  customizationMap_.clear();
+  choicesPerOptionMap_.clear();
 
   const auto infos = model_->infos;
   if (infos.raceID == -1)
@@ -751,31 +782,70 @@ void CharDetails::fillCustomizationMap9x()
 
   if (options.valid)
     for (auto& option : options.values)
-      customizationMap_[option[0].toUInt()] = {};
-
-  CharDetails::LINKED_OPTIONS_MAP_.clear();
+      choicesPerOptionMap_[option[0].toUInt()] = {};
+  
+  LINKED_OPTIONS_MAP_.clear();
   initLinkedOptionsMap();
 
-  for(auto &option : customizationMap_)
+  for (auto &option : choicesPerOptionMap_)
+    fillCustomizationMapForOption(option.first);
+}
+
+void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
+{
+  const auto parentOptions = getParentOptions(chrCustomizationOption);
+ 
+  auto &vals = choicesPerOptionMap_.at(chrCustomizationOption);
+  const auto curvals = vals;
+  vals.clear();
+
+  // 1. fill direct values
+  auto choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(chrCustomizationOption));
+  if (choices.valid)
   {
-    sqlResult choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(option.first));
-    // check if there is a linked option
-    if(getParentOption(option.first) == -1) // regular option
+    LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();
+    for (auto v : choices.values)
+      vals.push_back(v[0].toUInt());
+  }
+
+  // 2. fill with parent values
+  /*
+  for (auto parentOption : parentOptions)
+  {
+    choices.valid = false;
+    if ((parentOption != -1) && (currentCustomization_.count(parentOption) != 0))
     {
-      
+      choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ID IN (SELECT ChrCustomizationChoiceID FROM ChrCustomizationElement WHERE RelatedChrCustomizationChoiceID = %1) "
+        "ORDER BY OrderIndex").arg(currentCustomization_[parentOption]));
     }
-   /* else // linked option, check possibilities from ChrCustomizationElements
+
+    if (choices.valid)
     {
-      choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ID IN "
-                                              "(SELECT ChrCustomizationChoiceID FROM ChrCustomizationElement WHERE RelatedChrCustomizationChoiceID = %1) "
-                                              "ORDER BY OrderIndex ").arg(currentCustomization_[getLinkedOption(option.first)]));
-    }
-    */
-    if (choices.valid && !choices.values.empty())
+      LOG_INFO << __FUNCTION__ << "INDIRECT values from" << parentOption << currentCustomization_[parentOption] << choices.values.size();
       for (auto v : choices.values)
-        option.second.push_back(v[0].toUInt());
+        vals.push_back(v[0].toUInt());
+    }
+  }
+
+  // remove potential duplicates
+  std::sort(vals.begin(), vals.end());
+  const auto last = std::unique(vals.begin(), vals.end());
+  vals.erase(last, vals.end());
+  */
+  if (vals != curvals)
+  {
+    LOG_INFO << __FUNCTION__ << chrCustomizationOption;
+    QString info;
+    for (const auto& v : vals)
+      info += QString("%1 ").arg(v);
+    LOG_INFO << info;
+
+    CharDetailsEvent event(this, CharDetailsEvent::CHOICE_LIST_CHANGED);
+    event.setCustomizationOptionId(chrCustomizationOption);
+    notify(event);
   }
 }
+
 
 CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
 {
@@ -854,13 +924,17 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
     return;
 
   currentCustomization_[chrCustomizationOptionID] = chrCustomizationChoiceID;
+  customizationElementsPerOption_.erase(chrCustomizationOptionID);
 
   LOG_INFO << __FUNCTION__ << chrCustomizationOptionID << chrCustomizationChoiceID;
-  const auto parentOption = getParentOption(chrCustomizationOptionID);
+  const auto parentOptions = getParentOptions(chrCustomizationOptionID);
   const auto childOption = getChildOption(chrCustomizationOptionID);
 
-  LOG_INFO << "Parent option for" << chrCustomizationOptionID << "->" << parentOption;
-  LOG_INFO << "Child option for" << chrCustomizationOptionID << "->" << childOption;
+  LOG_INFO << "Parent options for" << chrCustomizationOptionID;
+  for (const auto &opt : parentOptions)
+    LOG_INFO << "\t" << opt;
+  LOG_INFO << "Child option for" << chrCustomizationOptionID;
+    LOG_INFO << "\t" << childOption;
 
   auto choiceId = chrCustomizationChoiceID;
   auto relatedChoiceId = 0;
@@ -872,47 +946,96 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
                               .arg(relatedChoiceId);
 
   auto elements = GAMEDATABASE.sqlQuery(query);
-  applyChrCustomizationElements(elements);
-
-  // 2. Query elements coming from dependant options
-  // we are setting an option which is dependant from anther one, set relateChoiceId (ie, we are setting tattoo color, which depends on tattoo)
-  if (parentOption != -1) 
+  if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
   {
-    relatedChoiceId = currentCustomization_[parentOption];
-  }
-  // we are setting an option which have a dependant option, we need to set child choice which a new related choice (ie, we are setting tattoo, which needs to set tattoo color)
-  else if(childOption != -1)
-  {
-    choiceId = currentCustomization_[childOption];
-    relatedChoiceId = chrCustomizationChoiceID;
-  }
-
-  // query related ChrCustomizationElements
-  query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
-                  "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
-                  "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
-                  .arg(relatedChoiceId);
-
-  elements = GAMEDATABASE.sqlQuery(query);
-
-  if(applyChrCustomizationElements(elements))
-  {
-    model_->refresh();
-    TEXTUREMANAGER.dump();
-  }
-  else
-  {
-    LOG_ERROR << __FUNCTION__ << "No customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+    LOG_ERROR << __FUNCTION__ << "No direct customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
     LOG_ERROR << query;
   }
+
+  // 2. Query elements coming from parent options
+  for(const auto option:parentOptions)
+  {
+    if(option != -1)
+    {
+      relatedChoiceId = currentCustomization_[option];
+
+      // query related ChrCustomizationElements
+      query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+        "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+        "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
+        .arg(relatedChoiceId);
+
+      elements = GAMEDATABASE.sqlQuery(query);
+
+      if (!applyChrCustomizationElements(option, elements))
+      {
+        LOG_ERROR << __FUNCTION__ << "Parent Option" << option << "-> No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+        LOG_ERROR << query;
+      }
+    }
+  }
+
+  // 3. Query elements coming from child option
+  if (childOption != -1)
+  {
+    // we are setting an option which have a dependant option, we need to set child choice with a new related choice (ie, we are setting tattoo, which needs to set tattoo color)
+    choiceId = currentCustomization_[childOption];
+    relatedChoiceId = chrCustomizationChoiceID;
+    //customizationElementsPerOption_.erase(childOption);
+    fillCustomizationMapForOption(childOption);
+    
+    // query related ChrCustomizationElements
+    query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+      "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+      "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
+      .arg(relatedChoiceId);
+
+    elements = GAMEDATABASE.sqlQuery(query);
+
+    if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
+    {
+      LOG_ERROR << __FUNCTION__ << "Child option" << childOption << "No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+      LOG_ERROR << query;
+    }
+  }
+
+  // build customization
+  // reset
+  geosets.clear();
+  textures.clear();
+
+  //reset geoset to default
+  resetGeosets();
+
+  // apply customization elements
+  for(const auto& elt: customizationElementsPerOption_)
+  {
+    LOG_INFO << elt.first;
+    for (auto geo : elt.second.geosets)
+    {
+      if (geo.first == CG_EARS && !showEars)
+        continue;
+      geosets[geo.first] = geo.second;
+      LOG_INFO << geo.first << geo.second;
+    }
+
+    for (auto t : elt.second.textures)
+    {
+      LOG_INFO << GAMEDIRECTORY.getFile(t.fileId)->fullname();
+      textures.push_back(t);
+    }
+  }
+
+  model_->refresh();
+ // TEXTUREMANAGER.dump();
 }
 
-std::vector<uint> CharDetails::getCustomisationChoices(const uint chrCustomizationOptionID)
+std::vector<uint> CharDetails::getCustomizationChoices(const uint chrCustomizationOptionID)
 {
-  if (customizationMap_.count(chrCustomizationOptionID) == 0)
+  if (choicesPerOptionMap_.count(chrCustomizationOptionID) == 0)
     fillCustomizationMap9x();
 
-  return customizationMap_.at(chrCustomizationOptionID);
+  return choicesPerOptionMap_.at(chrCustomizationOptionID);
   
 }
 
@@ -930,14 +1053,14 @@ uint CharDetails::get(uint chrCustomizationOptionID) const
 
 void CharDetails::setRandomValue(CustomizationType type)
 {
-  std::vector<int> allValues = customizationParamsMap_[type].possibleValues;
-  if (allValues.size() == 0)
+  const auto allValues = customizationParamsMap_[type].possibleValues;
+  if (allValues.empty())
     return;
-  std::vector<int> flags = customizationParamsMap_[type].flags;
+  const auto flags = customizationParamsMap_[type].flags;
   std::vector<int> filteredIndices;
   for (uint i = 0; i < allValues.size(); i++)
   {
-    int flag = flags[i];
+    const auto flag = flags[i];
     if (isDemonHunter_)
     {
       if ((flag & SF_DEMON_HUNTER) || (flag & SF_DEMON_HUNTER_FACE) || (flag & SF_DEMON_HUNTER_BFX) || (flag & SF_REGULAR) || flag == 0)
@@ -953,16 +1076,16 @@ void CharDetails::setRandomValue(CustomizationType type)
       }
     }
   }
-  if (filteredIndices.size() > 0)
+  if (!filteredIndices.empty())
   {
-    uint maxVal = filteredIndices.size() - 1;
-    int randval = filteredIndices[randint(0, maxVal)];
+    const auto maxVal = filteredIndices.size() - 1;
+    const auto randval = filteredIndices[randint(0, maxVal)];
     set(type, randval);
   }
   else // ok, filtering left us with nothing...
   {
-    uint maxVal = allValues.size() - 1;
-    int randval = randint(0, maxVal);
+    const auto maxVal = allValues.size() - 1;
+    const auto randval = randint(0, maxVal);
     set(type, randval);
   }
 }
@@ -1106,8 +1229,10 @@ void CharDetails::setDemonHunterMode(bool val)
   }
 }
 
-bool CharDetails::applyChrCustomizationElements(sqlResult & elements)
+bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sqlResult & elements)
 {
+  LOG_INFO << __FUNCTION__ << chrCustomizationOption << elements.values.size();
+
   if (elements.valid && !elements.values.empty())
   {
     for (auto elt : elements.values) // treat each line
@@ -1121,7 +1246,7 @@ bool CharDetails::applyChrCustomizationElements(sqlResult & elements)
         if (vals.valid)
         {
           for (auto geo : vals.values)
-            geosets[geo[0].toUInt()] = geo[1].toUInt();
+            customizationElementsPerOption_[chrCustomizationOption].geosets.emplace_back(geo[0].toUInt(),geo[1].toUInt());
         }
       }
       else if (elt[1].toUInt() != 0) // added model customization
@@ -1138,19 +1263,26 @@ bool CharDetails::applyChrCustomizationElements(sqlResult & elements)
           "WHERE ChrCustomizationMaterial.ID = %2").arg(model_->infos.textureLayoutID).arg(elt[2].toUInt()));
 
         if (vals.valid)
-          textures[vals.values[0][0].toUInt()] = { bitMaskToSectionType(vals.values[0][1].toInt()), vals.values[0][2].toUInt(), vals.values[0][3].toUInt() };
+        {
+          TextureCustomization t{};
+          t.layer = vals.values[0][0].toUInt();
+          t.region = bitMaskToSectionType(vals.values[0][1].toInt());
+          t.type = vals.values[0][2].toUInt();
+          t.fileId = vals.values[0][3].toUInt();
+          customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
+        }
       }
       else if (elt[3].toUInt() != 0) // boneset customization ??
       {
-        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6];
       }
       else if (elt[4].toUInt() != 0) // cond model customization ??
       {
-        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6];
       }
       else if (elt[5].toUInt() != 0) // display info customization ??
       {
-        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6];
       }
     }
     return true;
@@ -1174,20 +1306,28 @@ int CharDetails::bitMaskToSectionType(int mask)
   return val;
 }
 
-int CharDetails::getParentOption(uint chrCustomizationOption)
+std::vector<int> CharDetails::getParentOptions(uint chrCustomizationOption)
 {
   initLinkedOptionsMap();
-  return CharDetails::LINKED_OPTIONS_MAP_.at(chrCustomizationOption);
+
+  std::vector<int> result;
+
+  const auto vals = LINKED_OPTIONS_MAP_.equal_range(chrCustomizationOption);
+
+  for (auto it = vals.first; it != vals.second; ++it)
+    result.push_back(it->second);
+
+  return result;
 }
 
 int CharDetails::getChildOption(uint chrCustomizationOption)
 {
   initLinkedOptionsMap();
 
-  for (const auto c: CharDetails::LINKED_OPTIONS_MAP_)
+  for (const auto &c: LINKED_OPTIONS_MAP_)
   {
-    if (c.second == chrCustomizationOption)
-      return c.first;
+    if (c.second == static_cast<int>(chrCustomizationOption))
+      return static_cast<int>(c.first);
   }
 
   return -1;
@@ -1195,10 +1335,10 @@ int CharDetails::getChildOption(uint chrCustomizationOption)
 
 void CharDetails::initLinkedOptionsMap()
 {
-  if (CharDetails::LINKED_OPTIONS_MAP_.size() != 0) // already initialized
+  if (!LINKED_OPTIONS_MAP_.empty()) // already initialized
     return;
 
-  for(const auto c:customizationMap_)
+  for (const auto& c : choicesPerOptionMap_)
   {
     auto id = c.first;
     const auto query = QString("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
@@ -1208,11 +1348,26 @@ void CharDetails::initLinkedOptionsMap()
     auto link = GAMEDATABASE.sqlQuery(query);
 
     if (link.valid && !link.values.empty())
-      CharDetails::LINKED_OPTIONS_MAP_[id] = link.values[0][0].toInt();
+    {
+      for(const auto & vals: link.values)
+        LINKED_OPTIONS_MAP_.emplace(id, vals[0].toInt());
+    }
     else
-      CharDetails::LINKED_OPTIONS_MAP_[id] = -1;
+    {
+      LINKED_OPTIONS_MAP_.emplace(id, -1);
+    }
   }
-
-  
 }
 
+void CharDetails::resetGeosets()
+{
+  for (auto i = 0; i < NUM_GEOSETS; i++)
+    geosets[i] = 1;
+
+  if (showEars)
+    geosets[CG_EARS] = 2;
+  else
+    geosets[CG_EARS] = 0;
+
+  geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
+}
