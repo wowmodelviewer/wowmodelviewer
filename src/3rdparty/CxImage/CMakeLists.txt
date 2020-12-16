@@ -54,7 +54,7 @@ if (WIN32)
 endif()
 
 add_library(cximage STATIC ${SRC_FILES})
-set_property(TARGET cximage PROPERTY FOLDER "external libraries")
+set_property(TARGET cximage PROPERTY FOLDER "3rdparty libraries")
 target_link_libraries(cximage $ENV{WMV_SDK_BASEDIR}/lib/jpeg.lib 
 						$ENV{WMV_SDK_BASEDIR}/lib/libpng.lib)
 
