@@ -15,14 +15,19 @@
 
 #include <QFile>
 #include <QXmlStreamReader>
-#include <QXmlStreamReader>
+
+std::multimap<uint, int> CharDetails::LINKED_OPTIONS_MAP_ = {
+  // hardcoded values (need to figure out how to find this from DB - if possible ?)
+  {726, 724}, // veins color linked to veins for BE male
+  {730, 728} // veins color linked to veins for BE female
+};
 
 CharDetails::CharDetails():
 eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
-isNPC(true), m_model(nullptr), m_isDemonHunter(false), m_dhModel(0)
+isNPC(true), model_(nullptr), isDemonHunter_(false)
 {
-
+  resetGeosets();
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -30,23 +35,23 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeStartElement("CharDetails");
 
   stream.writeStartElement("skinColor");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[SKIN_COLOR]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[SKIN_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("faceType");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[FACE]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[FACE]));
   stream.writeEndElement();
 
   stream.writeStartElement("hairColor");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("hairStyle");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("facialHair");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[ADDITIONAL_FACIAL_CUSTOMIZATION]));
   stream.writeEndElement();
 
   stream.writeStartElement("eyeGlowType");
@@ -74,23 +79,23 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeEndElement();
 
   stream.writeStartElement("isDemonHunter");
-  stream.writeAttribute("value", QString::number(m_isDemonHunter));
+  stream.writeAttribute("value", QString::number(isDemonHunter_));
   stream.writeEndElement();
 
   stream.writeStartElement("DHTattooStyle");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM1_STYLE]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHTattooColor");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM1_COLOR]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_COLOR]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHHornStyle");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM2_STYLE]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM2_STYLE]));
   stream.writeEndElement();
 
   stream.writeStartElement("DHBlindFolds");
-  stream.writeAttribute("value", QString::number(m_currentCustomization[CUSTOM3_STYLE]));
+  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM3_STYLE]));
   stream.writeEndElement();
 
   stream.writeEndElement(); // CharDetails
@@ -217,18 +222,13 @@ void CharDetails::load(QString & f)
 
 void CharDetails::reset(WoWModel * model)
 {
-  m_model = model;
+  if ((model != nullptr) & (model != model_))
+  {
+    model_ = model;
+    fillCustomizationMap();
+  }
 
-  m_currentCustomization.clear();
-  m_currentCustomization.insert({ SKIN_COLOR, 0 });
-  m_currentCustomization.insert({ FACE, 0 });
-  m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
-  m_currentCustomization.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
-  m_currentCustomization.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
-  m_currentCustomization.insert({ CUSTOM1_STYLE, 0 });
-  m_currentCustomization.insert({ CUSTOM1_COLOR, 0 });
-  m_currentCustomization.insert({ CUSTOM2_STYLE, 0 });
-  m_currentCustomization.insert({ CUSTOM3_STYLE, 0 });
+  currentCustomization_.clear();
 
   showUnderwear = true;
   showHair = true;
@@ -238,24 +238,68 @@ void CharDetails::reset(WoWModel * model)
 
   isNPC = false;
 
-  m_isDemonHunter = false;
+  isDemonHunter_ = false;
 
-  fillCustomizationMap();
+  resetGeosets();
+
+  textures.clear();
+
+  if (GAMEDIRECTORY.majorVersion() < 9)
+  {
+    currentCustomization_.insert({ SKIN_COLOR, 0 });
+    currentCustomization_.insert({ FACE, 0 });
+    currentCustomization_.insert({ FACIAL_CUSTOMIZATION_STYLE, 0 });
+    currentCustomization_.insert({ FACIAL_CUSTOMIZATION_COLOR, 0 });
+    currentCustomization_.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, 0 });
+    currentCustomization_.insert({ CUSTOM1_STYLE, 0 });
+    currentCustomization_.insert({ CUSTOM1_COLOR, 0 });
+    currentCustomization_.insert({ CUSTOM2_STYLE, 0 });
+    currentCustomization_.insert({ CUSTOM3_STYLE, 0 });
+  }
+  else
+  {
+    for (const auto &c : choicesPerOptionMap_)
+      set(c.first, c.second[0]);
+  }
 }
+
+void CharDetails::randomise()
+{
+  // TODO repair randomise
+  reset();
+  /*
+  // Choose random values for the looks! ^_^
+  setRandomValue(SKIN_COLOR);
+  setRandomValue(FACE);
+  setRandomValue(FACIAL_CUSTOMIZATION_STYLE);
+  setRandomValue(FACIAL_CUSTOMIZATION_COLOR);
+  setRandomValue(ADDITIONAL_FACIAL_CUSTOMIZATION);
+
+  // Don't worry about Custom 1-3 for elves, unless they're Demon Hunters:
+  if(isDemonHunter_)
+  {
+    setRandomValue(CUSTOM1_STYLE);
+    setRandomValue(CUSTOM1_COLOR);
+    setRandomValue(CUSTOM2_STYLE);
+    setRandomValue(CUSTOM3_STYLE);
+  }
+  */
+}
+
 
 std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
 {
   std::vector<int> result;
 
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(m_model, infos))
+  const auto infos = model_->infos;
+  if (infos.raceID != -1)
     return result;
 
   /*
   LOG_INFO << __FUNCTION__;
   LOG_INFO << "----------------------------------------------";
-  LOG_INFO << "infos.raceid = " << infos.raceid;
-  LOG_INFO << "infos.sexid = " << infos.sexid;
+  LOG_INFO << "infos.raceID = " << infos.raceID;
+  LOG_INFO << "infos.sexID = " << infos.sexID;
   LOG_INFO << "infos.textureLayoutID = " << infos.textureLayoutID;
   LOG_INFO << "infos.isHD = " << infos.isHD;
   LOG_INFO << "cd.skinColor() = " << skinColor();
@@ -276,63 +320,63 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
     case SkinBaseType:
     case UnderwearBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND ColorIndex=%3)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[SKIN_COLOR]);
+        .arg(infos.raceID)
+        .arg(infos.sexID)
+        .arg(currentCustomization_[SKIN_COLOR]);
       break;
     case FaceBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND VariationIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[SKIN_COLOR])
-        .arg(m_currentCustomization[FACE]);
+        .arg(infos.raceID)
+        .arg(infos.sexID)
+        .arg(currentCustomization_[SKIN_COLOR])
+        .arg(currentCustomization_[FACE]);
       break;
     case HairBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg((m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
-        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]);
+        .arg(infos.raceID)
+        .arg(infos.sexID)
+        .arg((currentCustomization_[FACIAL_CUSTOMIZATION_STYLE] == 0) ? 1 : currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]) // quick fix for bald characters... VariationIndex = 0 returns no result
+        .arg(currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]);
       break;
     case FacialHairBaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex=%4)")
-        .arg(infos.raceid)
-        .arg(infos.sexid)
-        .arg(m_currentCustomization[ADDITIONAL_FACIAL_CUSTOMIZATION])
-        .arg(m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]);
+        .arg(infos.raceID)
+        .arg(infos.sexID)
+        .arg(currentCustomization_[ADDITIONAL_FACIAL_CUSTOMIZATION])
+        .arg(currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]);
       break;
     case Custom1BaseType:
-      if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF) // for Night Elves and Blood Elves - Demon Hunter Tattoos are handled strangely:
+      if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF) // for Night Elves and Blood Elves - Demon Hunter Tattoos are handled strangely:
       {
         uint tattvar = 0;
-        if (m_currentCustomization[CUSTOM1_STYLE] > 0)  // style = 0 means no tattoos, so variation is always 0
-          tattvar = (m_customizationParamsMap[CUSTOM1_STYLE].possibleValues.size() - 1) * m_currentCustomization[CUSTOM1_COLOR]
-                    + m_currentCustomization[CUSTOM1_STYLE];
+        if (currentCustomization_[CUSTOM1_STYLE] > 0)  // style = 0 means no tattoos, so variation is always 0
+          tattvar = (customizationParamsMap_[CUSTOM1_STYLE].possibleValues.size() - 1) * currentCustomization_[CUSTOM1_COLOR]
+                    + currentCustomization_[CUSTOM1_STYLE];
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
+          .arg(infos.raceID)
+          .arg(infos.sexID)
           .arg(tattvar);
       }
       else
       {
         query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3 AND ColorIndex = %4)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
-          .arg(m_currentCustomization[CUSTOM1_STYLE])
-          .arg(m_currentCustomization[CUSTOM1_COLOR]);
+          .arg(infos.raceID)
+          .arg(infos.sexID)
+          .arg(currentCustomization_[CUSTOM1_STYLE])
+          .arg(currentCustomization_[CUSTOM1_COLOR]);
       }
       break;
     case Custom2BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
-          .arg(m_currentCustomization[CUSTOM2_STYLE]);
+          .arg(infos.raceID)
+          .arg(infos.sexID)
+          .arg(currentCustomization_[CUSTOM2_STYLE]);
       break;
     case Custom3BaseType:
       query += QString(" AND (RaceID=%1 AND SexID=%2 AND VariationIndex=%3)")
-          .arg(infos.raceid)
-          .arg(infos.sexid)
-          .arg(m_currentCustomization[CUSTOM3_STYLE]);
+          .arg(infos.raceID)
+          .arg(infos.sexID)
+          .arg(currentCustomization_[CUSTOM3_STYLE]);
       break;
     default:
       query = "";
@@ -359,25 +403,38 @@ std::vector<int> CharDetails::getTextureForSection(BaseSectionType baseSection)
 
 void CharDetails::fillCustomizationMap()
 {
-  if (!m_model)
+  if (!model_)
     return;
 
-  RaceInfos infos;
-  RaceInfos::getCurrent(m_model, infos);
+  if (GAMEDIRECTORY.majorVersion() < 9)
+    fillCustomizationMap8x();
+  else
+    fillCustomizationMap9x();
+}
+
+void CharDetails::fillCustomizationMap8x()
+{
+  // clear any previous value found
+  customizationParamsMap_.clear();
+  multiCustomizationMap_.clear();
+
+  const auto infos = model_->infos;
+  if (infos.raceID == -1)
+    return;
 
   // clear any previous value found
-  m_customizationParamsMap.clear();
-  m_multiCustomizationMap.clear();
-  
+  customizationParamsMap_.clear();
+  multiCustomizationMap_.clear();
+
   // SECTION 0 (= Sections 0 & 5) : skin
   CustomizationParam skin;
-  skin.name = getCustomizationName(SkinBaseType, infos.raceid, infos.sexid);
+  skin.name = getCustomizationName(SkinBaseType, infos.raceID, infos.sexID);
   QString query = QString("SELECT ColorIndex, Flags FROM CharSections "
                           "LEFT JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                           "WHERE RaceID=%1 AND SexID=%2 AND CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                           "ORDER BY ColorIndex")
-                         .arg(infos.raceid)
-                         .arg(infos.sexid)
+                         .arg(infos.raceID)
+                         .arg(infos.sexID)
                          .arg(SkinBaseType)
                          .arg(infos.isHD ? 1 : 0);
 
@@ -393,16 +450,16 @@ void CharDetails::fillCustomizationMap()
   }
   else
   {
-    LOG_ERROR << "Unable to collect skin parameters for model" << m_model->name();
+    LOG_ERROR << "Unable to collect skin parameters for model" << model_->name();
   }
 
-  m_customizationParamsMap.insert({ SKIN_COLOR, skin });
+  customizationParamsMap_.insert({ SKIN_COLOR, skin });
 
 
   // BASE SECTION 1 (= Sections 1 & 6) : face customization
 
-  // face possible customization depends on current skin color. We fill m_multiCustomizationMap first
-  QString faceName = getCustomizationName(FaceBaseType, infos.raceid, infos.sexid);
+  // face possible customization depends on current skin color. We fill multiCustomizationMap_ first
+  QString faceName = getCustomizationName(FaceBaseType, infos.raceID, infos.sexID);
   for (auto it = skin.possibleValues.begin(), itEnd = skin.possibleValues.end(); it != itEnd; ++it)
   {
     query = QString("SELECT VariationIndex, Flags FROM CharSections "
@@ -410,8 +467,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID=%1 AND SexID=%2 AND ColorIndex=%3 AND "
                     "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
                     "GROUP BY VariationIndex ORDER BY VariationIndex")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
+                    .arg(infos.raceID)
+                    .arg(infos.sexID)
                     .arg(*it)
                     .arg(FaceBaseType)
                     .arg(infos.isHD ? 1 : 0);
@@ -430,13 +487,13 @@ void CharDetails::fillCustomizationMap()
     }
     else
     {
-      LOG_ERROR << "No face customization available for skin color" << *it << "for model" << m_model->name();
+      LOG_ERROR << "No face customization available for skin color" << *it << "for model" << model_->name();
     }
 
-    m_multiCustomizationMap[FACE].insert({ *it, face });
+    multiCustomizationMap_[FACE].insert({ *it, face });
   }
 
-  m_customizationParamsMap.insert({ FACE, m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]] });
+  customizationParamsMap_.insert({ FACE, multiCustomizationMap_[FACE][currentCustomization_[SKIN_COLOR]] });
 
 
   // BASE SECTION 2 (= Sections 2 & 7) : Additional facial customization - facial hair, earrings, horns, tusks, depending on model:
@@ -448,15 +505,15 @@ void CharDetails::fillCustomizationMap()
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
+                  .arg(infos.raceID)
+                  .arg(infos.sexID)
                   .arg(FacialHairBaseType)
                   .arg(infos.isHD ? 1 : 0);
 
   sqlResult additional = GAMEDATABASE.sqlQuery(query);
 
   CustomizationParam additionalCustomization;
-  additionalCustomization.name = getCustomizationName(FacialHairBaseType, infos.raceid, infos.sexid);
+  additionalCustomization.name = getCustomizationName(FacialHairBaseType, infos.raceID, infos.sexID);
   
   if (additional.valid && !additional.values.empty())
   {
@@ -471,8 +528,8 @@ void CharDetails::fillCustomizationMap()
     query = QString("SELECT DISTINCT VariationID FROM CharacterFacialHairStyles "
                     "WHERE RaceID = %1 AND SexID = %2 "
                     "ORDER BY VariationID")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid);
+                    .arg(infos.raceID)
+                    .arg(infos.sexID);
 
     additional = GAMEDATABASE.sqlQuery(query);
   
@@ -486,11 +543,11 @@ void CharDetails::fillCustomizationMap()
     }
     else
     {
-      LOG_ERROR << "Unable to collect additional facial customization parameters for model" << m_model->name();
+      LOG_ERROR << "Unable to collect additional facial customization parameters for model" << model_->name();
     }
   }
 
-  m_customizationParamsMap.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
+  customizationParamsMap_.insert({ ADDITIONAL_FACIAL_CUSTOMIZATION, additionalCustomization });
 
 
   // BASE SECTION 3 (= Sections 3 & 8) : Hair style customization (horn style for some races)
@@ -500,15 +557,15 @@ void CharDetails::fillCustomizationMap()
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum = %3 AND CharBaseSection.LayoutResType = %4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-                  .arg(infos.raceid)
-                  .arg(infos.sexid)
+                  .arg(infos.raceID)
+                  .arg(infos.sexID)
                   .arg(HairBaseType)
                   .arg(infos.isHD ? 1 : 0);
 
   sqlResult styles = GAMEDATABASE.sqlQuery(query);
 
-  QString hairName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid);
-  QString hairColName = getCustomizationName(HairBaseType, infos.raceid, infos.sexid, true);
+  QString hairName = getCustomizationName(HairBaseType, infos.raceID, infos.sexID);
+  QString hairColName = getCustomizationName(HairBaseType, infos.raceID, infos.sexID, true);
   
   CustomizationParam hairCustomizationStyle;
   hairCustomizationStyle.name = hairName;
@@ -522,10 +579,10 @@ void CharDetails::fillCustomizationMap()
   }
   else
   {
-    LOG_ERROR << "Unable to facial style parameters for model" << m_model->name();
+    LOG_ERROR << "Unable to facial style parameters for model" << model_->name();
   }
 
-  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_STYLE, hairCustomizationStyle });
+  customizationParamsMap_.insert({ FACIAL_CUSTOMIZATION_STYLE, hairCustomizationStyle });
 
   for (auto it = hairCustomizationStyle.possibleValues.begin(), itEnd = hairCustomizationStyle.possibleValues.end(); it != itEnd; ++it)
   {
@@ -534,8 +591,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
                     "CharBaseSection.VariationEnum = %4 AND CharBaseSection.LayoutResType = %5 "
                     "GROUP BY ColorIndex ORDER BY ColorIndex")
-                    .arg(infos.raceid)
-                    .arg(infos.sexid)
+                    .arg(infos.raceID)
+                    .arg(infos.sexID)
                     .arg(*it)
                     .arg(HairBaseType)
                     .arg(infos.isHD ? 1 : 0);
@@ -554,13 +611,13 @@ void CharDetails::fillCustomizationMap()
     }
     else
     {
-      LOG_ERROR << "No hair color available for hair customization style " << *it << "for model" << m_model->name();
+      LOG_ERROR << "No hair color available for hair customization style " << *it << "for model" << model_->name();
     }
 
-    m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, hairColor });
+    multiCustomizationMap_[FACIAL_CUSTOMIZATION_COLOR].insert({ *it, hairColor });
   }
 
-  m_customizationParamsMap.insert({ FACIAL_CUSTOMIZATION_COLOR, m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]] });
+  customizationParamsMap_.insert({ FACIAL_CUSTOMIZATION_COLOR, multiCustomizationMap_[FACIAL_CUSTOMIZATION_COLOR][currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]] });
 
 
   // BASE SECTION 4 (= Sections 4 & 9) : Just underwear - no variation, so not handled here.
@@ -569,18 +626,18 @@ void CharDetails::fillCustomizationMap()
   // BASE SECTION 5 (= Sections 10 & 11) : Custom1 Section (tattoos and some other things, depending on race)
   
   CustomizationParam custom1;
-  custom1.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid);
-  QString custom1ColName = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
+  custom1.name = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID);
+  QString custom1ColName = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID, true);
     
   // Night Elf & Blood Elf (Demon Hunters) only:
   // For some reason tattoo colour indices aren't used in CharDetails.db2.
   // Instead the variation index goes from 0-36, even though there are actually 6
   // colours of 6 tattoo types (plus 0 = no tattoo). So we have to hardcode this instead:
-  if (infos.raceid == RACE_NIGHTELF || infos.raceid == RACE_BLOODELF)
+  if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
   {
     custom1.possibleValues = { 0, 1, 2, 3, 4, 5, 6 };
     custom1.flags = { 33, 33, 33, 33, 33, 33 };
-    m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
+    customizationParamsMap_.insert({ CUSTOM1_STYLE, custom1 });
  
     for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
     {
@@ -589,9 +646,9 @@ void CharDetails::fillCustomizationMap()
       custom1Color.name = custom1ColName;
       custom1Color.possibleValues = { 0, 1, 2, 3, 4, 5 };
       custom1Color.flags = { 33, 33, 33, 33, 33, 33 };
-      m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
+      multiCustomizationMap_[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
-    m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
+    customizationParamsMap_.insert({ CUSTOM1_COLOR, multiCustomizationMap_[CUSTOM1_COLOR][currentCustomization_[CUSTOM1_STYLE]] });
   }
   // Dark Iron males use this section for piercings. Other races for tattoos/markings.
   // Not many races use the colour variant setting for this section, but we'll check for it
@@ -605,8 +662,8 @@ void CharDetails::fillCustomizationMap()
                     "WHERE RaceID = %1 AND SexID = %2 AND "
                     "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                     "GROUP BY VariationIndex ORDER BY VariationIndex")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
+      .arg(infos.raceID)
+      .arg(infos.sexID)
       .arg(Custom1BaseType)
       .arg(infos.isHD ? 1 : 0);
     vals = GAMEDATABASE.sqlQuery(query);
@@ -620,12 +677,12 @@ void CharDetails::fillCustomizationMap()
     }
     else
     {
-      LOG_ERROR << "Unable to get custom1 style parameters for model" << m_model->name();
+      LOG_ERROR << "Unable to get custom1 style parameters for model" << model_->name();
     }
   
-    m_customizationParamsMap.insert({ CUSTOM1_STYLE, custom1 });
+    customizationParamsMap_.insert({ CUSTOM1_STYLE, custom1 });
   
-    // Tattoo color customization depends on current tattoo style. We fill m_multiCustomizationMap first
+    // Tattoo color customization depends on current tattoo style. We fill multiCustomizationMap_ first
     for (auto it = custom1.possibleValues.begin(), itEnd = custom1.possibleValues.end(); it != itEnd; ++it)
     {
       query = QString("SELECT ColorIndex, Flags FROM CharSections "
@@ -633,8 +690,8 @@ void CharDetails::fillCustomizationMap()
                       "WHERE RaceID = %1 AND SexID = %2 AND VariationIndex = %3 AND "
                       "CharBaseSection.VariationEnum=%4 AND CharBaseSection.LayoutResType=%5 "
                       "GROUP BY ColorIndex ORDER BY ColorIndex")
-                      .arg(infos.raceid)
-                      .arg(infos.sexid)
+                      .arg(infos.raceID)
+                      .arg(infos.sexID)
                       .arg(*it)
                       .arg(Custom1BaseType)
                       .arg(infos.isHD ? 1 : 0);
@@ -643,7 +700,7 @@ void CharDetails::fillCustomizationMap()
   
       CustomizationParam custom1Color;
 
-      custom1Color.name = getCustomizationName(Custom1BaseType, infos.raceid, infos.sexid, true);
+      custom1Color.name = getCustomizationName(Custom1BaseType, infos.raceID, infos.sexID, true);
   
       if (colors.valid && (colors.values.size() > 1))
       {
@@ -653,24 +710,24 @@ void CharDetails::fillCustomizationMap()
           custom1Color.flags.push_back(colors.values[i][1].toInt());
         }
       }
-      m_multiCustomizationMap[CUSTOM1_COLOR].insert({ *it, custom1Color });
+      multiCustomizationMap_[CUSTOM1_COLOR].insert({ *it, custom1Color });
     }
-    m_customizationParamsMap.insert({ CUSTOM1_COLOR, m_multiCustomizationMap[CUSTOM1_COLOR][m_currentCustomization[CUSTOM1_STYLE]] });
+    customizationParamsMap_.insert({ CUSTOM1_COLOR, multiCustomizationMap_[CUSTOM1_COLOR][currentCustomization_[CUSTOM1_STYLE]] });
   }
 
   // BASE SECTION 6 (= Sections 12 & 13) : Custom2 Section (tusk, tattoos, snouts, earrings and some other things, depending on race)
   
   CustomizationParam custom2;
-  custom2.name = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid);
-  QString custom2ColName = getCustomizationName(Custom2BaseType, infos.raceid, infos.sexid, true);
+  custom2.name = getCustomizationName(Custom2BaseType, infos.raceID, infos.sexID);
+  QString custom2ColName = getCustomizationName(Custom2BaseType, infos.raceID, infos.sexID, true);
 
   query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(Custom2BaseType)
     .arg(infos.isHD ? 1 : 0);
   vals = GAMEDATABASE.sqlQuery(query);
@@ -682,22 +739,22 @@ void CharDetails::fillCustomizationMap()
       custom2.flags.push_back(vals.values[i][1].toInt());
     }
   }
-  m_customizationParamsMap.insert({ CUSTOM2_STYLE, custom2 });
+  customizationParamsMap_.insert({ CUSTOM2_STYLE, custom2 });
 
 
   // BASE SECTION 7 (= Sections 14 & 15) : Custom3 Section (various things, depending on race)
   
   CustomizationParam custom3;
-  custom3.name = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid);
-  QString custom3ColName = getCustomizationName(Custom3BaseType, infos.raceid, infos.sexid, true);
+  custom3.name = getCustomizationName(Custom3BaseType, infos.raceID, infos.sexID);
+  QString custom3ColName = getCustomizationName(Custom3BaseType, infos.raceID, infos.sexID, true);
 
   query = QString("SELECT VariationIndex, Flags FROM CharSections "
                   "INNER JOIN CharBaseSection ON CharSections.SectionType = CharBaseSection.ResolutionVariationEnum "
                   "WHERE RaceID = %1 AND SexID = %2 AND "
                   "CharBaseSection.VariationEnum=%3 AND CharBaseSection.LayoutResType=%4 "
                   "GROUP BY VariationIndex ORDER BY VariationIndex")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(Custom3BaseType)
     .arg(infos.isHD ? 1 : 0);
   vals = GAMEDATABASE.sqlQuery(query);
@@ -709,36 +766,114 @@ void CharDetails::fillCustomizationMap()
       custom3.flags.push_back(vals.values[i][1].toInt());
     }
   }
-  m_customizationParamsMap.insert({ CUSTOM3_STYLE, custom3 });
+  customizationParamsMap_.insert({ CUSTOM3_STYLE, custom3 });
 }
+
+void CharDetails::fillCustomizationMap9x()
+{
+  // clear any previous value found
+  choicesPerOptionMap_.clear();
+
+  const auto infos = model_->infos;
+  if (infos.raceID == -1)
+    return;
+
+  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
+
+  if (options.valid)
+    for (auto& option : options.values)
+      choicesPerOptionMap_[option[0].toUInt()] = {};
+  
+  LINKED_OPTIONS_MAP_.clear();
+  initLinkedOptionsMap();
+
+  for (auto &option : choicesPerOptionMap_)
+    fillCustomizationMapForOption(option.first);
+}
+
+void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
+{
+  const auto parentOptions = getParentOptions(chrCustomizationOption);
+ 
+  auto &vals = choicesPerOptionMap_.at(chrCustomizationOption);
+  const auto curvals = vals;
+  vals.clear();
+
+  // 1. fill direct values
+  auto choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(chrCustomizationOption));
+  if (choices.valid)
+  {
+    LOG_INFO << __FUNCTION__ << "DIRECT values" << choices.values.size();
+    for (auto v : choices.values)
+      vals.push_back(v[0].toUInt());
+  }
+
+  // 2. fill with parent values
+  /*
+  for (auto parentOption : parentOptions)
+  {
+    choices.valid = false;
+    if ((parentOption != -1) && (currentCustomization_.count(parentOption) != 0))
+    {
+      choices = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationChoice WHERE ID IN (SELECT ChrCustomizationChoiceID FROM ChrCustomizationElement WHERE RelatedChrCustomizationChoiceID = %1) "
+        "ORDER BY OrderIndex").arg(currentCustomization_[parentOption]));
+    }
+
+    if (choices.valid)
+    {
+      LOG_INFO << __FUNCTION__ << "INDIRECT values from" << parentOption << currentCustomization_[parentOption] << choices.values.size();
+      for (auto v : choices.values)
+        vals.push_back(v[0].toUInt());
+    }
+  }
+
+  // remove potential duplicates
+  std::sort(vals.begin(), vals.end());
+  const auto last = std::unique(vals.begin(), vals.end());
+  vals.erase(last, vals.end());
+  */
+  if (vals != curvals)
+  {
+    LOG_INFO << __FUNCTION__ << chrCustomizationOption;
+    QString info;
+    for (const auto& v : vals)
+      info += QString("%1 ").arg(v);
+    LOG_INFO << info;
+
+    CharDetailsEvent event(this, CharDetailsEvent::CHOICE_LIST_CHANGED);
+    event.setCustomizationOptionId(chrCustomizationOption);
+    notify(event);
+  }
+}
+
 
 CharDetails::CustomizationParam CharDetails::getParams(CustomizationType type)
 {
-  auto it = m_customizationParamsMap.find(type);
+  const auto it = customizationParamsMap_.find(type);
 
-  if (it != m_customizationParamsMap.end())
+  if (it != customizationParamsMap_.end())
     return it->second;
 
   CustomizationParam dummy;
   return dummy;
 }
 
-void CharDetails::set(CustomizationType type, unsigned int val)
+void CharDetails::set(CustomizationType type, unsigned int val) // wow version < 9.x
 {
-  if (val != m_currentCustomization.at(type))
+  if (val != currentCustomization_.at(type))
   {
-    m_currentCustomization[type] = val;
+    currentCustomization_[type] = val;
     CharDetailsEvent event(this, CharDetailsEvent::SKIN_COLOR_CHANGED);
     switch (type)
     {
       case SKIN_COLOR:
       {
-        m_customizationParamsMap[FACE] = m_multiCustomizationMap[FACE][m_currentCustomization[SKIN_COLOR]];
+        customizationParamsMap_[FACE] = multiCustomizationMap_[FACE][currentCustomization_[SKIN_COLOR]];
 
         // reset current face if not available for this skin color
-        std::vector<int> & vec = m_customizationParamsMap[FACE].possibleValues;
-        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACE]) == vec.end())
-          m_currentCustomization[FACE] = vec[0];
+        std::vector<int> & vec = customizationParamsMap_[FACE].possibleValues;
+        if (std::find(vec.begin(), vec.end(), currentCustomization_[FACE]) == vec.end())
+          set(FACE, vec[0]);
 
         event.setType((Event::EventType)CharDetailsEvent::SKIN_COLOR_CHANGED);
         break;
@@ -748,12 +883,12 @@ void CharDetails::set(CustomizationType type, unsigned int val)
         break;
       case FACIAL_CUSTOMIZATION_STYLE:
       {
-        m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR] = m_multiCustomizationMap[FACIAL_CUSTOMIZATION_COLOR][m_currentCustomization[FACIAL_CUSTOMIZATION_STYLE]];
+        customizationParamsMap_[FACIAL_CUSTOMIZATION_COLOR] = multiCustomizationMap_[FACIAL_CUSTOMIZATION_COLOR][currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]];
 
         // reset current hair color if not available for this hair style
-        std::vector<int> & vec = m_customizationParamsMap[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
-        if (std::find(vec.begin(), vec.end(), m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
-          m_currentCustomization[FACIAL_CUSTOMIZATION_COLOR] = vec[0];
+        std::vector<int> & vec = customizationParamsMap_[FACIAL_CUSTOMIZATION_COLOR].possibleValues;
+        if (std::find(vec.begin(), vec.end(), currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]) == vec.end())
+          set(FACIAL_CUSTOMIZATION_COLOR, vec[0]);
 
         event.setType((Event::EventType)CharDetailsEvent::FACIAL_CUSTOMIZATION_STYLE_CHANGED);
         break;
@@ -782,22 +917,151 @@ void CharDetails::set(CustomizationType type, unsigned int val)
   }
 }
 
+void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID) // wow version >= 9.x
+{
+  const auto infos = model_->infos;
+  if (infos.raceID == -1)
+    return;
+
+  currentCustomization_[chrCustomizationOptionID] = chrCustomizationChoiceID;
+  customizationElementsPerOption_.erase(chrCustomizationOptionID);
+
+  LOG_INFO << __FUNCTION__ << chrCustomizationOptionID << chrCustomizationChoiceID;
+  const auto parentOptions = getParentOptions(chrCustomizationOptionID);
+  const auto childOption = getChildOption(chrCustomizationOptionID);
+
+  LOG_INFO << "Parent options for" << chrCustomizationOptionID;
+  for (const auto &opt : parentOptions)
+    LOG_INFO << "\t" << opt;
+  LOG_INFO << "Child option for" << chrCustomizationOptionID;
+    LOG_INFO << "\t" << childOption;
+
+  auto choiceId = chrCustomizationChoiceID;
+  auto relatedChoiceId = 0;
+
+  // 1. First query direct elements (related choice id = 0)
+  auto query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+                              "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+                              "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
+                              .arg(relatedChoiceId);
+
+  auto elements = GAMEDATABASE.sqlQuery(query);
+  if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
+  {
+    LOG_ERROR << __FUNCTION__ << "No direct customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+    LOG_ERROR << query;
+  }
+
+  // 2. Query elements coming from parent options
+  for(const auto option:parentOptions)
+  {
+    if(option != -1)
+    {
+      relatedChoiceId = currentCustomization_[option];
+
+      // query related ChrCustomizationElements
+      query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+        "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+        "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
+        .arg(relatedChoiceId);
+
+      elements = GAMEDATABASE.sqlQuery(query);
+
+      if (!applyChrCustomizationElements(option, elements))
+      {
+        LOG_ERROR << __FUNCTION__ << "Parent Option" << option << "-> No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+        LOG_ERROR << query;
+      }
+    }
+  }
+
+  // 3. Query elements coming from child option
+  if (childOption != -1)
+  {
+    // we are setting an option which have a dependant option, we need to set child choice with a new related choice (ie, we are setting tattoo, which needs to set tattoo color)
+    choiceId = currentCustomization_[childOption];
+    relatedChoiceId = chrCustomizationChoiceID;
+    //customizationElementsPerOption_.erase(childOption);
+    fillCustomizationMapForOption(childOption);
+    
+    // query related ChrCustomizationElements
+    query = QString("SELECT ChrCustomizationGeosetID, ChrCustomizationSkinnedModelID, ChrCustomizationMaterialID, "
+      "ChrCustomizationBoneSetID, ChrCustomizationCondModelID, ChrCustomizationDisplayInfoID, ID FROM ChrCustomizationElement "
+      "WHERE ChrCustomizationChoiceID = %1 AND RelatedChrCustomizationChoiceID = %2").arg(choiceId)
+      .arg(relatedChoiceId);
+
+    elements = GAMEDATABASE.sqlQuery(query);
+
+    if (!applyChrCustomizationElements(chrCustomizationOptionID, elements))
+    {
+      LOG_ERROR << __FUNCTION__ << "Child option" << childOption << "No dependant customization entry found for chrCustomizationOptionID" << chrCustomizationOptionID << "/ chrCustomizationChoiceID" << chrCustomizationChoiceID;
+      LOG_ERROR << query;
+    }
+  }
+
+  // build customization
+  // reset
+  geosets.clear();
+  textures.clear();
+
+  //reset geoset to default
+  resetGeosets();
+
+  // apply customization elements
+  for(const auto& elt: customizationElementsPerOption_)
+  {
+    LOG_INFO << elt.first;
+    for (auto geo : elt.second.geosets)
+    {
+      if (geo.first == CG_EARS && !showEars)
+        continue;
+      geosets[geo.first] = geo.second;
+      LOG_INFO << geo.first << geo.second;
+    }
+
+    for (auto t : elt.second.textures)
+    {
+      LOG_INFO << GAMEDIRECTORY.getFile(t.fileId)->fullname();
+      textures.push_back(t);
+    }
+  }
+
+  model_->refresh();
+ // TEXTUREMANAGER.dump();
+}
+
+std::vector<uint> CharDetails::getCustomizationChoices(const uint chrCustomizationOptionID)
+{
+  if (choicesPerOptionMap_.count(chrCustomizationOptionID) == 0)
+    fillCustomizationMap9x();
+
+  return choicesPerOptionMap_.at(chrCustomizationOptionID);
+  
+}
+
+
 uint CharDetails::get(CustomizationType type) const
 {
-  return m_currentCustomization.at(type);
+  return currentCustomization_.at(type);
 }
+
+uint CharDetails::get(uint chrCustomizationOptionID) const
+{
+  return currentCustomization_.at(chrCustomizationOptionID);
+}
+
 
 void CharDetails::setRandomValue(CustomizationType type)
 {
-  std::vector<int> allValues = m_customizationParamsMap[type].possibleValues;
-  if (allValues.size() == 0)
+  const auto allValues = customizationParamsMap_[type].possibleValues;
+  if (allValues.empty())
     return;
-  std::vector<int> flags = m_customizationParamsMap[type].flags;
+  const auto flags = customizationParamsMap_[type].flags;
   std::vector<int> filteredIndices;
   for (uint i = 0; i < allValues.size(); i++)
   {
-    int flag = flags[i];
-    if (m_isDemonHunter)
+    const auto flag = flags[i];
+    if (isDemonHunter_)
     {
       if ((flag & SF_DEMON_HUNTER) || (flag & SF_DEMON_HUNTER_FACE) || (flag & SF_DEMON_HUNTER_BFX) || (flag & SF_REGULAR) || flag == 0)
       {
@@ -812,16 +1076,16 @@ void CharDetails::setRandomValue(CustomizationType type)
       }
     }
   }
-  if (filteredIndices.size() > 0)
+  if (!filteredIndices.empty())
   {
-    uint maxVal = filteredIndices.size() - 1;
-    int randval = filteredIndices[randint(0, maxVal)];
+    const auto maxVal = filteredIndices.size() - 1;
+    const auto randval = filteredIndices[randint(0, maxVal)];
     set(type, randval);
   }
   else // ok, filtering left us with nothing...
   {
-    uint maxVal = allValues.size() - 1;
-    int randval = randint(0, maxVal);
+    const auto maxVal = allValues.size() - 1;
+    const auto randval = randint(0, maxVal);
     set(type, randval);
   }
 }
@@ -830,43 +1094,43 @@ std::vector<CharDetails::CustomizationType> CharDetails::getCustomizationOptions
 {
   std::vector<CustomizationType> result;
 
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(m_model, infos))
+  const auto infos = model_->infos;
+  if (infos.raceID == -1)
     return result;
 
-  LOG_INFO << __FUNCTION__ << infos.raceid << infos.sexid;
+  LOG_INFO << __FUNCTION__ << infos.raceID << infos.sexID;
 
   result.push_back(SKIN_COLOR);
   result.push_back(FACE);
   result.push_back(FACIAL_CUSTOMIZATION_STYLE);
   // pandaren male hair color can't be defined
-  if (!((infos.raceid == 24) && (infos.sexid == 0)))
+  if (!((infos.raceID == 24) && (infos.sexID == 0)))
     result.push_back(FACIAL_CUSTOMIZATION_COLOR);
   
-  if (m_customizationParamsMap.find(ADDITIONAL_FACIAL_CUSTOMIZATION) != m_customizationParamsMap.end() &&
-      m_customizationParamsMap.at(ADDITIONAL_FACIAL_CUSTOMIZATION).possibleValues.size() > 1)
+  if (customizationParamsMap_.find(ADDITIONAL_FACIAL_CUSTOMIZATION) != customizationParamsMap_.end() &&
+      customizationParamsMap_.at(ADDITIONAL_FACIAL_CUSTOMIZATION).possibleValues.size() > 1)
     result.push_back(ADDITIONAL_FACIAL_CUSTOMIZATION);
 
   // For Night Elves and Blood Elves, Custom 1-3 options are only used by demon hunters:
-  if (m_isDemonHunter || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (isDemonHunter_ || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
-    if (m_customizationParamsMap.find(CUSTOM1_STYLE) != m_customizationParamsMap.end() &&
-        m_customizationParamsMap.at(CUSTOM1_STYLE).possibleValues.size() > 1)
+    if (customizationParamsMap_.find(CUSTOM1_STYLE) != customizationParamsMap_.end() &&
+        customizationParamsMap_.at(CUSTOM1_STYLE).possibleValues.size() > 1)
       result.push_back(CUSTOM1_STYLE);
 
-    if (m_customizationParamsMap.find(CUSTOM1_COLOR) != m_customizationParamsMap.end() &&
-        m_customizationParamsMap.at(CUSTOM1_COLOR).possibleValues.size() > 1)
+    if (customizationParamsMap_.find(CUSTOM1_COLOR) != customizationParamsMap_.end() &&
+        customizationParamsMap_.at(CUSTOM1_COLOR).possibleValues.size() > 1)
       result.push_back(CUSTOM1_COLOR);
 
-    if (m_customizationParamsMap.find(CUSTOM2_STYLE) != m_customizationParamsMap.end() &&
-        m_customizationParamsMap.at(CUSTOM2_STYLE).possibleValues.size() > 1)
+    if (customizationParamsMap_.find(CUSTOM2_STYLE) != customizationParamsMap_.end() &&
+        customizationParamsMap_.at(CUSTOM2_STYLE).possibleValues.size() > 1)
       result.push_back(CUSTOM2_STYLE);
 
-    if (m_customizationParamsMap.find(CUSTOM3_STYLE) != m_customizationParamsMap.end() &&
-        m_customizationParamsMap.at(CUSTOM3_STYLE).possibleValues.size() > 1)
+    if (customizationParamsMap_.find(CUSTOM3_STYLE) != customizationParamsMap_.end() &&
+        customizationParamsMap_.at(CUSTOM3_STYLE).possibleValues.size() > 1)
     {
       // workaround to hide male orc "posture" setting, since it doesn't work:
-      if ((infos.sexid != GENDER_MALE) || (infos.raceid != RACE_ORC && infos.raceid != RACE_MAGHAR_ORC))  
+      if ((infos.sexID != GENDER_MALE) || (infos.raceID != RACE_ORC && infos.raceID != RACE_MAGHAR_ORC))  
       result.push_back(CUSTOM3_STYLE);
     }
   }
@@ -917,18 +1181,19 @@ std::vector<int> CharDetails::getRegionForSection(BaseSectionType section)
 {
   std::vector<int> result = {-1, -1, -1};
 
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(m_model, infos))
+  const auto infos = model_->infos;
+  if (infos.raceID == -1)
     return result;
+
   QString query = QString("SELECT ComponentSection1, ComponentSection2, ComponentSection3 FROM ChrCustomization "
                   "WHERE BaseSection = %1 "
                   "AND (RaceId = %2 OR RaceId = %3) "
                   "AND (Sex = %4 OR Sex = %5) "
                   "ORDER BY RaceId DESC, Sex, UiCustomizationType")
                   .arg(section)
-                  .arg(infos.raceid)
+                  .arg(infos.raceID)
                   .arg(RACE_ANY)
-                  .arg(infos.sexid)
+                  .arg(infos.sexID)
                   .arg(GENDER_ANY);
   
   sqlResult vals = GAMEDATABASE.sqlQuery(query);
@@ -944,12 +1209,12 @@ std::vector<int> CharDetails::getRegionForSection(BaseSectionType section)
 
 void CharDetails::setDemonHunterMode(bool val)
 {
-  if (val != m_isDemonHunter)
+  if (val != isDemonHunter_)
   {
-    m_isDemonHunter = val;
+    isDemonHunter_ = val;
     // All we need to do is toggle DH customization options, then let
     // WoWModel::refresh() add/remove the DH component models for us.
-    if (m_isDemonHunter)
+    if (isDemonHunter_)
     {
       setRandomValue(CUSTOM1_STYLE);
       setRandomValue(CUSTOM1_COLOR);
@@ -960,6 +1225,149 @@ void CharDetails::setDemonHunterMode(bool val)
     fillCustomizationMap();
     CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED);
     notify(event);
-    m_model->refresh();
+    model_->refresh();
   }
+}
+
+bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sqlResult & elements)
+{
+  LOG_INFO << __FUNCTION__ << chrCustomizationOption << elements.values.size();
+
+  if (elements.valid && !elements.values.empty())
+  {
+    for (auto elt : elements.values) // treat each line
+    {
+      if (elt[0].toUInt() != 0) // geoset customization
+      {
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeoSetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
+
+        if (vals.valid)
+        {
+          for (auto geo : vals.values)
+            customizationElementsPerOption_[chrCustomizationOption].geosets.emplace_back(geo[0].toUInt(),geo[1].toUInt());
+        }
+      }
+      else if (elt[1].toUInt() != 0) // added model customization
+      {
+        LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6];
+      }
+      else if (elt[2].toUInt() != 0) // texture customization
+      {
+        LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6];
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, TextureID FROM ChrCustomizationMaterial "
+          "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
+          "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
+          "AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
+          "WHERE ChrCustomizationMaterial.ID = %2").arg(model_->infos.textureLayoutID).arg(elt[2].toUInt()));
+
+        if (vals.valid)
+        {
+          TextureCustomization t{};
+          t.layer = vals.values[0][0].toUInt();
+          t.region = bitMaskToSectionType(vals.values[0][1].toInt());
+          t.type = vals.values[0][2].toUInt();
+          t.fileId = vals.values[0][3].toUInt();
+          customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
+        }
+      }
+      else if (elt[3].toUInt() != 0) // boneset customization ??
+      {
+        LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6];
+      }
+      else if (elt[4].toUInt() != 0) // cond model customization ??
+      {
+        LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6];
+      }
+      else if (elt[5].toUInt() != 0) // display info customization ??
+      {
+        LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6];
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+int CharDetails::bitMaskToSectionType(int mask)
+{
+  if (mask == -1)
+    return -1;
+
+  if (mask == 0)
+    return 0;
+
+  auto val = 1;
+
+  while (((mask = mask >> 1) & 0x01) == 0)
+    val++;
+
+  return val;
+}
+
+std::vector<int> CharDetails::getParentOptions(uint chrCustomizationOption)
+{
+  initLinkedOptionsMap();
+
+  std::vector<int> result;
+
+  const auto vals = LINKED_OPTIONS_MAP_.equal_range(chrCustomizationOption);
+
+  for (auto it = vals.first; it != vals.second; ++it)
+    result.push_back(it->second);
+
+  return result;
+}
+
+int CharDetails::getChildOption(uint chrCustomizationOption)
+{
+  initLinkedOptionsMap();
+
+  for (const auto &c: LINKED_OPTIONS_MAP_)
+  {
+    if (c.second == static_cast<int>(chrCustomizationOption))
+      return static_cast<int>(c.first);
+  }
+
+  return -1;
+}
+
+void CharDetails::initLinkedOptionsMap()
+{
+  if (!LINKED_OPTIONS_MAP_.empty()) // already initialized
+    return;
+
+  for (const auto& c : choicesPerOptionMap_)
+  {
+    auto id = c.first;
+    const auto query = QString("SELECT DISTINCT ChrCustomizationOptionID FROM ChrCustomizationChoice WHERE ID IN "
+      "(SELECT RelatedChrCustomizationChoiceID FROM ChrCustomizationElement WHERE ChrCustomizationChoiceID = "
+      "(SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 AND OrderIndex = 1))").arg(id);
+
+    auto link = GAMEDATABASE.sqlQuery(query);
+
+    if (link.valid && !link.values.empty())
+    {
+      for(const auto & vals: link.values)
+        LINKED_OPTIONS_MAP_.emplace(id, vals[0].toInt());
+    }
+    else
+    {
+      LINKED_OPTIONS_MAP_.emplace(id, -1);
+    }
+  }
+}
+
+void CharDetails::resetGeosets()
+{
+  for (auto i = 0; i < NUM_GEOSETS; i++)
+    geosets[i] = 1;
+
+  if (showEars)
+    geosets[CG_EARS] = 2;
+  else
+    geosets[CG_EARS] = 0;
+
+  geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
 }

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <vector>
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -19,22 +20,25 @@ class WoWModel;
 class _RACEINFOS_API_ RaceInfos
 {
   public:
-    int raceid;
-    int sexid; // 0 male / 1 female
+    int raceID = -1; // -1 means invalid race (default value)
+    int sexID; // 0 male / 1 female
     int textureLayoutID;
     bool isHD;
     bool barefeet;
     std::string prefix;
-    std::string customization[3];
-    int MaleModelFallbackRaceID, MaleModelFallbackSex, FemaleModelFallbackRaceID, FemaleModelFallbackSex, MaleTextureFallbackRaceID, MaleTextureFallbackSex, FemaleTextureFallbackRaceID, FemaleTextureFallbackSex;
-
-    static bool getCurrent(WoWModel * model, RaceInfos & result);
+    int modelFallbackRaceID;
+    int modelFallbackSexID;
+    int textureFallbackRaceID;
+    int textureFallbackSexID;
+    std::vector<int> ChrModelID;
+   
     static void init();
     static int getHDModelForFileID(int);
+    static bool getRaceInfosForFileID(int, RaceInfos &);
+    static int getFileIDForRaceSex(const int & race, const int & sex);
 
   private:
-    static std::map< int, RaceInfos> RACES;
-    static std::map<int, int> SDReplacementModel;
+    static std::map<int, RaceInfos> RACES;
 };
 
 

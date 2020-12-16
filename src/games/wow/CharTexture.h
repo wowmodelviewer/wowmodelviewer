@@ -48,12 +48,12 @@ struct CharTextureComponent
 class _CHARTEXTURE_API_ CharTexture
 {
   public:
-    CharTexture(unsigned int _layoutSizeId = 0)
-      : layoutSizeId(_layoutSizeId), baseImage(0)
-  {}
+    explicit CharTexture(unsigned int _layoutSizeId = 0)
+      : layoutSizeId(_layoutSizeId)
+    {}
 
-    void setBaseImage(GameFile * img) { baseImage = img; }
-    void addLayer(GameFile *, int region, int layer);
+    void addLayer(GameFile * file, int region, int layer);
+    void addComponent(CharTextureComponent c) { m_components.push_back(c); }
 
     void compose(TextureID texID);
 
@@ -62,10 +62,9 @@ class _CHARTEXTURE_API_ CharTexture
     static void initRegions();
 
   private:
-    void burnComponent(QImage & destImage, CharTextureComponent &);
+    void burnComponent(QImage & destImage, CharTextureComponent &) const;
     static QImage * gameFileToQImage(GameFile * file);
     unsigned int layoutSizeId;
-    GameFile * baseImage;
     std::vector<CharTextureComponent> m_components;
     static std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > LAYOUTS;
 };

@@ -25,13 +25,14 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(src  AnimationExportChoiceDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
-		 app.cpp
-		 ArcBallCamera.cpp
-		 ArcBallCameraControl.cpp
+         app.cpp
+         ArcBallCamera.cpp
+         ArcBallCameraControl.cpp
          AVIGenerator.cpp
-		 camera.cpp
+         camera.cpp
          charcontrol.cpp
-		 CharDetailsCustomizationSpin.cpp
+         CharDetailsCustomizationChoice.cpp
+         CharDetailsCustomizationSpin.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp
          effects.cpp
@@ -44,7 +45,7 @@ set(src  AnimationExportChoiceDialog.cpp
          lightcontrol.cpp
          liquid.cpp
          LogStackWalker.cpp
-		 main.cpp
+         main.cpp
          maptile.cpp
          modelbankcontrol.cpp
          modelcanvas.cpp
@@ -58,40 +59,41 @@ set(src  AnimationExportChoiceDialog.cpp
          util.cpp)
 
 set(headers AnimationExportChoiceDialog.h
-			animcontrol.h
-			AnimExporter.h
-			app.h
-			ArcBallCamera.h
-			ArcBallCameraControl.h
-			AVIGenerator.h
-			camera.h
-			charcontrol.h
-			CharDetailsCustomizationSpin.h
-			CharDetailsFrame.h
-			DisplaySettings.h
-			effects.h
-			enums.h
-			ExportSettings.h
-			filecontrol.h
-			GeneralSettings.h
-			imagecontrol.h
-			ItemImporterDialog.h
-			itemselection.h
-			lightcontrol.h
-			liquid.h
-			LogStackWalker.h
-			maptile.h
-			modelbankcontrol.h
-			modelcanvas.h
-			modelcontrol.h
-			modelviewer.h
-			NPCImporterDialog.h
-			Quantize.h
-			resource1.h
-			SettingsControl.h
-			shaders.h
-			UserSkins.h
-			util.h)
+            animcontrol.h
+            AnimExporter.h
+            app.h
+            ArcBallCamera.h
+            ArcBallCameraControl.h
+            AVIGenerator.h
+            camera.h
+            charcontrol.h
+            CharDetailsCustomizationChoice.h
+            CharDetailsCustomizationSpin.h
+            CharDetailsFrame.h
+            DisplaySettings.h
+            effects.h
+            enums.h
+            ExportSettings.h
+            filecontrol.h
+            GeneralSettings.h
+            imagecontrol.h
+            ItemImporterDialog.h
+            itemselection.h
+            lightcontrol.h
+            liquid.h
+            LogStackWalker.h
+            maptile.h
+            modelbankcontrol.h
+            modelcanvas.h
+            modelcontrol.h
+            modelviewer.h
+            NPCImporterDialog.h
+            Quantize.h
+            resource1.h
+            SettingsControl.h
+            shaders.h
+            UserSkins.h
+            util.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -109,23 +111,23 @@ set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
 set(common_files wowmodelviewer.json
-				 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
-				 ${WMV_BASE_PATH}/appveyor.yml
-				 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
+                 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
+                 ${WMV_BASE_PATH}/appveyor.yml
+                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(wow8_3_files 
-				 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv)
-         
+                 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
+                 ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv)
+
 source_group("wow8.3" FILES ${wow8_3_files})
 
 set(wow9_0_files 
-				 ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
-				 ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
-				 ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv)
+                 ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
+                 ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv)
 
 source_group("wow9.0" FILES ${wow9_0_files})
 
@@ -141,17 +143,17 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 
 if (MSVC_IDE)
-	# Enable Qt in Visual Studio
-	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-	set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
-	set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
+  # Enable Qt in Visual Studio
+  set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+  set_target_properties(${NAME} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
+  set_target_properties(${NAME} PROPERTIES COMPILE_DEFINITIONS $<$<CONFIG:DEBUG>:_CONSOLE>)
+  set_target_properties(${NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:windows")
+  set_target_properties(${NAME} PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:windows")
 
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 target_link_libraries(${NAME}
@@ -169,34 +171,34 @@ install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
-           ${QT_BIN_DIR}/Qt5Gui.dll
-           ${QT_BIN_DIR}/Qt5Network.dll
-           ${QT_BIN_DIR}/Qt5Widgets.dll
-           ${QT_BIN_DIR}/Qt5Xml.dll)
-           
+             ${QT_BIN_DIR}/Qt5Gui.dll
+             ${QT_BIN_DIR}/Qt5Network.dll
+             ${QT_BIN_DIR}/Qt5Widgets.dll
+             ${QT_BIN_DIR}/Qt5Xml.dll)
+
 set(QT_PLUGIN_DIR $ENV{WMV_SDK_BASEDIR}/Qt/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
-                   
+
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
-                        
+
 set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
                 $ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
                 $ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
- 
+
 set(GAMEFILES_WOW8_3 ${WMV_BASE_PATH}/bin_support/wow/8.3/listfile.csv
-        		         ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
-				             ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
-				             ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv) 
-                     
+                     ${WMV_BASE_PATH}/bin_support/wow/8.3/database.xml
+                     ${WMV_BASE_PATH}/bin_support/wow/8.3/AnimationData.csv
+                     ${WMV_BASE_PATH}/bin_support/wow/8.3/ChrRacesCustomization.csv) 
+
 set(GAMEFILES_WOW9_0 ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
-        		         ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
-				             ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
-				             ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv) 
-                 
+                     ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
+                     ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
+                     ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv) 
+
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})

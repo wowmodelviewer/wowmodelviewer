@@ -222,8 +222,8 @@ void WoWItem::load()
   if (id_ == 0 || displayId_ == 0) // no equipment, just return
     return;
 
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(charModel_, charInfos);
+  const auto charInfos = charModel_->infos;
+
   sqlResult iteminfos;
 
   // query geosets infos
@@ -260,12 +260,13 @@ void WoWItem::load()
       classFilter = QString("(ComponentTextureFileData.ClassID = %1 OR ComponentTextureFileData.ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
     
     if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.ID "
+                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.MaterialResourcesID "
                               "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
                               "WHERE (ComponentTextureFileData.GenderIndex = %1 OR ComponentTextureFileData.GenderIndex = %2) "
                               "AND ItemDisplayInfoID = %3 AND %4 "
                               "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC")
-                              .arg(GENDER_ANY).arg(charInfos.sexid).arg(displayId_).arg(classFilter),
+
+                              .arg(GENDER_ANY).arg(charInfos.sexID).arg(displayId_).arg(classFilter),
                       iteminfos))
     {
       for (auto& value : iteminfos.values)
@@ -1101,8 +1102,7 @@ int WoWItem::getCustomModelId(size_t index) const
   auto idListStr = idList.join(", ");
   idListStr = "(" + idListStr + ")";
   
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(charModel_, charInfos);
+  const auto charInfos = charModel_->infos;
 
   auto classFilter = QString("ClassID = %1").arg(CLASS_ANY);
   if (charModel_ && charModel_->cd.isDemonHunter())
@@ -1117,48 +1117,37 @@ int WoWItem::getCustomModelId(size_t index) const
   // Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
   // and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
   sqlResult iteminfos;
-
-  if (queryItemInfo(QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-                            "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                            "AND ID IN %4 AND %5 "
-                            "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-                            .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort),
-                    iteminfos))
+  QString query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                          "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                          "AND ID IN %4 AND %5 "
+                          "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter).arg(positionSort);
+  if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   // Failed to find model for that specific race and sex, so check fallback race:
-  auto fallbackRaceId = 0;
-  auto fallbackSex = -1;
-  if (charInfos.sexid == GENDER_MALE)
+  if (charInfos.modelFallbackRaceID > 0)
   {
-    fallbackRaceId = charInfos.MaleModelFallbackRaceID;
-    fallbackSex = charInfos.MaleModelFallbackSex;
-  }
-  else if (charInfos.sexid == GENDER_FEMALE)
-  {
-    fallbackRaceId = charInfos.FemaleModelFallbackRaceID;
-    fallbackSex = charInfos.FemaleModelFallbackSex;
-  }
-  if (fallbackRaceId > 0)
-  {
-    if (queryItemInfo(QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-                              "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                              "AND ID IN %4 AND %5 "
-                              "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-                              .arg(fallbackRaceId).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort),
-                      iteminfos))
+    query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                    "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                    "AND ID IN %4 AND %5 "
+                    "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                    .arg(charInfos.modelFallbackRaceID).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort);
+
+    if (queryItemInfo(query, iteminfos))
       return iteminfos.values[0][0].toInt();
   }
   
   // We still didn't find the model, so check for RACE_ANY (race = 0) items:
   // Note: currently all race = 0 entries are also gender = 2, but we probably
   // shouldn't assume it will stay that way, so check for both gender values:
-  if (queryItemInfo(QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
-                            "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                            "AND ID IN %4 AND %5 "
-                            "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
-                            .arg(RACE_ANY).arg(fallbackSex).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort),
-                    iteminfos))
+  query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
+                  "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                  "AND ID IN %4 AND %5 "
+                  "ORDER BY GenderIndex, ClassID DESC, PositionIndex %6")
+                  .arg(RACE_ANY).arg(charInfos.modelFallbackSexID).arg(GENDER_NONE).arg(idListStr).arg(classFilter).arg(positionSort);
+
+  if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   return 0;
@@ -1168,7 +1157,7 @@ int WoWItem::getCustomTextureId(size_t index) const
 {
   sqlResult infos;
   if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
-                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.ID "
+                             "LEFT JOIN TextureFileData ON %1 = TextureFileData.MaterialResourcesID "
                              "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"TextureItemID1":"TextureItemID2").arg(displayId_),
                      infos))
     return 0;
@@ -1184,56 +1173,45 @@ int WoWItem::getCustomTextureId(size_t index) const
   auto idListStr = idList.join(", ");
   idListStr = "(" + idListStr + ")";
   
-  RaceInfos charInfos;
-  RaceInfos::getCurrent(charModel_, charInfos);
+  const auto charInfos = charModel_->infos;
+  
+  QString classFilter = QString("ClassID = %1").arg(CLASS_ANY);
 
-  auto classFilter = QString("ClassID = %1").arg(CLASS_ANY);
   if (charModel_ && charModel_->cd.isDemonHunter())
     classFilter = QString("(ClassID = %1 OR ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
   
   // Order all queries by GenderIndex to ensure definite genders have priority over generic ones,
   // and ClassID descending to ensure Demon Hunter textures have priority over regular ones, for DHs only:
-  sqlResult iteminfos;
-
-  if (queryItemInfo(QString("SELECT ID FROM ComponentTextureFileData "
-                            "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                            "AND ID IN %4 AND %5 "
-                            "ORDER BY GenderIndex, ClassID DESC")
-                            .arg(charInfos.raceid).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter),
-                    iteminfos))
+  sqlResult iteminfos; 
+  QString query = QString("SELECT ID FROM ComponentTextureFileData "
+                          "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                          "AND ID IN %4 AND %5 "
+                          "ORDER BY GenderIndex, ClassID DESC")
+                          .arg(charInfos.raceID).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+  if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   // Failed to find model for that specific race and sex, so check fallback race:
-  auto fallbackRaceId = 0;
-  auto fallbackSex = -1;
-  if (charInfos.sexid == GENDER_MALE)
+  if (charInfos.textureFallbackRaceID > 0)
   {
-    fallbackRaceId = charInfos.MaleTextureFallbackRaceID;
-    fallbackSex = charInfos.MaleTextureFallbackSex;
-  }
-  else if (charInfos.sexid == GENDER_FEMALE)
-  {
-    fallbackRaceId = charInfos.FemaleTextureFallbackRaceID;
-    fallbackSex = charInfos.FemaleTextureFallbackSex;
-  }
-  if (fallbackRaceId > 0)
-  {
-    if (queryItemInfo(QString("SELECT ID FROM ComponentTextureFileData "
-                              "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                              "AND ID IN %4 AND %5 "
-                              "ORDER BY GenderIndex, ClassID DESC")
-                              .arg(fallbackRaceId).arg(fallbackSex).arg(GENDER_ANY).arg(idListStr).arg(classFilter),
-                      iteminfos))
+    query = QString("SELECT ID FROM ComponentTextureFileData "
+                    "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                    "AND ID IN %4 AND %5 "
+                    "ORDER BY GenderIndex, ClassID DESC")
+                    .arg(charInfos.textureFallbackRaceID).arg(charInfos.textureFallbackSexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+
+    if (queryItemInfo(query, iteminfos))
       return iteminfos.values[0][0].toInt();
   }
   
   // We still didn't find the model, so check for RACE_ANY (race = 0) items: 
-  if (queryItemInfo(QString("SELECT ID FROM ComponentTextureFileData "
-                            "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
-                            "AND ID IN %4 AND %5 "
-                            "ORDER BY GenderIndex, ClassID DESC")
-                            .arg(RACE_ANY).arg(charInfos.sexid).arg(GENDER_ANY).arg(idListStr).arg(classFilter),
-                    iteminfos))
+  query = QString("SELECT ID FROM ComponentTextureFileData "
+                  "WHERE RaceID = %1 AND (GenderIndex = %2 OR GenderIndex = %3) "
+                  "AND ID IN %4 AND %5 "
+                  "ORDER BY GenderIndex, ClassID DESC")
+                  .arg(RACE_ANY).arg(charInfos.sexID).arg(GENDER_ANY).arg(idListStr).arg(classFilter);
+
+  if (queryItemInfo(query, iteminfos))
     return iteminfos.values[0][0].toInt();
 
   return 0;

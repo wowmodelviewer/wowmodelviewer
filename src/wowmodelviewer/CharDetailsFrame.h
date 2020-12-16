@@ -26,7 +26,6 @@ class CharDetailsFrame : public wxWindow, public Observer
 public:
   CharDetailsFrame(wxWindow* parent);
 
-  void randomiseChar();
   void setModel(WoWModel * model);
 
   virtual void onEvent(Event *);
@@ -38,13 +37,13 @@ private:
   DECLARE_CLASS(CharDetailsFrame)
   DECLARE_EVENT_TABLE()
 
-  wxFlexGridSizer * charCustomizationGS;
-  wxCheckBox * dhMode;
+  wxFlexGridSizer * charCustomizationGS_;
+  wxCheckBox * dhMode_;
 
   void onRandomise(wxCommandEvent &event);
   void onDHMode(wxCommandEvent &event);
 
-  WoWModel * m_model;
+  WoWModel * model_;
 };
 
 

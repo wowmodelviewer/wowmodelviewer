@@ -59,14 +59,15 @@ namespace core
       virtual bool openFile(int id, void ** result) = 0;
       
       virtual QString version() = 0;
+      virtual int majorVersion() = 0;
       virtual QString locale() = 0;
       virtual bool setConfig(GameConfig config) = 0;
       virtual std::vector<GameConfig> configsFound() = 0;
 
       virtual int lastError() = 0;
 
-      virtual void onChildAdded(GameFile *);
-      virtual void onChildRemoved(GameFile *);
+      virtual void onChildAdded(GameFile *) override;
+      virtual void onChildRemoved(GameFile *) override;
 
       QString path() { return m_path; }
 

@@ -86,12 +86,12 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   gs2->AddGrowableCol(1);
 
 #define ADD_CONTROLS(type, caption) \
-  	{ \
-	gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption)); \
-	gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
-	levelboxes[type]->SetMinSize(wxSize(15, -1)); \
-	levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
-	gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"))); \
+    { \
+  gs2->Add(buttons[type]=new wxButton(this, ID_EQUIPMENT + type, caption)); \
+  gs2->Add(levelboxes[type]=new wxComboBox(this, ID_EQUIPMENT + 1000 + type, caption)); \
+  levelboxes[type]->SetMinSize(wxSize(15, -1)); \
+  levelboxes[type]->SetMaxSize(wxSize(15, -1)); \
+  gs2->Add(labels[type]=new wxStaticText(this, -1, _("---- None ----"))); \
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
@@ -119,9 +119,9 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   // Create our tabard customisation spin buttons
   wxGridSizer *gs3 = new wxGridSizer(3);
 #define ADD_CONTROLS(type, id, caption) \
-	gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
-	gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
-	gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
+  gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
+  gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
+  gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
 
   ADD_CONTROLS(SPIN_TABARD_ICON, ID_TABARD_ICON, _("Icon"))
     ADD_CONTROLS(SPIN_TABARD_ICONCOLOR, ID_TABARD_ICONCOLOR, _("Icon Color"))
@@ -180,8 +180,8 @@ void CharControl::UpdateModel(Attachment *a)
 
   Init();
 
-  RaceInfos infos;
-  if (RaceInfos::getCurrent(model, infos)) // fails if it is a creature
+  const auto infos = model->infos;
+  if (infos.raceID != -1) // fails if it is a creature
   {
     cdFrame->Enable(true);
     tabardSpins[SPIN_TABARD_ICON]->Enable(true);
@@ -224,15 +224,17 @@ void CharControl::UpdateModel(Attachment *a)
     tabardSpins[SPIN_TABARD_BACKGROUND]->SetRange(0, model->td.GetMaxBackground());
 
     //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-    //	spins[i]->Refresh(false);
+    //  spins[i]->Refresh(false);
     for (size_t i = 0; i < NUM_TABARD_BTNS; i++) {
       tabardSpins[i]->Refresh(false);
       spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
     }
     //for (size_t i=0; i<NUM_SPIN_BTNS; i++)
-    //		spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
+    //    spinLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), spins[i]->GetValue(), spins[i]->GetMax()));
     if (useRandomLooks)
-      cdFrame->randomiseChar();
+      model->cd.randomise();
+    else
+      model->cd.reset();
   }
   else // creature
   {
@@ -355,7 +357,7 @@ void CharControl::OnButton(wxCommandEvent &event)
   static wxString dir = cfgPath.BeforeLast(SLASH);
 
   //if (dir.Last() != '\\')
-  //	dir.Append('\\');
+  //  dir.Append('\\');
   switch (event.GetId())
   {
     case ID_CLEAR_EQUIPMENT:
@@ -574,19 +576,19 @@ void CharControl::selectSet()
 
 void CharControl::selectStart()
 {
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(model, infos))
+  const auto infos = model->infos;
+  if (infos.raceID == -1)
     return;
 
   ClearItemDialog();
   numbers.clear();
   choices.Clear();
 
-  LOG_INFO << "race =" << infos.raceid << "sex = " << infos.sexid;
+  LOG_INFO << "race =" << infos.raceID << "sex = " << infos.sexID;
 
   QString query = QString("SELECT ChrClasses.name, CSO.ID "
                           "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
-                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceid).arg(infos.sexid);
+                          "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
 
   sqlResult startOutfit = GAMEDATABASE.sqlQuery(query);
 
@@ -791,7 +793,7 @@ void CharControl::OnUpdateItem(int type, int id)
       if (id && model)
       {
         QString query = QString("SELECT item1, item2, item3, item4, item5, "
-                                "item6, item7,	item8 FROM ItemSet WHERE ID = %1").arg(id);
+                                "item6, item7,  item8 FROM ItemSet WHERE ID = %1").arg(id);
 
         sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
 

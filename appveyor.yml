@@ -27,12 +27,5 @@ build_script:
 
 test: off
 
-for:
--
-  branches:
-    only:
-      - master
-      - develop
-  
-  artifacts:
-    - path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe
+artifacts:
+- path: bin\WMV_Installer_v%APPVEYOR_BUILD_VERSION%.exe

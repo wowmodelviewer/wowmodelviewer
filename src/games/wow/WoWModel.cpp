@@ -167,7 +167,7 @@ gamefile(file)
 
   mergedModelType = 0;
 
-  initCommon(file);
+  initCommon();
 }
 
 WoWModel::~WoWModel()
@@ -305,10 +305,10 @@ void WoWModel::displayHeader(ModelHeader & a_header)
 }
 
 
-bool WoWModel::isAnimated(GameFile * f)
+bool WoWModel::isAnimated()
 {
   // see if we have any animated bones
-  ModelBoneDef *bo = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+  ModelBoneDef *bo = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
 
   animGeometry = false;
   animBones = false;
@@ -364,7 +364,7 @@ bool WoWModel::isAnimated(GameFile * f)
   // animated colors
   if (header.nColors)
   {
-    ModelColorDef *cols = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
+    ModelColorDef *cols = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
     for (size_t i = 0; i < header.nColors; i++)
     {
       if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
@@ -378,7 +378,7 @@ bool WoWModel::isAnimated(GameFile * f)
   // animated opacity
   if (header.nTransparency && !animMisc)
   {
-    ModelTransDef *trs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
+    ModelTransDef *trs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
     for (size_t i = 0; i < header.nTransparency; i++)
     {
       if (trs[i].trans.type != 0)
@@ -393,39 +393,42 @@ bool WoWModel::isAnimated(GameFile * f)
   return animGeometry || (header.nTexAnims > 0) || animMisc;
 }
 
-void WoWModel::initCommon(GameFile * f)
+void WoWModel::initCommon()
 {
   // --
   ok = false;
 
-  if (!f)
+  if (!gamefile)
     return;
 
-  if (!f->open() || f->isEof() || (f->getSize() < sizeof(ModelHeader)))
+  if (!gamefile->open() || gamefile->isEof() || (gamefile->getSize() < sizeof(ModelHeader)))
   {
-    LOG_ERROR << "Unable to load model:" << f->fullname();
-    f->close();
+    LOG_ERROR << "Unable to load model:" << gamefile->fullname();
+    gamefile->close();
     return;
   }
 
-  if (f->isChunked() && !f->setChunk("MD21")) // Legion chunked files
+  if (gamefile->isChunked() && !gamefile->setChunk("MD21")) // Legion chunked files
   {
-    LOG_ERROR << "Unable to set chunk to MD21 for model:" << f->fullname();
-    f->close();
+    LOG_ERROR << "Unable to set chunk to MD21 for model:" << gamefile->fullname();
+    gamefile->close();
     return;
   }
 
-  setItemName(f->fullname());
+  setItemName(gamefile->fullname());
+
+  initRaceInfos();
+  cd.reset(this);
 
   // replace .MDX with .M2
-  QString tempname = f->fullname();
+  QString tempname = gamefile->fullname();
   tempname.replace(".mdx", ".m2");
 
   ok = true;
 
-  memcpy(&header, f->getBuffer(), sizeof(ModelHeader));
+  memcpy(&header, gamefile->getBuffer(), sizeof(ModelHeader));
 
-  LOG_INFO << "Loading model:" << tempname << "size:" << f->getSize();
+  LOG_INFO << "Loading model:" << tempname << "size:" << gamefile->getSize();
 
   // displayHeader(header);
 
@@ -434,7 +437,7 @@ void WoWModel::initCommon(GameFile * f)
     LOG_ERROR << "Invalid model!  May be corrupted. Header id:" << header.id[0] << header.id[1] << header.id[2] << header.id[3];
 
     ok = false;
-    f->close();
+    gamefile->close();
     return;
   }
 
@@ -453,17 +456,20 @@ void WoWModel::initCommon(GameFile * f)
   // 4 1 0 0 = WoW 2.0 models
   // 0 1 0 0 = WoW 1.0 models
 
-  if (f->getSize() < header.ofsParticleEmitters)
+  if (gamefile->getSize() < header.ofsParticleEmitters)
   {
     LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
-    f->close();
+    gamefile->close();
     return;
   }
 
-  if (f->isChunked() && f->setChunk("SKID"))
+  // init race info
+
+
+  if (gamefile->isChunked() && gamefile->setChunk("SKID"))
   {
     uint32 skelFileID;
-    f->read(&skelFileID, sizeof(skelFileID));
+    gamefile->read(&skelFileID, sizeof(skelFileID));
     GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
 
     if (skelFile->open())
@@ -511,19 +517,19 @@ void WoWModel::initCommon(GameFile * f)
       }
       skelFile->close();
     }
-    f->setChunk("MD21");
+    gamefile->setChunk("MD21");
   }
   else if (header.nGlobalSequences)
   {
     // vector.assign() isn't working:
-    // globalSequences.assign(f->getBuffer() + header.ofsGlobalSequences, f->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
+    // globalSequences.assign(gamefile->getBuffer() + header.ofsGlobalSequences, gamefile->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
     uint32 * buffer = new uint32[header.nGlobalSequences];
-    memcpy(buffer, f->getBuffer() + header.ofsGlobalSequences, sizeof(uint32)*header.nGlobalSequences);
+    memcpy(buffer, gamefile->getBuffer() + header.ofsGlobalSequences, sizeof(uint32)*header.nGlobalSequences);
     globalSequences.assign(buffer, buffer + header.nGlobalSequences);
     delete[] buffer;
   }
 
-  if (f->isChunked() && f->setChunk("SFID"))
+  if (gamefile->isChunked() && gamefile->setChunk("SFID"))
   {
     uint32 skinfile;
     
@@ -531,7 +537,7 @@ void WoWModel::initCommon(GameFile * f)
     { 
       for (uint i = 0; i < header.nViews; i++)
       {
-        f->read(&skinfile, sizeof(skinfile));
+        gamefile->read(&skinfile, sizeof(skinfile));
         skinFileIDs.push_back(skinfile);
         LOG_INFO << "Adding skin file" << i << ":" << skinfile;
         // If the first view is the best, and we don't need to switch to a lower one, then maybe we don't need to store all these file IDs, but we can for now.
@@ -539,7 +545,7 @@ void WoWModel::initCommon(GameFile * f)
     }
     // LOD .skin file IDs are next in SFID, but we'll ignore them. They're probably unnecessary in a model viewer.
 
-    f->setChunk("MD21");
+    gamefile->setChunk("MD21");
   }
 
   if (forceAnim)
@@ -550,7 +556,7 @@ void WoWModel::initCommon(GameFile * f)
   alpha = 1.0f;
 
   ModelVertex * buffer = new ModelVertex[header.nVertices];
-  memcpy(buffer, f->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
+  memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
   rawVertices.assign(buffer, buffer + header.nVertices);
   delete[] buffer;
 
@@ -588,7 +594,7 @@ void WoWModel::initCommon(GameFile * f)
   if (header.nBoundingVertices > 0)
   {
     Vec3D * buffer = new Vec3D[header.nBoundingVertices];
-    memcpy(buffer, f->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
+    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
     bounds.assign(buffer, buffer + header.nBoundingVertices);
     delete[] buffer;
 
@@ -599,23 +605,23 @@ void WoWModel::initCommon(GameFile * f)
   if (header.nBoundingTriangles > 0)
   {
     uint16 * buffer = new uint16[header.nBoundingTriangles];
-    memcpy(buffer, f->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
+    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
     boundTris.assign(buffer, buffer + header.nBoundingTriangles);
     delete[] buffer;
   }
 
   // textures
-  ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
+  ModelTextureDef *texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
   if (header.nTextures)
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
     vector<TXID> txids;
 
-    if (f->isChunked() && f->setChunk("TXID"))
+    if (gamefile->isChunked() && gamefile->setChunk("TXID"))
     {
-      txids = readTXIDSFromFile(f);
-      f->setChunk("MD21", false);
+      txids = readTXIDSFromFile(gamefile);
+      gamefile->setChunk("MD21", false);
     }
 
     for (size_t i = 0; i < header.nTextures; i++)
@@ -660,7 +666,7 @@ void WoWModel::initCommon(GameFile * f)
         }
         else
         {
-          QString texname((char*)(f->getBuffer() + texdef[i].nameOfs));
+          QString texname((char*)(gamefile->getBuffer() + texdef[i].nameOfs));
           tex = GAMEDIRECTORY.getFile(texname);
         }
         textures[i] = TEXTUREMANAGER.add(tex);
@@ -681,15 +687,15 @@ void WoWModel::initCommon(GameFile * f)
   if (header.nTexReplace) {
   size_t m = header.nTexReplace;
   if (m>16) m = 16;
-  int16 *texrep = (int16*)(f->getBuffer() + header.ofsTexReplace);
+  int16 *texrep = (int16*)(gamefile->getBuffer() + header.ofsTexReplace);
   for (size_t i=0; i<m; i++) specialTextures[i] = texrep[i];
   }
   */
 
-  if (f->isChunked() && f->setChunk("SKID"))
+  if (gamefile->isChunked() && gamefile->setChunk("SKID"))
   {
     uint32 skelFileID;
-    f->read(&skelFileID, sizeof(skelFileID));
+    gamefile->read(&skelFileID, sizeof(skelFileID));
     GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
 
     if (skelFile->open())
@@ -724,14 +730,14 @@ void WoWModel::initCommon(GameFile * f)
       }
       skelFile->close();
     }
-    f->setChunk("MD21");
+    gamefile->setChunk("MD21");
   }
   else
   {
     // attachments
     if (header.nAttachments)
     {
-      ModelAttachmentDef *attachments = (ModelAttachmentDef*)(f->getBuffer() + header.ofsAttachments);
+      ModelAttachmentDef *attachments = (ModelAttachmentDef*)(gamefile->getBuffer() + header.ofsAttachments);
       for (size_t i = 0; i < header.nAttachments; i++)
       {
         ModelAttachment att;
@@ -743,7 +749,7 @@ void WoWModel::initCommon(GameFile * f)
 
     if (header.nAttachLookup)
     {
-      int16 *p = (int16*)(f->getBuffer() + header.ofsAttachLookup);
+      int16 *p = (int16*)(gamefile->getBuffer() + header.ofsAttachLookup);
       if (header.nAttachLookup > ATT_MAX)
         LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
       for (size_t i = 0; i < header.nAttachLookup; i++)
@@ -760,18 +766,18 @@ void WoWModel::initCommon(GameFile * f)
   if (header.nColors)
   {
     colors.resize(header.nColors);
-    ModelColorDef *colorDefs = (ModelColorDef*)(f->getBuffer() + header.ofsColors);
+    ModelColorDef *colorDefs = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
     for (uint i = 0; i < colors.size(); i++)
-      colors[i].init(f, colorDefs[i], globalSequences);
+      colors[i].init(gamefile, colorDefs[i], globalSequences);
   }
 
   // init transparency
   if (header.nTransparency)
   {
     transparency.resize(header.nTransparency);
-    ModelTransDef *trDefs = (ModelTransDef*)(f->getBuffer() + header.ofsTransparency);
+    ModelTransDef *trDefs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
     for (uint i = 0; i < header.nTransparency; i++)
-      transparency[i].init(f, trDefs[i], globalSequences);
+      transparency[i].init(gamefile, trDefs[i], globalSequences);
   }
 
   if (header.nViews)
@@ -781,32 +787,32 @@ void WoWModel::initCommon(GameFile * f)
     // TODO: Add support for selecting the LOD.
     // int viewLOD = 0; // sets LOD to worst
     // int viewLOD = header.nViews - 1; // sets LOD to best
-    setLOD(f, 0); // Set the default Level of Detail to the best possible.
+    setLOD(0); // Set the default Level of Detail to the best possible.
   }
 
   // proceed with specialized init depending on model "type"
 
-  animated = isAnimated(f) || forceAnim;  // isAnimated will set animGeometry
+  animated = isAnimated() || forceAnim;  // isAnimated will set animGeometry
 
   if (animated)
-    initAnimated(f);
+    initAnimated();
   else
-    initStatic(f);
+    initStatic();
   
   QString query = QString("SELECT CreatureGeosetDataID "
                           "FROM CreatureModelData "
                           "WHERE FileID = %1")
-                          .arg( f->fileDataId() );
+                          .arg(gamefile->fileDataId() );
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   if(r.valid && !r.values.empty())
   {
     creatureGeosetDataID = r.values[0][0].toInt();
   }
   
-  f->close();
+  gamefile->close();
 }
 
-void WoWModel::initStatic(GameFile * f)
+void WoWModel::initStatic()
 {
   dlist = glGenLists(1);
   glNewList(dlist, GL_COMPILE);
@@ -820,6 +826,31 @@ void WoWModel::initStatic(GameFile * f)
   delete[] normals; normals = 0;
   indices.clear();
 }
+
+void WoWModel::initRaceInfos()
+{
+  // This mapping links *_sdr character models to their HD equivalents, so they can get race info for display.
+  // *_sdr models are actually now obsolete and the database that used to provide this info is now empty,
+  // but while the models are still appearing in the model tree we may as well keep them working, so they
+  // don't look broken:
+  std::map<int, int> SDReplacementModel = // {SDRFileID , HDFileID}
+  { {1838568, 119369},  {1838570, 119376},  {1838201, 307453},  {1838592, 307454},  {1853956, 535052},
+   {1853610, 589715},  {1838560, 878772},  {1838566, 900914},  {1838578, 917116},  {1838574, 921844},
+   {1838564, 940356},  {1838580, 949470},  {1838562, 950080},  {1838584, 959310},  {1838586, 968705},
+   {1838576, 974343},  {1839008, 986648},  {1838582, 997378},  {1838572, 1000764}, {1839253, 1005887},
+   {1838385, 1011653}, {1838588, 1018060}, {1822372, 1022598}, {1838590, 1022938}, {1853408, 1100087},
+   {1839709, 1100258}, {1825438, 1593999}, {1839042, 1620605}, {1858265, 1630218}, {1859379, 1630402},
+   {1900779, 1630447}, {1894572, 1662187}, {1859345, 1733758}, {1858367, 1734034}, {1858099, 1810676},
+   {1857801, 1814471}, {1892825, 1890763}, {1892543, 1890765}, {1968838, 1968587}, {1842700, 1000764} };
+
+  auto fdid = gamefile->fileDataId();
+  if (SDReplacementModel.count(fdid)) // if it's an old *_sdr model, use the file ID of its HD counterpart for race info
+    fdid = SDReplacementModel[fdid];
+
+  if(!RaceInfos::getRaceInfosForFileID(fdid,infos))
+    LOG_ERROR << "Unable to retrieve race infos for model" << gamefile->fullname() << gamefile->fileDataId();
+}
+
 
 vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {
@@ -913,15 +944,15 @@ void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimDa
 }
 
 
-void WoWModel::initAnimated(GameFile * f)
+void WoWModel::initAnimated()
 {
   modelAnimData data;
   data.globalSequences = globalSequences;
 
-  if (f->isChunked() && f->setChunk("SKID"))
+  if (gamefile->isChunked() && gamefile->setChunk("SKID"))
   {
     uint32 skelFileID;
-    f->read(&skelFileID, sizeof(skelFileID));
+    gamefile->read(&skelFileID, sizeof(skelFileID));
     GameFile * skelFile = GAMEDIRECTORY.getFile(skelFileID);
 
     if (skelFile->open())
@@ -1005,40 +1036,40 @@ void WoWModel::initAnimated(GameFile * f)
       }
       skelFile->close();
     }
-    f->setChunk("MD21", false);
+    gamefile->setChunk("MD21", false);
   }
   else if (header.nAnimations > 0)
   {
     vector<AFID> afids;
 
-    if (f->isChunked() && f->setChunk("AFID"))
+    if (gamefile->isChunked() && gamefile->setChunk("AFID"))
     {
-      afids = readAFIDSFromFile(f);
-      f->setChunk("MD21", false);
+      afids = readAFIDSFromFile(gamefile);
+      gamefile->setChunk("MD21", false);
     }
 
-    readAnimsFromFile(f, afids, data, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
+    readAnimsFromFile(gamefile, afids, data, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
 
     animManager = new AnimManager(*this);
 
     // init bones...
     bones.resize(header.nBones);
-    ModelBoneDef *mb = (ModelBoneDef*)(f->getBuffer() + header.ofsBones);
+    ModelBoneDef *mb = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
 
     for (uint i = 0; i < anims.size(); i++)
       data.animIndexToAnimId[i] = anims[i].animID;
 
     for (uint i = 0; i < bones.size(); i++)
-      bones[i].initV3(*f, mb[i], data);
+      bones[i].initV3(*gamefile, mb[i], data);
 
     // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
     if (header.nKeyBoneLookup < BONE_MAX)
     {
-      memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
+      memcpy(keyBoneLookup, gamefile->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
     }
     else
     {
-      memcpy(keyBoneLookup, f->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
+      memcpy(keyBoneLookup, gamefile->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
       LOG_ERROR << "KeyBone number" << header.nKeyBoneLookup << "over" << BONE_MAX;
     }
   }
@@ -1085,15 +1116,15 @@ void WoWModel::initAnimated(GameFile * f)
   if (header.nTexAnims > 0)
   {
     texAnims.resize(header.nTexAnims);
-    ModelTexAnimDef *ta = (ModelTexAnimDef*)(f->getBuffer() + header.ofsTexAnims);
+    ModelTexAnimDef *ta = (ModelTexAnimDef*)(gamefile->getBuffer() + header.ofsTexAnims);
                                                                  
     for (uint i = 0; i < texAnims.size(); i++)
-      texAnims[i].init(f, ta[i], globalSequences);
+      texAnims[i].init(gamefile, ta[i], globalSequences);
   }
 
   if (header.nEvents)
   {
-    ModelEventDef *edefs = (ModelEventDef *)(f->getBuffer() + header.ofsEvents);
+    ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
     events.resize(header.nEvents);
     for (uint i = 0; i < events.size(); i++)
       events[i].init(edefs[i]);
@@ -1102,7 +1133,7 @@ void WoWModel::initAnimated(GameFile * f)
   // particle systems
   if (header.nParticleEmitters)
   {
-    M2ParticleDef *pdefs = (M2ParticleDef *)(f->getBuffer() + header.ofsParticleEmitters);
+    M2ParticleDef *pdefs = (M2ParticleDef *)(gamefile->getBuffer() + header.ofsParticleEmitters);
     M2ParticleDef *pdef;
     particleSystems.resize(header.nParticleEmitters);
     hasParticles = true;
@@ -1111,7 +1142,7 @@ void WoWModel::initAnimated(GameFile * f)
     {
       pdef = (M2ParticleDef *)&pdefs[i];
       particleSystems[i].model = this;
-      particleSystems[i].init(f, *pdef, globalSequences);
+      particleSystems[i].init(gamefile, *pdef, globalSequences);
       int pci = particleSystems[i].particleColID;
       if (pci && (std::find(replacableParticleColorIDs.begin(),
         replacableParticleColorIDs.end(), pci) == replacableParticleColorIDs.end()))
@@ -1122,12 +1153,12 @@ void WoWModel::initAnimated(GameFile * f)
   // ribbons
   if (header.nRibbonEmitters)
   {
-    ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(f->getBuffer() + header.ofsRibbonEmitters);
+    ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(gamefile->getBuffer() + header.ofsRibbonEmitters);
     ribbons.resize(header.nRibbonEmitters);
     for (uint i = 0; i < ribbons.size(); i++)
     {
       ribbons[i].model = this;
-      ribbons[i].init(f, rdefs[i], globalSequences);
+      ribbons[i].init(gamefile, rdefs[i], globalSequences);
     }
   }
 
@@ -1136,21 +1167,21 @@ void WoWModel::initAnimated(GameFile * f)
   {
     if (header.version[0] <= 9)
     {
-      ModelCameraDef *camDefs = (ModelCameraDef*)(f->getBuffer() + header.ofsCameras);
+      ModelCameraDef *camDefs = (ModelCameraDef*)(gamefile->getBuffer() + header.ofsCameras);
       for (size_t i = 0; i < header.nCameras; i++)
       {
         ModelCamera a;
-        a.init(f, camDefs[i], globalSequences, modelname);
+        a.init(gamefile, camDefs[i], globalSequences, modelname);
         cam.push_back(a);
       }
     }
     else if (header.version[0] <= 16)
     {
-      ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(f->getBuffer() + header.ofsCameras);
+      ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(gamefile->getBuffer() + header.ofsCameras);
       for (size_t i = 0; i < header.nCameras; i++)
       {
         ModelCamera a;
-        a.initv10(f, camDefs[i], globalSequences, modelname);
+        a.initv10(gamefile, camDefs[i], globalSequences, modelname);
         cam.push_back(a);
       }
     }
@@ -1164,19 +1195,19 @@ void WoWModel::initAnimated(GameFile * f)
   if (header.nLights)
   {
     lights.resize(header.nLights);
-    ModelLightDef *lDefs = (ModelLightDef*)(f->getBuffer() + header.ofsLights);
+    ModelLightDef *lDefs = (ModelLightDef*)(gamefile->getBuffer() + header.ofsLights);
     for (uint i = 0; i < lights.size(); i++)
-      lights[i].init(f, lDefs[i], globalSequences);
+      lights[i].init(gamefile, lDefs[i], globalSequences);
   }
 
   animcalc = false;
 }
 
-void WoWModel::setLOD(GameFile * f, int index)
+void WoWModel::setLOD(int index)
 {
   GameFile * g;
   
-  if (f->isChunked())
+  if (gamefile->isChunked())
   {
     int numSkinFiles = sizeof(skinFileIDs);
     if (!numSkinFiles)
@@ -1218,10 +1249,10 @@ void WoWModel::setLOD(GameFile * f, int index)
   }
   
   // Texture definitions
-  ModelTextureDef *texdef = (ModelTextureDef*)(f->getBuffer() + header.ofsTextures);
+  ModelTextureDef *texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
 
   // Transparency
-  int16 *transLookup = (int16*)(f->getBuffer() + header.ofsTransparencyLookup);
+  int16 *transLookup = (int16*)(gamefile->getBuffer() + header.ofsTransparencyLookup);
 
   if (g->isEof())
   {
@@ -1255,10 +1286,10 @@ void WoWModel::setLOD(GameFile * f, int index)
   // render ops
   ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
   ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
-  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(f->getBuffer() + header.ofsTexFlags);
-  uint16 *texlookup = (uint16*)(f->getBuffer() + header.ofsTexLookup);
-  uint16 *texanimlookup = (uint16*)(f->getBuffer() + header.ofsTexAnimLookup);
-  int16 *texunitlookup = (int16*)(f->getBuffer() + header.ofsTexUnitLookup);
+  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.ofsTexFlags);
+  uint16 *texlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexLookup);
+  uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
+  int16 *texunitlookup = (int16*)(gamefile->getBuffer() + header.ofsTexUnitLookup);
 
   uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
@@ -2100,9 +2131,11 @@ WoWModel* WoWModel::getMergedModel(uint fileID)
 
 void WoWModel::refreshMerging()
 {
+  /*
   LOG_INFO << __FUNCTION__;
   for (auto it : mergedModels)
     LOG_INFO << it->name() << it->gamefile->fullname();
+    */
 
   // first reinit this model with original data
   origVertices = rawVertices;
@@ -2312,22 +2345,29 @@ void WoWModel::unmergeModel(WoWModel * m)
 
 void WoWModel::refresh()
 {
+  if (GAMEDIRECTORY.majorVersion() < 9)
+    refresh8x();
+  else
+    refresh9x();
+}
+
+void WoWModel::refresh8x()
+{
   TextureID charTex = 0;
   bool showScalp = true;
-  
+
   // Reset geosets
   for (size_t i = 0; i < NUM_GEOSETS; i++)
     cd.geosets[i] = 1;
 
-  RaceInfos infos;
-  if (!RaceInfos::getCurrent(this, infos)) // if no race info found, simply update geosets
+  if (infos.raceID == -1) // if no race info found, simply update geosets
   {
     // reset geosets
     for (uint i = 0; i < NUM_GEOSETS; i++)
       setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
     return;
   }
-  
+
   for (auto it : mergedModels)
   {
     // hide all geosets of customization models. The correct ones will be set later
@@ -2345,9 +2385,9 @@ void WoWModel::refresh()
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
   // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
-  
+
   if (foundTextures.size() > 0)
-    tex.setBaseImage(GAMEDIRECTORY.getFile(foundTextures[0]));
+    tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), -1, 0);
 
   if (foundTextures.size() > 1)
   {
@@ -2373,8 +2413,8 @@ void WoWModel::refresh()
 
   // select hairstyle geoset(s)
   QString query = QString("SELECT GeoSetID,ShowScalp FROM CharHairGeoSets WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(cd.get(CharDetails::FACIAL_CUSTOMIZATION_STYLE));
   sqlResult hairStyle = GAMEDATABASE.sqlQuery(query);
 
@@ -2419,8 +2459,8 @@ void WoWModel::refresh()
 
   // select facial geoset(s)
   query = QString("SELECT GeoSet1,GeoSet2,GeoSet3,GeoSet4,GeoSet5 FROM CharacterFacialHairStyles WHERE RaceID=%1 AND SexID=%2 AND VariationID=%3")
-    .arg(infos.raceid)
-    .arg(infos.sexid)
+    .arg(infos.raceID)
+    .arg(infos.sexID)
     .arg(cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION));
 
   sqlResult facialHairStyle = GAMEDATABASE.sqlQuery(query);
@@ -2442,11 +2482,11 @@ void WoWModel::refresh()
     LOG_ERROR << "Unable to collect number of facial hair style" << cd.get(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION) << "for model" << name();
   }
 
-    
+
   // CUSTOM1 - Tattoos for Demon Hunters, Markings for Vulpera, Piercings for Male Dark Iron Dwarves.
   // Because custom sections could deal with textures or geosets, we check both.
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     refreshCustomSection(CharDetails::Custom1BaseType, CharDetails::CUSTOM1_STYLE);
     /*
@@ -2465,11 +2505,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom1Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2487,7 +2527,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom1BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom1BaseType);
@@ -2511,7 +2551,7 @@ void WoWModel::refresh()
   // Because custom sections could deal with textures or geosets, we check both.
 
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
     refreshCustomSection(CharDetails::Custom2BaseType, CharDetails::CUSTOM2_STYLE);
     /*
@@ -2530,11 +2570,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom2Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2552,7 +2592,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom2BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom2BaseType);
@@ -2576,9 +2616,9 @@ void WoWModel::refresh()
   //           Leg Upgrades for Mechagnomes.
   // Because custom sections could deal with textures or geosets, we check both.
   // Ignore this for Night Elves and Blood Elves who aren't demon hunters:
-  if (cd.isDemonHunter() || (infos.raceid != RACE_NIGHTELF && infos.raceid != RACE_BLOODELF))
+  if (cd.isDemonHunter() || (infos.raceID != RACE_NIGHTELF && infos.raceID != RACE_BLOODELF))
   {
-    
+
     refreshCustomSection(CharDetails::Custom3BaseType, CharDetails::CUSTOM3_STYLE);
     /*
     // Geoset modifications:
@@ -2596,11 +2636,11 @@ void WoWModel::refresh()
     {
       for (auto it : custom3Style.values)
       {
-        WoWModel* custommodel = nullptr; 
+        WoWModel* custommodel = nullptr;
         uint geoId = it[0].toInt();
         uint geoType = it[1].toInt();
         uint customGeoFile = it[2].toInt();
-        
+
         if (customGeoFile > 0)
         {
           custommodel = getMergedModel(customGeoFile);
@@ -2618,7 +2658,7 @@ void WoWModel::refresh()
           }
         }
       }
-    }  
+    }
     // Textures (tattoos):
     foundTextures = cd.getTextureForSection(CharDetails::Custom3BaseType);
     foundRegions = cd.getRegionForSection(CharDetails::Custom3BaseType);
@@ -2638,28 +2678,28 @@ void WoWModel::refresh()
   }
 
   foundTextures = cd.getTextureForSection(CharDetails::UnderwearBaseType);
-  
+
   // only show underwear tops/bras if the character isn't wearing a shirt or chest:
   if (cd.showUnderwear && foundTextures.size() > 1 &&
-      getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
+    getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2);
-    
+
   // only show underwear bottoms if the character isn't wearing pants:
   if (cd.showUnderwear && getItem(CS_PANTS)->id() < 1)
   {
     if (foundTextures.size() > 0)
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2);
     // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
-    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
+    if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 1;
-  } 
+  }
   else  // hide underwear
   {
     // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
-    if (cd.isDemonHunter() || ((infos.raceid == RACE_PANDAREN) && (infos.sexid == GENDER_FEMALE)))
+    if (cd.isDemonHunter() || ((infos.raceID == RACE_PANDAREN) && (infos.sexID == GENDER_FEMALE)))
       cd.geosets[CG_TABARD2] = 0;
   }
-  
+
   // horns
   // cd.geosets[CG_DH_HORNS] = cd.get(CharDetails::CUSTOM2_STYLE);
 
@@ -2690,7 +2730,7 @@ void WoWModel::refresh()
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
     cd.geosets[CG_WRISTBANDS] = 0;
-  
+
   // reset geosets
   for (uint i = 0; i < NUM_GEOSETS; i++)
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
@@ -2700,16 +2740,12 @@ void WoWModel::refresh()
 
   if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
   {
-    QString query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
-                            "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-                            "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-                            .arg(infos.raceid)
-                            .arg((infos.sexid == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                            .arg(headItem->id());
-
-
-
-    sqlResult helmetInfos = GAMEDATABASE.sqlQuery(query);
+    auto helmetInfos = GAMEDATABASE.sqlQuery(QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+                                                            "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+                                                            "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+                                                            .arg(infos.raceID)
+                                                            .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+                                                            .arg(headItem->id()));
 
     if (helmetInfos.valid && !helmetInfos.values.empty())
     {
@@ -2741,18 +2777,126 @@ void WoWModel::refresh()
   refreshMerging();
 }
 
+void WoWModel::refresh9x()
+{
+  const TextureID charTex = 0;
+  auto showScalp = true;
+
+  for (auto* it : mergedModels)
+  {
+    // hide all geosets of customization models. The correct ones will be set later
+    if (it->mergedModelType == 1)
+      it->hideAllGeosets();
+  }
+
+  if (infos.raceID == -1) // if no race info found, simply update geosets
+  {
+    // reset geosets
+    for (auto geo : cd.geosets)
+      setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+    return;
+  }
+
+  // reset char texture
+  tex.reset(infos.textureLayoutID);
+  for (auto t : cd.textures)
+  {
+    if(t.type != 1)
+    {
+      updateTextureList(GAMEDIRECTORY.getFile(t.fileId), t.type); 
+    }
+    else
+    {
+      tex.addLayer(GAMEDIRECTORY.getFile(t.fileId), t.region, t.layer);
+    }    
+  }
+
+  //refresh equipment
+
+  for (auto* it : *this)
+    it->refresh();
+
+  LOG_INFO << "Current Equipment :"
+    << "Head" << (getItem(CS_HEAD) ? getItem(CS_HEAD)->id() : -1)
+    << "Shoulder" << (getItem(CS_SHOULDER) ? getItem(CS_SHOULDER)->id() : -1)
+    << "Shirt" << (getItem(CS_SHIRT) ? getItem(CS_SHIRT)->id() : -1)
+    << "Chest" << (getItem(CS_CHEST) ? getItem(CS_CHEST)->id() : -1)
+    << "Belt" << (getItem(CS_BELT) ? getItem(CS_BELT)->id() : -1)
+    << "Legs" << (getItem(CS_PANTS) ? getItem(CS_PANTS)->id() : -1)
+    << "Boots" << (getItem(CS_BOOTS) ? getItem(CS_BOOTS)->id() : -1)
+    << "Bracers" << (getItem(CS_BRACERS) ? getItem(CS_BRACERS)->id() : -1)
+    << "Gloves" << (getItem(CS_GLOVES) ? getItem(CS_GLOVES)->id() : -1)
+    << "Cape" << (getItem(CS_CAPE) ? getItem(CS_CAPE)->id() : -1)
+    << "Right Hand" << (getItem(CS_HAND_RIGHT) ? getItem(CS_HAND_RIGHT)->id() : -1)
+    << "Left Hand" << (getItem(CS_HAND_LEFT) ? getItem(CS_HAND_LEFT)->id() : -1)
+    << "Quiver" << (getItem(CS_QUIVER) ? getItem(CS_QUIVER)->id() : -1)
+    << "Tabard" << (getItem(CS_TABARD) ? getItem(CS_TABARD)->id() : -1);
+
+  // gloves - this is so gloves have preference over shirt sleeves.
+  if (cd.geosets[CG_GLOVES] > 1)
+    cd.geosets[CG_WRISTBANDS] = 0;
+  
+  // Reset geosets
+  for (auto geo : cd.geosets)
+    setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+
+  auto headItem = getItem(CS_HEAD);
+
+  if (headItem != nullptr && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
+  {
+    const auto query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
+                         "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+                         "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+                       .arg(infos.raceID)
+                       .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+                       .arg(headItem->id());
+
+
+
+    auto helmetInfos = GAMEDATABASE.sqlQuery(query);
+
+    if (helmetInfos.valid && !helmetInfos.values.empty())
+    {
+      for (auto it : helmetInfos.values)
+      {
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+      }
+    }
+  }
+
+  // finalize character texture
+  tex.compose(charTex);
+
+  // set replacable textures
+  replaceTextures[TEXTURE_SKIN] = charTex;
+
+  // If model is one of these races, show the feet (don't wear boots)
+  cd.showFeet = infos.barefeet;
+
+  // Eye Glow Geosets are ID 1701, 1702, etc.
+  const size_t egt = cd.eyeGlowType;
+  const int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
+  for (size_t i = 0; i < rawGeosets.size(); i++)
+  {
+    const int id = geosets[i]->id;
+    if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
+      showGeoset(i, (id == egtId));
+  }
+
+  refreshMerging();
+}
+
 void WoWModel::refreshCustomSection(CharDetails::BaseSectionType section, CharDetails::CustomizationType customType)
 {
   // configure customization data for the Custom1, Custom2 & Custom3 sections (base sections 5, 6 & 7)
-  RaceInfos infos;
-  RaceInfos::getCurrent(this, infos);
   
   // Geoset modifications:
   QString query = QString("SELECT GeoSetID,GeoSetType,%1 AS CustomGeoFile FROM CharHairGeoSets "
                           "WHERE RaceID=%2 AND SexID=%3 AND VariationID=%4 AND VariationType = %5")
       .arg((infos.isHD) ? "HdCustomGeoFileDataID" : "CustomGeoFileDataID")
-      .arg(infos.raceid)
-      .arg(infos.sexid)
+      .arg(infos.raceID)
+      .arg(infos.sexID)
       .arg(cd.get(customType))
       .arg(section);
   sqlResult customStyle = GAMEDATABASE.sqlQuery(query);

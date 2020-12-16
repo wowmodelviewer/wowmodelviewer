@@ -76,25 +76,16 @@ class _CHARINFOS_API_ CharInfos
     unsigned int raceId;
     std::string gender;
     bool hasTransmogGear;
-    unsigned int skinColor;
-    unsigned int faceType;
-    unsigned int hairColor;
-    unsigned int hairStyle;
-    unsigned int facialHair;
 
     unsigned int eyeGlowType;
 
-    bool isDemonHunter;
-    unsigned int DHTattooStyle;
-    unsigned int DHTattooColor;
-    unsigned int DHHorns;
-    unsigned int DHBlindfolds;
-
     int tabardIcon;
-    int IconColor;
+    int iconColor;
     int tabardBorder;
-    int BorderColor;
-    int Background;
+    int borderColor;
+    int background;
+
+    std::vector< std::pair<unsigned int, unsigned int> > customizations; // vector<pair<optionId, choiceId>>
 
     // TODO refactor this part to associate slots, id and level
     std::vector<int> equipment;

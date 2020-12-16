@@ -21,7 +21,7 @@ END_EVENT_TABLE()
 CharDetailsCustomizationSpin::CharDetailsCustomizationSpin(wxWindow* parent, CharDetails & details, CharDetails::CustomizationType type)
 : wxWindow(parent, wxID_ANY),  m_type(type), m_details(details)
 {
-  wxFlexGridSizer *top = new wxFlexGridSizer(3, 0, 5);
+  auto *top = new wxFlexGridSizer(3, 0, 5);
   top->AddGrowableCol(2);
 
   m_params = m_details.getParams(m_type);
@@ -64,7 +64,7 @@ void  CharDetailsCustomizationSpin::refresh()
   if (m_text)
   {
     uint pos = 0;
-    const int currentValue = static_cast<int>(m_details.get(m_type));
+    const auto currentValue = static_cast<int>(m_details.get(m_type));
 
     for (; pos < m_params.possibleValues.size(); pos++)
       if (m_params.possibleValues[pos] == currentValue) break;
@@ -72,7 +72,7 @@ void  CharDetailsCustomizationSpin::refresh()
     m_spin->SetValue(pos);
 
     // update max value and range
-    int max = (m_params.possibleValues.size() > 0) ? m_params.possibleValues.size() - 1 : 0;
+    const auto max = (!m_params.possibleValues.empty()) ? m_params.possibleValues.size() - 1 : 0;
     m_spin->SetRange(0, max);
 
     m_text->SetLabel(wxString::Format(wxT("%2i / %i"), pos, max));

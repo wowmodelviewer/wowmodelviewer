@@ -48,7 +48,7 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-class ArmoryImporter : public ImporterPlugin
+class ArmoryImporter final : public ImporterPlugin
 {
     Q_INTERFACES(ImporterPlugin)
     Q_OBJECT
@@ -58,17 +58,17 @@ class ArmoryImporter : public ImporterPlugin
     // Constants / Enums
 
     // Constructors
-    ArmoryImporter() {}
+    ArmoryImporter() = default;
 
     // Destructors
-    ~ArmoryImporter() {}
+    ~ArmoryImporter() = default;
 
     // Methods
-	bool acceptURL(QString url) const;
+    bool acceptURL(QString url) const override;
 
-	NPCInfos * importNPC(QString url) const { return NULL; };
-	CharInfos * importChar(QString url) const;
-	ItemRecord * importItem(QString url) const;
+    NPCInfos * importNPC(QString url) const override { return nullptr; };
+    CharInfos * importChar(QString url) const override;
+    ItemRecord * importItem(QString url) const override;
 
     // Members
 
@@ -96,10 +96,10 @@ class ArmoryImporter : public ImporterPlugin
     // Destructors
 
     // Methods
-	int readJSONValues(ImportType type, QString url, QJsonObject & result) const;
-	QByteArray getURLData(QString inputUrl) const;
-	bool hasMember(QJsonValueRef check, QString lookfor) const;
-	bool hasTransmog(QJsonValueRef check) const;
+    int readJSONValues(ImportType type, const QString & url, QJsonObject & result) const;
+    QByteArray getURLData(const QString & inputUrl) const;
+    static bool hasMember(const QJsonValueRef & check, const QString & lookfor);
+    static bool hasTransmog(const QJsonValueRef & check);
 
     // Members
 

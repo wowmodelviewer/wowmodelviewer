@@ -8,11 +8,14 @@
 #ifndef _CHARDETAILS_H_
 #define _CHARDETAILS_H_
 
+#include "CharTexture.h"
 #include "database.h"
 #include "RaceInfos.h"
 #include "wow_enums.h"
+
 #include "metaclasses/Observable.h"
 
+class sqlResult;
 class WoWModel;
 class QXmlStreamWriter;
 class QXmlStreamReader;
@@ -103,54 +106,98 @@ public:
     std::vector<int> flags;
   };
 
+  class TextureCustomization
+  {
+  public:
+    uint layer;
+    int region;
+    uint type;
+    uint fileId;
+  };
+
   EyeGlowTypes eyeGlowType;
 
   bool showUnderwear, showEars, showHair, showFacialHair, showFeet, autoHideGeosetsForHeadItems;
 
   bool isNPC;
 
-  RaceInfos infos;
-
-  int geosets[NUM_GEOSETS];
+  std::map <uint, uint> geosets; // map <geoset type, geosetid>
+  std::vector<TextureCustomization> textures;
 
   // save + load
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-
-  void reset(WoWModel *);
-
-  void print();
+  void reset(WoWModel * m = nullptr);
+  void randomise();
 
   std::vector<int> getTextureForSection(BaseSectionType);
   std::vector<int> getRegionForSection(BaseSectionType);
 
   // accessors to customization
-  void set(CustomizationType type, uint val);
+  // wow version < 9.x
+  void set(CustomizationType type, uint val); 
   uint get(CustomizationType type) const;
-
+  uint get(uint chrCustomizationOptionID) const;
   CustomizationParam getParams(CustomizationType type);
-
-  void setRandomValue(CustomizationType type);
-
   std::vector<CustomizationType> getCustomizationOptions() const;
 
+  // wow version >= 9.x
+  void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
+  std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
+ 
   void setDemonHunterMode(bool);
-  bool isDemonHunter() const { return m_isDemonHunter; }
+  bool isDemonHunter() const { return isDemonHunter_; }
 
 private:
-  WoWModel * m_model;
 
+  // wow version independant
   void fillCustomizationMap();
+  void setRandomValue(CustomizationType type);
+
+  WoWModel * model_;
+  bool isDemonHunter_;
+
+  std::map<uint, uint> currentCustomization_; // wow version < 9.x : map<CustomizationType, value> -- wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+
+  // wow version < 9.x
+  void fillCustomizationMap8x();
+  
   QString getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization = false);
-  std::map<CustomizationType, CustomizationParam> m_customizationParamsMap;
-  std::map<CustomizationType, std::map<int, CustomizationParam> > m_multiCustomizationMap;
 
+  std::map<CustomizationType, CustomizationParam> customizationParamsMap_;
+  std::map<uint, std::map<int, CustomizationParam> > multiCustomizationMap_;
 
-  std::map<CustomizationType, uint> m_currentCustomization;
+  // wow version > 9.x
+  class CustomizationElements
+  {
+  public:
+    std::vector<std::pair<uint, uint> > geosets;
+    std::vector<TextureCustomization> textures;
+    void clear()
+    {
+      geosets.clear();
+      textures.clear();
+    }
+  };
 
-  bool m_isDemonHunter;
-  uint m_dhModel;
+  void fillCustomizationMap9x();
+  void fillCustomizationMapForOption(uint chrCustomizationOption);
+
+  bool applyChrCustomizationElements(uint chrCustomizationOption, sqlResult &);
+  static int bitMaskToSectionType(int mask);
+  std::vector<int> getParentOptions(uint chrCustomizationOption);
+  int getChildOption(uint chrCustomizationOption);
+
+  void initLinkedOptionsMap();
+  void resetGeosets();
+
+  std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
+  std::map<uint, CustomizationElements> customizationElementsPerOption_; // keep track of current elements applied for a given option
+
+  static std::multimap<uint, int> LINKED_OPTIONS_MAP_; // multimap < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID>
+                                                       // (ie, <markings color, markings> or <tattoo color, tattoo>)
+                                                       // some child options are multi parent (ie Tauren facial Markings & body markings are sharing same color)
 };
 
 
