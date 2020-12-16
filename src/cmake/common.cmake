@@ -59,7 +59,7 @@ macro(use_wxwidgets)
 endmacro()
 
 macro(use_cximage)
-  include_directories(${WMV_BASE_PATH}/src/CxImage)
+  include_directories(${WMV_BASE_PATH}/src/3rdparty/CxImage)
   list(APPEND extralibs ${wxWidgets_LIBRARIES} cximage)
 endmacro()
 
