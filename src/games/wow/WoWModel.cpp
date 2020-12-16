@@ -131,6 +131,8 @@ gamefile(file)
   replaceParticleColors = false;
   replacableParticleColorIDs.clear();
   creatureGeosetData.clear();
+  creatureGeosetDataID = 0;
+  
   isWMO = false;
   isMount = false;
 
@@ -796,7 +798,17 @@ void WoWModel::initCommon()
     initAnimated();
   else
     initStatic();
-
+  
+  QString query = QString("SELECT CreatureGeosetDataID "
+                          "FROM CreatureModelData "
+                          "WHERE FileID = %1")
+                          .arg(gamefile->fileDataId() );
+  sqlResult r = GAMEDATABASE.sqlQuery(query);
+  if(r.valid && !r.values.empty())
+  {
+    creatureGeosetDataID = r.values[0][0].toInt();
+  }
+  
   gamefile->close();
 }
 
@@ -2028,22 +2040,29 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
     restoreRawGeosets();
 
   creatureGeosetData = cgd;
-  if (!cgd.size())
+  
+  if (cgd.size() == 0 && creatureGeosetDataID == 0)
     return;
-  int geomax = *cgd.rbegin() + 1; // highest value in set
-
-  // We should only be dealing with geosets below 900, but just in case
-  // Blizzard changes this, we'll set the max higher and log that it's happened:
-  if (geomax > 900)
+  
+  int geomax = 900;
+  
+  if (cgd.size() > 0)
   {
-    LOG_ERROR << "setCreatureGeosetData value of " << geomax <<
-                 " detected. We were assuming the maximum was 899.";
-    geomax = ((geomax/100)+1)*100;  // round the max up to the next 100 (next geoset group)
+    geomax = *cgd.rbegin() + 1; // highest value in set
+    // We should only be dealing with geosets below 900, but just in case
+    // Blizzard changes this, we'll set the max higher and log that it's happened:
+    if (geomax > 900)
+    {
+      LOG_ERROR << "setCreatureGeosetData value of " << geomax <<
+                   " detected. We were assuming the maximum was 899.";
+      geomax = ((geomax/100)+1)*100;  // round the max up to the next 100 (next geoset group)
+    }
+    else
+      geomax = 900;
   }
-  else
-    geomax = 900;
-  // If creatureGeosetData is used then we switch off
-  // ALL geosets from 1 to 899 that aren't specified by it:
+  
+  // If creatureGeosetData is used , or creatureGeosetDataID > 0, then
+  // we switch off ALL geosets from 1 to 899 that aren't specified by it:
   for (uint i = 0; i < rawGeosets.size(); i++)
   {
     int id = geosets[i]->id;

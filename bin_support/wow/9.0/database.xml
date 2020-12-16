@@ -211,6 +211,7 @@
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="FileID" pos="2" />
+    <field type="uint" name="CreatureGeosetDataID" pos="16" />
   </table>
   
   <!-- Creature tables - END -->

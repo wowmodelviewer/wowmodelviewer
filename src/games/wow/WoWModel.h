@@ -245,6 +245,7 @@ public:
   TabardDetails td;
   ModelHeader header;
   std::set<GeosetNum> creatureGeosetData;
+  uint creatureGeosetDataID;
   bool bSheathe;
 
   friend class ModelRenderPass;

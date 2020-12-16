@@ -112,8 +112,8 @@ struct ModelHeader {
 	uint32 ofsRibbonEmitters; // Things swirling around. See the CoT-entrance for light-trails.
 	uint32 nParticleEmitters; // V, Effects
 	uint32 ofsParticleEmitters; // Spells and weapons, doodads and loginscreens use them. Blood dripping of a blade? Particles.
-	uint32 nUnknown; // Apparently added in models with the 8-flag only. If that flag is not set, this field does not exist!
-	uint32 ofsUnknown; // An array of shorts, related to renderflags.
+	uint32 nTextureCombinerCombos; // Only used in models where GlobalModelFlags & 8 is true. Otherwise this field does not exist!
+	uint32 ofsTextureCombinerCombos; // An array of shorts, related to renderflags.
 };
 
 #define	ANIMATION_HANDSCLOSED	15
@@ -273,7 +273,8 @@ class ModelGeosetHD {
 
 
 
-#define	TEXTUREUNIT_STATIC	16
+#define	TEXTUREUNIT_STATIC	0x10
+#define	TEXTUREUNIT_IGNORE_TEXTURE_WEIGHTS	0x40
 /// Lod part, A texture unit (sub of material)
 struct ModelTexUnit
 {
