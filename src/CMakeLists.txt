@@ -15,7 +15,7 @@ add_subdirectory(3rdparty/CxImage)
 
 # configure CASC lib for our usage
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
-add_subdirectory(casclib)
+add_subdirectory(3rdparty/casclib)
 
 # add internal libraries compilation 
 add_subdirectory(core)
