@@ -41,8 +41,8 @@ endif()
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories(${WMV_BASE_PATH}/src/glew/include)
-  list(APPEND src ${WMV_BASE_PATH}/src/glew/src/glew.c)
+  include_directories(${WMV_BASE_PATH}/src/3rdparty/glew/include)
+  list(APPEND src ${WMV_BASE_PATH}/src/3rdparty/glew/src/glew.c)
   add_definitions(-DGLEW_STATIC)
   
   # temporary solution, glew needs opengl lib, and right now, wx one is used...
