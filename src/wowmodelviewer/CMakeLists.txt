@@ -110,6 +110,15 @@ use_wxwidgets()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
+set(cmake_files ${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/FindGLEW.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/linux.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/macos.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/policies.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/windows.cmake)
+
+source_group("cmake" FILES ${cmake_files})
+
 set(common_files wowmodelviewer.json
                  ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
                  ${WMV_BASE_PATH}/appveyor.yml
@@ -131,7 +140,7 @@ set(wow9_0_files
 
 source_group("wow9.0" FILES ${wow9_0_files})
 
-set(useful_files ${common_files} ${wow8_3_files} ${wow9_0_files})
+set(useful_files ${common_files} ${cmake_files} ${wow8_3_files} ${wow9_0_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
