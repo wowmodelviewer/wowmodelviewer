@@ -34,7 +34,7 @@ set(NAME UpdateManager)
 add_executable(${NAME} WIN32 ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-target_link_libraries(${NAME} core wow Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
+target_link_libraries(${NAME} ${extralibs} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/")
 

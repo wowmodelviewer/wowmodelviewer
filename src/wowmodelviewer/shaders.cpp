@@ -2,11 +2,11 @@
 
 #include <string>
 
-#include "OpenGLHeaders.h"
-
 #include "logger/Logger.h"
 
 #include <wx/string.h>
+
+#include "GL/wglew.h"
 
 bool supportShaders = false;
 static bool initedShaders = false;

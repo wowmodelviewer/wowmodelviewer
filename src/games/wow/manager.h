@@ -7,7 +7,6 @@
 #include <QString>
 
 #include "GameFile.h"
-#include "OpenGLHeaders.h"
 
 #include "logger/Logger.h"
 

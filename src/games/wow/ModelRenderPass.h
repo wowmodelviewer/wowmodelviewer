@@ -30,7 +30,6 @@ public:
 
   ModelRenderPass(WoWModel *, int geo);
 
-  //TextureID texture, texture2;
   bool useTex2, useEnvMap, cull, trans, unlit, noZWrite, billboard;
 
   int16 texanim, color, opacity, blendmode, specialTex;

@@ -11,8 +11,7 @@
 
 #include "camera.h"
 
-#include "OpenGLHeaders.h"
-
+#include "GL/glew.h"
 
 CCamera::CCamera()
 {

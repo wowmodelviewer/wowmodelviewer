@@ -9,11 +9,11 @@
 
 #include "logger/Logger.h"
 
-#include "OpenGLHeaders.h"
 #include "quaternion.h"
 
 #include <math.h>
 
+#include "Gl/glew.h"
 
 #define DISPLAY_ORIGIN 0
 #define DISPLAY_LOOKAT 0

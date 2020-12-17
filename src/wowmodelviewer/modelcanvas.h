@@ -6,9 +6,6 @@
     #include <wx/wx.h>
 #endif
 
-// gl
-#include "OpenGLHeaders.h"
-
 // wx
 #include <wx/glcanvas.h>
 #include <wx/window.h>
@@ -28,6 +25,7 @@
 #include "maptile.h"
 #include "RenderTexture.h"
 #include "util.h"
+#include "video.h"
 #include "wmo.h"
 #include "WoWModel.h"
 

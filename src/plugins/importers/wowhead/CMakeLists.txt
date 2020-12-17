@@ -34,7 +34,7 @@ set(NAME wowhead)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
-target_link_libraries(${NAME} Qt5::Core core wow)
+target_link_libraries(${NAME} Qt5::Core ${extralibs})
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 

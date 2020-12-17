@@ -5,12 +5,13 @@
 #include <vector>
 #include <string>
 
+#include "GL/glew.h"
+
 // Our headers
 #include "displayable.h"
 #include "manager.h"
 #include "ModelManager.h"
 #include "vec3d.h"
-#include "video.h"
 #include "WMOFog.h"
 #include "WMOLight.h"
 #include "WMOModelInstance.h"
@@ -36,7 +37,7 @@ struct WMOMaterial {
 	float f1,f2;
 	int dx[5];
 	// read up to here -_-
-	TextureID tex;
+	GLuint tex;
 };
 
 struct WMOPV {

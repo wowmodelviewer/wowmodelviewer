@@ -41,26 +41,20 @@ endif()
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories(${WMV_BASE_PATH}/src/3rdparty/glew/include)
-  list(APPEND src ${WMV_BASE_PATH}/src/3rdparty/glew/src/glew.c)
+  include_directories(${WMV_BASE_PATH}/src/3rdparty)
   add_definitions(-DGLEW_STATIC)
-  
-  # temporary solution, glew needs opengl lib, and right now, wx one is used...
-  set(wxWidgets_USE_UNICODE ON)
-  find_package(wxWidgets REQUIRED gl core base)
-  
-  list(APPEND extralibs ${wxWidgets_LIBRARIES})
+  list(APPEND extralibs opengl32 ${WMV_BASE_PATH}/src/3rdparty/libs/glew32s.lib)
 endmacro()
 
 macro(use_wxwidgets)
-	set(wxWidgets_USE_UNICODE ON)
-	find_package(wxWidgets REQUIRED net gl aui xml adv core base)
-	list(APPEND extralibs ${wxWidgets_LIBRARIES})
+  set(wxWidgets_USE_UNICODE ON)
+  find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+  list(APPEND extralibs ${wxWidgets_LIBRARIES})
 endmacro()
 
 macro(use_cximage)
   include_directories(${WMV_BASE_PATH}/src/3rdparty/CxImage)
-  list(APPEND extralibs ${wxWidgets_LIBRARIES} cximage)
+  list(APPEND extralibs cximage)
 endmacro()
 
 macro(use_wow)
@@ -72,6 +66,7 @@ macro(use_wow)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
   find_package(Qt5Network)
+  list(APPEND extralibs wow)
 endmacro()
 
 macro(use_core)
@@ -80,11 +75,13 @@ macro(use_core)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)
+  list(APPEND extralibs core)
 endmacro()
   
 macro(use_casclib)
   include_directories(${CASCLIB_INSTALL_LOCATION}/include)
   link_directories(${CASCLIB_INSTALL_LOCATION}/lib)
+  list(APPEND extralibs casc)
 endmacro()
 
 macro(use_sqlite)

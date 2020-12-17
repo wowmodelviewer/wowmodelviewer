@@ -70,7 +70,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   // ===============================
   // Texture data
   // ===============================
-  std::vector<TextureID> textures;
+  std::vector<GLuint> textures;
   std::vector<int> specialTextures;
   std::vector<GLuint> replaceTextures;
 

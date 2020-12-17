@@ -41,7 +41,7 @@ void CharTexture::reset(unsigned int _layoutSizeId)
 
 #define DEBUG_TEXTURE 0 // 1 output component names, 2 save intermediate images on disk
 
-void CharTexture::compose(TextureID texID)
+void CharTexture::compose(GLuint texID)
 {
   if (m_components.empty())
     return;

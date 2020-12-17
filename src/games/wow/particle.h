@@ -16,9 +16,9 @@ class ParticleSystem;
 class RibbonEmitter;
 
 #include "animated.h"
-#include "OpenGLHeaders.h"
 
 #include <list>
+#include "GL/glew.h"
 
 class Bone;
 

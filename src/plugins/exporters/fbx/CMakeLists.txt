@@ -45,7 +45,7 @@ set(NAME fbxexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
-target_link_libraries(${NAME} Qt5::Core core wow 
+target_link_libraries(${NAME} Qt5::Core ${extralibs} 
 	$ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")

@@ -8,7 +8,8 @@
 
 #define	CHUNKS_IN_TILE	16
 
-#include "video.h"
+#include "GL/glew.h"
+
 #include "wmo.h"
 #include "WoWModel.h"
 #include "liquid.h"
@@ -136,9 +137,9 @@ public:
 	bool hasholes;
 	float waterlevel[2];
 
-	TextureID textures[4];
-	TextureID alphamaps[3];
-	TextureID shadow, blend;
+	GLuint textures[4];
+  GLuint alphamaps[3];
+  GLuint shadow, blend;
 
 	int animated[4];
 

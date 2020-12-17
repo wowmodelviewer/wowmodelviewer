@@ -10,8 +10,6 @@
 
 #include <QImage>
 
-// gl
-#include "OpenGLHeaders.h"
 
 #define WIP_DH_SUPPORT 1
 

@@ -10,9 +10,12 @@
 #include "ModelColor.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
+#include "video.h"
 #include "wow_enums.h"
 #include "WoWModel.h"
+
 #include "logger/Logger.h"
+
 #include "GL/glew.h"
 
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):

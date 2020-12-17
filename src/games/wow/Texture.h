@@ -4,6 +4,8 @@
 #include "manager.h"
 #include "vec3d.h"
 
+#include "GL/glew.h"
+
 typedef GLuint TextureID;
 
 #ifdef _WIN32

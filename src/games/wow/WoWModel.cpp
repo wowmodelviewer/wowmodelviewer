@@ -1,23 +1,25 @@
 #include "WoWModel.h"
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <sstream>
 
 #include "Attachment.h"
-#include "GlobalSettings.h"
 #include "CASCFile.h"
 #include "Game.h"
+#include "GlobalSettings.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
+#include "video.h"
 
 #include "logger/Logger.h"
 
 #include <QXmlStreamWriter>
 
-#include <sstream>
+#define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
 enum TextureFlags
 {
@@ -2353,7 +2355,7 @@ void WoWModel::refresh()
 
 void WoWModel::refresh8x()
 {
-  TextureID charTex = 0;
+  GLuint charTex = 0;
   bool showScalp = true;
 
   // Reset geosets
@@ -2779,7 +2781,7 @@ void WoWModel::refresh8x()
 
 void WoWModel::refresh9x()
 {
-  const TextureID charTex = 0;
+  const GLuint charTex = 0;
   auto showScalp = true;
 
   for (auto* it : mergedModels)

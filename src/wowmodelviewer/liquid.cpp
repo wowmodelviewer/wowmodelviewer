@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "GameFile.h"
 #include "shaders.h"
+#include "video.h"
 
 struct LiquidVertex {
 	//unsigned char c[4];

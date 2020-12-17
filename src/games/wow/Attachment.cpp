@@ -8,14 +8,17 @@
 #include "Attachment.h"
 
 #include <string>
+#include "GL/glew.h"
 
 #include "BaseCanvas.h"
 #include "displayable.h"
 #include "Game.h"
+#include "video.h"
 #include "WoWModel.h"
 
 #include "logger/Logger.h"
-#include "GL/glew.h"
+
+
 
 Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, Vec3D rot, Vec3D pos, bool mirror)
   : parent(parent), id(id), slot(slot), scale(scale), rot(rot), pos(pos), m_model(nullptr), mirror(mirror)

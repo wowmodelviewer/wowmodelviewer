@@ -8,7 +8,8 @@
 
 #include <QImage>
 
-#include "OpenGLHeaders.h"
+#include "GL/glew.h"
+
 #include "ddslib.h"
 
 Texture::Texture(GameFile * f)

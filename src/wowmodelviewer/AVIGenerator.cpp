@@ -4,7 +4,8 @@
 
 #include "AVIGenerator.h"
 
-#include "OpenGLHeaders.h"
+#include "GL/glew.h"
+
 #include "logger/Logger.h"
 
 //////////////////////////////////////////////////////////////////////

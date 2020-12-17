@@ -8,7 +8,7 @@
 #include "GameFile.h"
 #include "Texture.h"
 
-#include "OpenGLHeaders.h"
+#include "GL/glew.h"
 
 _TEXTUREMANAGER_API_ TextureManager TEXTUREMANAGER;
 

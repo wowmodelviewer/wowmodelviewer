@@ -2,11 +2,12 @@
 #include "lightcontrol.h"
 
 #include "enums.h"
-#include "OpenGLHeaders.h"
 
 #include "logger/Logger.h"
 
 #include <wx/colordlg.h>
+
+#include "GL/glew.h"
 
 extern const size_t MAX_LIGHTS;
 

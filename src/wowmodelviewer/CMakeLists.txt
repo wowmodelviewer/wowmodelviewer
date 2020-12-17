@@ -99,8 +99,6 @@ source_group("Header Files" FILES ${headers})
 
 # add external code usage
 use_glew()
-# reset extralibs to clean up wxwidgets (use_glew actually links with wx gl lib)
-set(extralibs "")
 use_core()
 use_wow()
 use_cximage()
@@ -111,7 +109,6 @@ set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
 set(cmake_files ${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake
-                ${CMAKE_CURRENT_LIST_DIR}/../cmake/FindGLEW.cmake
                 ${CMAKE_CURRENT_LIST_DIR}/../cmake/linux.cmake
                 ${CMAKE_CURRENT_LIST_DIR}/../cmake/macos.cmake
                 ${CMAKE_CURRENT_LIST_DIR}/../cmake/policies.cmake
@@ -166,9 +163,7 @@ if (MSVC_IDE)
 endif()
 
 target_link_libraries(${NAME}
-  ${wxWidgets_LIBRARIES}
-  wow
-  cximage
+  ${extralibs}
   Qt5::Xml
   Qt5::Gui
   Qt5::Network

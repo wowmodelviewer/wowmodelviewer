@@ -2,9 +2,8 @@
 #define VIDEO_H
 
 #include <vector>
-#include "RenderTexture.h"
-
-typedef GLuint TextureID;
+#include "GL/glew.h"
+#include "GL/wglew.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL

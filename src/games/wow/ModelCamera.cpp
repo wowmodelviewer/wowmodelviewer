@@ -12,7 +12,6 @@
 #include "logger/Logger.h"
 #include "GL/glew.h"
 
-
 void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)
 {
 	LOG_INFO << "Using original Camera Model Definitions.";
