@@ -4,9 +4,9 @@
 #include "types.h"
 #include "wmo.h"
 
-
-
 #include <QString>
+
+#include <glm/gtc/type_ptr.hpp>
 
 /*
 The fields referenced from the MOPR chunk indicate portals leading out of the WMO group in question.
@@ -189,7 +189,7 @@ void WMOGroup::initDisplayList()
     else if (fourcc == "MOTV") {
       // Texture coordinates, 2 floats per vertex in (X,Y) order. The values range from 0.0 to 1.0. Vertices, normals and texture coordinates are in corresponding order, of course.
       uint32 tSize = (uint32)(size / 8);
-      texcoords = new Vec2D[tSize];
+      texcoords = new glm::vec2[tSize];
       gf.read(texcoords, size);
     }
     else if (fourcc == "MOLR") {
@@ -396,7 +396,7 @@ void WMOGroup::initDisplayList()
         setGLColor(cv[a]);
       }
       glNormal3f(normals[a].x, normals[a].z, -normals[a].y);
-      glTexCoord2fv(texcoords[a]);
+      glTexCoord2fv(glm::value_ptr(texcoords[a]));
       glVertex3f(vertices[a].x, vertices[a].z, -vertices[a].y);
     }
     glEnd();

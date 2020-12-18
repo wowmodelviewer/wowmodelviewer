@@ -10,7 +10,6 @@
 #else
 #    define _PARTICLE_API_
 #endif
-#include "vec3d.h" // Vec2D
 
 class WoWModel;
 class ParticleSystem;
@@ -62,7 +61,7 @@ public:
 
 struct TexCoordSet
 {
-  Vec2D tc[4];
+  glm::vec2 tc[4];
 };
 
 class _PARTICLE_API_ ParticleSystem
@@ -76,7 +75,7 @@ class _PARTICLE_API_ ParticleSystem
   size_t manim, mtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
-  void initTile(Vec2D *tc, int num);
+  void initTile(glm::vec2 *tc, int num);
   bool billboard;
   float rem;
   //bool transform;

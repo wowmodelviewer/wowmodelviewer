@@ -52,7 +52,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
     float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
     colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f,
         colors2[i].z/255.0f, opacity/32767.0f);
-    sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(Vec2D)))*mta.p.scales[i];
+    sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(glm::vec2)))*mta.p.scales[i];
   }
   mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
 
@@ -119,10 +119,10 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   }
 }
 
-void ParticleSystem::initTile(Vec2D *tc, int num)
+void ParticleSystem::initTile(glm::vec2 *tc, int num)
 {
-  Vec2D otc[4];
-  Vec2D a,b;
+  glm::vec2 otc[4];
+  glm::vec2 a,b;
   int x = num % cols;
   int y = num / cols;
   a.x = x * (1.0f / cols);
@@ -446,32 +446,32 @@ void ParticleSystem::draw()
       vert4 = it->origin + bv0 * size;
     }
 
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, tiles[it->tile].tc[0]);
+    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
     if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, tiles[it->tile].tc[0]);
+      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
     if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, tiles[it->tile].tc[0]);
+      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[0]));
     glVertex3fv(glm::value_ptr(vert1));
 
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, tiles[it->tile].tc[1]);
+    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
     if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, tiles[it->tile].tc[1]);
+      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
     if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, tiles[it->tile].tc[1]);
+      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[1]));
     glVertex3fv(glm::value_ptr(vert2));
 
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, tiles[it->tile].tc[2]);
+    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
     if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, tiles[it->tile].tc[2]);
+      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
     if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, tiles[it->tile].tc[2]);
+      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[2]));
     glVertex3fv(glm::value_ptr(vert3));
 
-    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, tiles[it->tile].tc[3]);
+    glMultiTexCoord2fvARB(GL_TEXTURE0_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
     if (texture2)
-      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, tiles[it->tile].tc[3]);
+      glMultiTexCoord2fvARB(GL_TEXTURE1_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
     if (texture3)
-      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, tiles[it->tile].tc[3]);
+      glMultiTexCoord2fvARB(GL_TEXTURE2_ARB, glm::value_ptr(tiles[it->tile].tc[3]));
     glVertex3fv(glm::value_ptr(vert4));
   }
   glEnd();

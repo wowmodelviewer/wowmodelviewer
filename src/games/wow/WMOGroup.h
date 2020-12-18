@@ -1,11 +1,11 @@
 #ifndef _WMO_GROUP_H_
 #define _WMO_GROUP_H_
 
+#include <string>
+
 #include "types.h"
 #include "GL/glew.h"
 #include "glm/glm.hpp"
-
-#include "vec3d.h" // Vec2D
 
 class GameFile;
 class WMO;
@@ -35,7 +35,7 @@ class WMOGroup
   //Liquid *lq;
   public:
   glm::vec3 *vertices, *normals;
-  Vec2D *texcoords;
+  glm::vec2 *texcoords;
   uint16 *indices;
   uint16 *materials;
   uint32 nTriangles, nVertices, nIndices, nBatches;

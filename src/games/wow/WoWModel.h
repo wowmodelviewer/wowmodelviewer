@@ -146,7 +146,7 @@ public:
   typedef int GeosetNum;
 
   glm::vec3 *normals;
-  Vec2D *texCoords;
+  glm::vec2 *texCoords;
   glm::vec3 *vertices;
   std::vector<uint32> indices;
   // --

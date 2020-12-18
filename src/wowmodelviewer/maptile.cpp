@@ -234,7 +234,7 @@ void initGlobalVBOs()
 
     GLuint detailtexcoords, alphatexcoords;
 
-    Vec2D temp[mapbufsize], *vt;
+    glm::vec2 temp[mapbufsize], *vt;
     float tx,ty;
     
     // init texture coordinates for detail map:
@@ -249,7 +249,7 @@ void initGlobalVBOs()
           // offset by half
           tx += detail_half;
         }
-        *vt++ = Vec2D(tx, ty);
+        *vt++ = glm::vec2(tx, ty);
       }
     }
 
@@ -268,11 +268,11 @@ void initGlobalVBOs()
           // offset by half
           tx += alpha_half;
         }
-        //*vt++ = Vec2D(tx*0.95f, ty*0.95f);
+        //*vt++ = glm::vec2(tx*0.95f, ty*0.95f);
         const int divs = 32;
         const float inv = 1.0f / divs;
         const float mul = (divs-1.0f);
-        *vt++ = Vec2D(tx*(mul*inv), ty*(mul*inv));
+        *vt++ = glm::vec2(tx*(mul*inv), ty*(mul*inv));
       }
     }
 

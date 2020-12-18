@@ -5,7 +5,6 @@
 
 #include "glm/glm.hpp"
 #include "types.h" // unit8, etC.
-#include "vec3d.h" // Vec2D
 
 struct Vertex {
   float tu, tv;
@@ -190,7 +189,7 @@ struct ModelVertex {
   uint8 weights[4];
   uint8 bones[4];
   glm::vec3 normal;
-  Vec2D texcoords;
+  glm::vec2 texcoords;
   int unk1, unk2; // always 0,0 so this is probably unused
 };
 
@@ -409,7 +408,7 @@ struct ModelCameraDefV10 {
 struct ModelParticleParams {
   FakeAnimationBlock colors;   // ( glm::vec3)  This one points to 3 floats defining red, green and blue.
   FakeAnimationBlock opacity;      // (UInt16)    Looks like opacity (short), Most likely they all have 3 timestamps for {start, middle, end}.
-  FakeAnimationBlock sizes;     // (Vec2D)  It carries two floats per key. (x and y scale)
+  FakeAnimationBlock sizes;     // (glm::vec2)  It carries two floats per key. (x and y scale)
   int32 d[2];
   FakeAnimationBlock Intensity;   // (UInt16) Some kind of intensity values seen: 0,16,17,32(if set to different it will have high intensity)
   FakeAnimationBlock unk2;     // (UInt16)

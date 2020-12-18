@@ -259,7 +259,7 @@ void ModelRenderPass::render(bool animated)
       {
         uint32 a = model->indices[b];
         glNormal3fv(glm::value_ptr(model->normals[a]));
-        glTexCoord2fv(model->origVertices[a].texcoords);
+        glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
         glVertex3fv(glm::value_ptr(model->vertices[a]));
         /*
         if (geoset->id == 2401 && k < 10)
@@ -282,7 +282,7 @@ void ModelRenderPass::render(bool animated)
     {
       uint16 a = model->indices[b];
       glNormal3fv(glm::value_ptr(model->normals[a]));
-      glTexCoord2fv(model->origVertices[a].texcoords);
+      glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
       glVertex3fv(glm::value_ptr(model->vertices[a]));
     }
     glEnd();

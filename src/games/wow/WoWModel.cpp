@@ -1089,7 +1089,7 @@ void WoWModel::initAnimated()
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
-  texCoords = new Vec2D[origVertices.size()];
+  texCoords = new glm::vec2[origVertices.size()];
   auto ov_it = origVertices.begin();
   for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
     texCoords[i] = ov_it->texcoords;
