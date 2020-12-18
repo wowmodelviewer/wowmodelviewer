@@ -18,7 +18,7 @@ void WMOLight::setup(GLint light)
   glEnable(light);
 }
 
-void WMOLight::setupOnce(GLint light, Vec3D dir, Vec3D lcol)
+void WMOLight::setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol)
 {
   Vec4D position(dir, 0);
   //Vec4D position(0,1,0,0);
@@ -54,14 +54,14 @@ void WMOLight::init(GameFile &f)
   f.read(&useatten, 1);
   f.read(&pad, 1);
   f.read(&color, 4);
-  f.read(pos, 12);
+  f.read(&pos, 12);
   f.read(&intensity, 4);
   f.read(&attenStart, 4);
   f.read(&attenEnd, 4);
   f.read(unk, 4 * 3);	// Seems to be -1, -0.5, X, where X changes from model to model. Guard Tower: 2.3611112, GoldshireInn: 5.8888888, Duskwood_TownHall: 5
   f.read(&r, 4);
 
-  pos = Vec3D(pos.x, pos.z, -pos.y);
+  pos = glm::vec3(pos.x, pos.z, -pos.y);
 
   // rgb? bgr? hm
   float fa = ((color & 0xff000000) >> 24) / 255.0f;

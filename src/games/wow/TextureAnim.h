@@ -9,14 +9,14 @@
 #define _TEXTUREANIM_H_
 
 #include "animated.h"
-#include "vec3d.h"
+#include "glm/glm.hpp"
 
 class TextureAnim 
 {
 public:
-	Animated<Vec3D> trans, rot, scale;
+	Animated<glm::vec3> trans, rot, scale;
 
-	Vec3D tval, rval, sval;
+	glm::vec3 tval, rval, sval;
 
 	void calc(ssize_t anim, size_t time);
   void init(GameFile * f, ModelTexAnimDef &mta, std::vector<uint32> & global);

@@ -1682,7 +1682,7 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
     enchants->Display();
 }
 
-Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
+glm::vec3 ModelViewer::DoSetColor(const glm::vec3 &defColor)
 {
   wxColour dcol(roundf(defColor.x*255.0f), roundf(defColor.y*255.0f), roundf(defColor.z*255.0f));
   bgDialogData.SetChooseFull(true);
@@ -1694,7 +1694,7 @@ Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
   {
     bgDialogData = dialog.GetColourData();
     wxColour col = bgDialogData.GetColour();
-    return Vec3D(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
+    return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
   }
   return defColor;
 }

@@ -27,6 +27,8 @@
 #include "modelbankcontrol.h"
 #include "filecontrol.h"
 
+#include "glm/glm.hpp"
+
 class SettingsControl;
 
 namespace WMVLog
@@ -136,7 +138,7 @@ public:
 	void ImportArmoury(wxString strURL);
 	void ModelInfo();
 
-	Vec3D DoSetColor(const Vec3D &defColor);
+	glm::vec3 DoSetColor(const glm::vec3 &defColor);
 
 	void OnGameToggle(wxCommandEvent &event);
 	void OnViewLog(wxCommandEvent &event);

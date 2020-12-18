@@ -1,7 +1,7 @@
 #ifndef QUATERNION_H
 #define QUATERNION_H
 
-#include "vec3d.h"
+#include "glm/glm.hpp"
 
 class Matrix;
 
@@ -24,7 +24,7 @@ class _QUATERNION_API_ Vec4D
 
     Vec4D(const Vec4D& v) : x(v.x), y(v.y), z(v.z), w(v.w) {}
 
-    Vec4D(const Vec3D& v, const float w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
+    Vec4D(const glm::vec3& v, const float w0) : x(v.x), y(v.y), z(v.z), w(w0) {}
 
     Vec4D& operator= (const Vec4D &v) 
     {
@@ -48,53 +48,48 @@ class _QUATERNION_API_ Vec4D
     }
 
     const Vec4D operator* (float d) const
-	  {
+    {
       Vec4D r(x*d,y*d,z*d,w*d);
       return r;
-	  }
+    }
 
     friend Vec4D operator* (float d, const Vec4D& v)
-	  {
+    {
       return v * d;
-	  }
+    }
 
     Vec4D& operator+= (const Vec4D &v)
-	  {
+    {
       x += v.x;
       y += v.y;
       z += v.z;
       w += v.w;
       return *this;
-	  }
+    }
 
     Vec4D& operator-= (const Vec4D &v)
-	  {
+    {
       x -= v.x;
       y -= v.y;
       z -= v.z;
       w -= v.w;
       return *this;
-	  }
+    }
 
     Vec4D& operator*= (float d)
-	  {
+    {
       x *= d;
       y *= d;
       z *= d;
       w *= d;
       return *this;
-	  }
+    }
 
     float operator* (const Vec4D &v) const
-	  {
-      return x*v.x + y*v.y + z*v.z + w*v.w;
-	  }
-
-    friend std::ostream& operator<<(std::ostream& out, const Vec4D& v)
     {
-      out << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
-      return out;
+      return x*v.x + y*v.y + z*v.z + w*v.w;
     }
+
 
     float lengthSquared() const
     {
@@ -113,13 +108,13 @@ class _QUATERNION_API_ Vec4D
     }
 
     operator float*()
-	  {
-      return (float*)this;
-	  }
-
-    Vec3D xyz() const
     {
-      return Vec3D(x,y,z);
+      return (float*)this;
+    }
+
+    glm::vec3 xyz() const
+    {
+      return glm::vec3(x,y,z);
     }
 };
 
@@ -130,17 +125,17 @@ class _QUATERNION_API_ Quaternion: public Vec4D
 
     Quaternion(const Vec4D& v) : Vec4D(v) {}
 
-    Quaternion(const Vec3D& v, const float w0) : Vec4D(v, w0) {}
+    Quaternion(const glm::vec3& v, const float w0) : Vec4D(v, w0) {}
 
     static const Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2);
 
     static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2);
 
-    Vec3D GetHPB();
+    glm::vec3 GetHPB();
 
     Matrix toMat();
 
-    Vec3D toEulerXYZ();
+    glm::vec3 toEulerXYZ();
 };
 
 

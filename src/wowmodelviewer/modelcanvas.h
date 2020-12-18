@@ -29,6 +29,8 @@
 #include "wmo.h"
 #include "WoWModel.h"
 
+#include "glm/glm.hpp"
+
 // custom objects
 class ArcBallCameraControl;
 
@@ -46,8 +48,8 @@ const int TIME_STEP = 10; // 10 millisecs between each frame
 
 
 struct SceneState {
-	Vec3D pos;	// Model Position
-	Vec3D rot;	// Model Rotation
+	glm::vec3 pos;	// Model Position
+	glm::vec3 rot;	// Model Rotation
 
 	float fov;  // OpenGL Field of View
 };
@@ -120,8 +122,8 @@ public:
 	void SwapBuffers();
 
   // view:
-  Vec3D vRot0;
-  Vec3D vPos0;
+  glm::vec3 vRot0;
+  glm::vec3 vPos0;
   wxCoord mx, my;
 
   void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
@@ -160,7 +162,7 @@ public:
 	//void deleteSlot(int slot);
 
 	// Background colour
-	Vec3D vecBGColor;
+	glm::vec3 vecBGColor;
 
 	// Backgroun image stuff
 	GLuint uiBGTexture;

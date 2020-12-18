@@ -29,7 +29,7 @@ void ArcBallCamera::reset()
   m_distance = 5.;
   m_minZoomDistance = 1;
   m_maxZoomDistance = 50;
-  m_lookAt.reset();
+  m_lookAt = glm::vec3(0.0f);
   m_sceneWidth = 0;
   m_sceneHeight = 0;
   m_transform = Matrix::identity();
@@ -42,7 +42,7 @@ void ArcBallCamera::reset()
  
   m_lastRot = Matrix::identity();
 
-  m_startVec.reset();
+  m_startVec = glm::vec3(0.0f);
 }
 
 void ArcBallCamera::refreshSceneSize(const int width, const int height)
@@ -161,18 +161,18 @@ void ArcBallCamera::setup()
 
 }
 
-Vec3D ArcBallCamera::mapToSphere(const int x, const int y)
+glm::vec3 ArcBallCamera::mapToSphere(const int x, const int y)
 {
-  Vec3D v = Vec3D(1.0*x / m_sceneWidth * 2 - 1.0,
+  glm::vec3 v = glm::vec3(1.0*x / m_sceneWidth * 2 - 1.0,
                           1.0*y / m_sceneHeight * 2 - 1.0,
                           0);
 
-  float length = v.lengthSquared();
+  float length = glm::length(v);
 
   if (length <= 1)
     v.z = sqrt(1 - length);  // Pythagore
   else
-    v = v.normalize();  // nearest point
+    v = glm::normalize(v);  // nearest point
   return v;
 }
 
@@ -187,10 +187,10 @@ void ArcBallCamera::updatePos(const int x, const int y)
   int l_xCurrent = x;
   int l_yCurrent = y;
 
-  Vec3D newVec = mapToSphere(x, y);
+  glm::vec3 newVec = mapToSphere(x, y);
 
   //Compute the vector perpendicular to the begin and end vectors
-  Vec3D perp = m_startVec % newVec;
+  glm::vec3 perp = glm::cross(m_startVec, newVec);
 
   //Compute the length of the perpendicular vector
   if (perp.length() > 0.001)    //if its non-zero
@@ -198,7 +198,7 @@ void ArcBallCamera::updatePos(const int x, const int y)
     m_rotation.x = perp.x;
     m_rotation.y = -perp.y;  // invert rotation around y axis, when moving right, rotation must decrease
     m_rotation.z = perp.z;
-    m_rotation.w = m_startVec * newVec;
+    m_rotation.w = glm::dot(m_startVec,newVec);
   }
   else                                    //if its zero
   {
@@ -216,7 +216,7 @@ void ArcBallCamera::updatePos(const int x, const int y)
 }
 
 
-void ArcBallCamera::autofit(const Vec3D & minp, const Vec3D & maxp, const float fov)
+void ArcBallCamera::autofit(const glm::vec3 & minp, const glm::vec3 & maxp, const float fov)
 {
   reset();
 

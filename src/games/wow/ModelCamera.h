@@ -11,6 +11,8 @@
 #include <string>
 #include "animated.h"
 
+#include "glm/glm.hpp"
+
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
 #        define _MODELCAMERA_API_ __declspec(dllexport)
@@ -23,19 +25,19 @@
 
 struct _MODELCAMERA_API_ ModelCamera 
 {
-	bool ok;
+  bool ok;
 
-	Vec3D pos, target;
-	float nearclip, farclip, fov;
-	Animated<Vec3D> tPos, tTarget;
-	Animated<float> rot;
+  glm::vec3 pos, target;
+  float nearclip, farclip, fov;
+  Animated<glm::vec3> tPos, tTarget;
+  Animated<float> rot;
 
   void init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname);
   void initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname);
-	void setup(size_t time=0);
+  void setup(size_t time=0);
 
-	ModelCamera():ok(false), pos(Vec3D()), target(Vec3D()),
-			nearclip(0), farclip(0), fov(0) {}
+  ModelCamera():ok(false), pos(glm::vec3()), target(glm::vec3()),
+      nearclip(0), farclip(0), fov(0) {}
 };
 
 

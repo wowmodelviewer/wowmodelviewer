@@ -9,21 +9,22 @@
 #define _MODELATTACHMENT_H_
 
 #include "modelheaders.h"
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
 
 class GameFile;
 class WoWModel;
 
 struct ModelAttachment 
 {
-	int id;
-	Vec3D pos;
-	int bone;
-	WoWModel *model;
+  int id;
+  glm::vec3 pos;
+  int bone;
+  WoWModel *model;
 
   void init(ModelAttachmentDef &mad);
-	void setup();
-	void setupParticle();
+  void setup();
+  void setupParticle();
 };
 
 

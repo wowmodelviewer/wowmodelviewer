@@ -89,8 +89,8 @@ void WMOGroup::initDisplayList()
   name = QString::fromLatin1(wmo->groupnames + gh.nameStart).toStdWString();
   desc = QString::fromLatin1(wmo->groupnames + gh.nameStart2).toStdWString();
 
-  b1 = Vec3D(gh.box1[0], gh.box1[2], -gh.box1[1]);
-  b2 = Vec3D(gh.box2[0], gh.box2[2], -gh.box2[1]);
+  b1 = glm::vec3(gh.box1[0], gh.box1[2], -gh.box1[1]);
+  b2 = glm::vec3(gh.box2[0], gh.box2[2], -gh.box2[1]);
 
   gf.seek(0x58); // first chunk
 
@@ -163,13 +163,13 @@ void WMOGroup::initDisplayList()
       //			Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
       nVertices = (size / 12);
       // let's hope it's padded to 12 bytes, not 16...
-      vertices = new Vec3D[nVertices];
+      vertices = new glm::vec3[nVertices];
       gf.read(vertices, size);
-      vmin = Vec3D(9999999.0f, 9999999.0f, 9999999.0f);
-      vmax = Vec3D(-9999999.0f, -9999999.0f, -9999999.0f);
+      vmin = glm::vec3(9999999.0f, 9999999.0f, 9999999.0f);
+      vmax = glm::vec3(-9999999.0f, -9999999.0f, -9999999.0f);
       rad = 0;
       for (size_t i = 0; i < nVertices; i++) {
-        Vec3D v(vertices[i].x, vertices[i].z, -vertices[i].y);
+        glm::vec3 v(vertices[i].x, vertices[i].z, -vertices[i].y);
         if (v.x < vmin.x) vmin.x = v.x;
         if (v.y < vmin.y) vmin.y = v.y;
         if (v.z < vmin.z) vmin.z = v.z;
@@ -183,7 +183,7 @@ void WMOGroup::initDisplayList()
     else if (fourcc == "MONR") {
       // Normals. 3 floats per vertex normal, in (X,Z,-Y) order.
       uint32 tSize = (uint32)(size / 12);
-      normals = new Vec3D[tSize];
+      normals = new glm::vec3[tSize];
       gf.read(normals, size);
     }
     else if (fourcc == "MOTV") {
@@ -431,7 +431,7 @@ void WMOGroup::initLighting(int nLR, short *useLights)
   // "real" lighting?
   if ((flags & 0x2000) && hascv) {
 
-    Vec3D dirmin(1, 1, 1);
+    glm::vec3 dirmin(1, 1, 1);
     float lenmin;
     int lmin;
 
@@ -441,8 +441,8 @@ void WMOGroup::initLighting(int nLR, short *useLights)
       WMOModelInstance &mi = wmo->modelis[ddr[i]];
       for (size_t j = 0; j<wmo->nLights; j++) {
         WMOLight &l = wmo->lights[j];
-        Vec3D dir = l.pos - mi.pos;
-        float ll = dir.lengthSquared();
+        glm::vec3 dir = l.pos - mi.pos;
+        float ll = glm::length(dir) * glm::length(dir);
         if (ll < lenmin) {
           lenmin = ll;
           dirmin = dir;
@@ -660,9 +660,9 @@ void WMOGroup::init(WMO *wmo, GameFile &f, int num, char *names)
   f.read(&flags, 4);
   float ff[3];
   f.read(ff, 12); // Bounding box corner 1
-  v1 = Vec3D(ff[0], ff[1], ff[2]);
+  v1 = glm::vec3(ff[0], ff[1], ff[2]);
   f.read(ff, 12); // Bounding box corner 2
-  v2 = Vec3D(ff[0], ff[1], ff[2]);
+  v2 = glm::vec3(ff[0], ff[1], ff[2]);
   int nameOfs;
   f.read(&nameOfs, 4); // name in MOGN chunk (or -1 for no name?)
 

@@ -38,6 +38,7 @@ class WoWModel;
 
 // Other libraries
 #include "matrix.h"
+#include "glm/glm.hpp"
 
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "ExporterPlugin.h"
@@ -97,7 +98,7 @@ class OBJExporter : public ExporterPlugin
 
     // Methods
 
-     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), Vec3D pos = Vec3D::nullVec()) const;
+     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix m = Matrix::identity(), glm::vec3 pos = glm::vec3(0.0f)) const;
      bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
 
 

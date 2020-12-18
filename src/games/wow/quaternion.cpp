@@ -8,6 +8,8 @@
 #include "quaternion.h"
 
 #include "matrix.h"
+#include "vec3d.h" // HALFPif
+
 
 const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Quaternion &v2)
 {
@@ -32,9 +34,9 @@ const Quaternion Quaternion::lerp(const float r, const Quaternion &v1, const Qua
   return v1*(1.0f-r) + v2*r;
 }
 
-Vec3D Quaternion::GetHPB()
+glm::vec3 Quaternion::GetHPB()
 {
-  Vec3D hpb;
+  glm::vec3 hpb;
   hpb.x = atan2(2 * (x*z + y*w), 1 - 2 * (x*x + y*y));
   float sp = 2*(x*w - y*z);
   if(sp < -1) sp = -1;
@@ -75,9 +77,9 @@ Matrix Quaternion::toMat()
   return result;
 }
 
-Vec3D Quaternion::toEulerXYZ()
+glm::vec3 Quaternion::toEulerXYZ()
 {
-  Vec3D result;
+  glm::vec3 result;
 
   Matrix mat = toMat();
 

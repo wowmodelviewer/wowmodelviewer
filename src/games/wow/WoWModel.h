@@ -30,13 +30,12 @@
 #include "TabardDetails.h"
 #include "TextureAnim.h"
 #include "TextureManager.h"
-#include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
 
 #include "metaclasses/Container.h"
 
-
+#include "glm/glm.hpp"
 
 class CASCFile;
 class GameFile;
@@ -89,7 +88,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void lightsOff(GLuint lbase);
 
   std::vector<uint16> boundTris;
-  std::vector<Vec3D> bounds;
+  std::vector<glm::vec3> bounds;
 
   void refreshMerging();
   set<WoWModel *> mergedModels;
@@ -146,9 +145,9 @@ public:
 
   typedef int GeosetNum;
 
-  Vec3D *normals;
+  glm::vec3 *normals;
   Vec2D *texCoords;
-  Vec3D *vertices;
+  glm::vec3 *vertices;
   std::vector<uint32> indices;
   // --
 
@@ -173,8 +172,8 @@ public:
   float alpha;
 
   // Position and rotation vector
-  Vec3D pos;
-  Vec3D rot;
+  glm::vec3 pos;
+  glm::vec3 rot;
 
   //
   bool ok;
@@ -260,7 +259,7 @@ public:
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-  void computeMinMaxCoords(Vec3D & min, Vec3D & max);
+  void computeMinMaxCoords(glm::vec3 & min, glm::vec3 & max);
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector

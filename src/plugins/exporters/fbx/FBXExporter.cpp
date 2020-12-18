@@ -221,7 +221,7 @@ void FBXExporter::createMeshes()
 
         int l = m_p_model->attLookup[it->first];
         Matrix m;
-        Vec3D pos;
+        glm::vec3 pos;
         if (l > -1)
         {
           m = m_p_model->bones[m_p_model->atts[l].bone].mat;

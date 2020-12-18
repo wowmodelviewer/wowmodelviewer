@@ -10,7 +10,8 @@
 
 #include <string>
 #include <vector>
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
 
 class Displayable;
 class WoWModel;
@@ -28,39 +29,39 @@ class BaseCanvas;
 
 class _ATTACHMENT_API_ Attachment
 {
-	public:
-  Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
+  public:
+    Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
 
-		~Attachment();
+    ~Attachment();
 
-		void setup();
-		void setupParticle();
-    Attachment* addChild(std::string fn, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
-    Attachment* addChild(Displayable *disp, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
-		void delSlot(int slot);
-		void delChildren();
-		WoWModel* getModelFromSlot(int slot);
+    void setup();
+    void setupParticle();
+    Attachment* addChild(std::string fn, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
+    Attachment* addChild(Displayable *disp, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
+    void delSlot(int slot);
+    void delChildren();
+    WoWModel* getModelFromSlot(int slot);
 
-		void draw(BaseCanvas *c);
-		void drawParticles(bool force=false);
-		void tick(float dt);
+    void draw(BaseCanvas *c);
+    void drawParticles(bool force=false);
+    void tick(float dt);
 
-		void setModel(Displayable * newmodel);
-		Displayable * model() { return m_model;}
+    void setModel(Displayable * newmodel);
+    Displayable * model() { return m_model;}
 
-		Attachment *parent;
+    Attachment *parent;
 
-		std::vector<Attachment*> children;
+    std::vector<Attachment*> children;
 
-		int id;
-		int slot;
-		float scale;
-		Vec3D rot;
-		Vec3D pos;
+    int id;
+    int slot;
+    float scale;
+    glm::vec3 rot;
+    glm::vec3 pos;
     bool mirror;
 
-	private:
-		Displayable *m_model;
+  private:
+    Displayable *m_model;
 };
 
 

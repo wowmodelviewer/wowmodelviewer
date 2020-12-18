@@ -940,7 +940,7 @@ void CharControl::OnUpdateItem(int type, int id)
           charAtt->scale = 1.0f;
       }
       g_canvas->ResetView();
-      model->rot = model->pos = Vec3D(0.0f, 0.0f, 0.0f);
+      model->rot = model->pos = glm::vec3(0.0f, 0.0f, 0.0f);
       m->rot.x = 0.0f; // mounted characters look better from the side
       break;
     }

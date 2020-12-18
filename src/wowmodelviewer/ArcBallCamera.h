@@ -9,7 +9,8 @@
 #define _ARCBALLCAMERA_H_
 
 #include "matrix.h"
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
 
 class ArcBallCamera
 {
@@ -29,14 +30,14 @@ class ArcBallCamera
     void setStartPos(const int x, const int y);
     void updatePos(const int x, const int y);
 
-    void autofit(const Vec3D & min, const Vec3D & max, const float fov);
+    void autofit(const glm::vec3 & min, const glm::vec3 & max, const float fov);
     
   protected:
 
 
   private:
     void updatePosition();
-    Vec3D mapToSphere(const int x, const int y);
+    glm::vec3 mapToSphere(const int x, const int y);
 
     // zoom
     float m_distance;
@@ -44,14 +45,14 @@ class ArcBallCamera
     float m_maxZoomDistance;
 
     // camera definition
-    Vec3D m_lookAt;
-	Vec3D m_modelCenter;
+    glm::vec3 m_lookAt;
+	glm::vec3 m_modelCenter;
 
     // scene size
     int m_sceneWidth;
     int m_sceneHeight;
 
-    Vec3D m_startVec;
+    glm::vec3 m_startVec;
     Quaternion m_rotation;
     Matrix m_lastRot;
     Matrix m_transform;

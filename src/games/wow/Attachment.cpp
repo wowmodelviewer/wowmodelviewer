@@ -20,7 +20,7 @@
 
 
 
-Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, Vec3D rot, Vec3D pos, bool mirror)
+Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale, glm::vec3 rot, glm::vec3 pos, bool mirror)
   : parent(parent), id(id), slot(slot), scale(scale), rot(rot), pos(pos), m_model(nullptr), mirror(mirror)
 {
   setModel(model);
@@ -59,7 +59,7 @@ void Attachment::draw(BaseCanvas *c)
 
     if (c->model() != 0)
     {
-      Vec3D scaling = Vec3D(scale, scale, scale);
+      glm::vec3 scaling = glm::vec3(scale, scale, scale);
       if (mirror)
       {
         glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
@@ -68,14 +68,14 @@ void Attachment::draw(BaseCanvas *c)
       
       // no need to scale if its already 100%
       // scaling manually set from model control panel
-      if (scaling != Vec3D(1.0f, 1.0f, 1.0f))
+      if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
         glScalef(scaling.x, scaling.y, scaling.z);
 
-      if (pos != Vec3D(0.0f, 0.0f, 0.0f))
+      if (pos != glm::vec3(0.0f, 0.0f, 0.0f))
         glTranslatef(pos.x, pos.y, pos.z);
 
 
-      if (rot != Vec3D(0.0f, 0.0f, 0.0f))
+      if (rot != glm::vec3(0.0f, 0.0f, 0.0f))
       {
         glRotatef(rot.x, 1.0f, 0.0f, 0.0f);
         glRotatef(rot.y, 0.0f, 1.0f, 0.0f);
@@ -105,10 +105,10 @@ void Attachment::draw(BaseCanvas *c)
     // shift or rotate the attached model
     if (c->model() && c->model() != m)
     {
-      if (m->pos != Vec3D(0.0f, 0.0f, 0.0f))
+      if (m->pos != glm::vec3(0.0f, 0.0f, 0.0f))
         glTranslatef(m->pos.x, m->pos.y, m->pos.z);
 
-      if (m->rot != Vec3D(0.0f, 0.0f, 0.0f))
+      if (m->rot != glm::vec3(0.0f, 0.0f, 0.0f))
       {
         glRotatef(m->rot.x, 1.0f, 0.0f, 0.0f);
         glRotatef(m->rot.y, 0.0f, 1.0f, 0.0f);
@@ -175,7 +175,7 @@ void Attachment::drawParticles(bool force)
     setupParticle();
 
     // no need to scale if its already 100%
-    Vec3D scaling = Vec3D(scale, scale, scale);
+    glm::vec3 scaling = glm::vec3(scale, scale, scale);
     if (mirror)
     {
       glFrontFace(GL_CW);
@@ -184,15 +184,15 @@ void Attachment::drawParticles(bool force)
       
     // no need to scale if its already 100%
     // scaling manually set from model control panel
-    if (scaling != Vec3D(1.0f, 1.0f, 1.0f))
+    if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
       glScalef(scaling.x, scaling.y, scaling.z);
 
-    if (rot != Vec3D(0.0f, 0.0f, 0.0f))
+    if (rot != glm::vec3(0.0f, 0.0f, 0.0f))
       glRotatef(rot.y, 0.0f, 1.0f, 0.0f);
 
     //glRotatef(45.0f, 1,0,0);
 
-    if (pos != Vec3D(0.0f, 0.0f, 0.0f))
+    if (pos != glm::vec3(0.0f, 0.0f, 0.0f))
       glTranslatef(pos.x, pos.y, pos.z);
 
     if (force)
@@ -236,7 +236,7 @@ void Attachment::setupParticle()
     parent->m_model->setupAtt2(id);
 }
 
-Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float scale, Vec3D rot, Vec3D pos, bool mirror)
+Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float scale, glm::vec3 rot, glm::vec3 pos, bool mirror)
 {
   if (modelfn.length() == 0 || id < 0)
     return 0;
@@ -255,7 +255,7 @@ Attachment* Attachment::addChild(std::string modelfn, int id, int slot, float sc
   }
 }
 
-Attachment* Attachment::addChild(Displayable *disp, int id, int slot, float scale, Vec3D rot, Vec3D pos, bool mirror)
+Attachment* Attachment::addChild(Displayable *disp, int id, int slot, float scale, glm::vec3 rot, glm::vec3 pos, bool mirror)
 {
   LOG_INFO << "Attach on id" << id << "slot" << slot << "scale" << scale << "rot (" << rot.x << "," << rot.y << "," << rot.z << ") pos (" << pos.x << "," << pos.y << "," << pos.z << ") mirror" << mirror;
   Attachment *att = new Attachment(this, disp, id, slot, scale, rot, pos, mirror);

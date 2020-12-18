@@ -17,6 +17,8 @@
 #include "logger/Logger.h"
 
 #include "GL/glew.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
@@ -99,7 +101,7 @@ bool ModelRenderPass::init()
   // emissive colors
   if (color != -1 && color < (int16)model->colors.size() && model->colors[color].color.uses(0))
   {
-    Vec3D c;
+    glm::vec3 c;
     /* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
     c = model->colors[color].color.getValue(0, model->animtime);
     if (model->colors[color].opacity.uses(model->anim))
@@ -256,9 +258,9 @@ void ModelRenderPass::render(bool animated)
       for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint32 a = model->indices[b];
-        glNormal3fv(model->normals[a]);
+        glNormal3fv(glm::value_ptr(model->normals[a]));
         glTexCoord2fv(model->origVertices[a].texcoords);
-        glVertex3fv(model->vertices[a]);
+        glVertex3fv(glm::value_ptr(model->vertices[a]));
         /*
         if (geoset->id == 2401 && k < 10)
         {
@@ -279,9 +281,9 @@ void ModelRenderPass::render(bool animated)
     for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
       uint16 a = model->indices[b];
-      glNormal3fv(model->normals[a]);
+      glNormal3fv(glm::value_ptr(model->normals[a]));
       glTexCoord2fv(model->origVertices[a].texcoords);
-      glVertex3fv(model->vertices[a]);
+      glVertex3fv(glm::value_ptr(model->vertices[a]));
     }
     glEnd();
   }

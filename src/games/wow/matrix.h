@@ -2,7 +2,10 @@
 #define MATRIX_H
 
 #include "quaternion.h"
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
+
+#include "vec3d.h" // HALFPIf
 
 #undef minor
 
@@ -60,7 +63,7 @@ public:
     return m;
   }
 
-  void translation(const Vec3D& tr)
+  void translation(const glm::vec3& tr)
   {
     /*
       100#
@@ -74,14 +77,14 @@ public:
     m[2][3]=tr.z;
   }
 
-  static const Matrix newTranslation(const Vec3D& tr)
+  static const Matrix newTranslation(const glm::vec3& tr)
   {
     Matrix t;
     t.translation(tr);
     return t;
   }
 
-  void scale(const Vec3D& sc)
+  void scale(const glm::vec3& sc)
   {
     /*
       #000
@@ -96,7 +99,7 @@ public:
     m[3][3]=1.0f;
   }
 
-  static const Matrix newScale(const Vec3D& sc)
+  static const Matrix newScale(const glm::vec3& sc)
   {
     Matrix t;
     t.scale(sc);
@@ -175,9 +178,9 @@ public:
     return t;
   }
 
-  Vec3D operator* (const Vec3D& v) const
+  glm::vec3 operator* (const glm::vec3& v) const
   {
-    Vec3D o;
+    glm::vec3 o;
     o.x = m[0][0]*v.x + m[0][1]*v.y + m[0][2]*v.z + m[0][3];
     o.y = m[1][0]*v.x + m[1][1]*v.y + m[1][2]*v.z + m[1][3];
     o.z = m[2][0]*v.x + m[2][1]*v.y + m[2][2]*v.z + m[2][3];
@@ -246,12 +249,12 @@ public:
     return q;
   }
 
-  Vec3D GetTranslation() {
-    return Vec3D(m[0][3], m[1][3], m[2][3]);
+  glm::vec3 GetTranslation() {
+    return glm::vec3(m[0][3], m[1][3], m[2][3]);
   }
 
-  Vec3D GetScale() {
-    return Vec3D(m[0][0], m[1][1], m[2][2]);
+  glm::vec3 GetScale() {
+    return glm::vec3(m[0][0], m[1][1], m[2][2]);
   }
 
 
@@ -352,11 +355,11 @@ public:
     return dest;
   }
 
-  Vec3D GetHPB(){
-    Vec3D y(m[0][1], m[1][1], m[2][1]);
-    Vec3D z(m[0][2], m[1][2], m[2][2]);
+  glm::vec3 GetHPB(){
+    glm::vec3 y(m[0][1], m[1][1], m[2][1]);
+    glm::vec3 z(m[0][2], m[1][2], m[2][2]);
 
-    Vec3D hpb;
+    glm::vec3 hpb;
 
     // First get RX and RY
     bool zzero[3] = {
@@ -389,7 +392,7 @@ public:
     // Find RZ
     Matrix rot_hp(newRotate_HPB(hpb[0], hpb[1], 0));
     rot_hp.invert();
-    Vec3D rot_y(rot_hp * y);
+    glm::vec3 rot_y(rot_hp * y);
     bool rot_yzero[3] = {
       (fabs(rot_y[0]) <= std::numeric_limits<float>::epsilon()),
       (fabs(rot_y[1]) <= std::numeric_limits<float>::epsilon()),

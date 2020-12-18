@@ -2,14 +2,14 @@
 #define _WMO_FOG_H_
 
 #include "quaternion.h" // Vec4D
-#include "vec3d.h"
+#include "glm/glm.hpp"
 
 class GameFile;
 
 struct WMOFog 
 {
   unsigned int flags;
-  Vec3D pos;
+  glm::vec3 pos;
   float r1; // Smaller radius
   float r2; // Larger radius
   float fogend; // This is the distance at which all visibility ceases, and you see no objects or terrain except for the fog color.

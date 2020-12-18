@@ -19,6 +19,9 @@
 
 #include <QXmlStreamWriter>
 
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/norm.hpp"
+
 #define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
 enum TextureFlags
@@ -114,8 +117,8 @@ gamefile(file)
   // Initiate our model variables.
   trans = 1.0f;
   rad = 1.0f;
-  pos = Vec3D(0.0f, 0.0f, 0.0f);
-  rot = Vec3D(0.0f, 0.0f, 0.0f);
+  pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  rot = glm::vec3(0.0f, 0.0f, 0.0f);
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
@@ -572,17 +575,17 @@ void WoWModel::initCommon()
   origVertices = rawVertices;
 
   // This data is needed for both VBO and non-VBO cards.
-  vertices = new Vec3D[origVertices.size()];
-  normals = new Vec3D[origVertices.size()];
+  vertices = new glm::vec3[origVertices.size()];
+  normals = new glm::vec3[origVertices.size()];
 
   uint i = 0;
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
   {
     // Set the data for our vertices, normals from the model data
     vertices[i] = ov_it->pos;
-    normals[i] = ov_it->normal.normalize();
+    normals[i] = glm::normalize(ov_it->normal);
 
-    float len = ov_it->pos.lengthSquared();
+    float len = glm::length2(ov_it->pos);
     if (len > rad)
     {
       rad = len;
@@ -595,8 +598,8 @@ void WoWModel::initCommon()
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    Vec3D * buffer = new Vec3D[header.nBoundingVertices];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
+    glm::vec3 * buffer = new glm::vec3[header.nBoundingVertices];
+    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
     bounds.assign(buffer, buffer + header.nBoundingVertices);
     delete[] buffer;
 
@@ -1600,7 +1603,7 @@ void WoWModel::animate(ssize_t anim)
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
       glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
 
-      vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
+      vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
 
     }
 
@@ -1608,14 +1611,14 @@ void WoWModel::animate(ssize_t anim)
     auto ov_it = origVertices.begin();
     for (size_t i = 0; ov_it != origVertices.end(); ++i, ++ov_it)
     { //,k=0
-      Vec3D v(0, 0, 0), n(0, 0, 0);
+      glm::vec3 v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b = 0; b < 4; b++)
       {
         if (ov_it->weights[b] > 0)
         {
-          Vec3D tv = bones[ov_it->bones[b]].mat * ov_it->pos;
-          Vec3D tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
+          glm::vec3 tv = bones[ov_it->bones[b]].mat * ov_it->pos;
+          glm::vec3 tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
           v += tv * ((float)ov_it->weights[b] / 255.0f);
           n += tn * ((float)ov_it->weights[b] / 255.0f);
         }
@@ -1623,7 +1626,7 @@ void WoWModel::animate(ssize_t anim)
 
       vertices[i] = v;
       if (video.supportVBO)
-        vertices[origVertices.size() + i] = n.normalize(); // shouldn't these be normal by default?
+        vertices[origVertices.size() + i] = glm::normalize(n); // shouldn't these be normal by default?
       else
         normals[i] = n;
     }
@@ -1786,8 +1789,8 @@ void WoWModel::drawBones()
     //for (size_t i=30; i<40; i++) {
     if (it.parent != -1)
     {
-      glVertex3fv(it.transPivot);
-      glVertex3fv(bones[it.parent].transPivot);
+      glVertex3fv(glm::value_ptr(it.transPivot));
+      glVertex3fv(glm::value_ptr(bones[it.parent].transPivot));
     }
   }
   glEnd();
@@ -1819,7 +1822,7 @@ void WoWModel::drawBoundingVolume()
   {
     size_t v = boundTris[i];
     if (v < bounds.size())
-      glVertex3fv(bounds[v]);
+      glVertex3fv(glm::value_ptr(bounds[v]));
     else
       glVertex3f(0, 0, 0);
   }
@@ -1931,13 +1934,13 @@ bool WoWModel::canSetTextureFromFile(int texnum)
   return 0;
 }
 
-void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
+void WoWModel::computeMinMaxCoords(glm::vec3 & minCoord, glm::vec3 & maxCoord)
 {
   if (video.supportVBO)
   {
     // get back vertices
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
+    vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
   }
 
   for (auto & it : passes)
@@ -1948,7 +1951,7 @@ void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
 
     for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
-      Vec3D v = vertices[indices[b]];
+      glm::vec3 v = vertices[indices[b]];
 
       // detect min/max coordinates and set them
       if (v.x < minCoord.x)
@@ -2179,10 +2182,10 @@ void WoWModel::refreshMerging()
 
     for (uint i = 0; i < nbBonesInNewModel; ++i)
     {
-      Vec3D pivot = modelsIt->bones[i].pivot;
+      glm::vec3 pivot = modelsIt->bones[i].pivot;
       for (uint b = 0; b < bones.size(); ++b)
       {
-        Vec3D p = bones[b].pivot;
+        glm::vec3 p = bones[b].pivot;
         if ((p == pivot) && 
             (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
@@ -2270,15 +2273,15 @@ void WoWModel::refreshMerging()
   delete[] vertices;
   delete[] normals;
 
-  vertices = new Vec3D[origVertices.size()];
-  normals = new Vec3D[origVertices.size()];
+  vertices = new glm::vec3[origVertices.size()];
+  normals = new glm::vec3[origVertices.size()];
 
   uint i = 0;
   for (auto & ov_it : origVertices)
   {
     // Set the data for our vertices, normals from the model data
     vertices[i] = ov_it.pos;
-    normals[i] = ov_it.normal.normalize();
+    normals[i] = glm::normalize(ov_it.normal);
     ++i;
   }
 
@@ -3050,13 +3053,13 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "    <nTexAnimLookup>" << m.header.nTexAnimLookup << "</nTexAnimLookup>" << endl;
   out << "    <ofsTexAnimLookup>" << m.header.ofsTexAnimLookup << "</ofsTexAnimLookup>" << endl;
   out << "    <collisionSphere>" << endl;
-  out << "      <min>" << m.header.collisionSphere.min << "</min>" << endl;
-  out << "      <max>" << m.header.collisionSphere.max << "</max>" << endl;
+  out << "      <min>" << m.header.collisionSphere.min.x << " " << m.header.collisionSphere.min.y << " " << m.header.collisionSphere.min.z << "</min>" << endl;
+  out << "      <max>" << m.header.collisionSphere.max.x << " " << m.header.collisionSphere.max.y << " " << m.header.collisionSphere.max.z << "</max>" << endl;
   out << "      <radius>" << m.header.collisionSphere.radius << "</radius>" << endl;
   out << "    </collisionSphere>" << endl;
   out << "    <boundSphere>" << endl;
-  out << "      <min>" << m.header.boundSphere.min << "</min>" << endl;
-  out << "      <max>" << m.header.boundSphere.max << "</max>" << endl;
+  out << "      <min>" << m.header.boundSphere.min.x << " " << m.header.boundSphere.min.y << " " << m.header.boundSphere.min.z << "</min>" << endl;
+  out << "      <min>" << m.header.boundSphere.max.x << " " << m.header.boundSphere.max.y << " " << m.header.boundSphere.max.z << "</min>" << endl;
   out << "      <radius>" << m.header.boundSphere.radius << "</radius>" << endl;
   out << "    </boundSphere>" << endl;
   out << "    <nBoundingTriangles>" << m.header.nBoundingTriangles << "</nBoundingTriangles>" << endl;
@@ -3110,8 +3113,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <d1>" << m.anims[i].d1 << "</d1>" << endl;
     out << "      <d2>" << m.anims[i].d2 << "</d2>" << endl;
     out << "      <playSpeed>" << m.anims[i].playSpeed << "</playSpeed>" << endl;
-    out << "      <boxA>" << m.anims[i].boundSphere.min << "</boxA>" << endl;
-    out << "      <boxB>" << m.anims[i].boundSphere.max << "</boxB>" << endl;
+    out << "      <boxA>" << m.anims[i].boundSphere.min.x << " " << m.anims[i].boundSphere.min.y << " " << m.anims[i].boundSphere.min.z << "</boxA>" << endl;
+    out << "      <boxA>" << m.anims[i].boundSphere.max.x << " " << m.anims[i].boundSphere.max.y << " " << m.anims[i].boundSphere.max.z << "</boxA>" << endl;
     out << "      <rad>" << m.anims[i].boundSphere.radius << "</rad>" << endl;
     out << "      <NextAnimation>" << m.anims[i].NextAnimation << "</NextAnimation>" << endl;
     out << "      <Index>" << m.anims[i].Index << "</Index>" << endl;
@@ -3147,7 +3150,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << m.bones[i].scale;
     out << "      </scale>" << endl;
 #endif
-    out << "      <pivot>" << m.bones[i].boneDef.pivot << "</pivot>" << endl;
+    out << "      <pivot>" << m.bones[i].boneDef.pivot.x << " " << m.bones[i].boneDef.pivot.y << " " << m.bones[i].boneDef.pivot.z << "</pivot>" << endl;
     out << "    </Bone>" << endl;
   }
   out << "  </Bones>" << endl;
@@ -3233,8 +3236,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <StartBones>" << m.geosets[i]->StartBones << "</StartBones>" << endl;
     out << "      <rootBone>" << m.geosets[i]->rootBone << "</rootBone>" << endl;
     out << "      <nBones>" << m.geosets[i]->nBones << "</nBones>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0] << "</BoundingBox>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1] << "</BoundingBox>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0].x << " " << m.geosets[i]->BoundingBox[0].y << " " << m.geosets[i]->BoundingBox[0].z << "</BoundingBox>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1].x << " " << m.geosets[i]->BoundingBox[1].y << " " << m.geosets[i]->BoundingBox[1].z << "</BoundingBox>" << endl;
     out << "      <radius>" << m.geosets[i]->radius << "</radius>" << endl;
     out << "	  </Geoset>" << endl;
   }
@@ -3366,7 +3369,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "	  <Attachment id=\"" << i << "\">" << endl;
     out << "      <id>" << m.atts[i].id << "</id>" << endl;
     out << "      <bone>" << m.atts[i].bone << "</bone>" << endl;
-    out << "      <pos>" << m.atts[i].pos << "</pos>" << endl;
+    out << "      <pos>" << m.atts[i].pos.x << " " << m.atts[i].pos.y << " " << m.atts[i].pos.z << "</pos>" << endl;
     out << "	  </Attachment>" << endl;
   }
   out << "	</Attachments>" << endl;

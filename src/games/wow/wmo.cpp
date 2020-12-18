@@ -70,9 +70,9 @@ WMO::WMO(QString name) :
 			f.read(&col, 4); // ambient color? RGB
 			f.read(&nX, 4); // WMO ID (column 2 in WMOAreaTable.dbc)
 			f.read(ff,12); // Bounding box corner 1
-      v1 = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+      v1 = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 			f.read(ff,12); // Bounding box corner 2
-      v2 = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+      v2 = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 			f.read(&LiquidType, 4);
 
 			groups = new WMOGroup[nGroups];
@@ -220,13 +220,13 @@ WMO::WMO(QString name) :
 			WMOPV p;
 			for (size_t i=0; i<nP; i++) {
 				f.read(ff,12);
-        p.a = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+        p.a = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-        p.b = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+        p.b = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-        p.c = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+        p.c = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 				f.read(ff,12);
-        p.d = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+        p.d = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
 				pvs.push_back(p);
 			}
 		}
@@ -380,8 +380,8 @@ void WMO::draw()
 	for (size_t i=0; i<nLights; i++) {
 		glColor4fv(lights[i].fcolor);
 		glVertex3fv(lights[i].pos);
-		glVertex3fv(lights[i].pos + Vec3D(-0.5f,1,0));
-		glVertex3fv(lights[i].pos + Vec3D(0.5f,1,0));
+		glVertex3fv(lights[i].pos + glm::vec3(-0.5f,1,0));
+		glVertex3fv(lights[i].pos + glm::vec3(0.5f,1,0));
 	}
 	glEnd();
 	glEnable(GL_TEXTURE_2D);
@@ -399,10 +399,10 @@ void WMO::draw()
 		glColor4f(1,1,1,1);
 		glBegin(GL_LINE_LOOP);
 		glVertex3fv(fog.pos);
-		glVertex3fv(fog.pos + Vec3D(fog.rad1, 5, -fog.rad2));
-		glVertex3fv(fog.pos + Vec3D(fog.rad1, 5, fog.rad2));
-		glVertex3fv(fog.pos + Vec3D(-fog.rad1, 5, fog.rad2));
-		glVertex3fv(fog.pos + Vec3D(-fog.rad1, 5, -fog.rad2));
+		glVertex3fv(fog.pos + glm::vec3(fog.rad1, 5, -fog.rad2));
+		glVertex3fv(fog.pos + glm::vec3(fog.rad1, 5, fog.rad2));
+		glVertex3fv(fog.pos + glm::vec3(-fog.rad1, 5, fog.rad2));
+		glVertex3fv(fog.pos + glm::vec3(-fog.rad1, 5, -fog.rad2));
 		glEnd();
 	}
 	glEnable(GL_TEXTURE_2D);
@@ -438,8 +438,8 @@ void WMO::draw()
 		WMOPV &pv = pvs[pr.portal];
 		if (pr.dir>0) glColor4f(1,0,0,1);
 		else glColor4f(0,0,1,1);
-		Vec3D pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
-		Vec3D gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
+		glm::vec3 pc = (pv.a+pv.b+pv.c+pv.d)*0.25f;
+		glm::vec3 gc = (groups[pr.group].b1 + groups[pr.group].b2)*0.5f;
 		glVertex3fv(pc);
 		glVertex3fv(gc);
 	}
@@ -466,7 +466,7 @@ void WMO::drawSkybox()
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		glPushMatrix();
-		Vec3D o = gWorld->camera;
+		glm::vec3 o = gWorld->camera;
 		glTranslatef(o.x, o.y, o.z);
 		const float sc = 2.0f;
 		glScalef(sc,sc,sc);

@@ -64,10 +64,10 @@
 
 // Public methods
 //--------------------------------------------------------------------
-// Change a Vec3D so it now faces forwards
-void MakeModelFaceForwards(Vec3D &vect)
+// Change a glm::vec3 so it now faces forwards
+void MakeModelFaceForwards(glm::vec3 &vect)
 {
-  Vec3D Temp;
+  glm::vec3 Temp;
 
   Temp.x = 0-vect.z;
   Temp.y = vect.y;
@@ -178,7 +178,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
           // find matrix
           int l = model->attLookup[it->first];
           Matrix m;
-          Vec3D pos;
+          glm::vec3 pos;
           if (l>-1)
           {
             m = model->bones[model->atts[l].bone].mat;
@@ -212,7 +212,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
 // Private methods
 //--------------------------------------------------------------------
-bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, Vec3D pos) const
+bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, glm::vec3 pos) const
 {
   bool vertMsg = false;
   // output all the vertice data
@@ -227,7 +227,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
-        Vec3D vert;
+        glm::vec3 vert;
         if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
         {
           if (vertMsg == false)
@@ -291,7 +291,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
-        Vec3D n = model->origVertices[a].normal;
+        glm::vec3 n = model->origVertices[a].normal;
         QString val;
         val.sprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
         file << val << "\n";

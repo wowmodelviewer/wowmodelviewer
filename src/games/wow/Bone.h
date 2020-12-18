@@ -11,7 +11,6 @@
 #include "animated.h"
 #include "matrix.h"
 #include "modelheaders.h" // ModelBoneDef
-#include "vec3d.h"
 
 class GameFile;
 class WoWModel;
@@ -20,22 +19,22 @@ class WoWModel;
 
 class Bone {
 public:
-	Animated<Vec3D> trans;
-	//Animated<Quaternion> rot;
-	Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
-	Animated<Vec3D> scale;
+  Animated<glm::vec3> trans;
+  //Animated<Quaternion> rot;
+  Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
+  Animated<glm::vec3> scale;
 
-	Vec3D pivot, transPivot;
-	int16 parent;
+  glm::vec3 pivot, transPivot;
+  int16 parent;
 
-	bool billboard;
-	Matrix mat;
-	Matrix mrot;
+  bool billboard;
+  Matrix mat;
+  Matrix mrot;
 
-	ModelBoneDef boneDef;
+  ModelBoneDef boneDef;
 
-	bool calc;
-	void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
+  bool calc;
+  void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
   void initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data);
 };
 

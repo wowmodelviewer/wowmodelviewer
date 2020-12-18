@@ -18,6 +18,8 @@
 #include "video.h"
 #include "WMOGroup.h"
 
+#include "glm/glm.hpp"
+
 #include "logger/Logger.h"
 
 static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
@@ -110,7 +112,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 	lightType = LIGHT_DYNAMIC;
 
 	// Setup our default colour values.
-	vecBGColor = Vec3D((float)(71.0/255),(float)(95.0/255),(float)(121.0/255)); 
+	vecBGColor = glm::vec3((float)(71.0/255),(float)(95.0/255),(float)(121.0/255)); 
 
 	drawLightDir = false;
 	drawBackground = false;
@@ -378,7 +380,7 @@ void ModelCanvas::LoadADT(wxString fn)
 	if (!adt) {
 		adt = new MapTile(fn);
 		if (adt->ok) {
-			Vec3D vc = adt->topnode.vmax;
+			glm::vec3 vc = adt->topnode.vmax;
 			if (vc.y < 0) vc.y = 0;
 			adt->viewpos.y = vc.y + 50.0f;
 			adt->viewpos.x = adt->xbase;
@@ -705,7 +707,7 @@ inline void ModelCanvas::RenderLight(Light *l)
 	glTranslatef(l->pos.x, l->pos.y, l->pos.z);
 
 	// rotate the objects to point in the right direction
-	//Vec3D rot(l->pos.x, l->pos.y, l->pos.z);
+	//glm::vec3 rot(l->pos.x, l->pos.y, l->pos.z);
 	//float theta = rot.thetaXZ(l->target);
 	//glRotatef(theta * rad2deg, 0.0f, 1.0f, 0.0f);
 	
@@ -1611,8 +1613,8 @@ void ModelCanvas::TogglePause()
 void ModelCanvas::ResetView()
 {
   WoWModel * m = const_cast<WoWModel *>(model());
-	m->rot = Vec3D(0,-90.0f,0);
-	m->pos = Vec3D(0, 0, 5.0f);
+	m->rot = glm::vec3(0,-90.0f,0);
+	m->pos = glm::vec3(0, 0, 5.0f);
 
 	bool isSkyBox = (wxString(m->name().toStdWString()).substr(0,3)==wxT("Env"));
 	if (!isSkyBox) {
@@ -1645,10 +1647,10 @@ void ModelCanvas::ResetViewWMO(int id)
 	if (!wmo || id>=(int)wmo->nGroups) 
 		return;
 
-	wmo->viewrot = Vec3D(-90.0f, 0.0f, 0.0f);
-	//model->rot = Vec3D(0.0f, -90.0f, 0.0f);
-	//model->pos = Vec3D(0.0f, 0.0f, 5.0f);
-	Vec3D mid;
+	wmo->viewrot = glm::vec3(-90.0f, 0.0f, 0.0f);
+	//model->rot = glm::vec3(0.0f, -90.0f, 0.0f);
+	//model->pos = glm::vec3(0.0f, 0.0f, 5.0f);
+	glm::vec3 mid;
 
 	if (id==-1) {
 		//model->pos.z = (wmo->v2-wmo->v1).length();
@@ -1984,7 +1986,7 @@ void ModelCanvas::autofit()
 {
   if (m_useNewCamera)
   { 
-    Vec3D minCoord, maxCoord;
+    glm::vec3 minCoord, maxCoord;
     WoWModel * m = const_cast<WoWModel *>(model());
     m->computeMinMaxCoords(minCoord, maxCoord);
     arcCamera.autofit(minCoord, maxCoord, video.fov);

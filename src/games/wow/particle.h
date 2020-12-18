@@ -10,6 +10,7 @@
 #else
 #    define _PARTICLE_API_
 #endif
+#include "vec3d.h" // Vec2D
 
 class WoWModel;
 class ParticleSystem;
@@ -19,14 +20,15 @@ class RibbonEmitter;
 
 #include <list>
 #include "GL/glew.h"
+#include "glm/glm.hpp"
 
 class Bone;
 
 struct Particle
 {
-  Vec3D pos, speed, down, origin, dir;
-  Vec3D	corners[4];
-  Vec3D tpos;
+  glm::vec3 pos, speed, down, origin, dir;
+  glm::vec3	corners[4];
+  glm::vec3 tpos;
   float size, life, maxlife;
   size_t tile;
   Vec4D color;
@@ -66,7 +68,7 @@ struct TexCoordSet
 class _PARTICLE_API_ ParticleSystem
 {
   float mid, slowdown, rotation;
-  Vec3D pos, tpos;
+  glm::vec3 pos, tpos;
   GLuint texture, texture2, texture3;
   ParticleEmitter *emitter;
   ParticleList particles;
@@ -137,16 +139,16 @@ public:
   int BlendValueForMode(int mode);
   friend std::ostream& operator<<(std::ostream& out, const ParticleSystem& v)
   {
-    out << "    <colors>" << v.colors[0] << "</colors>" << std::endl;
-    out << "    <colors>" << v.colors[1] << "</colors>" << std::endl;
-    out << "    <colors>" << v.colors[2] << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[0].x << " " << v.colors[0].y << " " << v.colors[0].z << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[1].x << " " << v.colors[1].y << " " << v.colors[1].z << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[2].x << " " << v.colors[2].y << " " << v.colors[2].z << "</colors>" << std::endl;
     out << "    <sizes>" << v.sizes[0] << "</sizes>" << std::endl;
     out << "    <sizes>" << v.sizes[1] << "</sizes>" << std::endl;
     out << "    <sizes>" << v.sizes[2] << "</sizes>" << std::endl;
     out << "    <mid>" << v.mid << "</mid>" << std::endl;
     out << "    <slowdown>" << v.slowdown << "</slowdown>" << std::endl;
     out << "    <rotation>" << v.rotation << "</rotation>" << std::endl;
-    out << "    <pos>" << v.pos << "</pos>" << std::endl;
+    out << "    <pos>" << v.pos.x << " " << v.pos.y << " " << v.pos.z << "</pos>" << std::endl;
     out << "    <texture>" << v.texture << "</texture>" << std::endl;
     out << "    <blend>" << v.blend << "</blend>" << std::endl;
     out << "    <order>" << v.order << "</order>" << std::endl;
@@ -174,25 +176,25 @@ public:
 
 struct RibbonSegment
 {
-  Vec3D pos, up, back;
+  glm::vec3 pos, up, back;
   float len,len0;
 };
 
 class RibbonEmitter
 {
-  Animated<Vec3D> color;
+  Animated<glm::vec3> color;
   AnimatedShort opacity;
   Animated<float> above, below;
 
   Bone *parent;
 
-  Vec3D pos;
+  glm::vec3 pos;
 
   size_t manim, mtime;
   float length, seglen;
   int numsegs;
 
-  Vec3D tpos;
+  glm::vec3 tpos;
   Vec4D tcolor;
   float tabove, tbelow;
 

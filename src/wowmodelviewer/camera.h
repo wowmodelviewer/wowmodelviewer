@@ -17,26 +17,26 @@
 
 //#include <gl\glut.h>		// Need to include it here because the GL* types are required
 
-#include "vec3d.h"
+#include "glm/glm.hpp"
 
 //Note: All angles in degrees
 
 class CCamera {
   private:
 
-  Vec3D m_vViewDir;
-  Vec3D m_vRightVector;
-  Vec3D m_vUpVector;
-  Vec3D m_vPosition;
+  glm::vec3 m_vViewDir;
+  glm::vec3 m_vRightVector;
+  glm::vec3 m_vUpVector;
+  glm::vec3 m_vPosition;
 
-  Vec3D m_vRotation;
+  glm::vec3 m_vRotation;
 
   public:
   CCamera();
   void Reset();	//inits the default values)
   void Setup();	// Puts the camera into place.
 
-  void Move(Vec3D Direction);
+  void Move(glm::vec3 Direction);
   void RotateX(float Angle);
   void RotateY(float Angle);
   void RotateZ(float Angle);

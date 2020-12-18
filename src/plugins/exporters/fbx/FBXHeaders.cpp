@@ -85,7 +85,7 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 }
 
 // Create mesh.
-FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, Matrix matrix, Vec3D offset)
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, Matrix matrix, glm::vec3 offset)
 {
   // Create a node for the mesh.
   FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
@@ -124,9 +124,9 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex &v = model->origVertices[i];
-    Vec3D Position = m * (v.pos + offset);
+    glm::vec3 Position = m * (v.pos + offset);
     vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
-    Vec3D vn = v.normal.normalize();
+    glm::vec3 vn = glm::normalize(v.normal);
     layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
     layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
   }
@@ -227,7 +227,7 @@ void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode
   for (size_t i = 0; i < num_of_bones; ++i)
   {
     Bone &bone = l_model->bones[i];
-    Vec3D trans = bone.pivot;
+    glm::vec3 trans = bone.pivot;
 
     int pid = bone.parent;
     if (pid > -1)
@@ -386,7 +386,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* t_curve_y = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* t_curve_z = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        Vec3D v = bone.trans.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.trans.getValue(cur_anim.Index, t);
 
         if (bone.parent != -1)
         {
@@ -425,7 +425,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         Quaternion tq;
         tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
 
-        Vec3D rot = tq.toEulerXYZ();
+        glm::vec3 rot = tq.toEulerXYZ();
 
         x = rot.x * -(180.0f / PI);
         y = rot.y * -(180.0f / PI);
@@ -456,7 +456,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* s_curve_y = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* s_curve_z = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        Vec3D v = bone.scale.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.scale.getValue(cur_anim.Index, t);
 
         s_curve_x->KeyModifyBegin();
         int key_index = s_curve_x->KeyAdd(time);

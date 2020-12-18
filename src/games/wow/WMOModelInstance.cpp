@@ -20,16 +20,16 @@ void WMOModelInstance::init(char *fname, GameFile &f)
 
   float ff[3];
   f.read(ff, 12); // Position (X,Z,-Y)
-  pos = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+  pos = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
   f.read(&w, 4); // W component of the orientation quaternion
   f.read(ff, 12); // X, Y, Z components of the orientaton quaternion
-  dir = fixCoordSystem(Vec3D(ff[0], ff[1], ff[2]));
+  dir = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
   f.read(&sc, 4); // Scale factor
   f.read(&d1, 4); // (B,G,R,A) Lightning-color. 
-  lcol = Vec3D(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
+  lcol = glm::vec3(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);
 }
 
-void glQuaternionRotate(const Vec3D& vdir, float w)
+void glQuaternionRotate(const glm::vec3& vdir, float w)
 {
   Matrix m;
   Quaternion q(vdir, w);
@@ -44,7 +44,7 @@ void WMOModelInstance::draw()
   glPushMatrix();
 
   glTranslatef(pos.x, pos.y, pos.z);
-  Vec3D vdir(-dir.z, dir.x, dir.y);
+  glm::vec3 vdir(-dir.z, dir.x, dir.y);
   glQuaternionRotate(vdir, w);
   glScalef(sc, -sc, -sc);
 
