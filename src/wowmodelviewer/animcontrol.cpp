@@ -366,68 +366,68 @@ void AnimControl::UpdateModel(WoWModel *m)
 
 void AnimControl::UpdateWMO(WMO *w, int group)
 {
-	if (!w || w->itemName().size()==0)
-		return;
+  if (!w || w->itemName().size()==0)
+    return;
 
-	bool newwmo = (oldname != w->itemName().toStdString());
-	oldname = w->itemName().toStdString();
+  bool newwmo = (oldname != w->itemName().toStdString());
+  oldname = w->itemName().toStdString();
 
-	//Model *m = static_cast<Model*>(canvas->root->children[0]);
+  //Model *m = static_cast<Model*>(canvas->root->children[0]);
 
-	//if (!m || m->anims==NULL)
-	//	return;
+  //if (!m || m->anims==NULL)
+  //  return;
 
-	//m->animManager->Reset();
-	g_selWMO = w;
+  //m->animManager->Reset();
+  g_selWMO = w;
 
 
-	UpdateFrameSlider(10, 2);
-	PCRList.clear();
-	animCList->Show(false);
-	skinList->Show(false);
-	showBLPList->Show(false);
-	BLPSkinList1->Show(false);
-	BLPSkinList2->Show(false);
-	BLPSkinList3->Show(false);
-	BLPSkinsLabel->Show(false);
-	BLPSkinLabel1->Show(false);
-	BLPSkinLabel2->Show(false);
-	BLPSkinLabel3->Show(false);
+  UpdateFrameSlider(10, 2);
+  PCRList.clear();
+  animCList->Show(false);
+  skinList->Show(false);
+  showBLPList->Show(false);
+  BLPSkinList1->Show(false);
+  BLPSkinList2->Show(false);
+  BLPSkinList3->Show(false);
+  BLPSkinsLabel->Show(false);
+  BLPSkinLabel1->Show(false);
+  BLPSkinLabel2->Show(false);
+  BLPSkinLabel3->Show(false);
 
-	loopList->Show(false);
-	btnAdd->Show(false);
-	
-	if (newwmo) {
-		// build itemset list
-		wmoList->Clear();
-		wmoList->Append(wxT("(No doodads)"));
+  loopList->Show(false);
+  btnAdd->Show(false);
+  
+  if (newwmo) {
+    // build itemset list
+    wmoList->Clear();
+    wmoList->Append(wxT("(No doodads)"));
 
-		for (size_t i=0; i<g_selWMO->doodadsets.size(); i++) {
-			wmoList->Append(wxString(g_selWMO->doodadsets[i].name, *wxConvCurrent));
-		}
+    for (size_t i=0; i<g_selWMO->doodadsets.size(); i++) {
+      wmoList->Append(wxString(g_selWMO->doodadsets[i].name, *wxConvCurrent));
+    }
 
-		int sel = defaultDoodads ? 1 : 0;
-		g_selWMO->includeDefaultDoodads = defaultDoodads;
-		wmoList->Select(sel);
-		g_selWMO->showDoodadSet(sel-1);
-	}
-	wmoList->Show(TRUE);
+    int sel = defaultDoodads ? 1 : 0;
+    g_selWMO->includeDefaultDoodads = defaultDoodads;
+    wmoList->Select(sel);
+    g_selWMO->showDoodadSet(sel-1);
+  }
+  wmoList->Show(TRUE);
 
-	// get wmo name or current wmogroup name/descr
-	if (group>=-1 && group<(int)g_selWMO->nGroups) {
-		wxString label = w->itemName().toStdWString();
-		label = label.AfterLast('/');
-		if (group>=0) {
-			label += wxT(" - ") + g_selWMO->groups[group].name;
-			if (g_selWMO->groups[group].desc.length()) {
-				label += wxT(" - ") + g_selWMO->groups[group].desc;
-			}
-		}
-		wmoLabel->SetLabel(label);
-	} else {
-		wmoLabel->SetLabel(wxT("This group has been removed from the WMO"));
-	}
-	wmoLabel->Show(TRUE);
+  // get wmo name or current wmogroup name/descr
+  if (group>=-1 && group<(int)g_selWMO->nGroups) {
+    wxString label = w->itemName().toStdWString();
+    label = label.AfterLast('/');
+    if (group>=0) {
+      label += wxT(" - ") + g_selWMO->groups[group].name;
+      if (g_selWMO->groups[group].desc.length()) {
+        label += wxT(" - ") + g_selWMO->groups[group].desc;
+      }
+    }
+    wmoLabel->SetLabel(label);
+  } else {
+    wmoLabel->SetLabel(wxT("This group has been removed from the WMO"));
+  }
+  wmoLabel->Show(TRUE);
 }
 
 void AnimControl::SetSkinByDisplayID(int cdi)

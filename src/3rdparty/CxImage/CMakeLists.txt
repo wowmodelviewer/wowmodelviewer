@@ -38,25 +38,25 @@ set(SRC_FILES
 message(STATUS "Using CxImage")
 
 if (APPLE)
-	add_definitions(-D_MAC)
-	add_definitions(-D_MAC_INTEL)
+  add_definitions(-D_MAC)
+  add_definitions(-D_MAC_INTEL)
 endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-	add_definitions(-D_LINUX)
-	add_definitions(-D_LINUX32)
+  add_definitions(-D_LINUX)
+  add_definitions(-D_LINUX32)
 endif()
 
 if (WIN32)
-  	include_directories($ENV{WMV_SDK_BASEDIR}/include)
-	add_definitions(-D_WINDOWS)
-	add_definitions(-D_WIN32)
+    include_directories($ENV{WMV_SDK_BASEDIR}/include)
+  add_definitions(-D_WINDOWS)
+  add_definitions(-D_WIN32)
 endif()
 
 add_library(cximage STATIC ${SRC_FILES})
 set_property(TARGET cximage PROPERTY FOLDER "3rdparty libraries")
 target_link_libraries(cximage $ENV{WMV_SDK_BASEDIR}/lib/jpeg.lib 
-						$ENV{WMV_SDK_BASEDIR}/lib/libpng.lib)
+            $ENV{WMV_SDK_BASEDIR}/lib/libpng.lib)
 
 #if(WIN32)
 #  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")

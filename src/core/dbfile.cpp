@@ -12,10 +12,10 @@ DBFile::DBFile() :
 
 DBFile::Iterator DBFile::begin()
 {
-	return Iterator(*this, 0);
+  return Iterator(*this, 0);
 }
 DBFile::Iterator DBFile::end()
 {
-	return Iterator(*this, recordCount);
+  return Iterator(*this, recordCount);
 }
 

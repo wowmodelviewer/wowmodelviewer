@@ -26,7 +26,7 @@ class Bone;
 struct Particle
 {
   glm::vec3 pos, speed, down, origin, dir;
-  glm::vec3	corners[4];
+  glm::vec3 corners[4];
   glm::vec3 tpos;
   float size, life, maxlife;
   size_t tile;

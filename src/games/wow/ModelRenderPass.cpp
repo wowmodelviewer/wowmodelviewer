@@ -49,7 +49,7 @@ void ModelRenderPass::deinit()
     glEnable(GL_LIGHTING);
 
   //if (billboard)
-  //	glPopMatrix();
+  //  glPopMatrix();
 
   if (cull)
     glDisable(GL_CULL_FACE);
@@ -143,7 +143,7 @@ bool ModelRenderPass::init()
   
   switch (blendmode)
   {
-  case BM_OPAQUE:	         // 0
+  case BM_OPAQUE:           // 0
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     break;
   case BM_TRANSPARENT:      // 1
@@ -162,15 +162,15 @@ bool ModelRenderPass::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     break;
-  case BM_MODULATE:	         // 5
+  case BM_MODULATE:           // 5
     glEnable(GL_BLEND);
     glBlendFunc(GL_DST_COLOR, GL_ZERO);
     break;
-  case BM_MODULATEX2:	    // 6
+  case BM_MODULATEX2:      // 6
     glEnable(GL_BLEND);
     glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
     break;
-  case BM_7:	               // 7, new in WoD
+  case BM_7:                 // 7, new in WoD
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     break;

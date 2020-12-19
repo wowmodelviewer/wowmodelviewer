@@ -120,8 +120,8 @@ namespace core
       int m_versionMinorNumber;
       int m_versionRevNumber;
 
-      std::wstring	m_appName;
-      std::wstring	m_buildName;
+      std::wstring m_appName;
+      std::wstring m_buildName;
       std::wstring m_platform;
 
       bool m_isBetaVersion;

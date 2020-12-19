@@ -24,8 +24,8 @@ class BaseCanvas
       m_p_model = m;
     }
 
-	private:
-		WoWModel *m_p_model;
+  private:
+    WoWModel *m_p_model;
 };
 
 

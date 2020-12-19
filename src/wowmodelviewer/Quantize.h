@@ -23,7 +23,7 @@
  */
 
 #ifndef _WINDOWS
-	#include "ximage.h"
+  #include "ximage.h"
 #endif
 
 
@@ -64,6 +64,6 @@ protected:
         NODE** pReducibleNodes);
     void DeleteTree (NODE** ppNode);
     void GetPaletteColors (NODE* pTree, RGBQUAD* prgb, UINT* pIndex, UINT* pSum);
-	BYTE GetPixelIndex(long x,long y, int nbit, long effwdt, BYTE *pimage);
+  BYTE GetPixelIndex(long x,long y, int nbit, long effwdt, BYTE *pimage);
 };
 

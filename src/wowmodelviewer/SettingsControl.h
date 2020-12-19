@@ -29,21 +29,21 @@ enum
 
 class SettingsControl: public wxWindow
 {
-	DECLARE_CLASS(SettingsControl)
+  DECLARE_CLASS(SettingsControl)
     DECLARE_EVENT_TABLE()
 
-	wxNotebook *notebook;
-	GeneralSettings *page1;
-	DisplaySettings *page2;
-	ExportSettings *page3;
+  wxNotebook *notebook;
+  GeneralSettings *page1;
+  DisplaySettings *page2;
+  ExportSettings *page3;
 
 public:
 
-	SettingsControl(wxWindow* parent, wxWindowID id);
-	~SettingsControl();
-	
-	void Open();
-	void Close();
+  SettingsControl(wxWindow* parent, wxWindowID id);
+  ~SettingsControl();
+  
+  void Open();
+  void Close();
 };
 
 #endif

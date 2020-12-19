@@ -3,19 +3,19 @@
 
 //***********************************************************************//
 //                                                                       //
-//		$Author:		John Steele		darjk@wowmodelviewer.org		 //
-//																		 //
-//		$Program:		Camera Class									 //
-//																		 //
-//		$Description:	Just a standard Camera Class Object to simplify  //
-//						the viewport									 //
-//																		 //
-//		$Date:			25/01/07										 //
+//    $Author:    John Steele    darjk@wowmodelviewer.org     //
+//                                     //
+//    $Program:    Camera Class                   //
+//                                     //
+//    $Description:  Just a standard Camera Class Object to simplify  //
+//            the viewport                   //
+//                                     //
+//    $Date:      25/01/07                     //
 //                                                                       //
 //***********************************************************************//
 
 
-//#include <gl\glut.h>		// Need to include it here because the GL* types are required
+//#include <gl\glut.h>    // Need to include it here because the GL* types are required
 
 #include "glm/glm.hpp"
 
@@ -33,8 +33,8 @@ class CCamera {
 
   public:
   CCamera();
-  void Reset();	//inits the default values)
-  void Setup();	// Puts the camera into place.
+  void Reset();  //inits the default values)
+  void Setup();  // Puts the camera into place.
 
   void Move(glm::vec3 Direction);
   void RotateX(float Angle);

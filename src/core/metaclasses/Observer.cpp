@@ -98,11 +98,11 @@ void Observer::treatEvent(Event * event)
 
 void Observer::addObservable(Observable * obs)
 {
-	std::list<Observable *>::iterator l_toRemove = findObservable(obs);
-	if(l_toRemove == m_observableList.end())
-	{
-		m_observableList.push_back(obs);
-	}
+  std::list<Observable *>::iterator l_toRemove = findObservable(obs);
+  if(l_toRemove == m_observableList.end())
+  {
+    m_observableList.push_back(obs);
+  }
 }
 
 void Observer::removeObservable(Observable * obs)
@@ -112,20 +112,20 @@ void Observer::removeObservable(Observable * obs)
 
 std::list<Observable *>::iterator Observer::findObservable(Observable * obs)
 {
-	std::list<Observable *>::iterator l_result = m_observableList.end();
+  std::list<Observable *>::iterator l_result = m_observableList.end();
 
     if(obs != 0)
-	{
-		std::list<Observable *>::iterator l_it;
-		for(l_it = m_observableList.begin() ; l_it != m_observableList.end() ; l_it++)
-		{
-			if(*l_it == obs)
-			{
-				l_result = l_it;
-				break;
-			}
-		}
-	}
+  {
+    std::list<Observable *>::iterator l_it;
+    for(l_it = m_observableList.begin() ; l_it != m_observableList.end() ; l_it++)
+    {
+      if(*l_it == obs)
+      {
+        l_result = l_it;
+        break;
+      }
+    }
+  }
 
-	return l_result;
+  return l_result;
 }

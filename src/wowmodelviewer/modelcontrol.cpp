@@ -20,36 +20,36 @@ IMPLEMENT_CLASS(ModelControl, wxWindow)
 BEGIN_EVENT_TABLE(ModelControl, wxWindow)
   EVT_TREE_ITEM_ACTIVATED(ID_MODEL_GEOSETS, ModelControl::OnList)
 
-	EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
-	EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
+  EVT_COMBOBOX(ID_MODEL_NAME, ModelControl::OnCombo)
+  EVT_COMBOBOX(ID_MODEL_LOD, ModelControl::OnCombo)
 
-	EVT_CHECKBOX(ID_MODEL_BONES, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_BOUNDS, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_RENDER, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
-	EVT_CHECKBOX(ID_MODEL_PC_REPLACE, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_BONES, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_BOUNDS, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_RENDER, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_WIREFRAME, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_PARTICLES, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_TEXTURE, ModelControl::OnCheck)
+  EVT_CHECKBOX(ID_MODEL_PC_REPLACE, ModelControl::OnCheck)
 
-	EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
-	EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
-	EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
+  EVT_COMMAND_SCROLL(ID_MODEL_ALPHA, ModelControl::OnSlider)
+  EVT_COMMAND_SCROLL(ID_MODEL_SCALE, ModelControl::OnSlider)
+  EVT_TEXT_ENTER(ID_MODEL_SIZE, ModelControl::OnEnter)
 
-	EVT_TEXT_ENTER(ID_MODEL_X, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_Y, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_Z, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_X, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_Y, ModelControl::OnEnter)
-	EVT_TEXT_ENTER(ID_MODEL_ROT_Z, ModelControl::OnEnter)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_11, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_12, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_13, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_13, ModelControl::OnColourChange)
-	EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_13, ModelControl::OnColourChange)
+  EVT_TEXT_ENTER(ID_MODEL_X, ModelControl::OnEnter)
+  EVT_TEXT_ENTER(ID_MODEL_Y, ModelControl::OnEnter)
+  EVT_TEXT_ENTER(ID_MODEL_Z, ModelControl::OnEnter)
+  EVT_TEXT_ENTER(ID_MODEL_ROT_X, ModelControl::OnEnter)
+  EVT_TEXT_ENTER(ID_MODEL_ROT_Y, ModelControl::OnEnter)
+  EVT_TEXT_ENTER(ID_MODEL_ROT_Z, ModelControl::OnEnter)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_11, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_11, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_11, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_12, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_12, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_12, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_START_13, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_MID_13, ModelControl::OnColourChange)
+  EVT_COLOURPICKER_CHANGED(ID_MODEL_PC_END_13, ModelControl::OnColourChange)
 END_EVENT_TABLE()
 
 
@@ -61,10 +61,10 @@ END_EVENT_TABLE()
 // Render
 // Geosets
 // Future Additions:
-//		- Pos
-//		- Rotation
-//		- Scale
-//		- Attach model
+//    - Pos
+//    - Rotation
+//    - Scale
+//    - Attach model
 
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
  : wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0,  wxT("ModelControlFrame"))
@@ -262,93 +262,93 @@ ModelControl::~ModelControl()
 // Iterates through all the models counting and creating a list
 void ModelControl::RefreshModel(Attachment *root)
 {
-	try {
-		attachments.clear();
+  try {
+    attachments.clear();
 
-		WoWModel *m = static_cast<WoWModel*>(root->model());
-		if (m) {
-		//	wxASSERT(m);
-			attachments.push_back(root);
-			if (!init)
-				UpdateModel(root);
-			LOG_INFO << "ModelControl Refresh: Adding Model...";
-		}
-		
-		for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
-			//m = NULL;
-			m = static_cast<WoWModel*>((*it)->model());
-			if (m) {
-				attachments.push_back((*it));
-				if (!init)
-					UpdateModel((*it));
-				LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 1...";
-			}
+    WoWModel *m = static_cast<WoWModel*>(root->model());
+    if (m) {
+    //  wxASSERT(m);
+      attachments.push_back(root);
+      if (!init)
+        UpdateModel(root);
+      LOG_INFO << "ModelControl Refresh: Adding Model...";
+    }
+    
+    for (std::vector<Attachment *>::iterator it=root->children.begin(); it!=root->children.end(); ++it) {
+      //m = NULL;
+      m = static_cast<WoWModel*>((*it)->model());
+      if (m) {
+        attachments.push_back((*it));
+        if (!init)
+          UpdateModel((*it));
+        LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 1...";
+      }
 
-			for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
-				m = static_cast<WoWModel*>((*it2)->model());
-				if (m) {
-					//models.push_back(m);
-					attachments.push_back((*it2));
-					if (!init)
-						UpdateModel((*it2));
-					LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 2...";
-				}
+      for (std::vector<Attachment *>::iterator it2=(*it)->children.begin(); it2!=(*it)->children.end(); ++it2) {
+        m = static_cast<WoWModel*>((*it2)->model());
+        if (m) {
+          //models.push_back(m);
+          attachments.push_back((*it2));
+          if (!init)
+            UpdateModel((*it2));
+          LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 2...";
+        }
 
-				for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
-					m = static_cast<WoWModel*>((*it3)->model());
-					if (m) {
-						//models.push_back(m);
-						attachments.push_back((*it3));
-						if (!init)
-							UpdateModel((*it3));
-						LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 3...";
-					}
-				}
-			}
-		}
+        for (std::vector<Attachment *>::iterator it3=(*it2)->children.begin(); it3!=(*it2)->children.end(); ++it3) {
+          m = static_cast<WoWModel*>((*it3)->model());
+          if (m) {
+            //models.push_back(m);
+            attachments.push_back((*it3));
+            if (!init)
+              UpdateModel((*it3));
+            LOG_INFO << "ModelControl Refresh: Adding Attachment" << m->name() << "at level 3...";
+          }
+        }
+      }
+    }
 
-		// update combo box with the list of models?
-		wxString tmp;
-		modelname->Clear();
-		for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
-			m = dynamic_cast<WoWModel*>((*it)->model());
-			if (m) {
-				tmp = m->name().toStdWString();
-				modelname->Append(tmp.AfterLast('\\'));
-			}
-		}
+    // update combo box with the list of models?
+    wxString tmp;
+    modelname->Clear();
+    for (std::vector<Attachment*>::iterator it=attachments.begin(); it!=attachments.end(); ++it) {
+      m = dynamic_cast<WoWModel*>((*it)->model());
+      if (m) {
+        tmp = m->name().toStdWString();
+        modelname->Append(tmp.AfterLast('\\'));
+      }
+    }
 
-		LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
+    LOG_INFO << "ModelControl Refresh: Found" << attachments.size() << "Models...";
 
-		if (modelname->GetCount() > 0)
-			modelname->SetSelection(0);
+    if (modelname->GetCount() > 0)
+      modelname->SetSelection(0);
 
-	} catch( ... ) {
-		LOG_ERROR << "Problem occured in ModelControl::RefreshModel(Attachment *)";
-	}
+  } catch( ... ) {
+    LOG_ERROR << "Problem occured in ModelControl::RefreshModel(Attachment *)";
+  }
 
 }
 
 void ModelControl::UpdateModel(Attachment *a)
 {
-	if (!a)
-		return;
+  if (!a)
+    return;
 
-	init = false;
+  init = false;
 
-	WoWModel *m = NULL;
-	if (a->model())
-		m = static_cast<WoWModel*>(a->model());
+  WoWModel *m = NULL;
+  if (a->model())
+    m = static_cast<WoWModel*>(a->model());
 
-	if (m) {
-		init = true;
-		model = m;
-		att = a;
+  if (m) {
+    init = true;
+    model = m;
+    att = a;
 
-		modelname->SetLabel(m->name().toStdWString());
+    modelname->SetLabel(m->name().toStdWString());
 
-		Update();
-	}
+    Update();
+  }
 }
 
 void ModelControl::Update()
@@ -551,47 +551,47 @@ void ModelControl::OnCheck(wxCommandEvent &event)
 
 void ModelControl::OnCombo(wxCommandEvent &event)
 {
-	if (!init)
-		return;
+  if (!init)
+    return;
 
-	int id = event.GetId();
+  int id = event.GetId();
 
-	if (id == ID_MODEL_LOD) {
-//		int value = event.GetInt();
+  if (id == ID_MODEL_LOD) {
+//    int value = event.GetInt();
 //
-//		MPQFile f(model->name);
-//		if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
-//			LOG_ERROR << "Unable to open MPQFile:" << model->name.c_str();
-//			f.close();
-//			return;
-//		}
+//    MPQFile f(model->name);
+//    if (f.isEof() || (f.getSize() < sizeof(ModelHeader))) {
+//      LOG_ERROR << "Unable to open MPQFile:" << model->name.c_str();
+//      f.close();
+//      return;
+//    }
 //
-//		model->showModel = false;
-//		model->setLOD(&f, value);
-//		model->showModel = true;
+//    model->showModel = false;
+//    model->setLOD(&f, value);
+//    model->showModel = true;
 //
-//		/*
-//		for (size_t i=0; i<model->geosets.size(); i++) {
-//			int id = model->geosets[i].id;
-//			model->showGeosets[i] = (id==0);
-//		}
+//    /*
+//    for (size_t i=0; i<model->geosets.size(); i++) {
+//      int id = model->geosets[i].id;
+//      model->showGeosets[i] = (id==0);
+//    }
 //
-//		cc->RefreshModel();
-//		*/
+//    cc->RefreshModel();
+//    */
 //
-//		f.close();
-	} else if (id == ID_MODEL_NAME) {
-		/* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
-		int CurrentSelection = modelname->GetCurrentSelection();
-		if (CurrentSelection < (int)attachments.size()) {
-			UpdateModel(attachments[CurrentSelection]);
-			att = attachments[CurrentSelection];
-			model = static_cast<WoWModel*>(attachments[CurrentSelection]->model());
-			
-			animControl->UpdateModel(model);
-			modelname->SetSelection(CurrentSelection);
-		}
-	}
+//    f.close();
+  } else if (id == ID_MODEL_NAME) {
+    /* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
+    int CurrentSelection = modelname->GetCurrentSelection();
+    if (CurrentSelection < (int)attachments.size()) {
+      UpdateModel(attachments[CurrentSelection]);
+      att = attachments[CurrentSelection];
+      model = static_cast<WoWModel*>(attachments[CurrentSelection]->model());
+      
+      animControl->UpdateModel(model);
+      modelname->SetSelection(CurrentSelection);
+    }
+  }
 }
 
 void ModelControl::OnList(wxTreeEvent &event)
@@ -623,16 +623,16 @@ void ModelControl::OnList(wxTreeEvent &event)
 
 void ModelControl::OnSlider(wxScrollEvent &event)
 {
-	if (!init || !model)
-		return;
+  if (!init || !model)
+    return;
 
-	int id = event.GetId();
-	if (id == ID_MODEL_ALPHA) {
-		model->alpha = event.GetInt() / 100.0f;
-	} else if (id == ID_MODEL_SCALE) {
-		att->scale = event.GetInt() / 100.0f;
-		txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
-	}
+  int id = event.GetId();
+  if (id == ID_MODEL_ALPHA) {
+    model->alpha = event.GetInt() / 100.0f;
+  } else if (id == ID_MODEL_SCALE) {
+    att->scale = event.GetInt() / 100.0f;
+    txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
+  }
 }
 
 Vec4D ModelControl::fromColWidget(wxColour col)
@@ -763,28 +763,28 @@ bool ModelControl::IsReplacingParticleColors()
 ScrWindow::ScrWindow(const wxString& title)
        : wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(512, 512))
 {
-	wxImage::AddHandler(new wxPNGHandler);
-	sw = new wxScrolledWindow(this);
+  wxImage::AddHandler(new wxPNGHandler);
+  sw = new wxScrolledWindow(this);
 
-	wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
-	sb = new wxStaticBitmap(sw, -1, bmp);
+  wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
+  sb = new wxStaticBitmap(sw, -1, bmp);
 
-	int width = bmp.GetWidth();
-	int height = bmp.GetHeight();
+  int width = bmp.GetWidth();
+  int height = bmp.GetHeight();
 
-	CreateStatusBar();
-	wxString sbarText;
-	sbarText.Printf(wxT("%ix%i"), width, height);
-	SetStatusText(sbarText);
+  CreateStatusBar();
+  wxString sbarText;
+  sbarText.Printf(wxT("%ix%i"), width, height);
+  SetStatusText(sbarText);
 
-	sw->SetScrollbars(10, 10, width/10, height/10);
-//	sw->Scroll(50,10);
+  sw->SetScrollbars(10, 10, width/10, height/10);
+//  sw->Scroll(50,10);
 
-	Center();
+  Center();
 }
 
 ScrWindow::~ScrWindow()
 {
-	sb->Destroy();
-	sw->Destroy();
+  sb->Destroy();
+  sw->Destroy();
 }

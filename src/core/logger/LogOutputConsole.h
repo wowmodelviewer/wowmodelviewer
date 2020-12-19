@@ -61,42 +61,42 @@ namespace WMVLog
 {
 class _LOGOUTPUTCONSOLE_API_ LogOutputConsole : public LogOutput
 {
-	public :
-		// Constants / Enums
-		
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+  public :
+    // Constants / Enums
+    
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
     void write(const QString & message);
-		
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-		// friend class declarations
-	
+    
+    // Members
+    
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+    // friend class declarations
+  
 };
 
 // static members definition

@@ -59,49 +59,49 @@ class Observable;
 
 class _OBSERVER_API_ Observer
 {
-	public :
-		// Constants / Enums
+  public :
+    // Constants / Enums
 
-		// Constructors
-		Observer();
+    // Constructors
+    Observer();
 
-		// Destructors
-		virtual ~Observer();
+    // Destructors
+    virtual ~Observer();
 
-		// Methods
+    // Methods
 
-	protected :
-		// Constants / Enums
+  protected :
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
-		virtual void onDestroyEvent() {}
-		virtual void onEvent(Event *) {}
+    // Methods
+    virtual void onDestroyEvent() {}
+    virtual void onEvent(Event *) {}
 
-		// Members
+    // Members
 
-	private :
-		// Constants / Enums
+  private :
+    // Constants / Enums
 
-		// Constructors
+    // Constructors
 
-		// Destructors
+    // Destructors
 
-		// Methods
-		void treatEvent(Event *);
-		void addObservable(Observable *);
-		void removeObservable(Observable *);
+    // Methods
+    void treatEvent(Event *);
+    void addObservable(Observable *);
+    void removeObservable(Observable *);
 
-		std::list<Observable *>::iterator findObservable(Observable *);
+    std::list<Observable *>::iterator findObservable(Observable *);
 
-		// Members
-		std::list<Observable *> m_observableList;
+    // Members
+    std::list<Observable *> m_observableList;
 
-		// friend class declarations
-		friend class Observable;
+    // friend class declarations
+    friend class Observable;
 
 };
 

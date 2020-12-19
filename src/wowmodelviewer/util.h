@@ -47,9 +47,9 @@ extern wxString locales[];
 
 // Slashes for Pathing
 #ifdef _WINDOWS
-	#define SLASH wxT('\\')
+  #define SLASH wxT('\\')
 #else
-	#define SLASH wxT('/')
+  #define SLASH wxT('/')
 #endif
 
 float frand();

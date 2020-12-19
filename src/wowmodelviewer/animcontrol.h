@@ -13,7 +13,7 @@
 extern float animSpeed;
 
 // AnimationData.dbc
-#define	ANIM_STAND	0
+#define ANIM_STAND  0
 
 typedef int GeosetNum;
 

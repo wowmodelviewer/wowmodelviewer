@@ -70,32 +70,32 @@ core::GlobalSettings::GlobalSettings()
 
  
   /*
-		--==List of Build Name ideas==--	(Feel free to add!)
-		Bouncing Baracuda
-		Hoppin Jalapeno
-		Stealthed Rogue
-		Deadly Druid
-		Killer Krakken
-		Crazy Kaelthas
-		Lonely Mastiff
-		Cold Kelthuzad
-		Jiggly Jaina
-		Vashj's Folly
-		Epic Win
-		Epic Lose
-		Lord Kezzak
-		Perky Pug
-		Great-father Winter
+    --==List of Build Name ideas==--  (Feel free to add!)
+    Bouncing Baracuda
+    Hoppin Jalapeno
+    Stealthed Rogue
+    Deadly Druid
+    Killer Krakken
+    Crazy Kaelthas
+    Lonely Mastiff
+    Cold Kelthuzad
+    Jiggly Jaina
+    Vashj's Folly
+    Epic Win
+    Epic Lose
+    Lord Kezzak
+    Perky Pug
+    Great-father Winter
 
 
-		--== Used Build Names ==--			(So we don't repeat...)
-		Wascally Wabbit
-		Gnome Punter
-		Fickle Felguard
-		Demented Deathwing
-		Pickled Herring
-		Windrunner's Lament
-		Lost Lich King
+    --== Used Build Names ==--      (So we don't repeat...)
+    Wascally Wabbit
+    Gnome Punter
+    Fickle Felguard
+    Demented Deathwing
+    Pickled Herring
+    Windrunner's Lament
+    Lost Lich King
     Skeer the Bloodseeker
     Thrall's revenge
     Trip in Draenor

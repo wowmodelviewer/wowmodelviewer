@@ -12,10 +12,10 @@ class WoWModel;
 class WMOModelInstance {
   public:
   // header
-  glm::vec3 pos;		// Position
-  float w;		// W for Quat Rotation
-  glm::vec3 dir;		// Direction for Quat Rotation
-  float sc;		// Scale Factor
+  glm::vec3 pos;    // Position
+  float w;    // W for Quat Rotation
+  glm::vec3 dir;    // Direction for Quat Rotation
+  float sc;    // Scale Factor
   unsigned int d1;
 
   WoWModel *model;

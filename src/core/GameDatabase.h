@@ -49,8 +49,8 @@ namespace core
       type(""),
       isKey(false),
       needIndex(false),
-	  arraySize(1),
-	  id(0)
+    arraySize(1),
+    id(0)
     {}
 
     virtual ~FieldStructure() {}

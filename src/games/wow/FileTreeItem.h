@@ -12,7 +12,7 @@
 
 class FileTreeItem
 {
-	public:
+  public:
     QString displayName;
 
     int color;

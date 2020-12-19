@@ -231,7 +231,7 @@ ModelViewer::ModelViewer()
   {
     SetIcon(wxICON(IDI_ICON1));
     SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-#ifndef	_LINUX // buggy
+#ifndef  _LINUX // buggy
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 #endif
 
@@ -926,7 +926,7 @@ void ModelViewer::LoadLayout()
 
       // If character panel is showing,  hide it
       interfaceManager.GetPane(charControl).Show(isChar);
-#ifndef	_LINUX // buggy
+#ifndef  _LINUX // buggy
       interfaceManager.Update();
 #endif
       LOG_INFO << "GUI Layout loaded from previous session.";
@@ -1271,7 +1271,7 @@ ModelViewer::~ModelViewer()
   // If we have a canvas (which we always should)
   // Stop rendering, give more power back to the CPU to close this sucker down!
   //if (canvas)
-  //	canvas->timer.Stop();
+  //  canvas->timer.Stop();
 
   // Save current layout
   SaveLayout();
@@ -1658,7 +1658,7 @@ void ModelViewer::OnCamMenu(wxCommandEvent &event)
     m->rot.x = 20.0f;
   }
 
-  //viewControl->Update();	
+  //viewControl->Update();  
 }
 
 // Menu button press events
@@ -1669,7 +1669,7 @@ void ModelViewer::OnSetColor(wxCommandEvent &event)
     canvas->vecBGColor = DoSetColor(canvas->vecBGColor);
     canvas->drawBackground = false;
     //} else if (id==ID_LT_COLOR) {
-    //	canvas->ltColor = DoSetColor(canvas->ltColor);
+    //  canvas->ltColor = DoSetColor(canvas->ltColor);
   }
 }
 
@@ -1712,9 +1712,9 @@ void ModelViewer::OnViewLog(wxCommandEvent &event)
   int ID = event.GetId();
   if (ID == ID_FILE_VIEWLOG) {
     wxString logPath = cfgPath.BeforeLast(SLASH) + SLASH + wxT("log.txt");
-#ifdef	_WINDOWS
+#ifdef  _WINDOWS
     wxExecute(wxT("notepad.exe ") + logPath);
-#elif	_MAC
+#elif  _MAC
     wxExecute(wxT("/Applications/TextEdit.app/Contents/MacOS/TextEdit ")+logPath);
 #endif
   }
@@ -1932,7 +1932,7 @@ void ModelViewer::OnSave(wxCommandEvent &event)
       // Save the folder location for next time
       dir.SetPath(dialog.GetPath());
 
-      // Show our exporter window			
+      // Show our exporter window      
       animExporter->Init(dialog.GetPath());
       animExporter->Show(true);
     }
@@ -2319,31 +2319,31 @@ void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 {
   switch (event.GetId())
   {
-    case ID_CANVASS120:	SetCanvasSize(120, 120);
+    case ID_CANVASS120:  SetCanvasSize(120, 120);
       break;
-    case ID_CANVASS512:	SetCanvasSize(512, 512);
+    case ID_CANVASS512:  SetCanvasSize(512, 512);
       break;
-    case ID_CANVASS1024:	SetCanvasSize(1024, 1024);
+    case ID_CANVASS1024:  SetCanvasSize(1024, 1024);
       break;
-    case ID_CANVASF480:	SetCanvasSize(640, 480);
+    case ID_CANVASF480:  SetCanvasSize(640, 480);
       break;
-    case ID_CANVASF600:	SetCanvasSize(800, 600);
+    case ID_CANVASF600:  SetCanvasSize(800, 600);
       break;
-    case ID_CANVASF768:	SetCanvasSize(1024, 768);
+    case ID_CANVASF768:  SetCanvasSize(1024, 768);
       break;
-    case ID_CANVASF864:	SetCanvasSize(1152, 864);
+    case ID_CANVASF864:  SetCanvasSize(1152, 864);
       break;
-    case ID_CANVASF1200:	SetCanvasSize(1600, 1200);
+    case ID_CANVASF1200:  SetCanvasSize(1600, 1200);
       break;
-    case ID_CANVASW480:	SetCanvasSize(864, 480);
+    case ID_CANVASW480:  SetCanvasSize(864, 480);
       break;
-    case ID_CANVASW720:	SetCanvasSize(1280, 720);
+    case ID_CANVASW720:  SetCanvasSize(1280, 720);
       break;
-    case ID_CANVASW1080:	SetCanvasSize(1920, 1080);
+    case ID_CANVASW1080:  SetCanvasSize(1920, 1080);
       break;
-    case ID_CANVASM768:	SetCanvasSize(1280, 768);
+    case ID_CANVASM768:  SetCanvasSize(1280, 768);
       break;
-    case ID_CANVASM1200:	SetCanvasSize(1900, 1200);
+    case ID_CANVASM1200:  SetCanvasSize(1900, 1200);
       break;
   }
 }

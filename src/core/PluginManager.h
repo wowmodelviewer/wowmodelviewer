@@ -58,14 +58,14 @@
 
 class _PLUGINMANAGER_API_ PluginManager : public Container<Plugin>
 {
-	public :
-		// Constants / Enums
-		
-		// Constructors
+  public :
+    // Constants / Enums
+    
+    // Constructors
 
-		// Destructors
-	
-		// Methods
+    // Destructors
+  
+    // Methods
     static PluginManager & instance()
     {
       if(PluginManager::m_instance == 0)
@@ -80,36 +80,36 @@ class _PLUGINMANAGER_API_ PluginManager : public Container<Plugin>
     // overloaded from Component method
     void doPrint();
 
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
+    // Members
+    
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors
     // to avoid unwanted instantiation as this class is a Singleton
     PluginManager();
     PluginManager(PluginManager &);
 
-		// Destructors
-	
-		// Methods
+    // Destructors
+  
+    // Methods
 
     // Members
     static PluginManager * m_instance;
 
-		// friend class declarations
-	
+    // friend class declarations
+  
 };
 
 // static members definition

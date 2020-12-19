@@ -53,41 +53,41 @@ class FileDownloader;
 class UpdateManager : public QMainWindow
 {
     Q_OBJECT
-	public :
-		// Constants / Enums
-		
-		// Constructors
+  public :
+    // Constants / Enums
+    
+    // Constructors
     UpdateManager();
-	
-		// Destructors
+  
+    // Destructors
     ~UpdateManager();
-	
-		// Methods
+  
+    // Methods
 
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+    // Members
+    
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
     void updateTable();
     void resizeTable();
-		
+    
   private slots:
     void fileDownloaded(QString &);
     void updateLastVersionInfo();
@@ -99,9 +99,9 @@ class UpdateManager : public QMainWindow
     QTableWidget * m_table;
     FileDownloader * m_fileDownloader;
     VersionManager * m_versionManager;
-		
-		// friend class declarations
-	
+    
+    // friend class declarations
+  
 };
 
 // static members definition

@@ -12,20 +12,20 @@
 The fields referenced from the MOPR chunk indicate portals leading out of the WMO group in question.
 For the "Number of batches" fields, A + B + C == the total number of batches in the WMO group (in the MOBA chunk). This might be some kind of LOD thing, or just separating the batches into different types/groups...?
 Flags: always contain more information than flags in MOGI. I suppose MOGI only deals with topology/culling, while flags here also include rendering info.
-Flag		Meaning
-0x1 		something with bounding
-0x4 		Has vertex colors (MOCV chunk)
-0x8 		Outdoor
+Flag    Meaning
+0x1     something with bounding
+0x4     Has vertex colors (MOCV chunk)
+0x8     Outdoor
 0x40
-0x200 		Has lights  (MOLR chunk)
+0x200     Has lights  (MOLR chunk)
 0x400
-0x800 		Has doodads (MODR chunk)
-0x1000 	        Has water   (MLIQ chunk)
-0x2000		Indoor
+0x800     Has doodads (MODR chunk)
+0x1000           Has water   (MLIQ chunk)
+0x2000    Indoor
 0x8000
-0x20000		Parses some additional chunk. No idea what it is. Oo
-0x40000	        Show skybox
-0x80000		isNotOcean, LiquidType related, see below in the MLIQ chunk.
+0x20000    Parses some additional chunk. No idea what it is. Oo
+0x40000          Show skybox
+0x80000    isNotOcean, LiquidType related, see below in the MLIQ chunk.
 */
 struct WMOGroupHeader {
   int nameStart; // Group name (offset into MOGN chunk)
@@ -115,38 +115,38 @@ void WMOGroup::initDisplayList()
 
     if (fourcc == "MOPY") {
 
-      //			Material info for triangles, two bytes per triangle. So size of this chunk in bytes is twice the number of triangles in the WMO group.
-      //			Offset	Type	Description
-      //			0x00	uint8	Flags?
-      //			0x01	uint8	Material ID
-      //			struct SMOPoly // 03-29-2005 By ObscuR ( Maybe not accurate :p )
-      //			{
-      //				enum
-      //				{
-      //					F_NOCAMCOLLIDE,
-      //					F_DETAIL,
-      //					F_COLLISION,
-      //					F_HINT,
-      //					F_RENDER,
-      //					F_COLLIDE_HIT,
-      //				};
-      //			000h  uint8 flags;
-      //			001h  uint8 mtlId;
-      //			002h
-      //			};
+      //      Material info for triangles, two bytes per triangle. So size of this chunk in bytes is twice the number of triangles in the WMO group.
+      //      Offset  Type  Description
+      //      0x00  uint8  Flags?
+      //      0x01  uint8  Material ID
+      //      struct SMOPoly // 03-29-2005 By ObscuR ( Maybe not accurate :p )
+      //      {
+      //        enum
+      //        {
+      //          F_NOCAMCOLLIDE,
+      //          F_DETAIL,
+      //          F_COLLISION,
+      //          F_HINT,
+      //          F_RENDER,
+      //          F_COLLIDE_HIT,
+      //        };
+      //      000h  uint8 flags;
+      //      001h  uint8 mtlId;
+      //      002h
+      //      };
       //
-      //			Frequently used flags are 0x20 and 0x40, but I have no idea what they do.
-      //			Flag	Description
-      //			0x00	?
-      //			0x01	?
-      //			0x04	no collision
-      //			0x08	?
-      //			0x20	?
-      //			0x40	?
-      //			Material ID specifies an index into the material table in the root WMO file's MOMT chunk. Some of the triangles have 0xFF for the material ID, I skip these. (but there might very well be a use for them?)
-      //			The triangles with 0xFF Material ID seem to be a simplified mesh. Like for collision detection or something like that. At least stairs are flattened to ramps if you only display these polys. --shlainn 7 Jun 2009
-      //			0xFF representing -1 is used for collision-only triangles. They aren't rendered but have collision. Problem with it: WoW seems to cast and reflect light on them. Its a bug in the engine. --schlumpf_ 20:40, 7 June 2009 (CEST)
-      //			Triangles stored here are more-or-less pre-sorted by texture, so it's ok to draw them sequentially.
+      //      Frequently used flags are 0x20 and 0x40, but I have no idea what they do.
+      //      Flag  Description
+      //      0x00  ?
+      //      0x01  ?
+      //      0x04  no collision
+      //      0x08  ?
+      //      0x20  ?
+      //      0x40  ?
+      //      Material ID specifies an index into the material table in the root WMO file's MOMT chunk. Some of the triangles have 0xFF for the material ID, I skip these. (but there might very well be a use for them?)
+      //      The triangles with 0xFF Material ID seem to be a simplified mesh. Like for collision detection or something like that. At least stairs are flattened to ramps if you only display these polys. --shlainn 7 Jun 2009
+      //      0xFF representing -1 is used for collision-only triangles. They aren't rendered but have collision. Problem with it: WoW seems to cast and reflect light on them. Its a bug in the engine. --schlumpf_ 20:40, 7 June 2009 (CEST)
+      //      Triangles stored here are more-or-less pre-sorted by texture, so it's ok to draw them sequentially.
 
       // materials per triangle
       nTriangles = (uint32)(size / 2);
@@ -154,13 +154,13 @@ void WMOGroup::initDisplayList()
       gf.read(materials, size);
     }
     else if (fourcc == "MOVI") {
-      //			Vertex indices for triangles. Three 16-bit integers per triangle, that are indices into the vertex list. The numbers specify the 3 vertices for each triangle, their order makes it possible to do backface culling.
+      //      Vertex indices for triangles. Three 16-bit integers per triangle, that are indices into the vertex list. The numbers specify the 3 vertices for each triangle, their order makes it possible to do backface culling.
       nIndices = (size / 2);
       indices = new uint16[nIndices];
       gf.read(indices, nIndices * 2);
     }
     else if (fourcc == "MOVT") {
-      //			Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
+      //      Vertices chunk. 3 floats per vertex, the coordinates are in (X,Z,-Y) order. It's likely that WMOs and models (M2s) were created in a coordinate system with the Z axis pointing up and the Y axis into the screen, whereas in OpenGL, the coordinate system used in WoWmapview the Z axis points toward the viewer and the Y axis points up. Hence the juggling around with coordinates.
       nVertices = (size / 12);
       // let's hope it's padded to 12 bytes, not 16...
       vertices = new glm::vec3[nVertices];
@@ -193,15 +193,15 @@ void WMOGroup::initDisplayList()
       gf.read(texcoords, size);
     }
     else if (fourcc == "MOLR") {
-      //			Light references, one 16-bit integer per light reference.
-      //			This is basically a list of lights used in this WMO group, the numbers are indices into the WMO root file's MOLT table.
-      //			For some WMO groups there is a large number of lights specified here, more than what a typical video card will handle at once. I wonder how they do lighting properly. Currently, I just turn on the first GL_MAX_LIGHTS and hope for the best. :(
+      //      Light references, one 16-bit integer per light reference.
+      //      This is basically a list of lights used in this WMO group, the numbers are indices into the WMO root file's MOLT table.
+      //      For some WMO groups there is a large number of lights specified here, more than what a typical video card will handle at once. I wonder how they do lighting properly. Currently, I just turn on the first GL_MAX_LIGHTS and hope for the best. :(
       nLR = (int)size / 2;
       useLights = (short*)gf.getPointer();
     }
     else if (fourcc == "MODR") {
-      //			Doodad references, one 16-bit integer per doodad.
-      //			The numbers are indices into the doodad instance table (MODD chunk) of the WMO root file. These have to be filtered to the doodad set being used in any given WMO instance.
+      //      Doodad references, one 16-bit integer per doodad.
+      //      The numbers are indices into the doodad instance table (MODD chunk) of the WMO root file. These have to be filtered to the doodad set being used in any given WMO instance.
       /*
       nDoodads = (int)(size/2);
       ddr = new short[nDoodads];
@@ -209,90 +209,90 @@ void WMOGroup::initDisplayList()
       */
     }
     else if (fourcc == "MOBN") {
-      //			Array of t_BSP_NODE.
-      //			struct t_BSP_NODE
-      //			{
-      //				short planetype;		  // unsure
-      //				short children[2];		  // index of bsp child node(right in this array)
-      //				unsigned short numfaces;  // num of triangle faces in  MOBR
-      //				unsigned short firstface; // index of the first triangle index(in  MOBR)
-      //				short nUnk; 		  // 0
-      //				float fDist;
-      //			};
-      //			// The numfaces and firstface define a polygon plane.
-      //													2005-4-4 by linghuye
-      //			This+BoundingBox(in wmo_root.MOGI) is used for Collision --Tigurius
+      //      Array of t_BSP_NODE.
+      //      struct t_BSP_NODE
+      //      {
+      //        short planetype;      // unsure
+      //        short children[2];      // index of bsp child node(right in this array)
+      //        unsigned short numfaces;  // num of triangle faces in  MOBR
+      //        unsigned short firstface; // index of the first triangle index(in  MOBR)
+      //        short nUnk;       // 0
+      //        float fDist;
+      //      };
+      //      // The numfaces and firstface define a polygon plane.
+      //                          2005-4-4 by linghuye
+      //      This+BoundingBox(in wmo_root.MOGI) is used for Collision --Tigurius
     }
     else if (fourcc == "MOBR") {
       // Triangle indices (in MOVI which define triangles) to describe polygon planes defined by MOBN BSP nodes.
     }
     else if (fourcc == "MOBA") {
-      //			Render batches. Records of 24 bytes.
-      //			struct SMOBatch // 03-29-2005 By ObscuR
-      //			{
-      //				enum
-      //				{
-      //					F_RENDERED
-      //				};
-      //				?? lightMap;
-      //				?? texture;
-      //				?? bx;
-      //				?? by;
-      //				?? bz;
-      //				?? tx;
-      //				?? ty;
-      //				?? tz;
-      //				?? startIndex;
-      //				?? count;
-      //				?? minIndex;
-      //				?? maxIndex;
-      //				?? flags;
-      //			};
-      //			For the enUS, enGB versions, it seems to be different from the preceding struct:
-      //			Offset	Type		Description
-      //			0x00	uint32		Some color?
-      //			0x04	uint32		Some color?
-      //			0x08	uint32		Some color?
-      //			0x0C	uint32		Start index
-      //			0x10	uint16		Number of indices
-      //			0x12	uint16		Start vertex
-      //			0x14	uint16		End vertex
-      //			0x16	uint8		0?
-      //			0x17	uint8		Texture
+      //      Render batches. Records of 24 bytes.
+      //      struct SMOBatch // 03-29-2005 By ObscuR
+      //      {
+      //        enum
+      //        {
+      //          F_RENDERED
+      //        };
+      //        ?? lightMap;
+      //        ?? texture;
+      //        ?? bx;
+      //        ?? by;
+      //        ?? bz;
+      //        ?? tx;
+      //        ?? ty;
+      //        ?? tz;
+      //        ?? startIndex;
+      //        ?? count;
+      //        ?? minIndex;
+      //        ?? maxIndex;
+      //        ?? flags;
+      //      };
+      //      For the enUS, enGB versions, it seems to be different from the preceding struct:
+      //      Offset  Type    Description
+      //      0x00  uint32    Some color?
+      //      0x04  uint32    Some color?
+      //      0x08  uint32    Some color?
+      //      0x0C  uint32    Start index
+      //      0x10  uint16    Number of indices
+      //      0x12  uint16    Start vertex
+      //      0x14  uint16    End vertex
+      //      0x16  uint8    0?
+      //      0x17  uint8    Texture
       //
-      //			Flags
-      //			0x1		Unknown
-      //			0x4		Unknown
+      //      Flags
+      //      0x1    Unknown
+      //      0x4    Unknown
 
       nBatches = (uint32)(size / 24);
       batches = new WMOBatch[nBatches];
       gf.read(batches, size);
 
-      //			// batch logging
-      //			gLog("\nWMO group #%d - %s\nVertices: %d\nTriangles: %d\nIndices: %d\nBatches: %d\n",
-      //				this->num, this->name.c_str(), nVertices, nTriangles, nTriangles*3, nBatches);
-      //			WMOBatch *ba = batches;
-      //			for (size_t i=0; i<nBatches; i++) {
-      //				gLog("Batch %d:\t", i);
+      //      // batch logging
+      //      gLog("\nWMO group #%d - %s\nVertices: %d\nTriangles: %d\nIndices: %d\nBatches: %d\n",
+      //        this->num, this->name.c_str(), nVertices, nTriangles, nTriangles*3, nBatches);
+      //      WMOBatch *ba = batches;
+      //      for (size_t i=0; i<nBatches; i++) {
+      //        gLog("Batch %d:\t", i);
       //
-      //				for (size_t j=0; j<12; j++) {
-      //					if ((j%4)==0 && j!=0) gLog("| ");
-      //					gLog("%d\t", ba[i].bytes[j]);
-      //				}
+      //        for (size_t j=0; j<12; j++) {
+      //          if ((j%4)==0 && j!=0) gLog("| ");
+      //          gLog("%d\t", ba[i].bytes[j]);
+      //        }
       //
-      //				gLog("| %d\t%d\t| %d\t%d\t", ba[i].indexStart, ba[i].indexCount, ba[i].vertexStart, ba[i].vertexEnd);
-      //				gLog("%d\t%d\t%s\n", ba[i].flags, ba[i].texture, wmo->textures[ba[i].texture].c_str());
+      //        gLog("| %d\t%d\t| %d\t%d\t", ba[i].indexStart, ba[i].indexCount, ba[i].vertexStart, ba[i].vertexEnd);
+      //        gLog("%d\t%d\t%s\n", ba[i].flags, ba[i].texture, wmo->textures[ba[i].texture].c_str());
       //
-      //			}
-      //			int l = nBatches-1;
-      //			gLog("Max index: %d\n", ba[l].indexStart + ba[l].indexCount);
+      //      }
+      //      int l = nBatches-1;
+      //      gLog("Max index: %d\n", ba[l].indexStart + ba[l].indexCount);
     }
     else if (fourcc == "MOCV") {
       size_t spos = gf.getPos();
-      //			Vertex colors, 4 bytes per vertex (BGRA), for WMO groups using indoor lighting.
-      //			I don't know if this is supposed to work together with, or replace, the lights referenced in MOLR. But it sure is the only way for the ground around the goblin smelting pot to turn red in the Deadmines. (but some corridors are, in turn, too dark - how the hell does lighting work anyway, are there lightmaps hidden somewhere?)
-      //			- I'm pretty sure WoW does not use lightmaps in it's WMOs...
-      //			After further inspection, this is it, actual pre-lit vertex colors for WMOs - vertex lighting is turned off. This is used if flag 0x2000 in the MOGI chunk is on for this group. This pretty much fixes indoor lighting in Ironforge and Undercity. The "light" lights are used only for M2 models (doodads and characters). (The "too dark" corridors seemed like that because I was looking at it in a window - in full screen it looks pretty much the same as in the game) Now THAT's progress!!!
+      //      Vertex colors, 4 bytes per vertex (BGRA), for WMO groups using indoor lighting.
+      //      I don't know if this is supposed to work together with, or replace, the lights referenced in MOLR. But it sure is the only way for the ground around the goblin smelting pot to turn red in the Deadmines. (but some corridors are, in turn, too dark - how the hell does lighting work anyway, are there lightmaps hidden somewhere?)
+      //      - I'm pretty sure WoW does not use lightmaps in it's WMOs...
+      //      After further inspection, this is it, actual pre-lit vertex colors for WMOs - vertex lighting is turned off. This is used if flag 0x2000 in the MOGI chunk is on for this group. This pretty much fixes indoor lighting in Ironforge and Undercity. The "light" lights are used only for M2 models (doodads and characters). (The "too dark" corridors seemed like that because I was looking at it in a window - in full screen it looks pretty much the same as in the game) Now THAT's progress!!!
 
       //gLog("CV: %d\n", size);
       //hascv = true;
@@ -302,11 +302,11 @@ void WMOGroup::initDisplayList()
       gf.seek(spos);
       VertexColors = new WMOVertColor[nVertices];
       gf.read(VertexColors, size);
-      //			for (size_t x=0;x<nVertices;x++){
-      //				WMOVertColor vc;
-      //				gf.read(&vc,4);
-      //				VertexColors.push_back(vc);
-      //			}
+      //      for (size_t x=0;x<nVertices;x++){
+      //        WMOVertColor vc;
+      //        gf.read(&vc,4);
+      //        VertexColors.push_back(vc);
+      //      }
     }
     else if (fourcc == "MLIQ") {
       // liquids
@@ -332,11 +332,11 @@ void WMOGroup::initDisplayList()
 
   glColor4f(1, 1, 1, 1);
 
-  //	float xr=0,xg=0,xb=0;
-  //	if (flags & 0x0040) xr = 1;
-  //	if (flags & 0x2000) xg = 1;
-  //	if (flags & 0x8000) xb = 1;
-  //	glColor4f(xr,xg,xb,1);
+  //  float xr=0,xg=0,xb=0;
+  //  if (flags & 0x0040) xr = 1;
+  //  if (flags & 0x2000) xg = 1;
+  //  if (flags & 0x8000) xb = 1;
+  //  glColor4f(xr,xg,xb,1);
 
   // assume that texturing is on, for unit 1
 
@@ -375,11 +375,11 @@ void WMOGroup::initDisplayList()
     else
       glEnable(GL_CULL_FACE);
 
-    //		float fr,fg,fb;
-    //		fr = rand()/(float)RAND_MAX;
-    //		fg = rand()/(float)RAND_MAX;
-    //		fb = rand()/(float)RAND_MAX;
-    //		glColor4f(fr,fg,fb,1);
+    //    float fr,fg,fb;
+    //    fr = rand()/(float)RAND_MAX;
+    //    fg = rand()/(float)RAND_MAX;
+    //    fb = rand()/(float)RAND_MAX;
+    //    glColor4f(fr,fg,fb,1);
 
     bool overbright = ((mat->flags & 0x10) && !hascv);
     if (overbright) {

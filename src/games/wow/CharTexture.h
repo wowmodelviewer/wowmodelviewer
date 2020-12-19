@@ -17,7 +17,7 @@
 class GameFile;
 
 struct CharRegionCoords {
-	int xpos, ypos, width, height;
+  int xpos, ypos, width, height;
 };
 
 struct LayoutSize {
@@ -32,7 +32,7 @@ struct CharTextureComponent
 
   bool operator<(const CharTextureComponent& c) const
   {
-	return layer < c.layer;
+  return layer < c.layer;
   }
 };
 

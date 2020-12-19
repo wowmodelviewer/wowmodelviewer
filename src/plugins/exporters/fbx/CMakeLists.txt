@@ -25,12 +25,12 @@ include_directories($ENV{WMV_SDK_BASEDIR}/include)
 include_directories(${WMV_BASE_PATH}/src/wowmodelviewer) # needed for util.h inclusion
 
 set(src FBXExporter.cpp
-	FBXAnimExporter.cpp
-	FBXHeaders.cpp)
+  FBXAnimExporter.cpp
+  FBXHeaders.cpp)
 
 set(headers FBXExporter.h
-	FBXAnimExporter.h
-	FBXHeaders.h)
+  FBXAnimExporter.h
+  FBXHeaders.h)
 
 source_group("Header Files" FILES ${headers})
 
@@ -46,17 +46,17 @@ add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
 target_link_libraries(${NAME} Qt5::Core ${extralibs} 
-	$ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
+  $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 
 if (MSVC_IDE)
-	# Enable Qt in Visual Studio
-	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+  # Enable Qt in Visual Studio
+  set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 if(WIN32)

@@ -58,7 +58,7 @@ void WMOLight::init(GameFile &f)
   f.read(&intensity, 4);
   f.read(&attenStart, 4);
   f.read(&attenEnd, 4);
-  f.read(unk, 4 * 3);	// Seems to be -1, -0.5, X, where X changes from model to model. Guard Tower: 2.3611112, GoldshireInn: 5.8888888, Duskwood_TownHall: 5
+  f.read(unk, 4 * 3);  // Seems to be -1, -0.5, X, where X changes from model to model. Guard Tower: 2.3611112, GoldshireInn: 5.8888888, Duskwood_TownHall: 5
   f.read(&r, 4);
 
   pos = glm::vec3(pos.x, pos.z, -pos.y);

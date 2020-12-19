@@ -72,7 +72,7 @@ enum CharGeosets {
   NUM_GEOSETS
 };
 
-#define	UPPER_BODY_BONES	5
+#define  UPPER_BODY_BONES  5
 
 enum POSITION_SLOTS { // wxString Attach_Names[]
   ATT_LEFT_WRIST = 0, // Mountpoint
@@ -160,41 +160,41 @@ enum CharRegions {
 enum KeyBoneTable { // wxString Bone_Names[]
   //Block F - Key Bone lookup table.
   //---------------------------------
-  BONE_LARM = 0,		// 0, ArmL: Left upper arm
-  BONE_RARM,			// 1, ArmR: Right upper arm
-  BONE_LSHOULDER,		// 2, ShoulderL: Left Shoulder / deltoid area
-  BONE_RSHOULDER,		// 3, ShoulderR: Right Shoulder / deltoid area
-  BONE_STOMACH,		// 4, SpineLow: (upper?) abdomen
-  BONE_WAIST,			// 5, Waist: (lower abdomen?) waist
-  BONE_HEAD,			// 6, Head
-  BONE_JAW,			// 7, Jaw: jaw/mouth
-  BONE_RFINGER1,		// 8, IndexFingerR: (Trolls have 3 "fingers", this points to the 2nd one.
-  BONE_RFINGER2,		// 9, MiddleFingerR: center finger - only used by dwarfs.. don't know why
-  BONE_RFINGER3,		// 10, PinkyFingerR: (Trolls have 3 "fingers", this points to the 3rd one.
-  BONE_RFINGERS,		// 11, RingFingerR: Right fingers -- this is -1 for trolls, they have no fingers, only the 3 thumb like thingys
-  BONE_RTHUMB,		// 12, ThumbR: Right Thumb
-  BONE_LFINGER1,		// 13, IndexFingerL: (Trolls have 3 "fingers", this points to the 2nd one.
-  BONE_LFINGER2,		// 14, MiddleFingerL: Center finger - only used by dwarfs.
-  BONE_LFINGER3,		// 15, PinkyFingerL: (Trolls have 3 "fingers", this points to the 3rd one.
-  BONE_LFINGERS,		// 16, RingFingerL: Left fingers
-  BONE_LTHUMB,		// 17, ThubbL: Left Thumb
-  BONE_BTH,			// 18, $BTH: In front of head
-  BONE_CSR,			// 19, $CSR: Left hand
-  BONE_CSL,			// 20, $CSL: Left hand
-  BONE_BREATH,		// 21, _Breath
-  BONE_NAME,			// 22, _Name
-  BONE_NAMEMOUNT,		// 23, _NameMount
-  BONE_CHD,			// 24, $CHD: Head
-  BONE_CCH,			// 25, $CCH: Bust
-  BONE_ROOT,			// 26, Root: The "Root" bone,  this controls rotations, transformations, etc of the whole model and all subsequent bones.
-  BONE_WHEEL1,		// 27, Wheel1
-  BONE_WHEEL2,		// 28, Wheel2
-  BONE_WHEEL3,		// 29, Wheel3
-  BONE_WHEEL4,		// 30, Wheel4
-  BONE_WHEEL5,		// 31, Wheel5
-  BONE_WHEEL6,		// 32, Wheel6
-  BONE_WHEEL7,		// 33, Wheel7
-  BONE_WHEEL8,		// 34, Wheel8
+  BONE_LARM = 0,    // 0, ArmL: Left upper arm
+  BONE_RARM,      // 1, ArmR: Right upper arm
+  BONE_LSHOULDER,    // 2, ShoulderL: Left Shoulder / deltoid area
+  BONE_RSHOULDER,    // 3, ShoulderR: Right Shoulder / deltoid area
+  BONE_STOMACH,    // 4, SpineLow: (upper?) abdomen
+  BONE_WAIST,      // 5, Waist: (lower abdomen?) waist
+  BONE_HEAD,      // 6, Head
+  BONE_JAW,      // 7, Jaw: jaw/mouth
+  BONE_RFINGER1,    // 8, IndexFingerR: (Trolls have 3 "fingers", this points to the 2nd one.
+  BONE_RFINGER2,    // 9, MiddleFingerR: center finger - only used by dwarfs.. don't know why
+  BONE_RFINGER3,    // 10, PinkyFingerR: (Trolls have 3 "fingers", this points to the 3rd one.
+  BONE_RFINGERS,    // 11, RingFingerR: Right fingers -- this is -1 for trolls, they have no fingers, only the 3 thumb like thingys
+  BONE_RTHUMB,    // 12, ThumbR: Right Thumb
+  BONE_LFINGER1,    // 13, IndexFingerL: (Trolls have 3 "fingers", this points to the 2nd one.
+  BONE_LFINGER2,    // 14, MiddleFingerL: Center finger - only used by dwarfs.
+  BONE_LFINGER3,    // 15, PinkyFingerL: (Trolls have 3 "fingers", this points to the 3rd one.
+  BONE_LFINGERS,    // 16, RingFingerL: Left fingers
+  BONE_LTHUMB,    // 17, ThubbL: Left Thumb
+  BONE_BTH,      // 18, $BTH: In front of head
+  BONE_CSR,      // 19, $CSR: Left hand
+  BONE_CSL,      // 20, $CSL: Left hand
+  BONE_BREATH,    // 21, _Breath
+  BONE_NAME,      // 22, _Name
+  BONE_NAMEMOUNT,    // 23, _NameMount
+  BONE_CHD,      // 24, $CHD: Head
+  BONE_CCH,      // 25, $CCH: Bust
+  BONE_ROOT,      // 26, Root: The "Root" bone,  this controls rotations, transformations, etc of the whole model and all subsequent bones.
+  BONE_WHEEL1,    // 27, Wheel1
+  BONE_WHEEL2,    // 28, Wheel2
+  BONE_WHEEL3,    // 29, Wheel3
+  BONE_WHEEL4,    // 30, Wheel4
+  BONE_WHEEL5,    // 31, Wheel5
+  BONE_WHEEL6,    // 32, Wheel6
+  BONE_WHEEL7,    // 33, Wheel7
+  BONE_WHEEL8,    // 34, Wheel8
   BONE_MAX
 };
 
@@ -258,14 +258,14 @@ enum ModelLightTypes {
 // copied from the .mdl docs? this might be completely wrong
 /*
 Blending mode
-Value	 Mapped to	 Meaning
-0	 0	 Combiners_Opaque
-1	 1	 Combiners_Mod
-2	 1	 Combiners_Decal
-3	 1	 Combiners_Add
-4	 1	 Combiners_Mod2x
-5	 4	 Combiners_Fade
-6	 4	 Used in the Deeprun Tram subway glass, supposedly (src=dest_color, dest=src_color) (?)
+Value   Mapped to   Meaning
+0   0   Combiners_Opaque
+1   1   Combiners_Mod
+2   1   Combiners_Decal
+3   1   Combiners_Add
+4   1   Combiners_Mod2x
+5   4   Combiners_Fade
+6   4   Used in the Deeprun Tram subway glass, supposedly (src=dest_color, dest=src_color) (?)
 */
 enum BlendModes {
   BM_OPAQUE,
@@ -350,9 +350,9 @@ enum Races
   RACE_ICE_TROLL = 21,
   RACE_WORGEN = 22,
   RACE_GILNEAN = 23,
-  RACE_PANDAREN = 24,	  // Pandaren #1
-  RACE_PANDAREN2 = 25,	// Pandaren #2
-  RACE_PANDAREN3 = 26,	// Pandaren #3
+  RACE_PANDAREN = 24,    // Pandaren #1
+  RACE_PANDAREN2 = 25,  // Pandaren #2
+  RACE_PANDAREN3 = 26,  // Pandaren #3
   RACE_NIGHTBORNE = 27,
   RACE_HIGHMOUNTAIN_TAUREN = 28,
   RACE_VOID_ELF = 29,

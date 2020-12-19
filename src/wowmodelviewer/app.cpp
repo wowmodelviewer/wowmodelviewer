@@ -27,7 +27,7 @@
 #include <QSettings>
 
 
-/*	THIS IS OUR MAIN "START UP" FILE.
+/*  THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.
 the wxApp initiates our program (takes over the role of main())
 When our wxApp loads,  it creates our ModelViewer class object,
@@ -35,7 +35,7 @@ which is a wxWindow.  From there ModelViewer object then creates
 our menu bar, character control, view control, filetree control,
 animation control, and the canvas control (opengl).  Once those
 controls are created it then loads saved variables from the config.ini
-file.  Then it proceeds	to create and open the MPQ archives,  creating
+file.  Then it proceeds  to create and open the MPQ archives,  creating
 a file list of the contents from all files within all of the opened mpq archives.
 
 I hope this gives some insight into the "program flow".
@@ -86,46 +86,46 @@ void WowModelViewApp::setInterfaceLocale()
 
 bool WowModelViewApp::OnInit()
 {
-	bool displayConsole = false;
+  bool displayConsole = false;
 
-	// init next-gen stuff
-	GLOBALSETTINGS.bShowParticle = true;
-	GLOBALSETTINGS.bZeroParticle = true;
+  // init next-gen stuff
+  GLOBALSETTINGS.bShowParticle = true;
+  GLOBALSETTINGS.bZeroParticle = true;
 
-	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
-	frame = NULL;
-	wxSplashScreen* splash = NULL;
-	{
-		wxLogNull logNo;
+  QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
+  frame = NULL;
+  wxSplashScreen* splash = NULL;
+  {
+    wxLogNull logNo;
 
-		wxImage::AddHandler(new wxPNGHandler);
-		wxImage::AddHandler(new wxXPMHandler);
+    wxImage::AddHandler(new wxPNGHandler);
+    wxImage::AddHandler(new wxXPMHandler);
 
-		// Enable Randomly choosing between SPLASH and SPLASH2
-		bool randomSplash2 = true;
+    // Enable Randomly choosing between SPLASH and SPLASH2
+    bool randomSplash2 = true;
 
-		wxString splashname = L"SPLASH";
-		if (randomSplash2 == true)
-		{
-			srand(time(NULL));
-			int randomchoice = rand() % 10;		// Random number between 0-9
-			if (randomchoice >= 5)
-			{
-				splashname = L"SPLASH2";
-			}
-		}
+    wxString splashname = L"SPLASH";
+    if (randomSplash2 == true)
+    {
+      srand(time(NULL));
+      int randomchoice = rand() % 10;    // Random number between 0-9
+      if (randomchoice >= 5)
+      {
+        splashname = L"SPLASH2";
+      }
+    }
 
-		wxBitmap * bitmap = createBitmapFromResource(splashname);
-		if (!bitmap)
-			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
-		else
-			splash = new wxSplashScreen(*bitmap,
-				wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-				2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-				wxBORDER_NONE);
-		wxYield();
-		Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
-	}
+    wxBitmap * bitmap = createBitmapFromResource(splashname);
+    if (!bitmap)
+      wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
+    else
+      splash = new wxSplashScreen(*bitmap,
+        wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+        2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+        wxBORDER_NONE);
+    wxYield();
+    Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+  }
 
 
   // Error & Logging settings
@@ -193,11 +193,11 @@ bool WowModelViewApp::OnInit()
 #elif defined (_LINUX)
   // This probably needs to be fixed...
   //if (icon->LoadFile(wxT("../bin_support/icon/wmv_xpm")) == false)
-  //	wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
+  //  wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #elif defined (_MAC)
   // Dunno what to do about Macs...
   //if (icon->LoadFile(wxT("../bin_support/icon/wmv.icns")) == false)
-  //	wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
+  //  wxMessageBox(wxT("Failed to load Icon"),wxT("Failure"));
 #endif
   frame->SetIcon(*icon);
   // --
@@ -208,7 +208,7 @@ bool WowModelViewApp::OnInit()
   g_charControl = frame->charControl;
   g_fileControl = frame->fileControl;
 
-#ifndef	_LINUX // buggy
+#ifndef  _LINUX // buggy
   frame->interfaceManager.Update();
 #endif
 

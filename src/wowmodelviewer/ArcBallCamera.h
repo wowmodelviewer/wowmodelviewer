@@ -46,7 +46,7 @@ class ArcBallCamera
 
     // camera definition
     glm::vec3 m_lookAt;
-	glm::vec3 m_modelCenter;
+    glm::vec3 m_modelCenter;
 
     // scene size
     int m_sceneWidth;

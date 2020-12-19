@@ -35,14 +35,14 @@ wxString locales[] = {wxT("enUS"), wxT("koKR"), wxT("frFR"), wxT("deDE"), wxT("z
 
 // Round a float, down to the specified decimal
 float round(float input, int limit = 2){
-	if (limit > 0){
-		input *= (10^limit);
-	}
-	input = int(input+0.5);
-	if (limit > 0){
-		input /= (10^limit);
-	}
-	return input;
+  if (limit > 0){
+    input *= (10^limit);
+  }
+  input = int(input+0.5);
+  if (limit > 0){
+    input /= (10^limit);
+  }
+  return input;
 }
 
 wxString getGamePath(bool noSet)
@@ -155,10 +155,10 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
   
   if(0 != a_resource)
   {
-	a_resHandle = LoadResource(NULL, a_resource);
-	if (0 != a_resHandle)
+  a_resHandle = LoadResource(NULL, a_resource);
+  if (0 != a_resHandle)
     {
-	  t_data = (char*)LockResource(a_resHandle);
+    t_data = (char*)LockResource(a_resHandle);
       t_dataSize = SizeofResource(NULL, a_resource);
       r_result = true;
     }
@@ -176,34 +176,34 @@ wxBitmap* getBitmapFromMemory(const char* t_data, const DWORD t_size, long type,
   wxImage newImage(wxImage(a_is, type, -1));
   
   if((width != 0) && (height != 0))
-	newImage.Rescale(width,height);
+  newImage.Rescale(width,height);
   return new wxBitmap(newImage, -1);
 }
 
 bool correctType(ssize_t type, ssize_t slot)
 {
-	if (type == IT_ALL)
-		return true;
+  if (type == IT_ALL)
+    return true;
 
-	switch (slot) {
-	case CS_HEAD:		return (type == IT_HEAD);
-	case CS_SHOULDER:	return (type == IT_SHOULDER);
-	case CS_SHIRT:		return (type == IT_SHIRT);
-	case CS_CHEST:		return (type == IT_CHEST || type == IT_ROBE);
-	case CS_BELT:		return (type == IT_BELT);
-	case CS_PANTS:		return (type == IT_PANTS);
-	case CS_BOOTS:		return (type == IT_BOOTS);
-	case CS_BRACERS:	return (type == IT_BRACERS);
-	case CS_GLOVES:		return (type == IT_GLOVES);
+  switch (slot) {
+  case CS_HEAD:    return (type == IT_HEAD);
+  case CS_SHOULDER:  return (type == IT_SHOULDER);
+  case CS_SHIRT:    return (type == IT_SHIRT);
+  case CS_CHEST:    return (type == IT_CHEST || type == IT_ROBE);
+  case CS_BELT:    return (type == IT_BELT);
+  case CS_PANTS:    return (type == IT_PANTS);
+  case CS_BOOTS:    return (type == IT_BOOTS);
+  case CS_BRACERS:  return (type == IT_BRACERS);
+  case CS_GLOVES:    return (type == IT_GLOVES);
 
-	// Slight correction.  Type 21 = Lefthand weapon, Type 22 = Righthand weapon
-	//case CS_HAND_RIGHT:	return (type == IT_1HANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER);
-	//case CS_HAND_LEFT:	return (type == IT_1HANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_HAND_RIGHT:	return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_DAGGER);
-	case CS_HAND_LEFT:	return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
-	case CS_CAPE:		return (type == IT_CAPE);
-	case CS_TABARD:		return (type == IT_TABARD);
-	case CS_QUIVER:		return (type == IT_QUIVER);
-	}
-	return false;
+  // Slight correction.  Type 21 = Lefthand weapon, Type 22 = Righthand weapon
+  //case CS_HAND_RIGHT:  return (type == IT_1HANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER);
+  //case CS_HAND_LEFT:  return (type == IT_1HANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_CLAW || type == IT_DAGGER || type == IT_OFFHAND);
+  case CS_HAND_RIGHT:  return (type == IT_RIGHTHANDED || type == IT_GUN || type == IT_THROWN || type == IT_2HANDED || type == IT_DAGGER);
+  case CS_HAND_LEFT:  return (type == IT_LEFTHANDED || type == IT_BOW || type == IT_SHIELD || type == IT_2HANDED || type == IT_DAGGER || type == IT_OFFHAND);
+  case CS_CAPE:    return (type == IT_CAPE);
+  case CS_TABARD:    return (type == IT_TABARD);
+  case CS_QUIVER:    return (type == IT_QUIVER);
+  }
+  return false;
 }

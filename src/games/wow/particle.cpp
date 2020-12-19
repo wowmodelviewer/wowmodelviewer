@@ -269,17 +269,17 @@ void ParticleSystem::setup(size_t anim, size_t time)
   mtime = time;
 
   /*
-	if (transform) {
-		// transform every particle by the parent trans matrix   - apparently this isn't needed
-		Matrix m = parent->mat;
-		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-			it->tpos = m * it->pos;
-		}
-	} else {
-		for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
-			it->tpos = it->pos;
-		}
-	}
+  if (transform) {
+    // transform every particle by the parent trans matrix   - apparently this isn't needed
+    Matrix m = parent->mat;
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+      it->tpos = m * it->pos;
+    }
+  } else {
+    for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) {
+      it->tpos = it->pos;
+    }
+  }
    */
 }
 
@@ -293,7 +293,7 @@ void ParticleSystem::draw()
     blend = 2;
   switch (blend)
   {
-    case BM_OPAQUE:	          // 0
+    case BM_OPAQUE:            // 0
       glDisable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -318,17 +318,17 @@ void ParticleSystem::draw()
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       break;
-    case BM_MODULATE:	      // 5
+    case BM_MODULATE:        // 5
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_DST_COLOR, GL_ZERO);
       break;
-    case BM_MODULATEX2:	      // 6
+    case BM_MODULATEX2:        // 6
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
       break;
-    case BM_7:	              // 7, new in WoD
+    case BM_7:                // 7, new in WoD
       glEnable(GL_BLEND);
       glDisable(GL_ALPHA_TEST);
       glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -398,9 +398,9 @@ void ParticleSystem::draw()
 
   /*
    * type:
-   * 0	 "normal" particle
-   * 1	large quad from the particle's origin to its position (used in Moonwell water effects)
-   * 2	seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
+   * 0   "normal" particle
+   * 1  large quad from the particle's origin to its position (used in Moonwell water effects)
+   * 2  seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
    */
 
   glm::vec3 vert1, vert2, vert3, vert4, pos;
@@ -511,8 +511,8 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 
 /*
     SpreadMat.m[0][0]*=l;
-	SpreadMat.m[1][1]*=l;
-	SpreadMat.m[2][2]*=w;
+  SpreadMat.m[1][1]*=l;
+  SpreadMat.m[2][2]*=w;
 */
 
   for(i=0;i<2;i++)
@@ -644,7 +644,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   // New
   // Length should never technically be zero ?
   //if (l==0)
-  //	l = w;
+  //  l = w;
 
   // New method
   // glm::vec3 bdir(w*cosf(t), 0.0f, l*sinf(t));
@@ -811,17 +811,17 @@ void RibbonEmitter::setup(size_t anim, size_t time)
 void RibbonEmitter::draw()
 {
   /*
-	// placeholders
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glColor4f(1,1,1,1);
-	glBegin(GL_TRIANGLES);
-	glVertex3fv(tpos);
-	glVertex3fv(tpos + glm::vec3(1,1,0));
-	glVertex3fv(tpos + glm::vec3(-1,1,0));
-	glEnd();
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
+  // placeholders
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
+  glColor4f(1,1,1,1);
+  glBegin(GL_TRIANGLES);
+  glVertex3fv(tpos);
+  glVertex3fv(tpos + glm::vec3(1,1,0));
+  glVertex3fv(tpos + glm::vec3(-1,1,0));
+  glEnd();
+  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_LIGHTING);
    */
 
   glEnable(GL_TEXTURE_2D);

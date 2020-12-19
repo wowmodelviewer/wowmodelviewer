@@ -46,7 +46,7 @@ void CharTexture::compose(GLuint texID)
   if (m_components.empty())
     return;
 
-	std::sort(m_components.begin(), m_components.end());
+  std::sort(m_components.begin(), m_components.end());
 
   QImage img;
 
@@ -63,11 +63,11 @@ void CharTexture::compose(GLuint texID)
 #endif
   }
 
-	// good, upload this to video
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+  // good, upload this to video
+  glBindTexture(GL_TEXTURE_2D, texID);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width(), img.height(), 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, img.bits());
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
 }
 
 void CharTexture::initRegions()
