@@ -95,7 +95,6 @@ set(headers animated.h
       TabardDetails.h
       TextureAnim.h
       types.h
-      vec3d.h
       video.h
       wdb2file.h
       wdb5file.h

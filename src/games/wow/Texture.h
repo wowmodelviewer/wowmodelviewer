@@ -2,7 +2,6 @@
 #define TEXTURE_H
 
 #include "manager.h"
-#include "vec3d.h"
 
 #include "GL/glew.h"
 

@@ -8,7 +8,6 @@
 #include "quaternion.h"
 
 #include "matrix.h"
-#include "vec3d.h" // HALFPif
 
 
 const Quaternion Quaternion::slerp(const float r, const Quaternion &v1, const Quaternion &v2)
@@ -99,7 +98,7 @@ glm::vec3 Quaternion::toEulerXYZ()
       // y_angle = -pi/2
       // z_angle - x_angle = atan2(r10,r11)
       // WARNING.  Solution is not unique.  Choosing z_angle = 0.
-      result.y = -HALFPIf;
+      result.y = -glm::half_pi<float>();
       result.x = -atan2(mat.m[1][0],mat.m[1][1]);
       result.z = (float)0.0f;
     }
@@ -109,7 +108,7 @@ glm::vec3 Quaternion::toEulerXYZ()
     // y_angle = +pi/2
     // z_angle + x_angle = atan2(r10,r11)
     // WARNING.  Solutions is not unique.  Choosing z_angle = 0.
-    result.y = HALFPIf;
+    result.y = glm::half_pi<float>();
     result.x = atan2(mat.m[1][0],mat.m[1][1]);
     result.z = (float)0.0f;
   }

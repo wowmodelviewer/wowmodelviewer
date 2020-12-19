@@ -4,8 +4,7 @@
 #include "quaternion.h"
 
 #include "glm/glm.hpp"
-
-#include "vec3d.h" // HALFPIf
+#include "glm/gtc/constants.hpp"
 
 #undef minor
 
@@ -372,19 +371,19 @@ public:
     {
       hpb[0] = 0;
       if (!zzero[1])
-        hpb[1] = (z[1] < 0) ? HALFPIf : -HALFPIf;
+        hpb[1] = (z[1] < 0) ? glm::half_pi<float>() : -glm::half_pi<float>();
       else
         hpb[1] = 0;
     }
     else
     {
       if (zzero[2])
-        hpb[0] = (z[0] < 0) ? -HALFPIf : HALFPIf;
+        hpb[0] = (z[0] < 0) ? -glm::half_pi<float>() : glm::half_pi<float>();
       else
         hpb[0] = atan2(z[0], z[2]);
       float hyp = sqrt(z[0] * z[0] + z[2] * z[2]);
       if (hyp <= std::numeric_limits<float>::epsilon())
-        hpb[1] = (z[1] < 0.0) ? HALFPIf : -HALFPIf;
+        hpb[1] = (z[1] < 0.0) ? glm::half_pi<float>() : -glm::half_pi<float>();
       else
         hpb[1] = -atan2(z[1], hyp);
     }
@@ -401,7 +400,7 @@ public:
     if(rot_yzero[0] && rot_yzero[1])
       hpb[2] = 0;
     else if(rot_yzero[1])
-      hpb[2] = (rot_y[0] < 0) ? HALFPIf : -HALFPIf;
+      hpb[2] = (rot_y[0] < 0) ? glm::half_pi<float>() : -glm::half_pi<float>();
     else
       hpb[2] = atan2(-rot_y[0], rot_y[1]);
 

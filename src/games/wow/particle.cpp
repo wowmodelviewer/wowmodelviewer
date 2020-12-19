@@ -554,7 +554,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
   if (sys->flags == 1041) { // Trans Halo
     p.pos = (sys->pos + glm::vec3(randfloat(-l,l), 0, randfloat(-w,w)));
-    const float t = randfloat(0.0f, float(2*PI));
+    const float t = randfloat(0.0f, 2*glm::pi<float>());
     p.pos = glm::vec3(0.0f, sys->pos.y + 0.15f, sys->pos.z) + glm::vec3(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
@@ -631,7 +631,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   // Spread should never be zero for sphere particles ?
   float t = 0;
   if (spr == 0)
-    t = randfloat((float)-PI,(float)PI);
+    t = randfloat(-glm::pi<float>(),glm::pi<float>());
   else
     t = randfloat(-spr,spr);
 
@@ -665,7 +665,6 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     float phi = randfloat(0, phi_range);
     rotate(0,0, &bdir.z, &bdir.x, phi);
 */
-
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
     glm::vec3 bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
 

@@ -11,8 +11,9 @@
 
 #include "camera.h"
 
+#include "glm/gtc/constants.hpp""
 
-#include "vec3d.h" // PIOVER180f
+
 #include "GL/glew.h"
 
 CCamera::CCamera()
@@ -56,7 +57,7 @@ void CCamera::RotateX(float Angle)
   m_vRotation.x += Angle;
 
   //Rotate viewdir around the right vector:
-  m_vViewDir = glm::normalize((m_vViewDir * cosf(Angle*PIOVER180f)) + (m_vUpVector * sinf(Angle*PIOVER180f)));
+  m_vViewDir = glm::normalize((m_vViewDir * cosf(Angle*glm::pi<float>()/180.f)) + (m_vUpVector * sinf(Angle*glm::pi<float>() / 180.f)));
 
   //now compute the new UpVector (by cross product)
   m_vUpVector = glm::cross(m_vViewDir,m_vRightVector) * -1.f;
@@ -67,7 +68,7 @@ void CCamera::RotateY(float Angle)
   m_vRotation.y += Angle;
 
   //Rotate viewdir around the up vector:
-  m_vViewDir = glm::normalize((m_vViewDir * cosf(Angle*PIOVER180f)) - (m_vRightVector * sinf(Angle*PIOVER180f)));
+  m_vViewDir = glm::normalize((m_vViewDir * cosf(Angle*glm::pi<float>() / 180.f)) - (m_vRightVector * sinf(Angle*glm::pi<float>() / 180.f)));
 
   //now compute the new RightVector (by cross product)
   m_vRightVector = glm::cross(m_vViewDir, m_vUpVector);
@@ -78,7 +79,7 @@ void CCamera::RotateZ(float Angle)
   m_vRotation.z += Angle;
 
   //Rotate viewdir around the right vector:
-  m_vRightVector = glm::normalize(m_vRightVector*cosf(Angle*PIOVER180f) + m_vUpVector * sinf(Angle*PIOVER180f));
+  m_vRightVector = glm::normalize(m_vRightVector*cosf(Angle*glm::pi<float>() / 180.f) + m_vUpVector * sinf(Angle*glm::pi<float>() / 180.f));
 
   //now compute the new UpVector (by cross product)
   m_vUpVector = glm::cross(m_vViewDir, m_vRightVector) * -1.f;

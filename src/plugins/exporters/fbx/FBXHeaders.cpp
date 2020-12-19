@@ -427,9 +427,9 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
 
         glm::vec3 rot = tq.toEulerXYZ();
 
-        x = rot.x * -(180.0f / PI);
-        y = rot.y * -(180.0f / PI);
-        z = rot.z * -(180.0f / PI);
+        x = rot.x * -(180.0f / glm::pi<float>());
+        y = rot.y * -(180.0f / glm::pi<float>());
+        z = rot.z * -(180.0f / glm::pi<float>());
 
         r_curve_x->KeyModifyBegin();
         int key_index = r_curve_x->KeyAdd(time);

@@ -230,7 +230,7 @@ void ArcBallCamera::autofit(const glm::vec3 & minp, const glm::vec3 & maxp, cons
 
   // adjust current zoom based on object size
   float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
-  m_distance = abs((maxsize /2.)  / sinf(fov/2.*PI/180)) * 1.2;
+  m_distance = abs((maxsize /2.)  / sinf(fov/2.*glm::pi<float>() /180)) * 1.2;
 
   // set min /max zoom bounds based on optimal zoom
   m_minZoomDistance = m_distance / 10;
