@@ -32,7 +32,7 @@ void WMOModelInstance::init(char *fname, GameFile &f)
 void glQuaternionRotate(const glm::vec3& vdir, float w)
 {
   Matrix m;
-  Quaternion q(vdir, w);
+  glm::fquat q(w, vdir);
   m.quaternionRotate(q);
   glMultMatrixf(m);
 }

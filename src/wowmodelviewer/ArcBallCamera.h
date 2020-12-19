@@ -11,6 +11,7 @@
 #include "matrix.h"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 class ArcBallCamera
 {
@@ -53,7 +54,7 @@ class ArcBallCamera
     int m_sceneHeight;
 
     glm::vec3 m_startVec;
-    Quaternion m_rotation;
+    glm::fquat m_rotation;
     Matrix m_lastRot;
     Matrix m_transform;
 

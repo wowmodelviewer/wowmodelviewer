@@ -17,7 +17,7 @@
 #include "CharDetails.h"
 #include "CharTexture.h"
 #include "displayable.h"
-#include "matrix.h"
+#include "quaternion.h" // Vec4D
 #include "Model.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"

@@ -118,27 +118,6 @@ class _QUATERNION_API_ Vec4D
     }
 };
 
-class _QUATERNION_API_ Quaternion: public Vec4D
-{
-  public:
-    Quaternion(float x0=0.0f, float y0=0.0f, float z0=0.0f, float w0=1.0f): Vec4D(x0,y0,z0,w0) {}
-
-    Quaternion(const Vec4D& v) : Vec4D(v) {}
-
-    Quaternion(const glm::vec3& v, const float w0) : Vec4D(v, w0) {}
-
-    static const Quaternion slerp(const float r, const Quaternion &v1, const Quaternion &v2);
-
-    static const Quaternion lerp(const float r, const Quaternion &v1, const Quaternion &v2);
-
-    glm::vec3 GetHPB();
-
-    Matrix toMat();
-
-    glm::vec3 toEulerXYZ();
-};
-
-
 #endif
 
 

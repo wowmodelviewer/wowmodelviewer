@@ -17,7 +17,7 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
     return;
 
   Matrix m;
-  Quaternion q;
+  glm::fquat q;
 
   bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
   if (tr) {

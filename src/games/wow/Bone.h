@@ -20,8 +20,7 @@ class WoWModel;
 class Bone {
 public:
   Animated<glm::vec3> trans;
-  //Animated<Quaternion> rot;
-  Animated<Quaternion, PACK_QUATERNION, Quat16ToQuat32> rot;
+  Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;
   Animated<glm::vec3> scale;
 
   glm::vec3 pivot, transPivot;

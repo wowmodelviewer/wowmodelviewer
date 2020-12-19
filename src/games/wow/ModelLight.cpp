@@ -7,6 +7,8 @@
 
 #include "ModelLight.h"
 
+
+#include "quaternion.h" // Vec4D
 #include "wow_enums.h"
 #include "logger/Logger.h"
 

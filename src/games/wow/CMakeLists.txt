@@ -36,7 +36,6 @@ set(src animated.cpp
       ModelRenderPass.cpp
       ModelTransparency.cpp
       particle.cpp
-      quaternion.cpp
       RaceInfos.cpp
       RenderTexture.cpp
       TabardDetails.cpp

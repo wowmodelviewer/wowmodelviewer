@@ -1,10 +1,10 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include "quaternion.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/constants.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 #undef minor
 
@@ -105,7 +105,7 @@ public:
     return t;
   }
 
-  void quaternionRotate(const Quaternion& q)
+  void quaternionRotate(const glm::fquat& q)
   {
     /*
       ###0
@@ -126,7 +126,7 @@ public:
     m[3][3] = 1.0f;
   }
 
-  void QRotate(const Quaternion& q){
+  void QRotate(const glm::fquat& q){
     float x = q.x;
     float y = q.y;
     float z = q.z;
@@ -170,7 +170,7 @@ public:
     m[2][2] = z*z * (1 - cosa) + cosa;
   }
 
-  static const Matrix newQuatRotate(const Quaternion& qr)
+  static const Matrix newQuatRotate(const glm::fquat& qr)
   {
     Matrix t;
     t.quaternionRotate(qr);
@@ -212,8 +212,8 @@ public:
     return o;
   }
 
-  Quaternion GetQuaternion(){
-    Quaternion q(Vec4D(0,0,0,0));
+  glm::fquat GetQuaternion(){
+    glm::fquat q(0,0,0,0);
 
     float trace = m[0][0] + m[1][1] + m[2][2];
 

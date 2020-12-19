@@ -20,9 +20,9 @@ glm::vec3 fixCoordSystem2(glm::vec3 v)
   return glm::vec3(v.x, v.z, v.y);
 }
 
-Quaternion fixCoordSystemQuat(Quaternion v)
+glm::fquat fixCoordSystemQuat(glm::fquat v)
 {
-  return Quaternion(-v.x, -v.z, v.y, v.w);
+  return glm::fquat(v.w, -v.x, -v.z, v.y);
 }
 
 float frand()

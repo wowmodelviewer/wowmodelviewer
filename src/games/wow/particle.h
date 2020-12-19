@@ -16,6 +16,7 @@ class ParticleSystem;
 class RibbonEmitter;
 
 #include "animated.h"
+#include "quaternion.h" // Vec4D
 
 #include <list>
 #include "GL/glew.h"

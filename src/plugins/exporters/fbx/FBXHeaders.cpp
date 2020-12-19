@@ -36,6 +36,8 @@
 
 // Externals
 #include "fbxsdk.h"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 // Other libraries
 #include "FBXAnimExporter.h"
@@ -421,15 +423,15 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
 
         float x, y, z;
 
-        Quaternion q = bone.rot.getValue(cur_anim.Index, t);
-        Quaternion tq;
+        glm::fquat q = bone.rot.getValue(cur_anim.Index, t);
+        glm::fquat tq;
         tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
 
-        glm::vec3 rot = tq.toEulerXYZ();
+        auto r = glm::eulerAngles(tq);
 
-        x = rot.x * -(180.0f / glm::pi<float>());
-        y = rot.y * -(180.0f / glm::pi<float>());
-        z = rot.z * -(180.0f / glm::pi<float>());
+        x = r.x * -(180.0f / glm::pi<float>());
+        y = r.y * -(180.0f / glm::pi<float>());
+        z = r.z * -(180.0f / glm::pi<float>());
 
         r_curve_x->KeyModifyBegin();
         int key_index = r_curve_x->KeyAdd(time);

@@ -6,10 +6,10 @@
 #include <vector>
 
 #include "glm/glm.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 #include "GameFile.h"
 #include "modelheaders.h"
-#include "quaternion.h"
 #include "types.h"
 
 
@@ -70,9 +70,9 @@ inline T interpolateBezier(const float r, const T &v1, const T &v2, const T &in,
 
 // "linear" interpolation for quaternions should be slerp by default
 template<>
-inline Quaternion interpolate<Quaternion>(const float r, const Quaternion &v1, const Quaternion &v2)
+inline glm::fquat interpolate<glm::fquat>(const float r, const  glm::fquat &v1, const  glm::fquat &v2)
 {
-  return Quaternion::slerp(r, v1, v2);
+  return glm::slerp(v1, v2, r);
 }
 
 
@@ -106,13 +106,13 @@ struct PACK_QUATERNION {
 
 class Quat16ToQuat32 {
 public:
-  static const Quaternion conv(const PACK_QUATERNION t)
+  static const glm::fquat conv(const PACK_QUATERNION t)
   {
-    return Quaternion(
+    return glm::fquat(
+      float(t.w < 0 ? t.w + 32768 : t.w - 32767) / 32767.0f,
       float(t.x < 0? t.x + 32768 : t.x - 32767)/ 32767.0f, 
       float(t.y < 0? t.y + 32768 : t.y - 32767)/ 32767.0f,
-      float(t.z < 0? t.z + 32768 : t.z - 32767)/ 32767.0f,
-      float(t.w < 0? t.w + 32768 : t.w - 32767)/ 32767.0f);
+      float(t.z < 0? t.z + 32768 : t.z - 32767)/ 32767.0f);
   }
 };
 
@@ -434,7 +434,7 @@ typedef Animated<float,short,ShortToFloat> AnimatedShort;
 float frand();
 glm::vec3 fixCoordSystem(glm::vec3 v);
 glm::vec3 fixCoordSystem2(glm::vec3 v);
-Quaternion fixCoordSystemQuat(Quaternion v);
+glm::fquat fixCoordSystemQuat(glm::fquat v);
 
 float randfloat(float lower, float upper);
 _ANIMATED_API_ int randint(int lower, int upper);
