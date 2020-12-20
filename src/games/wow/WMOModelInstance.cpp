@@ -2,11 +2,12 @@
 
 #include "Game.h"
 #include "GameFile.h"
-#include "matrix.h"
 #include "ModelManager.h"
 #include "WoWModel.h"
 
 #include "GL/glew.h"
+#include "glm/gtx/quaternion.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 void WMOModelInstance::init(char *fname, GameFile &f)
 {
@@ -30,10 +31,9 @@ void WMOModelInstance::init(char *fname, GameFile &f)
 
 void glQuaternionRotate(const glm::vec3& vdir, float w)
 {
-  Matrix m;
   glm::fquat q(w, vdir);
-  m.quaternionRotate(q);
-  glMultMatrixf(m);
+  glm::mat4 m = glm::inverse(glm::toMat4(q));
+  glMultMatrixf(glm::value_ptr(m));
 }
 
 void WMOModelInstance::draw()

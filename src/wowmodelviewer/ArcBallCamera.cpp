@@ -12,6 +12,8 @@
 #include <math.h>
 
 #include "Gl/glew.h"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/quaternion.hpp"
 
 #define DISPLAY_ORIGIN 0
 #define DISPLAY_LOOKAT 0
@@ -30,15 +32,15 @@ void ArcBallCamera::reset()
   m_lookAt = glm::vec3(0.0f);
   m_sceneWidth = 0;
   m_sceneHeight = 0;
-  m_transform = Matrix::identity();
+  m_transform = glm::mat4(1.0f);
 
   // set 90 rotation on Y by default (make models front to screen)
-  m_transform.m[0][0] = 0;
-  m_transform.m[0][2] = -1;
-  m_transform.m[2][0] = 1;
-  m_transform.m[2][2] = 0;
+  m_transform[0][0] = 0;
+  m_transform[0][2] = -1;
+  m_transform[2][0] = 1;
+  m_transform[2][2] = 0;
  
-  m_lastRot = Matrix::identity();
+  m_lastRot = glm::mat4(1.0f);
 
   m_startVec = glm::vec3(0.0f);
 }
@@ -83,9 +85,9 @@ void ArcBallCamera::setup()
 
   // apply rotation around model center
   glTranslatef(m_modelCenter.x, m_modelCenter.y, m_modelCenter.z);
-  Matrix m = m_transform;
-  m.transpose();
-  glMultMatrixf(m);
+  glm::mat4 m = m_transform;
+  m = glm::transpose(m);
+  glMultMatrixf(glm::value_ptr(m));
   glTranslatef(-m_modelCenter.x, -m_modelCenter.y, -m_modelCenter.z);
 
 #if DISPLAY_ORIGIN > 0
@@ -207,8 +209,7 @@ void ArcBallCamera::updatePos(const int x, const int y)
     m_rotation.w = 0.;
   }
 
-  Matrix curRot;
-  curRot.quaternionRotate(m_rotation);
+  glm::mat4 curRot = glm::inverse(glm::toMat4(m_rotation));
   curRot *= m_lastRot;
   m_transform = curRot;
 }
@@ -227,7 +228,7 @@ void ArcBallCamera::autofit(const glm::vec3 & minp, const glm::vec3 & maxp, cons
   m_modelCenter = m_lookAt;
 
   // adjust current zoom based on object size
-  float maxsize = max(max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
+  float maxsize = std::max(std::max(maxp.x - minp.x, maxp.y - minp.y), maxp.z - minp.z);
   m_distance = abs((maxsize /2.)  / sinf(fov/2.*glm::pi<float>() /180)) * 1.2;
 
   // set min /max zoom bounds based on optimal zoom

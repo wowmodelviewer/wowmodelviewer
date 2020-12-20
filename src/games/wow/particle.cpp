@@ -237,7 +237,7 @@ void ParticleSystem::update(float dt)
 
   float mspeed = 1.0f;
 
-  Matrix m = parent->mat;
+  glm::mat4 m = parent->mat;
 
   for (ParticleList::iterator it = particles.begin(); it != particles.end(); )
   {
@@ -248,7 +248,7 @@ void ParticleSystem::update(float dt)
     if (slowdown>0)
       mspeed = expf(-1.0f * slowdown * p.life);
     p.pos += p.speed * mspeed * dt;
-    p.tpos = m * p.pos;
+    p.tpos = glm::vec3(m * glm::vec4(p.pos,1.0f));
     p.life += dt;
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
@@ -496,15 +496,15 @@ void ParticleSystem::draw()
 }
 
 //Generates the rotation matrix based on spread
-static Matrix SpreadMat;
+static glm::mat4 SpreadMat;
 
 void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 {
   int i,j;
   float a[2],c[2],s[2];
-  Matrix Temp;
+  glm::mat4 Temp(1.0f);
 
-  SpreadMat.unit();
+  SpreadMat = glm::mat4(1.0f);
 
   a[0]=randfloat(-Spread1,Spread1)/2.0f;
   a[1]=randfloat(-Spread2,Spread2)/2.0f;
@@ -520,26 +520,25 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
     c[i]=cos(a[i]);
     s[i]=sin(a[i]);
   }
-  Temp.unit();
-  Temp.m[1][1]=c[0];
-  Temp.m[2][1]=s[0];
-  Temp.m[2][2]=c[0];
-  Temp.m[1][2]=-s[0];
+  Temp[1][1]=c[0];
+  Temp[2][1]=s[0];
+  Temp[2][2]=c[0];
+  Temp[1][2]=-s[0];
 
   SpreadMat=SpreadMat*Temp;
 
-  Temp.unit();
-  Temp.m[0][0]=c[1];
-  Temp.m[1][0]=s[1];
-  Temp.m[1][1]=c[1];
-  Temp.m[0][1]=-s[1];
+  Temp = glm::mat4(1.0f);
+  Temp[0][0]=c[1];
+  Temp[1][0]=s[1];
+  Temp[1][1]=c[1];
+  Temp[0][1]=-s[1];
 
   SpreadMat=SpreadMat*Temp;
 
   float Size=abs(c[0])*l+abs(s[0])*w;
   for(i=0;i<3;i++)
     for(j=0;j<3;j++)
-      SpreadMat.m[i][j]*=Size;
+      SpreadMat[i][j]*=Size;
 }
 
 Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2)
@@ -547,7 +546,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   Particle p;
 
   //Spread Calculation
-  Matrix mrot;
+  glm::mat4 mrot;
 
   CalcSpreadMatrix(spr,spr,1.0f,1.0f);
   mrot=sys->parent->mrot*SpreadMat;
@@ -566,26 +565,26 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
     p.speed = glm::normalize(dir) * spd * randfloat(0, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
     p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = mrot * glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
     p.dir = glm::normalize(dir);
     //glm::vec3 dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * glm::vec3(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
     p.pos = (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = glm::vec3(sys->parent->mat.m[1][0],sys->parent->mat.m[1][1], sys->parent->mat.m[1][2]) * glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 dir = glm::vec3(sys->parent->mat[1][0],sys->parent->mat[1][1], sys->parent->mat[1][2]) * glm::vec3(0.0f, 1.0f, 0.0f);
     p.speed = glm::normalize(dir) * spd * randfloat(0, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
     p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = mrot * glm::vec3(0,1,0);
+    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f,1.0f,0.0f,1.0f));
     p.dir = glm::normalize(dir);
 
   } else {
     p.pos = sys->pos + glm::vec3(randfloat(-l,l), 0, randfloat(-w,w));
 
     //glm::vec3 dir = mrot * glm::vec3(0,1,0);
-    glm::vec3 dir = sys->parent->mrot * glm::vec3(0,1,0);
+    glm::vec3 dir = glm::vec3(sys->parent->mrot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     p.dir = dir;//.normalize();
     p.down = glm::vec3(0,-1.0f,0); // dir * -1.0f;
@@ -594,12 +593,12 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 
   if(!sys->billboard)
   {
-    p.corners[0] = mrot * glm::vec3(-1,0,+1);
-    p.corners[1] = mrot * glm::vec3(+1,0,+1);
-    p.corners[2] = mrot * glm::vec3(+1,0,-1);
-    p.corners[3] = mrot * glm::vec3(-1,0,-1);
+    p.corners[0] = glm::vec3(mrot * glm::vec4(-1,0,+1,+1));
+    p.corners[1] = glm::vec3(mrot * glm::vec4(+1,0,+1,+1));
+    p.corners[2] = glm::vec3(mrot * glm::vec4(+1,0,-1,+1));
+    p.corners[3] = glm::vec3(mrot * glm::vec4(-1,0,-1,+1));
   }
-  p.tpos = sys->parent->mat * p.pos;
+  p.tpos = glm::vec3(sys->parent->mat * glm::vec4(p.pos,1.0f));
   p.life = 0;
   size_t l_anim = anim;
   if (GLOBALSETTINGS.bZeroParticle)
@@ -636,7 +635,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     t = randfloat(-spr,spr);
 
   //Spread Calculation
-  Matrix mrot;
+  glm::mat4 mrot;
 
   CalcSpreadMatrix(spr*2,spr2*2,w,l);
   mrot=sys->parent->mrot*SpreadMat;
@@ -669,12 +668,12 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     glm::vec3 bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
 
     p.pos = sys->pos + bdir;
-    p.tpos = sys->parent->mat * p.pos;
+    p.tpos = glm::vec3(sys->parent->mat * glm::vec4(p.pos, 1.0f));
 
     if (glm::length(bdir) == 0)
       p.speed = glm::vec3(0,0,0);
     else {
-      dir = sys->parent->mrot * glm::normalize(dir);//mrot * glm::vec3(0, 1.0f,0);
+      dir = glm::vec3(sys->parent->mrot * glm::vec4(glm::normalize(dir),1.0f));//mrot * glm::vec3(0, 1.0f,0);
       p.speed = glm::normalize(dir) * spd * (1.0f+randfloat(-var,var));   // ?
     }
 
@@ -682,23 +681,23 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     glm::vec3 bdir;
     float temp;
 
-    bdir = mrot * glm::vec3(0,1,0) * radius;
+    bdir = glm::vec3(mrot * glm::vec4(0, 1, 0,1)) * radius;
     temp = bdir.z;
     bdir.z = bdir.y;
     bdir.y = temp;
 
     p.pos = sys->pos + bdir;
-    p.tpos = sys->parent->mat * p.pos;
+    p.tpos = glm::vec3(sys->parent->mat * glm::vec4(p.pos,1.0f));
 
 
     if (glm::length(bdir) == 0 && (sys->flags&0x100)!=0x100)
     {
       p.speed = glm::vec3(0,0,0);
-      dir = sys->parent->mrot * glm::vec3(0,1,0);
+      dir = glm::vec3(sys->parent->mrot * glm::vec4(0,1,0,1));
     }
     else {
       if(sys->flags&0x100)
-        dir = sys->parent->mrot * glm::vec3(0,1,0);
+        dir = glm::vec3(sys->parent->mrot * glm::vec4(0,1,0,1));
       else
         dir = glm::normalize(bdir);
 
@@ -758,8 +757,8 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<u
 
 void RibbonEmitter::setup(size_t anim, size_t time)
 {
-  glm::vec3 ntpos = parent->mat * pos;
-  glm::vec3 ntup = parent->mat * (pos + glm::vec3(0,0,1));
+  glm::vec3 ntpos = glm::vec3(parent->mat * glm::vec4(pos,1.0f));
+  glm::vec3 ntup = glm::vec3(parent->mat * (glm::vec4(pos,1.f) + glm::vec4(0,0,1,1)));
   ntup -= ntpos;
   glm::normalize(ntup);
   float dlen = (ntpos-tpos).length();

@@ -37,6 +37,7 @@
 // Externals
 #include "fbxsdk.h"
 #include "glm/gtc/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/quaternion.hpp"
 
 // Other libraries
@@ -87,13 +88,13 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 }
 
 // Create mesh.
-FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, Matrix matrix, glm::vec3 offset)
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, glm::mat4 matrix, glm::vec3 offset)
 {
   // Create a node for the mesh.
   FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
 
   // Create new Matrix Data
-  Matrix m = Matrix::newScale(matrix.GetScale());
+  glm::mat4 m = glm::scale(glm::mat4(1.0f), glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
 
   // Create mesh.
   size_t num_of_vertices = model->origVertices.size();
@@ -126,7 +127,7 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex &v = model->origVertices[i];
-    glm::vec3 Position = m * (v.pos + offset);
+    glm::vec3 Position = glm::vec3(m * glm::vec4((v.pos + offset), 1.0f));
     vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
     glm::vec3 vn = glm::normalize(v.normal);
     layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));

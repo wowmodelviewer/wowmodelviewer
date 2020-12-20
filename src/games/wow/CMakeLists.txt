@@ -77,7 +77,6 @@ set(headers animated.h
       globalvars.h
       HardDriveFile.h
       manager.h
-      matrix.h
       ModelAttachment.h
       ModelCamera.h
       ModelColor.h

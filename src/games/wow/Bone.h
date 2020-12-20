@@ -9,8 +9,9 @@
 #define _BONE_H_
 
 #include "animated.h"
-#include "matrix.h"
 #include "modelheaders.h" // ModelBoneDef
+
+#include "glm/glm.hpp"
 
 class GameFile;
 class WoWModel;
@@ -27,8 +28,8 @@ public:
   int16 parent;
 
   bool billboard;
-  Matrix mat;
-  Matrix mrot;
+  glm::mat4 mat;
+  glm::mat4 mrot;
 
   ModelBoneDef boneDef;
 

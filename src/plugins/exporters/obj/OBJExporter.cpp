@@ -65,10 +65,10 @@
 
 // Public methods
 //--------------------------------------------------------------------
-// Change a glm::vec3 so it now faces forwards
-void MakeModelFaceForwards(glm::vec3 &vect)
+// Change a glm::vec4 so it now faces forwards
+void MakeModelFaceForwards(glm::vec4 &vect)
 {
-  glm::vec3 Temp;
+  glm::vec4 Temp;
 
   Temp.x = 0-vect.z;
   Temp.y = vect.y;
@@ -178,7 +178,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
           // find matrix
           int l = model->attLookup[it->first];
-          Matrix m;
+          glm::mat4 m;
           glm::vec3 pos;
           if (l>-1)
           {
@@ -213,7 +213,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
 // Private methods
 //--------------------------------------------------------------------
-bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, glm::vec3 pos) const
+bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, glm::mat4 mat, glm::vec3 pos) const
 {
   bool vertMsg = false;
   // output all the vertice data
@@ -228,7 +228,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
-        glm::vec3 vert;
+        glm::vec4 vert;
         if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
         {
           if (vertMsg == false)
@@ -236,7 +236,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Verticies";
             vertMsg = true;
           }
-          vert = mat * (model->vertices[a] + pos);
+          vert = mat * glm::vec4((model->vertices[a] + pos), 1.0);
         }
         else
         {
@@ -245,7 +245,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Original Verticies";
             vertMsg = true;
           }
-          vert = mat * (model->origVertices[a].pos + pos);
+          vert = mat * glm::vec4((model->origVertices[a].pos + pos), 1.0);
         }
         MakeModelFaceForwards(vert);
         vert *= 1.0;

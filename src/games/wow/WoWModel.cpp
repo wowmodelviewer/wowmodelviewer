@@ -621,7 +621,7 @@ void WoWModel::initCommon()
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
-    vector<TXID> txids;
+    std::vector<TXID> txids;
 
     if (gamefile->isChunked() && gamefile->setChunk("TXID"))
     {
@@ -857,9 +857,9 @@ void WoWModel::initRaceInfos()
 }
 
 
-vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
+std::vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {
-  vector<TXID> txids;
+  std::vector<TXID> txids;
 
   if (f->setChunk("TXID"))
   {
@@ -873,9 +873,9 @@ vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
   return txids;
 }
 
-vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+std::vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
-  vector<AFID> afids;
+  std::vector<AFID> afids;
 
   if (f->setChunk("AFID"))
   {
@@ -891,7 +891,7 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
@@ -963,7 +963,7 @@ void WoWModel::initAnimated()
     if (skelFile->open())
     {
       // skelFile->dumpStructure();
-      vector<AFID> afids = readAFIDSFromFile(skelFile);
+      std::vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
@@ -1045,7 +1045,7 @@ void WoWModel::initAnimated()
   }
   else if (header.nAnimations > 0)
   {
-    vector<AFID> afids;
+    std::vector<AFID> afids;
 
     if (gamefile->isChunked() && gamefile->setChunk("AFID"))
     {
@@ -1617,8 +1617,8 @@ void WoWModel::animate(ssize_t anim)
       {
         if (ov_it->weights[b] > 0)
         {
-          glm::vec3 tv = bones[ov_it->bones[b]].mat * ov_it->pos;
-          glm::vec3 tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
+          glm::vec3 tv = glm::vec3(bones[ov_it->bones[b]].mat * glm::vec4(ov_it->pos, 1.0f));
+          glm::vec3 tn = glm::vec3(bones[ov_it->bones[b]].mrot * glm::vec4(ov_it->normal, 1.0f));
           v += tv * ((float)ov_it->weights[b] / 255.0f);
           n += tn * ((float)ov_it->weights[b] / 255.0f);
         }
@@ -1642,8 +1642,8 @@ void WoWModel::animate(ssize_t anim)
   {
     if (lights[i].parent >= 0)
     {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+      lights[i].tpos = glm::vec3(bones[lights[i].parent].mat * glm::vec4(lights[i].pos, 1.0f));
+      lights[i].tdir = glm::vec3(bones[lights[i].parent].mrot * glm::vec4(lights[i].dir, 1.0f));
     }
   }
 
@@ -2389,7 +2389,7 @@ void WoWModel::refresh8x()
   tex.reset(infos.textureLayoutID);
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
-  // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
+  // std::std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
 
   if (foundTextures.size() > 0)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), -1, 0);
@@ -3098,7 +3098,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   {
     out << "    <Animation id=\"" << i << "\">" << endl;
     out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
-    string strName;
+    std::string strName;
     QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
     sqlResult anim = GAMEDATABASE.sqlQuery(query);
     if (anim.valid && !anim.empty())

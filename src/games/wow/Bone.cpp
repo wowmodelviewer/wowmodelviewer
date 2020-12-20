@@ -8,6 +8,9 @@
 #include "Bone.h"
 
 #include "GL/glew.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 
 #include "logger/Logger.h"
 
@@ -16,29 +19,25 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
   if (calc)
     return;
 
-  Matrix m;
+  glm::mat4 m(1.0f);
   glm::fquat q;
 
   bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
-  if (tr) {
-    m.translation(pivot);
+  if (tr) 
+  {
+    m = glm::translate(m, pivot);
 
-    if (trans.uses(anim)) {
-      glm::vec3 tr = trans.getValue(anim, time);
-      m *= Matrix::newTranslation(tr);
-    }
+    if (trans.uses(anim))
+      m = glm::translate(m, trans.getValue(anim, time));
 
-    if (rot.uses(anim) && rotate) {
-      q = rot.getValue(anim, time);
-      m *= Matrix::newQuatRotate(q);
-    }
+    if (rot.uses(anim) && rotate)
+      m = m * glm::inverse(glm::toMat4(rot.getValue(anim, time))); // inverse is needed when using glm::mat4 (still not figured out why)
 
-    if (scale.uses(anim)) {
-      glm::vec3 sc = scale.getValue(anim, time);
-      m *= Matrix::newScale(sc);
-    }
+    if (scale.uses(anim))
+      m = glm::scale(m, scale.getValue(anim, time));
 
-    if (billboard) {
+    if (billboard)
+    {
       float modelview[16];
       glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
@@ -46,32 +45,42 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
       glm::vec3 vUp = glm::vec3(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
       //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
       vRight = vRight * -1.f;
-      m.m[0][2] = vRight.x;
-      m.m[1][2] = vRight.y;
-      m.m[2][2] = vRight.z;
-      m.m[0][1] = vUp.x;
-      m.m[1][1] = vUp.y;
-      m.m[2][1] = vUp.z;
+      m[0][2] = vRight.x;
+      m[1][2] = vRight.y;
+      m[2][2] = vRight.z;
+      m[0][1] = vUp.x;
+      m[1][1] = vUp.y;
+      m[2][1] = vUp.z;
     }
+    
+    m = glm::translate(m, pivot * -1.0f);
 
-    m *= Matrix::newTranslation(pivot*-1.0f);
+  }
 
-  } else m.unit();
-
-  if (parent > -1) {
+  if (parent > -1) 
+  {
     allbones[parent].calcMatrix(allbones, anim, time, rotate);
     mat = allbones[parent].mat * m;
-  } else mat = m;
+  }
+  else
+  {
+    mat = m;
+  }
 
   // transform matrix for normal vectors ... ??
-  if (rot.uses(anim) && rotate) {
+  if (rot.uses(anim) && rotate) 
+  {
     if (parent>=0)
-      mrot = allbones[parent].mrot * Matrix::newQuatRotate(q);
+      mrot = allbones[parent].mrot * glm::inverse(glm::toMat4(q));
     else
-      mrot = Matrix::newQuatRotate(q);
-  } else mrot.unit();
+      mrot = glm::inverse(glm::toMat4(q));
+  }
+  else
+  {
+    mrot = glm::mat4(1.0f);
+  }
 
-  transPivot = mat * pivot;
+  transPivot = glm::vec3(mat * glm::vec4(pivot, 1.0f));
 
   calc = true;
 }

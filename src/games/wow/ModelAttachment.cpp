@@ -8,9 +8,10 @@
 #include "ModelAttachment.h"
 
 #include "Bone.h"
-#include "matrix.h"
 #include "WoWModel.h"
 #include "GL/glew.h"
+
+#include "glm/gtc/type_ptr.hpp"
 
 
 
@@ -23,17 +24,17 @@ void ModelAttachment::init(ModelAttachmentDef &mad)
 
 void ModelAttachment::setup()
 {
-  Matrix m = model->bones[bone].mat;
-  m.transpose();
-  glMultMatrixf(m);
+  glm::mat4 m = model->bones[bone].mat;
+  m = glm::transpose(m);
+  glMultMatrixf(glm::value_ptr(m));
   glTranslatef(pos.x, pos.y, pos.z);
 }
 
 void ModelAttachment::setupParticle()
 {
-  Matrix m = model->bones[bone].mat;
-  m.transpose();
-  glMultMatrixf(m);
+  glm::mat4 m = model->bones[bone].mat;
+  m = glm::transpose(m);
+  glMultMatrixf(glm::value_ptr(m));
   glTranslatef(pos.x, pos.y, pos.z);
 }
 

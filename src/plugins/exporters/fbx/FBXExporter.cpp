@@ -220,7 +220,7 @@ void FBXExporter::createMeshes()
         LOG_INFO << "Found attached item:" << itemModel->modelname.c_str();
 
         int l = m_p_model->attLookup[it->first];
-        Matrix m;
+        glm::mat4 m;
         glm::vec3 pos;
         if (l > -1)
         {

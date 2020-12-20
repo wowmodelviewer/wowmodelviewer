@@ -90,7 +90,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   std::vector<glm::vec3> bounds;
 
   void refreshMerging();
-  set<WoWModel *> mergedModels;
+  std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
   std::vector<ModelVertex> rawVertices;
@@ -113,9 +113,9 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   bool animGeometry, animBones;
 
-  vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
-  vector<TXID> readTXIDSFromFile(GameFile * f);
+  std::vector<AFID> readAFIDSFromFile(GameFile * f);
+  void readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
+  std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things

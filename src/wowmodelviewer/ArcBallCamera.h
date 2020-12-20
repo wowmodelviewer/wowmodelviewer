@@ -8,8 +8,6 @@
 #ifndef _ARCBALLCAMERA_H_
 #define _ARCBALLCAMERA_H_
 
-#include "matrix.h"
-
 #include "glm/glm.hpp"
 #include "glm/gtc/quaternion.hpp"
 
@@ -55,8 +53,8 @@ class ArcBallCamera
 
     glm::vec3 m_startVec;
     glm::fquat m_rotation;
-    Matrix m_lastRot;
-    Matrix m_transform;
+    glm::mat4 m_lastRot;
+    glm::mat4 m_transform;
 
 };
 
