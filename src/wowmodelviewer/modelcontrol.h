@@ -80,7 +80,7 @@ public:
   void UpdatePCRText(wxColourPickerCtrl *cpc);
   void UpdatePCRTexts();
   bool IsReplacingParticleColors();
-  Vec4D fromColWidget(wxColour col);
+  glm::vec4 fromColWidget(wxColour col);
 };
 
 class ScrWindow : public wxFrame

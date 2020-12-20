@@ -1,7 +1,6 @@
 #ifndef _WMO_LIGHT_H_
 #define _WMO_LIGHT_H_
 
-#include "quaternion.h" // Vec4D
 #include "glm/glm.hpp"
 
 typedef int GLint;
@@ -16,7 +15,7 @@ struct WMOLight {
   float unk[3];
   float r;
 
-  Vec4D fcolor;
+  glm::vec4 fcolor;
 
   void init(GameFile &f);
   void setup(GLint light);

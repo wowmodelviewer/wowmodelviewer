@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QImageWriter>
 #include <QImageReader>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <wx/display.h>
 #include <wx/file.h>
@@ -943,22 +944,22 @@ inline void ModelCanvas::RenderModel()
   // All our lighting related rendering code
   // Use model lighting?
   if (model() && (lightType==LIGHT_MODEL_ONLY)) {
-    Vec4D la;
+    glm::vec4 la;
 
     if (model()->nbLights() > 0) {
-      la = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
+      la = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     } else {
-      la = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
+      la = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     // Set the Model Ambience lighting.
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
 
   // Dynamic
   } else if (lightType == LIGHT_DYNAMIC) {
     for (size_t i=0; i<MAX_LIGHTS; i++) {
       if (g_modelViewer->lightControl->lights[i].enabled && !g_modelViewer->lightControl->lights[i].relative) {
-        glLightfv(GL_LIGHT0 + (GLenum)i, GL_POSITION, g_modelViewer->lightControl->lights[i].pos);
+        glLightfv(GL_LIGHT0 + (GLenum)i, GL_POSITION, glm::value_ptr(g_modelViewer->lightControl->lights[i].pos));
 
         // Draw our 'light cone' to represent the light.
         if (drawLightDir)
@@ -968,7 +969,7 @@ inline void ModelCanvas::RenderModel()
     
   // Ambient lighting is just a single colour applied to all rendered vertices.
   } else if (lightType==LIGHT_AMBIENT) {
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, g_modelViewer->lightControl->lights[0].diffuse);  // use diffuse, as thats our main 'colour setter'
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(g_modelViewer->lightControl->lights[0].diffuse));  // use diffuse, as thats our main 'colour setter'
   }
   // ==============================================
   // This is also redundant
@@ -999,7 +1000,7 @@ inline void ModelCanvas::RenderModel()
     // and if so to apply their settings.
     for (size_t i=0; i<MAX_LIGHTS; i++) {
       if (g_modelViewer->lightControl->lights[i].enabled && g_modelViewer->lightControl->lights[i].relative) {
-        glLightfv(GL_LIGHT0 + (GLenum)i, GL_POSITION, g_modelViewer->lightControl->lights[i].pos);
+        glLightfv(GL_LIGHT0 + (GLenum)i, GL_POSITION, glm::value_ptr(g_modelViewer->lightControl->lights[i].pos));
         
         // Draw our 'light cone' to represent the light.
         if (drawLightDir)
@@ -1232,7 +1233,7 @@ inline void ModelCanvas::RenderWMO()
   InitView();
 
   // Lighting
-  Vec4D la;
+  glm::vec4 la;
   // From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
   for (size_t i=0; i<4; i++) {
     GLuint light = GL_LIGHT0 + (GLuint)i;
@@ -1241,9 +1242,9 @@ inline void ModelCanvas::RenderWMO()
     glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
     glDisable(light);
   }
-  la = Vec4D(0.35f, 0.35f, 0.35f, 1.0f);
+  la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
   glColor3f(1.0f, 1.0f, 1.0f);
   
   
@@ -1287,7 +1288,7 @@ inline void ModelCanvas::RenderADT()
   InitView();
 
   // Lighting
-  Vec4D la;
+  glm::vec4 la;
   // From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
   for (size_t i=0; i<4; i++) {
     GLuint light = GL_LIGHT0 + (GLuint)i;
@@ -1296,9 +1297,9 @@ inline void ModelCanvas::RenderADT()
     glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
     glDisable(light);
   }
-  la = Vec4D(0.35f, 0.35f, 0.35f, 1.0f);
+  la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
   glColor3f(1.0f, 1.0f, 1.0f);
   // --==--
 
@@ -1356,7 +1357,7 @@ inline void ModelCanvas::RenderWMOToBuffer()
   }
 
   // Lighting
-  Vec4D la;
+  glm::vec4 la;
   // From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
   for (size_t i=0; i<4; i++) {
     GLuint light = GL_LIGHT0 + (GLuint)i;
@@ -1365,9 +1366,9 @@ inline void ModelCanvas::RenderWMOToBuffer()
     glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
     glDisable(light);
   }
-  la = Vec4D(0.35f, 0.35f, 0.35f, 1.0f);
+  la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, la);
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
   glColor3f(1.0f, 1.0f, 1.0f);
   // --==--
 
@@ -1475,12 +1476,12 @@ void ModelCanvas::RenderToBuffer()
   /*
   // Use model lighting?
   if (model && (lightType==LT_MODEL_ONLY)) {
-    Vec4D la;
+    glm::vec4 la;
 
     if (model->lights.size() > 0) {
-      la = Vec4D(0.0f, 0.0f, 0.0f, 1.0f);
+      la = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     } else {
-      la = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
+      la = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     // Set the Model Ambience lighting.

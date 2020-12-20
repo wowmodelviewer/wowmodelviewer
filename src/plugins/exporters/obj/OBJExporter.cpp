@@ -377,7 +377,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
       float amb = 0.25f;
-      Vec4D diff = p->ocol;
+      glm::vec4 diff = p->ocol;
 
       QString val;
       val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
@@ -388,7 +388,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
         // Add Lum, just in case there's a non-luminous surface with the same name.
         material = material + "_Lum";
         amb = 1.0f;
-        diff = Vec4D(0,0,0,0);
+        diff = glm::vec4(0,0,0,0);
       }
 
       // If Doublesided

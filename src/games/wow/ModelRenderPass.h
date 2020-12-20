@@ -8,8 +8,9 @@
 #ifndef _MODELRENDERPASS_H_
 #define _MODELRENDERPASS_H_
 
-#include "quaternion.h"
 #include "types.h"
+
+#include "glm/glm.hpp"
 
 class WoWModel;
 
@@ -39,7 +40,7 @@ public:
   bool swrap, twrap;
 
   // colours
-  Vec4D ocol, ecol;
+  glm::vec4 ocol, ecol;
 
   WoWModel * model;
 

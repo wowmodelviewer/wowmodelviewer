@@ -1,6 +1,8 @@
 
 #include "lightcontrol.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "enums.h"
 
 #include "logger/Logger.h"
@@ -12,9 +14,9 @@
 extern const size_t MAX_LIGHTS;
 
 // default colour values
-const static Vec4D def_ambience = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
-const static Vec4D def_diffuse = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
-const static Vec4D def_specular = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
+const static glm::vec4 def_ambience = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const static glm::vec4 def_diffuse = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+const static glm::vec4 def_specular = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 // Inhereit class event table from wxWindow
 IMPLEMENT_CLASS(LightControl, wxWindow)
@@ -181,8 +183,8 @@ void LightControl::Init()
     lights[i].diffuse = def_diffuse;
     lights[i].specular = def_specular;
     //lights[i].colour = glm::vec3(1.0f, 1.0f, 1.0f);
-    lights[i].pos = Vec4D(0.0f, 0.2f, 1.0f, 1.0f);
-    lights[i].target = Vec4D(0.0f, -1.0f, 0.0f, 1.0f);
+    lights[i].pos = glm::vec4(0.0f, 0.2f, 1.0f, 1.0f);
+    lights[i].target = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
     lights[i].enabled = false;
     lights[i].relative = false;
     lights[i].type = LIGHT_DIRECTIONAL;
@@ -195,10 +197,10 @@ void LightControl::Init()
   // Turn on the first light by default
   lights[0].enabled = true;
   glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, lights[0].diffuse);
-  glLightfv(GL_LIGHT0, GL_AMBIENT, lights[0].ambience);
-  glLightfv(GL_LIGHT0, GL_SPECULAR, lights[0].specular);
-  glLightfv(GL_LIGHT0, GL_POSITION, lights[0].pos);
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, glm::value_ptr(lights[0].diffuse));
+  glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(lights[0].ambience));
+  glLightfv(GL_LIGHT0, GL_SPECULAR, glm::value_ptr(lights[0].specular));
+  glLightfv(GL_LIGHT0, GL_POSITION, glm::value_ptr(lights[0].pos));
 
   Update();
 }
@@ -217,7 +219,7 @@ void LightControl::SetAmbience()
 {
   lights[activeLight].ambience = DoSetColour(lights[activeLight].ambience);
 
-  glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, lights[activeLight].ambience);
+  glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
 
   wxColour col((unsigned char)(lights[activeLight].ambience.x*255.0f), (unsigned char)(lights[activeLight].ambience.y*255.0f), (unsigned char)(lights[activeLight].ambience.z*255.0f));
   ambience->SetBackgroundColour(col);
@@ -228,18 +230,18 @@ void LightControl::SetDiffuse()
   lights[activeLight].diffuse = DoSetColour(lights[activeLight].diffuse);
 
   // Update the opengl scene lighting
-  glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, lights[activeLight].diffuse);
+  glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
   
   wxColour col((unsigned char)(lights[activeLight].diffuse.x*255.0f), (unsigned char)(lights[activeLight].diffuse.y*255.0f), (unsigned char)(lights[activeLight].diffuse.z*255.0f));
   diffuse->SetBackgroundColour(col);
 }
 
-void LightControl::SetPos(Vec4D p)
+void LightControl::SetPos(glm::vec4 p)
 {
   lights[activeLight].pos = p;
 }
 
-void LightControl::SetTarget(Vec4D t)
+void LightControl::SetTarget(glm::vec4 t)
 {
   lights[activeLight].target = t;
 }
@@ -248,7 +250,7 @@ void LightControl::SetSpecular()
 {
   lights[activeLight].specular = DoSetColour(lights[activeLight].specular);
 
-  glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, lights[activeLight].specular);
+  glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
 
   wxColour col((unsigned char)(lights[activeLight].specular.x*255.0f), (unsigned char)(lights[activeLight].specular.y*255.0f), (unsigned char)(lights[activeLight].specular.z*255.0f));
   specular->SetBackgroundColour(col);
@@ -271,8 +273,8 @@ void LightControl::OnButton(wxCommandEvent &event)
     lights[activeLight].diffuse = def_diffuse;
     lights[activeLight].specular = def_specular;
     //lights[activeLight].colour = glm::vec3(1.0f, 1.0f, 1.0f);
-    lights[activeLight].pos = Vec4D(0.0f, 0.2f, 1.0f, 1.0f);
-    lights[activeLight].target = Vec4D(0.0f, -1.0f, 0.0f, 1.0f);
+    lights[activeLight].pos = glm::vec4(0.0f, 0.2f, 1.0f, 1.0f);
+    lights[activeLight].target = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
     lights[activeLight].enabled = (activeLight==0) ? true : false;
     lights[activeLight].relative = false;
     lights[activeLight].type = LIGHT_DIRECTIONAL;
@@ -281,9 +283,9 @@ void LightControl::OnButton(wxCommandEvent &event)
     lights[activeLight].linear_int = 0.0f;
     lights[activeLight].quadradic_int = 0.0f;
 
-    glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, lights[activeLight].diffuse);
-    glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, lights[activeLight].ambience);
-    glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, lights[activeLight].specular);
+    glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
+    glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
+    glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
 
     Update();
   }
@@ -300,8 +302,8 @@ void LightControl::OnCombo(wxCommandEvent &event)
 void LightControl::OnText(wxCommandEvent &event)
 {
   int id = event.GetId();
-  Vec4D p = lights[activeLight].pos;
-  Vec4D t = lights[activeLight].target;
+  glm::vec4 p = lights[activeLight].pos;
+  glm::vec4 t = lights[activeLight].target;
 
   if (id==ID_LIGHTPOSX)
     from_string<float>(p.x, std::string(txtPosX->GetValue().mb_str()), dec);
@@ -367,7 +369,7 @@ void LightControl::OnRadio(wxCommandEvent &event)
 
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);          // This seems to have no effect?
     glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, lights[activeLight].target);  // Lighting target
+    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
 
   } else if(event.GetId() == ID_LIGHTDIRECTIONAL) {
@@ -406,7 +408,7 @@ void LightControl::OnScroll(wxScrollEvent &event)
   } else { // its a spot light
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);          // This seems to have no effect?
     glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, lights[activeLight].target);  // Lighting target
+    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
   }
 }
@@ -416,12 +418,12 @@ Light LightControl::GetCurrentLight()
   return lights[activeLight];
 }
 
-Vec4D LightControl::GetCurrentPos()
+glm::vec4 LightControl::GetCurrentPos()
 {
   return lights[activeLight].pos;
 }
 
-Vec4D LightControl::GetCurrentAmbience()
+glm::vec4 LightControl::GetCurrentAmbience()
 {
   return lights[activeLight].ambience;
 }
@@ -443,7 +445,7 @@ glm::vec3 LightControl::DoSetColour(const glm::vec3 &defColor)
   return defColor;
 }
 
-Vec4D LightControl::DoSetColour(const Vec4D &defColor)
+glm::vec4 LightControl::DoSetColour(const glm::vec4 &defColor)
 {
   wxColourData data;
   wxColour dcol((unsigned char)(defColor.x*255.0f), (unsigned char)(defColor.y*255.0f), (unsigned char)(defColor.z*255.0f));
@@ -455,7 +457,7 @@ Vec4D LightControl::DoSetColour(const Vec4D &defColor)
   {
     wxColourData retData = dialog.GetColourData();
     wxColour col = retData.GetColour();
-    return Vec4D(col.Red()/255.0f, col.Green()/255.0f, col.Blue()/255.0f, 1.0f);
+    return glm::vec4(col.Red()/255.0f, col.Green()/255.0f, col.Blue()/255.0f, 1.0f);
   }
   return defColor;
 }
@@ -548,7 +550,7 @@ void LightControl::Update()
     
     //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);            // This seems to have no effect?
     glLightf(lightID, GL_SPOT_CUTOFF, lights[activeLight].arc);      // Lighting arc
-    glLightfv(lightID, GL_SPOT_DIRECTION, lights[activeLight].target);  // Lighting target
+    glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[activeLight].target));  // Lighting target
     //glLightf(lightID, GL_SPOT_ATTENUATION, lights[i].constant_int);
 
   } else if(lights[activeLight].type == LIGHT_DIRECTIONAL) {
@@ -558,10 +560,10 @@ void LightControl::Update()
   }
 
   //glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, lights[activeLight].diffuse);
-  glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, lights[activeLight].ambience);
-  glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, lights[activeLight].specular);
-  glLightfv(GL_LIGHT0+activeLight, GL_POSITION, lights[activeLight].pos);  
+  glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
+  glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
+  glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
+  glLightfv(GL_LIGHT0+activeLight, GL_POSITION, glm::value_ptr(lights[activeLight].pos));
 }
 
 void LightControl::UpdateGL()
@@ -576,10 +578,10 @@ void LightControl::UpdateGL()
     else
       glDisable(lightID);
 
-    glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, lights[i].diffuse);
-    glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, lights[i].ambience);
-    glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, lights[i].specular);
-    glLightfv(GL_LIGHT0+activeLight, GL_POSITION, lights[i].pos);
+    glLightfv(GL_LIGHT0+activeLight, GL_DIFFUSE, glm::value_ptr(lights[i].diffuse));
+    glLightfv(GL_LIGHT0+activeLight, GL_AMBIENT, glm::value_ptr(lights[i].ambience));
+    glLightfv(GL_LIGHT0+activeLight, GL_SPECULAR, glm::value_ptr(lights[i].specular));
+    glLightfv(GL_LIGHT0+activeLight, GL_POSITION, glm::value_ptr(lights[i].pos));
 
     glLightf(lightID, GL_CONSTANT_ATTENUATION, 1.0f);
     glLightf(lightID, GL_LINEAR_ATTENUATION, 0.0f);
@@ -596,7 +598,7 @@ void LightControl::UpdateGL()
     } else if(lights[activeLight].type == LIGHT_SPOT) {
       //glLightf(lightID, GL_SPOT_EXPONENT, 8.0f);            // This seems to have no effect?
       glLightf(lightID, GL_SPOT_CUTOFF, lights[i].arc);      // Lighting arc
-      glLightfv(lightID, GL_SPOT_DIRECTION, lights[i].target);  // Lighting target
+      glLightfv(lightID, GL_SPOT_DIRECTION, glm::value_ptr(lights[i].target));  // Lighting target
 
     }  
   }

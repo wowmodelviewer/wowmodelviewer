@@ -9,8 +9,6 @@
 
 #include "logger/Logger.h"
 
-#include "quaternion.h"
-
 #include <math.h>
 
 #include "Gl/glew.h"

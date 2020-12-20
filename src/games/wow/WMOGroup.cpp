@@ -549,9 +549,9 @@ void WMOGroup::drawLiquid()
   // TODO: setup some kind of indoor lighting... ?
   //gWorld->outdoorLights(false);
   glEnable(GL_LIGHT2);
-  glLightfv(GL_LIGHT2, GL_AMBIENT, Vec4D(0.1f,0.1f,0.1f,1));
-  glLightfv(GL_LIGHT2, GL_DIFFUSE, Vec4D(0.8f,0.8f,0.8f,1));
-  glLightfv(GL_LIGHT2, GL_POSITION, Vec4D(0,1,0,0));
+  glLightfv(GL_LIGHT2, GL_AMBIENT, glm::value_ptr(glm::vec4(0.1f,0.1f,0.1f,1)));
+  glLightfv(GL_LIGHT2, GL_DIFFUSE, glm::value_ptr(glm::vec4(0.8f,0.8f,0.8f,1)));
+  glLightfv(GL_LIGHT2, GL_POSITION, glm::value_ptr(glm::vec4(0,1,0,0)));
   }
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);

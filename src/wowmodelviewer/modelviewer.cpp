@@ -1617,7 +1617,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
       }
       else {
         glEnable(GL_COLOR_MATERIAL);
-        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, Vec4D(0.4f,0.4f,0.4f,1.0f));
+        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(glm::vec4(0.4f,0.4f,0.4f,1.0f)));
       }
 
       lightControl->Update();

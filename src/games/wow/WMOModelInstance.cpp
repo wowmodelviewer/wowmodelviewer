@@ -4,7 +4,6 @@
 #include "GameFile.h"
 #include "matrix.h"
 #include "ModelManager.h"
-#include "quaternion.h"
 #include "WoWModel.h"
 
 #include "GL/glew.h"

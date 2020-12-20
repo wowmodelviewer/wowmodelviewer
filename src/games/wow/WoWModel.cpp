@@ -95,9 +95,9 @@ void glInitAll()
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
-  glLightfv(GL_LIGHT0, GL_AMBIENT, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
-  glLightfv(GL_LIGHT0, GL_SPECULAR, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+  glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+  glLightfv(GL_LIGHT0, GL_SPECULAR, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
   glDisable(GL_LIGHT1);
   glDisable(GL_LIGHT2);
   glDisable(GL_LIGHT3);
@@ -3217,8 +3217,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <geoset>" << geoset->id << "</geoset>" << endl;
     out << "      <swrap>" << p->swrap << "</swrap>" << endl;
     out << "      <twrap>" << p->twrap << "</twrap>" << endl;
-    out << "      <ocol>" << p->ocol << "</ocol>" << endl;
-    out << "      <ecol>" << p->ecol << "</ecol>" << endl;
+    out << "      <ocol>" << p->ocol.x << " " << p->ocol.y << " " << p->ocol.z << " " << p->ocol.w << "</ocol>" << endl;
+    out << "      <ecol>" << p->ecol.x << " " << p->ecol.y << " " << p->ecol.z << " " << p->ecol.w << "</ecol>" << endl;
     out << "    </RenderPass>" << endl;
   }
   out << "  </RenderPasses>" << endl;

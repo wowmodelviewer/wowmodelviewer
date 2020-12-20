@@ -88,7 +88,6 @@ set(headers animated.h
       ModelRenderPass.h
       ModelTransparency.h
       particle.h
-      quaternion.h
       RaceInfos.h
       RenderTexture.h
       TabardDetails.h

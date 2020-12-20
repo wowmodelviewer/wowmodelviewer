@@ -437,9 +437,9 @@ void ModelControl::Update()
   {
     pcr.clear();
     particleColorSet cols11, cols12, cols13;
-    cols11 = { Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0) };
-    cols12 = { Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0) };
-    cols13 = { Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0), Vec4D(0.0, 0.0, 0.0, 1.0) };
+    cols11 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
+    cols12 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
+    cols13 = { glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0) };
     pcr = { cols11, cols12, cols13 };
   }
   particlecolreplace->SetValue(false);
@@ -635,9 +635,9 @@ void ModelControl::OnSlider(wxScrollEvent &event)
   }
 }
 
-Vec4D ModelControl::fromColWidget(wxColour col)
+glm::vec4 ModelControl::fromColWidget(wxColour col)
 {
-  return Vec4D((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
+  return glm::vec4((float)col.Red()/255.0f, (float)col.Green()/255.0f, (float)col.Blue()/255.0f, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent &event)
@@ -696,7 +696,7 @@ void ModelControl::OnColourChange(wxColourPickerEvent &event)
   if (!init)
     return;
 
-  Vec4D col = fromColWidget(event.GetColour());
+  glm::vec4 col = fromColWidget(event.GetColour());
   wxColourPickerCtrl *cpc;
 
   switch (event.GetId())

@@ -17,7 +17,6 @@
 #include "logger/Logger.h"
 
 #include "GL/glew.h"
-#include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
@@ -81,7 +80,7 @@ void ModelRenderPass::deinit()
 
     //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     //glMaterialfv(GL_FRONT, GL_AMBIENT, ocol);
-    //ocol = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
+    //ocol = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     //glMaterialfv(GL_FRONT, GL_DIFFUSE, ocol);
   }
 }
@@ -95,8 +94,8 @@ bool ModelRenderPass::init()
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  ocol = Vec4D(1.0f, 1.0f, 1.0f, model->trans);
-  ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
+  ocol = glm::vec4(1.0f, 1.0f, 1.0f, model->trans);
+  ecol = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
   // emissive colors
   if (color != -1 && color < (int16)model->colors.size() && model->colors[color].color.uses(0))
@@ -114,8 +113,8 @@ bool ModelRenderPass::init()
     else
       ocol.x = ocol.y = ocol.z = 0;
 
-    ecol = Vec4D(c, ocol.w);
-    glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
+    ecol = glm::vec4(c, ocol.w);
+    glMaterialfv(GL_FRONT, GL_EMISSION, glm::value_ptr(ecol));
   }
 
   // opacity
@@ -224,7 +223,7 @@ bool ModelRenderPass::init()
   }
 
   // color
-  glColor4fv(ocol);
+  glColor4fv(glm::value_ptr(ocol));
   //glMaterialfv(GL_FRONT, GL_SPECULAR, ocol);
 
   // don't use lighting on the surface

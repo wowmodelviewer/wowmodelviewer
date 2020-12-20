@@ -1,6 +1,7 @@
 #include "maptile.h"
 
 #include <cassert>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "logger/Logger.h"
 
@@ -823,8 +824,8 @@ void MapTile::draw()
   glColor4f(1,1,1,1);
   // if we're using shaders let's give it some specular
   if (video.supportShaders) {
-    Vec4D spec_color(1,1,1,1);
-    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec_color);
+    glm::vec4 spec_color(1,1,1,1);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, glm::value_ptr(spec_color));
     glMateriali(GL_FRONT_AND_BACK, GL_SHININESS, 20);
 
     glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);

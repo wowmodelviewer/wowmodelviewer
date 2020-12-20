@@ -16,7 +16,6 @@ class ParticleSystem;
 class RibbonEmitter;
 
 #include "animated.h"
-#include "quaternion.h" // Vec4D
 
 #include <list>
 #include "GL/glew.h"
@@ -31,7 +30,7 @@ struct Particle
   glm::vec3 tpos;
   float size, life, maxlife;
   size_t tile;
-  Vec4D color;
+  glm::vec4 color;
 };
 
 typedef std::list<Particle> ParticleList;
@@ -92,14 +91,14 @@ public:
   Animated<uint16> enabled;
   Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw;
   //Animated<float>  deacceleration;
-  Vec4D colors[3];
+  glm::vec4 colors[3];
   float sizes[3];
   bool multitexture, doNotTrail;
   int particleColID;
   bool replaceParticleColors;
   // Start, Mid and End colours, for cases where the model's particle colours
   // are overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
-  typedef std::vector<Vec4D> particleColorSet;
+  typedef std::vector<glm::vec4> particleColorSet;
   // The particle will get its replacement colour set from 0, 1 or 2, depending on
   // whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
@@ -195,7 +194,7 @@ class RibbonEmitter
   int numsegs;
 
   glm::vec3 tpos;
-  Vec4D tcolor;
+  glm::vec4 tcolor;
   float tabove, tbelow;
 
   GLuint texture;

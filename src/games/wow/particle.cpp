@@ -50,7 +50,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   for (size_t i=0; i<3; i++)
   {
     float opacity = *(short*)(f->getBuffer()+mta.p.opacity.ofsKeys+i*2);
-    colors[i] = Vec4D(colors2[i].x/255.0f, colors2[i].y/255.0f,
+    colors[i] = glm::vec4(colors2[i].x/255.0f, colors2[i].y/255.0f,
         colors2[i].z/255.0f, opacity/32767.0f);
     sizes[i] = (*(float*)(f->getBuffer()+mta.p.sizes.ofsKeys+i*sizeof(glm::vec2)))*mta.p.scales[i];
   }
@@ -145,7 +145,7 @@ void ParticleSystem::initTile(glm::vec2 *tc, int num)
 
 void ParticleSystem::update(float dt)
 {
-  Vec4D colVals[3];
+  glm::vec4 colVals[3];
 
   if (replaceParticleColors && particleColID >= 11 && particleColID <= 13)
   {
@@ -172,7 +172,7 @@ void ParticleSystem::update(float dt)
     {
       Particle &p = *it;
       float rlife = p.life / p.maxlife;
-      p.color = lifeRamp<Vec4D>(rlife, mid, colVals[0], colVals[1], colVals[2]);
+      p.color = lifeRamp<glm::vec4>(rlife, mid, colVals[0], colVals[1], colVals[2]);
     }
     return;
   }
@@ -253,7 +253,7 @@ void ParticleSystem::update(float dt)
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
     p.size = lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
-    p.color = lifeRamp<Vec4D>(rlife, mid, colVals[0], colVals[1], colVals[2]);
+    p.color = lifeRamp<glm::vec4>(rlife, mid, colVals[0], colVals[1], colVals[2]);
 
     // kill off old particles
     if (rlife >= 1.0f)
@@ -412,7 +412,7 @@ void ParticleSystem::draw()
   {
     if (tiles.size() - 1 < it->tile) // Alfred, 2009.08.07, error prevent
       break;
-    glColor4fv(it->color);
+    glColor4fv(glm::value_ptr(it->color));
     size = it->size;
     if (doNotTrail)
       pos = it->tpos;
@@ -801,7 +801,7 @@ void RibbonEmitter::setup(size_t anim, size_t time)
   }
 
   tpos = ntpos;
-  tcolor = Vec4D(color.getValue(anim, time), opacity.getValue(anim, time));
+  tcolor = glm::vec4(color.getValue(anim, time), opacity.getValue(anim, time));
 
   tabove = above.getValue(anim, time);
   tbelow = below.getValue(anim, time);
@@ -831,7 +831,7 @@ void RibbonEmitter::draw()
   glDisable(GL_CULL_FACE);
   glDepthMask(GL_FALSE);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-  glColor4fv(tcolor);
+  glColor4fv(glm::value_ptr(tcolor));
 
   glBegin(GL_QUAD_STRIP);
   std::list<RibbonSegment>::iterator it = segs.begin();

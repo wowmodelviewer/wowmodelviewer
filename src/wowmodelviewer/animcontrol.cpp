@@ -461,13 +461,13 @@ QString AnimControl::GetModelFolder(WoWModel *m)
   return QString(m->itemName().toStdString().c_str()).section('/', 0, -2) + '/';
 }
 
-Vec4D AnimControl::fromARGB(int color)
+glm::vec4 AnimControl::fromARGB(int color)
 {
   const float alpha = ((color & 0xFF000000) >> 24) / 255.0f;
   const float red = ((color & 0x00FF0000) >> 16) / 255.0f;
   const float green = ((color & 0x0000FF00) >>  8) / 255.0f;
   const float blue = ((color & 0x000000FF)      ) / 255.0f;
-  return Vec4D(red, green, blue, alpha);
+  return glm::vec4(red, green, blue, alpha);
 // Note: the above alpha is probably irrelevant. It doesn't seem to be included. We always set the particle to its default one
 }
 
@@ -573,7 +573,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));
@@ -713,7 +713,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));
@@ -762,7 +762,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));

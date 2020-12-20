@@ -1,5 +1,7 @@
 #include "WMOLight.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "GameFile.h"
 
 #include "GL/glew.h"
@@ -12,7 +14,7 @@ void WMOLight::setup(GLint light)
   GLfloat LightPosition[] = { pos.x, pos.y, pos.z, 0.0f };
 
   glLightfv(light, GL_AMBIENT, LightAmbient);
-  glLightfv(light, GL_DIFFUSE, fcolor);
+  glLightfv(light, GL_DIFFUSE, glm::value_ptr(fcolor));
   glLightfv(light, GL_POSITION, LightPosition);
 
   glEnable(light);
@@ -20,17 +22,17 @@ void WMOLight::setup(GLint light)
 
 void WMOLight::setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol)
 {
-  Vec4D position(dir, 0);
-  //Vec4D position(0,1,0,0);
+  glm::vec4 position(dir, 0);
+  //glm::vec4 position(0,1,0,0);
 
-  Vec4D ambient = Vec4D(lcol * 0.3f, 1);
-  //Vec4D ambient = Vec4D(0.101961f, 0.062776f, 0, 1);
-  Vec4D diffuse = Vec4D(lcol, 1);
-  //Vec4D diffuse = Vec4D(0.439216f, 0.266667f, 0, 1);
+  glm::vec4 ambient = glm::vec4(lcol * 0.3f, 1);
+  //glm::vec4 ambient = glm::vec4(0.101961f, 0.062776f, 0, 1);
+  glm::vec4 diffuse = glm::vec4(lcol, 1);
+  //glm::vec4 diffuse = glm::vec4(0.439216f, 0.266667f, 0, 1);
 
-  glLightfv(light, GL_AMBIENT, ambient);
-  glLightfv(light, GL_DIFFUSE, diffuse);
-  glLightfv(light, GL_POSITION, position);
+  glLightfv(light, GL_AMBIENT, glm::value_ptr(ambient));
+  glLightfv(light, GL_DIFFUSE, glm::value_ptr(diffuse));
+  glLightfv(light, GL_POSITION, glm::value_ptr(position));
 
   glEnable(light);
 }
@@ -69,7 +71,7 @@ void WMOLight::init(GameFile &f)
   float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
   float fb = ((color & 0x000000ff)) / 255.0f;
 
-  fcolor = Vec4D(fr, fg, fb, fa);
+  fcolor = glm::vec4(fr, fg, fb, fa);
   fcolor *= intensity;
   fcolor.w = 1.0f;
 

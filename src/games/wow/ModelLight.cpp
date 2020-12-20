@@ -7,8 +7,9 @@
 
 #include "ModelLight.h"
 
+#include <glm/gtc/type_ptr.hpp>
 
-#include "quaternion.h" // Vec4D
+
 #include "wow_enums.h"
 #include "logger/Logger.h"
 
@@ -30,22 +31,22 @@ void ModelLight::init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & gl
 
 void ModelLight::setup(size_t time, GLuint l)
 {
-  Vec4D ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
-  Vec4D diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
-  Vec4D p;
+  glm::vec4 ambcol(ambColor.getValue(0, time) * ambIntensity.getValue(0, time), 1.0f);
+  glm::vec4 diffcol(diffColor.getValue(0, time) * diffIntensity.getValue(0, time), 1.0f);
+  glm::vec4 p;
   if (type==MODELLIGHT_DIRECTIONAL) {
     // directional
-    p = Vec4D(tdir, 0.0f);
+    p = glm::vec4(tdir, 0.0f);
   } else if (type==MODELLIGHT_POINT) {
     // point
-    p = Vec4D(tpos, 1.0f);
+    p = glm::vec4(tpos, 1.0f);
   } else {
-    p = Vec4D(tpos, 1.0f);
+    p = glm::vec4(tpos, 1.0f);
     LOG_ERROR << "Light type" << type << "is unknown.";
   }
   //gLog("Light %d (%f,%f,%f) (%f,%f,%f) [%f,%f,%f]\n", l-GL_LIGHT4, ambcol.x, ambcol.y, ambcol.z, diffcol.x, diffcol.y, diffcol.z, p.x, p.y, p.z);
-  glLightfv(l, GL_POSITION, p);
-  glLightfv(l, GL_DIFFUSE, diffcol);
-  glLightfv(l, GL_AMBIENT, ambcol);
+  glLightfv(l, GL_POSITION, glm::value_ptr(p));
+  glLightfv(l, GL_DIFFUSE, glm::value_ptr(diffcol));
+  glLightfv(l, GL_AMBIENT, glm::value_ptr(ambcol));
   glEnable(l);
 }

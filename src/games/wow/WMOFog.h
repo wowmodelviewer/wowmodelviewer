@@ -1,7 +1,6 @@
 #ifndef _WMO_FOG_H_
 #define _WMO_FOG_H_
 
-#include "quaternion.h" // Vec4D
 #include "glm/glm.hpp"
 
 class GameFile;
@@ -19,7 +18,7 @@ struct WMOFog
   float f3; // Unknown (-1 or -0.5)
   unsigned int color2;
   // read to here (0x30 bytes)
-  Vec4D color;
+  glm::vec4 color;
   void init(GameFile &f);
   void setup();
 };

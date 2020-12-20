@@ -17,7 +17,6 @@
 #include "CharDetails.h"
 #include "CharTexture.h"
 #include "displayable.h"
-#include "quaternion.h" // Vec4D
 #include "Model.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
@@ -135,7 +134,7 @@ public:
 
   // Start, Mid and End colours, for cases where the model's particle colours are
   // overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
-  typedef std::vector<Vec4D> particleColorSet;
+  typedef std::vector<glm::vec4> particleColorSet;
 
   // The particle will get its replacement colour set from 0, 1 or 2,
   // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
