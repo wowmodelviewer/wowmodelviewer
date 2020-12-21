@@ -23,8 +23,8 @@ struct ModelAttachment
   WoWModel *model;
 
   void init(ModelAttachmentDef &mad);
-  void setup();
-  void setupParticle();
+  void setup() const;
+  void setupParticle() const;
 };
 
 

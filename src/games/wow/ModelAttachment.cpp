@@ -22,19 +22,15 @@ void ModelAttachment::init(ModelAttachmentDef &mad)
   id = mad.id;
 }
 
-void ModelAttachment::setup()
+void ModelAttachment::setup() const
 {
-  glm::mat4 m = model->bones[bone].mat;
-  m = glm::transpose(m);
-  glMultMatrixf(glm::value_ptr(m));
+  glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
   glTranslatef(pos.x, pos.y, pos.z);
 }
 
-void ModelAttachment::setupParticle()
+void ModelAttachment::setupParticle() const
 {
-  glm::mat4 m = model->bones[bone].mat;
-  m = glm::transpose(m);
-  glMultMatrixf(glm::value_ptr(m));
+  glMultMatrixf(glm::value_ptr(model->bones[bone].mat));
   glTranslatef(pos.x, pos.y, pos.z);
 }
 
