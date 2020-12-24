@@ -19,6 +19,7 @@
 
 #include <QXmlStreamWriter>
 
+#include "glm/gtc/epsilon.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"
 
@@ -2184,9 +2185,8 @@ void WoWModel::refreshMerging()
     {
       glm::vec3 pivot = modelsIt->bones[i].pivot;
       for (uint b = 0; b < bones.size(); ++b)
-      {
-        glm::vec3 p = bones[b].pivot;
-        if ((p == pivot) && 
+      { 
+        if (glm::all(glm::epsilonEqual(bones[b].pivot, pivot, glm::vec3(0.0001f))) &&
             (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
           boneConvertTable[i] = b;
