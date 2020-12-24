@@ -224,7 +224,7 @@ void FBXExporter::createMeshes()
         glm::vec3 pos;
         if (l > -1)
         {
-          m = m_p_model->bones[m_p_model->atts[l].bone].mat;
+          m = glm::inverse(m_p_model->bones[m_p_model->atts[l].bone].mat);
         }
 
         FbxNode* itemMeshNode = FBXHeaders::createMesh(m_p_manager, m_p_scene, itemModel, m);

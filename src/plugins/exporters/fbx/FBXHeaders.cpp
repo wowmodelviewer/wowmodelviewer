@@ -39,6 +39,10 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/transform.hpp"
+
+#include "glm/gtx/string_cast.hpp"
+
 
 // Other libraries
 #include "FBXAnimExporter.h"
@@ -88,23 +92,23 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 }
 
 // Create mesh.
-FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, glm::mat4 matrix, glm::vec3 offset)
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, const glm::mat4 & matrix, const glm::vec3 & offset)
 {
   // Create a node for the mesh.
   FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
 
   // Create new Matrix Data
-  glm::mat4 m = glm::scale(glm::mat4(1.0f), glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
+  const auto m = glm::scale(glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
 
   // Create mesh.
-  size_t num_of_vertices = model->origVertices.size();
+  const auto num_of_vertices = model->origVertices.size();
   FbxMesh* mesh = FbxMesh::Create(l_manager, model->name().toStdString().c_str());
   mesh->InitControlPoints((int)num_of_vertices);
   FbxVector4* vertices = mesh->GetControlPoints();
 
   // Set the normals on Layer 0.
-  FbxLayer* layer = mesh->GetLayer(0);
-  if (layer == 0)
+  auto layer = mesh->GetLayer(0);
+  if (layer == nullptr)
   {
     mesh->CreateLayer();
     layer = mesh->GetLayer(0);
@@ -422,18 +426,12 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        float x, y, z;
+        auto r = glm::eulerAngles(glm::inverse(bone.rot.getValue(cur_anim.Index, t)));
 
-        glm::fquat q = bone.rot.getValue(cur_anim.Index, t);
-        glm::fquat tq;
-        tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
-
-        auto r = glm::eulerAngles(tq);
-
-        x = r.x * -(180.0f / glm::pi<float>());
-        y = r.y * -(180.0f / glm::pi<float>());
-        z = r.z * -(180.0f / glm::pi<float>());
-
+        auto x = glm::degrees(r.x);
+        auto y = glm::degrees(r.y);
+        auto z = glm::degrees(r.z);
+       
         r_curve_x->KeyModifyBegin();
         int key_index = r_curve_x->KeyAdd(time);
         r_curve_x->KeySetValue(key_index, x);

@@ -57,7 +57,7 @@
 namespace FBXHeaders
 {
   bool createFBXHeaders(FbxString fileVersion, QString l_FileName, FbxManager* &l_Manager, FbxExporter* &l_Exporter, FbxScene* &l_Scene);
-  FbxNode* createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel* model, glm::mat4 matrix = glm::mat4(1.0f), glm::vec3 offset = glm::vec3());
+  FbxNode* createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel* model, const glm::mat4 & matrix = glm::mat4(1.0f), const glm::vec3 & offset = glm::vec3(0.0f));
   void createSkeleton(WoWModel* l_model, FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes);
   void storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_boneClusters, FbxNode* l_meshNode);
   void storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot);
