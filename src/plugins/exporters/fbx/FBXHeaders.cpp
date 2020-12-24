@@ -41,8 +41,6 @@
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/transform.hpp"
 
-#include "glm/gtx/string_cast.hpp"
-
 
 // Other libraries
 #include "FBXAnimExporter.h"
