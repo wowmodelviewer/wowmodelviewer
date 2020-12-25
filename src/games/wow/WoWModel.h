@@ -258,7 +258,6 @@ public:
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-  void computeMinMaxCoords(glm::vec3 & min, glm::vec3 & max);
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector

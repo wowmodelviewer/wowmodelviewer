@@ -26,8 +26,6 @@ set(src  AnimationExportChoiceDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
          app.cpp
-         ArcBallCamera.cpp
-         ArcBallCameraControl.cpp
          AVIGenerator.cpp
          camera.cpp
          charcontrol.cpp
@@ -62,8 +60,6 @@ set(headers AnimationExportChoiceDialog.h
             animcontrol.h
             AnimExporter.h
             app.h
-            ArcBallCamera.h
-            ArcBallCameraControl.h
             AVIGenerator.h
             camera.h
             charcontrol.h

@@ -1935,54 +1935,6 @@ bool WoWModel::canSetTextureFromFile(int texnum)
   return 0;
 }
 
-void WoWModel::computeMinMaxCoords(glm::vec3 & minCoord, glm::vec3 & maxCoord)
-{
-  if (video.supportVBO)
-  {
-    // get back vertices
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
-  }
-
-  for (auto & it : passes)
-  {
-    ModelGeosetHD * geoset = geosets[it->geoIndex];
-    if (!geoset->display)
-      continue;
-
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
-    {
-      glm::vec3 v = vertices[indices[b]];
-
-      // detect min/max coordinates and set them
-      if (v.x < minCoord.x)
-        minCoord.x = v.x;
-      else if (v.x > maxCoord.x)
-        maxCoord.x = v.x;
-
-      if (v.y < minCoord.y)
-        minCoord.y = v.y;
-      else if (v.y > maxCoord.y)
-        maxCoord.y = v.y;
-
-      if (v.z < minCoord.z)
-        minCoord.z = v.z;
-      else if (v.z > maxCoord.z)
-        maxCoord.z = v.z;
-    }
-  }
-
-  if (video.supportVBO)
-  {
-    glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
-    vertices = 0;
-  }
-
-  LOG_INFO << __FUNCTION__;
-  LOG_INFO << "min" << minCoord.x << minCoord.y << minCoord.z;
-  LOG_INFO << "max" << maxCoord.x << maxCoord.y << maxCoord.z;
-}
-
 QString WoWModel::getCGGroupName(CharGeosets cg)
 {
   QString result = "";

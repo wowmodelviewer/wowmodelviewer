@@ -61,10 +61,7 @@ public:
 
   ModelViewer *frame;
   
-  wxLocale locale;
-  
-  bool useNewCamera;
-  
+  wxLocale locale; 
 };
 
 void searchMPQs(bool firstTime);

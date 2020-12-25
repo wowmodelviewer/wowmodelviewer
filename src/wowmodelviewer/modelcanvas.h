@@ -15,7 +15,6 @@
 
 // our headers
 #include "AnimExporter.h"
-#include "ArcBallCamera.h"
 #if defined (_WINDOWS)
 #include "AVIGenerator.h"
 #endif
@@ -32,8 +31,6 @@
 #include "glm/glm.hpp"
 
 // custom objects
-class ArcBallCameraControl;
-
 class Attachment;
 
 class AnimControl;
@@ -171,10 +168,6 @@ public:
   CAVIGenerator cAvi;
 #endif
 
-  void autofit();
-
-  void activateNewCamera();
-
 private:
   float time, modelsize;
   DWORD lastTime;
@@ -185,9 +178,6 @@ private:
 
   bool fxBlur, fxGlow, fxFog;
 
-  bool m_useNewCamera;
-  ArcBallCameraControl * m_p_cameraCtrl;
-  ArcBallCamera arcCamera;
   CCamera camera;
 };
 

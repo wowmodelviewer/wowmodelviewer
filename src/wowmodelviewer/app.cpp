@@ -296,9 +296,6 @@ bool WowModelViewApp::OnInit()
   }
 #endif
 
-  if (useNewCamera)
-    frame->canvas->activateNewCamera();
-
   // -------
   // Load previously saved layout
   frame->LoadLayout();
@@ -397,7 +394,6 @@ void WowModelViewApp::LoadSettings()
   ssCounter = config.value("Settings/SSCounter", 100).toInt();
   imgFormat = config.value("Settings/DefaultFormat", 1).toInt();
 
-  useNewCamera = config.value("Unofficial/UseNewCamera", false).toBool();
   if (config.value("Unofficial/UseDoNotTrailInfo", false).toBool() == true)
     ParticleSystem::useDoNotTrailInfo();
 }
