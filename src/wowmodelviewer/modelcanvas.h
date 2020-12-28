@@ -80,6 +80,7 @@ public:
   void OnSize(wxSizeEvent& event);
   void OnMouse(wxMouseEvent& event);
   void OnKey(wxKeyEvent &event);
+  void OnCamMenu(wxCommandEvent &event);
 
   //void OnIdle(wxIdleEvent& event);
   void OnEraseBackground(wxEraseEvent& event);

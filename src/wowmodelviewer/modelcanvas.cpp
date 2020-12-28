@@ -1566,6 +1566,22 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
   // }
 }
 
+void ModelCanvas::OnCamMenu(wxCommandEvent &event)
+{
+  const auto id = event.GetId();
+  
+  if (id == ID_CAM_FRONT)
+    camera.setYawAndPitch(0., 90.);
+  else if (id == ID_CAM_BACK)
+    camera.setYawAndPitch(180., 90.);
+  else if (id == ID_CAM_SIDE)
+    camera.setYawAndPitch(270., 90.);
+  else if (id == ID_CAM_ISO)
+    camera.setYawAndPitch(315., 90.);
+  else if (id == ID_CAM_RESET)
+    camera.reset(model());
+}
+
 void ModelCanvas::CheckMovement()
 {
   // Make sure its the canvas that has focus before continuing

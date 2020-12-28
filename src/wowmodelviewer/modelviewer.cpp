@@ -95,6 +95,7 @@ EVT_MENU(ID_CAM_FRONT, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_SIDE, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_BACK, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_ISO, ModelViewer::OnCamMenu)
+EVT_MENU(ID_CAM_RESET, ModelViewer::OnCamMenu)
 
 EVT_MENU(ID_CANVASS120, ModelViewer::OnCanvasSize)
 EVT_MENU(ID_CANVASS512, ModelViewer::OnCanvasSize)
@@ -384,6 +385,7 @@ void ModelViewer::InitMenu()
     camMenu->Append(ID_CAM_BACK, _("Back"));
     camMenu->Append(ID_CAM_SIDE, _("Side"));
     camMenu->Append(ID_CAM_ISO, _("Perspective"));
+    camMenu->Append(ID_CAM_RESET, _("Reset to default"));
 
     viewMenu->Append(ID_CAMERA, _("Camera"), camMenu);
     viewMenu->AppendSeparator();
@@ -1642,20 +1644,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
 
 void ModelViewer::OnCamMenu(wxCommandEvent &event)
 {
-  int id = event.GetId();
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  if (id == ID_CAM_FRONT)
-    m->rot.y = -90.0f;
-  else if (id == ID_CAM_BACK)
-    m->rot.y = 90.0f;
-  else if (id == ID_CAM_SIDE)
-    m->rot.y = 0.0f;
-  else if (id == ID_CAM_ISO) {
-    m->rot.y = -40.0f;
-    m->rot.x = 20.0f;
-  }
-
-  //viewControl->Update();  
+  canvas->OnCamMenu(event);
 }
 
 // Menu button press events
