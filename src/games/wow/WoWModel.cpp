@@ -566,13 +566,6 @@ void WoWModel::initCommon()
   rawVertices.assign(buffer, buffer + header.nVertices);
   delete[] buffer;
 
-  // Correct the data from the model, so that its using the Y-Up axis mode.
-  for (auto & it : rawVertices)
-  {
-     it.pos = fixCoordSystem(it.pos);
-     it.normal = fixCoordSystem(it.normal);
-  }
-
   origVertices = rawVertices;
 
   // This data is needed for both VBO and non-VBO cards.
@@ -603,9 +596,6 @@ void WoWModel::initCommon()
     memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
     bounds.assign(buffer, buffer + header.nBoundingVertices);
     delete[] buffer;
-
-    for (uint i = 0; i < bounds.size(); i++)
-      bounds[i] = fixCoordSystem(bounds[i]);
   }
 
   if (header.nBoundingTriangles > 0)

@@ -19,13 +19,11 @@ void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & 
   nearclip = mcd.nearclip;
   farclip = mcd.farclip;
   fov = mcd.fov;
-  pos = fixCoordSystem(mcd.pos);
-  target = fixCoordSystem(mcd.target);
+  pos = mcd.pos;
+  target = mcd.target;
   tPos.init(mcd.transPos, f, global);
   tTarget.init(mcd.transTarget, f, global);
   rot.init(mcd.rot, f, global);
-  tPos.fix(fixCoordSystem);
-  tTarget.fix(fixCoordSystem);
 }
 
 void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname)
@@ -34,13 +32,11 @@ void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint
   ok = true;
   nearclip = mcd.nearclip;
   farclip = mcd.farclip;
-  pos = fixCoordSystem(mcd.pos);
-  target = fixCoordSystem(mcd.target);
+  pos = mcd.pos;
+  target = mcd.target;
   tPos.init(mcd.transPos, f, global);
   tTarget.init(mcd.transTarget, f, global);
   rot.init(mcd.rot, f, global);
-  tPos.fix(fixCoordSystem);
-  tTarget.fix(fixCoordSystem);
   fov = 0.95f;
 }
 

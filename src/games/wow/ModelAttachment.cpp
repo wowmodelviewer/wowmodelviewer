@@ -17,7 +17,7 @@
 
 void ModelAttachment::init(ModelAttachmentDef &mad)
 {
-  pos = fixCoordSystem(mad.pos);
+  pos = mad.pos;
   bone = mad.bone;
   id = mad.id;
 }

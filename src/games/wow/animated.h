@@ -374,37 +374,6 @@ public:
     }
   }
 
-  void fix(T fixfunc(const T))
-  {
-    switch (type) {
-      case INTERPOLATION_NONE:
-      case INTERPOLATION_LINEAR:
-        for (size_t i=0; i<sizes; i++) {
-          for (size_t j=0; j<data[i].size(); j++) {
-            data[i][j] = fixfunc(data[i][j]);
-          }
-        }
-        break;
-      case INTERPOLATION_HERMITE:
-        for (size_t i=0; i<sizes; i++) {
-          for (size_t j=0; j<data[i].size(); j++) {
-            data[i][j] = fixfunc(data[i][j]);
-            in[i][j] = fixfunc(in[i][j]);
-            out[i][j] = fixfunc(out[i][j]);
-          }
-        }
-        break;
-      case INTERPOLATION_BEZIER:
-        for (size_t i=0; i<sizes; i++) {
-          for (size_t j=0; j<data[i].size(); j++) {
-            data[i][j] = fixfunc(data[i][j]);
-            in[i][j] = fixfunc(in[i][j]);
-            out[i][j] = fixfunc(out[i][j]);
-          }
-        }
-        break;
-    }
-  }
   friend std::ostream& operator<<(std::ostream& out, const Animated& v)
   {
     if (v.sizes == 0)
@@ -432,9 +401,6 @@ public:
 typedef Animated<float,short,ShortToFloat> AnimatedShort;
 
 float frand();
-glm::vec3 fixCoordSystem(glm::vec3 v);
-glm::vec3 fixCoordSystem2(glm::vec3 v);
-glm::fquat fixCoordSystemQuat(glm::fquat v);
 
 float randfloat(float lower, float upper);
 _ANIMATED_API_ int randint(int lower, int upper);

@@ -424,7 +424,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        auto r = glm::eulerAngles(glm::inverse(bone.rot.getValue(cur_anim.Index, t)));
+        auto r = glm::eulerAngles(bone.rot.getValue(cur_anim.Index, t));
 
         auto x = glm::degrees(r.x);
         auto y = glm::degrees(r.y);

@@ -58,8 +58,8 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
 
   slowdown = mta.p.slowdown;
   rotation = mta.p.rotation;
-  pos = fixCoordSystem(mta.pos);
-  tpos = fixCoordSystem(mta.pos);
+  pos = mta.pos;
+  tpos = mta.pos;
   texture = model->getGLTexture(mta.texture);
   blend = mta.blend;
   rows = mta.rows;
@@ -739,7 +739,7 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<u
   // just use the first texture for now; most models I've checked only had one
   texture = model->getGLTexture(texlist[0]);
 
-  tpos = pos = fixCoordSystem(mta.pos);
+  tpos = pos = mta.pos;
 
   // TODO: figure out actual correct way to calculate length
   // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)

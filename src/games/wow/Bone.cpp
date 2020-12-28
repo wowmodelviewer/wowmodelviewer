@@ -31,7 +31,7 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
       m = glm::translate(m, trans.getValue(anim, time));
 
     if (rot.uses(anim) && rotate)
-      m = m * glm::inverse(glm::toMat4(rot.getValue(anim, time))); // inverse is needed when using glm::mat4 (still not figured out why)
+      m = m * glm::toMat4(rot.getValue(anim, time)); 
 
     if (scale.uses(anim))
       m = glm::scale(m, scale.getValue(anim, time));
@@ -71,9 +71,9 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
   if (rot.uses(anim) && rotate) 
   {
     if (parent>=0)
-      mrot = allbones[parent].mrot * glm::inverse(glm::toMat4(q));
+      mrot = allbones[parent].mrot * glm::toMat4(q);
     else
-      mrot = glm::inverse(glm::toMat4(q));
+      mrot = glm::toMat4(q);
   }
   else
   {
@@ -90,7 +90,7 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data)
   calc = false;
 
   parent = b.parent;
-  pivot = fixCoordSystem(b.pivot);
+  pivot = b.pivot;
   billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
 
   boneDef = b;
@@ -98,8 +98,5 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data)
   trans.init(b.translation, f, data);
   rot.init(b.rotation, f, data);
   scale.init(b.scaling, f, data);
-  trans.fix(fixCoordSystem);
-  rot.fix(fixCoordSystemQuat);
-  scale.fix(fixCoordSystem2);
 }
 

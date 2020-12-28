@@ -20,10 +20,10 @@ void WMOModelInstance::init(char *fname, GameFile &f)
 
   float ff[3];
   f.read(ff, 12); // Position (X,Z,-Y)
-  pos = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+  pos = glm::vec3(ff[0], ff[1], ff[2]);
   f.read(&w, 4); // W component of the orientation quaternion
   f.read(ff, 12); // X, Y, Z components of the orientaton quaternion
-  dir = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+  dir = glm::vec3(ff[0], ff[1], ff[2]);
   f.read(&sc, 4); // Scale factor
   f.read(&d1, 4); // (B,G,R,A) Lightning-color. 
   lcol = glm::vec3(((d1 & 0xff0000) >> 16) / 255.0f, ((d1 & 0x00ff00) >> 8) / 255.0f, (d1 & 0x0000ff) / 255.0f);

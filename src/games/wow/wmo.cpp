@@ -70,9 +70,9 @@ WMO::WMO(QString name) :
       f.read(&col, 4); // ambient color? RGB
       f.read(&nX, 4); // WMO ID (column 2 in WMOAreaTable.dbc)
       f.read(ff,12); // Bounding box corner 1
-      v1 = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+      v1 = glm::vec3(ff[0], ff[1], ff[2]);
       f.read(ff,12); // Bounding box corner 2
-      v2 = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+      v2 = glm::vec3(ff[0], ff[1], ff[2]);
       f.read(&LiquidType, 4);
 
       groups = new WMOGroup[nGroups];
@@ -220,13 +220,13 @@ WMO::WMO(QString name) :
       WMOPV p;
       for (size_t i=0; i<nP; i++) {
         f.read(ff,12);
-        p.a = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+        p.a = glm::vec3(ff[0], ff[1], ff[2]);
         f.read(ff,12);
-        p.b = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+        p.b = glm::vec3(ff[0], ff[1], ff[2]);
         f.read(ff,12);
-        p.c = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+        p.c = glm::vec3(ff[0], ff[1], ff[2]);
         f.read(ff,12);
-        p.d = fixCoordSystem(glm::vec3(ff[0], ff[1], ff[2]));
+        p.d = glm::vec3(ff[0], ff[1], ff[2]);
         pvs.push_back(p);
       }
     }

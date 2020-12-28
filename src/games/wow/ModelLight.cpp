@@ -16,7 +16,7 @@
 
 void ModelLight::init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global)
 {
-  tpos = pos = fixCoordSystem(mld.pos);
+  tpos = pos = mld.pos;
   tdir = dir = glm::vec3(0,1,0); // no idea
   type = mld.type;
   parent = mld.bone;
