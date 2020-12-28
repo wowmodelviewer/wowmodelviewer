@@ -46,12 +46,6 @@ macro(use_glew)
   list(APPEND extralibs opengl32 ${WMV_BASE_PATH}/src/3rdparty/libs/glew32s.lib)
 endmacro()
 
-macro(use_wxwidgets)
-  set(wxWidgets_USE_UNICODE ON)
-  find_package(wxWidgets REQUIRED net gl aui xml adv core base)
-  list(APPEND extralibs ${wxWidgets_LIBRARIES})
-endmacro()
-
 macro(use_cximage)
   include_directories(${WMV_BASE_PATH}/src/3rdparty/CxImage)
   list(APPEND extralibs cximage)

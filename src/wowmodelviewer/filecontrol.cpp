@@ -530,7 +530,6 @@ void FileControl::OnTreeSelect(wxTreeEvent &event)
     LOG_INFO << __FUNCTION__ << "wmo =" << modelviewer->canvas->wmo;
 
     modelviewer->canvas->wmo->loadGroup(id);
-    modelviewer->canvas->ResetViewWMO(id);
     modelviewer->animControl->UpdateWMO(modelviewer->canvas->wmo, id);
 
     // wxAUI

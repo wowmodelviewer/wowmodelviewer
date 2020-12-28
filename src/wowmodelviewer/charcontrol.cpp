@@ -865,7 +865,6 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         // clearing the mount
         g_canvas->setModel(model);
-        g_canvas->ResetView();
         if (charAtt)
         {
           charAtt->scale = g_canvas->root->scale;
@@ -923,7 +922,6 @@ void CharControl::OnUpdateItem(int type, int id)
         model->currentAnim = model->animLookups[ANIMATION_MOUNT];
         model->animManager->SetAnim(0, (short)model->currentAnim, 0);
       }
-      g_canvas->curAtt = g_canvas->root;
 
       if (charAtt)
       {
@@ -939,7 +937,6 @@ void CharControl::OnUpdateItem(int type, int id)
         else
           charAtt->scale = 1.0f;
       }
-      g_canvas->ResetView();
       model->rot = model->pos = glm::vec3(0.0f, 0.0f, 0.0f);
       m->rot.x = 0.0f; // mounted characters look better from the side
       break;

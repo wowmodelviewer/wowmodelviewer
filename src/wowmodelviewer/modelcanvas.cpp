@@ -9,9 +9,11 @@
 #include <wx/display.h>
 #include <wx/file.h>
 #include <wx/filename.h>
+#include <wx/window.h>
 
 #include "animcontrol.h"
 #include "Attachment.h"
+#include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
 #include "shaders.h"
@@ -19,14 +21,13 @@
 #include "WMOGroup.h"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include "logger/Logger.h"
 
-static const float defaultMatrix[] = {1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000,0.000000,0.000000,0.000000,0.000000,1.000000};
 
 //float animSpeed = 1.0f;
 static const float piover180 = 0.0174532925f;
-static const float rad2deg = 57.295779513f;
 
 #ifdef  _WINDOWS
 IMPLEMENT_CLASS(ModelCanvas, wxWindow)
@@ -36,11 +37,10 @@ IMPLEMENT_CLASS(ModelCanvas, wxGLCanvas)
 BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
 #endif
   EVT_SIZE(ModelCanvas::OnSize)
-  EVT_PAINT(ModelCanvas::OnPaint)
+  EVT_PAINT(ModelCanvas::Render)
   EVT_ERASE_BACKGROUND(ModelCanvas::OnEraseBackground)
-
-    EVT_TIMER(ID_TIMER, ModelCanvas::OnTimer)
-    EVT_MOUSE_EVENTS(ModelCanvas::OnMouse)
+  EVT_TIMER(ID_TIMER, ModelCanvas::OnTimer)
+  EVT_MOUSE_EVENTS(ModelCanvas::OnMouse)
   EVT_KEY_DOWN(ModelCanvas::OnKey)
 END_EVENT_TABLE()
 
@@ -73,6 +73,55 @@ namespace {
 }
 #endif
 
+void drawPoint(const glm::vec3 & coord, const glm::vec3 & color)
+{
+  glPushMatrix();
+  glTranslatef(coord.x, coord.y, coord.z);
+  glBegin(GL_LINES);
+
+  glColor3f(color.x, color.y, color.z);
+  glVertex3f(-0.05f, 0.0, 0.0);
+  glVertex3f(0.05f, 0.0, 0.0);
+
+  glColor3f(color.x, color.y, color.z);
+  glVertex3f(0.0, -0.05f, 0.0);
+  glVertex3f(0.0, 0.05f, 0.0);
+
+  glColor3f(color.x, color.y, color.z);
+  glVertex3f(0.0, 0.0, -0.05f);
+  glVertex3f(0.0, 0.0, 0.05f);
+  glEnd();
+
+  glPopMatrix();
+}
+
+void drawAxis(const glm::vec3 & coord, float size, const glm::vec3 & xcolor, const glm::vec3 & ycolor, const glm::vec3 & zcolor)
+{
+  glPushMatrix();
+  glTranslatef(coord.x, coord.y, coord.z);
+  glBegin(GL_LINES);
+
+  // X axis
+  glColor3f(xcolor.x, xcolor.y, xcolor.z);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(size, 0.0, 0.0);
+
+  // Y axis
+  glColor3f(ycolor.x, ycolor.y, ycolor.z);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, size, 0.0);
+
+  // Z axis
+  glColor3f(zcolor.x, zcolor.y, zcolor.z);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, size);
+  glEnd();
+
+  glPopMatrix();
+}
+
+
+
 ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 #ifndef _WINDOWS
 : wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"), attrib, wxNullPalette)
@@ -95,10 +144,8 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
   animControl = 0;
   gifExporter = 0;
   rt = 0;        // RenderToTexture class
-  curAtt = 0;      // Current Attachment
   root = 0;
   sky = 0;
-  modelsize = 0;
   fogTex = 0;
 
   /*
@@ -210,7 +257,6 @@ void ModelCanvas::InitView()
 #endif
 
   // update projection
-  //SetupProjection();
   video.ResizeGLScene(w, h);
   video.xRes = w;
   video.yRes = h;
@@ -301,66 +347,27 @@ void ModelCanvas::UninitShaders()
   */
 }
 
-#if 0
-Attachment* ModelCanvas::AddModel(const char *fn)
-{
-  Attachment *att = root->addChild(fn, (int)root->children.size(), -1);
-  
-  //curAtt->pos = vPos;
-  //curAtt->rot = vRot;
-
-  curAtt = att;
-
-  ResetView();
-
-  return att;
-}
-#endif
-
 Attachment* ModelCanvas::LoadModel(GameFile * file)
 {
   clearAttachments();
-  root->setModel(0);
+  root->setModel(nullptr);
   delete wmo;
-  wmo = NULL;
-  WoWModel * m = new WoWModel(file, true);
-  setModel(m);
-
-  if (!model()->ok)
-  {
-    setModel(NULL);
-    return NULL;
-  }
-
-  root->setModel(m);
-
-  curAtt = root;
-
-  ResetView();
-  return root;
-}
-
-Attachment* ModelCanvas::LoadCharModel(GameFile * file)
-{
-  clearAttachments();
-  root->setModel(0);
-  delete wmo;
-  wmo = NULL;
+  wmo = nullptr;
 
   // Create new one
-  WoWModel * m = new WoWModel(file, true);
+  auto * m = new WoWModel(file, true);
   setModel(m);
   if (!model()->ok)
   {
     LOG_INFO << "Model is not OK !";
-    setModel(NULL);
-    return NULL;
+    setModel(nullptr);
+    return nullptr;
   }
 
-  ResetView();
-  Attachment *att = root->addChild(m, 0, -1);
-  curAtt = att;
- 
+  auto *att = root->addChild(m, 0, -1);
+
+  camera.reset(m);
+
   return att;
 }
 
@@ -403,194 +410,57 @@ void ModelCanvas::clearAttachments()
     sky->delChildren();
 }
 
-void ModelCanvas::Zoom(float f, bool rel)
-{
-  WoWModel * m = const_cast<WoWModel *>(model());
-  if (!m)
-    return;
-
-  if (rel) {
-    float cosx = cos(m->rot.x * piover180);
-    m->pos.x += cos(m->rot.y * piover180) * cosx * f;
-    m->pos.y += sin(m->rot.x * piover180) * sin(m->rot.y * piover180) * f;
-    m->pos.z += sin(m->rot.y * piover180) * cosx * f;
-  }
-  else {
-    m->pos.z -= f;
-  }
-}
-
 
 void ModelCanvas::OnMouse(wxMouseEvent& event)
 {
-  if (!model() && !wmo && !adt)
-    return;
-
-  if (event.Button(wxMOUSE_BTN_ANY) == true)
-    SetFocus();
-
-  if (!model() && !wmo && !adt)
-    return;
-
-  if (event.Button(wxMOUSE_BTN_ANY) == true)
-    SetFocus();
-
-  int px = event.GetX();
-  int py = event.GetY();
-  int pz = event.GetWheelRotation();
-
   // mul = multiplier in which to multiply everything to achieve a sense of control over the amount to move stuff by
   float mul = 1.0f;
   if (event.m_shiftDown)
     mul /= 10;
+  /*
   if (event.m_controlDown)
     mul *= 10;
   if (event.m_altDown)
     mul *= 50;
+   */
 
-  if (wmo) {
+  static glm::vec2 lastMousePos = glm::vec2(0.0f, 0.0f);
+  const float MOUSE_SENSITIVITY = 0.25f;
 
-    //if (model->animManager)
-    //  mul *= model->animManager->GetSpeed(); //animSpeed;
-
-    if (event.ButtonDown()) {
-      mx = px;
-      my = py;
-
-    }
-    else if (event.Dragging()) {
-      int dx = mx - px;
-      int dy = my - py;
-      mx = px;
-      my = py;
-
-      if (event.LeftIsDown() && event.RightIsDown()) {
-        wmo->viewpos.y -= dy*mul;
-      }
-      else if (event.LeftIsDown()) {
-        wmo->viewrot.x -= dx*mul / 5;
-        wmo->viewrot.y -= dy*mul / 5;
-      }
-      else if (event.RightIsDown()) {
-        wmo->viewrot.x -= dx*mul / 5;
-        float f = cos(wmo->viewrot.y * piover180);
-        float sf = sin(wmo->viewrot.x * piover180);
-        float cf = cos(wmo->viewrot.x * piover180);
-        wmo->viewpos.x -= sf * mul * dy * f;
-        wmo->viewpos.z += cf * mul * dy * f;
-        wmo->viewpos.y += sin(wmo->viewrot.y * piover180) * mul * dy;
-      }
-      else if (event.MiddleIsDown()) {
-        //?
-      }
-
-    }
-    else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-      //?
-    }
-
+  if (event.GetEventType() == wxEVT_MOUSEWHEEL)
+  {
+    const auto zoom = -event.GetWheelRotation() / 240.f * mul;
+    camera.setRadius(camera.radius() + zoom);
   }
-  else if (model()) {
-    WoWModel * m = const_cast<WoWModel *>(model());
-    if (m->animManager)
-      mul *= m->animManager->GetSpeed(); //animSpeed;
+  else if (event.Dragging())
+  {
+    const auto deltax = ((float)event.GetX() - lastMousePos.x) * MOUSE_SENSITIVITY * mul;
+    const auto deltay = ((float)event.GetY() - lastMousePos.y) * MOUSE_SENSITIVITY * mul;
 
-    if (event.ButtonDown()) {
-      mx = px;
-      my = py;
-
-      vRot0 = m->rot;
-      vPos0 = m->pos;
-
+    if (event.LeftIsDown())
+    {
+      const auto yaw = -deltax;
+      const auto pitch = -deltay;
+      camera.setYawAndPitch(camera.yaw() + yaw, camera.pitch() + pitch);
     }
-    else if (event.Dragging()) {
-      int dx = mx - px;
-      int dy = my - py;
+    else if(event.RightIsDown())
+    {
+      const auto x = deltax * 0.025;
+      const auto y = deltay * 0.025;
 
-      if (event.LeftIsDown()) {
+      const auto look = camera.lookAt();
+      const auto right = camera.right();
 
-        m->rot.x = vRot0.x - (dy / 2.0f); // * mul);
-        m->rot.y = vRot0.y - (dx / 2.0f); // * mul);
-
-        //viewControl->Refresh();
-
-      }
-      else if (event.RightIsDown()) {
-        mul /= 100.0f;
-
-
-        m->pos.x = vPos0.x - dx*mul;
-        m->pos.y = vPos0.y + dy*mul;
-
-      }
-      else if (event.MiddleIsDown()) {
-        if (!event.m_altDown) {
-          mul = (mul / 20.0f) * dy;
-
-          Zoom(mul, false);
-          my = py;
-
-        }
-        else {
-          mul = (mul / 1200.0f) * dy;
-          Zoom(mul, true);
-          my = py;
-        }
-      }
-
+      camera.setLookAt(glm::vec3(look.x + right.x * -x, look.y + right.y * -x, look.z + y));
     }
-    else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-      if (pz != 0) {
-        mul = (mul / 120.0f) * pz;
-        if (!wxGetKeyState(WXK_ALT)) {
-          Zoom(mul, false);
-        }
-        else {
-          mul /= 50.0f;
-          Zoom(mul, true);
-        }
-      }
+    else if(event.MiddleIsDown())
+    {
+      camera.setRadius(camera.radius() + deltay/10.f);
     }
   }
-  else if (adt) {
-    // Copied from WMO controls.
-
-    if (event.ButtonDown()) {
-      mx = px;
-      my = py;
-
-    }
-    else if (event.Dragging()) {
-      int dx = mx - px;
-      int dy = my - py;
-      mx = px;
-      my = py;
-
-      if (event.LeftIsDown() && event.RightIsDown()) {
-        adt->viewpos.y -= dy*mul;
-      }
-      else if (event.LeftIsDown()) {
-        adt->viewrot.x -= dx*mul / 5;
-        adt->viewrot.y -= dy*mul / 5;
-      }
-      else if (event.RightIsDown()) {
-        adt->viewrot.x -= dx*mul / 5;
-        float f = cos(adt->viewrot.y * piover180);
-        float sf = sin(adt->viewrot.x * piover180);
-        float cf = cos(adt->viewrot.x * piover180);
-        adt->viewpos.x -= sf * mul * dy * f;
-        adt->viewpos.z += cf * mul * dy * f;
-        adt->viewpos.y += sin(adt->viewrot.y * piover180) * mul * dy;
-      }
-      else if (event.MiddleIsDown()) {
-        //?
-      }
-
-    }
-    else if (event.GetEventType() == wxEVT_MOUSEWHEEL) {
-      //?
-    }
-  }
+  
+  lastMousePos.x = event.GetX();
+  lastMousePos.y = event.GetY();
 }
 
 void ModelCanvas::InitGL()
@@ -611,18 +481,13 @@ void ModelCanvas::InitGL()
 
   // load up our shaders
   InitShaders();
-
-  // init the default view
-  InitView();
 }
 
 void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {
-  // Set this window handler as the reference to draw to.
-  wxPaintDC dc(this);
 
-  if (!init)
-    InitGL();
+
+
 
   if (video.render) {
     if (wmo)
@@ -631,8 +496,6 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
       RenderModel();
     else if (adt)
       RenderADT();
-    else
-      Render();
   }
 }
 
@@ -867,21 +730,53 @@ inline void ModelCanvas::RenderBackground()
   glMatrixMode(GL_MODELVIEW);
 }
 
-void ModelCanvas::Render()
+void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 {
+  // Set this window handler as the reference to draw to.
+  wxPaintDC dc(this);
+
+  if (!init)
+    InitGL();
+
+  displayDebugInfos();
+
+  int w = 0, h = 0;
+  GetClientSize(&w, &h);
+
+  glViewport(0, 0, w, h);
+
   // Sets the "clear" colour.  Without this you get the "ghosting" effecting 
   // as the buffer doesn't get set/cleared.
   if (video.useMasking)
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
   else
     glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
+
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-  // (re)set the view
-  InitView();
+  // setup projection (use perspective camera)
+  glMatrixMode(GL_PROJECTION); 
+  glLoadIdentity();
+
+  glm::mat4 projection = glm::perspective(video.fov, (float)w / (float)h, 0.1f, 1280 * 5.f);
+  glMultMatrixf((glm::value_ptr(projection)));
+
+  // setup camera
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glm::mat4 view = camera.getViewMatrix();
+  glMultMatrixf((glm::value_ptr(view)));
 
   // If masking isn't enabled
-  if (!video.useMasking) {
+  if (!video.useMasking) 
+  {
+    // draw origin axis
+    drawAxis(glm::vec3(0.0, 0.0, 0.0), 1.0f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+
+    // draw lookAt axis
+    drawAxis(camera.lookAt(), 0.5f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+
     // Draw the background image if any
     if(drawBackground)
       RenderBackground();
@@ -889,7 +784,12 @@ void ModelCanvas::Render()
     // render the skybox, if any
     if (drawSky && skyModel && sky->model())
       RenderSkybox();
+
+    if (drawGrid)
+      RenderGrid();
   }
+
+  RenderObjects();
 
   SwapBuffers();
 }
@@ -904,9 +804,9 @@ inline void ModelCanvas::RenderModel()
     glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
 
   glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-  
+
   // (re)set the view
-  InitView();
+//  InitView();
 
   // If masking isn't enabled
   if (!video.useMasking) {
@@ -919,7 +819,7 @@ inline void ModelCanvas::RenderModel()
       RenderSkybox();
   }
 
-  camera.Setup();
+ // camera.Setup();
 
   // This is redundant and no longer needed.
   // all lighting stuff needs to be reorganised
@@ -959,6 +859,7 @@ inline void ModelCanvas::RenderModel()
   // The camera class should be taking over this crap
   // *************************
   // setup the view/projection
+  /*
   if (model()) {
     if (useCamera && model()->hasCamera) {
       WoWModel * m = const_cast<WoWModel *>(model());
@@ -973,6 +874,7 @@ inline void ModelCanvas::RenderModel()
       // --==--
     }
   }
+  */
   // ==========================
 
   // As above for lighting
@@ -1212,7 +1114,6 @@ inline void ModelCanvas::RenderWMO()
   glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //SetupProjection(modelsize);
   InitView();
 
   // Lighting
@@ -1242,7 +1143,7 @@ inline void ModelCanvas::RenderWMO()
     // --==--
   }
 
-  camera.Setup();
+  //camera.Setup();
 
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
@@ -1263,7 +1164,6 @@ inline void ModelCanvas::RenderADT()
   glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //SetupProjection(modelsize);
   InitView();
 
   // Lighting
@@ -1294,7 +1194,7 @@ inline void ModelCanvas::RenderADT()
   }
   */
 
-  camera.Setup();
+  // camera.Setup();
 
 
   glEnable(GL_TEXTURE_2D);
@@ -1373,7 +1273,7 @@ void ModelCanvas::RenderToBuffer()
   
   // --==--
   // Reset the render state
-  glLoadMatrixf(defaultMatrix);
+  glLoadMatrixf(glm::value_ptr(glm::mat4(1.0f)));
 
   if (video.supportDrawRangeElements || video.supportVBO) {
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -1440,7 +1340,7 @@ void ModelCanvas::RenderToBuffer()
       RenderSkybox();
   }
 
-  camera.Setup();
+  // camera.Setup();
     
   // Render the grid if wanted and masking isn't enabled
   if (drawGrid && !video.useMasking)
@@ -1566,84 +1466,6 @@ void ModelCanvas::tick()
 
 }
 
-/*
-void ModelCanvas::TogglePause()
-{
-  if (!bPaused) {
-    // pause
-    bPaused = true;
-    pauseTime = timeGetTime();
-
-  } else {
-    // unpause
-    DWORD t = timeGetTime();
-    deltaTime += t - pauseTime;
-    if (time==0) deltaTime = t;
-    bPaused = false;
-  }
-}
-*/
-
-void ModelCanvas::ResetView()
-{
-  WoWModel * m = const_cast<WoWModel *>(model());
-  m->rot = glm::vec3(0,-90.0f,0);
-  m->pos = glm::vec3(0, 0, 5.0f);
-
-  bool isSkyBox = (wxString(m->name().toStdWString()).substr(0,3)==wxT("Env"));
-  if (!isSkyBox) {
-    if (m->name().indexOf("SkyBox") != -1)
-      isSkyBox = true;
-  }
-
-  if (isSkyBox) {
-    // for skyboxes, don't zoom out ;)
-    m->pos.y = m->pos.z = 0.0f;
-  } else {
-    m->pos.z = m->rad * 1.6f;
-    if (m->pos.z < 3.0f) m->pos.z = 3.0f;
-    if (m->pos.z > 64.0f) m->pos.z = 64.0f;
-    
-    //ofsy = (model->anims[model->currentAnim].boxA.y + model->anims[model->currentAnim].boxB.y) * 0.5f;
-    m->pos.y = -m->rad * 0.5f;
-    if (m->pos.y > 50) m->pos.y = 50;
-    if (m->pos.y < -50) m->pos.y = -50;
-  }
-
-  modelsize = m->rad * 2.0f;
-  
-  if (wxString(m->name().toStdWString()).substr(0,4)==wxT("Item"))
-    m->rot.y = 0; // items look better facing right by default
-}
-
-void ModelCanvas::ResetViewWMO(int id)
-{
-  if (!wmo || id>=(int)wmo->nGroups) 
-    return;
-
-  wmo->viewrot = glm::vec3(-90.0f, 0.0f, 0.0f);
-  //model->rot = glm::vec3(0.0f, -90.0f, 0.0f);
-  //model->pos = glm::vec3(0.0f, 0.0f, 5.0f);
-  glm::vec3 mid;
-
-  if (id==-1) {
-    //model->pos.z = (wmo->v2-wmo->v1).length();
-    mid = (wmo->v1+wmo->v2)*0.3f;
-  } else {
-    // zoom/center on current WMO group
-    WMOGroup &g = wmo->groups[id];
-    //model->pos.z = (g.v2-g.v1).length();
-    mid = (g.v1+g.v2)*0.5f;
-  }
-
-  //modelsize = model->pos.z;
-
-  //if (model->pos.z < 3.0f) model->pos.z = 3.0f;
-  //if (model->pos.z > 500.0f) model->pos.z = 500.0f;
-
-  //model->pos.y = (model->pos.y / 2);
-}
-
 void ModelCanvas::LoadBackground(wxString filename)
 {
   if (!wxFile::Exists(filename))
@@ -1737,6 +1559,9 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
     else if (keycode == '9')
       animControl->SetAnimSpeed(0.9f);
 
+    
+
+
     // --  
   // }
 }
@@ -1754,6 +1579,39 @@ void ModelCanvas::CheckMovement()
   if(!wintest)
     return;
 
+  if (wxGetKeyState(WXK_NUMPAD4))  // Rotate left
+    camera.setYaw(camera.yaw() + 1.0f);
+  if (wxGetKeyState(WXK_NUMPAD6))  // Rotate right
+    camera.setYaw(camera.yaw() - 1.0f);
+  if (wxGetKeyState(WXK_NUMPAD8))  // Rotate back
+    camera.setPitch(camera.pitch() + 1.0f);
+  if (wxGetKeyState(WXK_NUMPAD2))  // Rotate fornt
+    camera.setPitch(camera.pitch() - 1.0f);
+  if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
+    camera.reset(model());
+  if (wxGetKeyState(WXK_NUMPAD7))  // Look upper
+    camera.setLookAt(glm::vec3(camera.lookAt().x, camera.lookAt().y, camera.lookAt().z + 0.2f));
+  if (wxGetKeyState(WXK_NUMPAD9))  // Reset lower
+    camera.setLookAt(glm::vec3(camera.lookAt().x, camera.lookAt().y, camera.lookAt().z - 0.2f));
+  if (wxGetKeyState(WXK_NUMPAD1))  // Look left
+  {
+    const auto look = camera.lookAt();
+    const auto right = camera.right();
+
+    camera.setLookAt(glm::vec3(look.x + right.x * -0.2, look.y + right.y * -0.2, look.z));
+  }
+  if (wxGetKeyState(WXK_NUMPAD3))  // Look right
+  {
+    const auto look = camera.lookAt();
+    const auto right = camera.right();
+
+    camera.setLookAt(glm::vec3(look.x + right.x * 0.2, look.y + right.y * 0.2, look.z));
+  }
+
+
+  
+
+  /*
   if (wxGetKeyState(WXK_NUMPAD8))  // Move forward
     camera.MoveForward(-0.1f);
   if (wxGetKeyState(WXK_NUMPAD2))  // Move Backwards
@@ -1768,7 +1626,7 @@ void ModelCanvas::CheckMovement()
     camera.Strafe(-0.05f);
   if (wxGetKeyState(WXK_NUMPAD6))  // Straff Right
     camera.Strafe(0.05f);
-
+    */
   // M2 Model only stuff below here
   if (!model() || !model()->animManager)
     return;
@@ -1805,15 +1663,6 @@ void ModelCanvas::CheckMovement()
   WoWModel * m = const_cast<WoWModel *>(model());
   if (m->animated)
     speed *= (m->anims[m->currentAnim].moveSpeed / 160.0f);
-  //else
-  //  speed *= 0.05f;
-
-  if (wxGetKeyState(WXK_UP))
-    Zoom(speed, true);
-  else if (wxGetKeyState(WXK_DOWN))
-    Zoom(-speed, true);
-
-  // --
 }
 
 // Our screenshot function which supports both PBO and FBO aswell as traditional older cards, eventually.
@@ -1949,5 +1798,35 @@ void ModelCanvas::SwapBuffers()
 #else
   wxGLCanvas::SwapBuffers();
 #endif
+}
+
+void ModelCanvas::displayDebugInfos() const
+{
+  static wxString appTitle = GLOBALSETTINGS.appTitle();
+  static int frameCount = 0;
+
+  static DWORD previousTime = 0;
+  const auto currentTime = timeGetTime();
+  const auto elapsedTime = (currentTime - previousTime) / 1000.0;
+
+  if(elapsedTime > 0.25) // update 4 times per second
+  {
+    previousTime = currentTime;
+    const auto fps = (double)frameCount / elapsedTime;
+    const auto msPerFrame = 1000.0 / fps;
+
+    wxString title;
+    const auto look = camera.lookAt();
+    const auto pos = camera.position();
+    const auto right = camera.right();
+    title.Printf(L"%s - FPS: %0.1f - Frame Time: %0.1f (ms) - Camera: Y=%0.1f P=%0.1f r=%0.1f LookAt: %0.1f/%0.1f/%0.1f Pos: %0.1f/%0.1f/%0.1f Right: %0.1f/%0.1f/%0.1f", 
+      appTitle, fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x, pos.y, pos.z, right.x, right.y, right.z);
+    
+    ((wxTopLevelWindow*)wxTheApp->GetTopWindow())->SetTitle(title);
+
+    frameCount = 0;
+  }
+
+  frameCount++;
 }
 

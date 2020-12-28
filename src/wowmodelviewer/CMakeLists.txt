@@ -27,7 +27,6 @@ set(src  AnimationExportChoiceDialog.cpp
          AnimExporter.cpp
          app.cpp
          AVIGenerator.cpp
-         camera.cpp
          charcontrol.cpp
          CharDetailsCustomizationChoice.cpp
          CharDetailsCustomizationSpin.cpp
@@ -50,6 +49,7 @@ set(src  AnimationExportChoiceDialog.cpp
          modelcontrol.cpp
          modelviewer.cpp
          NPCImporterDialog.cpp
+         OrbitCamera.cpp
          Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
@@ -61,7 +61,6 @@ set(headers AnimationExportChoiceDialog.h
             AnimExporter.h
             app.h
             AVIGenerator.h
-            camera.h
             charcontrol.h
             CharDetailsCustomizationChoice.h
             CharDetailsCustomizationSpin.h
@@ -84,6 +83,7 @@ set(headers AnimationExportChoiceDialog.h
             modelcontrol.h
             modelviewer.h
             NPCImporterDialog.h
+            OrbitCamera.h
             Quantize.h
             resource1.h
             SettingsControl.h
@@ -99,7 +99,6 @@ use_core()
 use_wow()
 use_cximage()
 use_casclib()
-use_wxwidgets()
 
 set(RES_FILES "wmv.rc")
 
@@ -164,6 +163,7 @@ target_link_libraries(${NAME}
   Qt5::Gui
   Qt5::Network
   Qt5::Widgets
+  ${wxWidgets_LIBRARIES}
 )
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})

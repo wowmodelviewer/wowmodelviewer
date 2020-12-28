@@ -969,7 +969,7 @@ void ModelViewer::LoadModel(GameFile * file)
 
   if (isChar)
   {
-    modelAtt = canvas->LoadCharModel(file);
+    modelAtt = canvas->LoadModel(file);
     // error check
     if (!modelAtt)
     {
@@ -997,7 +997,7 @@ void ModelViewer::LoadModel(GameFile * file)
   }
   else
   {
-    modelAtt = canvas->LoadCharModel(file); //  change it from LoadModel, don't sure it's right or not.
+    modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
 
     // error check
     if (!modelAtt)

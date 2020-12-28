@@ -19,9 +19,9 @@
 #include "AVIGenerator.h"
 #endif
 #include "BaseCanvas.h"
-#include "camera.h"
 #include "lightcontrol.h"
 #include "maptile.h"
+#include "OrbitCamera.h"
 #include "RenderTexture.h"
 #include "util.h"
 #include "video.h"
@@ -62,10 +62,10 @@ class ModelCanvas:
 //class ModelCanvas: public wxGLCanvas
 {
   DECLARE_CLASS(ModelCanvas)
-    DECLARE_EVENT_TABLE()
+  DECLARE_EVENT_TABLE()
 
 public:
-  ModelCanvas(wxWindow *parent, VideoCaps *cap = NULL);
+  ModelCanvas(wxWindow *parent, VideoCaps *cap = nullptr);
   ~ModelCanvas();
 
   // GUI Control Panels
@@ -76,6 +76,7 @@ public:
 
   // Event Handlers
   void OnPaint(wxPaintEvent& WXUNUSED(event));
+  void Render(wxPaintEvent& WXUNUSED(event));
   void OnSize(wxSizeEvent& event);
   void OnMouse(wxMouseEvent& event);
   void OnKey(wxKeyEvent &event);
@@ -91,11 +92,8 @@ public:
   void InitView();
   void InitShaders();
   void UninitShaders();
-  void ResetView();
-  void ResetViewWMO(int id);
 
   // Main render routines which call the sub routines
-  void Render();
   void RenderToTexture();
   void RenderModel();
   void RenderWMO();
@@ -123,14 +121,10 @@ public:
   glm::vec3 vPos0;
   wxCoord mx, my;
 
-  void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
   void CheckMovement();  // move the character
   
   Attachment* LoadModel(GameFile *);
-  Attachment* LoadCharModel(GameFile *);
-#if 0
-  Attachment* AddModel(const char *fn);
-#endif
+
   void LoadWMO(wxString fn);
   void LoadADT(wxString fn);
   //void TogglePause();
@@ -151,7 +145,6 @@ public:
 
   Attachment *root;
   Attachment *sky;
-  Attachment *curAtt;
 
   // Attachment related functions
   void clearAttachments();
@@ -169,7 +162,9 @@ public:
 #endif
 
 private:
-  float time, modelsize;
+  void displayDebugInfos() const;
+
+  float time;
   DWORD lastTime;
   //DWORD pauseTime;
   SceneState sceneState[4]; // 4 scene states for F1-F4
@@ -178,7 +173,7 @@ private:
 
   bool fxBlur, fxGlow, fxFog;
 
-  CCamera camera;
+  OrbitCamera camera;
 };
 
 
