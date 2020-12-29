@@ -62,7 +62,6 @@ set(src animated.cpp
 set(headers animated.h
       AnimManager.h
       Attachment.h
-      BaseCanvas.h
       Bone.h
       CASCChunks.h
       CASCFile.h

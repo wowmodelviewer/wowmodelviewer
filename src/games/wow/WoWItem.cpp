@@ -684,12 +684,9 @@ void WoWItem::refresh()
           else
             charModel_->charModelDetails.closeLHand = true;
 
-          const glm::vec3 rot(0.0f, 0.0f, 0.0f);
-          const glm::vec3 pos(0.0f, 0.0f, 0.0f);
-
           // if (displayFlags_ & 0x100) then item should be mirrored when in left hand:
-          const bool mirror = (displayFlags_ & 0x100);
-          charModel_->attachment->addChild(it->second, attachement, slot_, 1.0f, rot, pos, mirror);
+          it->second->mirrored_ = (displayFlags_ & 0x100);
+          charModel_->attachment->addChild(it->second, attachement, slot_);
         }
       }
       break;

@@ -18,7 +18,6 @@
 #if defined (_WINDOWS)
 #include "AVIGenerator.h"
 #endif
-#include "BaseCanvas.h"
 #include "lightcontrol.h"
 #include "maptile.h"
 #include "OrbitCamera.h"
@@ -58,8 +57,6 @@ class ModelCanvas:
 #else
     public wxGLCanvas
 #endif
-    , public BaseCanvas
-//class ModelCanvas: public wxGLCanvas
 {
   DECLARE_CLASS(ModelCanvas)
   DECLARE_EVENT_TABLE()
@@ -116,6 +113,9 @@ public:
 
   void SetCurrent();
   void SwapBuffers();
+
+  void setModel(WoWModel * m, bool keepPrevious = false);
+  WoWModel const * model() const { return model_; }
 
   // view:
   glm::vec3 vRot0;
@@ -175,6 +175,8 @@ private:
   bool fxBlur, fxGlow, fxFog;
 
   OrbitCamera camera;
+
+  WoWModel * model_;
 };
 
 

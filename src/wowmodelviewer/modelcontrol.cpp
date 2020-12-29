@@ -418,16 +418,16 @@ void ModelControl::Update()
   particles->SetValue(model->showParticles);
   texture->SetValue(model->showTexture);
 
-  alpha->SetValue(int(model->alpha * 100));
-  scale->SetValue(att->scale*100);
+  alpha->SetValue(int(model->alpha_ * 100));
+  scale->SetValue(model->scale_*100);
 
-  txtX->SetValue(wxString::Format(wxT("%f"), model->pos.x));
-  txtY->SetValue(wxString::Format(wxT("%f"), model->pos.y));
-  txtZ->SetValue(wxString::Format(wxT("%f"), model->pos.z));
-  rotX->SetValue(wxString::Format(wxT("%f"), model->rot.x));
-  rotY->SetValue(wxString::Format(wxT("%f"), model->rot.y));
-  rotZ->SetValue(wxString::Format(wxT("%f"), model->rot.z));
-  txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
+  txtX->SetValue(wxString::Format(wxT("%f"), model->pos_.x));
+  txtY->SetValue(wxString::Format(wxT("%f"), model->pos_.y));
+  txtZ->SetValue(wxString::Format(wxT("%f"), model->pos_.z));
+  rotX->SetValue(wxString::Format(wxT("%f"), model->rot_.x));
+  rotY->SetValue(wxString::Format(wxT("%f"), model->rot_.y));
+  rotZ->SetValue(wxString::Format(wxT("%f"), model->rot_.z));
+  txtsize->SetValue(wxString::Format(wxT("%.2f"), model->scale_));
 
   if (modelPCRSaves.find(model->modelname) != modelPCRSaves.end())
   {
@@ -628,10 +628,10 @@ void ModelControl::OnSlider(wxScrollEvent &event)
 
   int id = event.GetId();
   if (id == ID_MODEL_ALPHA) {
-    model->alpha = event.GetInt() / 100.0f;
+    model->alpha_ = event.GetInt() / 100.0f;
   } else if (id == ID_MODEL_SCALE) {
-    att->scale = event.GetInt() / 100.0f;
-    txtsize->SetValue(wxString::Format(wxT("%.2f"), att->scale));
+    model->scale_ = event.GetInt() / 100.0f;
+    txtsize->SetValue(wxString::Format(wxT("%.2f"), model->scale_));
   }
 }
 
@@ -650,17 +650,17 @@ void ModelControl::OnEnter(wxCommandEvent &event)
   if (eventID == ID_MODEL_X || eventID == ID_MODEL_Y || eventID == ID_MODEL_Z ||
       eventID == ID_MODEL_ROT_X || eventID == ID_MODEL_ROT_Y || eventID == ID_MODEL_ROT_Z)
   {
-    model->pos.x = wxAtof(txtX->GetValue());
-    model->pos.y = wxAtof(txtY->GetValue());
-    model->pos.z = wxAtof(txtZ->GetValue());
-    model->rot.x = wxAtof(rotX->GetValue());
-    model->rot.y = wxAtof(rotY->GetValue());
-    model->rot.z = wxAtof(rotZ->GetValue());
+    model->pos_.x = wxAtof(txtX->GetValue());
+    model->pos_.y = wxAtof(txtY->GetValue());
+    model->pos_.z = wxAtof(txtZ->GetValue());
+    model->rot_.x = wxAtof(rotX->GetValue());
+    model->rot_.y = wxAtof(rotY->GetValue());
+    model->rot_.z = wxAtof(rotZ->GetValue());
   }
 
   if (eventID == ID_MODEL_SIZE)
   {
-    att->scale = wxAtof(txtsize->GetValue());
+    model->scale_ = wxAtof(txtsize->GetValue());
     scale->SetValue(wxAtoi(txtsize->GetValue())*100);
   }
 }

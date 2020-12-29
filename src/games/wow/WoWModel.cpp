@@ -118,8 +118,9 @@ gamefile(file)
   // Initiate our model variables.
   trans = 1.0f;
   rad = 1.0f;
-  pos = glm::vec3(0.0f, 0.0f, 0.0f);
-  rot = glm::vec3(0.0f, 0.0f, 0.0f);
+  pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
+  rot_ = glm::vec3(0.0f, 0.0f, 0.0f);
+  scale_ = 1.0f;
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
@@ -148,6 +149,7 @@ gamefile(file)
   showWireframe = false;
   showParticles = false;
   showTexture = true;
+  mirrored_ = false;
 
   charModelDetails.Reset();
 
@@ -559,7 +561,7 @@ void WoWModel::initCommon()
 
   // Ready to render.
   showModel = true;
-  alpha = 1.0f;
+  alpha_ = 1.0f;
 
   ModelVertex * buffer = new ModelVertex[header.nVertices];
   memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
@@ -1654,6 +1656,54 @@ void WoWModel::animate(ssize_t anim)
 
 inline void WoWModel::drawModel()
 {
+  glPushMatrix();
+
+  glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
+  if (mirrored_)
+  {
+    glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
+    scaling.y *= -1.0f;
+  }
+  else
+  {
+    glFrontFace(GL_CCW);
+  }
+
+  // no need to scale if its already 100%
+  // scaling manually set from model control panel
+  if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
+    glScalef(scaling.x, scaling.y, scaling.z);
+
+  if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
+    glTranslatef(pos_.x, pos_.y, pos_.z);
+
+
+  if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
+  {
+    glRotatef(rot_.x, 1.0f, 0.0f, 0.0f);
+    glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
+    glRotatef(rot_.z, 0.0f, 0.0f, 1.0f);
+  }
+
+
+  if (showModel && (alpha_ != 1.0f))
+  {
+    glDisable(GL_COLOR_MATERIAL);
+
+    float a[] = { 1.0f, 1.0f, 1.0f, alpha_ };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, a);
+
+    glEnable(GL_BLEND);
+    //glDisable(GL_DEPTH_TEST);
+    //glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+
+  if (!showTexture || video.useMasking)
+    glDisable(GL_TEXTURE_2D);
+  else
+    glEnable(GL_TEXTURE_2D);
+
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
   if (video.supportVBO && animated)
   {
@@ -1688,6 +1738,7 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   for (auto it : passes)
   {
     if (it->init())
@@ -1702,10 +1753,20 @@ inline void WoWModel::drawModel()
 
   // clean bind
   if (video.supportVBO && animated)
-  {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+  if (showModel && (alpha_ != 1.0f))
+  {
+    float a[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, a);
+
+    glDisable(GL_BLEND);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthMask(GL_TRUE);
+    glEnable(GL_COLOR_MATERIAL);
   }
 
+  glPopMatrix();
   // done with all render ops
 }
 
@@ -1737,6 +1798,21 @@ inline void WoWModel::draw()
 
     if (showModel)
       drawModel();
+  }
+
+  if (!video.useMasking && (showBounds || showBones))
+  {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    if (showBounds)
+      drawBoundingVolume();
+
+    if (showBones)
+      drawBones();
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
   }
 }
 
@@ -1824,13 +1900,44 @@ void WoWModel::drawBoundingVolume()
 // Renders our particles into the pipeline.
 void WoWModel::drawParticles()
 {
-  // draw particle systems
-  for (auto & it : particleSystems)
-    it.draw();
+  if (hasParticles && showParticles)
+  {
+    glPushMatrix();
 
-  // draw ribbons
-  for (auto & it : ribbons)
-    it.draw();
+    glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
+    if (mirrored_)
+    {
+      glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
+      scaling.y *= -1.0f;
+    }
+    else
+    {
+      glFrontFace(GL_CCW);
+    }
+
+    // no need to scale if its already 100%
+    // scaling manually set from model control panel
+    if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
+      glScalef(scaling.x, scaling.y, scaling.z);
+
+    if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
+      glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
+
+    //glRotatef(45.0f, 1,0,0);
+
+    if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
+      glTranslatef(pos_.x, pos_.y, pos_.z);
+
+    // draw particle systems
+    for (auto & it : particleSystems)
+      it.draw();
+
+    // draw ribbons
+    for (auto & it : ribbons)
+      it.draw();
+
+    glPopMatrix();
+  }
 }
 
 WoWItem * WoWModel::getItem(CharSlots slot)

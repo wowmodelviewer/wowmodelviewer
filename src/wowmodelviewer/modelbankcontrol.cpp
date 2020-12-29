@@ -84,8 +84,8 @@ void ModelBankControl::LoadModel()
 
   if (g_canvas->model()) {
     WoWModel * m = const_cast<WoWModel *>(g_canvas->model());
-    m->pos = cd.pos;
-    m->rot = cd.rot;
+    m->pos_ = cd.pos;
+    m->rot_ = cd.rot;
   } else
     return;
 
@@ -133,8 +133,8 @@ void ModelBankControl::AddModel()
   cd.fileName = wxString(g_canvas->model()->name().toStdWString());
   cd.name = txtName->GetValue();
 
-  cd.pos = g_canvas->model()->pos;
-  cd.rot = g_canvas->model()->rot;
+  cd.pos = g_canvas->model()->pos_;
+  cd.rot = g_canvas->model()->rot_;
 
   cd.modelType = g_canvas->model()->modelType;
 

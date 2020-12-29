@@ -867,7 +867,7 @@ void CharControl::OnUpdateItem(int type, int id)
         g_canvas->setModel(model);
         if (charAtt)
         {
-          charAtt->scale = g_canvas->root->scale;
+          model->scale_ = dynamic_cast<WoWModel *>(g_canvas->root->model())->scale_;
           charAtt->id = 0;
         }
         g_animControl->UpdateModel(model);
@@ -933,12 +933,12 @@ void CharControl::OnUpdateItem(int type, int id)
         // For "Taxi" mounts scale should be 1.0f I think, for now I'll ignore them
         // I really have no idea!  
         if (creaturemodels[id - 1].Mid(9, 9).IsSameAs(wxT("Kodobeast"), false))
-          charAtt->scale = 2.25f;
+          dynamic_cast<WoWModel*>(charAtt->model())->scale_ = 2.25f;
         else
-          charAtt->scale = 1.0f;
+          dynamic_cast<WoWModel*>(charAtt->model())->scale_ = 1.0f;
       }
-      model->rot = model->pos = glm::vec3(0.0f, 0.0f, 0.0f);
-      m->rot.x = 0.0f; // mounted characters look better from the side
+      model->rot_ = model->pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
+      m->rot_.x = 0.0f; // mounted characters look better from the side
       break;
     }
     case UPDATE_CREATURE_ITEM:

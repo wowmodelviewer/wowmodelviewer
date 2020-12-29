@@ -15,7 +15,6 @@
 
 class Displayable;
 class WoWModel;
-class BaseCanvas;
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -30,24 +29,23 @@ class BaseCanvas;
 class _ATTACHMENT_API_ Attachment
 {
   public:
-    Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
+    Attachment(Attachment *parent, Displayable *model, int id, int slot);
 
     ~Attachment();
 
     void setup();
     void setupParticle();
-    Attachment* addChild(std::string fn, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
-    Attachment* addChild(Displayable *disp, int id, int slot, float scale = 1.0f, glm::vec3 rot = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 pos = glm::vec3(0.0f, 0.0f, 0.0f), bool mirror = false);
+    Attachment* addChild(std::string fn, int id, int slot);
+    Attachment* addChild(Displayable *disp, int id, int slot);
     void delSlot(int slot);
     void delChildren();
-    WoWModel* getModelFromSlot(int slot);
 
-    void draw(BaseCanvas *c);
-    void drawParticles(bool force=false);
+    void draw();
+    void drawParticles();
     void tick(float dt);
 
     void setModel(Displayable * newmodel);
-    Displayable * model() { return m_model;}
+    Displayable * model() const { return model_;}
 
     Attachment *parent;
 
@@ -55,13 +53,9 @@ class _ATTACHMENT_API_ Attachment
 
     int id;
     int slot;
-    float scale;
-    glm::vec3 rot;
-    glm::vec3 pos;
-    bool mirror;
 
   private:
-    Displayable *m_model;
+    Displayable *model_;
 };
 
 

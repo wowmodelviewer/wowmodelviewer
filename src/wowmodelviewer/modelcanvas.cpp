@@ -18,16 +18,12 @@
 #include "modelviewer.h"
 #include "shaders.h"
 #include "video.h"
-#include "WMOGroup.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "logger/Logger.h"
 
-
-//float animSpeed = 1.0f;
-static const float piover180 = 0.0174532925f;
 
 #ifdef  _WINDOWS
 IMPLEMENT_CLASS(ModelCanvas, wxWindow)
@@ -138,14 +134,16 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
   lastTime = timeGetTime();
 
   // Set all our pointers to null
-  skyModel = 0;    // SkyBox Model
-  wmo = 0;      // world map object model
-  adt = 0;      // ADT
-  animControl = 0;
-  gifExporter = 0;
-  rt = 0;        // RenderToTexture class
-  root = 0;
-  sky = 0;
+  skyModel = nullptr;    // SkyBox Model
+  wmo = nullptr;      // world map object model
+  adt = nullptr;      // ADT
+  animControl = nullptr;
+  gifExporter = nullptr;
+  rt = nullptr;        // RenderToTexture class
+  root = new Attachment(nullptr, nullptr, -1, -1);
+  sky = new Attachment(nullptr, nullptr, -1, -1);
+  model_ = nullptr;
+
   fogTex = 0;
 
   /*
@@ -197,9 +195,6 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
     video.render = true;
 #endif
   }
-  
-  root = new Attachment(NULL, NULL, -1, -1);
-  sky = new Attachment(NULL, NULL, -1, -1);
 }
 
 ModelCanvas::~ModelCanvas()
@@ -355,18 +350,17 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
   wmo = nullptr;
 
   // Create new one
-  auto * m = new WoWModel(file, true);
-  setModel(m);
-  if (!model()->ok)
+  model_ = new WoWModel(file, true);
+  if (!model_->ok)
   {
     LOG_INFO << "Model is not OK !";
-    setModel(nullptr);
+    model_ = nullptr;
     return nullptr;
   }
 
-  auto *att = root->addChild(m, 0, -1);
+  auto *att = root->addChild(model_, 0, -1);
 
-  camera.reset(m);
+  camera.reset(model_);
 
   return att;
 }
@@ -492,7 +486,7 @@ void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
   if (video.render) {
     if (wmo)
       RenderWMO();
-    else if (model())
+    else if (model_)
       RenderModel();
     else if (adt)
       RenderADT();
@@ -589,7 +583,7 @@ inline void ModelCanvas::RenderSkybox()
   
   glTranslatef(0.0f, 0.0f, -5.0f);  // Position the sky box
   glScalef(fScale, fScale, fScale);  // Scale it so it looks appropriate
-  sky->draw(this);          // Render the skybox
+  sky->draw();          // Render the skybox
 
   glPopMatrix();            // load the old modelview matrix that we saved previously
   // ====================================
@@ -637,7 +631,7 @@ inline void ModelCanvas::RenderObjects()
   //model->animcalc = false;
     
   //glEnable(GL_NORMALIZE);
-  root->draw(this);
+  root->draw();
   //glDisable(GL_NORMALIZE);
 
   if (video.supportGLSL) {
@@ -826,10 +820,10 @@ inline void ModelCanvas::RenderModel()
   // ************* Absolute Lighting *******************
   // All our lighting related rendering code
   // Use model lighting?
-  if (model() && (lightType==LIGHT_MODEL_ONLY)) {
+  if (model_ && (lightType==LIGHT_MODEL_ONLY)) {
     glm::vec4 la;
 
-    if (model()->nbLights() > 0) {
+    if (model_->nbLights() > 0) {
       la = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     } else {
       la = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -860,17 +854,17 @@ inline void ModelCanvas::RenderModel()
   // *************************
   // setup the view/projection
   /*
-  if (model()) {
-    if (useCamera && model()->hasCamera) {
-      WoWModel * m = const_cast<WoWModel *>(model());
+  if (model_) {
+    if (useCamera && model_->hasCamera) {
+      WoWModel * m = const_cast<WoWModel *>(model_);
       m->cam[0].setup();
     }
     else {
       // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-      glTranslatef(model()->pos.x, model()->pos.y, -model()->pos.z);
-      glRotatef(model()->rot.x, 1.0f, 0.0f, 0.0f);
-      glRotatef(model()->rot.y, 0.0f, 1.0f, 0.0f);
-      glRotatef(model()->rot.z, 0.0f, 0.0f, 1.0f);
+      glTranslatef(model_->pos.x, model_->pos.y, -model_->pos.z);
+      glRotatef(model_->rot.x, 1.0f, 0.0f, 0.0f);
+      glRotatef(model_->rot.y, 0.0f, 1.0f, 0.0f);
+      glRotatef(model_->rot.z, 0.0f, 0.0f, 1.0f);
       // --==--
     }
   }
@@ -880,7 +874,7 @@ inline void ModelCanvas::RenderModel()
   // As above for lighting
   // ************* Relative Lighting *******************
   // More lighting code, this is to setup the g_modelViewer->lightControl->lights that are 'relative' to the model.
-  if (model() && (lightType==LIGHT_DYNAMIC)) { // Else, for all our models, we use the new "lighting control", IF we're not using model only lighting    
+  if (model_ && (lightType==LIGHT_DYNAMIC)) { // Else, for all our models, we use the new "lighting control", IF we're not using model only lighting    
     // loop through the g_modelViewer->lightControl->lights of our lighting system checking to see if they are turned on
     // and if so to apply their settings.
     for (size_t i=0; i<MAX_LIGHTS; i++) {
@@ -900,7 +894,7 @@ inline void ModelCanvas::RenderModel()
     RenderGrid();
 
   // render our main model
-  if (model()) {
+  if (model_) {
     if (video.supportGLSL) {
       // Per pixel lighting, experimental
       //perpixelShader.Enable();
@@ -1135,11 +1129,11 @@ inline void ModelCanvas::RenderWMO()
   // --==--
   // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
   // View
-  if (model()) {
-    glTranslatef(model()->pos.x, model()->pos.y, -model()->pos.z);
-    glRotatef(model()->rot.x, 1.0f, 0.0f, 0.0f);
-    glRotatef(model()->rot.y, 0.0f, 1.0f, 0.0f);
-    glRotatef(model()->rot.z, 0.0f, 0.0f, 1.0f);
+  if (model_) {
+    glTranslatef(model_->pos_.x, model_->pos_.y, -model_->pos_.z);
+    glRotatef(model_->rot_.x, 1.0f, 0.0f, 0.0f);
+    glRotatef(model_->rot_.y, 0.0f, 1.0f, 0.0f);
+    glRotatef(model_->rot_.z, 0.0f, 0.0f, 1.0f);
     // --==--
   }
 
@@ -1148,7 +1142,7 @@ inline void ModelCanvas::RenderWMO()
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  root->draw(this);
+  root->draw();
   //root->drawParticles(true);
 
   //glFlush();
@@ -1200,7 +1194,7 @@ inline void ModelCanvas::RenderADT()
   glEnable(GL_TEXTURE_2D);
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  root->draw(this);
+  root->draw();
   //root->drawParticles(true);
 
   //glFlush();
@@ -1250,17 +1244,17 @@ inline void ModelCanvas::RenderWMOToBuffer()
 
   // View
   // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-  if (model()) {
-    glTranslatef(model()->pos.x, model()->pos.y, -model()->pos.z);
-    glRotatef(model()->rot.x, 1.0f, 0.0f, 0.0f);
-    glRotatef(model()->rot.y, 0.0f, 1.0f, 0.0f);
-    glRotatef(model()->rot.z, 0.0f, 0.0f, 1.0f);
+  if (model_) {
+    glTranslatef(model_->pos_.x, model_->pos_.y, -model_->pos_.z);
+    glRotatef(model_->rot_.x, 1.0f, 0.0f, 0.0f);
+    glRotatef(model_->rot_.y, 0.0f, 1.0f, 0.0f);
+    glRotatef(model_->rot_.z, 0.0f, 0.0f, 1.0f);
   }
   // --==--
 
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_CULL_FACE);
-  root->draw(this);
+  root->draw();
   //root->drawParticles(true);
 }
 
@@ -1378,16 +1372,16 @@ void ModelCanvas::RenderToBuffer()
   */
   // *************************
   // setup the view/projection
-  if (model()) {
-    if (useCamera && model()->hasCamera) {
-      WoWModel * m = const_cast<WoWModel *>(model());
+  if (model_) {
+    if (useCamera && model_->hasCamera) {
+      WoWModel * m = const_cast<WoWModel *>(model_);
       m->cam[0].setup();
     } else {
       // TODO: Possibly move this into the Model/Attachment/Displayable::draw() routine?
-      glTranslatef(model()->pos.x, model()->pos.y, -model()->pos.z);
-      glRotatef(model()->rot.x, 1.0f, 0.0f, 0.0f);
-      glRotatef(model()->rot.y, 0.0f, 1.0f, 0.0f);
-      glRotatef(model()->rot.z, 0.0f, 0.0f, 1.0f);
+      glTranslatef(model_->pos_.x, model_->pos_.y, -model_->pos_.z);
+      glRotatef(model_->rot_.x, 1.0f, 0.0f, 0.0f);
+      glRotatef(model_->rot_.y, 0.0f, 1.0f, 0.0f);
+      glRotatef(model_->rot_.z, 0.0f, 0.0f, 1.0f);
       // --==--
     }
   }
@@ -1416,7 +1410,7 @@ void ModelCanvas::RenderToBuffer()
     
 
   // render our main model
-  if (model())
+  if (model_)
     RenderObjects();
 
   if (rt)
@@ -1447,13 +1441,13 @@ void ModelCanvas::tick()
 
   globalTime += (ddt);
 
-  if (model()) {
-    if (model()->animManager && !wmo) {
-      if (model()->animManager->IsPaused())
+  if (model_) {
+    if (model_->animManager && !wmo) {
+      if (model_->animManager->IsPaused())
         ddt = 0;
 /*    
-      if (!model()->animManager->IsParticlePaused())
-        ddt = model()->animManager->GetTimeDiff();
+      if (!model_->animManager->IsParticlePaused())
+        ddt = model_->animManager->GetTimeDiff();
 */
     }
     
@@ -1528,7 +1522,7 @@ void ModelCanvas::LoadBackground(wxString filename)
 void ModelCanvas::OnKey(wxKeyEvent &event)
 {
   // error checking
-  if(!model()) 
+  if(!model_) 
     return;
   
   // --
@@ -1579,7 +1573,7 @@ void ModelCanvas::OnCamMenu(wxCommandEvent &event)
   else if (id == ID_CAM_ISO)
     camera.setYawAndPitch(315., 90.);
   else if (id == ID_CAM_RESET)
-    camera.reset(model());
+    camera.reset(model_);
 }
 
 void ModelCanvas::CheckMovement()
@@ -1604,7 +1598,7 @@ void ModelCanvas::CheckMovement()
   if (wxGetKeyState(WXK_NUMPAD2))  // Rotate fornt
     camera.setPitch(camera.pitch() - 1.0f);
   if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
-    camera.reset(model());
+    camera.reset(model_);
   if (wxGetKeyState(WXK_NUMPAD7))  // Look upper
     camera.setLookAt(glm::vec3(camera.lookAt().x, camera.lookAt().y, camera.lookAt().z + 0.2f));
   if (wxGetKeyState(WXK_NUMPAD9))  // Reset lower
@@ -1644,14 +1638,14 @@ void ModelCanvas::CheckMovement()
     camera.Strafe(0.05f);
     */
   // M2 Model only stuff below here
-  if (!model() || !model()->animManager)
+  if (!model_ || !model_->animManager)
     return;
 
   float speed = 1.0f;
 
   // Time stuff
-  if (model())
-    speed = ((timeGetTime() - lastTime) * model()->animManager->GetSpeed()) / 7.0f;
+  if (model_)
+    speed = ((timeGetTime() - lastTime) * model_->animManager->GetSpeed()) / 7.0f;
   else
     speed = (timeGetTime() - lastTime);
 
@@ -1659,24 +1653,24 @@ void ModelCanvas::CheckMovement()
 
   // Turning
   if (wxGetKeyState(WXK_LEFT)) {
-    WoWModel * m = const_cast<WoWModel *>(model());
-    m->rot.y += speed;
+    WoWModel * m = const_cast<WoWModel *>(model_);
+    m->rot_.y += speed;
 
-    if (m->rot.y > 360) m->rot.y -= 360;
-    if (m->rot.y < 0) m->rot.y += 360;
+    if (m->rot_.y > 360) m->rot_.y -= 360;
+    if (m->rot_.y < 0) m->rot_.y += 360;
     
   } else if (wxGetKeyState(WXK_RIGHT)) {
-    WoWModel * m = const_cast<WoWModel *>(model());
-    m->rot.y -= speed;
+    WoWModel * m = const_cast<WoWModel *>(model_);
+    m->rot_.y -= speed;
 
-    if (m->rot.y > 360) m->rot.y -= 360;
-    if (m->rot.y < 0) m->rot.y += 360;
+    if (m->rot_.y > 360) m->rot_.y -= 360;
+    if (m->rot_.y < 0) m->rot_.y += 360;
   }
   // --
 
   // Moving forward/backward
   //float speed = 0.0f;
-  WoWModel * m = const_cast<WoWModel *>(model());
+  WoWModel * m = const_cast<WoWModel *>(model_);
   if (m->animated)
     speed *= (m->anims[m->currentAnim].moveSpeed / 160.0f);
 }
@@ -1712,7 +1706,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 
     rt->BeginRender();
 
-    if (model())
+    if (model_)
       RenderToBuffer();
 
     rt->BindTexture();
@@ -1721,7 +1715,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
   {
     glGetIntegerv(GL_VIEWPORT, screenSize);
     glReadBuffer(GL_BACK);
-    if(model())
+    if(model_)
       RenderToBuffer();
   }
 
@@ -1768,13 +1762,13 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 // Save the scene state,  currently this is just position/rotation/field of view
 void ModelCanvas::SaveSceneState(int id)
 {
-  if (!model())
+  if (!model_)
     return;
 
   // bounds check
   if (id > -1 && id < 4) {
-    sceneState[id].pos = model()->pos;
-    sceneState[id].rot = model()->rot;
+    sceneState[id].pos = model_->pos_;
+    sceneState[id].rot = model_->rot_;
     sceneState[id].fov = video.fov;
   }
 }
@@ -1782,15 +1776,15 @@ void ModelCanvas::SaveSceneState(int id)
 // Load the scene state, as above
 void ModelCanvas::LoadSceneState(int id)
 {
-  if (!model())
+  if (!model_)
     return;
 
   // bounds check
-  WoWModel * m = const_cast<WoWModel *>(model());
+  WoWModel * m = const_cast<WoWModel *>(model_);
   if (id > -1 && id < 4) {
     video.fov =  sceneState[id].fov ;
-    m->pos = sceneState[id].pos;
-    m->rot = sceneState[id].rot;
+    m->pos_ = sceneState[id].pos;
+    m->rot_ = sceneState[id].rot;
 
     int screenSize[4];
     glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
@@ -1844,5 +1838,13 @@ void ModelCanvas::displayDebugInfos() const
   }
 
   frameCount++;
+}
+
+void ModelCanvas::setModel(WoWModel * m, bool keepPrevious)
+{
+  if(!keepPrevious)
+    delete model_;
+
+  model_ = m;
 }
 

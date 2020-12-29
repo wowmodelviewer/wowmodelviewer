@@ -168,11 +168,12 @@ public:
   bool showParticles;
   bool showModel;
   bool showTexture;
-  float alpha;
+  float alpha_;
+  float scale_;
 
   // Position and rotation vector
-  glm::vec3 pos;
-  glm::vec3 rot;
+  glm::vec3 pos_;
+  glm::vec3 rot_;
 
   //
   bool ok;
@@ -245,6 +246,7 @@ public:
   std::set<GeosetNum> creatureGeosetData;
   uint creatureGeosetDataID;
   bool bSheathe;
+  bool mirrored_;
 
   friend class ModelRenderPass;
 
