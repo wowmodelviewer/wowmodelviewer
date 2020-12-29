@@ -29,17 +29,17 @@ set(NAME armory)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
-target_link_libraries(${NAME} core wow Qt5::Core)
+target_link_libraries(${NAME} Qt5::Core ${extralibs})
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 
 if (MSVC_IDE)
-	# Enable Qt in Visual Studio
-	set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-	set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
+  # Enable Qt in Visual Studio
+  set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
+  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
 
 if(WIN32)

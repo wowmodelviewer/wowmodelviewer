@@ -8,7 +8,8 @@
 
 #include <QImage>
 
-#include "OpenGLHeaders.h"
+#include "GL/glew.h"
+
 #include "ddslib.h"
 
 Texture::Texture(GameFile * f)
@@ -18,8 +19,8 @@ Texture::Texture(GameFile * f)
 
 void Texture::getPixels(unsigned char* buf, unsigned int format)
 {
-	glBindTexture(GL_TEXTURE_2D, id);
-	glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buf);
+  glBindTexture(GL_TEXTURE_2D, id);
+  glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, buf);
 }
 
 void Texture::load()
@@ -180,7 +181,7 @@ void Texture::load()
       if (!video.supportCompression)
       {
         delete ucbuf;
-		ucbuf = nullptr;
+    ucbuf = nullptr;
       }
 
     }
@@ -323,7 +324,7 @@ void Texture::decompressDXTC(GLint format, int w, int h, size_t size, unsigned c
   }
 
   // DXT5 Textures
-  if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)	
+  if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)  
   {
     //DXT5UnpackAlphaValues(src, w, h, dest);
     DDSDecompressDXT5(src, w, h, dest);
@@ -375,7 +376,7 @@ void Texture::decompressDXTC(GLint format, int w, int h, size_t size, unsigned c
   *dd++ = color[index & 0x03].b;
   *dd++ = color[index & 0x03].g;
   *dd++ = color[index & 0x03].r;
-  //if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)	{
+  //if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT)  {
   *dd++ = ((index & 0x03) == 3 && c0 <= c1) ? 0 : 255;
   //}
   index >>= 2;

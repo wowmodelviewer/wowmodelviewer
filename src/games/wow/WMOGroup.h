@@ -1,10 +1,11 @@
 #ifndef _WMO_GROUP_H_
 #define _WMO_GROUP_H_
 
-#include "types.h"
-#include "vec3d.h"
+#include <string>
 
-typedef unsigned int GLuint;
+#include "types.h"
+#include "GL/glew.h"
+#include "glm/glm.hpp"
 
 class GameFile;
 class WMO;
@@ -25,7 +26,7 @@ class WMOGroup
   WMO *wmo;
   int flags;
   GLuint dl, dl_light;
-  Vec3D center;
+  glm::vec3 center;
   float rad;
   int num;
   int fog;
@@ -33,8 +34,8 @@ class WMOGroup
   short *ddr;
   //Liquid *lq;
   public:
-  Vec3D *vertices, *normals;
-  Vec2D *texcoords;
+  glm::vec3 *vertices, *normals;
+  glm::vec2 *texcoords;
   uint16 *indices;
   uint16 *materials;
   uint32 nTriangles, nVertices, nIndices, nBatches;
@@ -43,9 +44,9 @@ class WMOGroup
   WMOVertColor *VertexColors;
   uint32 *IndiceToVerts;
 
-  Vec3D v1, v2;
-  Vec3D b1, b2;
-  Vec3D vmin, vmax;
+  glm::vec3 v1, v2;
+  glm::vec3 b1, b2;
+  glm::vec3 vmin, vmax;
   bool indoor, hascv, visible, ok;
 
   bool outdoorLights;

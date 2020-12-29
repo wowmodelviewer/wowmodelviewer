@@ -6,9 +6,6 @@
     #include <wx/wx.h>
 #endif
 
-// gl
-#include "OpenGLHeaders.h"
-
 // wx
 #include <wx/glcanvas.h>
 #include <wx/window.h>
@@ -18,22 +15,21 @@
 
 // our headers
 #include "AnimExporter.h"
-#include "ArcBallCamera.h"
 #if defined (_WINDOWS)
 #include "AVIGenerator.h"
 #endif
-#include "BaseCanvas.h"
-#include "camera.h"
 #include "lightcontrol.h"
 #include "maptile.h"
+#include "OrbitCamera.h"
 #include "RenderTexture.h"
 #include "util.h"
+#include "video.h"
 #include "wmo.h"
 #include "WoWModel.h"
 
-// custom objects
-class ArcBallCameraControl;
+#include "glm/glm.hpp"
 
+// custom objects
 class Attachment;
 
 class AnimControl;
@@ -48,135 +44,130 @@ const int TIME_STEP = 10; // 10 millisecs between each frame
 
 
 struct SceneState {
-	Vec3D pos;	// Model Position
-	Vec3D rot;	// Model Rotation
+  glm::vec3 pos;  // Model Position
+  glm::vec3 rot;  // Model Rotation
 
-	float fov;  // OpenGL Field of View
+  float fov;  // OpenGL Field of View
 };
 
 
 class ModelCanvas:
 #ifdef _WINDOWS
-		public wxWindow
+    public wxWindow
 #else
-		public wxGLCanvas
+    public wxGLCanvas
 #endif
-		, public BaseCanvas
-//class ModelCanvas: public wxGLCanvas
 {
-	DECLARE_CLASS(ModelCanvas)
-    DECLARE_EVENT_TABLE()
+  DECLARE_CLASS(ModelCanvas)
+  DECLARE_EVENT_TABLE()
 
 public:
-	ModelCanvas(wxWindow *parent, VideoCaps *cap = NULL);
-	~ModelCanvas();
+  ModelCanvas(wxWindow *parent, VideoCaps *cap = nullptr);
+  ~ModelCanvas();
 
-	// GUI Control Panels
-	AnimControl *animControl;
-	GifExporter *gifExporter;
+  // GUI Control Panels
+  AnimControl *animControl;
+  GifExporter *gifExporter;
 
-	RenderTexture *rt;
+  RenderTexture *rt;
 
-	// Event Handlers
-	void OnPaint(wxPaintEvent& WXUNUSED(event));
-	void OnSize(wxSizeEvent& event);
-	void OnMouse(wxMouseEvent& event);
-	void OnKey(wxKeyEvent &event);
+  // Event Handlers
+  void OnPaint(wxPaintEvent& WXUNUSED(event));
+  void Render(wxPaintEvent& WXUNUSED(event));
+  void OnSize(wxSizeEvent& event);
+  void OnMouse(wxMouseEvent& event);
+  void OnKey(wxKeyEvent &event);
+  void OnCamMenu(wxCommandEvent &event);
 
-	//void OnIdle(wxIdleEvent& event);
-	void OnEraseBackground(wxEraseEvent& event);
-	void OnTimer(wxTimerEvent& event);
-	void tick();
-	wxTimer timer;
+  //void OnIdle(wxIdleEvent& event);
+  void OnEraseBackground(wxEraseEvent& event);
+  void OnTimer(wxTimerEvent& event);
+  void tick();
+  wxTimer timer;
 
-	// OGL related functions
-	void InitGL();
-	void InitView();
-	void InitShaders();
-	void UninitShaders();
-	void ResetView();
-	void ResetViewWMO(int id);
+  // OGL related functions
+  void InitGL();
+  void InitView();
+  void InitShaders();
+  void UninitShaders();
 
-	// Main render routines which call the sub routines
-	void Render();
-	void RenderToTexture();
-	void RenderModel();
-	void RenderWMO();
-	void RenderADT();
-	void RenderToBuffer();
-	void RenderWMOToBuffer();
-	void RenderLight(Light *l);
+  // Main render routines which call the sub routines
+  void RenderToTexture();
+  void RenderModel();
+  void RenderWMO();
+  void RenderADT();
+  void RenderToBuffer();
+  void RenderWMOToBuffer();
+  void RenderLight(Light *l);
 
-	// Render sub routines
-	void RenderSkybox();
-	void RenderObjects();
-	void RenderBackground();
-	void RenderGrid();
-	//void GenerateShadowMap();
+  // Render sub routines
+  void RenderSkybox();
+  void RenderObjects();
+  void RenderBackground();
+  void RenderGrid();
+  //void GenerateShadowMap();
 
-	void Screenshot(const wxString fn, int x=0, int y=0);
-	void SaveSceneState(int id);
-	void LoadSceneState(int id);
+  void Screenshot(const wxString fn, int x=0, int y=0);
+  void SaveSceneState(int id);
+  void LoadSceneState(int id);
 
-	void SetCurrent();
-	void SwapBuffers();
+  void SetCurrent();
+  void SwapBuffers();
+
+  void setModel(WoWModel * m, bool keepPrevious = false);
+  WoWModel const * model() const { return model_; }
 
   // view:
-  Vec3D vRot0;
-  Vec3D vPos0;
+  glm::vec3 vRot0;
+  glm::vec3 vPos0;
   wxCoord mx, my;
 
-  void Zoom(float f, bool rel = false); // f = amount to zoom, rel = relative to model or not
-	void CheckMovement();	// move the character
-	
-	Attachment* LoadModel(GameFile *);
-	Attachment* LoadCharModel(GameFile *);
-#if 0
-	Attachment* AddModel(const char *fn);
-#endif
-	void LoadWMO(wxString fn);
-	void LoadADT(wxString fn);
-	//void TogglePause();
-	
-	// Various toggles
-	bool init;
-	bool initShaders;
-	bool drawLightDir, drawBackground, drawSky, drawGrid, drawAVIBackground;
-	bool useCamera; //, useLights;
+  void CheckMovement();  // move the character
+  
+  Attachment* LoadModel(GameFile *);
 
-	int lightType;	// MODEL / AMBIENCE / DYNAMIC
-	int ignoreMouse;
+  void LoadWMO(wxString fn);
+  void LoadADT(wxString fn);
+  //void TogglePause();
+  
+  // Various toggles
+  bool init;
+  bool initShaders;
+  bool drawLightDir, drawBackground, drawSky, drawGrid, drawAVIBackground;
+  bool useCamera; //, useLights;
 
-	// Models / Attachments
-	WoWModel *skyModel;
-	WMO *wmo;
-	MapTile *adt;
+  int lightType;  // MODEL / AMBIENCE / DYNAMIC
+  int ignoreMouse;
 
-	Attachment *root;
-	Attachment *sky;
-	Attachment *curAtt;
+  // Models / Attachments
+  WoWModel *skyModel;
+  WMO *wmo;
+  MapTile *adt;
 
-	// Attachment related functions
-	void clearAttachments();
-	//int addAttachment(const char *model, Attachment *parent, int id, int slot);
-	//void deleteSlot(int slot);
+  Attachment *root;
+  Attachment *sky;
 
-	// Background colour
-	Vec3D vecBGColor;
+  // Attachment related functions
+  void clearAttachments();
+  //int addAttachment(const char *model, Attachment *parent, int id, int slot);
+  //void deleteSlot(int slot);
 
-	// Backgroun image stuff
-	GLuint uiBGTexture;
-	void LoadBackground(wxString filename);
+  // Background colour
+  glm::vec3 vecBGColor;
+
+  // Backgroun image stuff
+  GLuint uiBGTexture;
+  void LoadBackground(wxString filename);
 #if defined(_WINDOWS)
-	CAVIGenerator cAvi;
+  CAVIGenerator cAvi;
 #endif
 
-  void autofit();
-
-  void activateNewCamera();
+  void toggleOpenGLDebug();
 
 private:
-  float time, modelsize;
+  void displayDebugInfos() const;
+
+  float time;
   DWORD lastTime;
   //DWORD pauseTime;
   SceneState sceneState[4]; // 4 scene states for F1-F4
@@ -185,10 +176,10 @@ private:
 
   bool fxBlur, fxGlow, fxFog;
 
-  bool m_useNewCamera;
-  ArcBallCameraControl * m_p_cameraCtrl;
-  ArcBallCamera arcCamera;
-  CCamera camera;
+  OrbitCamera camera;
+
+  WoWModel * model_;
+  bool openGLDebug_;
 };
 
 

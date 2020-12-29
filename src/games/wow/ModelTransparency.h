@@ -15,7 +15,7 @@ class GameFile;
 
 struct ModelTransparency 
 {
-	AnimatedShort trans;
+  AnimatedShort trans;
 
   void init(GameFile * f, ModelTransDef &mtd, std::vector<uint32> & global);
 };

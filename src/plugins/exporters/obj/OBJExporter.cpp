@@ -35,6 +35,7 @@
 #include <QFileInfo>
 
 // Externals
+#include "glm/glm.hpp"
 
 // Other libraries
 #include "Bone.h"
@@ -64,10 +65,10 @@
 
 // Public methods
 //--------------------------------------------------------------------
-// Change a Vec3D so it now faces forwards
-void MakeModelFaceForwards(Vec3D &vect)
+// Change a glm::vec4 so it now faces forwards
+void MakeModelFaceForwards(glm::vec4 &vect)
 {
-  Vec3D Temp;
+  glm::vec4 Temp;
 
   Temp.x = 0-vect.z;
   Temp.y = vect.y;
@@ -177,8 +178,8 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
           // find matrix
           int l = model->attLookup[it->first];
-          Matrix m;
-          Vec3D pos;
+          glm::mat4 m;
+          glm::vec3 pos;
           if (l>-1)
           {
             m = model->bones[model->atts[l].bone].mat;
@@ -212,7 +213,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
 // Private methods
 //--------------------------------------------------------------------
-bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, Matrix mat, Vec3D pos) const
+bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int & counter, glm::mat4 mat, glm::vec3 pos) const
 {
   bool vertMsg = false;
   // output all the vertice data
@@ -227,7 +228,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
-        Vec3D vert;
+        glm::vec4 vert;
         if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
         {
           if (vertMsg == false)
@@ -235,7 +236,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Verticies";
             vertMsg = true;
           }
-          vert = mat * (model->vertices[a] + pos);
+          vert = mat * glm::vec4((model->vertices[a] + pos), 1.0);
         }
         else
         {
@@ -244,7 +245,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
             LOG_INFO << "Using Original Verticies";
             vertMsg = true;
           }
-          vert = mat * (model->origVertices[a].pos + pos);
+          vert = mat * glm::vec4((model->origVertices[a].pos + pos), 1.0);
         }
         MakeModelFaceForwards(vert);
         vert *= 1.0;
@@ -271,7 +272,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
-        Vec2D tc =  model->origVertices[a].texcoords;
+        glm::vec2 tc =  model->origVertices[a].texcoords;
         QString val;
         val.sprintf("vt %.06f %.06f", tc.x, 1-tc.y);
         file << val << "\n";
@@ -291,7 +292,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
-        Vec3D n = model->origVertices[a].normal;
+        glm::vec3 n = model->origVertices[a].normal;
         QString val;
         val.sprintf("vn %.06f %.06f %.06f", n.x, n.y, n.z);
         file << val << "\n";
@@ -376,7 +377,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       tex = QFileInfo(mtlFile).completeBaseName() + "_" + texfile + ".png";
 
       float amb = 0.25f;
-      Vec4D diff = p->ocol;
+      glm::vec4 diff = p->ocol;
 
       QString val;
       val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
@@ -387,7 +388,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
         // Add Lum, just in case there's a non-luminous surface with the same name.
         material = material + "_Lum";
         amb = 1.0f;
-        diff = Vec4D(0,0,0,0);
+        diff = glm::vec4(0,0,0,0);
       }
 
       // If Doublesided

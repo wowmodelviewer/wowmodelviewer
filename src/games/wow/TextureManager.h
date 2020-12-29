@@ -2,8 +2,9 @@
 #define TEXTUREMANAGER_H
 
 #include <vector>
+#include "Gl/glew.h"
+
 #include "manager.h"
-#include "vec3d.h"
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL

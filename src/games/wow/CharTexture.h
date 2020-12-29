@@ -9,14 +9,15 @@
 #define _CHARTEXTURE_H_
 
 #include <map>
-#include "video.h" // TextureID
+
+#include "GL/glew.h"
 
 #include <QImage>
 
 class GameFile;
 
 struct CharRegionCoords {
-	int xpos, ypos, width, height;
+  int xpos, ypos, width, height;
 };
 
 struct LayoutSize {
@@ -31,7 +32,7 @@ struct CharTextureComponent
 
   bool operator<(const CharTextureComponent& c) const
   {
-	return layer < c.layer;
+  return layer < c.layer;
   }
 };
 
@@ -55,7 +56,7 @@ class _CHARTEXTURE_API_ CharTexture
     void addLayer(GameFile * file, int region, int layer);
     void addComponent(CharTextureComponent c) { m_components.push_back(c); }
 
-    void compose(TextureID texID);
+    void compose(GLuint texID);
 
     void reset(unsigned int _layoutSizeId);
 

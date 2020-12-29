@@ -40,7 +40,7 @@
 
 #include "logger/Logger.h"
 
-map<CharSlots, int> WoWItem::SLOT_LAYERS_ = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
+std::map<CharSlots, int> WoWItem::SLOT_LAYERS_ = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                               { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },
                                               { CS_TABARD, 17 }, { CS_BELT, 18 }, { CS_BRACERS, 19 },
                                               { CS_GLOVES, 20 }, { CS_HAND_RIGHT, 21 }, { CS_HAND_LEFT, 22 },
@@ -684,12 +684,9 @@ void WoWItem::refresh()
           else
             charModel_->charModelDetails.closeLHand = true;
 
-          const Vec3D rot(0.0f, 0.0f, 0.0f);
-          const Vec3D pos(0.0f, 0.0f, 0.0f);
-
           // if (displayFlags_ & 0x100) then item should be mirrored when in left hand:
-          const bool mirror = (displayFlags_ & 0x100);
-          charModel_->attachment->addChild(it->second, attachement, slot_, 1.0f, rot, pos, mirror);
+          it->second->mirrored_ = (displayFlags_ & 0x100);
+          charModel_->attachment->addChild(it->second, attachement, slot_);
         }
       }
       break;

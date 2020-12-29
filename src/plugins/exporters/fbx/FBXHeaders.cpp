@@ -36,6 +36,11 @@
 
 // Externals
 #include "fbxsdk.h"
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/transform.hpp"
+
 
 // Other libraries
 #include "FBXAnimExporter.h"
@@ -85,23 +90,23 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 }
 
 // Create mesh.
-FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, Matrix matrix, Vec3D offset)
+FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, const glm::mat4 & matrix, const glm::vec3 & offset)
 {
   // Create a node for the mesh.
   FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
 
   // Create new Matrix Data
-  Matrix m = Matrix::newScale(matrix.GetScale());
+  const auto m = glm::scale(glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
 
   // Create mesh.
-  size_t num_of_vertices = model->origVertices.size();
+  const auto num_of_vertices = model->origVertices.size();
   FbxMesh* mesh = FbxMesh::Create(l_manager, model->name().toStdString().c_str());
   mesh->InitControlPoints((int)num_of_vertices);
   FbxVector4* vertices = mesh->GetControlPoints();
 
   // Set the normals on Layer 0.
-  FbxLayer* layer = mesh->GetLayer(0);
-  if (layer == 0)
+  auto layer = mesh->GetLayer(0);
+  if (layer == nullptr)
   {
     mesh->CreateLayer();
     layer = mesh->GetLayer(0);
@@ -124,9 +129,9 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   for (size_t i = 0; i < num_of_vertices; i++)
   {
     ModelVertex &v = model->origVertices[i];
-    Vec3D Position = m * (v.pos + offset);
+    glm::vec3 Position = glm::vec3(m * glm::vec4((v.pos + offset), 1.0f));
     vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
-    Vec3D vn = v.normal.normalize();
+    glm::vec3 vn = glm::normalize(v.normal);
     layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
     layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
   }
@@ -227,7 +232,7 @@ void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode
   for (size_t i = 0; i < num_of_bones; ++i)
   {
     Bone &bone = l_model->bones[i];
-    Vec3D trans = bone.pivot;
+    glm::vec3 trans = bone.pivot;
 
     int pid = bone.parent;
     if (pid > -1)
@@ -386,7 +391,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* t_curve_y = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* t_curve_z = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        Vec3D v = bone.trans.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.trans.getValue(cur_anim.Index, t);
 
         if (bone.parent != -1)
         {
@@ -419,18 +424,12 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        float x, y, z;
+        auto r = glm::eulerAngles(bone.rot.getValue(cur_anim.Index, t));
 
-        Quaternion q = bone.rot.getValue(cur_anim.Index, t);
-        Quaternion tq;
-        tq.x = q.w; tq.y = q.x; tq.z = q.y; tq.w = q.z;
-
-        Vec3D rot = tq.toEulerXYZ();
-
-        x = rot.x * -(180.0f / PI);
-        y = rot.y * -(180.0f / PI);
-        z = rot.z * -(180.0f / PI);
-
+        auto x = glm::degrees(r.x);
+        auto y = glm::degrees(r.y);
+        auto z = glm::degrees(r.z);
+       
         r_curve_x->KeyModifyBegin();
         int key_index = r_curve_x->KeyAdd(time);
         r_curve_x->KeySetValue(key_index, x);
@@ -456,7 +455,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* s_curve_y = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* s_curve_z = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        Vec3D v = bone.scale.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.scale.getValue(cur_anim.Index, t);
 
         s_curve_x->KeyModifyBegin();
         int key_index = s_curve_x->KeyAdd(time);

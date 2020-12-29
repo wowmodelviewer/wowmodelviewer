@@ -16,20 +16,21 @@ class ParticleSystem;
 class RibbonEmitter;
 
 #include "animated.h"
-#include "OpenGLHeaders.h"
 
 #include <list>
+#include "GL/glew.h"
+#include "glm/glm.hpp"
 
 class Bone;
 
 struct Particle
 {
-  Vec3D pos, speed, down, origin, dir;
-  Vec3D	corners[4];
-  Vec3D tpos;
+  glm::vec3 pos, speed, down, origin, dir;
+  glm::vec3 corners[4];
+  glm::vec3 tpos;
   float size, life, maxlife;
   size_t tile;
-  Vec4D color;
+  glm::vec4 color;
 };
 
 typedef std::list<Particle> ParticleList;
@@ -60,13 +61,13 @@ public:
 
 struct TexCoordSet
 {
-  Vec2D tc[4];
+  glm::vec2 tc[4];
 };
 
 class _PARTICLE_API_ ParticleSystem
 {
   float mid, slowdown, rotation;
-  Vec3D pos, tpos;
+  glm::vec3 pos, tpos;
   GLuint texture, texture2, texture3;
   ParticleEmitter *emitter;
   ParticleList particles;
@@ -74,7 +75,7 @@ class _PARTICLE_API_ ParticleSystem
   size_t manim, mtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
-  void initTile(Vec2D *tc, int num);
+  void initTile(glm::vec2 *tc, int num);
   bool billboard;
   float rem;
   //bool transform;
@@ -90,14 +91,14 @@ public:
   Animated<uint16> enabled;
   Animated<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw;
   //Animated<float>  deacceleration;
-  Vec4D colors[3];
+  glm::vec4 colors[3];
   float sizes[3];
   bool multitexture, doNotTrail;
   int particleColID;
   bool replaceParticleColors;
   // Start, Mid and End colours, for cases where the model's particle colours
   // are overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
-  typedef std::vector<Vec4D> particleColorSet;
+  typedef std::vector<glm::vec4> particleColorSet;
   // The particle will get its replacement colour set from 0, 1 or 2, depending on
   // whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
@@ -137,16 +138,16 @@ public:
   int BlendValueForMode(int mode);
   friend std::ostream& operator<<(std::ostream& out, const ParticleSystem& v)
   {
-    out << "    <colors>" << v.colors[0] << "</colors>" << std::endl;
-    out << "    <colors>" << v.colors[1] << "</colors>" << std::endl;
-    out << "    <colors>" << v.colors[2] << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[0].x << " " << v.colors[0].y << " " << v.colors[0].z << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[1].x << " " << v.colors[1].y << " " << v.colors[1].z << "</colors>" << std::endl;
+    out << "    <colors>" << v.colors[2].x << " " << v.colors[2].y << " " << v.colors[2].z << "</colors>" << std::endl;
     out << "    <sizes>" << v.sizes[0] << "</sizes>" << std::endl;
     out << "    <sizes>" << v.sizes[1] << "</sizes>" << std::endl;
     out << "    <sizes>" << v.sizes[2] << "</sizes>" << std::endl;
     out << "    <mid>" << v.mid << "</mid>" << std::endl;
     out << "    <slowdown>" << v.slowdown << "</slowdown>" << std::endl;
     out << "    <rotation>" << v.rotation << "</rotation>" << std::endl;
-    out << "    <pos>" << v.pos << "</pos>" << std::endl;
+    out << "    <pos>" << v.pos.x << " " << v.pos.y << " " << v.pos.z << "</pos>" << std::endl;
     out << "    <texture>" << v.texture << "</texture>" << std::endl;
     out << "    <blend>" << v.blend << "</blend>" << std::endl;
     out << "    <order>" << v.order << "</order>" << std::endl;
@@ -174,26 +175,26 @@ public:
 
 struct RibbonSegment
 {
-  Vec3D pos, up, back;
+  glm::vec3 pos, up, back;
   float len,len0;
 };
 
 class RibbonEmitter
 {
-  Animated<Vec3D> color;
+  Animated<glm::vec3> color;
   AnimatedShort opacity;
   Animated<float> above, below;
 
   Bone *parent;
 
-  Vec3D pos;
+  glm::vec3 pos;
 
   size_t manim, mtime;
   float length, seglen;
   int numsegs;
 
-  Vec3D tpos;
-  Vec4D tcolor;
+  glm::vec3 tpos;
+  glm::vec4 tcolor;
   float tabove, tbelow;
 
   GLuint texture;

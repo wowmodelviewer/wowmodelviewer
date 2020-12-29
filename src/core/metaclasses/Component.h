@@ -58,95 +58,95 @@
 
 class _COMPONENT_API_ Component
 {
-	public :
-		// Constants / Enums
+  public :
+    // Constants / Enums
 
-		// Constructors 
-		Component();
+    // Constructors 
+    Component();
 
-		// Destructors
-		virtual ~Component();
+    // Destructors
+    virtual ~Component();
 
-		// Methods
-		// children management
-		virtual bool addChild(Component *);
-		virtual bool removeChild(Component *);
-		virtual void removeAllChildren() { }
+    // Methods
+    // children management
+    virtual bool addChild(Component *);
+    virtual bool removeChild(Component *);
+    virtual void removeAllChildren() { }
 
-		virtual unsigned int nbChildren() const {return 0; }
+    virtual unsigned int nbChildren() const {return 0; }
 
-		virtual bool findChildComponent(Component * /* component */, bool /* recursive */ ) { return false; }
-		virtual Component * getChild(unsigned int /* index */) { return 0; }
-		virtual const Component * getChild(unsigned int /* index */) const { return 0; }
+    virtual bool findChildComponent(Component * /* component */, bool /* recursive */ ) { return false; }
+    virtual Component * getChild(unsigned int /* index */) { return 0; }
+    virtual const Component * getChild(unsigned int /* index */) const { return 0; }
 
-		// parent management
-		void setParentComponent(Component *);
-		virtual void onParentSet(Component *);
-		const Component * parent() const { return m_p_parent; }
-		Component * parent() { return m_p_parent; }
+    // parent management
+    void setParentComponent(Component *);
+    virtual void onParentSet(Component *);
+    const Component * parent() const { return m_p_parent; }
+    Component * parent() { return m_p_parent; }
 
-		template <class DataType>
-				   const DataType * firstParentOfType();
+    template <class DataType>
+           const DataType * firstParentOfType();
 
-		// auto delete management
-		void ref();
-		void unref();
+    // auto delete management
+    void ref();
+    void unref();
 
-		// Name management
-		void setName(const QString & name);
-		QString name() const;
-		virtual void onNameChanged();
+    // Name management
+    void setName(const QString & name);
+    QString name() const;
+    virtual void onNameChanged();
 
-		// misc
-		void print(int l_depth = 0);
-		// overlaod in inheritted classes to perform specific stuff at display time
-		virtual void doPrint();
+    // misc
+    void print(int l_depth = 0);
+    // overlaod in inheritted classes to perform specific stuff at display time
+    virtual void doPrint();
 
-		// copy
-		void copy(const Component & component, bool /* recursive*/);
+    // copy
+    void copy(const Component & component, bool /* recursive*/);
 
-	protected :
-		// Constants / Enums
-	
-		// Constructors 
-	
-		// Destructors
-	
-		// Methods
+  protected :
+    // Constants / Enums
+  
+    // Constructors 
+  
+    // Destructors
+  
+    // Methods
 
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors 
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		Component * m_p_parent;
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors 
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    Component * m_p_parent;
 
-		unsigned int m_refCounter;
+    unsigned int m_refCounter;
 
-		QString m_name;
+    QString m_name;
 
-		// friend class declarations
+    // friend class declarations
 };
 
 template <class DataType>
 const DataType * Component::firstParentOfType()
 {
-	if(parent() != 0)
-	{
-		DataType * l_p_parent = dynamic_cast<DataType *>(parent());
-		if(l_p_parent != 0)
-			return l_p_parent;
-		else
-			return parent()->firstParentOfType<DataType>();
-	}
-	return 0;
+  if(parent() != 0)
+  {
+    DataType * l_p_parent = dynamic_cast<DataType *>(parent());
+    if(l_p_parent != 0)
+      return l_p_parent;
+    else
+      return parent()->firstParentOfType<DataType>();
+  }
+  return 0;
 }
 
 // static members definition

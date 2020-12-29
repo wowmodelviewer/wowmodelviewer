@@ -10,10 +10,14 @@
 #include "ModelColor.h"
 #include "ModelTransparency.h"
 #include "TextureAnim.h"
+#include "video.h"
 #include "wow_enums.h"
 #include "WoWModel.h"
+
 #include "logger/Logger.h"
+
 #include "GL/glew.h"
+#include "glm/gtc/type_ptr.hpp"
 
 ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
   useTex2(false), useEnvMap(false), cull(false), trans(false), 
@@ -44,7 +48,7 @@ void ModelRenderPass::deinit()
     glEnable(GL_LIGHTING);
 
   //if (billboard)
-  //	glPopMatrix();
+  //  glPopMatrix();
 
   if (cull)
     glDisable(GL_CULL_FACE);
@@ -76,7 +80,7 @@ void ModelRenderPass::deinit()
 
     //glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     //glMaterialfv(GL_FRONT, GL_AMBIENT, ocol);
-    //ocol = Vec4D(1.0f, 1.0f, 1.0f, 1.0f);
+    //ocol = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     //glMaterialfv(GL_FRONT, GL_DIFFUSE, ocol);
   }
 }
@@ -90,13 +94,13 @@ bool ModelRenderPass::init()
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  ocol = Vec4D(1.0f, 1.0f, 1.0f, model->trans);
-  ecol = Vec4D(0.0f, 0.0f, 0.0f, 0.0f);
+  ocol = glm::vec4(1.0f, 1.0f, 1.0f, model->trans);
+  ecol = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
   // emissive colors
   if (color != -1 && color < (int16)model->colors.size() && model->colors[color].color.uses(0))
   {
-    Vec3D c;
+    glm::vec3 c;
     /* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
     c = model->colors[color].color.getValue(0, model->animtime);
     if (model->colors[color].opacity.uses(model->anim))
@@ -109,8 +113,8 @@ bool ModelRenderPass::init()
     else
       ocol.x = ocol.y = ocol.z = 0;
 
-    ecol = Vec4D(c, ocol.w);
-    glMaterialfv(GL_FRONT, GL_EMISSION, ecol);
+    ecol = glm::vec4(c, ocol.w);
+    glMaterialfv(GL_FRONT, GL_EMISSION, glm::value_ptr(ecol));
   }
 
   // opacity
@@ -138,7 +142,7 @@ bool ModelRenderPass::init()
   
   switch (blendmode)
   {
-  case BM_OPAQUE:	         // 0
+  case BM_OPAQUE:           // 0
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     break;
   case BM_TRANSPARENT:      // 1
@@ -157,15 +161,15 @@ bool ModelRenderPass::init()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     break;
-  case BM_MODULATE:	         // 5
+  case BM_MODULATE:           // 5
     glEnable(GL_BLEND);
     glBlendFunc(GL_DST_COLOR, GL_ZERO);
     break;
-  case BM_MODULATEX2:	    // 6
+  case BM_MODULATEX2:      // 6
     glEnable(GL_BLEND);
     glBlendFunc(GL_DST_COLOR, GL_SRC_COLOR);
     break;
-  case BM_7:	               // 7, new in WoD
+  case BM_7:                 // 7, new in WoD
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     break;
@@ -219,7 +223,7 @@ bool ModelRenderPass::init()
   }
 
   // color
-  glColor4fv(ocol);
+  glColor4fv(glm::value_ptr(ocol));
   //glMaterialfv(GL_FRONT, GL_SPECULAR, ocol);
 
   // don't use lighting on the surface
@@ -253,9 +257,9 @@ void ModelRenderPass::render(bool animated)
       for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
       {
         uint32 a = model->indices[b];
-        glNormal3fv(model->normals[a]);
-        glTexCoord2fv(model->origVertices[a].texcoords);
-        glVertex3fv(model->vertices[a]);
+        glNormal3fv(glm::value_ptr(model->normals[a]));
+        glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
+        glVertex3fv(glm::value_ptr(model->vertices[a]));
         /*
         if (geoset->id == 2401 && k < 10)
         {
@@ -276,9 +280,9 @@ void ModelRenderPass::render(bool animated)
     for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
     {
       uint16 a = model->indices[b];
-      glNormal3fv(model->normals[a]);
-      glTexCoord2fv(model->origVertices[a].texcoords);
-      glVertex3fv(model->vertices[a]);
+      glNormal3fv(glm::value_ptr(model->normals[a]));
+      glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
+      glVertex3fv(glm::value_ptr(model->vertices[a]));
     }
     glEnd();
   }

@@ -13,7 +13,7 @@
 extern float animSpeed;
 
 // AnimationData.dbc
-#define	ANIM_STAND	0
+#define ANIM_STAND  0
 
 typedef int GeosetNum;
 
@@ -104,7 +104,7 @@ class TextureGroup
 };
 
 typedef std::set<TextureGroup> TextureSet;
-typedef std::vector<Vec4D> particleColorSet; // Holds 3 particle colours: Start, Mid and End (of particle life), for cases where 
+typedef std::vector<glm::vec4> particleColorSet; // Holds 3 particle colours: Start, Mid and End (of particle life), for cases where 
                                              // particle colours are overridden by values from ParticleColor.dbc,
 typedef std::vector<particleColorSet> particleColorReplacements; // Holds 3 colour sets. The particle will get its replacement
                                                                  // colour set from 0, 1 or 2, depending on whether its
@@ -150,7 +150,7 @@ public:
   void OnItemSet(wxCommandEvent &event);
   void OnSliderUpdate(wxCommandEvent &event);
   void OnLoop(wxCommandEvent &event); 
-  Vec4D fromARGB(int color);
+  glm::vec4 fromARGB(int color);
   void SetSkinByDisplayID(int cdi);
   int AddSkin(TextureGroup grp);
   void SetSkin(int num);

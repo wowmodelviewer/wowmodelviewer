@@ -65,50 +65,50 @@ class _VERSIONMANAGER_API_ VersionManager : public QObject
 {
   Q_OBJECT
 
-	public :
-		// Constants / Enums
-		
-		// Constructors
+  public :
+    // Constants / Enums
+    
+    // Constructors
     VersionManager(QObject *parent = 0);
-	
-		// Destructors
+  
+    // Destructors
     ~VersionManager() {}
 
-		// Methods
+    // Methods
     QString getLastVersionFor(QString &);
     static int compareVersion(const QString & v1, const QString & v2);
 
   signals:
     void downloadFinished(QString &);
-		
-		// Members
-		
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+    
+    // Members
+    
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
     void updateCurrentVersionInfo();
     void checkForNewVersionAndExit();
 
   private slots:
     void fileDownloaded(QString &);
-		
-		// Members
+    
+    // Members
   private:
     FileDownloader * m_fileDownloader;
     std::map<QString, QString> m_currentVersionsMap;
@@ -116,9 +116,9 @@ class _VERSIONMANAGER_API_ VersionManager : public QObject
 
     bool m_standaloneVersion;
 
-		// friend class declarations
+    // friend class declarations
     friend class UpdateManager;
-	
+  
 };
 
 // static members definition

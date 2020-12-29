@@ -17,7 +17,6 @@
 #include "CharDetails.h"
 #include "CharTexture.h"
 #include "displayable.h"
-#include "matrix.h"
 #include "Model.h"
 #include "ModelAttachment.h"
 #include "ModelCamera.h"
@@ -30,13 +29,12 @@
 #include "TabardDetails.h"
 #include "TextureAnim.h"
 #include "TextureManager.h"
-#include "vec3d.h"
 #include "wow_enums.h"
 #include "WoWItem.h"
 
 #include "metaclasses/Container.h"
 
-
+#include "glm/glm.hpp"
 
 class CASCFile;
 class GameFile;
@@ -70,7 +68,7 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   // ===============================
   // Texture data
   // ===============================
-  std::vector<TextureID> textures;
+  std::vector<GLuint> textures;
   std::vector<int> specialTextures;
   std::vector<GLuint> replaceTextures;
 
@@ -89,10 +87,10 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
   void lightsOff(GLuint lbase);
 
   std::vector<uint16> boundTris;
-  std::vector<Vec3D> bounds;
+  std::vector<glm::vec3> bounds;
 
   void refreshMerging();
-  set<WoWModel *> mergedModels;
+  std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
   std::vector<ModelVertex> rawVertices;
@@ -115,9 +113,9 @@ class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public M
 
   bool animGeometry, animBones;
 
-  vector<AFID> readAFIDSFromFile(GameFile * f);
-  void readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
-  vector<TXID> readTXIDSFromFile(GameFile * f);
+  std::vector<AFID> readAFIDSFromFile(GameFile * f);
+  void readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup);
+  std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
   bool model24500; // flag for build 24500 model changes to anim chunking and other things
@@ -136,7 +134,7 @@ public:
 
   // Start, Mid and End colours, for cases where the model's particle colours are
   // overridden by values from ParticleColor.dbc, indexed from CreatureDisplayInfo:
-  typedef std::vector<Vec4D> particleColorSet;
+  typedef std::vector<glm::vec4> particleColorSet;
 
   // The particle will get its replacement colour set from 0, 1 or 2,
   // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
@@ -146,9 +144,9 @@ public:
 
   typedef int GeosetNum;
 
-  Vec3D *normals;
-  Vec2D *texCoords;
-  Vec3D *vertices;
+  glm::vec3 *normals;
+  glm::vec2 *texCoords;
+  glm::vec3 *vertices;
   std::vector<uint32> indices;
   // --
 
@@ -170,11 +168,12 @@ public:
   bool showParticles;
   bool showModel;
   bool showTexture;
-  float alpha;
+  float alpha_;
+  float scale_;
 
   // Position and rotation vector
-  Vec3D pos;
-  Vec3D rot;
+  glm::vec3 pos_;
+  glm::vec3 rot_;
 
   //
   bool ok;
@@ -247,6 +246,7 @@ public:
   std::set<GeosetNum> creatureGeosetData;
   uint creatureGeosetDataID;
   bool bSheathe;
+  bool mirrored_;
 
   friend class ModelRenderPass;
 
@@ -260,7 +260,6 @@ public:
   void save(QXmlStreamWriter &);
   void load(QString &);
 
-  void computeMinMaxCoords(Vec3D & min, Vec3D & max);
   static QString getCGGroupName(CharGeosets cg);
 
   // @TODO use geoset id instead of geoset index in vector

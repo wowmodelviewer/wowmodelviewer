@@ -1,23 +1,29 @@
 #include "WoWModel.h"
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
+#include <sstream>
 
 #include "Attachment.h"
-#include "GlobalSettings.h"
 #include "CASCFile.h"
 #include "Game.h"
+#include "GlobalSettings.h"
 #include "ModelColor.h"
 #include "ModelEvent.h"
 #include "ModelLight.h"
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
+#include "video.h"
 
 #include "logger/Logger.h"
 
 #include <QXmlStreamWriter>
 
-#include <sstream>
+#include "glm/gtc/epsilon.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/norm.hpp"
+
+#define GL_BUFFER_OFFSET(i) ((char *)(0) + (i))
 
 enum TextureFlags
 {
@@ -90,9 +96,9 @@ void glInitAll()
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_LIGHT0);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
-  glLightfv(GL_LIGHT0, GL_AMBIENT, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
-  glLightfv(GL_LIGHT0, GL_SPECULAR, Vec4D(1.0f, 1.0f, 1.0f, 1.0f));
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+  glLightfv(GL_LIGHT0, GL_AMBIENT, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+  glLightfv(GL_LIGHT0, GL_SPECULAR, glm::value_ptr(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
   glDisable(GL_LIGHT1);
   glDisable(GL_LIGHT2);
   glDisable(GL_LIGHT3);
@@ -112,8 +118,9 @@ gamefile(file)
   // Initiate our model variables.
   trans = 1.0f;
   rad = 1.0f;
-  pos = Vec3D(0.0f, 0.0f, 0.0f);
-  rot = Vec3D(0.0f, 0.0f, 0.0f);
+  pos_ = glm::vec3(0.0f, 0.0f, 0.0f);
+  rot_ = glm::vec3(0.0f, 0.0f, 0.0f);
+  scale_ = 1.0f;
 
   specialTextures.resize(TEXTURE_MAX, -1);
   replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
@@ -142,6 +149,7 @@ gamefile(file)
   showWireframe = false;
   showParticles = false;
   showTexture = true;
+  mirrored_ = false;
 
   charModelDetails.Reset();
 
@@ -274,10 +282,10 @@ void WoWModel::displayHeader(ModelHeader & a_header)
   LOG_INFO << "nTexAnimLookup:" << a_header.nTexAnimLookup;
   LOG_INFO << "ofsTexAnimLookup:" << a_header.ofsTexAnimLookup;
 
-  //	LOG_INFO << "collisionSphere :";
-  //	displaySphere(a_header.collisionSphere);
-  //	LOG_INFO << "boundSphere :";
-  //	displaySphere(a_header.boundSphere);
+  //  LOG_INFO << "collisionSphere :";
+  //  displaySphere(a_header.collisionSphere);
+  //  LOG_INFO << "boundSphere :";
+  //  displaySphere(a_header.boundSphere);
 
   LOG_INFO << "nBoundingTriangles:" << a_header.nBoundingTriangles;
   LOG_INFO << "ofsBoundingTriangles:" << a_header.ofsBoundingTriangles;
@@ -553,34 +561,27 @@ void WoWModel::initCommon()
 
   // Ready to render.
   showModel = true;
-  alpha = 1.0f;
+  alpha_ = 1.0f;
 
   ModelVertex * buffer = new ModelVertex[header.nVertices];
   memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
   rawVertices.assign(buffer, buffer + header.nVertices);
   delete[] buffer;
 
-  // Correct the data from the model, so that its using the Y-Up axis mode.
-  for (auto & it : rawVertices)
-  {
-     it.pos = fixCoordSystem(it.pos);
-     it.normal = fixCoordSystem(it.normal);
-  }
-
   origVertices = rawVertices;
 
   // This data is needed for both VBO and non-VBO cards.
-  vertices = new Vec3D[origVertices.size()];
-  normals = new Vec3D[origVertices.size()];
+  vertices = new glm::vec3[origVertices.size()];
+  normals = new glm::vec3[origVertices.size()];
 
   uint i = 0;
   for (auto ov_it = origVertices.begin(), ov_end = origVertices.end(); ov_it != ov_end; i++, ov_it++)
   {
     // Set the data for our vertices, normals from the model data
     vertices[i] = ov_it->pos;
-    normals[i] = ov_it->normal.normalize();
+    normals[i] = glm::normalize(ov_it->normal);
 
-    float len = ov_it->pos.lengthSquared();
+    float len = glm::length2(ov_it->pos);
     if (len > rad)
     {
       rad = len;
@@ -593,13 +594,10 @@ void WoWModel::initCommon()
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    Vec3D * buffer = new Vec3D[header.nBoundingVertices];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(Vec3D)*header.nBoundingVertices);
+    glm::vec3 * buffer = new glm::vec3[header.nBoundingVertices];
+    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
     bounds.assign(buffer, buffer + header.nBoundingVertices);
     delete[] buffer;
-
-    for (uint i = 0; i < bounds.size(); i++)
-      bounds[i] = fixCoordSystem(bounds[i]);
   }
 
   if (header.nBoundingTriangles > 0)
@@ -616,7 +614,7 @@ void WoWModel::initCommon()
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
-    vector<TXID> txids;
+    std::vector<TXID> txids;
 
     if (gamefile->isChunked() && gamefile->setChunk("TXID"))
     {
@@ -642,19 +640,19 @@ void WoWModel::initCommon()
       DBFilesClient\ItemDisplayInfo.dbc
       (possibly more)
 
-      0	 Texture given in filename
-      1	 Body + clothes
-      2	 Cape
-      6	 Hair, beard
-      8	 Tauren fur
+      0   Texture given in filename
+      1   Body + clothes
+      2   Cape
+      6   Hair, beard
+      8   Tauren fur
       11 Skin for creatures #1
       12 Skin for creatures #2
       13 Skin for creatures #3
 
       Texture Flags
-      Value	 Meaning
-      1	Texture wrap X
-      2	Texture wrap Y
+      Value   Meaning
+      1  Texture wrap X
+      2  Texture wrap Y
       */
 
       if (texdef[i].type == TEXTURE_FILENAME)  // 0
@@ -852,9 +850,9 @@ void WoWModel::initRaceInfos()
 }
 
 
-vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
+std::vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
 {
-  vector<TXID> txids;
+  std::vector<TXID> txids;
 
   if (f->setChunk("TXID"))
   {
@@ -868,9 +866,9 @@ vector<TXID> WoWModel::readTXIDSFromFile(GameFile * f)
   return txids;
 }
 
-vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
+std::vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
 {
-  vector<AFID> afids;
+  std::vector<AFID> afids;
 
   if (f->setChunk("AFID"))
   {
@@ -886,7 +884,7 @@ vector<AFID> WoWModel::readAFIDSFromFile(GameFile * f)
   return afids;
 }
 
-void WoWModel::readAnimsFromFile(GameFile * f, vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
+void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelAnimData & data, uint32 nAnimations, uint32 ofsAnimation, uint32 nAnimationLookup, uint32 ofsAnimationLookup)
 {
   for (uint i = 0; i < nAnimations; i++)
   {
@@ -958,7 +956,7 @@ void WoWModel::initAnimated()
     if (skelFile->open())
     {
       // skelFile->dumpStructure();
-      vector<AFID> afids = readAFIDSFromFile(skelFile);
+      std::vector<AFID> afids = readAFIDSFromFile(skelFile);
 
       if (skelFile->setChunk("SKS1"))
       {
@@ -1040,7 +1038,7 @@ void WoWModel::initAnimated()
   }
   else if (header.nAnimations > 0)
   {
-    vector<AFID> afids;
+    std::vector<AFID> afids;
 
     if (gamefile->isChunked() && gamefile->setChunk("AFID"))
     {
@@ -1084,7 +1082,7 @@ void WoWModel::initAnimated()
   const size_t size = (origVertices.size() * sizeof(float));
   vbufsize = (3 * size); // we multiple by 3 for the x, y, z positions of the vertex
 
-  texCoords = new Vec2D[origVertices.size()];
+  texCoords = new glm::vec2[origVertices.size()];
   auto ov_it = origVertices.begin();
   for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
     texCoords[i] = ov_it->texcoords;
@@ -1335,7 +1333,7 @@ void WoWModel::setLOD(int index)
 
     pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
-    //	continue;
+    //  continue;
 
     pass->color = tex[j].colorIndex;
 
@@ -1357,7 +1355,7 @@ void WoWModel::setLOD(int index)
     pass->noZWrite = (rf.flags & RENDERFLAGS_ZBUFFERED) != 0;
 
     // ToDo: Work out the correct way to get the true/false of transparency
-    pass->trans = (pass->blendmode > 0) && (pass->opacity > 0);	// Transparency - not the correct way to get transparency
+    pass->trans = (pass->blendmode > 0) && (pass->opacity > 0);  // Transparency - not the correct way to get transparency
 
     // Texture flags
     pass->swrap = (texdef[pass->tex].flags & TEXTURE_WRAPX) != 0; // Texture wrap X
@@ -1598,7 +1596,7 @@ void WoWModel::animate(ssize_t anim)
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
       glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
 
-      vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
+      vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
 
     }
 
@@ -1606,14 +1604,14 @@ void WoWModel::animate(ssize_t anim)
     auto ov_it = origVertices.begin();
     for (size_t i = 0; ov_it != origVertices.end(); ++i, ++ov_it)
     { //,k=0
-      Vec3D v(0, 0, 0), n(0, 0, 0);
+      glm::vec3 v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b = 0; b < 4; b++)
       {
         if (ov_it->weights[b] > 0)
         {
-          Vec3D tv = bones[ov_it->bones[b]].mat * ov_it->pos;
-          Vec3D tn = bones[ov_it->bones[b]].mrot * ov_it->normal;
+          glm::vec3 tv = glm::vec3(bones[ov_it->bones[b]].mat * glm::vec4(ov_it->pos, 1.0f));
+          glm::vec3 tn = glm::vec3(bones[ov_it->bones[b]].mrot * glm::vec4(ov_it->normal, 1.0f));
           v += tv * ((float)ov_it->weights[b] / 255.0f);
           n += tn * ((float)ov_it->weights[b] / 255.0f);
         }
@@ -1621,7 +1619,7 @@ void WoWModel::animate(ssize_t anim)
 
       vertices[i] = v;
       if (video.supportVBO)
-        vertices[origVertices.size() + i] = n.normalize(); // shouldn't these be normal by default?
+        vertices[origVertices.size() + i] = glm::normalize(n); // shouldn't these be normal by default?
       else
         normals[i] = n;
     }
@@ -1637,8 +1635,8 @@ void WoWModel::animate(ssize_t anim)
   {
     if (lights[i].parent >= 0)
     {
-      lights[i].tpos = bones[lights[i].parent].mat * lights[i].pos;
-      lights[i].tdir = bones[lights[i].parent].mrot * lights[i].dir;
+      lights[i].tpos = glm::vec3(bones[lights[i].parent].mat * glm::vec4(lights[i].pos, 1.0f));
+      lights[i].tdir = glm::vec3(bones[lights[i].parent].mrot * glm::vec4(lights[i].dir, 1.0f));
     }
   }
 
@@ -1658,6 +1656,54 @@ void WoWModel::animate(ssize_t anim)
 
 inline void WoWModel::drawModel()
 {
+  glPushMatrix();
+
+  glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
+  if (mirrored_)
+  {
+    glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
+    scaling.y *= -1.0f;
+  }
+  else
+  {
+    glFrontFace(GL_CCW);
+  }
+
+  // no need to scale if its already 100%
+  // scaling manually set from model control panel
+  if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
+    glScalef(scaling.x, scaling.y, scaling.z);
+
+  if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
+    glTranslatef(pos_.x, pos_.y, pos_.z);
+
+
+  if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
+  {
+    glRotatef(rot_.x, 1.0f, 0.0f, 0.0f);
+    glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
+    glRotatef(rot_.z, 0.0f, 0.0f, 1.0f);
+  }
+
+
+  if (showModel && (alpha_ != 1.0f))
+  {
+    glDisable(GL_COLOR_MATERIAL);
+
+    float a[] = { 1.0f, 1.0f, 1.0f, alpha_ };
+    glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, a);
+
+    glEnable(GL_BLEND);
+    //glDisable(GL_DEPTH_TEST);
+    //glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  }
+
+  if (!showTexture || video.useMasking)
+    glDisable(GL_TEXTURE_2D);
+  else
+    glEnable(GL_TEXTURE_2D);
+
   // assume these client states are enabled: GL_VERTEX_ARRAY, GL_NORMAL_ARRAY, GL_TEXTURE_COORD_ARRAY
   if (video.supportVBO && animated)
   {
@@ -1692,6 +1738,7 @@ inline void WoWModel::drawModel()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // Render the various parts of the model.
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   for (auto it : passes)
   {
     if (it->init())
@@ -1706,10 +1753,20 @@ inline void WoWModel::drawModel()
 
   // clean bind
   if (video.supportVBO && animated)
-  {
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+  if (showModel && (alpha_ != 1.0f))
+  {
+    float a[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, a);
+
+    glDisable(GL_BLEND);
+    //glEnable(GL_DEPTH_TEST);
+    //glDepthMask(GL_TRUE);
+    glEnable(GL_COLOR_MATERIAL);
   }
 
+  glPopMatrix();
   // done with all render ops
 }
 
@@ -1741,6 +1798,21 @@ inline void WoWModel::draw()
 
     if (showModel)
       drawModel();
+  }
+
+  if (!video.useMasking && (showBounds || showBones))
+  {
+    glDisable(GL_LIGHTING);
+    glDisable(GL_TEXTURE_2D);
+
+    if (showBounds)
+      drawBoundingVolume();
+
+    if (showBones)
+      drawBones();
+
+    glEnable(GL_TEXTURE_2D);
+    glEnable(GL_LIGHTING);
   }
 }
 
@@ -1784,8 +1856,8 @@ void WoWModel::drawBones()
     //for (size_t i=30; i<40; i++) {
     if (it.parent != -1)
     {
-      glVertex3fv(it.transPivot);
-      glVertex3fv(bones[it.parent].transPivot);
+      glVertex3fv(glm::value_ptr(it.transPivot));
+      glVertex3fv(glm::value_ptr(bones[it.parent].transPivot));
     }
   }
   glEnd();
@@ -1817,7 +1889,7 @@ void WoWModel::drawBoundingVolume()
   {
     size_t v = boundTris[i];
     if (v < bounds.size())
-      glVertex3fv(bounds[v]);
+      glVertex3fv(glm::value_ptr(bounds[v]));
     else
       glVertex3f(0, 0, 0);
   }
@@ -1828,13 +1900,44 @@ void WoWModel::drawBoundingVolume()
 // Renders our particles into the pipeline.
 void WoWModel::drawParticles()
 {
-  // draw particle systems
-  for (auto & it : particleSystems)
-    it.draw();
+  if (hasParticles && showParticles)
+  {
+    glPushMatrix();
 
-  // draw ribbons
-  for (auto & it : ribbons)
-    it.draw();
+    glm::vec3 scaling = glm::vec3(scale_, scale_, scale_);
+    if (mirrored_)
+    {
+      glFrontFace(GL_CW);  // necessary when model is being mirrored or it appears inside-out
+      scaling.y *= -1.0f;
+    }
+    else
+    {
+      glFrontFace(GL_CCW);
+    }
+
+    // no need to scale if its already 100%
+    // scaling manually set from model control panel
+    if (scaling != glm::vec3(1.0f, 1.0f, 1.0f))
+      glScalef(scaling.x, scaling.y, scaling.z);
+
+    if (rot_ != glm::vec3(0.0f, 0.0f, 0.0f))
+      glRotatef(rot_.y, 0.0f, 1.0f, 0.0f);
+
+    //glRotatef(45.0f, 1,0,0);
+
+    if (pos_ != glm::vec3(0.0f, 0.0f, 0.0f))
+      glTranslatef(pos_.x, pos_.y, pos_.z);
+
+    // draw particle systems
+    for (auto & it : particleSystems)
+      it.draw();
+
+    // draw ribbons
+    for (auto & it : ribbons)
+      it.draw();
+
+    glPopMatrix();
+  }
 }
 
 WoWItem * WoWModel::getItem(CharSlots slot)
@@ -1927,54 +2030,6 @@ bool WoWModel::canSetTextureFromFile(int texnum)
       return 1;
   }
   return 0;
-}
-
-void WoWModel::computeMinMaxCoords(Vec3D & minCoord, Vec3D & maxCoord)
-{
-  if (video.supportVBO)
-  {
-    // get back vertices
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    vertices = (Vec3D*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY);
-  }
-
-  for (auto & it : passes)
-  {
-    ModelGeosetHD * geoset = geosets[it->geoIndex];
-    if (!geoset->display)
-      continue;
-
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
-    {
-      Vec3D v = vertices[indices[b]];
-
-      // detect min/max coordinates and set them
-      if (v.x < minCoord.x)
-        minCoord.x = v.x;
-      else if (v.x > maxCoord.x)
-        maxCoord.x = v.x;
-
-      if (v.y < minCoord.y)
-        minCoord.y = v.y;
-      else if (v.y > maxCoord.y)
-        maxCoord.y = v.y;
-
-      if (v.z < minCoord.z)
-        minCoord.z = v.z;
-      else if (v.z > maxCoord.z)
-        maxCoord.z = v.z;
-    }
-  }
-
-  if (video.supportVBO)
-  {
-    glUnmapBufferARB(GL_ARRAY_BUFFER_ARB);
-    vertices = 0;
-  }
-
-  LOG_INFO << __FUNCTION__;
-  LOG_INFO << "min" << minCoord.x << minCoord.y << minCoord.z;
-  LOG_INFO << "max" << maxCoord.x << maxCoord.y << maxCoord.z;
 }
 
 QString WoWModel::getCGGroupName(CharGeosets cg)
@@ -2177,11 +2232,10 @@ void WoWModel::refreshMerging()
 
     for (uint i = 0; i < nbBonesInNewModel; ++i)
     {
-      Vec3D pivot = modelsIt->bones[i].pivot;
+      glm::vec3 pivot = modelsIt->bones[i].pivot;
       for (uint b = 0; b < bones.size(); ++b)
-      {
-        Vec3D p = bones[b].pivot;
-        if ((p == pivot) && 
+      { 
+        if (glm::all(glm::epsilonEqual(bones[b].pivot, pivot, glm::vec3(0.0001f))) &&
             (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
         {
           boneConvertTable[i] = b;
@@ -2268,15 +2322,15 @@ void WoWModel::refreshMerging()
   delete[] vertices;
   delete[] normals;
 
-  vertices = new Vec3D[origVertices.size()];
-  normals = new Vec3D[origVertices.size()];
+  vertices = new glm::vec3[origVertices.size()];
+  normals = new glm::vec3[origVertices.size()];
 
   uint i = 0;
   for (auto & ov_it : origVertices)
   {
     // Set the data for our vertices, normals from the model data
     vertices[i] = ov_it.pos;
-    normals[i] = ov_it.normal.normalize();
+    normals[i] = glm::normalize(ov_it.normal);
     ++i;
   }
 
@@ -2353,7 +2407,7 @@ void WoWModel::refresh()
 
 void WoWModel::refresh8x()
 {
-  TextureID charTex = 0;
+  GLuint charTex = 0;
   bool showScalp = true;
 
   // Reset geosets
@@ -2384,7 +2438,7 @@ void WoWModel::refresh8x()
   tex.reset(infos.textureLayoutID);
 
   std::vector<int> foundTextures = cd.getTextureForSection(CharDetails::SkinBaseType);
-  // std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
+  // std::std::vector<int> foundRegions;  // component regions that textures are applied to, used only in Custom* sections
 
   if (foundTextures.size() > 0)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), -1, 0);
@@ -2779,7 +2833,7 @@ void WoWModel::refresh8x()
 
 void WoWModel::refresh9x()
 {
-  const TextureID charTex = 0;
+  const GLuint charTex = 0;
   auto showScalp = true;
 
   for (auto* it : mergedModels)
@@ -3006,10 +3060,10 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "    <modelname>" << m.modelname.c_str() << "</modelname>" << endl;
   out << "  </info>" << endl;
   out << "  <header>" << endl;
-  //	out << "    <id>" << m.header.id << "</id>" << endl;
+  //  out << "    <id>" << m.header.id << "</id>" << endl;
   out << "    <nameLength>" << m.header.nameLength << "</nameLength>" << endl;
   out << "    <nameOfs>" << m.header.nameOfs << "</nameOfs>" << endl;
-  //	out << "    <name>" << f.getBuffer()+m.header.nameOfs << "</name>" << endl; // @TODO
+  //  out << "    <name>" << f.getBuffer()+m.header.nameOfs << "</name>" << endl; // @TODO
   out << "    <GlobalModelFlags>" << m.header.GlobalModelFlags << "</GlobalModelFlags>" << endl;
   out << "    <nGlobalSequences>" << m.header.nGlobalSequences << "</nGlobalSequences>" << endl;
   out << "    <ofsGlobalSequences>" << m.header.ofsGlobalSequences << "</ofsGlobalSequences>" << endl;
@@ -3048,13 +3102,13 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "    <nTexAnimLookup>" << m.header.nTexAnimLookup << "</nTexAnimLookup>" << endl;
   out << "    <ofsTexAnimLookup>" << m.header.ofsTexAnimLookup << "</ofsTexAnimLookup>" << endl;
   out << "    <collisionSphere>" << endl;
-  out << "      <min>" << m.header.collisionSphere.min << "</min>" << endl;
-  out << "      <max>" << m.header.collisionSphere.max << "</max>" << endl;
+  out << "      <min>" << m.header.collisionSphere.min.x << " " << m.header.collisionSphere.min.y << " " << m.header.collisionSphere.min.z << "</min>" << endl;
+  out << "      <max>" << m.header.collisionSphere.max.x << " " << m.header.collisionSphere.max.y << " " << m.header.collisionSphere.max.z << "</max>" << endl;
   out << "      <radius>" << m.header.collisionSphere.radius << "</radius>" << endl;
   out << "    </collisionSphere>" << endl;
   out << "    <boundSphere>" << endl;
-  out << "      <min>" << m.header.boundSphere.min << "</min>" << endl;
-  out << "      <max>" << m.header.boundSphere.max << "</max>" << endl;
+  out << "      <min>" << m.header.boundSphere.min.x << " " << m.header.boundSphere.min.y << " " << m.header.boundSphere.min.z << "</min>" << endl;
+  out << "      <min>" << m.header.boundSphere.max.x << " " << m.header.boundSphere.max.y << " " << m.header.boundSphere.max.z << "</min>" << endl;
   out << "      <radius>" << m.header.boundSphere.radius << "</radius>" << endl;
   out << "    </boundSphere>" << endl;
   out << "    <nBoundingTriangles>" << m.header.nBoundingTriangles << "</nBoundingTriangles>" << endl;
@@ -3093,7 +3147,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   {
     out << "    <Animation id=\"" << i << "\">" << endl;
     out << "      <animID>" << m.anims[i].animID << "</animID>" << endl;
-    string strName;
+    std::string strName;
     QString query = QString("SELECT Name FROM AnimationData WHERE ID = %1").arg(m.anims[i].animID);
     sqlResult anim = GAMEDATABASE.sqlQuery(query);
     if (anim.valid && !anim.empty())
@@ -3108,8 +3162,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <d1>" << m.anims[i].d1 << "</d1>" << endl;
     out << "      <d2>" << m.anims[i].d2 << "</d2>" << endl;
     out << "      <playSpeed>" << m.anims[i].playSpeed << "</playSpeed>" << endl;
-    out << "      <boxA>" << m.anims[i].boundSphere.min << "</boxA>" << endl;
-    out << "      <boxB>" << m.anims[i].boundSphere.max << "</boxB>" << endl;
+    out << "      <boxA>" << m.anims[i].boundSphere.min.x << " " << m.anims[i].boundSphere.min.y << " " << m.anims[i].boundSphere.min.z << "</boxA>" << endl;
+    out << "      <boxA>" << m.anims[i].boundSphere.max.x << " " << m.anims[i].boundSphere.max.y << " " << m.anims[i].boundSphere.max.z << "</boxA>" << endl;
     out << "      <rad>" << m.anims[i].boundSphere.radius << "</rad>" << endl;
     out << "      <NextAnimation>" << m.anims[i].NextAnimation << "</NextAnimation>" << endl;
     out << "      <Index>" << m.anims[i].Index << "</Index>" << endl;
@@ -3145,17 +3199,17 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << m.bones[i].scale;
     out << "      </scale>" << endl;
 #endif
-    out << "      <pivot>" << m.bones[i].boneDef.pivot << "</pivot>" << endl;
+    out << "      <pivot>" << m.bones[i].boneDef.pivot.x << " " << m.bones[i].boneDef.pivot.y << " " << m.bones[i].boneDef.pivot.z << "</pivot>" << endl;
     out << "    </Bone>" << endl;
   }
   out << "  </Bones>" << endl;
 
-  //	out << "  <BoneLookups size=\"" << m.header.nBoneLookup << "\">" << endl;
-  //	uint16 *boneLookup = (uint16 *)(f.getBuffer() + m.header.ofsBoneLookup);
-  //	for(size_t i=0; i<m.header.nBoneLookup; i++) {
-  //		out << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
-  //	}
-  //	out << "  </BoneLookups>" << endl;
+  //  out << "  <BoneLookups size=\"" << m.header.nBoneLookup << "\">" << endl;
+  //  uint16 *boneLookup = (uint16 *)(f.getBuffer() + m.header.ofsBoneLookup);
+  //  for(size_t i=0; i<m.header.nBoneLookup; i++) {
+  //    out << "    <BoneLookup id=\"" << i << "\">" << boneLookup[i] << "</BoneLookup>" << endl;
+  //  }
+  //  out << "  </BoneLookups>" << endl;
 
   out << "  <KeyBoneLookups size=\"" << m.header.nKeyBoneLookup << "\">" << endl;
   for (size_t i = 0; i < m.header.nKeyBoneLookup; i++)
@@ -3166,29 +3220,29 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
   out << "  <GeometryAndRendering>" << endl;
 
-  //	out << "  <Vertices size=\"" << m.header.nVertices << "\">" << endl;
-  //	ModelVertex *verts = (ModelVertex*)(f.getBuffer() + m.header.ofsVertices);
-  //	for(uint32 i=0; i<m.header.nVertices; i++) {
-  //		out << "    <Vertice id=\"" << i << "\">" << endl;
-  //		out << "      <pos>" << verts[i].pos << "</pos>" << endl; // TODO
-  //		out << "    </Vertice>" << endl;
-  //	}
+  //  out << "  <Vertices size=\"" << m.header.nVertices << "\">" << endl;
+  //  ModelVertex *verts = (ModelVertex*)(f.getBuffer() + m.header.ofsVertices);
+  //  for(uint32 i=0; i<m.header.nVertices; i++) {
+  //    out << "    <Vertice id=\"" << i << "\">" << endl;
+  //    out << "      <pos>" << verts[i].pos << "</pos>" << endl; // TODO
+  //    out << "    </Vertice>" << endl;
+  //  }
   out << "  </Vertices>" << endl; // TODO
   out << "  <Views>" << endl;
 
-  //	out << "  <Indices size=\"" << view->nIndex << "\">" << endl;
-  //	out << "  </Indices>" << endl; // TODO
-  //	out << "  <Triangles size=\""<< view->nTris << "\">" << endl;
-  //	out << "  </Triangles>" << endl; // TODO
-  //	out << "  <Properties size=\"" << view->nProps << "\">" << endl;
-  //	out << "  </Properties>" << endl; // TODO
-  //	out << "  <Subs size=\"" << view->nSub << "\">" << endl;
-  //	out << "  </Subs>" << endl; // TODO
+  //  out << "  <Indices size=\"" << view->nIndex << "\">" << endl;
+  //  out << "  </Indices>" << endl; // TODO
+  //  out << "  <Triangles size=\""<< view->nTris << "\">" << endl;
+  //  out << "  </Triangles>" << endl; // TODO
+  //  out << "  <Properties size=\"" << view->nProps << "\">" << endl;
+  //  out << "  </Properties>" << endl; // TODO
+  //  out << "  <Subs size=\"" << view->nSub << "\">" << endl;
+  //  out << "  </Subs>" << endl; // TODO
 
-  out << "	<RenderPasses size=\"" << m.passes.size() << "\">" << endl;
+  out << "  <RenderPasses size=\"" << m.passes.size() << "\">" << endl;
   for (size_t i = 0; i < m.passes.size(); i++)
   {
-    out << "	  <RenderPass id=\"" << i << "\">" << endl;
+    out << "    <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass * p = m.passes[i];
     ModelGeosetHD * geoset = m.geosets[p->geoIndex];
     out << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
@@ -3212,16 +3266,16 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <geoset>" << geoset->id << "</geoset>" << endl;
     out << "      <swrap>" << p->swrap << "</swrap>" << endl;
     out << "      <twrap>" << p->twrap << "</twrap>" << endl;
-    out << "      <ocol>" << p->ocol << "</ocol>" << endl;
-    out << "      <ecol>" << p->ecol << "</ecol>" << endl;
-    out << "	  </RenderPass>" << endl;
+    out << "      <ocol>" << p->ocol.x << " " << p->ocol.y << " " << p->ocol.z << " " << p->ocol.w << "</ocol>" << endl;
+    out << "      <ecol>" << p->ecol.x << " " << p->ecol.y << " " << p->ecol.z << " " << p->ecol.w << "</ecol>" << endl;
+    out << "    </RenderPass>" << endl;
   }
-  out << "	</RenderPasses>" << endl;
+  out << "  </RenderPasses>" << endl;
 
-  out << "	<Geosets size=\"" << m.geosets.size() << "\">" << endl;
+  out << "  <Geosets size=\"" << m.geosets.size() << "\">" << endl;
   for (size_t i = 0; i < m.geosets.size(); i++)
   {
-    out << "	  <Geoset id=\"" << i << "\">" << endl;
+    out << "    <Geoset id=\"" << i << "\">" << endl;
     out << "      <id>" << m.geosets[i]->id << "</id>" << endl;
     out << "      <vstart>" << m.geosets[i]->vstart << "</vstart>" << endl;
     out << "      <vcount>" << m.geosets[i]->vcount << "</vcount>" << endl;
@@ -3231,38 +3285,38 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "      <StartBones>" << m.geosets[i]->StartBones << "</StartBones>" << endl;
     out << "      <rootBone>" << m.geosets[i]->rootBone << "</rootBone>" << endl;
     out << "      <nBones>" << m.geosets[i]->nBones << "</nBones>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0] << "</BoundingBox>" << endl;
-    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1] << "</BoundingBox>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[0].x << " " << m.geosets[i]->BoundingBox[0].y << " " << m.geosets[i]->BoundingBox[0].z << "</BoundingBox>" << endl;
+    out << "      <BoundingBox>" << m.geosets[i]->BoundingBox[1].x << " " << m.geosets[i]->BoundingBox[1].y << " " << m.geosets[i]->BoundingBox[1].z << "</BoundingBox>" << endl;
     out << "      <radius>" << m.geosets[i]->radius << "</radius>" << endl;
-    out << "	  </Geoset>" << endl;
+    out << "    </Geoset>" << endl;
   }
-  out << "	</Geosets>" << endl;
+  out << "  </Geosets>" << endl;
 
-  //	ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
-  //	out << "	<TexUnits size=\"" << view->nTex << "\">" << endl;
-  //	for (size_t i=0; i<view->nTex; i++) {
-  //		out << "	  <TexUnit id=\"" << i << "\">" << endl;
-  //		out << "      <flags>" << tex[i].flags << "</flags>" << endl;
-  //		out << "      <shading>" << tex[i].shading << "</shading>" << endl;
-  //		out << "      <op>" << tex[i].op << "</op>" << endl;
-  //		out << "      <op2>" << tex[i].op2 << "</op2>" << endl;
-  //		out << "      <colorIndex>" << tex[i].colorIndex << "</colorIndex>" << endl;
-  //		out << "      <flagsIndex>" << tex[i].flagsIndex << "</flagsIndex>" << endl;
-  //		out << "      <texunit>" << tex[i].texunit << "</texunit>" << endl;
-  //		out << "      <mode>" << tex[i].mode << "</mode>" << endl;
-  //		out << "      <textureid>" << tex[i].textureid << "</textureid>" << endl;
-  //		out << "      <texunit2>" << tex[i].texunit2 << "</texunit2>" << endl;
-  //		out << "      <transid>" << tex[i].transid << "</transid>" << endl;
-  //		out << "      <texanimid>" << tex[i].texanimid << "</texanimid>" << endl;
-  //		out << "	  </TexUnit>" << endl;
-  //	}
-  //	out << "	</TexUnits>" << endl;
+  //  ModelTexUnit *tex = (ModelTexUnit*)(g.getBuffer() + view->ofsTex);
+  //  out << "  <TexUnits size=\"" << view->nTex << "\">" << endl;
+  //  for (size_t i=0; i<view->nTex; i++) {
+  //    out << "    <TexUnit id=\"" << i << "\">" << endl;
+  //    out << "      <flags>" << tex[i].flags << "</flags>" << endl;
+  //    out << "      <shading>" << tex[i].shading << "</shading>" << endl;
+  //    out << "      <op>" << tex[i].op << "</op>" << endl;
+  //    out << "      <op2>" << tex[i].op2 << "</op2>" << endl;
+  //    out << "      <colorIndex>" << tex[i].colorIndex << "</colorIndex>" << endl;
+  //    out << "      <flagsIndex>" << tex[i].flagsIndex << "</flagsIndex>" << endl;
+  //    out << "      <texunit>" << tex[i].texunit << "</texunit>" << endl;
+  //    out << "      <mode>" << tex[i].mode << "</mode>" << endl;
+  //    out << "      <textureid>" << tex[i].textureid << "</textureid>" << endl;
+  //    out << "      <texunit2>" << tex[i].texunit2 << "</texunit2>" << endl;
+  //    out << "      <transid>" << tex[i].transid << "</transid>" << endl;
+  //    out << "      <texanimid>" << tex[i].texanimid << "</texanimid>" << endl;
+  //    out << "    </TexUnit>" << endl;
+  //  }
+  //  out << "  </TexUnits>" << endl;
 
   out << "  </Views>" << endl;
 
   out << "  <RenderFlags></RenderFlags>" << endl;
 
-  out << "	<Colors size=\"" << m.colors.size() << "\">" << endl;
+  out << "  <Colors size=\"" << m.colors.size() << "\">" << endl;
   for (uint i = 0; i < m.colors.size(); i++)
   {
     out << "    <Color id=\"" << i << "\">" << endl;
@@ -3276,9 +3330,9 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "    </opacity>" << endl;
     out << "    </Color>" << endl;
   }
-  out << "	</Colors>" << endl;
+  out << "  </Colors>" << endl;
 
-  out << "	<Transparency size=\"" << m.transparency.size() << "\">" << endl;
+  out << "  <Transparency size=\"" << m.transparency.size() << "\">" << endl;
   for (uint i = 0; i < m.transparency.size(); i++)
   {
     out << "    <Tran id=\"" << i << "\">" << endl;
@@ -3288,41 +3342,41 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "    </trans>" << endl;
     out << "    </Tran>" << endl;
   }
-  out << "	</Transparency>" << endl;
+  out << "  </Transparency>" << endl;
 
   out << "  <TransparencyLookup></TransparencyLookup>" << endl;
 
-  //	ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m.header.ofsTextures);
-  //	out << "	<Textures size=\"" << m.header.nTextures << "\">" << endl;
-  //	for(size_t i=0; i<m.header.nTextures; i++) {
-  //		out << "	  <Texture id=\"" << i << "\">" << endl;
-  //		out << "      <type>" << texdef[i].type << "</type>" << endl;
-  //		out << "      <flags>" << texdef[i].flags << "</flags>" << endl;
-  //		//out << "      <nameLen>" << texdef[i].nameLen << "</nameLen>" << endl;
-  //		//out << "      <nameOfs>" << texdef[i].nameOfs << "</nameOfs>" << endl;
-  //		if (texdef[i].type == TEXTURE_FILENAME)
-  //			out << "		<name>" << f.getBuffer()+texdef[i].nameOfs  << "</name>" << endl;
-  //		out << "	  </Texture>" << endl;
-  //	}
-  //	out << "	</Textures>" << endl;
+  //  ModelTextureDef *texdef = (ModelTextureDef*)(f.getBuffer() + m.header.ofsTextures);
+  //  out << "  <Textures size=\"" << m.header.nTextures << "\">" << endl;
+  //  for(size_t i=0; i<m.header.nTextures; i++) {
+  //    out << "    <Texture id=\"" << i << "\">" << endl;
+  //    out << "      <type>" << texdef[i].type << "</type>" << endl;
+  //    out << "      <flags>" << texdef[i].flags << "</flags>" << endl;
+  //    //out << "      <nameLen>" << texdef[i].nameLen << "</nameLen>" << endl;
+  //    //out << "      <nameOfs>" << texdef[i].nameOfs << "</nameOfs>" << endl;
+  //    if (texdef[i].type == TEXTURE_FILENAME)
+  //      out << "    <name>" << f.getBuffer()+texdef[i].nameOfs  << "</name>" << endl;
+  //    out << "    </Texture>" << endl;
+  //  }
+  //  out << "  </Textures>" << endl;
 
-  //	out << "  <TexLookups size=\"" << m.header.nTexLookup << "\">" << endl;
-  //	uint16 *texLookup = (uint16 *)(f.getBuffer() + m.header.ofsTexLookup);
-  //	for(size_t i=0; i<m.header.nTexLookup; i++) {
-  //		out << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
-  //	}
-  //	out << "  </TexLookups>" << endl;
+  //  out << "  <TexLookups size=\"" << m.header.nTexLookup << "\">" << endl;
+  //  uint16 *texLookup = (uint16 *)(f.getBuffer() + m.header.ofsTexLookup);
+  //  for(size_t i=0; i<m.header.nTexLookup; i++) {
+  //    out << "    <TexLookup id=\"" << i << "\">" << texLookup[i] << "</TexLookup>" << endl;
+  //  }
+  //  out << "  </TexLookups>" << endl;
 
-  out << "	<ReplacableTextureLookup></ReplacableTextureLookup>" << endl;
+  out << "  <ReplacableTextureLookup></ReplacableTextureLookup>" << endl;
 
   out << "  </GeometryAndRendering>" << endl;
 
   out << "  <Effects>" << endl;
 
-  out << "	<TexAnims size=\"" << m.texAnims.size() << "\">" << endl;
+  out << "  <TexAnims size=\"" << m.texAnims.size() << "\">" << endl;
   for (uint i = 0; i < m.texAnims.size(); i++)
   {
-    out << "	  <TexAnim id=\"" << i << "\">" << endl;
+    out << "    <TexAnim id=\"" << i << "\">" << endl;
     // AB trans
     out << "    <trans>" << endl;
     out << m.texAnims[i].trans;
@@ -3335,59 +3389,59 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
     out << "    <scale>" << endl;
     out << m.texAnims[i].scale;
     out << "    </scale>" << endl;
-    out << "	  </TexAnim>" << endl;
+    out << "    </TexAnim>" << endl;
   }
-  out << "	</TexAnims>" << endl;
+  out << "  </TexAnims>" << endl;
 
-  out << "	<RibbonEmitters></RibbonEmitters>" << endl; // TODO
+  out << "  <RibbonEmitters></RibbonEmitters>" << endl; // TODO
 
-  out << "	<Particles size=\"" << m.header.nParticleEmitters << "\">" << endl;
+  out << "  <Particles size=\"" << m.header.nParticleEmitters << "\">" << endl;
   for (size_t i = 0; i < m.particleSystems.size(); i++)
   {
-    out << "	  <Particle id=\"" << i << "\">" << endl;
+    out << "    <Particle id=\"" << i << "\">" << endl;
     out << m.particleSystems[i];
-    out << "	  </Particle>" << endl;
+    out << "    </Particle>" << endl;
   }
-  out << "	</Particles>" << endl;
+  out << "  </Particles>" << endl;
 
   out << "  </Effects>" << endl;
 
-  out << "	<Miscellaneous>" << endl;
+  out << "  <Miscellaneous>" << endl;
 
-  out << "	<BoundingVolumes></BoundingVolumes>" << endl;
-  out << "	<Lights></Lights>" << endl;
-  out << "	<Cameras></Cameras>" << endl;
+  out << "  <BoundingVolumes></BoundingVolumes>" << endl;
+  out << "  <Lights></Lights>" << endl;
+  out << "  <Cameras></Cameras>" << endl;
 
-  out << "	<Attachments size=\"" << m.header.nAttachments << "\">" << endl;
+  out << "  <Attachments size=\"" << m.header.nAttachments << "\">" << endl;
   for (size_t i = 0; i < m.header.nAttachments; i++)
   {
-    out << "	  <Attachment id=\"" << i << "\">" << endl;
+    out << "    <Attachment id=\"" << i << "\">" << endl;
     out << "      <id>" << m.atts[i].id << "</id>" << endl;
     out << "      <bone>" << m.atts[i].bone << "</bone>" << endl;
-    out << "      <pos>" << m.atts[i].pos << "</pos>" << endl;
-    out << "	  </Attachment>" << endl;
+    out << "      <pos>" << m.atts[i].pos.x << " " << m.atts[i].pos.y << " " << m.atts[i].pos.z << "</pos>" << endl;
+    out << "    </Attachment>" << endl;
   }
-  out << "	</Attachments>" << endl;
+  out << "  </Attachments>" << endl;
 
   out << "  <AttachLookups size=\"" << m.header.nAttachLookup << "\">" << endl;
-  //	int16 *attachLookup = (int16 *)(f.getBuffer() + m.header.ofsAttachLookup);
-  //	for(size_t i=0; i<m.header.nAttachLookup; i++) {
-  //		out << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
-  //	}
-  //	out << "  </AttachLookups>" << endl;
+  //  int16 *attachLookup = (int16 *)(f.getBuffer() + m.header.ofsAttachLookup);
+  //  for(size_t i=0; i<m.header.nAttachLookup; i++) {
+  //    out << "    <AttachLookup id=\"" << i << "\">" << attachLookup[i] << "</AttachLookup>" << endl;
+  //  }
+  //  out << "  </AttachLookups>" << endl;
 
-  out << "	<Events size=\"" << m.events.size() << "\">" << endl;
+  out << "  <Events size=\"" << m.events.size() << "\">" << endl;
   for (size_t i = 0; i < m.events.size(); i++)
   {
-    out << "	  <Event id=\"" << i << "\">" << endl;
+    out << "    <Event id=\"" << i << "\">" << endl;
     out << m.events[i];
-    out << "	  </Event>" << endl;
+    out << "    </Event>" << endl;
   }
-  out << "	</Events>" << endl;
+  out << "  </Events>" << endl;
 
-  out << "	</Miscellaneous>" << endl;
+  out << "  </Miscellaneous>" << endl;
 
-  //	out << "    <>" << m.header. << "</>" << endl;
+  //  out << "    <>" << m.header. << "</>" << endl;
   out << "  <TextureLists>" << endl;
   for (auto it : m.passes)
   {

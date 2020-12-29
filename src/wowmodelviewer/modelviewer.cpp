@@ -95,6 +95,7 @@ EVT_MENU(ID_CAM_FRONT, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_SIDE, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_BACK, ModelViewer::OnCamMenu)
 EVT_MENU(ID_CAM_ISO, ModelViewer::OnCamMenu)
+EVT_MENU(ID_CAM_RESET, ModelViewer::OnCamMenu)
 
 EVT_MENU(ID_CANVASS120, ModelViewer::OnCanvasSize)
 EVT_MENU(ID_CANVASS512, ModelViewer::OnCanvasSize)
@@ -113,6 +114,7 @@ EVT_MENU(ID_CANVASM1200, ModelViewer::OnCanvasSize)
 // hidden hotkeys for zooming
 EVT_MENU(ID_ZOOM_IN, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_ZOOM_OUT, ModelViewer::OnToggleCommand)
+EVT_MENU(ID_OPENGL_DEBUG, ModelViewer::OnToggleCommand)
 
 // Light Menu
 EVT_MENU(ID_LT_SAVE, ModelViewer::OnLightMenu)
@@ -231,7 +233,7 @@ ModelViewer::ModelViewer()
   {
     SetIcon(wxICON(IDI_ICON1));
     SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
-#ifndef	_LINUX // buggy
+#ifndef  _LINUX // buggy
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 #endif
 
@@ -384,6 +386,7 @@ void ModelViewer::InitMenu()
     camMenu->Append(ID_CAM_BACK, _("Back"));
     camMenu->Append(ID_CAM_SIDE, _("Side"));
     camMenu->Append(ID_CAM_ISO, _("Perspective"));
+    camMenu->Append(ID_CAM_RESET, _("Reset to default"));
 
     viewMenu->Append(ID_CAMERA, _("Camera"), camMenu);
     viewMenu->AppendSeparator();
@@ -528,7 +531,7 @@ void ModelViewer::InitMenu()
   // menuBar->EnableTop(2, false);
 
   // Hotkeys / shortcuts
-  wxAcceleratorEntry entries[25];
+  wxAcceleratorEntry entries[26];
   int keys = 0;
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT);
@@ -547,6 +550,7 @@ void ModelViewer::InitMenu()
   entries[keys++].Set(wxACCEL_CTRL, (int)'s', ID_FILE_SCREENSHOTCONFIG);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
+  entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
 
   // Temporary saves
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F1, ID_SAVE_TEMP1);
@@ -926,7 +930,7 @@ void ModelViewer::LoadLayout()
 
       // If character panel is showing,  hide it
       interfaceManager.GetPane(charControl).Show(isChar);
-#ifndef	_LINUX // buggy
+#ifndef  _LINUX // buggy
       interfaceManager.Update();
 #endif
       LOG_INFO << "GUI Layout loaded from previous session.";
@@ -969,7 +973,7 @@ void ModelViewer::LoadModel(GameFile * file)
 
   if (isChar)
   {
-    modelAtt = canvas->LoadCharModel(file);
+    modelAtt = canvas->LoadModel(file);
     // error check
     if (!modelAtt)
     {
@@ -997,7 +1001,7 @@ void ModelViewer::LoadModel(GameFile * file)
   }
   else
   {
-    modelAtt = canvas->LoadCharModel(file); //  change it from LoadModel, don't sure it's right or not.
+    modelAtt = canvas->LoadModel(file); //  change it from LoadModel, don't sure it's right or not.
 
     // error check
     if (!modelAtt)
@@ -1085,9 +1089,6 @@ void ModelViewer::LoadModel(GameFile * file)
   // Update the model control
   modelControl->UpdateModel(modelAtt);
   modelControl->RefreshModel(canvas->root);
-
-  // auto fit camera
-  canvas->autofit();
 
   // Update the animations / skins
   animControl->UpdateModel(m);
@@ -1271,7 +1272,7 @@ ModelViewer::~ModelViewer()
   // If we have a canvas (which we always should)
   // Stop rendering, give more power back to the CPU to close this sucker down!
   //if (canvas)
-  //	canvas->timer.Stop();
+  //  canvas->timer.Stop();
 
   // Save current layout
   SaveLayout();
@@ -1476,6 +1477,8 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
   canvas->Zoom(-0.5f, false);
   break;
   */
+    case ID_OPENGL_DEBUG:
+      canvas->toggleOpenGLDebug();
 
     case ID_SAVE_TEMP1:
       canvas->SaveSceneState(1);
@@ -1617,7 +1620,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
       }
       else {
         glEnable(GL_COLOR_MATERIAL);
-        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, Vec4D(0.4f,0.4f,0.4f,1.0f));
+        //glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(glm::vec4(0.4f,0.4f,0.4f,1.0f)));
       }
 
       lightControl->Update();
@@ -1645,20 +1648,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent &event)
 
 void ModelViewer::OnCamMenu(wxCommandEvent &event)
 {
-  int id = event.GetId();
-  WoWModel * m = const_cast<WoWModel *>(canvas->model());
-  if (id == ID_CAM_FRONT)
-    m->rot.y = -90.0f;
-  else if (id == ID_CAM_BACK)
-    m->rot.y = 90.0f;
-  else if (id == ID_CAM_SIDE)
-    m->rot.y = 0.0f;
-  else if (id == ID_CAM_ISO) {
-    m->rot.y = -40.0f;
-    m->rot.x = 20.0f;
-  }
-
-  //viewControl->Update();	
+  canvas->OnCamMenu(event);
 }
 
 // Menu button press events
@@ -1669,7 +1659,7 @@ void ModelViewer::OnSetColor(wxCommandEvent &event)
     canvas->vecBGColor = DoSetColor(canvas->vecBGColor);
     canvas->drawBackground = false;
     //} else if (id==ID_LT_COLOR) {
-    //	canvas->ltColor = DoSetColor(canvas->ltColor);
+    //  canvas->ltColor = DoSetColor(canvas->ltColor);
   }
 }
 
@@ -1682,7 +1672,7 @@ void ModelViewer::OnEffects(wxCommandEvent &event)
     enchants->Display();
 }
 
-Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
+glm::vec3 ModelViewer::DoSetColor(const glm::vec3 &defColor)
 {
   wxColour dcol(roundf(defColor.x*255.0f), roundf(defColor.y*255.0f), roundf(defColor.z*255.0f));
   bgDialogData.SetChooseFull(true);
@@ -1694,7 +1684,7 @@ Vec3D ModelViewer::DoSetColor(const Vec3D &defColor)
   {
     bgDialogData = dialog.GetColourData();
     wxColour col = bgDialogData.GetColour();
-    return Vec3D(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
+    return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
   }
   return defColor;
 }
@@ -1712,9 +1702,9 @@ void ModelViewer::OnViewLog(wxCommandEvent &event)
   int ID = event.GetId();
   if (ID == ID_FILE_VIEWLOG) {
     wxString logPath = cfgPath.BeforeLast(SLASH) + SLASH + wxT("log.txt");
-#ifdef	_WINDOWS
+#ifdef  _WINDOWS
     wxExecute(wxT("notepad.exe ") + logPath);
-#elif	_MAC
+#elif  _MAC
     wxExecute(wxT("/Applications/TextEdit.app/Contents/MacOS/TextEdit ")+logPath);
 #endif
   }
@@ -1932,7 +1922,7 @@ void ModelViewer::OnSave(wxCommandEvent &event)
       // Save the folder location for next time
       dir.SetPath(dialog.GetPath());
 
-      // Show our exporter window			
+      // Show our exporter window      
       animExporter->Init(dialog.GetPath());
       animExporter->Show(true);
     }
@@ -2319,31 +2309,31 @@ void ModelViewer::OnCanvasSize(wxCommandEvent &event)
 {
   switch (event.GetId())
   {
-    case ID_CANVASS120:	SetCanvasSize(120, 120);
+    case ID_CANVASS120:  SetCanvasSize(120, 120);
       break;
-    case ID_CANVASS512:	SetCanvasSize(512, 512);
+    case ID_CANVASS512:  SetCanvasSize(512, 512);
       break;
-    case ID_CANVASS1024:	SetCanvasSize(1024, 1024);
+    case ID_CANVASS1024:  SetCanvasSize(1024, 1024);
       break;
-    case ID_CANVASF480:	SetCanvasSize(640, 480);
+    case ID_CANVASF480:  SetCanvasSize(640, 480);
       break;
-    case ID_CANVASF600:	SetCanvasSize(800, 600);
+    case ID_CANVASF600:  SetCanvasSize(800, 600);
       break;
-    case ID_CANVASF768:	SetCanvasSize(1024, 768);
+    case ID_CANVASF768:  SetCanvasSize(1024, 768);
       break;
-    case ID_CANVASF864:	SetCanvasSize(1152, 864);
+    case ID_CANVASF864:  SetCanvasSize(1152, 864);
       break;
-    case ID_CANVASF1200:	SetCanvasSize(1600, 1200);
+    case ID_CANVASF1200:  SetCanvasSize(1600, 1200);
       break;
-    case ID_CANVASW480:	SetCanvasSize(864, 480);
+    case ID_CANVASW480:  SetCanvasSize(864, 480);
       break;
-    case ID_CANVASW720:	SetCanvasSize(1280, 720);
+    case ID_CANVASW720:  SetCanvasSize(1280, 720);
       break;
-    case ID_CANVASW1080:	SetCanvasSize(1920, 1080);
+    case ID_CANVASW1080:  SetCanvasSize(1920, 1080);
       break;
-    case ID_CANVASM768:	SetCanvasSize(1280, 768);
+    case ID_CANVASM768:  SetCanvasSize(1280, 768);
       break;
-    case ID_CANVASM1200:	SetCanvasSize(1900, 1200);
+    case ID_CANVASM1200:  SetCanvasSize(1900, 1200);
       break;
   }
 }

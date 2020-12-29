@@ -1,7 +1,7 @@
 #ifndef _WMO_MODELINSTANCE_H_
 #define _WMO_MODELINSTANCE_H_
 
-#include "vec3d.h"
+#include "glm/glm.hpp"
 
 #include <QString>
 
@@ -12,10 +12,10 @@ class WoWModel;
 class WMOModelInstance {
   public:
   // header
-  Vec3D pos;		// Position
-  float w;		// W for Quat Rotation
-  Vec3D dir;		// Direction for Quat Rotation
-  float sc;		// Scale Factor
+  glm::vec3 pos;    // Position
+  float w;    // W for Quat Rotation
+  glm::vec3 dir;    // Direction for Quat Rotation
+  float sc;    // Scale Factor
   unsigned int d1;
 
   WoWModel *model;
@@ -23,8 +23,8 @@ class WMOModelInstance {
   int id;
   unsigned int scale;
   int light;
-  Vec3D ldir;
-  Vec3D lcol;
+  glm::vec3 ldir;
+  glm::vec3 lcol;
 
   WMOModelInstance() {}
   void init(char *fname, GameFile &f);

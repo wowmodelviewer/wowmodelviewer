@@ -34,9 +34,9 @@ bool core::GameDatabase::initFromXML(const QString & file)
    int rc = 1;
 
    if(m_fastMode)
-	  rc = sqlite3_open("./wowdb.sqlite", &m_db);
+    rc = sqlite3_open("./wowdb.sqlite", &m_db);
    else
-	  rc = sqlite3_open(":memory:", &m_db);
+    rc = sqlite3_open(":memory:", &m_db);
 
    if( rc )
    {

@@ -10,16 +10,17 @@
 
 #include "animated.h"
 #include "modelheaders.h"
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
 
 class GameFile;
 
 struct ModelColor 
 {
-	Animated<Vec3D> color;
-	AnimatedShort opacity;
+  Animated<glm::vec3> color;
+  AnimatedShort opacity;
 
-	void init(GameFile * f, ModelColorDef &mcd, std::vector<uint32> & global);
+  void init(GameFile * f, ModelColorDef &mcd, std::vector<uint32> & global);
 };
 
 

@@ -366,68 +366,68 @@ void AnimControl::UpdateModel(WoWModel *m)
 
 void AnimControl::UpdateWMO(WMO *w, int group)
 {
-	if (!w || w->itemName().size()==0)
-		return;
+  if (!w || w->itemName().size()==0)
+    return;
 
-	bool newwmo = (oldname != w->itemName().toStdString());
-	oldname = w->itemName().toStdString();
+  bool newwmo = (oldname != w->itemName().toStdString());
+  oldname = w->itemName().toStdString();
 
-	//Model *m = static_cast<Model*>(canvas->root->children[0]);
+  //Model *m = static_cast<Model*>(canvas->root->children[0]);
 
-	//if (!m || m->anims==NULL)
-	//	return;
+  //if (!m || m->anims==NULL)
+  //  return;
 
-	//m->animManager->Reset();
-	g_selWMO = w;
+  //m->animManager->Reset();
+  g_selWMO = w;
 
 
-	UpdateFrameSlider(10, 2);
-	PCRList.clear();
-	animCList->Show(false);
-	skinList->Show(false);
-	showBLPList->Show(false);
-	BLPSkinList1->Show(false);
-	BLPSkinList2->Show(false);
-	BLPSkinList3->Show(false);
-	BLPSkinsLabel->Show(false);
-	BLPSkinLabel1->Show(false);
-	BLPSkinLabel2->Show(false);
-	BLPSkinLabel3->Show(false);
+  UpdateFrameSlider(10, 2);
+  PCRList.clear();
+  animCList->Show(false);
+  skinList->Show(false);
+  showBLPList->Show(false);
+  BLPSkinList1->Show(false);
+  BLPSkinList2->Show(false);
+  BLPSkinList3->Show(false);
+  BLPSkinsLabel->Show(false);
+  BLPSkinLabel1->Show(false);
+  BLPSkinLabel2->Show(false);
+  BLPSkinLabel3->Show(false);
 
-	loopList->Show(false);
-	btnAdd->Show(false);
-	
-	if (newwmo) {
-		// build itemset list
-		wmoList->Clear();
-		wmoList->Append(wxT("(No doodads)"));
+  loopList->Show(false);
+  btnAdd->Show(false);
+  
+  if (newwmo) {
+    // build itemset list
+    wmoList->Clear();
+    wmoList->Append(wxT("(No doodads)"));
 
-		for (size_t i=0; i<g_selWMO->doodadsets.size(); i++) {
-			wmoList->Append(wxString(g_selWMO->doodadsets[i].name, *wxConvCurrent));
-		}
+    for (size_t i=0; i<g_selWMO->doodadsets.size(); i++) {
+      wmoList->Append(wxString(g_selWMO->doodadsets[i].name, *wxConvCurrent));
+    }
 
-		int sel = defaultDoodads ? 1 : 0;
-		g_selWMO->includeDefaultDoodads = defaultDoodads;
-		wmoList->Select(sel);
-		g_selWMO->showDoodadSet(sel-1);
-	}
-	wmoList->Show(TRUE);
+    int sel = defaultDoodads ? 1 : 0;
+    g_selWMO->includeDefaultDoodads = defaultDoodads;
+    wmoList->Select(sel);
+    g_selWMO->showDoodadSet(sel-1);
+  }
+  wmoList->Show(TRUE);
 
-	// get wmo name or current wmogroup name/descr
-	if (group>=-1 && group<(int)g_selWMO->nGroups) {
-		wxString label = w->itemName().toStdWString();
-		label = label.AfterLast('/');
-		if (group>=0) {
-			label += wxT(" - ") + g_selWMO->groups[group].name;
-			if (g_selWMO->groups[group].desc.length()) {
-				label += wxT(" - ") + g_selWMO->groups[group].desc;
-			}
-		}
-		wmoLabel->SetLabel(label);
-	} else {
-		wmoLabel->SetLabel(wxT("This group has been removed from the WMO"));
-	}
-	wmoLabel->Show(TRUE);
+  // get wmo name or current wmogroup name/descr
+  if (group>=-1 && group<(int)g_selWMO->nGroups) {
+    wxString label = w->itemName().toStdWString();
+    label = label.AfterLast('/');
+    if (group>=0) {
+      label += wxT(" - ") + g_selWMO->groups[group].name;
+      if (g_selWMO->groups[group].desc.length()) {
+        label += wxT(" - ") + g_selWMO->groups[group].desc;
+      }
+    }
+    wmoLabel->SetLabel(label);
+  } else {
+    wmoLabel->SetLabel(wxT("This group has been removed from the WMO"));
+  }
+  wmoLabel->Show(TRUE);
 }
 
 void AnimControl::SetSkinByDisplayID(int cdi)
@@ -461,13 +461,13 @@ QString AnimControl::GetModelFolder(WoWModel *m)
   return QString(m->itemName().toStdString().c_str()).section('/', 0, -2) + '/';
 }
 
-Vec4D AnimControl::fromARGB(int color)
+glm::vec4 AnimControl::fromARGB(int color)
 {
   const float alpha = ((color & 0xFF000000) >> 24) / 255.0f;
   const float red = ((color & 0x00FF0000) >> 16) / 255.0f;
   const float green = ((color & 0x0000FF00) >>  8) / 255.0f;
   const float blue = ((color & 0x000000FF)      ) / 255.0f;
-  return Vec4D(red, green, blue, alpha);
+  return glm::vec4(red, green, blue, alpha);
 // Note: the above alpha is probably irrelevant. It doesn't seem to be included. We always set the particle to its default one
 }
 
@@ -573,7 +573,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));
@@ -713,7 +713,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));
@@ -762,7 +762,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
         {
-          std::vector<Vec4D> cols;
+          std::vector<glm::vec4> cols;
           for (size_t j = 0; j < pcir.values[0].size(); j++)
           {
             cols.push_back(fromARGB(pcir.values[0][j].toInt()));

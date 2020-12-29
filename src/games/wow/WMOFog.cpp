@@ -5,7 +5,7 @@
 void WMOFog::init(GameFile &f)
 {
   f.read(this, 0x30);
-  color = Vec4D(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
+  color = glm::vec4(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
                 (color1 & 0x000000FF) / 255.0f, ((color1 & 0xFF000000) >> 24) / 255.0f);
   float temp;
   temp = pos.y;

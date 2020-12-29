@@ -64,55 +64,55 @@
 class _FILEDOWNLOADER_API_ FileDownloader : public QObject
 {
     Q_OBJECT
-	public :
-		// Constants / Enums
-		
-		// Constructors
+  public :
+    // Constants / Enums
+    
+    // Constructors
     explicit FileDownloader(QObject *parent = 0);
 
-		// Destructors
+    // Destructors
     ~FileDownloader();
 
-		// Methods
+    // Methods
     void get(QUrl url);
 
-		// Members
+    // Members
     QByteArray m_datas;
     QString m_fileName;
 
   signals:
     void downloadFinished(QString &);
 
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
-		
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
+    
+  private :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
   private slots:
        void fileDownloaded();
        void downloadError(QNetworkReply::NetworkError error);
 
   private:
-		// Members
+    // Members
     QNetworkAccessManager m_manager;
     QWaitCondition m_locker;
-		
-		// friend class declarations
-	
+    
+    // friend class declarations
+  
 };
 
 // static members definition

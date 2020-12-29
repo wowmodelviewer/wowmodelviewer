@@ -26,10 +26,7 @@ set(src  AnimationExportChoiceDialog.cpp
          animcontrol.cpp
          AnimExporter.cpp
          app.cpp
-         ArcBallCamera.cpp
-         ArcBallCameraControl.cpp
          AVIGenerator.cpp
-         camera.cpp
          charcontrol.cpp
          CharDetailsCustomizationChoice.cpp
          CharDetailsCustomizationSpin.cpp
@@ -52,6 +49,7 @@ set(src  AnimationExportChoiceDialog.cpp
          modelcontrol.cpp
          modelviewer.cpp
          NPCImporterDialog.cpp
+         OrbitCamera.cpp
          Quantize.cpp
          SettingsControl.cpp
          shaders.cpp
@@ -62,10 +60,7 @@ set(headers AnimationExportChoiceDialog.h
             animcontrol.h
             AnimExporter.h
             app.h
-            ArcBallCamera.h
-            ArcBallCameraControl.h
             AVIGenerator.h
-            camera.h
             charcontrol.h
             CharDetailsCustomizationChoice.h
             CharDetailsCustomizationSpin.h
@@ -88,6 +83,7 @@ set(headers AnimationExportChoiceDialog.h
             modelcontrol.h
             modelviewer.h
             NPCImporterDialog.h
+            OrbitCamera.h
             Quantize.h
             resource1.h
             SettingsControl.h
@@ -99,17 +95,22 @@ source_group("Header Files" FILES ${headers})
 
 # add external code usage
 use_glew()
-# reset extralibs to clean up wxwidgets (use_glew actually links with wx gl lib)
-set(extralibs "")
 use_core()
 use_wow()
 use_cximage()
 use_casclib()
-use_wxwidgets()
 
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
+set(cmake_files ${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/linux.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/macos.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/policies.cmake
+                ${CMAKE_CURRENT_LIST_DIR}/../cmake/windows.cmake)
+
+source_group("cmake" FILES ${cmake_files})
+
 set(common_files wowmodelviewer.json
                  ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
                  ${WMV_BASE_PATH}/appveyor.yml
@@ -131,7 +132,7 @@ set(wow9_0_files
 
 source_group("wow9.0" FILES ${wow9_0_files})
 
-set(useful_files ${common_files} ${wow8_3_files} ${wow9_0_files})
+set(useful_files ${common_files} ${cmake_files} ${wow8_3_files} ${wow9_0_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -157,13 +158,12 @@ if (MSVC_IDE)
 endif()
 
 target_link_libraries(${NAME}
-  ${wxWidgets_LIBRARIES}
-  wow
-  cximage
+  ${extralibs}
   Qt5::Xml
   Qt5::Gui
   Qt5::Network
   Qt5::Widgets
+  ${wxWidgets_LIBRARIES}
 )
 
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})

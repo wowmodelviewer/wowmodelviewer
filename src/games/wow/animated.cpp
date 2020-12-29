@@ -10,21 +10,6 @@
 
 _ANIMATED_API_ size_t globalTime = 0;
 
-Vec3D fixCoordSystem(Vec3D v)
-{
-  return Vec3D(v.x, v.z, -v.y);
-}
-
-Vec3D fixCoordSystem2(Vec3D v)
-{
-  return Vec3D(v.x, v.z, v.y);
-}
-
-Quaternion fixCoordSystemQuat(Quaternion v)
-{
-  return Quaternion(-v.x, -v.z, v.y, v.w);
-}
-
 float frand()
 {
     return rand()/(float)RAND_MAX;

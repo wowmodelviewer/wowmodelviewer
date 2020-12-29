@@ -21,10 +21,10 @@
 // Wireframe
 // Geosets
 // Future Additions:
-//		- Pos
-//		- Rotation
-//		- Scale
-//		- Attach model
+//    - Pos
+//    - Rotation
+//    - Scale
+//    - Attach model
 
 class ModelControl: public wxWindow
 {
@@ -35,7 +35,7 @@ class ModelControl: public wxWindow
     public:
       size_t geosetId;
   };
-	
+  
   wxComboBox *modelname;
   // wxComboBox *cbLod;
   wxSlider *alpha, *scale;
@@ -56,9 +56,9 @@ class ModelControl: public wxWindow
   //std::vector<Model*> models;
   std::vector<Attachment*> attachments;
   bool init;
-	
+  
 public:
-  WoWModel *model;	// Currently 'active' model.
+  WoWModel *model;  // Currently 'active' model.
   Attachment *att; // Currently 'active' attachment.
   AnimControl *animControl;
   particleColorReplacements pcr;
@@ -80,7 +80,7 @@ public:
   void UpdatePCRText(wxColourPickerCtrl *cpc);
   void UpdatePCRTexts();
   bool IsReplacingParticleColors();
-  Vec4D fromColWidget(wxColour col);
+  glm::vec4 fromColWidget(wxColour col);
 };
 
 class ScrWindow : public wxFrame

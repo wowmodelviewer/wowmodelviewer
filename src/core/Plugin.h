@@ -64,16 +64,16 @@ class ModelViewer;
 class _PLUGIN_API_ Plugin : public QObject, public Component
 {
     Q_OBJECT
-	public :
-		// Constants / Enums
-		
-		// Constructors
+  public :
+    // Constants / Enums
+    
+    // Constructors
     Plugin();
 
-		// Destructors
+    // Destructors
     ~Plugin() {}
-	
-		// Methods
+  
+    // Methods
     // these fields are filled within json plugin informations and set by PluginManager
     // at load time
     std::string coreVersionNeeded() const { return m_coreVersionNeeded;}
@@ -85,31 +85,31 @@ class _PLUGIN_API_ Plugin : public QObject, public Component
     // overload from component class
     void doPrint();
 
-		// Members
+    // Members
 
-	protected :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
-		
-		// Members
+  protected :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
+    
+    // Members
 
 
-	private :
-		// Constants / Enums
-	
-		// Constructors
-	
-		// Destructors
-	
-		// Methods
+  private :
+    // Constants / Enums
+  
+    // Constructors
+  
+    // Destructors
+  
+    // Methods
     void transmitSingletonsFromCore(core::GlobalSettings &, core::Game &);
 
-		// Members
+    // Members
     std::string m_internalName;
     std::string m_category;
     std::string m_version;

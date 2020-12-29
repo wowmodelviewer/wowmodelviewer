@@ -8,14 +8,13 @@
 #ifndef _ATTACHMENT_H_
 #define _ATTACHMENT_H_
 
-#include <map>
 #include <string>
 #include <vector>
-#include "vec3d.h"
+
+#include "glm/glm.hpp"
 
 class Displayable;
 class WoWModel;
-class BaseCanvas;
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -29,39 +28,34 @@ class BaseCanvas;
 
 class _ATTACHMENT_API_ Attachment
 {
-	public:
-  Attachment(Attachment *parent, Displayable *model, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
+  public:
+    Attachment(Attachment *parent, Displayable *model, int id, int slot);
 
-		~Attachment();
+    ~Attachment();
 
-		void setup();
-		void setupParticle();
-    Attachment* addChild(std::string fn, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
-    Attachment* addChild(Displayable *disp, int id, int slot, float scale = 1.0f, Vec3D rot = Vec3D(0.0f, 0.0f, 0.0f), Vec3D pos = Vec3D(0.0f, 0.0f, 0.0f), bool mirror = false);
-		void delSlot(int slot);
-		void delChildren();
-		WoWModel* getModelFromSlot(int slot);
+    void setup();
+    void setupParticle();
+    Attachment* addChild(std::string fn, int id, int slot);
+    Attachment* addChild(Displayable *disp, int id, int slot);
+    void delSlot(int slot);
+    void delChildren();
 
-		void draw(BaseCanvas *c);
-		void drawParticles(bool force=false);
-		void tick(float dt);
+    void draw();
+    void drawParticles();
+    void tick(float dt);
 
-		void setModel(Displayable * newmodel);
-		Displayable * model() { return m_model;}
+    void setModel(Displayable * newmodel);
+    Displayable * model() const { return model_;}
 
-		Attachment *parent;
+    Attachment *parent;
 
-		std::vector<Attachment*> children;
+    std::vector<Attachment*> children;
 
-		int id;
-		int slot;
-		float scale;
-		Vec3D rot;
-		Vec3D pos;
-    bool mirror;
+    int id;
+    int slot;
 
-	private:
-		Displayable *m_model;
+  private:
+    Displayable *model_;
 };
 
 

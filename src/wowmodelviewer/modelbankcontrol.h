@@ -9,68 +9,69 @@
 #include <wx/arrstr.h>
 
 #include "GameFile.h"
-#include "vec3d.h"
 #include "wow_enums.h"
+
+#include "glm/glm.hpp"
 
 #include <vector>
 
 struct ModelBank
 {
-	// Standard
-	wxString name;
-	wxString fileName;
-	ModelType modelType;
+  // Standard
+  wxString name;
+  wxString fileName;
+  ModelType modelType;
 
-	// Non-Char info
-	std::vector<GameFile *> textures;
+  // Non-Char info
+  std::vector<GameFile *> textures;
 
-	Vec3D pos;
-	Vec3D rot;
+  glm::vec3 pos;
+  glm::vec3 rot;
 
-	// Char and NPC character info
-	size_t skinColor;
-	size_t faceType;
-	size_t hairColor;
-	size_t hairStyle;
-	size_t facialHair;
-	size_t race, gender;
-	size_t useNPC;
-	bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
-	int equipment[NUM_CHAR_SLOTS];
-	// -----------
+  // Char and NPC character info
+  size_t skinColor;
+  size_t faceType;
+  size_t hairColor;
+  size_t hairStyle;
+  size_t facialHair;
+  size_t race, gender;
+  size_t useNPC;
+  bool showUnderwear, showEars, showHair, showFacialHair, showFeet;
+  int equipment[NUM_CHAR_SLOTS];
+  // -----------
 
-	
+  
 };
 
 class ModelBankControl: public wxWindow
 {
-	DECLARE_CLASS(ModelBankControl)
-	DECLARE_EVENT_TABLE()
-	
-	wxButton *btnAdd, *btnRemove, *btnDisplay;
-	wxListBox *lstBank;
-	wxStaticText *lblName;
-	wxTextCtrl *txtName;
+  DECLARE_CLASS(ModelBankControl)
+  DECLARE_EVENT_TABLE()
+  
+  wxButton *btnAdd, *btnRemove, *btnDisplay;
+  wxListBox *lstBank;
+  wxStaticText *lblName;
+  wxTextCtrl *txtName;
 
-	std::vector<ModelBank> bankList;
+  std::vector<ModelBank> bankList;
 
 public:
-	ModelBankControl(wxWindow* parent, wxWindowID id);
-	~ModelBankControl();
+  ModelBankControl(wxWindow* parent, wxWindowID id);
+  ~ModelBankControl();
 
-	// Gui events
-	void OnButton(wxCommandEvent &event);
-	//void OnSelect(wxCommandEvent &event);
+  // Gui events
+  void OnButton(wxCommandEvent &event);
+  //void OnSelect(wxCommandEvent &event);
 
-	// functions / routines
-	void LoadModel();
-	void AddModel();
-	void RemoveModel();
-	void UpdateList();
+  // functions / routines
+  void LoadModel();
+  void AddModel();
+  void RemoveModel();
+  void UpdateList();
 
-	// file routines
-	void SaveList();
-	void LoadList();
+  // file routines
+  void SaveList();
+  void LoadList();
 };
 
 

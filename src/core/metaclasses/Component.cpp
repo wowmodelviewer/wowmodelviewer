@@ -67,28 +67,28 @@ Component::~Component()
 //--------------------------------------------------------------------
 bool Component::addChild(Component *)
 {
-	return false;
+  return false;
 }
 
 
 bool Component::removeChild(Component *)
 {
-	return false;
+  return false;
 }
 
 
 void Component::ref()
 {
-	m_refCounter++;
+  m_refCounter++;
 }
 
 void Component::unref()
 {
-	m_refCounter--;
-	if(m_refCounter <= 0)
-	{
+  m_refCounter--;
+  if(m_refCounter <= 0)
+  {
         delete this;
-	}
+  }
 }
 
 void Component::onParentSet(Component *)
@@ -98,8 +98,8 @@ void Component::onParentSet(Component *)
 
 void Component::setParentComponent(Component * a_p_parent)
 {
-	m_p_parent = a_p_parent;
-	onParentSet(m_p_parent);
+  m_p_parent = a_p_parent;
+  onParentSet(m_p_parent);
 }
 
 void Component::setName(const QString & name)
@@ -121,38 +121,38 @@ void Component::onNameChanged()
 //--------------------------------------------------------------------
 void Component::print(int a_depth /*= 0*/)
 {
-	for(int i = 0 ; i < a_depth - 1 ; i++)
-	{
-		std::cout << "  ";
-	}
+  for(int i = 0 ; i < a_depth - 1 ; i++)
+  {
+    std::cout << "  ";
+  }
 
-	if(m_p_parent != 0)
-	{
-		std::cout << "|-";
-	}
+  if(m_p_parent != 0)
+  {
+    std::cout << "|-";
+  }
 
-	if(nbChildren() != 0)
-	{
-		std::cout << "+ ";
-	}
-	else
-	{
-		std::cout << " ";
-	}
+  if(nbChildren() != 0)
+  {
+    std::cout << "+ ";
+  }
+  else
+  {
+    std::cout << " ";
+  }
 
-	doPrint();
+  doPrint();
 
-	a_depth++;
+  a_depth++;
 
-	for(unsigned int i = 0 ; i < nbChildren() ; i++)
-	{
-		getChild(i)->print(a_depth);
-	}
+  for(unsigned int i = 0 ; i < nbChildren() ; i++)
+  {
+    getChild(i)->print(a_depth);
+  }
 }
 
 void Component::copy(const Component & component, bool /* recursive*/)
 {
-	m_name = component.m_name;
+  m_name = component.m_name;
 }
 
 void Component::doPrint()

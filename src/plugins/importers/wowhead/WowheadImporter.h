@@ -64,11 +64,11 @@ class WowheadImporter : public ImporterPlugin
     ~WowheadImporter() {}
 
     // Methods
-	bool acceptURL(QString url) const;
+  bool acceptURL(QString url) const;
 
     NPCInfos * importNPC(QString url) const;
-	CharInfos * importChar(QString url) const { return NULL; }
-	ItemRecord * importItem(QString url) const;
+  CharInfos * importChar(QString url) const { return NULL; }
+  ItemRecord * importItem(QString url) const;
 
     // Members
 
@@ -91,8 +91,8 @@ class WowheadImporter : public ImporterPlugin
     // Destructors
 
     // Methods
-	QString extractSubString(QString & datas, QString beginPattern, QString endPattern = QString()) const;
-	QByteArray getURLData(QString inputUrl) const;
+  QString extractSubString(QString & datas, QString beginPattern, QString endPattern = QString()) const;
+  QByteArray getURLData(QString inputUrl) const;
 
     // Members
 

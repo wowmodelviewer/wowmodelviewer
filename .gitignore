@@ -1,0 +1,12 @@
+syntax: glob
+bin/*
+CMakeBuild/*
+src/latex/*
+src/html/*
+.project
+.cproject
+.settings/*
+Installers/Windows/NSIS/*.exe
+VisualStudio2013/*
+build
+.vs
