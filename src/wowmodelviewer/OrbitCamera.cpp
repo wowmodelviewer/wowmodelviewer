@@ -10,7 +10,7 @@ const float CAMERA_DEFAULT_YAW = 0.0f;
 const float CAMERA_DEFAULT_PITCH = 90.0f;
 const float CAMERA_DEFAULT_RADIUS = 5.0f;
 const float CAMERA_MIN_RADIUS = 0.5f;
-const float CAMERA_MAX_RADIUS = 80.0f;
+const float CAMERA_MAX_RADIUS = 150.0f;
 
 OrbitCamera::OrbitCamera()
   : pos_(glm::vec3(0.0f)),
