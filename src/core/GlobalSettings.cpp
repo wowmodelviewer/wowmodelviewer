@@ -62,11 +62,11 @@ core::GlobalSettings * core::GlobalSettings::m_instance = 0;
 core::GlobalSettings::GlobalSettings()
 {
   m_versionMajorNumber = 0;
-  m_versionMinorNumber = 9;
+  m_versionMinorNumber = 10;
   m_versionRevNumber = 0;
 
   m_appName = L"WoW Model Viewer";
-  m_buildName = L"In memory of Cenarius";
+  m_buildName = L"Oribos";
 
  
   /*
@@ -103,6 +103,7 @@ core::GlobalSettings::GlobalSettings()
     Archimonde will survive
     Wain's edition
     Bilgewhizzle
+    Oribos
 
    */
 
