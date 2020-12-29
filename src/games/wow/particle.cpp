@@ -379,12 +379,12 @@ void ParticleSystem::draw()
     }
   }
   glm::vec3 vRight(1,0,0);
-  glm::vec3 vUp(0,1,0);
+  glm::vec3 vUp(0,0,1);
 
   // position stuff
   const float f = 1;//0.707106781f; // sqrt(2)/2
-  glm::vec3 bv0 = glm::vec3(-f,+f,0);
-  glm::vec3 bv1 = glm::vec3(+f,+f,0);
+  glm::vec3 bv0 = glm::vec3(-f,0,+f);
+  glm::vec3 bv1 = glm::vec3(+f, 0, +f);
 
   if (billboard)
   {
@@ -552,42 +552,42 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
   mrot=sys->parent->mrot*SpreadMat;
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = (sys->pos + glm::vec3(randfloat(-l,l), 0, randfloat(-w,w)));
+    p.pos = (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-w, w), 0));
     const float t = randfloat(0.0f, 2*glm::pi<float>());
-    p.pos = glm::vec3(0.0f, sys->pos.y + 0.15f, sys->pos.z) + glm::vec3(cos(t)/8, 0.0f, sin(t)/8); // Need to manually correct for the halo - why?
+    p.pos = glm::vec3(0.0f, sys->pos.y + 0.15f, sys->pos.z) + glm::vec3(cos(t)/8, sin(t) / 8, 0.0f); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
 
-    glm::vec3 dir(0.0f, 1.0f, 0.0f);
+    glm::vec3 dir(0.0f, 0.0f, 1.0f);
     p.dir = dir;
 
     p.speed = glm::normalize(dir) * spd * randfloat(0, var);
   } else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-w, w), randfloat(-l,l)));
+    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
     p.dir = glm::normalize(dir);
     //glm::vec3 dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * glm::vec3(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   } else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = glm::vec3(sys->parent->mat[1][0],sys->parent->mat[1][1], sys->parent->mat[1][2]) * glm::vec3(0.0f, 1.0f, 0.0f);
+    p.pos = (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-w,w), randfloat(-l, l)));
+    glm::vec3 dir = glm::vec3(sys->parent->mat[1][0],sys->parent->mat[1][1], sys->parent->mat[1][2]) * glm::vec3(0.0f, 0.0f, 1.0f);
     p.speed = glm::normalize(dir) * spd * randfloat(0, var*2);
 
   } else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-l,l), randfloat(-w,w)));
-    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f,1.0f,0.0f,1.0f));
+    p.pos = sys->parent->pivot * (sys->pos + glm::vec3(randfloat(-l,l), randfloat(-w,w), randfloat(-l,l)));
+    glm::vec3 dir = glm::vec3(mrot * glm::vec4(0.0f,0.0f,1.0f,1.0f));
     p.dir = glm::normalize(dir);
 
   } else {
-    p.pos = sys->pos + glm::vec3(randfloat(-l,l), 0, randfloat(-w,w));
+    p.pos = sys->pos + glm::vec3(randfloat(-l,l), randfloat(-w, w), 0.0f);
 
     //glm::vec3 dir = mrot * glm::vec3(0,1,0);
-    glm::vec3 dir = glm::vec3(sys->parent->mrot * glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+    glm::vec3 dir = glm::vec3(sys->parent->mrot * glm::vec4(0.0f, 0.0f, 1.0f, 1.0f));
 
     p.dir = dir;//.normalize();
-    p.down = glm::vec3(0,-1.0f,0); // dir * -1.0f;
+    p.down = glm::vec3(0.0f, 0.0f, -1.0f);
     p.speed = glm::normalize(dir) * spd * (1.0f+randfloat(-var,var));
   }
 
@@ -665,7 +665,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     rotate(0,0, &bdir.z, &bdir.x, phi);
 */
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    glm::vec3 bdir(w*cosf(t)*1.6, 0.0f, l*sinf(t)*1.6);
+    glm::vec3 bdir(w*cosf(t)*1.6, l*sinf(t)*1.6, 0.0f);
 
     p.pos = sys->pos + bdir;
     p.tpos = glm::vec3(sys->parent->mat * glm::vec4(p.pos, 1.0f));
@@ -681,7 +681,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     glm::vec3 bdir;
     float temp;
 
-    bdir = glm::vec3(mrot * glm::vec4(0, 1, 0,1)) * radius;
+    bdir = glm::vec3(mrot * glm::vec4(0, 0, 1, 1)) * radius;
     temp = bdir.z;
     bdir.z = bdir.y;
     bdir.y = temp;
@@ -693,11 +693,11 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
     if (glm::length(bdir) == 0 && (sys->flags&0x100)!=0x100)
     {
       p.speed = glm::vec3(0,0,0);
-      dir = glm::vec3(sys->parent->mrot * glm::vec4(0,1,0,1));
+      dir = glm::vec3(sys->parent->mrot * glm::vec4(0,0,1,1));
     }
     else {
       if(sys->flags&0x100)
-        dir = glm::vec3(sys->parent->mrot * glm::vec4(0,1,0,1));
+        dir = glm::vec3(sys->parent->mrot * glm::vec4(0,0,1,1));
       else
         dir = glm::normalize(bdir);
 
@@ -706,7 +706,7 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
   }
 
   p.dir = glm::normalize(dir);//mrot * glm::vec3(0, 1.0f,0);
-  p.down = glm::vec3(0,-1.0f,0);
+  p.down = glm::vec3(0, 0, 1.0f);
 
   p.life = 0;
   size_t l_anim = anim;
