@@ -518,12 +518,12 @@ inline void ModelCanvas::RenderGrid()
         glColor3f(0.2f, 0.2f, 0.2f);
       }
 
-      glNormal3f(0, 1, 0);
+      glNormal3f(0, 0, 1);
 
-      glVertex3f(j,  0, i);
-      glVertex3f(j,  0, i+1);
-      glVertex3f(j+1,0, i+1);
-      glVertex3f(j+1,0, i);
+      glVertex3f(j,   i,   0);
+      glVertex3f(j,   i+1, 0);
+      glVertex3f(j+1, i+1, 0);
+      glVertex3f(j+1, i,   0);
       count++;
     }
   }
