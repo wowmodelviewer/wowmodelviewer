@@ -54,6 +54,10 @@ void OrbitCamera::reset(const WoWModel * m)
         zmax = v.pos.z;
     }
 
+    // by default, creatures/ characters are "on the ground", consider 0. as minimal possible z value
+    if (zmin < 0.0f)
+      zmin = 0.0f;
+
     target_.z = (zmin + zmax) / 2.0f;
     setRadius((zmin + zmax) / 2.0f * 1.3f / sinf(glm::radians(video.fov / 2.0f)));
   }
