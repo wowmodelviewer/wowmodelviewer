@@ -1768,6 +1768,17 @@ void ModelViewer::LoadWoW()
     return;
   }
 
+  // check if we are loading a 9.x version of WoW
+  if(GAMEDIRECTORY.majorVersion() != 9)
+  {
+    wxString message = wxString::Format(wxT("This version of WoW Model Viewer is intended to be used with WoW Shadowlands only (wow v9.x).\n"
+                                            "For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
+                                            "https://download.wowmodelviewer.net"));
+    wxMessageDialog *dial = new wxMessageDialog(NULL, message, wxT("Wrong World of Warcraft version"), wxOK | wxICON_ERROR);
+    dial->ShowModal();
+    return;
+  }
+
   // init game version
   SetStatusText(wxString(GAMEDIRECTORY.version().toStdWString()), 1);
 
