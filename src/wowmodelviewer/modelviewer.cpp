@@ -114,6 +114,7 @@ EVT_MENU(ID_CANVASM1200, ModelViewer::OnCanvasSize)
 // hidden hotkeys for zooming
 EVT_MENU(ID_ZOOM_IN, ModelViewer::OnToggleCommand)
 EVT_MENU(ID_ZOOM_OUT, ModelViewer::OnToggleCommand)
+EVT_MENU(ID_OPENGL_DEBUG, ModelViewer::OnToggleCommand)
 
 // Light Menu
 EVT_MENU(ID_LT_SAVE, ModelViewer::OnLightMenu)
@@ -530,7 +531,7 @@ void ModelViewer::InitMenu()
   // menuBar->EnableTop(2, false);
 
   // Hotkeys / shortcuts
-  wxAcceleratorEntry entries[25];
+  wxAcceleratorEntry entries[26];
   int keys = 0;
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F5, ID_SAVE_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F6, ID_LOAD_EQUIPMENT);
@@ -549,6 +550,7 @@ void ModelViewer::InitMenu()
   entries[keys++].Set(wxACCEL_CTRL, (int)'s', ID_FILE_SCREENSHOTCONFIG);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F9, ID_CLEAR_EQUIPMENT);
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F10, ID_CHAR_RANDOMISE);
+  entries[keys++].Set(wxACCEL_NORMAL, WXK_F11, ID_OPENGL_DEBUG);
 
   // Temporary saves
   entries[keys++].Set(wxACCEL_NORMAL, WXK_F1, ID_SAVE_TEMP1);
@@ -1475,6 +1477,8 @@ void ModelViewer::OnToggleCommand(wxCommandEvent &event)
   canvas->Zoom(-0.5f, false);
   break;
   */
+    case ID_OPENGL_DEBUG:
+      canvas->toggleOpenGLDebug();
 
     case ID_SAVE_TEMP1:
       canvas->SaveSceneState(1);

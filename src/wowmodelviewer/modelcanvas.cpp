@@ -165,7 +165,8 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
   drawSky = false;
   drawGrid = false;
   useCamera = false;
-  
+
+  openGLDebug_ = false;
   
   //wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE
 #ifdef _WINDOWS
@@ -732,7 +733,8 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
   if (!init)
     InitGL();
 
-  displayDebugInfos();
+  if(openGLDebug_)
+    displayDebugInfos();
 
   int w = 0, h = 0;
   GetClientSize(&w, &h);
@@ -765,11 +767,14 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
   // If masking isn't enabled
   if (!video.useMasking) 
   {
-    // draw origin axis
-    drawAxis(glm::vec3(0.0, 0.0, 0.0), 1.0f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+    if (openGLDebug_)
+    {
+      // draw origin axis
+      drawAxis(glm::vec3(0.0, 0.0, 0.0), 1.0f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
 
-    // draw lookAt axis
-    drawAxis(camera.lookAt(), 0.5f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+      // draw lookAt axis
+      drawAxis(camera.lookAt(), 0.5f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+    }
 
     // Draw the background image if any
     if(drawBackground)
@@ -1838,6 +1843,14 @@ void ModelCanvas::displayDebugInfos() const
   }
 
   frameCount++;
+}
+
+void ModelCanvas::toggleOpenGLDebug()
+{
+  openGLDebug_ = !openGLDebug_;
+
+  if (!openGLDebug_)
+    ((wxTopLevelWindow*)wxTheApp->GetTopWindow())->SetTitle(GLOBALSETTINGS.appTitle());
 }
 
 void ModelCanvas::setModel(WoWModel * m, bool keepPrevious)

@@ -95,6 +95,7 @@ enum ObjectID {
 
   ID_ZOOM_IN,
   ID_ZOOM_OUT,
+  ID_OPENGL_DEBUG,
 
   ID_ENCHANTS,
 

@@ -162,6 +162,8 @@ public:
   CAVIGenerator cAvi;
 #endif
 
+  void toggleOpenGLDebug();
+
 private:
   void displayDebugInfos() const;
 
@@ -177,6 +179,7 @@ private:
   OrbitCamera camera;
 
   WoWModel * model_;
+  bool openGLDebug_;
 };
 
 
