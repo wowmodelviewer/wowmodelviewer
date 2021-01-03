@@ -131,18 +131,8 @@ public:
   void reset(WoWModel * m = nullptr);
   void randomise();
 
-  std::vector<int> getTextureForSection(BaseSectionType);
-  std::vector<int> getRegionForSection(BaseSectionType);
-
   // accessors to customization
-  // wow version < 9.x
-  void set(CustomizationType type, uint val); 
-  uint get(CustomizationType type) const;
   uint get(uint chrCustomizationOptionID) const;
-  CustomizationParam getParams(CustomizationType type);
-  std::vector<CustomizationType> getCustomizationOptions() const;
-
-  // wow version >= 9.x
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
   std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
  
@@ -153,24 +143,14 @@ public:
 
 private:
 
-  // wow version independant
   void fillCustomizationMap();
   void setRandomValue(CustomizationType type);
 
   WoWModel * model_;
   bool isDemonHunter_;
 
-  std::map<uint, uint> currentCustomization_; // wow version < 9.x : map<CustomizationType, value> -- wow version >= 9.x -> map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
+  std::map<uint, uint> currentCustomization_; // map <ChrCustomizationOption::ID, ChrCustomizationChoice::ID>
 
-  // wow version < 9.x
-  void fillCustomizationMap8x();
-  
-  QString getCustomizationName(BaseSectionType section, uint raceID, uint sexID, bool secondCustomization = false);
-
-  std::map<CustomizationType, CustomizationParam> customizationParamsMap_;
-  std::map<uint, std::map<int, CustomizationParam> > multiCustomizationMap_;
-
-  // wow version > 9.x
   class CustomizationElements
   {
   public:
@@ -183,7 +163,6 @@ private:
     }
   };
 
-  void fillCustomizationMap9x();
   void fillCustomizationMapForOption(uint chrCustomizationOption);
 
   bool applyChrCustomizationElements(uint chrCustomizationOption, sqlResult &);
