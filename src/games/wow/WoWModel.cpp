@@ -1943,7 +1943,7 @@ void WoWModel::drawParticles()
 WoWItem * WoWModel::getItem(CharSlots slot)
 {
 
-  for (WoWModel::iterator it = this->begin();
+  for (auto it = this->begin();
        it != this->end();
        ++it)
   {
@@ -1951,8 +1951,33 @@ WoWItem * WoWModel::getItem(CharSlots slot)
       return *it;
   }
 
-  return 0;
+  return nullptr;
 }
+
+int WoWModel::getItemId(CharSlots slot)
+{
+  auto * item = getItem(slot);
+
+  if (item == nullptr)
+    return 0;
+
+  return item->id();
+}
+
+
+bool WoWModel::isWearingARobe()
+{
+  auto * chest = getItem(CS_CHEST);
+  if (chest == nullptr)
+    return false;
+
+  const auto &item = items.getById(chest->id());
+
+  return item.type == IT_ROBE;
+}
+
+
+
 
 void WoWModel::update(int dt) // (float dt)
 {
@@ -2735,11 +2760,11 @@ void WoWModel::refresh8x()
 
   // only show underwear tops/bras if the character isn't wearing a shirt or chest:
   if (cd.showUnderwear && foundTextures.size() > 1 &&
-    getItem(CS_CHEST)->id() < 1 && getItem(CS_SHIRT)->id() < 1)
+    getItemId(CS_CHEST) < 0)
     tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[1]), CR_TORSO_UPPER, 2);
 
   // only show underwear bottoms if the character isn't wearing pants:
-  if (cd.showUnderwear && getItem(CS_PANTS)->id() < 1)
+  if (cd.showUnderwear && getItemId(CS_PANTS) < 0)
   {
     if (foundTextures.size() > 0)
       tex.addLayer(GAMEDIRECTORY.getFile(foundTextures[0]), CR_LEG_UPPER, 2);
@@ -2766,20 +2791,20 @@ void WoWModel::refresh8x()
     (*it)->refresh();
 
   LOG_INFO << "Current Equipment :"
-    << "Head" << getItem(CS_HEAD)->id()
-    << "Shoulder" << getItem(CS_SHOULDER)->id()
-    << "Shirt" << getItem(CS_SHIRT)->id()
-    << "Chest" << getItem(CS_CHEST)->id()
-    << "Belt" << getItem(CS_BELT)->id()
-    << "Legs" << getItem(CS_PANTS)->id()
-    << "Boots" << getItem(CS_BOOTS)->id()
-    << "Bracers" << getItem(CS_BRACERS)->id()
-    << "Gloves" << getItem(CS_GLOVES)->id()
-    << "Cape" << getItem(CS_CAPE)->id()
-    << "Right Hand" << getItem(CS_HAND_RIGHT)->id()
-    << "Left Hand" << getItem(CS_HAND_LEFT)->id()
-    << "Quiver" << getItem(CS_QUIVER)->id()
-    << "Tabard" << getItem(CS_TABARD)->id();
+    << "Head" << getItemId(CS_HEAD)
+    << "Shoulder" << getItemId(CS_SHOULDER)
+    << "Shirt" << getItemId(CS_SHIRT)
+    << "Chest" << getItemId(CS_CHEST)
+    << "Belt" << getItemId(CS_BELT)
+    << "Legs" << getItemId(CS_PANTS)
+    << "Boots" << getItemId(CS_BOOTS)
+    << "Bracers" << getItemId(CS_BRACERS)
+    << "Gloves" << getItemId(CS_GLOVES)
+    << "Cape" << getItemId(CS_CAPE)
+    << "Right Hand" << getItemId(CS_HAND_RIGHT)
+    << "Left Hand" << getItemId(CS_HAND_LEFT)
+    << "Quiver" << getItemId(CS_QUIVER)
+    << "Tabard" << getItemId(CS_TABARD);
 
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
@@ -2790,16 +2815,16 @@ void WoWModel::refresh8x()
     setGeosetGroupDisplay((CharGeosets)i, cd.geosets[i]);
 
 
-  WoWItem * headItem = getItem(CS_HEAD);
+ const auto headItemId = getItemId(CS_HEAD);
 
-  if (headItem != 0 && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
+  if (headItemId!= -1 && cd.autoHideGeosetsForHeadItems)
   {
     auto helmetInfos = GAMEDATABASE.sqlQuery(QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
                                                             "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
                                                             "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
                                                             .arg(infos.raceID)
                                                             .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                                                            .arg(headItem->id()));
+                                                            .arg(headItemId));
 
     if (helmetInfos.valid && !helmetInfos.values.empty())
     {
@@ -2833,23 +2858,40 @@ void WoWModel::refresh8x()
 
 void WoWModel::refresh9x()
 {
-  const GLuint charTex = 0;
-  auto showScalp = true;
+  // apply chardetails customization
+  cd.refresh();
 
+  // hide all geosets of customization models. The correct ones will be set later
   for (auto* it : mergedModels)
   {
-    // hide all geosets of customization models. The correct ones will be set later
     if (it->mergedModelType == 1)
       it->hideAllGeosets();
   }
 
-  if (infos.raceID == -1) // if no race info found, simply update geosets
-  {
-    // reset geosets
-    for (auto geo : cd.geosets)
-      setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
-
+  // if no race info found, simply update geosets
+  if (infos.raceID == -1) 
     return;
+
+  const auto headItemId = getItemId(CS_HEAD);
+
+  if (headItemId != -1 && cd.autoHideGeosetsForHeadItems)
+  {
+    const auto query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+      "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+      "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
+      .arg(infos.raceID)
+      .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
+      .arg(headItemId);
+
+    auto helmetInfos = GAMEDATABASE.sqlQuery(query);
+
+    if (helmetInfos.valid && !helmetInfos.values.empty())
+    {
+      for (auto it : helmetInfos.values)
+      {
+        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+      }
+    }
   }
 
   // reset char texture
@@ -2867,66 +2909,42 @@ void WoWModel::refresh9x()
   }
 
   //refresh equipment
-
   for (auto* it : *this)
     it->refresh();
 
   LOG_INFO << "Current Equipment :"
-    << "Head" << (getItem(CS_HEAD) ? getItem(CS_HEAD)->id() : -1)
-    << "Shoulder" << (getItem(CS_SHOULDER) ? getItem(CS_SHOULDER)->id() : -1)
-    << "Shirt" << (getItem(CS_SHIRT) ? getItem(CS_SHIRT)->id() : -1)
-    << "Chest" << (getItem(CS_CHEST) ? getItem(CS_CHEST)->id() : -1)
-    << "Belt" << (getItem(CS_BELT) ? getItem(CS_BELT)->id() : -1)
-    << "Legs" << (getItem(CS_PANTS) ? getItem(CS_PANTS)->id() : -1)
-    << "Boots" << (getItem(CS_BOOTS) ? getItem(CS_BOOTS)->id() : -1)
-    << "Bracers" << (getItem(CS_BRACERS) ? getItem(CS_BRACERS)->id() : -1)
-    << "Gloves" << (getItem(CS_GLOVES) ? getItem(CS_GLOVES)->id() : -1)
-    << "Cape" << (getItem(CS_CAPE) ? getItem(CS_CAPE)->id() : -1)
-    << "Right Hand" << (getItem(CS_HAND_RIGHT) ? getItem(CS_HAND_RIGHT)->id() : -1)
-    << "Left Hand" << (getItem(CS_HAND_LEFT) ? getItem(CS_HAND_LEFT)->id() : -1)
-    << "Quiver" << (getItem(CS_QUIVER) ? getItem(CS_QUIVER)->id() : -1)
-    << "Tabard" << (getItem(CS_TABARD) ? getItem(CS_TABARD)->id() : -1);
+    << "Head" << getItemId(CS_HEAD)
+    << "Shoulder" << getItemId(CS_SHOULDER)
+    << "Shirt" << getItemId(CS_SHIRT)
+    << "Chest" << getItemId(CS_CHEST)
+    << "Belt" << getItemId(CS_BELT)
+    << "Legs" << getItemId(CS_PANTS)
+    << "Boots" << getItemId(CS_BOOTS)
+    << "Bracers" << getItemId(CS_BRACERS)
+    << "Gloves" << getItemId(CS_GLOVES)
+    << "Cape" << getItemId(CS_CAPE)
+    << "Right Hand" << getItemId(CS_HAND_RIGHT)
+    << "Left Hand" << getItemId(CS_HAND_LEFT)
+    << "Quiver" << getItemId(CS_QUIVER)
+    << "Tabard" << getItemId(CS_TABARD);
 
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
     cd.geosets[CG_WRISTBANDS] = 0;
-  
+
+  // If model is one of these races, show the feet (don't wear boots)
+  cd.showFeet = infos.barefeet;
+
   // Reset geosets
   for (auto geo : cd.geosets)
     setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
 
-  auto headItem = getItem(CS_HEAD);
-
-  if (headItem != nullptr && headItem->id() != -1 && cd.autoHideGeosetsForHeadItems)
-  {
-    const auto query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 " 
-                         "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
-                         "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
-                       .arg(infos.raceID)
-                       .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
-                       .arg(headItem->id());
-
-
-
-    auto helmetInfos = GAMEDATABASE.sqlQuery(query);
-
-    if (helmetInfos.valid && !helmetInfos.values.empty())
-    {
-      for (auto it : helmetInfos.values)
-      {
-        setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
-      }
-    }
-  }
-
   // finalize character texture
+  const GLuint charTex = 0;
   tex.compose(charTex);
 
   // set replacable textures
   replaceTextures[TEXTURE_SKIN] = charTex;
-
-  // If model is one of these races, show the feet (don't wear boots)
-  cd.showFeet = infos.barefeet;
 
   // Eye Glow Geosets are ID 1701, 1702, etc.
   const size_t egt = cd.eyeGlowType;
@@ -2938,6 +2956,7 @@ void WoWModel::refresh9x()
       showGeoset(i, (id == egtId));
   }
 
+  // refresh merged models
   refreshMerging();
 }
 

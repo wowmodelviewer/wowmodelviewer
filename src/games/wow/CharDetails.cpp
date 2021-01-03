@@ -27,7 +27,7 @@ eyeGlowType(EGT_NONE), showUnderwear(true), showEars(true), showHair(true),
 showFacialHair(true), showFeet(true), autoHideGeosetsForHeadItems(true), 
 isNPC(true), model_(nullptr), isDemonHunter_(false)
 {
-  resetGeosets();
+  refreshGeosets();
 }
 
 void CharDetails::save(QXmlStreamWriter & stream)
@@ -240,9 +240,8 @@ void CharDetails::reset(WoWModel * model)
 
   isDemonHunter_ = false;
 
-  resetGeosets();
-
-  textures.clear();
+  refreshGeosets();
+  refreshTextures();
 
   if (GAMEDIRECTORY.majorVersion() < 9)
   {
@@ -999,33 +998,6 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
     }
   }
 
-  // build customization
-  // reset
-  geosets.clear();
-  textures.clear();
-
-  //reset geoset to default
-  resetGeosets();
-
-  // apply customization elements
-  for(const auto& elt: customizationElementsPerOption_)
-  {
-    LOG_INFO << elt.first;
-    for (auto geo : elt.second.geosets)
-    {
-      if (geo.first == CG_EARS && !showEars)
-        continue;
-      geosets[geo.first] = geo.second;
-      LOG_INFO << geo.first << geo.second;
-    }
-
-    for (auto t : elt.second.textures)
-    {
-      LOG_INFO << GAMEDIRECTORY.getFile(t.fileId)->fullname();
-      textures.push_back(t);
-    }
-  }
-
   model_->refresh();
  // TEXTUREMANAGER.dump();
 }
@@ -1359,8 +1331,17 @@ void CharDetails::initLinkedOptionsMap()
   }
 }
 
-void CharDetails::resetGeosets()
+void CharDetails::refresh()
 {
+  refreshGeosets();
+  refreshTextures();
+}
+
+
+void CharDetails::refreshGeosets()
+{
+  geosets.clear();
+
   for (auto i = 0; i < NUM_GEOSETS; i++)
     geosets[i] = 1;
 
@@ -1370,4 +1351,70 @@ void CharDetails::resetGeosets()
     geosets[CG_EARS] = 0;
 
   geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
+
+  // apply customization elements
+  for (const auto& elt : customizationElementsPerOption_)
+  {
+    LOG_INFO << elt.first;
+    for (auto geo : elt.second.geosets)
+    {
+      if (geo.first == CG_EARS && !showEars)
+        continue;
+      geosets[geo.first] = geo.second;
+      LOG_INFO << geo.first << geo.second;
+    }
+  }
+
+  if (model_)
+  {
+    // only show underwear bottoms if the character isn't wearing pants or chest 
+    if (showUnderwear && model_->getItemId(CS_PANTS) < 1 && !model_->isWearingARobe())
+    {
+      // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
+      if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
+        geosets[CG_TABARD2] = 1;
+    }
+    else  // hide underwear
+    {
+      // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
+      if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
+        geosets[CG_TABARD2] = 0;
+    }
+  }
+
+}
+
+void CharDetails::refreshTextures()
+{
+  textures.clear();
+
+  // apply customization elements
+  for (const auto& elt : customizationElementsPerOption_)
+  {
+    LOG_INFO << elt.first;
+ 
+    for (auto t : elt.second.textures)
+    {
+      LOG_INFO << GAMEDIRECTORY.getFile(t.fileId)->fullname();
+
+      if (model_ != nullptr)
+      {
+        // don't apply underwear tops/bras if show underwear is off or if the character is wearing a shirt or chest
+        if (t.region == CR_TORSO_UPPER &&
+          (!showUnderwear ||
+            model_->getItemId(CS_CHEST) > 1 || model_->getItemId(CS_SHIRT) > 1))
+          continue;
+
+        // don't apply underwear bottoms if show underwear is off or if the character is wearing pants
+        if (t.region == CR_LEG_UPPER &&
+          (!showUnderwear ||
+            model_->getItemId(CS_PANTS) > 1))
+          continue;
+      }
+
+      LOG_INFO << "added";
+      textures.push_back(t);
+    }
+  }
+
 }

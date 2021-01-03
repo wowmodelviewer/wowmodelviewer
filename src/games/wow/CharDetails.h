@@ -149,6 +149,8 @@ public:
   void setDemonHunterMode(bool);
   bool isDemonHunter() const { return isDemonHunter_; }
 
+  void refresh();
+
 private:
 
   // wow version independant
@@ -190,7 +192,9 @@ private:
   int getChildOption(uint chrCustomizationOption);
 
   void initLinkedOptionsMap();
-  void resetGeosets();
+
+  void refreshGeosets();
+  void refreshTextures();
 
   std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
   std::map<uint, CustomizationElements> customizationElementsPerOption_; // keep track of current elements applied for a given option

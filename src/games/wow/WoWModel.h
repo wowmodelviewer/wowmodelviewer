@@ -251,6 +251,9 @@ public:
   friend class ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
+  int getItemId(CharSlots slot);
+  bool isWearingARobe();
+
   void updateTextureList(GameFile * tex, int special);
   void displayHeader(ModelHeader & a_header);
   bool canSetTextureFromFile(int texnum);
