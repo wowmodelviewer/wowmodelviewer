@@ -85,6 +85,11 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
     LOG_ERROR << "Unable to create FBX scene";
     return false;
   }
+
+  // convert scene from Yup to Zup
+  FbxAxisSystem conv(FbxAxisSystem::eMayaZUp); // we desire to convert the scene from Y-Up to Z-Up
+  conv.ConvertScene(l_Scene);
+
   //LOG_INFO << "FBX SDK scene successfully created";
   return true;
 }
