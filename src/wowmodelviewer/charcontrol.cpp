@@ -472,7 +472,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 
   std::map<std::pair<int, int>, int> subclasslookup;
 
-  sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ID, SubClassID, Name, VerboseName FROM ItemSubClass");
+  sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ClassID, SubClassID, Name, VerboseName FROM ItemSubClass");
 
   if (itemClasses.valid && !itemClasses.empty())
   {

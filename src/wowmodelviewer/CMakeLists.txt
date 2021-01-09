@@ -29,7 +29,6 @@ set(src  AnimationExportChoiceDialog.cpp
          AVIGenerator.cpp
          charcontrol.cpp
          CharDetailsCustomizationChoice.cpp
-         CharDetailsCustomizationSpin.cpp
          CharDetailsFrame.cpp
          DisplaySettings.cpp
          effects.cpp
@@ -63,7 +62,6 @@ set(headers AnimationExportChoiceDialog.h
             AVIGenerator.h
             charcontrol.h
             CharDetailsCustomizationChoice.h
-            CharDetailsCustomizationSpin.h
             CharDetailsFrame.h
             DisplaySettings.h
             effects.h

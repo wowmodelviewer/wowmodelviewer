@@ -251,6 +251,9 @@ public:
   friend class ModelRenderPass;
 
   WoWItem * getItem(CharSlots slot);
+  int getItemId(CharSlots slot);
+  bool isWearingARobe();
+
   void updateTextureList(GameFile * tex, int special);
   void displayHeader(ModelHeader & a_header);
   bool canSetTextureFromFile(int texnum);
@@ -278,9 +281,6 @@ public:
   WoWModel* getMergedModel(uint fileID);
 
   void refresh();
-  void refresh8x();
-  void refresh9x();
-  void refreshCustomSection(CharDetails::BaseSectionType section, CharDetails::CustomizationType customType);
   
   QString getNameForTex(uint16 tex);
   GLuint getGLTexture(uint16 tex) const;

@@ -11,7 +11,6 @@
 
 #include "charcontrol.h"
 #include "CharDetailsCustomizationChoice.h"
-#include "CharDetailsCustomizationSpin.h"
 #include "CharDetailsEvent.h"
 #include "Game.h"
 #include "WoWModel.h"
@@ -62,25 +61,13 @@ void CharDetailsFrame::setModel(WoWModel * model)
 
   const auto infos = model_->infos;
   
-  if(GAMEDIRECTORY.majorVersion() < 9)
-  {
-    auto options = model_->cd.getCustomizationOptions();
+ 
+  auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
 
-    for (auto& option : options)
-    {
-      if (model_->cd.getParams(option).possibleValues.size() > 1)
-        charCustomizationGS_->Add(new CharDetailsCustomizationSpin(this, model_->cd, option), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-    }
-  }
-  else
+  if(options.valid && !options.values.empty())
   {
-    auto options = GAMEDATABASE.sqlQuery(QString("SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex").arg(infos.ChrModelID[0]));
-
-    if(options.valid && !options.values.empty())
-    {
-      for(auto& option : options.values)
-        charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-    }
+    for(auto& option : options.values)
+      charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()), wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
   }
 
   if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)

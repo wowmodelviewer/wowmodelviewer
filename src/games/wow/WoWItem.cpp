@@ -700,7 +700,7 @@ void WoWItem::refresh()
     {
       for (const auto it : itemGeosets_)
       {
-        if (it.first != CG_BOOTS)
+        if (it.first != CG_BOOTS && !charModel_->isWearingARobe())
         {
           charModel_->cd.geosets[it.first] = it.second;
           /*
@@ -708,21 +708,17 @@ void WoWItem::refresh()
             mergedModel_->setGeosetGroupDisplay(it.first, 1);
           */
         }
-      }
-
-      const auto geoIt = itemGeosets_.find(CG_BOOTS);
-
-      if (geoIt != itemGeosets_.end())
-      {
-        // don't render boots behind robe
-        auto * chestItem = charModel_->getItem(CS_CHEST);
-        if (chestItem->type_ != IT_ROBE) // maybe not handle when geoIt->second = 5 ?
+        else
         {
-          charModel_->cd.geosets[CG_BOOTS] = geoIt->second;
-          /*
-          if (mergedModel_ != 0)
-            mergedModel_->setGeosetGroupDisplay(CG_BOOTS, 1);
-          */
+          // don't render boots behind robe
+          if (!charModel_->isWearingARobe())
+          {
+            charModel_->cd.geosets[it.first] = it.second;
+            /*
+            if (mergedModel_ != 0)
+              mergedModel_->setGeosetGroupDisplay(CG_BOOTS, 1);
+            */
+          }
         }
       }
 
@@ -757,9 +753,7 @@ void WoWItem::refresh()
       if (geoIt != itemGeosets_.end())
       {
         // apply trousers geosets only if character is not already wearing a robe
-        const auto &item = items.getById(charModel_->getItem(CS_CHEST)->id());
-
-        if (item.type != IT_ROBE)
+        if(!charModel_->isWearingARobe())
         {
           charModel_->cd.geosets[CG_TROUSERS] = geoIt->second;
           /*
@@ -790,8 +784,7 @@ void WoWItem::refresh()
 
       // if we are wearing a robe, render gloves first in texture compositing
       // only if GeoSetGroup1 is 0 (from item displayInfo db) which corresponds to stored geoset equals to 1
-      auto * chestItem = charModel_->getItem(CS_CHEST);
-      if ((chestItem->type_ == IT_ROBE) && (charModel_->cd.geosets[CG_GLOVES] == 1))
+      if (charModel_->isWearingARobe() && (charModel_->cd.geosets[CG_GLOVES] == 1))
         layer = SLOT_LAYERS_[CS_CHEST] - 1;
 
       if (texIt != itemTextures_.end())

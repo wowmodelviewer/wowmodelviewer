@@ -231,8 +231,8 @@
   </table>
   <table name="ItemSubClass">
     <field type="uint" name="col0" primary="yes" />
-    <field type="byte" name="ID" pos="2" />
-    <field type="byte" name="SubClassID" pos="3" />
+    <field type="byte" name="ClassID" pos="3" relationshipData="yes"/>
+    <field type="byte" name="SubClassID" pos="4" />
     <field type="text" name="Name" pos="0" />
     <field type="text" name="VerboseName" pos="1" />
   </table>

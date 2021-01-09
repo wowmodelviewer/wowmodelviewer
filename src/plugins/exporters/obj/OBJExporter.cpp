@@ -70,9 +70,9 @@ void MakeModelFaceForwards(glm::vec4 &vect)
 {
   glm::vec4 Temp;
 
-  Temp.x = 0-vect.z;
-  Temp.y = vect.y;
-  Temp.z = vect.x;
+  Temp.x = vect.x;
+  Temp.y = vect.z;
+  Temp.z = -vect.y;
 
   vect = Temp;
 }

@@ -1339,7 +1339,19 @@ void ModelCanvas::RenderToBuffer()
       RenderSkybox();
   }
 
-  // camera.Setup();
+  // setup projection (use perspective camera)
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  glm::mat4 projection = glm::perspective(video.fov, (float)rt->nWidth / (float)rt->nHeight, 0.1f, 1280 * 5.f);
+  glMultMatrixf((glm::value_ptr(projection)));
+
+  // setup camera
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glm::mat4 view = camera.getViewMatrix();
+  glMultMatrixf((glm::value_ptr(view)));
     
   // Render the grid if wanted and masking isn't enabled
   if (drawGrid && !video.useMasking)
