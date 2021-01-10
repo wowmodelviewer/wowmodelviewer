@@ -526,7 +526,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
     {
       if (elt[0].toUInt() != 0) // geoset customization
       {
-        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6];
+        LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6] << "/" << elt[0];
 
         auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeoSetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
 
@@ -538,11 +538,15 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       }
       else if (elt[1].toUInt() != 0) // added model customization
       {
-        LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6];
+        LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6] << "/" << elt[1];
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT CollectionsFileDataID, GeosetType, GeoSetID FROM ChrCustomizationSkinnedModel WHERE ID = %1").arg(elt[1].toUInt()));
+
+        if (vals.valid)
+          customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(vals.values[0][0].toInt(), std::make_pair(vals.values[0][1].toInt(), vals.values[0][2].toInt()));
       }
       else if (elt[2].toUInt() != 0) // texture customization
       {
-        LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6];
+        LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
         auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, TextureID FROM ChrCustomizationMaterial "
           "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
           "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
@@ -561,15 +565,15 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       }
       else if (elt[3].toUInt() != 0) // boneset customization ??
       {
-        LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! boneset based customization for" << elt[6] << "/" << elt[3];
       }
       else if (elt[4].toUInt() != 0) // cond model customization ??
       {
-        LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! Cond model based customization for" << elt[6] << "/" << elt[4];
       }
       else if (elt[5].toUInt() != 0) // display info customization ??
       {
-        LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6];
+        LOG_ERROR << "Not yet implemented ! Display info based customization for" << elt[6] << "/" << elt[5];
       }
     }
     return true;
@@ -650,6 +654,7 @@ void CharDetails::refresh()
 {
   refreshGeosets();
   refreshTextures();
+  refreshSkinnedModels();
 }
 
 
@@ -670,13 +675,11 @@ void CharDetails::refreshGeosets()
   // apply customization elements
   for (const auto& elt : customizationElementsPerOption_)
   {
-    LOG_INFO << elt.first;
     for (auto geo : elt.second.geosets)
     {
       if (geo.first == CG_EARS && !showEars)
         continue;
       geosets[geo.first] = geo.second;
-      LOG_INFO << geo.first << geo.second;
     }
   }
 
@@ -706,12 +709,8 @@ void CharDetails::refreshTextures()
   // apply customization elements
   for (const auto& elt : customizationElementsPerOption_)
   {
-    LOG_INFO << elt.first;
- 
     for (auto t : elt.second.textures)
     {
-      LOG_INFO << GAMEDIRECTORY.getFile(t.fileId)->fullname();
-
       if (model_ != nullptr)
       {
         // don't apply underwear tops/bras if show underwear is off or if the character is wearing a shirt or chest
@@ -727,9 +726,27 @@ void CharDetails::refreshTextures()
           continue;
       }
 
-      LOG_INFO << "added";
       textures.push_back(t);
     }
   }
 
+}
+
+void CharDetails::refreshSkinnedModels()
+{
+  // first clean any previous merging
+  for (const auto m : models_)
+    model_->unmergeModel(m.first);
+
+  models_.clear();
+
+  for (const auto& elt : customizationElementsPerOption_)
+  {
+    for (const auto m : elt.second.models)
+    {
+      auto * model = model_->mergeModel(m.first);
+      model->setGeosetGroupDisplay((CharGeosets)m.second.first, m.second.second);
+      models_.emplace_back(m.first, m.second);
+    }
+  }
 }
