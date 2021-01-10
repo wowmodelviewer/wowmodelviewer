@@ -71,7 +71,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     return;
   }
 
-  wxFlexGridSizer *top = new wxFlexGridSizer(1);
+  auto * top = new wxFlexGridSizer(1);
 
   cdFrame = new CharDetailsFrame(this);
   top->Add(cdFrame, wxSizerFlags(1).Align(wxALIGN_CENTER));
@@ -82,7 +82,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
   }
 
   top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200, 20), wxALIGN_CENTRE), wxSizerFlags().Border(wxTOP, 5));
-  wxFlexGridSizer *gs2 = new wxFlexGridSizer(3, 5, 5);
+  auto * gs2 = new wxFlexGridSizer(3, 5, 5);
   gs2->AddGrowableCol(1);
 
 #define ADD_CONTROLS(type, caption) \
@@ -95,53 +95,55 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
     }
 
   ADD_CONTROLS(CS_HEAD, _("Head"))
-    ADD_CONTROLS(CS_SHOULDER, _("Shoulder"))
+  ADD_CONTROLS(CS_SHOULDER, _("Shoulder"))
 
-    ADD_CONTROLS(CS_SHIRT, _("Shirt"))
-    ADD_CONTROLS(CS_CHEST, _("Chest"))
-    ADD_CONTROLS(CS_BELT, _("Belt"))
-    ADD_CONTROLS(CS_PANTS, _("Legs"))
-    ADD_CONTROLS(CS_BOOTS, _("Boots"))
+  ADD_CONTROLS(CS_SHIRT, _("Shirt"))
+  ADD_CONTROLS(CS_CHEST, _("Chest"))
+  ADD_CONTROLS(CS_BELT, _("Belt"))
+  ADD_CONTROLS(CS_PANTS, _("Legs"))
+  ADD_CONTROLS(CS_BOOTS, _("Boots"))
 
-    ADD_CONTROLS(CS_BRACERS, _("Bracers"))
-    ADD_CONTROLS(CS_GLOVES, _("Gloves"))
-    ADD_CONTROLS(CS_CAPE, _("Cape"))
+  ADD_CONTROLS(CS_BRACERS, _("Bracers"))
+  ADD_CONTROLS(CS_GLOVES, _("Gloves"))
+  ADD_CONTROLS(CS_CAPE, _("Cape"))
 
-    ADD_CONTROLS(CS_HAND_RIGHT, _("Right hand"))
-    ADD_CONTROLS(CS_HAND_LEFT, _("Left hand"))
+  ADD_CONTROLS(CS_HAND_RIGHT, _("Right hand"))
+  ADD_CONTROLS(CS_HAND_LEFT, _("Left hand"))
 
-    ADD_CONTROLS(CS_QUIVER, _("Quiver"))
-    ADD_CONTROLS(CS_TABARD, _("Tabard"))
+  ADD_CONTROLS(CS_QUIVER, _("Quiver"))
+  ADD_CONTROLS(CS_TABARD, _("Tabard"))
 #undef ADD_CONTROLS
 
-    top->Add(gs2, wxEXPAND);
+  top->Add(gs2, wxSizerFlags(1).Align(wxALIGN_CENTER));
 
   // Create our tabard customisation spin buttons
-  wxGridSizer *gs3 = new wxGridSizer(3);
+  auto * gs3 = new wxGridSizer(3);
 #define ADD_CONTROLS(type, id, caption) \
   gs3->Add(new wxStaticText(this, wxID_ANY, caption), wxSizerFlags().Align(wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL)); \
   gs3->Add(tabardSpins[type]=new wxSpinButton(this, id, wxDefaultPosition, wxSize(30,16), wxSP_HORIZONTAL|wxSP_WRAP), wxSizerFlags(1).Align(wxALIGN_CENTER|wxALIGN_CENTER_VERTICAL)); \
   gs3->Add(spinTbLabels[type] = new wxStaticText(this, wxID_ANY, wxT("0")), wxSizerFlags(2).Align(wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL));
 
   ADD_CONTROLS(SPIN_TABARD_ICON, ID_TABARD_ICON, _("Icon"))
-    ADD_CONTROLS(SPIN_TABARD_ICONCOLOR, ID_TABARD_ICONCOLOR, _("Icon Color"))
-    ADD_CONTROLS(SPIN_TABARD_BORDER, ID_TABARD_BORDER, _("Border"))
-    ADD_CONTROLS(SPIN_TABARD_BORDERCOLOR, ID_TABARD_BORDERCOLOR, _("Border Color"))
-    ADD_CONTROLS(SPIN_TABARD_BACKGROUND, ID_TABARD_BACKGROUND, _("BG Color"))
+  ADD_CONTROLS(SPIN_TABARD_ICONCOLOR, ID_TABARD_ICONCOLOR, _("Icon Color"))
+  ADD_CONTROLS(SPIN_TABARD_BORDER, ID_TABARD_BORDER, _("Border"))
+  ADD_CONTROLS(SPIN_TABARD_BORDERCOLOR, ID_TABARD_BORDERCOLOR, _("Border Color"))
+  ADD_CONTROLS(SPIN_TABARD_BACKGROUND, ID_TABARD_BACKGROUND, _("BG Color"))
 
 #undef ADD_CONTROLS
 
-    top->Add(new wxStaticText(this, -1, _("Tabard details")), wxSizerFlags().Align(wxALIGN_CENTRE).Border(wxALL, 1));
-  top->Add(gs3, wxEXPAND);
+  top->Add(new wxStaticText(this, -1, _("Tabard details")), wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxALL, 1));
+  top->Add(gs3, wxSizerFlags(1).Align(wxALIGN_CENTER));
   top->Add(new wxButton(this, ID_MOUNT, _("Mount / dismount")), wxSizerFlags(1).Align(wxALIGN_CENTRE).Border(wxTOP, 10));
 
   //p->SetSizer(top);
 
   top->SetSizeHints(this);
   Show(true);
-  SetAutoLayout(true);
+  //SetAutoLayout(true);
   SetSizer(top);
   Layout();
+  FitInside(); // ask the sizer about the needed size
+  SetScrollRate(5, 5);
 
   choosingSlot = 0;
   itemDialog = 0;

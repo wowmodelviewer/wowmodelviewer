@@ -24,7 +24,7 @@ class ModelViewer;
 
 bool slotHasModel(size_t i);
 
-class CharControl : public wxWindow, public Observer
+class CharControl : public wxScrolledWindow, public Observer
 {
   DECLARE_CLASS(CharControl)
   DECLARE_EVENT_TABLE()
