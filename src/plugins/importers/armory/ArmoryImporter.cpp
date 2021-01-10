@@ -591,8 +591,11 @@ As you can see, this will give us almost all the data we need to properly rebuil
         LOG_INFO << qPrintable(strUrl);
         const auto strList = strUrl.mid(8).split("/");
 
+        if(strList.size() > 5 ) // new form
+          region = strList.at(3);
+        else
+          region = strList.at(1);
 
-        region = strList.at(1);
         realm = strList.at(strList.size() - 2);
         charName = strList.at(strList.size() - 1).mid(0, strUrl.lastIndexOf("?") - 1);
         LOG_INFO << "WoW.com, CharName:" << charName << "Realm:" << realm << "Region:" << region;
