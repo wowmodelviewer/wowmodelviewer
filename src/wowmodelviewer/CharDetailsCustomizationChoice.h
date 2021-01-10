@@ -24,12 +24,14 @@ class CharDetailsCustomizationChoice : public wxWindow, public Observer
   public:
     CharDetailsCustomizationChoice(wxWindow* parent, CharDetails & details, uint chrCustomizationChoiceID);
 
+    void onEvent(Event *) override;
+
   private:
     DECLARE_CLASS(CharDetailsCustomizationChoice)
     DECLARE_EVENT_TABLE()
 
     void onChoice(wxCommandEvent& event);
-    void onEvent(Event *) override;
+   
 
     void refresh();
     void buildList();

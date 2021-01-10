@@ -435,6 +435,10 @@ void CharDetails::set(uint chrCustomizationOptionID, uint chrCustomizationChoice
     }
   }
 
+  CharDetailsEvent event(this, CharDetailsEvent::CHOICE_LIST_CHANGED);
+  event.setCustomizationOptionId(chrCustomizationOptionID);
+  notify(event);
+
   model_->refresh();
  // TEXTUREMANAGER.dump();
 }
@@ -492,28 +496,6 @@ void CharDetails::setRandomValue(CustomizationType type)
     set(type, randval);
   }
   */
-}
-
-void CharDetails::setDemonHunterMode(bool val)
-{
-  if (val != isDemonHunter_)
-  {
-    isDemonHunter_ = val;
-    // All we need to do is toggle DH customization options, then let
-    // WoWModel::refresh() add/remove the DH component models for us.
-    if (isDemonHunter_)
-    {
-      setRandomValue(CUSTOM1_STYLE);
-      setRandomValue(CUSTOM1_COLOR);
-      setRandomValue(CUSTOM2_STYLE);
-      setRandomValue(CUSTOM3_STYLE);
-    }
-
-    fillCustomizationMap();
-    CharDetailsEvent event(this, CharDetailsEvent::DH_MODE_CHANGED);
-    notify(event);
-    model_->refresh();
-  }
 }
 
 bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sqlResult & elements)

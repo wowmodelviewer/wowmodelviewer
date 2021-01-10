@@ -136,7 +136,7 @@ public:
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
   std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
  
-  void setDemonHunterMode(bool);
+  void setDemonHunterMode(bool val) { isDemonHunter_ = val; }
   bool isDemonHunter() const { return isDemonHunter_; }
 
   void refresh();

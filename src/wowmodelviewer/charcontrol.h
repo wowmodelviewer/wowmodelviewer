@@ -36,7 +36,6 @@ class CharControl : public wxWindow, public Observer
   wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
   CharDetailsFrame * cdFrame;
 
-  void onEvent(Event *);
   void tryToEquipItem(int id);
 
   public:
@@ -78,6 +77,8 @@ class CharControl : public wxWindow, public Observer
 
   const wxString selectCharModel();
   static QString getItemName(ItemRecord &);
+
+  void onEvent(Event *) override;
 };
 
 
