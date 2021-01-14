@@ -1606,13 +1606,13 @@ void ModelCanvas::CheckMovement()
   if(!wintest)
     return;
 
-  if (wxGetKeyState(WXK_NUMPAD4))  // Rotate left
+  if (wxGetKeyState(WXK_NUMPAD4) || wxGetKeyState(WXK_LEFT))  // Rotate left
     camera.setYaw(camera.yaw() + 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD6))  // Rotate right
+  if (wxGetKeyState(WXK_NUMPAD6) || wxGetKeyState(WXK_RIGHT))  // Rotate right
     camera.setYaw(camera.yaw() - 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD8))  // Rotate back
+  if (wxGetKeyState(WXK_NUMPAD8) || wxGetKeyState(WXK_UP))  // Rotate back
     camera.setPitch(camera.pitch() + 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD2))  // Rotate fornt
+  if (wxGetKeyState(WXK_NUMPAD2) || wxGetKeyState(WXK_DOWN))  // Rotate fornt
     camera.setPitch(camera.pitch() - 1.0f);
   if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
     camera.reset(model_);
@@ -1634,62 +1634,6 @@ void ModelCanvas::CheckMovement()
 
     camera.setLookAt(glm::vec3(look.x + right.x * 0.2, look.y + right.y * 0.2, look.z));
   }
-
-
-  
-
-  /*
-  if (wxGetKeyState(WXK_NUMPAD8))  // Move forward
-    camera.MoveForward(-0.1f);
-  if (wxGetKeyState(WXK_NUMPAD2))  // Move Backwards
-    camera.MoveForward(0.1f);
-  if (wxGetKeyState(WXK_NUMPAD7))  // Rotate left
-    camera.RotateY(1.0f);
-  if (wxGetKeyState(WXK_NUMPAD9))  // Rotate right
-    camera.RotateY(-1.0f);
-  if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
-    camera.Reset();
-  if (wxGetKeyState(WXK_NUMPAD4))  // Straff Left
-    camera.Strafe(-0.05f);
-  if (wxGetKeyState(WXK_NUMPAD6))  // Straff Right
-    camera.Strafe(0.05f);
-    */
-  // M2 Model only stuff below here
-  if (!model_ || !model_->animManager)
-    return;
-
-  float speed = 1.0f;
-
-  // Time stuff
-  if (model_)
-    speed = ((timeGetTime() - lastTime) * model_->animManager->GetSpeed()) / 7.0f;
-  else
-    speed = (timeGetTime() - lastTime);
-
-  //lastTime = timeGetTime();
-
-  // Turning
-  if (wxGetKeyState(WXK_LEFT)) {
-    WoWModel * m = const_cast<WoWModel *>(model_);
-    m->rot_.y += speed;
-
-    if (m->rot_.y > 360) m->rot_.y -= 360;
-    if (m->rot_.y < 0) m->rot_.y += 360;
-    
-  } else if (wxGetKeyState(WXK_RIGHT)) {
-    WoWModel * m = const_cast<WoWModel *>(model_);
-    m->rot_.y -= speed;
-
-    if (m->rot_.y > 360) m->rot_.y -= 360;
-    if (m->rot_.y < 0) m->rot_.y += 360;
-  }
-  // --
-
-  // Moving forward/backward
-  //float speed = 0.0f;
-  WoWModel * m = const_cast<WoWModel *>(model_);
-  if (m->animated)
-    speed *= (m->anims[m->currentAnim].moveSpeed / 160.0f);
 }
 
 // Our screenshot function which supports both PBO and FBO aswell as traditional older cards, eventually.
