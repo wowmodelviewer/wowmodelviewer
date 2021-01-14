@@ -1543,38 +1543,28 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
     return;
   
   // --
-  int keycode = event.GetKeyCode(); 
+  const auto keycode = event.GetKeyCode();
 
-  // if(bInGameKeys) {
-    
-  // } else {
-    // animation speed toggles
-    if (keycode == '0')
-      animControl->SetAnimSpeed(1.0f);
-    else if (keycode == '1')
-      animControl->SetAnimSpeed(0.1f);
-    else if (keycode == '2')
-      animControl->SetAnimSpeed(0.2f);
-    else if (keycode == '3')
-      animControl->SetAnimSpeed(0.3f);
-    else if (keycode == '4')
-      animControl->SetAnimSpeed(0.4f);
-    else if (keycode == '5')
-      animControl->SetAnimSpeed(0.5f);
-    else if (keycode == '6')
-      animControl->SetAnimSpeed(0.6f);
-    else if (keycode == '7')
-      animControl->SetAnimSpeed(0.7f);
-    else if (keycode == '8')
-      animControl->SetAnimSpeed(0.8f);
-    else if (keycode == '9')
-      animControl->SetAnimSpeed(0.9f);
-
-    
-
-
-    // --  
-  // }
+  if (keycode == '0')
+    animControl->SetAnimSpeed(1.0f);
+  else if (keycode == '1')
+    animControl->SetAnimSpeed(0.1f);
+  else if (keycode == '2')
+    animControl->SetAnimSpeed(0.2f);
+  else if (keycode == '3')
+    animControl->SetAnimSpeed(0.3f);
+  else if (keycode == '4')
+    animControl->SetAnimSpeed(0.4f);
+  else if (keycode == '5')
+    animControl->SetAnimSpeed(0.5f);
+  else if (keycode == '6')
+    animControl->SetAnimSpeed(0.6f);
+  else if (keycode == '7')
+    animControl->SetAnimSpeed(0.7f);
+  else if (keycode == '8')
+    animControl->SetAnimSpeed(0.8f);
+  else if (keycode == '9')
+    animControl->SetAnimSpeed(0.9f);
 }
 
 void ModelCanvas::OnCamMenu(wxCommandEvent &event)
@@ -1606,13 +1596,13 @@ void ModelCanvas::CheckMovement()
   if(!wintest)
     return;
 
-  if (wxGetKeyState(WXK_NUMPAD4) || wxGetKeyState(WXK_LEFT))  // Rotate left
+  if (wxGetKeyState(WXK_NUMPAD4))  // Rotate left
     camera.setYaw(camera.yaw() + 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD6) || wxGetKeyState(WXK_RIGHT))  // Rotate right
+  if (wxGetKeyState(WXK_NUMPAD6))  // Rotate right
     camera.setYaw(camera.yaw() - 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD8) || wxGetKeyState(WXK_UP))  // Rotate back
+  if (wxGetKeyState(WXK_NUMPAD8))  // Rotate back
     camera.setPitch(camera.pitch() + 1.0f);
-  if (wxGetKeyState(WXK_NUMPAD2) || wxGetKeyState(WXK_DOWN))  // Rotate fornt
+  if (wxGetKeyState(WXK_NUMPAD2))  // Rotate fornt
     camera.setPitch(camera.pitch() - 1.0f);
   if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
     camera.reset(model_);
