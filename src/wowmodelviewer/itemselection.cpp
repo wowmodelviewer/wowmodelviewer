@@ -53,7 +53,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-    : wxSingleChoiceDialog(parent, message, caption, choices, (char**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
+    : wxSingleChoiceDialog(parent, message, caption, choices, (void**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER, wxDefaultPosition)
 {
   cc = dest;
   this->type = type;
@@ -109,7 +109,7 @@ ChoiceDialog::ChoiceDialog(CharControl *dest, int type,
   wxBoxSizer *frameSizer = (wxBoxSizer*)this->GetSizer();
   if (frameSizer) {
     frameSizer->Detach(m_listbox);
-    frameSizer->Insert(1, m_listctrl, wxEXPAND|wxADJUST_MINSIZE|wxLEFT|wxRIGHT);
+    frameSizer->Insert(1, m_listctrl, wxEXPAND|wxLEFT|wxRIGHT);
     frameSizer->SetSizeHints( m_listctrl );
     frameSizer->Fit( m_listctrl );
 

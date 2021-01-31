@@ -7,7 +7,7 @@ before_build:
     
     cd wmv_sdk
 
-    git reset --hard b875dbd 
+    git reset --hard 5b71968 
 
     .\wmv_set_env.bat
 

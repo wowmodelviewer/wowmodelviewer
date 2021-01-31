@@ -39,10 +39,10 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent)
   top->Add(new wxStaticText(this, -1, _("Model Customization"), wxDefaultPosition, wxSize(-1, 20), wxALIGN_CENTER),
            wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
 
-  top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
-  top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize), wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+  top->Add(charCustomizationGS_);
+  top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize));
   dhMode_ = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
-  top->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+  top->Add(dhMode_, wxSizerFlags().Expand().Align(wxALIGN_CENTER_HORIZONTAL).Border(wxALL, 2));
   SetAutoLayout(true);
   top->SetSizeHints(this);
   SetSizer(top);

@@ -1,6 +1,7 @@
 #ifndef MODELCANVAS_H
 #define MODELCANVAS_H
 
+#include "GL/glew.h"
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
     #include <wx/wx.h>

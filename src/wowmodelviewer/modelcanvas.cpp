@@ -189,7 +189,7 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
     // Initiate our default OpenGL settings
     LOG_INFO << "Initiating OpenGL...";
 #ifdef _WINDOWS
-    wxDisplay *disp = new wxDisplay(0);
+    wxDisplay *disp = new wxDisplay((unsigned)0);
     int bpp = disp->GetCurrentMode().bpp;
     video.SetHandle((HWND)this->GetHandle(), bpp);
 #else

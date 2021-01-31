@@ -24,7 +24,7 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 : wxWindow(parent, wxID_ANY), ID_(chrCustomizationChoiceID), details_(details)
 {
   auto top = new wxFlexGridSizer(2, 0, 5);
-  top->AddGrowableCol(2);
+  top->AddGrowableCol(1);
 
   details_.attach(this);
 

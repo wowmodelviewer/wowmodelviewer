@@ -88,7 +88,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   speedMouthLabel->Show(false);
 
   speedMouthSlider = new wxSlider(this, ID_SPEED_MOUTH, 10, 0, 40, wxPoint(415,95), wxSize(100,38), wxSL_AUTOTICKS);
-  speedMouthSlider->SetTickFreq(10, 1);
+  speedMouthSlider->SetTickFreq(10);
   speedMouthSlider->Show(false);
 
   // ---
@@ -131,12 +131,12 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
   wmoLabel->Show(FALSE);
 
   speedSlider = new wxSlider(this, ID_SPEED, 10, 1, 40, wxPoint(490,56), wxSize(100,38), wxSL_AUTOTICKS);
-  speedSlider->SetTickFreq(10, 1);
+  speedSlider->SetTickFreq(10);
   speedLabel = new wxStaticText(this, -1, wxT("Speed: 1.0x"), wxPoint(490,40), wxDefaultSize);
 
   frameLabel = new wxStaticText(this, -1, wxT("Frame: 0"), wxPoint(330,40), wxDefaultSize);
   frameSlider = new wxSlider(this, ID_FRAME, 1, 1, 10, wxPoint(330,56), wxSize(160,38), wxSL_AUTOTICKS);
-  frameSlider->SetTickFreq(2, 1);
+  frameSlider->SetTickFreq(2);
 
   btnPlay = new wxButton(this, ID_PLAY, _("Play"), wxPoint(10,40), wxSize(45,20));
   btnPause = new wxButton(this, ID_PAUSE, _("Pause"), wxPoint(62,40), wxSize(45,20));
@@ -1342,7 +1342,7 @@ void AnimControl::SetAnimFrame(size_t frame)
 void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)
 {
   frameSlider->SetRange(0, maxRange);
-  frameSlider->SetTickFreq(tickFreq, 1);
+  frameSlider->SetTickFreq(tickFreq);
   frameSlider->SetValue(0);
   frameLabel->SetLabel(L"Frame: 0");
 }
