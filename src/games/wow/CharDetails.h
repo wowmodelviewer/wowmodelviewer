@@ -136,7 +136,7 @@ public:
   void set(uint chrCustomizationOptionID, uint chrCustomizationChoiceID); 
   std::vector<uint> getCustomizationChoices(const uint chrCustomizationOptionID);
  
-  void setDemonHunterMode(bool);
+  void setDemonHunterMode(bool val) { isDemonHunter_ = val; }
   bool isDemonHunter() const { return isDemonHunter_; }
 
   void refresh();
@@ -154,12 +154,14 @@ private:
   class CustomizationElements
   {
   public:
-    std::vector<std::pair<uint, uint> > geosets;
-    std::vector<TextureCustomization> textures;
+    std::vector<std::pair<uint, uint> > geosets; // std::vector<std::pair<GeosetType, GeosetID>>
+    std::vector<TextureCustomization> textures; 
+    std::vector<std::pair<uint, std::pair<uint, uint> > > models; // std::vector<std::pair<GameFileId, std::pair<GeosetType, GeosetID>>>
     void clear()
     {
       geosets.clear();
       textures.clear();
+      models.clear();
     }
   };
 
@@ -174,9 +176,11 @@ private:
 
   void refreshGeosets();
   void refreshTextures();
+  void refreshSkinnedModels();
 
   std::map<uint, std::vector<uint> > choicesPerOptionMap_; // map < ChrCustomizationOption::ID, vector <ChrCustomizationChoice::ID> >
   std::map<uint, CustomizationElements> customizationElementsPerOption_; // keep track of current elements applied for a given option
+  std::vector<std::pair<uint, std::pair<uint, uint> > > models_; // vector < pair < GameFileId, pair <GeosetType, GeosetID> > >
 
   static std::multimap<uint, int> LINKED_OPTIONS_MAP_; // multimap < child ChrCustomizationOption::ID, parent ChrCustomizationOption::ID>
                                                        // (ie, <markings color, markings> or <tattoo color, tattoo>)

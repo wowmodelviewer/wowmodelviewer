@@ -24,7 +24,7 @@ class ModelViewer;
 
 bool slotHasModel(size_t i);
 
-class CharControl : public wxWindow, public Observer
+class CharControl : public wxScrolledWindow, public Observer
 {
   DECLARE_CLASS(CharControl)
   DECLARE_EVENT_TABLE()
@@ -36,7 +36,6 @@ class CharControl : public wxWindow, public Observer
   wxStaticText *spinTbLabels[NUM_TABARD_BTNS];
   CharDetailsFrame * cdFrame;
 
-  void onEvent(Event *);
   void tryToEquipItem(int id);
 
   public:
@@ -78,6 +77,8 @@ class CharControl : public wxWindow, public Observer
 
   const wxString selectCharModel();
   static QString getItemName(ItemRecord &);
+
+  void onEvent(Event *) override;
 };
 
 

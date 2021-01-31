@@ -2427,13 +2427,6 @@ void WoWModel::refresh()
   // apply chardetails customization
   cd.refresh();
 
-  // hide all geosets of customization models. The correct ones will be set later
-  for (auto* it : mergedModels)
-  {
-    if (it->mergedModelType == 1)
-      it->hideAllGeosets();
-  }
-
   // if no race info found, simply update geosets
   if (infos.raceID == -1) 
     return;

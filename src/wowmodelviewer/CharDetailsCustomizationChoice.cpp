@@ -58,11 +58,12 @@ void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 void CharDetailsCustomizationChoice::onEvent(Event * e)
 {
   auto * event = dynamic_cast<CharDetailsEvent *>(e);
-  LOG_INFO << __FUNCTION__;
-  if (event)
-    LOG_INFO << event->type() << CharDetailsEvent::CHOICE_LIST_CHANGED << event->getCustomizationOptionId() << ID_;
   if (event && (event->type() == CharDetailsEvent::CHOICE_LIST_CHANGED) && (event->getCustomizationOptionId() == ID_))
-    buildList();
+  {
+    auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
+    if (it != values_.end())
+      choice_->SetSelection(it - values_.begin());
+  }
 }
 
 void CharDetailsCustomizationChoice::buildList()

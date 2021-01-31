@@ -134,6 +134,13 @@
     <field type="uint" name="ChrModelTextureTargetID" pos="1" />
     <field type="uint" name="MaterialResourcesID" pos="2" />
   </table>
+  <table name="ChrCustomizationSkinnedModel">
+    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="CollectionsFileDataID" pos="0" />
+    <field type="uint" name="GeosetType" pos="1" />
+    <field type="uint" name="GeosetID" pos="2" />
+  </table>
+
   <table name="ChrModelTextureLayer">
     <field type="uint" name="ID" primary="yes" />
     <field type="uint" name="TextureType" pos="1" />

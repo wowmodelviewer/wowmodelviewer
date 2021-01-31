@@ -1543,38 +1543,28 @@ void ModelCanvas::OnKey(wxKeyEvent &event)
     return;
   
   // --
-  int keycode = event.GetKeyCode(); 
+  const auto keycode = event.GetKeyCode();
 
-  // if(bInGameKeys) {
-    
-  // } else {
-    // animation speed toggles
-    if (keycode == '0')
-      animControl->SetAnimSpeed(1.0f);
-    else if (keycode == '1')
-      animControl->SetAnimSpeed(0.1f);
-    else if (keycode == '2')
-      animControl->SetAnimSpeed(0.2f);
-    else if (keycode == '3')
-      animControl->SetAnimSpeed(0.3f);
-    else if (keycode == '4')
-      animControl->SetAnimSpeed(0.4f);
-    else if (keycode == '5')
-      animControl->SetAnimSpeed(0.5f);
-    else if (keycode == '6')
-      animControl->SetAnimSpeed(0.6f);
-    else if (keycode == '7')
-      animControl->SetAnimSpeed(0.7f);
-    else if (keycode == '8')
-      animControl->SetAnimSpeed(0.8f);
-    else if (keycode == '9')
-      animControl->SetAnimSpeed(0.9f);
-
-    
-
-
-    // --  
-  // }
+  if (keycode == '0')
+    animControl->SetAnimSpeed(1.0f);
+  else if (keycode == '1')
+    animControl->SetAnimSpeed(0.1f);
+  else if (keycode == '2')
+    animControl->SetAnimSpeed(0.2f);
+  else if (keycode == '3')
+    animControl->SetAnimSpeed(0.3f);
+  else if (keycode == '4')
+    animControl->SetAnimSpeed(0.4f);
+  else if (keycode == '5')
+    animControl->SetAnimSpeed(0.5f);
+  else if (keycode == '6')
+    animControl->SetAnimSpeed(0.6f);
+  else if (keycode == '7')
+    animControl->SetAnimSpeed(0.7f);
+  else if (keycode == '8')
+    animControl->SetAnimSpeed(0.8f);
+  else if (keycode == '9')
+    animControl->SetAnimSpeed(0.9f);
 }
 
 void ModelCanvas::OnCamMenu(wxCommandEvent &event)
@@ -1634,62 +1624,6 @@ void ModelCanvas::CheckMovement()
 
     camera.setLookAt(glm::vec3(look.x + right.x * 0.2, look.y + right.y * 0.2, look.z));
   }
-
-
-  
-
-  /*
-  if (wxGetKeyState(WXK_NUMPAD8))  // Move forward
-    camera.MoveForward(-0.1f);
-  if (wxGetKeyState(WXK_NUMPAD2))  // Move Backwards
-    camera.MoveForward(0.1f);
-  if (wxGetKeyState(WXK_NUMPAD7))  // Rotate left
-    camera.RotateY(1.0f);
-  if (wxGetKeyState(WXK_NUMPAD9))  // Rotate right
-    camera.RotateY(-1.0f);
-  if (wxGetKeyState(WXK_NUMPAD5))  // Reset Camera
-    camera.Reset();
-  if (wxGetKeyState(WXK_NUMPAD4))  // Straff Left
-    camera.Strafe(-0.05f);
-  if (wxGetKeyState(WXK_NUMPAD6))  // Straff Right
-    camera.Strafe(0.05f);
-    */
-  // M2 Model only stuff below here
-  if (!model_ || !model_->animManager)
-    return;
-
-  float speed = 1.0f;
-
-  // Time stuff
-  if (model_)
-    speed = ((timeGetTime() - lastTime) * model_->animManager->GetSpeed()) / 7.0f;
-  else
-    speed = (timeGetTime() - lastTime);
-
-  //lastTime = timeGetTime();
-
-  // Turning
-  if (wxGetKeyState(WXK_LEFT)) {
-    WoWModel * m = const_cast<WoWModel *>(model_);
-    m->rot_.y += speed;
-
-    if (m->rot_.y > 360) m->rot_.y -= 360;
-    if (m->rot_.y < 0) m->rot_.y += 360;
-    
-  } else if (wxGetKeyState(WXK_RIGHT)) {
-    WoWModel * m = const_cast<WoWModel *>(model_);
-    m->rot_.y -= speed;
-
-    if (m->rot_.y > 360) m->rot_.y -= 360;
-    if (m->rot_.y < 0) m->rot_.y += 360;
-  }
-  // --
-
-  // Moving forward/backward
-  //float speed = 0.0f;
-  WoWModel * m = const_cast<WoWModel *>(model_);
-  if (m->animated)
-    speed *= (m->anims[m->currentAnim].moveSpeed / 160.0f);
 }
 
 // Our screenshot function which supports both PBO and FBO aswell as traditional older cards, eventually.

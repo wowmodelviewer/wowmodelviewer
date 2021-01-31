@@ -69,6 +69,8 @@ class _OBSERVER_API_ Observer
     virtual ~Observer();
 
     // Methods
+    virtual void onDestroyEvent() {}
+    virtual void onEvent(Event *) = 0;
 
   protected :
     // Constants / Enums
@@ -78,8 +80,6 @@ class _OBSERVER_API_ Observer
     // Destructors
 
     // Methods
-    virtual void onDestroyEvent() {}
-    virtual void onEvent(Event *) {}
 
     // Members
 

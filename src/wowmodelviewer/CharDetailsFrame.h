@@ -28,7 +28,7 @@ public:
 
   void setModel(WoWModel * model);
 
-  virtual void onEvent(Event *);
+  void onEvent(Event *) override;
 
 protected:
 
