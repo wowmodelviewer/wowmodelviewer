@@ -51,7 +51,6 @@ set(src  AnimationExportChoiceDialog.cpp
          OrbitCamera.cpp
          Quantize.cpp
          SettingsControl.cpp
-         shaders.cpp
          UserSkins.cpp
          util.cpp)
 
@@ -85,7 +84,6 @@ set(headers AnimationExportChoiceDialog.h
             Quantize.h
             resource1.h
             SettingsControl.h
-            shaders.h
             UserSkins.h
             util.h)
 

@@ -2,7 +2,6 @@
 
 #include "Game.h"
 #include "GameFile.h"
-#include "shaders.h"
 #include "video.h"
 
 #include "glm/glm.hpp"
@@ -265,39 +264,19 @@ void Liquid::draw()
     glDepthMask(GL_FALSE);
   }
 
-  if (video.supportShaders && (shader>=0)) {
-    // SHADER-BASED
-    glm::vec3 col2;
-    waterShaders[shader]->bind();
+  // FIXED-FUNCTION
+  if (type==0) glColor4f(1,1,1,tcol);
+  else {
     if (type==2) {
-      //col = gWorld->skies->colorSet[WATER_COLOR_LIGHT];
-      //col2 = gWorld->skies->colorSet[WATER_COLOR_DARK];
-      col2 = col;
-    } else {
-      col2 = col;
+      // dynamic color lookup! ^_^
+      //col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; // TODO: add variable water color
     }
-
-    glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, col.x,col.y,col.z,tcol);
-    glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1, col2.x,col2.y,col2.z,tcol);
-
-    glCallList(dlist);
-    waterShaders[shader]->unbind();
-  } else {
-    // FIXED-FUNCTION
-
-    if (type==0) glColor4f(1,1,1,tcol);
-    else {
-      if (type==2) {
-        // dynamic color lookup! ^_^
-        //col = gWorld->skies->colorSet[WATER_COLOR_LIGHT]; // TODO: add variable water color
-      }
-      glColor4f(col.x, col.y, col.z, tcol);
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); // TODO: check if ARB_texture_env_add is supported? :(
-    }
-    glCallList(dlist);
-    
-    if (type!=0) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glColor4f(col.x, col.y, col.z, tcol);
+    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); // TODO: check if ARB_texture_env_add is supported? :(
   }
+  glCallList(dlist);
+  
+  if (type!=0) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
   glDepthFunc(GL_LEQUAL);
   glColor4f(1,1,1,1);

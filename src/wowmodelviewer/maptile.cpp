@@ -8,7 +8,6 @@
 #include "Game.h"
 #include "GameFile.h"
 #include "modelviewer.h"
-#include "shaders.h"
 
 using namespace std;
 
@@ -1745,138 +1744,66 @@ void MapChunk::draw()
   glNormalPointer(GL_FLOAT, 0, 0);
   // ASSUME: texture coordinates set up already
 
-  if (video.supportShaders) {
-    // SHADER-BASED
+  // FIXED-FUNCTION
 
-    // TODO: figure out texture animation for shaders
-    // (modifying the texture matrix for only an individual texture layer)
-
-    // setup textures
-    /*
-    unit 0 - base texture layer
-    unit 1 - shadow map and alpha layers
-    unit 2 - texture layer 1
-    unit 3 - texture layer 2
-    unit 4 - texture layer 3
-    */
-    // base layer
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    // shadow map
-    // TODO: handle case when there is no shadowmap?
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glBindTexture(GL_TEXTURE_2D, blend);
-    // blended layers
-    for (size_t i=1; i<nTextures; i++) {
-      int tex = GL_TEXTURE2_ARB + i - 1;
-      glActiveTextureARB(tex);
-      glBindTexture(GL_TEXTURE_2D, textures[i]);
-    }
-    glActiveTextureARB( GL_TEXTURE0_ARB );
-
-    terrainShaders[nTextures-1]->bind();
-    // setup shadow color as local parameter:
-    //glm::vec3 shc = gWorld->skies->colorSet[SHADOW_COLOR] * 0.3f;
-    //glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, shc.x,shc.y,shc.z,1);
-    glProgramLocalParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0, 0.09f, 0.07f, 0.05f, 0.9f);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
-
-    terrainShaders[nTextures-1]->unbind();
-  } else {
-    // FIXED-FUNCTION
-
-    // first pass: base texture
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glDisable(GL_TEXTURE_2D);
-
-    glDisable(GL_BLEND);
-    drawPass(animated[0]);
-    glEnable(GL_BLEND);
-
-    if (nTextures>1) {
-      //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
-      glDepthMask(GL_FALSE);
-    }
-
-    // additional passes: if required
-    for (size_t i=0; i<nTextures-1; i++) {
-      glActiveTextureARB(GL_TEXTURE0_ARB);
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, textures[i+1]);
-      // this time, use blending:
-      glActiveTextureARB(GL_TEXTURE1_ARB);
-      glEnable(GL_TEXTURE_2D);
-      glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
-
-      // if we loaded a texture with specular maps, setup the texenv
-      // to replace our alpha channel instead of modulating it
-      if (video.supportShaders) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-      drawPass(animated[i+1]);
-      // back to normal
-      if (video.supportShaders) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-    }
-
-    if (nTextures>1) {
-      //glDepthFunc(GL_LEQUAL);
-      glDepthMask(GL_TRUE);
-    }
-
-    // shadow map
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    glDisable(GL_TEXTURE_2D);
-    glDisable(GL_LIGHTING);
-
-    //glm::vec3 shc = gWorld->skies->colorSet[SHADOW_COLOR] * 0.3f;
-    //glColor4f(0,0,0,1);
-    //glColor4f(shc.x,shc.y,shc.z,1);
-
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glBindTexture(GL_TEXTURE_2D, shadow);
-    glEnable(GL_TEXTURE_2D);
-
-    drawPass(0);
-
-    glEnable(GL_LIGHTING);
-    glColor4f(1,1,1,1);
-  }
-
-  /*
-  //////////////////////////////////
-  // debugging tile flags:
-  GLfloat tcols[8][4] = {  {1,1,1,1},
-  {1,0,0,1}, {1, 0.5f, 0, 1}, {1, 1, 0, 1},
-  {0,1,0,1}, {0,1,1,1}, {0,0,1,1}, {0.8f, 0, 1,1}
-  };
-  glPushMatrix();
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_TEXTURE_2D);
-  glTranslatef(xbase, ybase, zbase);
-  for (size_t i=0; i<8; i++) {
-  int v = 1 << (7-i);
-  for (ssize_t j=0; j<4; j++) {
-  if (animated[j] & v) {
-  glBegin(GL_TRIANGLES);
-  glColor4fv(tcols[i]);
-
-  glVertex3f(i*2.0f, 2.0f, j*2.0f);
-  glVertex3f(i*2.0f+1.0f, 2.0f, j*2.0f);
-  glVertex3f(i*2.0f+0.5f, 4.0f, j*2.0f);
-
-  glEnd();
-  }
-  }
-  }
+  // first pass: base texture
+  glActiveTextureARB(GL_TEXTURE0_ARB);
   glEnable(GL_TEXTURE_2D);
-  glEnable(GL_CULL_FACE);
+  glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+  glActiveTextureARB(GL_TEXTURE1_ARB);
+  glDisable(GL_TEXTURE_2D);
+
+  glDisable(GL_BLEND);
+  drawPass(animated[0]);
+  glEnable(GL_BLEND);
+
+  if (nTextures>1) {
+    //glDepthFunc(GL_EQUAL); // GL_LEQUAL is fine too...?
+    glDepthMask(GL_FALSE);
+  }
+
+  // additional passes: if required
+  for (size_t i=0; i<nTextures-1; i++) {
+    glActiveTextureARB(GL_TEXTURE0_ARB);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, textures[i+1]);
+    // this time, use blending:
+    glActiveTextureARB(GL_TEXTURE1_ARB);
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, alphamaps[i]);
+
+    // if we loaded a texture with specular maps, setup the texenv
+    // to replace our alpha channel instead of modulating it
+    if (video.supportShaders) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    drawPass(animated[i+1]);
+    // back to normal
+    if (video.supportShaders) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+  }
+
+  if (nTextures>1) {
+    //glDepthFunc(GL_LEQUAL);
+    glDepthMask(GL_TRUE);
+  }
+
+  // shadow map
+  glActiveTextureARB(GL_TEXTURE0_ARB);
+  glDisable(GL_TEXTURE_2D);
+  glDisable(GL_LIGHTING);
+
+  //glm::vec3 shc = gWorld->skies->colorSet[SHADOW_COLOR] * 0.3f;
+  //glColor4f(0,0,0,1);
+  //glColor4f(shc.x,shc.y,shc.z,1);
+
+  glActiveTextureARB(GL_TEXTURE1_ARB);
+  glBindTexture(GL_TEXTURE_2D, shadow);
+  glEnable(GL_TEXTURE_2D);
+
+  drawPass(0);
+
+  glEnable(GL_LIGHTING);
   glColor4f(1,1,1,1);
-  glPopMatrix();
-  */
 }
 
 void MapChunk::drawNoDetail()

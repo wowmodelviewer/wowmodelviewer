@@ -16,7 +16,6 @@
 #include "GlobalSettings.h"
 #include "globalvars.h"
 #include "modelviewer.h"
-#include "shaders.h"
 #include "video.h"
 
 #include "glm/glm.hpp"
@@ -368,8 +367,6 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
 
 void ModelCanvas::LoadADT(wxString fn)
 {
-  OldinitShaders();
-
   root->setModel(0);
   wxDELETE (adt);
 
