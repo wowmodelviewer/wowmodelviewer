@@ -56,12 +56,12 @@ class LogOutputFile : public LogOutput
     // Constants / Enums
     
     // Constructors
-    LogOutputFile(std::string fileName);
+    LogOutputFile(const std::string & fileName);
   
     // Destructors
   
     // Methods
-    void write(const QString & message);
+    void write(const QString & message) override;
     
     // Members
     
@@ -88,17 +88,13 @@ class LogOutputFile : public LogOutput
     // Methods
     
     // Members
-    mutable QMutex mutex;
-    QFile m_logFile;
+    mutable QMutex mutex_;
+    QFile logFile_;
     
     // friend class declarations
   
 };
 
-// static members definition
-#ifdef _LOGOUTPUTFILE_CPP_
-
-#endif
 
 }
 #endif /* _LOGOUTPUTFILE_H_ */

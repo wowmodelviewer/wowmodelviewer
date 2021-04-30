@@ -31,12 +31,11 @@
 // STL
 
 // Qt
-#include <QString>
+class QString;
 
 // Externals
 
 // Other libraries
-#include "../metaclasses/Component.h"
 
 // Current library
 
@@ -49,7 +48,7 @@
 //--------------------------------------------------------------------
 namespace WMVLog
 {
-class LogOutput : public Component
+class LogOutput
 {
   public :
     // Constants / Enums

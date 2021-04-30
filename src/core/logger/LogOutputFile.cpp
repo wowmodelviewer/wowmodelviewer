@@ -51,10 +51,10 @@ using namespace WMVLog;
 
 // Constructors 
 //--------------------------------------------------------------------
-LogOutputFile::LogOutputFile(std::string fileName)
- : m_logFile(fileName.c_str())
+LogOutputFile::LogOutputFile(const std::string & fileName)
+ : logFile_(fileName.c_str())
 {
-  m_logFile.open(QIODevice::WriteOnly | QIODevice::Text);
+  logFile_.open(QIODevice::WriteOnly | QIODevice::Text);
 }
 
 // Destructor
@@ -65,8 +65,8 @@ LogOutputFile::LogOutputFile(std::string fileName)
 //--------------------------------------------------------------------
 void LogOutputFile::write(const QString & message)
 {
-  QMutexLocker locker(&mutex);
-  QTextStream out(&m_logFile);
+  QMutexLocker locker(&mutex_);
+  QTextStream out(&logFile_);
   out << message << "\n";
 }
 

@@ -34,6 +34,7 @@
 #include <iostream>
 
 // Qt 
+#include <QString>
 
 // Externals
 

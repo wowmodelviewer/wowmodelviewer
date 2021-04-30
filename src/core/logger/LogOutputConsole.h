@@ -58,7 +58,7 @@ class LogOutputConsole : public LogOutput
     // Destructors
   
     // Methods
-    void write(const QString & message);
+    void write(const QString & message) override;
     
     // Members
     
@@ -87,11 +87,6 @@ class LogOutputConsole : public LogOutput
     // friend class declarations
   
 };
-
-// static members definition
-#ifdef _LOGOUTPUTCONSOLE_CPP_
-
-#endif
 
 }
 #endif /* _LOGOUTPUTCONSOLE_H_ */

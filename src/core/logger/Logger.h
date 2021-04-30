@@ -34,13 +34,13 @@
 #include <QDebug>
 #include <QtGlobal>
 #include <QString>
+#include <unordered_set>
 
 class QMessageLogContext;
 
 // Externals
 
 // Other libraries
-#include "../metaclasses/Container.h"
 
 // Current library
 #include "LogOutput.h"
@@ -60,7 +60,7 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-class Logger : public Container<LogOutput>
+class Logger
 {
   public :
     // Constants / Enums
@@ -79,10 +79,10 @@ class Logger : public Container<LogOutput>
     // Methods
     static Logger & instance()
     {
-      if(Logger::m_instance == 0)
-        Logger::m_instance = new Logger();
+      if(Logger::instance_ == nullptr)
+        Logger::instance_ = new Logger();
 
-      return *m_instance;
+      return *instance_;
     }
     
     static void init();
@@ -91,7 +91,9 @@ class Logger : public Container<LogOutput>
 
     static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    QDebug operator()(Logger::LogType type);
+    static void addOutput(LogOutput *);
+
+    QDebug operator()(Logger::LogType type) const;
 
     // Members
     
@@ -119,16 +121,13 @@ class Logger : public Container<LogOutput>
     // Methods
     
     // Members
-    static Logger * m_instance;
+    static Logger * instance_;
+
+    std::unordered_set<LogOutput *> logOutputs_;
 
     // friend class declarations
   
 };
-
-// static members definition
-#ifdef _LOGGER_CPP_
-
-#endif
 
 } // WMVLog
 #endif /* _LOGGER_H_ */

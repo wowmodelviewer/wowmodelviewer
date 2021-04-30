@@ -51,7 +51,7 @@ using namespace WMVLog;
 
 // Beginning of implementation
 //====================================================================
-Logger * Logger::m_instance = 0;
+Logger * Logger::instance_ = nullptr;
 
 // Constructors 
 //--------------------------------------------------------------------
@@ -74,15 +74,13 @@ void Logger::init()
 
 void Logger::writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-  QString message = Logger::formatLog(type, context, msg);
-  for(Logger::iterator it = LOGGER.begin();
-      it != LOGGER.end();
-      ++it)
-    (*it)->write(message);
+  const auto message = Logger::formatLog(type, context, msg);
+  for(const auto &it : LOGGER.logOutputs_)
+    it->write(message);
 }
 
 
-QString Logger::formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+QString Logger::formatLog(const QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
   QString msgType;
   switch(type)
@@ -99,6 +97,9 @@ QString Logger::formatLog(QtMsgType type, const QMessageLogContext &context, con
     case QtFatalMsg:
       msgType = "FATAL";
       break;
+    default:
+      msgType = "INFO";
+      break;
   }
 
   return msgType + "\t| " +
@@ -106,7 +107,7 @@ QString Logger::formatLog(QtMsgType type, const QMessageLogContext &context, con
          msg;
 }
 
-QDebug Logger::operator()(Logger::LogType type)
+QDebug Logger::operator()(Logger::LogType type) const
 {
   switch(type)
   {
@@ -121,6 +122,12 @@ QDebug Logger::operator()(Logger::LogType type)
   }
   return QDebug(QtDebugMsg);
 }
+
+void Logger::addOutput(LogOutput* output)
+{
+  LOGGER.logOutputs_.insert(output);
+}
+
 
 // Protected methods
 //--------------------------------------------------------------------
