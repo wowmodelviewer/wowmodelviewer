@@ -11,8 +11,10 @@
 #include "GameFolder.h"
 #include "GameDatabase.h"
 
-#define GAMEDIRECTORY core::Game::instance().folder()
-#define GAMEDATABASE core::Game::instance().database()
+#ifndef BUILDING_PLUGIN
+  #define GAMEDIRECTORY core::Game::instance().folder()
+  #define GAMEDATABASE core::Game::instance().database()
+#endif
 
 namespace core
 {

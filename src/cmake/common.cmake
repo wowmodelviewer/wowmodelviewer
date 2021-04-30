@@ -89,7 +89,7 @@ macro(use_sqlite)
 endmacro()
 
 macro(setup_wmv_plugin)
-  #add_definitions(-DBUILDING_PLUGIN)
+  add_definitions(-DBUILDING_PLUGIN)
   set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
   set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
   if(WIN32)

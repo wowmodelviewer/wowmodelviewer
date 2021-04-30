@@ -129,7 +129,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
   QTextStream obj(&file);
   QTextStream mtl(&matFile);
 
-  obj << "# Wavefront OBJ exported by " << QString::fromStdWString(GLOBALSETTINGS.appName()) << " " << QString::fromStdWString(GLOBALSETTINGS.appVersion()) << "\n";
+  obj << "# Wavefront OBJ exported by " << QString::fromStdWString(Plugin::globalSettings().appName()) << " " << QString::fromStdWString(Plugin::globalSettings().appVersion()) << "\n";
   obj << "\n";
   obj << "mtllib " <<  QFileInfo(matFile).fileName() << "\n";
   obj << "\n";
@@ -156,7 +156,7 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
   }
 
   // export equipped items
-  if(!GLOBALSETTINGS.bInitPoseOnlyExport)
+  if(!Plugin::globalSettings().bInitPoseOnlyExport)
   {
 
     for(WoWModel::iterator it = model->begin();
@@ -229,7 +229,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       {
         uint32 a = model->indices[b];
         glm::vec4 vert;
-        if ((model->animated == true) && (model->vertices) && !GLOBALSETTINGS.bInitPoseOnlyExport)
+        if ((model->animated == true) && (model->vertices) && !Plugin::globalSettings().bInitPoseOnlyExport)
         {
           if (vertMsg == false)
           {

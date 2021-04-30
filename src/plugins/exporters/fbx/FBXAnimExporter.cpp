@@ -42,6 +42,7 @@
 // Other libraries
 #include "GlobalSettings.h"
 #include "FBXHeaders.h"
+#include "Plugin.h"
 #include "WoWModel.h"
 #include "util.h" // SLASH
 
@@ -124,8 +125,8 @@ void FBXAnimExporter::run()
 
   FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager, "SceneInfo");
   sceneInfo->mTitle = qPrintable(QString("%1").arg(anim_name));
-  sceneInfo->mAuthor = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appName()));
-  sceneInfo->mRevision = qPrintable(QString::fromStdWString(GLOBALSETTINGS.appVersion()));
+  sceneInfo->mAuthor = qPrintable(QString::fromStdWString(Plugin::globalSettings().appName()));
+  sceneInfo->mRevision = qPrintable(QString::fromStdWString(Plugin::globalSettings().appVersion()));
   l_animscene->SetSceneInfo(sceneInfo);
   //LOG_INFO << "Scene Info added to animated scene...";
 

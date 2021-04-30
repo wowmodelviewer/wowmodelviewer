@@ -72,6 +72,9 @@ class Plugin : public QObject, public Component
 
     static Plugin * load(std::string path, core::GlobalSettings &, core::Game &);
 
+    // access to singleton passed at load time
+    static core::GlobalSettings & globalSettings() { return *globalSettings_; }
+
     // overload from component class
     void doPrint();
 

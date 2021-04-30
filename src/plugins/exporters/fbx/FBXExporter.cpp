@@ -123,8 +123,8 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
   // add some info to exported scene
   FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager,"SceneInfo");
   sceneInfo->mTitle = m_p_model->name().toStdString().c_str();
-  sceneInfo->mAuthor = QString::fromStdWString(GLOBALSETTINGS.appName()).toStdString().c_str();
-  sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
+  sceneInfo->mAuthor = QString::fromStdWString(Plugin::globalSettings().appName()).toStdString().c_str();
+  sceneInfo->mRevision = QString::fromStdWString(Plugin::globalSettings().appVersion()).toStdString().c_str();
   m_p_scene->SetSceneInfo(sceneInfo);
 
   // export main model mesh

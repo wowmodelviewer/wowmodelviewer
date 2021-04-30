@@ -46,7 +46,9 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-#define GLOBALSETTINGS core::GlobalSettings::instance()
+#ifndef BUILDING_PLUGIN
+  #define GLOBALSETTINGS core::GlobalSettings::instance()
+#endif
 
 namespace core
 {
