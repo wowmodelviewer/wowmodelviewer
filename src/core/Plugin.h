@@ -66,9 +66,9 @@ class Plugin : public QObject, public Component
     // Methods
     // these fields are filled within json plugin informations and set by PluginManager
     // at load time
-    std::string coreVersionNeeded() const { return m_coreVersionNeeded;}
-    std::string version() const { return m_version; }
-    std::string id() const { return (m_category + "_" + m_internalName); }
+    std::string coreVersionNeeded() const { return coreVersionNeeded_;}
+    std::string version() const { return version_; }
+    std::string id() const { return (category_ + "_" + internalName_); }
 
     static Plugin * load(std::string path, core::GlobalSettings &, core::Game &);
 
@@ -100,17 +100,17 @@ class Plugin : public QObject, public Component
     void transmitSingletonsFromCore(core::GlobalSettings &, core::Game &);
 
     // Members
-    std::string m_internalName;
-    std::string m_category;
-    std::string m_version;
-    std::string m_coreVersionNeeded;
+    std::string internalName_;
+    std::string category_;
+    std::string version_;
+    std::string coreVersionNeeded_;
 
-    static QCoreApplication * app;
-    static QThread * thread;
+    static QCoreApplication * app_;
+    static QThread * thread_;
 
     // Singletons from core application
-    static core::GlobalSettings * globalSettings;
-    static core::Game * game;
+    static core::GlobalSettings * globalSettings_;
+    static core::Game * game_;
 
   private slots:
     void onExec();

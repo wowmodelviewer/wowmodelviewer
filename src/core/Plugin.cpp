@@ -50,17 +50,17 @@
 
 // Beginning of implementation
 //====================================================================
-core::GlobalSettings * Plugin::globalSettings = 0;
-core::Game * Plugin::game = 0;
+core::GlobalSettings * Plugin::globalSettings_ = nullptr;
+core::Game * Plugin::game_ = nullptr;
 
-QCoreApplication * Plugin::app = NULL;
-QThread * Plugin::thread = NULL;
+QCoreApplication * Plugin::app_ = nullptr;
+QThread * Plugin::thread_ = nullptr;
 
 
 // Constructors 
 //--------------------------------------------------------------------
 Plugin::Plugin()
- : Component(), m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
+ : Component(), internalName_(""), category_(""), version_(""), coreVersionNeeded_("")
 {
 
 }
@@ -74,29 +74,29 @@ Plugin::Plugin()
 // Private Qt application
 Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::Game & game)
 {
-  QString pluginToLoad = QString::fromStdString(path);
-  Plugin * newPlugin = NULL;
+  const auto pluginToLoad = QString::fromStdString(path);
+  Plugin * newPlugin = nullptr;
 
   QPluginLoader loader(pluginToLoad);
 
-  if(QObject * plugin = loader.instance())
+  if(auto* const plugin = loader.instance())
   {
     newPlugin = dynamic_cast<Plugin *>(plugin);
-    QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
+    const auto metaInfos = loader.metaData().value("MetaData").toObject();
     newPlugin->setName(metaInfos.value("name").toString());
-    newPlugin->m_version = metaInfos.value("version").toString().toStdString();
-    newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();
-    newPlugin->m_internalName = metaInfos.value("internalname").toString().toStdString();
-    newPlugin->m_category = metaInfos.value("category").toString().toStdString();
+    newPlugin->version_ = metaInfos.value("version").toString().toStdString();
+    newPlugin->coreVersionNeeded_ = metaInfos.value("coreVersion").toString().toStdString();
+    newPlugin->internalName_ = metaInfos.value("internalname").toString().toStdString();
+    newPlugin->category_ = metaInfos.value("category").toString().toStdString();
 
     newPlugin->transmitSingletonsFromCore(settings, game);
 
     // waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
     // thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
     // starts the app)
-    Plugin::thread = new QThread();
-    connect(Plugin::thread, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
-    Plugin::thread->start();
+    Plugin::thread_ = new QThread();
+    connect(Plugin::thread_, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
+    Plugin::thread_->start();
 
     return newPlugin;
   }
@@ -109,7 +109,7 @@ Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::G
 
 void Plugin::doPrint()
 {
-  std::cout << id() << ": " << name().toStdString() << " (version: " << m_version << " - core needed: " << m_coreVersionNeeded << ")" << std::endl;
+  std::cout << id() << ": " << name().toStdString() << " (version: " << version_ << " - core needed: " << coreVersionNeeded_ << ")" << std::endl;
 }
 
 // Protected methods
@@ -120,19 +120,19 @@ void Plugin::doPrint()
 //--------------------------------------------------------------------
 void Plugin::transmitSingletonsFromCore(core::GlobalSettings & settings, core::Game & game)
 {
-  Plugin::globalSettings = &settings;
-  Plugin::game = &game;
+  Plugin::globalSettings_ = &settings;
+  Plugin::game_ = &game;
 }
 
 void Plugin::onExec()
 {
-  if (QCoreApplication::instance() == NULL)
+  if (QCoreApplication::instance() == nullptr)
   {
     int argc = 1;
-    char * argv[] = {"plugin.app", NULL};
-    app = new QCoreApplication(argc,argv);
-    app->exec();
-    if (app)
-      delete app;
+    char * argv[] = {"plugin.app", nullptr};
+    app_ = new QCoreApplication(argc,argv);
+    if(app_)
+      app_->exec();
+    delete app_;
   }
 }
