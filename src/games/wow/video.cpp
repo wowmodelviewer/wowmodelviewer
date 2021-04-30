@@ -3,7 +3,7 @@
 #include "video.h"
 #undef _VIDEO_CPP_
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "Game.h"
 #include "GameFile.h"

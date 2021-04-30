@@ -7,7 +7,7 @@
 #include "globalvars.h"
 #include "Quantize.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "ximage.h"
 #include "ximagif.h"

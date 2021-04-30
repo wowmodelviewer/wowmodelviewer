@@ -9,7 +9,7 @@
 
 #include "database.h"
 #include "video.h" // video global var
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "GL/glew.h"
 
 void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)

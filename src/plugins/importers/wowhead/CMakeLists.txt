@@ -27,6 +27,7 @@ source_group("Header Files" FILES ${headers})
 set(useful_files wowheadimporter.json)
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
+use_log()
 use_core()
 use_wow()
 

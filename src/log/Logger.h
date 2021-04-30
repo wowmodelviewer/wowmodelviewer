@@ -51,6 +51,16 @@ class QMessageLogContext;
 
 // Class Declaration
 //--------------------------------------------------------------------
+#ifdef _WIN32
+#    ifdef BUILDING_LOG_DLL
+#        define _LOGGER_API_ __declspec(dllexport)
+#    else
+#        define _LOGGER_API_ __declspec(dllimport)
+#    endif
+#else
+#    define _LOGGER_API_
+#endif
+
 #define LOGGER WMVLog::Logger::instance()
 
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)
@@ -60,7 +70,7 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-class Logger
+class _LOGGER_API_ Logger
 {
   public :
     // Constants / Enums
@@ -91,7 +101,9 @@ class Logger
 
     static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    static void addOutput(LogOutput *);
+    static void addFileOutput(const std::string &);
+    static void addConsoleOutput();
+
 
     QDebug operator()(Logger::LogType type) const;
 

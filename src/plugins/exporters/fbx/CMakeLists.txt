@@ -38,6 +38,7 @@ set(useful_files fbxexporter.json)
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 use_glew()
+use_log()
 use_core()
 use_wow()
 

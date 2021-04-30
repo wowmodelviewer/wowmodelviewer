@@ -35,10 +35,7 @@ set(src CharInfos.cpp
     metaclasses/Component.cpp
     metaclasses/Event.cpp
     metaclasses/Observable.cpp
-    metaclasses/Observer.cpp
-    logger/Logger.cpp
-    logger/LogOutputConsole.cpp
-    logger/LogOutputFile.cpp)
+    metaclasses/Observer.cpp)
 
 set(headers CharInfos.h
       CSVFile.h
@@ -62,17 +59,14 @@ set(headers CharInfos.h
       metaclasses/Container.h
       metaclasses/Event.h
       metaclasses/Observable.h
-      metaclasses/Observer.h
-      logger/Logger.h
-      logger/LogOutput.h
-      logger/LogOutputConsole.h
-      logger/LogOutputFile.h)
+      metaclasses/Observer.h)
 
 source_group("Header Files" FILES ${headers})
 
 use_glew()
 use_cximage()
 use_sqlite()
+use_log()
 
 set(NAME core)
 add_library(${NAME} ${src} ${headers})

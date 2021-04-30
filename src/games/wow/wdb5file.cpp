@@ -1,6 +1,6 @@
 #include "wdb5file.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <sstream>
 

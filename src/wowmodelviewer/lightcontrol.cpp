@@ -5,7 +5,7 @@
 
 #include "enums.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <wx/colordlg.h>
 

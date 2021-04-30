@@ -41,7 +41,7 @@ class ModelViewer;
 // Other libraries
 #include "Game.h"
 #include "GlobalSettings.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "metaclasses/Component.h"
 
 // Current library

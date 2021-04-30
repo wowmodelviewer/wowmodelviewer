@@ -15,7 +15,7 @@
 #include "ModelTransparency.h"
 #include "video.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <QXmlStreamWriter>
 

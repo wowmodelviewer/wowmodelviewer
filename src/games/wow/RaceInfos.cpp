@@ -4,7 +4,7 @@
 #include "WoWDatabase.h"
 #include "WoWModel.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #define DEBUG_RACEINFOS 1
 

@@ -12,7 +12,7 @@
 #include "modelviewer.h"
 #include "util.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <wx/stattext.h>
 #include <wx/statline.h>

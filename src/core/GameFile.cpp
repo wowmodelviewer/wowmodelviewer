@@ -10,7 +10,7 @@
 
 #include <cstring> // memcpy
 
-#include "logger\Logger.h"
+#include "Logger.h"
 
 size_t GameFile::read(void* dest, size_t bytes)
 {

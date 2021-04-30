@@ -31,7 +31,7 @@
 
 #include "sqlite3.h"
 
-#include "logger\Logger.h"
+#include "Logger.h"
 
 void core::displayMemInfo(QString message, bool displaySQLiteSize)
 {

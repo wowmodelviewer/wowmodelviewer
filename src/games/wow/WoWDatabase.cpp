@@ -10,7 +10,7 @@
 #include <QDomNamedNodeMap>
 
 #include "Game.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "wdb2file.h"
 #include "wdb5file.h"
 #include "wdb6file.h"

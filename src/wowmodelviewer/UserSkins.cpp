@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "Game.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #define SET_WARN_COUNT 10
 

@@ -15,7 +15,7 @@
 #include "video.h"
 #include "WoWModel.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 

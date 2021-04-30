@@ -38,6 +38,10 @@
 #endif
 #include <QDateTime>
 
+
+#include "LogOutputConsole.h"
+#include "LogOutputFile.h"
+
 // Externals
 
 // Other libraries
@@ -123,12 +127,15 @@ QDebug Logger::operator()(Logger::LogType type) const
   return QDebug(QtDebugMsg);
 }
 
-void Logger::addOutput(LogOutput* output)
+void Logger::addFileOutput(const std::string & filename)
 {
-  LOGGER.logOutputs_.insert(output);
+  LOGGER.logOutputs_.insert(new LogOutputFile(filename));
 }
 
-
+void Logger::addConsoleOutput()
+{
+  LOGGER.logOutputs_.insert(new LogOutputConsole());
+}
 // Protected methods
 //--------------------------------------------------------------------
 

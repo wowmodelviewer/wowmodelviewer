@@ -1,6 +1,6 @@
 #include "wdc2file.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "Game.h" // GAMEDIRECTORY Singleton
 

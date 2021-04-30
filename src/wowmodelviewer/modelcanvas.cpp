@@ -21,7 +21,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 #ifdef  _WINDOWS

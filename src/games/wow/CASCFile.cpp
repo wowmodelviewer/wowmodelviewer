@@ -14,7 +14,7 @@
 
 #include "CASCChunks.h"
 #include "Game.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 // #define DEBUG_READ
 
 std::vector<std::string> KNOWN_CHUNKS =

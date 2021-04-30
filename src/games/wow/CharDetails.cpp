@@ -11,7 +11,7 @@
 #include "CharDetailsEvent.h"
 #include "Game.h"
 #include "WoWModel.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <QFile>
 #include <QXmlStreamReader>

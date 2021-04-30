@@ -14,7 +14,7 @@
 #include "wow_enums.h"
 #include "WoWModel.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "GL/glew.h"
 #include "glm/gtc/type_ptr.hpp"

@@ -11,7 +11,7 @@
 
 
 #include "wow_enums.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 void ModelLight::init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global)

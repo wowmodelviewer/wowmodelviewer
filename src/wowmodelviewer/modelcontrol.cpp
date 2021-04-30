@@ -11,7 +11,7 @@
 #include "enums.h"
 #include "WoWItem.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 

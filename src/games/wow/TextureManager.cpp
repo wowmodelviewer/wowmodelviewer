@@ -3,7 +3,7 @@
 #include "TextureManager.h"
 #undef _TEXTUREMANAGER_CPP_
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "GameFile.h"
 #include "Texture.h"

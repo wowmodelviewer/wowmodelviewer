@@ -30,7 +30,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <QFile>
 #include <QSettings>

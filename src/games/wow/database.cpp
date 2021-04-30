@@ -1,7 +1,7 @@
 #include "database.h"
 
 #include "wow_enums.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 ItemDatabase items;

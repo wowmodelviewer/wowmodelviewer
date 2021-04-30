@@ -63,6 +63,11 @@ macro(use_wow)
   list(APPEND extralibs wow)
 endmacro()
 
+macro(use_log)
+  include_directories(${WMV_BASE_PATH}/src/log)
+  list(APPEND extralibs log)
+endmacro()
+
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
   link_directories(${WMV_SDK_BASEDIR}/Qt/lib)

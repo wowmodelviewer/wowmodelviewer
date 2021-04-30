@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "WMOGroup.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <algorithm>
 

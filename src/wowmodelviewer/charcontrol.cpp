@@ -15,7 +15,7 @@
 #include "WoWModel.h"
 #include "wow_enums.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 static wxArrayString creaturemodels;
 IMPLEMENT_CLASS(CharControl, wxWindow)

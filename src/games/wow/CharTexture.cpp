@@ -19,7 +19,7 @@
 #include "TextureManager.h"
 #include "WoWDatabase.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 constexpr int LAYOUT_BASE_REGION = -1;

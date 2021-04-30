@@ -16,7 +16,7 @@
 #include "Game.h"
 #include "HardDriveFile.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 wow::WoWFolder::WoWFolder(const QString & path)
   : GameFolder(path)

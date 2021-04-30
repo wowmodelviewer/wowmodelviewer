@@ -7,7 +7,7 @@
 
 #include "LogStackWalker.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 void LogStackWalker::OnStackFrame(const wxStackFrame& frame)
 {

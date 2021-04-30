@@ -91,6 +91,7 @@ source_group("Header Files" FILES ${headers})
 
 # add external code usage
 use_glew()
+use_log()
 use_core()
 use_wow()
 use_cximage()

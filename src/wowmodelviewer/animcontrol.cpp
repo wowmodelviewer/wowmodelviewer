@@ -3,7 +3,7 @@
 #include <wx/wx.h>
 #include <algorithm>
 #include <wx/combobox.h>
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "FileTreeItem.h"
 #include "Game.h"
 #include "globalvars.h"

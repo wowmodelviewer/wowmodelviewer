@@ -1,6 +1,6 @@
 #include "CSVFile.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include <QFile>
 #include "Game.h"

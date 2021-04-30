@@ -5,7 +5,7 @@
 
 #include "Game.h"
 #include "globalvars.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "modelviewer.h"
 
 IMPLEMENT_CLASS(ModelBankControl, wxWindow)

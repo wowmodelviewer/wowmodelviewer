@@ -19,9 +19,7 @@
 #include "WoWDatabase.h"
 #include "WoWFolder.h"
 
-#include "logger/Logger.h"
-#include "logger/LogOutputConsole.h"
-#include "logger/LogOutputFile.h"
+#include "Logger.h"
 
 #include <QCoreApplication>
 #include <QSettings>

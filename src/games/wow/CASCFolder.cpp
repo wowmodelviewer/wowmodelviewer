@@ -20,7 +20,7 @@
 #include <QRegularExpression>
 
 #include "CASCFile.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 CASCFolder::CASCFolder()
  : m_currentCascLocale(CASC_LOCALE_NONE), m_folder(""), m_openError(ERROR_SUCCESS), hStorage(nullptr)

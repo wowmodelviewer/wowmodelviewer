@@ -6,7 +6,7 @@
 
 #include "GL/glew.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

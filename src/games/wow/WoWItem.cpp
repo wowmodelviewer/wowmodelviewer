@@ -38,7 +38,7 @@
 #include "wow_enums.h"
 #include "WoWModel.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 std::map<CharSlots, int> WoWItem::SLOT_LAYERS_ = { { CS_SHIRT, 10 }, { CS_HEAD, 11 }, { CS_SHOULDER, 13 },
                                               { CS_PANTS, 10 }, { CS_BOOTS, 11 }, { CS_CHEST, 13 },

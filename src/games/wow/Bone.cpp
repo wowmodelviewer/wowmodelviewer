@@ -12,7 +12,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate)
 {

@@ -1,7 +1,7 @@
 
 #include "imagecontrol.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "enums.h"
 
 IMPLEMENT_CLASS(ImageControl, wxWindow)

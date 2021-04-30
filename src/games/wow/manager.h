@@ -8,7 +8,7 @@
 
 #include "GameFile.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 // base class for manager objects
 class ManagedItem

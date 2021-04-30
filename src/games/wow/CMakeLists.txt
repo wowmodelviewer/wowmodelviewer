@@ -111,6 +111,7 @@ set(headers animated.h
 
 source_group("Header Files" FILES ${headers})
 
+use_log()
 use_core()
 use_glew()
 use_casclib()

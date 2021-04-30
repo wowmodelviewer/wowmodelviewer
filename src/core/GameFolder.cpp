@@ -9,7 +9,7 @@
 
 #include <QRegularExpression>
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 core::GameFolder::GameFolder(const QString & path)
   : m_path(path)

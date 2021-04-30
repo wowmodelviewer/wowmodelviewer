@@ -9,7 +9,7 @@
 
 #include <QFile>
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)

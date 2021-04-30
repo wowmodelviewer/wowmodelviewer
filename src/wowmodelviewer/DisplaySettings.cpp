@@ -8,7 +8,7 @@
 #include "DisplaySettings.h"
 
 #include "globalvars.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "modelviewer.h"
 
 IMPLEMENT_CLASS(DisplaySettings, wxWindow)

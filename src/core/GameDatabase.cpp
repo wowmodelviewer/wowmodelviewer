@@ -13,7 +13,7 @@
 #include <QDomElement>
 #include <QFile>
 
-#include "logger/Logger.h"
+#include "Logger.h"
 #include "Game.h"
 
 core::GameDatabase::~GameDatabase()

@@ -6,7 +6,7 @@
  */
 #include "AnimManager.h"
 #include "WoWModel.h"
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "wow_enums.h"
 

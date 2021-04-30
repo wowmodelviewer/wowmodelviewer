@@ -26,7 +26,8 @@ set(src main.cpp
 set(headers UpdateManager.h)
 
 source_group("Header Files" FILES ${headers})
-        
+
+use_log()
 use_core()
 use_wow()
 

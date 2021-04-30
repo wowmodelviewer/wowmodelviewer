@@ -3,7 +3,7 @@
 #include <cassert>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 #include "Game.h"
 #include "GameFile.h"

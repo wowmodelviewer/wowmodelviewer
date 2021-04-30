@@ -46,8 +46,7 @@
 #include "PluginManager.h"
 #include "VersionManager.h"
 
-#include "logger/Logger.h"
-#include "logger/LogOutputFile.h"
+#include "Logger.h"
 
 // Current library
 
@@ -63,7 +62,7 @@
 //--------------------------------------------------------------------
 UpdateManager::UpdateManager()
 {
-  LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/updateManagerLog.txt"));
+  WMVLog::Logger::addFileOutput("userSettings/updateManagerLog.txt");
 
   PLUGINMANAGER.init("./plugins");
 

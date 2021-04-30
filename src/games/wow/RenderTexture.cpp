@@ -3,7 +3,7 @@
 
 #include "video.h"
 
-#include "logger/Logger.h"
+#include "Logger.h"
 
 
 bool CHECK_FRAMEBUFFER_STATUS()
