@@ -1,16 +1,6 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _PARTICLE_API_ __declspec(dllexport)
-#    else
-#        define _PARTICLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _PARTICLE_API_
-#endif
-
 class WoWModel;
 class ParticleSystem;
 class RibbonEmitter;
@@ -64,7 +54,7 @@ struct TexCoordSet
   glm::vec2 tc[4];
 };
 
-class _PARTICLE_API_ ParticleSystem
+class ParticleSystem
 {
   float mid, slowdown, rotation;
   glm::vec3 pos, tpos;

@@ -15,17 +15,6 @@ class GameFile;
 
 class QDomElement;
 
-
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWDATABASE_API_ __declspec(dllexport)
-#    else
-#        define _WOWDATABASE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWDATABASE_API_
-#endif
-
 namespace wow
 {
   class TableStructure : public core::TableStructure
@@ -55,7 +44,7 @@ namespace wow
     bool isRelationshipData;
   };
 
-  class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
+  class WoWDatabase : public core::GameDatabase
   {
     public:
       WoWDatabase();

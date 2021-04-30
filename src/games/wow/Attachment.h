@@ -11,22 +11,11 @@
 #include <string>
 #include <vector>
 
-#include "glm/glm.hpp"
-
 class Displayable;
 class WoWModel;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _ATTACHMENT_API_ __declspec(dllexport)
-#    else
-#        define _ATTACHMENT_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _ATTACHMENT_API_
-#endif
 
-class _ATTACHMENT_API_ Attachment
+class Attachment
 {
   public:
     Attachment(Attachment *parent, Displayable *model, int id, int slot);

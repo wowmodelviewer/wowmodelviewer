@@ -46,17 +46,7 @@ class Observable;
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _EVENT_API_ __declspec(dllexport)
-#    else
-#        define _EVENT_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _EVENT_API_
-#endif
-
-class _EVENT_API_ Event
+class Event
 {
   public :
     // Constants / Enums

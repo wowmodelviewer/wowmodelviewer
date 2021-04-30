@@ -86,17 +86,7 @@ struct WMOHeader {
 };
 
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WMO_API_ __declspec(dllexport)
-#    else
-#        define _WMO_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WMO_API_
-#endif
-
-class _WMO_API_ WMO: public ManagedItem, public Displayable {
+class WMO: public ManagedItem, public Displayable {
 public:
   //WMOHeader header;
   uint32 nTextures; // number of materials

@@ -15,19 +15,9 @@
 
 #include "metaclasses/Container.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _GAMEFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _GAMEFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _GAMEFOLDER_API_
-#endif
-
 namespace core
 {
-  class _GAMEFOLDER_API_ GameConfig
+  class GameConfig
   {
     public:
       QString locale;
@@ -35,7 +25,7 @@ namespace core
       QString product;
   };
 
-  class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
+  class GameFolder : public Container<GameFile>
   {
     public:
       explicit GameFolder(const QString & path);

@@ -47,17 +47,7 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _CHARINFOS_API_ __declspec(dllexport)
-#    else
-#        define _CHARINFOS_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CHARINFOS_API_
-#endif
-
-class _CHARINFOS_API_ CharInfos
+class CharInfos
 {
   public :
     // Constants / Enums

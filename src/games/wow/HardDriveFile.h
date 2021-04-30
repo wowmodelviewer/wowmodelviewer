@@ -12,17 +12,7 @@
 
 class QFile;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _HARDDRIVEFILE_API_ __declspec(dllexport)
-#    else
-#        define _HARDDRIVEFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _HARDDRIVEFILE_API_
-#endif
-
-class _HARDDRIVEFILE_API_ HardDriveFile : public CASCFile
+class  HardDriveFile : public CASCFile
 {
   public:
     HardDriveFile(QString path, QString realpath, int id = -1);

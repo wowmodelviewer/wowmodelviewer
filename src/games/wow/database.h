@@ -18,20 +18,10 @@
 class ItemDatabase;
 struct NPCRecord;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _DATABASE_API_ __declspec(dllexport)
-#    else
-#        define _DATABASE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _DATABASE_API_
-#endif
-
 class ItemDatabase;
 
-_DATABASE_API_ extern ItemDatabase items;
-_DATABASE_API_ extern std::vector<NPCRecord> npcs;
+extern ItemDatabase items;
+extern std::vector<NPCRecord> npcs;
 
 // ==============================================
 
@@ -39,7 +29,7 @@ _DATABASE_API_ extern std::vector<NPCRecord> npcs;
 // Item Stuff
 // -----------------------------------
 
-struct _DATABASE_API_ ItemRecord {
+struct ItemRecord {
   QString name;
   int id, itemclass, subclass, type, model, sheath, quality;
 
@@ -50,7 +40,7 @@ struct _DATABASE_API_ ItemRecord {
   int slot();
 };
 
-class _DATABASE_API_ ItemDatabase {
+class ItemDatabase {
 public:
   ItemDatabase();
 
@@ -66,7 +56,7 @@ public:
 // ------------------------------
 // NPC Stuff
 // -------------------------------
-struct _DATABASE_API_ NPCRecord
+struct NPCRecord
 {
   QString name;
   int id, model, type;

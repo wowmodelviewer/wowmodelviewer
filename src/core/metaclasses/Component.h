@@ -46,17 +46,7 @@
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _COMPONENT_API_ __declspec(dllexport)
-#    else
-#        define _COMPONENT_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _COMPONENT_API_
-#endif
-
-class _COMPONENT_API_ Component
+class Component
 {
   public :
     // Constants / Enums

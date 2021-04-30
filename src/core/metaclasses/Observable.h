@@ -49,17 +49,7 @@ class Observer;
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _OBSERVABLE_API_ __declspec(dllexport)
-#    else
-#        define _OBSERVABLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _OBSERVABLE_API_
-#endif
-
-class _OBSERVABLE_API_ Observable
+class Observable
 {
   public :
     // Constants / Enums

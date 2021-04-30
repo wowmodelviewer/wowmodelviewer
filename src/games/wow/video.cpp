@@ -46,7 +46,7 @@ PIXELFORMATDESCRIPTOR pfd =            // pfd Tells Windows How We Want Things T
 };
 #endif
 
-_VIDEO_API_ VideoSettings video;
+VideoSettings video;
 
 VideoSettings::VideoSettings()
 {

@@ -49,17 +49,7 @@ class Model;
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _EXPORTERPLUGIN_API_ __declspec(dllexport)
-#    else
-#        define _EXPORTERPLUGIN_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _EXPORTERPLUGIN_API_
-#endif
-
-class _EXPORTERPLUGIN_API_ ExporterPlugin : public Plugin
+class ExporterPlugin : public Plugin
 {
   public :
     // Constants / Enums

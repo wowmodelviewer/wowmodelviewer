@@ -12,17 +12,6 @@
 #include "modelheaders.h"
 #include "types.h"
 
-
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _ANIMATED_API_ __declspec(dllexport)
-#    else
-#        define _ANIMATED_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _ANIMATED_API_
-#endif
-
 class modelAnimData
 {
 public:
@@ -79,7 +68,7 @@ inline glm::fquat interpolate<glm::fquat>(const float r, const  glm::fquat &v1, 
 typedef std::pair<size_t, size_t> AnimRange;
 
 // global time for global sequences
-_ANIMATED_API_ extern size_t globalTime;
+extern size_t globalTime;
 
 enum Interpolations {
   INTERPOLATION_NONE,
@@ -403,6 +392,6 @@ typedef Animated<float,short,ShortToFloat> AnimatedShort;
 float frand();
 
 float randfloat(float lower, float upper);
-_ANIMATED_API_ int randint(int lower, int upper);
+int randint(int lower, int upper);
 
 #endif

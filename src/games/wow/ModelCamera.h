@@ -13,17 +13,7 @@
 
 #include "glm/glm.hpp"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _MODELCAMERA_API_ __declspec(dllexport)
-#    else
-#        define _MODELCAMERA_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _MODELCAMERA_API_
-#endif
-
-struct _MODELCAMERA_API_ ModelCamera 
+struct ModelCamera 
 {
   bool ok;
 

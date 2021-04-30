@@ -13,17 +13,7 @@
 
 #include "metaclasses/Component.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _GAMEFILE_API_ __declspec(dllexport)
-#    else
-#        define _GAMEFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _GAMEFILE_API_
-#endif
-
-class _GAMEFILE_API_ GameFile : public Component
+class GameFile : public Component
 {
   public:
     GameFile(QString path, int id = -1) 

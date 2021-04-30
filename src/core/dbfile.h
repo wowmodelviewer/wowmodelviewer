@@ -1,24 +1,12 @@
 #ifndef DBFILE_H
 #define DBFILE_H
 
-#include <map>
 #include <string>
 #include <vector>
 
 #include "GameDatabase.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _DBFILE_API_ __declspec(dllexport)
-#    else
-#        define _DBFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _DBFILE_API_
-#endif
-
-
-class _DBFILE_API_ DBFile
+class DBFile
 {
 public:
   explicit DBFile();

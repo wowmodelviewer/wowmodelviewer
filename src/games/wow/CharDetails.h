@@ -20,18 +20,7 @@ class WoWModel;
 class QXmlStreamWriter;
 class QXmlStreamReader;
 
-
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _CHARDETAILS_API_ __declspec(dllexport)
-#    else
-#        define _CHARDETAILS_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CHARDETAILS_API_
-#endif
-
-class _CHARDETAILS_API_ CharDetails : public Observable
+class CharDetails : public Observable
 {
 public:
   CharDetails();

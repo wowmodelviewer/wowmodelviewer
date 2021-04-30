@@ -36,17 +36,7 @@ struct CharTextureComponent
   }
 };
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _CHARTEXTURE_API_ __declspec(dllexport)
-#    else
-#        define _CHARTEXTURE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CHARTEXTURE_API_
-#endif
-
-class _CHARTEXTURE_API_ CharTexture
+class CharTexture
 {
   public:
     explicit CharTexture(unsigned int _layoutSizeId = 0)

@@ -1,22 +1,9 @@
 #ifndef CSVFILE_H
 #define CSVFILE_H
 
-#include <QString>
-
 #include "dbfile.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _CSVFILE_API_ __declspec(dllexport)
-#    else
-#        define _CSVFILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CSVFILE_API_
-#endif
-
-
-class _CSVFILE_API_ CSVFile : public DBFile
+class CSVFile : public DBFile
 {
 public:
 

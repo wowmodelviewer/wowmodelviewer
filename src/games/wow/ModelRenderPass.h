@@ -14,18 +14,7 @@
 
 class WoWModel;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _MODELRENDERPASS_API_ __declspec(dllexport)
-#    else
-#        define _MODELRENDERPASS_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _MODELRENDERPASS_API_
-#endif
-
-
-class _MODELRENDERPASS_API_ ModelRenderPass
+class ModelRenderPass
 {
 public:
 

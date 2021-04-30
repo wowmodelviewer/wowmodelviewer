@@ -4,8 +4,8 @@
 #include "logger/Logger.h"
 
 
-_DATABASE_API_ ItemDatabase    items;
-_DATABASE_API_ std::vector<NPCRecord> npcs;
+ItemDatabase items;
+std::vector<NPCRecord> npcs;
 
 
 // --

@@ -41,17 +41,7 @@ class WoWModel;
 class QXmlStreamWriter;
 class QXmlStreamReader;
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWITEM_API_ __declspec(dllexport)
-#    else
-#        define _WOWITEM_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWITEM_API_
-#endif
-
-class _WOWITEM_API_ WoWItem : public Component
+class WoWItem : public Component
 {
   public:
     WoWItem(CharSlots slot);

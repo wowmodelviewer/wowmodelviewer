@@ -10,25 +10,13 @@
 
 #include <map>
 
-#include <QString>
-
 #include "CASCFolder.h"
 #include "GameFile.h"
 #include "GameFolder.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WOWFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _WOWFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WOWFOLDER_API_
-#endif
-
 namespace wow
 {
-  class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
+  class WoWFolder : public core::GameFolder
   {
     public:
       WoWFolder(const QString & path);

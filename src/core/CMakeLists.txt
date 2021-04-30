@@ -74,10 +74,8 @@ use_glew()
 use_cximage()
 use_sqlite()
 
-add_definitions(-DBUILDING_CORE_DLL)
-
 set(NAME core)
-add_library(${NAME} SHARED ${src} ${headers})
+add_library(${NAME} ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
@@ -92,7 +90,3 @@ if (MSVC_IDE)
   set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
   set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
 endif()
-
-if(WIN32)
-  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-endif(WIN32)

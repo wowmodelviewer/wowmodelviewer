@@ -1,19 +1,10 @@
 #ifndef DISPLAYABLE_H
 #define DISPLAYABLE_H
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _DISPLAYABLE_API_ __declspec(dllexport)
-#    else
-#        define _DISPLAYABLE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _DISPLAYABLE_API_
-#endif
 
 class Attachment;
 
-class _DISPLAYABLE_API_ Displayable
+class Displayable
 {
 public:
   virtual ~Displayable() {};

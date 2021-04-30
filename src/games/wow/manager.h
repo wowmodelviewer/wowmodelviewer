@@ -11,18 +11,7 @@
 #include "logger/Logger.h"
 
 // base class for manager objects
-
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _MANAGEDITEM_API_ __declspec(dllexport)
-#    else
-#        define _MANAGEDITEM_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _MANAGEDITEM_API_
-#endif
-
-class _MANAGEDITEM_API_ ManagedItem
+class ManagedItem
 {
   int m_refcount;
   QString m_itemName;

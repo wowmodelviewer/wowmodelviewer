@@ -5,16 +5,6 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _VIDEO_API_ __declspec(dllexport)
-#    else
-#        define _VIDEO_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _VIDEO_API_
-#endif
-
 struct VideoCaps
 {
   int  colour;
@@ -28,7 +18,7 @@ struct VideoCaps
   GLboolean doubleBuffer;  // double buffered?
 };
 
-class _VIDEO_API_ VideoSettings {
+class VideoSettings {
 
 public:
   VideoSettings();
@@ -106,7 +96,7 @@ public:
   bool useEnvMapping;//  = true;
 };
 
-_VIDEO_API_ extern VideoSettings video;
+extern VideoSettings video;
 
 #endif
 

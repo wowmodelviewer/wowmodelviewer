@@ -1,23 +1,10 @@
 #ifndef WDC2FILE_H
 #define WDC2FILE_H
 
-#include <QString>
-
 #include "types.h"
 #include "wdb5file.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _WDC2FILE_API_ __declspec(dllexport)
-#    else
-#        define _WDC2FILE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _WDC2FILE_API_
-#endif
-
-
-class _WDC2FILE_API_ WDC2File : public WDB5File
+class WDC2File : public WDB5File
 {
 public:
 

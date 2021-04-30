@@ -51,17 +51,7 @@ class ModelViewer;
 
 // Class Declaration
 //--------------------------------------------------------------------
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _PLUGIN_API_ __declspec(dllexport)
-#    else
-#        define _PLUGIN_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _PLUGIN_API_
-#endif
-
-class _PLUGIN_API_ Plugin : public QObject, public Component
+class Plugin : public QObject, public Component
 {
     Q_OBJECT
   public :

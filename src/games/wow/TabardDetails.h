@@ -16,17 +16,7 @@ class QXmlStreamWriter;
 
 #include <vector>
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _TABARDDETAILS_API_ __declspec(dllexport)
-#    else
-#        define _TABARDDETAILS_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _TABARDDETAILS_API_
-#endif
-
-class _TABARDDETAILS_API_ TabardDetails
+class TabardDetails
 {
   public:
 

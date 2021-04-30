@@ -17,17 +17,7 @@ class GameFile;
 class QDomElement;
 #include <QString>
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _GAMEDATABASE_API_ __declspec(dllexport)
-#    else
-#        define _GAMEDATABASE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _GAMEDATABASE_API_
-#endif
-
-class _GAMEDATABASE_API_ sqlResult
+class sqlResult
 {
 public:
   sqlResult() : valid(false), nbcols(0) {}
@@ -41,7 +31,7 @@ public:
 namespace core
 {
   // table structures as defined in xml file
-  class _GAMEDATABASE_API_ FieldStructure
+  class FieldStructure
   {
   public:
     FieldStructure() :
@@ -63,7 +53,7 @@ namespace core
     int id;
   };
 
-  class _GAMEDATABASE_API_ TableStructure
+  class TableStructure
   {
   public:
     TableStructure() :
@@ -84,7 +74,7 @@ namespace core
   };
 
 
-  class _GAMEDATABASE_API_ GameDatabase
+  class GameDatabase
   {
   public:
     GameDatabase();

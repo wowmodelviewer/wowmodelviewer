@@ -10,7 +10,7 @@
 
 #include "GL/glew.h"
 
-_TEXTUREMANAGER_API_ TextureManager TEXTUREMANAGER;
+TextureManager TEXTUREMANAGER;
 
 GLuint TextureManager::add(GameFile * file)
 {

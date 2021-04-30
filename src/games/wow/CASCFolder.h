@@ -14,17 +14,7 @@ typedef void* HANDLE;
 
 #include "GameFolder.h" // GameConfig
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _CASCFOLDER_API_ __declspec(dllexport)
-#    else
-#        define _CASCFOLDER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _CASCFOLDER_API_
-#endif
-
-class _CASCFOLDER_API_ CASCFolder
+class CASCFolder
 {
   public:
     CASCFolder();

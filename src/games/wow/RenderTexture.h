@@ -4,17 +4,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
-#ifdef _WIN32
-#    ifdef BUILDING_WOW_DLL
-#        define _RENDERTEXTURE_API_ __declspec(dllexport)
-#    else
-#        define _RENDERTEXTURE_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _RENDERTEXTURE_API_
-#endif
-
-class _RENDERTEXTURE_API_ RenderTexture {
+class  RenderTexture {
 protected:
   HPBUFFERARB m_hPBuffer;
   HDC         m_hDC;

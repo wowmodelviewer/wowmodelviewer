@@ -46,17 +46,7 @@
 //--------------------------------------------------------------------
 #define PLUGINMANAGER PluginManager::instance()
 
-#ifdef _WIN32
-#    ifdef BUILDING_CORE_DLL
-#        define _PLUGINMANAGER_API_ __declspec(dllexport)
-#    else
-#        define _PLUGINMANAGER_API_ __declspec(dllimport)
-#    endif
-#else
-#    define _PLUGINMANAGER_API_
-#endif
-
-class _PLUGINMANAGER_API_ PluginManager : public Container<Plugin>
+class PluginManager : public Container<Plugin>
 {
   public :
     // Constants / Enums
