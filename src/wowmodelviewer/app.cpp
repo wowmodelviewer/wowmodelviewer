@@ -144,7 +144,7 @@ bool WowModelViewApp::OnInit()
   LoadSettings();
 
   setInterfaceLocale();
-  LOGGER.addChild(new WMVLog::LogOutputFile("userSettings/log.txt"));
+  WMVLog::Logger::addFileOutput("userSettings/log.txt");
 
   // Just a little header to start off the log file.
   LOG_INFO << "Starting:" << QString::fromStdWString(GLOBALSETTINGS.appName().c_str())
@@ -289,7 +289,7 @@ bool WowModelViewApp::OnInit()
       std::wcerr.clear();
       std::cerr.clear();
 
-      LOGGER.addChild(new WMVLog::LogOutputConsole());
+      WMVLog::Logger::addConsoleOutput();
     }
   }
 #endif
