@@ -38,18 +38,14 @@ set(useful_files fbxexporter.json)
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 use_glew()
-use_log()
-use_core()
 use_wow()
 
 set(NAME fbxexporter)
 add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
-set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
-
 target_link_libraries(${NAME} Qt5::Core ${extralibs} 
   $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
+setup_wmv_plugin()
 
 if (MSVC_IDE)
   # Enable Qt in Visual Studio
@@ -61,6 +57,5 @@ if (MSVC_IDE)
 endif()
 
 if(WIN32)
-  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   install(FILES "$ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.dll" DESTINATION "${WMV_BASE_PATH}/bin")
 endif(WIN32)

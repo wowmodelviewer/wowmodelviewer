@@ -69,6 +69,7 @@ macro(use_log)
 endmacro()
 
 macro(use_core)
+  use_log() # if you use core lib, you are underneath using log lib
   include_directories(${WMV_BASE_PATH}/src/core)
   link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
   find_package(Qt5Core) 
@@ -85,4 +86,13 @@ endmacro()
 
 macro(use_sqlite)
   list(APPEND src sqlite3.c)
+endmacro()
+
+macro(setup_wmv_plugin)
+  #add_definitions(-DBUILDING_PLUGIN)
+  set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
+  set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
+  if(WIN32)
+    install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
+  endif(WIN32)
 endmacro()
