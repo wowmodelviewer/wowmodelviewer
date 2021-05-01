@@ -116,15 +116,15 @@ QDebug Logger::operator()(Logger::LogType type) const
   switch(type)
   {
     case INFO_LOG:
-      return QDebug(QtDebugMsg);
+      return QDebug(QtDebugMsg).noquote();
     case WARNING_LOG:
-      return QDebug(QtWarningMsg);
+      return QDebug(QtWarningMsg).noquote();
     case ERROR_LOG:
-      return QDebug(QtCriticalMsg);
+      return QDebug(QtCriticalMsg).noquote();
     case FATAL_LOG:
-      return QDebug(QtFatalMsg);
+      return QDebug(QtFatalMsg).noquote();
   }
-  return QDebug(QtDebugMsg);
+  return QDebug(QtDebugMsg).noquote();
 }
 
 void Logger::addFileOutput(const std::string & filename)
