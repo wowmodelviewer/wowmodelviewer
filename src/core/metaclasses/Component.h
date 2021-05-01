@@ -55,28 +55,28 @@ class Component
     Component();
 
     // Destructors
-    virtual ~Component();
+    virtual ~Component() = default;
 
     // Methods
     // children management
-    virtual bool addChild(Component *);
-    virtual bool removeChild(Component *);
-    virtual void removeAllChildren() { }
+    virtual bool addChild(Component *) { return false; }
+    virtual bool removeChild(Component *) { return false; }
+    virtual void removeAllChildren() {}
 
     virtual unsigned int nbChildren() const {return 0; }
 
     virtual bool findChildComponent(Component * /* component */, bool /* recursive */ ) { return false; }
-    virtual Component * getChild(unsigned int /* index */) { return 0; }
-    virtual const Component * getChild(unsigned int /* index */) const { return 0; }
+    virtual Component * getChild(unsigned int /* index */) { return nullptr; }
+    virtual const Component * getChild(unsigned int /* index */) const { return nullptr; }
 
     // parent management
-    void setParentComponent(Component *);
-    virtual void onParentSet(Component *);
-    const Component * parent() const { return m_p_parent; }
-    Component * parent() { return m_p_parent; }
+    void setParentComponent(Component * parent);
+    virtual void onParentSet(Component * /*parent*/) {}
+    const Component * parent() const { return parent_; }
+    Component * parent() { return parent_; }
 
     template <class DataType>
-           const DataType * firstParentOfType();
+      const DataType * firstParentOfType();
 
     // auto delete management
     void ref();
@@ -85,15 +85,15 @@ class Component
     // Name management
     void setName(const QString & name);
     QString name() const;
-    virtual void onNameChanged();
+    virtual void onNameChanged() {}
 
     // misc
-    void print(int l_depth = 0);
+    void print(int depth = 0);
     // overlaod in inheritted classes to perform specific stuff at display time
-    virtual void doPrint();
+    virtual void doPrint(const QString & prefix = "");
 
     // copy
-    void copy(const Component & component, bool /* recursive*/);
+    void copy(const Component & component, bool recursive);
 
   protected :
     // Constants / Enums
@@ -116,11 +116,11 @@ class Component
     // Methods
     
     // Members
-    Component * m_p_parent;
+    Component * parent_;
 
-    unsigned int m_refCounter;
+    unsigned int refCounter_;
 
-    QString m_name;
+    QString name_;
 
     // friend class declarations
 };
@@ -128,15 +128,15 @@ class Component
 template <class DataType>
 const DataType * Component::firstParentOfType()
 {
-  if(parent() != 0)
+  if(parent() != nullptr)
   {
     DataType * l_p_parent = dynamic_cast<DataType *>(parent());
-    if(l_p_parent != 0)
+    if(l_p_parent != nullptr)
       return l_p_parent;
-    else
-      return parent()->firstParentOfType<DataType>();
+    
+    return parent()->firstParentOfType<DataType>();
   }
-  return 0;
+  return nullptr;
 }
 
 // static members definition

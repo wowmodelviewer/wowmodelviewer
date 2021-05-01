@@ -31,10 +31,9 @@
 // Includes / class Declarations
 //--------------------------------------------------------------------
 // STL
-#include <iostream>
-#include <string>
 
 // Qt 
+#include "Logger.h"
 
 // Externals
 
@@ -51,113 +50,89 @@
 
 // Constructors 
 //--------------------------------------------------------------------
-Component::Component() : m_p_parent(0), m_refCounter(0)
+Component::Component() : parent_(nullptr), refCounter_(0)
 {
-    m_name = "Component";
+    name_ = "Component";
 }
 
 // Destructor
 //--------------------------------------------------------------------
-Component::~Component()
-{
 
-}
 
 // Public methods
 //--------------------------------------------------------------------
-bool Component::addChild(Component *)
-{
-  return false;
-}
-
-
-bool Component::removeChild(Component *)
-{
-  return false;
-}
-
-
 void Component::ref()
 {
-  m_refCounter++;
+  refCounter_++;
 }
 
 void Component::unref()
 {
-  m_refCounter--;
-  if(m_refCounter <= 0)
+  refCounter_--;
+  if(refCounter_ <= 0)
   {
-        delete this;
+    delete this;
   }
 }
 
-void Component::onParentSet(Component *)
+void Component::setParentComponent(Component * parent)
 {
-
-}
-
-void Component::setParentComponent(Component * a_p_parent)
-{
-  m_p_parent = a_p_parent;
-  onParentSet(m_p_parent);
+  parent_ = parent;
+  onParentSet(parent_);
 }
 
 void Component::setName(const QString & name)
 {
-    m_name = name;
+    name_ = name;
     onNameChanged();
 }
 
 QString Component::name() const
 {
-    return m_name;
-}
-
-void Component::onNameChanged()
-{
-
+    return name_;
 }
 
 //--------------------------------------------------------------------
-void Component::print(int a_depth /*= 0*/)
+void Component::print(int depth /*= 0*/)
 {
-  for(int i = 0 ; i < a_depth - 1 ; i++)
+  QString prefix;
+  for(auto i = 0 ; i < depth - 1 ; i++)
   {
-    std::cout << "  ";
+    prefix += "  ";
   }
 
-  if(m_p_parent != 0)
+  if(parent_ != nullptr)
   {
-    std::cout << "|-";
+    prefix += "|-";
   }
 
   if(nbChildren() != 0)
   {
-    std::cout << "+ ";
+    prefix += "+ ";
   }
   else
   {
-    std::cout << " ";
+    prefix += " ";
   }
 
-  doPrint();
+  doPrint(prefix);
 
-  a_depth++;
+  depth++;
 
   for(unsigned int i = 0 ; i < nbChildren() ; i++)
   {
-    getChild(i)->print(a_depth);
+    getChild(i)->print(depth);
   }
 }
 
 void Component::copy(const Component & component, bool /* recursive*/)
 {
-  m_name = component.m_name;
+  name_ = component.name_;
 }
 
-void Component::doPrint()
+void Component::doPrint(const QString& prefix)
 {
-  std::cout << m_name.toStdString() << " (address : " << std::hex << this << ")" << std::endl;
+  LOG_INFO << prefix << name_ << " (address : " << hex << this << ")";
 }
 
 // Protected methods

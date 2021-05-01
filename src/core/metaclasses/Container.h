@@ -63,28 +63,28 @@ class Container : public Component
     // Methods
     virtual bool addChild(DataType * child);
     virtual bool removeChild(DataType * child);
-    void removeAllChildren();
+    virtual void removeAllChildren();
 
-    virtual void onChildAdded(DataType *) {};
-    virtual void onChildRemoved(DataType *) {};
+    virtual void onChildAdded(DataType *) {}
+    virtual void onChildRemoved(DataType *) {}
 
     template <class ChildType>
       int removeAllChildrenOfType();
 
-    unsigned int nbChildren() const {return (unsigned int)m_children.size(); }
+    unsigned int nbChildren() const override {return children_.size(); }
 
-    bool findChildComponent(Component * child, bool recursive = false);
-    Component * getChild(unsigned int index);
-    const Component * getChild(unsigned int index) const;
+    bool findChildComponent(Component * child, bool recursive = false) override;
+    Component * getChild(unsigned int index) override;
+    const Component * getChild(unsigned int index) const override;
     
     iterator begin()
     {
-      return m_children.begin();
+      return children_.begin();
     }
 
     iterator end()
     {
-      return m_children.end();
+      return children_.end();
     }
 
   protected :
@@ -108,7 +108,7 @@ class Container : public Component
     // Methods
     
     // Members
-    std::unordered_set<DataType *> m_children;
+    std::unordered_set<DataType *> children_;
 
     // friend class declarations
 };
@@ -116,24 +116,24 @@ class Container : public Component
 template<class DataType>
 Container<DataType>::Container()
 {
-  m_children.clear();
+  children_.clear();
   setName("Container");
 }
 
 template<class DataType>
 Container<DataType>::~Container()
 {
-  typename std::unordered_set<DataType *>::iterator l_it;
-  for(l_it = m_children.begin() ; l_it != m_children.end() ; l_it++)
-  {
-    (*l_it)->unref();
-  }
+  for(auto & it : children_)
+    it->unref();
 }
 
 template<class DataType>
 bool Container<DataType>::addChild(DataType * child)
 {
-  m_children.insert(child);
+  if (!child)
+    return false;
+
+  children_.insert(child);
 
   child->setParentComponent(this);
 
@@ -146,8 +146,11 @@ bool Container<DataType>::addChild(DataType * child)
 template<class DataType>
 bool Container<DataType>::removeChild(DataType * child)
 {
+  if (!child)
+    return false;
+
   // ok, we remove this child from the list
-  m_children.erase(child);
+  children_.erase(child);
   child->setParentComponent(0);
 
   // for hierarchy notification
@@ -160,33 +163,27 @@ bool Container<DataType>::removeChild(DataType * child)
 template<class DataType>
 void Container<DataType>::removeAllChildren()
 {
-  while(!m_children.empty())
-  {
-    removeChild(*m_children.begin());
-  }
+  while(!children_.empty())
+    removeChild(*children_.begin());
 }
 
 template <class DataType> template <class ChildType>
 int Container<DataType>::removeAllChildrenOfType()
 {
-  typename std::list<DataType *>::iterator l_it;
-  std::list<DataType *> l_childrenToRemove;
-  for(l_it = m_children.begin() ; l_it != m_children.end() ; l_it++)
+  std::list<DataType *> childrenToRemove;
+
+  for(auto & it : children_)
   {
-    if(dynamic_cast<ChildType *>(*l_it) != 0)
+    if(dynamic_cast<ChildType *>(*it) != nullptr)
     {
-      l_childrenToRemove.push_back(*l_it);
+      childrenToRemove.push_back(*it);
     }
   }
 
-  int l_result = l_childrenToRemove.size();
+  for(auto & it : childrenToRemove)
+    removeChild(it);
 
-  for(l_it = l_childrenToRemove.begin() ; l_it != l_childrenToRemove.end() ; l_it++)
-  {
-    removeChild(*l_it);
-  }
-
-  return l_result;
+  return childrenToRemove.size();
 }
 
 
@@ -194,18 +191,15 @@ int Container<DataType>::removeAllChildrenOfType()
 template<class DataType>
 bool Container<DataType>::findChildComponent(Component * child, bool recursive /* = false */)
 {
-  auto l_it = m_children.find(dynamic_cast<DataType *>(child));
-
-  if(l_it != m_children.end())
+  if(children_.find(dynamic_cast<DataType *>(child)) != children_.end())
     return true;
 
   // resursive part
   if(recursive)
   {
-    auto l_itEnd = m_children.end();
-    for(l_it = m_children.begin() ; l_it != l_itEnd ; ++l_it)
+    for(auto & it : children_)
     {
-      if((*l_it)->findChildComponent(child,recursive))
+      if(it->findChildComponent(child,recursive))
         return true;
     }
   }
@@ -216,35 +210,33 @@ bool Container<DataType>::findChildComponent(Component * child, bool recursive /
 template<class DataType>
 Component * Container<DataType>::getChild(unsigned int index)
 {
-  DataType * l_p_result = 0;
-  if(index < m_children.size())
+  DataType * result = nullptr;
+  if(index < children_.size())
   {
-    unsigned int l_index = 0;
-    typename std::unordered_set<DataType *>::iterator l_it;
-  for(l_it = m_children.begin() ; l_index < index ;  l_index++)
-    {
-      l_it++;
-    }
-    l_p_result = *l_it;
+    unsigned int idx = 0;
+    typename std::unordered_set<DataType *>::iterator it;
+    for(it = children_.begin() ; idx < index ;  idx++)
+      ++it;
+
+    result = *it;
   }
-  return l_p_result;
+  return result;
 }
 
 template<class DataType>
 const Component * Container<DataType>::getChild(unsigned int index) const
 {
-  const DataType * l_p_result = 0;
-  if(index < m_children.size())
+  const DataType * result = nullptr;
+  if(index < children_.size())
   {
-    unsigned int l_index = 0;
-    typename std::unordered_set<DataType *>::const_iterator l_it;
-        for(l_it = m_children.begin() ; l_index < index ; l_index++)
-    {
-             l_it++;
-    }
-    l_p_result = *l_it;
+    unsigned int idx = 0;
+    typename std::unordered_set<DataType *>::const_iterator it;
+    for(it = children_.begin() ; idx < index ; idx++)
+      ++it;
+
+    result = *it;
   }
-  return l_p_result;
+  return result;
 }
 
 #endif /* _CONTAINER_H_ */
