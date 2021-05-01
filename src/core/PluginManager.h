@@ -60,17 +60,17 @@ class PluginManager : public Container<Plugin>
     // Methods
     static PluginManager & instance()
     {
-      if(PluginManager::m_instance == 0)
-        PluginManager::m_instance = new PluginManager();
+      if(PluginManager::instance_ == nullptr)
+        PluginManager::instance_ = new PluginManager();
 
-      return *m_instance;
+      return *instance_;
     }
 
     // load all plugins in given directory
-    void init(const std::string & pluginDir);
+    void init(const std::string & dir);
 
     // overloaded from Component method
-    void doPrint();
+    void doPrint(const QString &) override;
 
     // Members
     
@@ -98,7 +98,7 @@ class PluginManager : public Container<Plugin>
     // Methods
 
     // Members
-    static PluginManager * m_instance;
+    static PluginManager * instance_;
 
     // friend class declarations
   

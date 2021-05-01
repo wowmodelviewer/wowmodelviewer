@@ -44,7 +44,6 @@
 // Other libraries
 
 // Current library
-#include "Game.h"
 #include "GlobalSettings.h"
 
 // Namespaces used
@@ -53,7 +52,7 @@
 
 // Beginning of implementation
 //====================================================================
-PluginManager * PluginManager::m_instance = 0;
+PluginManager * PluginManager::instance_ = nullptr;
 
 // Constructors 
 //--------------------------------------------------------------------
@@ -71,22 +70,22 @@ PluginManager::PluginManager()
 //--------------------------------------------------------------------
  void PluginManager::init(const std::string & dir)
  {
-   QString directory = QString::fromStdString(dir);
-   QDir pluginDir(directory);
-   QStringList plugins = pluginDir.entryList(QDir::Files);
-   for (int i=0;i<plugins.size();i++)
+   const auto directory = QString::fromStdString(dir);
+   const QDir pluginDir(directory);
+   auto plugins = pluginDir.entryList(QDir::Files);
+   for (auto i=0;i<plugins.size();i++)
    {
      if (plugins.at(i).contains(".dll") == false) continue;   // Skip non-plugin files
-     Plugin * newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[(int)i]).toStdString(),GLOBALSETTINGS, core::Game::instance());
+     auto* const newPlugin = Plugin::load(pluginDir.absoluteFilePath(plugins[i]).toStdString(),GLOBALSETTINGS);
      if(newPlugin)
        addChild(newPlugin);
    }
    print();
  }
 
- void PluginManager::doPrint()
+ void PluginManager::doPrint(const QString & prefix)
  {
-   std::cout << "PluginManager (" << nbChildren() << " plugins loaded)" << std::endl;
+   LOG_INFO << prefix << "PluginManager (" << nbChildren() << " plugins loaded)";
  }
 
 // Protected methods

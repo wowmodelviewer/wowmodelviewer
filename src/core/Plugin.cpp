@@ -51,7 +51,6 @@
 // Beginning of implementation
 //====================================================================
 core::GlobalSettings * Plugin::globalSettings_ = nullptr;
-core::Game * Plugin::game_ = nullptr;
 
 QCoreApplication * Plugin::app_ = nullptr;
 QThread * Plugin::thread_ = nullptr;
@@ -72,7 +71,7 @@ Plugin::Plugin()
 // Public methods
 //--------------------------------------------------------------------
 // Private Qt application
-Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::Game & game)
+Plugin * Plugin::load(const std::string & path, core::GlobalSettings & settings)
 {
   const auto pluginToLoad = QString::fromStdString(path);
   Plugin * newPlugin = nullptr;
@@ -89,7 +88,7 @@ Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::G
     newPlugin->internalName_ = metaInfos.value("internalname").toString().toStdString();
     newPlugin->category_ = metaInfos.value("category").toString().toStdString();
 
-    newPlugin->transmitSingletonsFromCore(settings, game);
+    transmitSingletonsFromCore(settings);
 
     // waiting for the overall application being a Qt application, we start a QCoreApplication in a dedicated
     // thread for each plugin, so that Qt event loop is accessible from plugins (see onExec slot that actually
@@ -97,19 +96,17 @@ Plugin * Plugin::load(std::string path, core::GlobalSettings & settings, core::G
     Plugin::thread_ = new QThread();
     connect(Plugin::thread_, SIGNAL(started()), newPlugin, SLOT(onExec()), Qt::DirectConnection);
     Plugin::thread_->start();
-
-    return newPlugin;
   }
   else
   {
-    std::cout << "Unable to load plugin file " << path << ": " << loader.errorString().toStdString() << std::endl;
+    LOG_ERROR << "Unable to load plugin file " << pluginToLoad << ": " << loader.errorString();
   }
   return newPlugin;
 }
 
-void Plugin::doPrint()
+void Plugin::doPrint(const QString & prefix)
 {
-  std::cout << id() << ": " << name().toStdString() << " (version: " << version_ << " - core needed: " << coreVersionNeeded_ << ")" << std::endl;
+  LOG_INFO << prefix << QString::fromStdString(id()) << ": " << name() << " (version: " << QString::fromStdString(version_) << " - core needed: " << QString::fromStdString(coreVersionNeeded_) << ")";
 }
 
 // Protected methods
@@ -118,17 +115,16 @@ void Plugin::doPrint()
 
 // Private methods
 //--------------------------------------------------------------------
-void Plugin::transmitSingletonsFromCore(core::GlobalSettings & settings, core::Game & game)
+void Plugin::transmitSingletonsFromCore(core::GlobalSettings & settings)
 {
   Plugin::globalSettings_ = &settings;
-  Plugin::game_ = &game;
 }
 
 void Plugin::onExec()
 {
   if (QCoreApplication::instance() == nullptr)
   {
-    int argc = 1;
+    auto argc = 1;
     char * argv[] = {"plugin.app", nullptr};
     app_ = new QCoreApplication(argc,argv);
     if(app_)

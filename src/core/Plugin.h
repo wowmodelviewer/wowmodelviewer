@@ -61,7 +61,7 @@ class Plugin : public QObject, public Component
     Plugin();
 
     // Destructors
-    ~Plugin() {}
+    ~Plugin() = default;
   
     // Methods
     // these fields are filled within json plugin informations and set by PluginManager
@@ -70,13 +70,13 @@ class Plugin : public QObject, public Component
     std::string version() const { return version_; }
     std::string id() const { return (category_ + "_" + internalName_); }
 
-    static Plugin * load(std::string path, core::GlobalSettings &, core::Game &);
+    static Plugin * load(const std::string & path, core::GlobalSettings &);
 
     // access to singleton passed at load time
     static core::GlobalSettings & globalSettings() { return *globalSettings_; }
 
     // overload from component class
-    void doPrint();
+    void doPrint(const QString &) override;
 
     // Members
 
@@ -100,7 +100,7 @@ class Plugin : public QObject, public Component
     // Destructors
   
     // Methods
-    void transmitSingletonsFromCore(core::GlobalSettings &, core::Game &);
+    static void transmitSingletonsFromCore(core::GlobalSettings &);
 
     // Members
     std::string internalName_;
@@ -113,7 +113,6 @@ class Plugin : public QObject, public Component
 
     // Singletons from core application
     static core::GlobalSettings * globalSettings_;
-    static core::Game * game_;
 
   private slots:
     void onExec();
