@@ -42,7 +42,7 @@
 
 // Other libraries
 class WoWModel;
-struct ModelAnimation;
+struct M2Sequence;
 
 #define _EXPORTERPLUGIN_CPP_ // to define interface
 #include "ExporterPlugin.h"

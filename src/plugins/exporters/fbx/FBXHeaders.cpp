@@ -133,7 +133,7 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
   LOG_INFO << "Adding main mesh Verts...";
   for (size_t i = 0; i < num_of_vertices; i++)
   {
-    ModelVertex &v = model->origVertices[i];
+    M2Vertex &v = model->origVertices[i];
     glm::vec3 Position = glm::vec3(m * glm::vec4((v.pos + offset), 1.0f));
     vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
     glm::vec3 vn = glm::normalize(v.normal);
@@ -164,7 +164,7 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
       FbxSurfaceMaterial* material = l_scene->GetMaterial(mtrl_name.Buffer());
       meshNode->AddMaterial(material);
 
-      ModelGeosetHD * g = model->geosets[p->geoIndex];
+      M2SkinSectionHD * g = model->geosets[p->geoIndex];
       size_t num_of_faces = g->icount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
@@ -349,7 +349,7 @@ void FBXHeaders::storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot)
   l_scene->AddPose(pose);
 }
 
-void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton)
+void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QString animName, M2Sequence cur_anim, std::map<int, FbxNode*>& skeleton)
 {
   if (skeleton.empty())
   {

@@ -69,7 +69,7 @@
 void FBXAnimExporter::run()
 {
   QMutexLocker locker(&m_mutex);
-  ModelAnimation curAnimation = l_model->anims[animID];
+  M2Sequence curAnimation = l_model->anims[animID];
   if (srcfileName.isNull() || srcfileName.isEmpty())
   {
     LOG_ERROR << "Unable to get FBX Animation Source Filename.";

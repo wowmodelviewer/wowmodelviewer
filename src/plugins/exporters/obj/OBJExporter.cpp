@@ -224,7 +224,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
     if (p->init())
     {
-      ModelGeosetHD * geoset = model->geosets[p->geoIndex];
+      M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
@@ -268,7 +268,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     // we don't want to render completely transparent parts
     if (p->init())
     {
-      ModelGeosetHD * geoset = model->geosets[p->geoIndex];
+      M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint32 a = model->indices[b];
@@ -288,7 +288,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     ModelRenderPass * p = model->passes[i];
     if (p->init())
     {
-      ModelGeosetHD * geoset = model->geosets[p->geoIndex];
+      M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
       {
         uint16 a = model->indices[b];
@@ -311,7 +311,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
 
     if (p->init())
     {
-      ModelGeosetHD * geoset = model->geosets[p->geoIndex];
+      M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       // Build Vert2Point DB
       uint16 *Vert2Point = new uint16[geoset->vstart + geoset->vcount];
       for (uint16 v = geoset->vstart; v<(geoset->vstart + geoset->vcount); v++, pointnum++)

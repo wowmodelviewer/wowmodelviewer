@@ -120,7 +120,7 @@ struct ModelHeader {
 #define  ANIMATION_MOUNT      91
 #define  ANIMATION_LOOPED    0x20 // flags
 // block B - animations, size 68 bytes, WotLK 64 bytes
-struct ModelAnimation {
+struct M2Sequence {
   int16 animID; // AnimationDataDB.ID
   int16 subAnimID;
   uint32 length;
@@ -141,7 +141,7 @@ struct ModelAnimation {
 };
 
 // sub-block in block E - animation data, size 28 bytes, WotLK 20 bytes
-struct AnimationBlock {
+struct M2Track {
   int16 type;    // interpolation type (0=none, 1=linear, 2=hermite)
   int16 seq;    // global sequence id or -1
   uint32 nTimes;
@@ -172,19 +172,19 @@ struct ModelBoneDef {
   int16 parent; // parent bone index
   int16 geoid; // A geoset for this bone.
   int32 unknown; // new int added to the bone definitions.  Added in WoW 2.0
-  AnimationBlock translation; // ( glm::vec3)
-  AnimationBlock rotation; // (QuatS)
-  AnimationBlock scaling; // ( glm::vec3)
+  M2Track translation; // ( glm::vec3)
+  M2Track rotation; // (QuatS)
+  M2Track scaling; // ( glm::vec3)
   glm::vec3 pivot;
 };
 
 struct ModelTexAnimDef {
-  AnimationBlock trans; // ( glm::vec3)
-  AnimationBlock rot; // (QuatS)
-  AnimationBlock scale; // ( glm::vec3)
+  M2Track trans; // ( glm::vec3)
+  M2Track rot; // (QuatS)
+  M2Track scale; // ( glm::vec3)
 };
 
-struct ModelVertex {
+struct M2Vertex {
   glm::vec3 pos;
   uint8 weights[4];
   uint8 bones[4];
@@ -194,7 +194,7 @@ struct ModelVertex {
 };
 
 /// Lod part, 
-struct ModelView {
+struct M2SkinProfile {
   char id[4];         // Signature
   uint32 nIndex;
   uint32 ofsIndex; // int16, Vertices in this model (index into vertices[])
@@ -211,7 +211,7 @@ struct ModelView {
 
 
 /// Lod part, One material + render operation
-struct ModelGeoset {
+struct M2SkinSection {
   uint32 id;    // mesh part id?
   uint16 vstart;  // first vertex, Starting vertex number.
   uint16 vcount;  // num vertices, Number of vertices.
@@ -225,10 +225,10 @@ struct ModelGeoset {
   float radius;
 };
 
-// same as ModelGeoset but with a uint32 as istart, to handle index > 65535 (present in HD models)
-class ModelGeosetHD {
+// same as M2SkinSection but with a uint32 as istart, to handle index > 65535 (present in HD models)
+class M2SkinSectionHD {
   public:
-    ModelGeosetHD():
+    M2SkinSectionHD():
       id(-1), vstart(0), vcount(0),
       istart(0), icount(0), nSkinnedBones(0),
       StartBones(0), rootBone(0), nBones(0), radius(0), display(false)
@@ -237,7 +237,7 @@ class ModelGeosetHD {
         BoundingBox[1] =  glm::vec3(0, 0, 0);
       }
 
-    ModelGeosetHD(ModelGeoset & geo) :
+    M2SkinSectionHD(M2SkinSection & geo) :
       id(geo.id&0x7FFF), vstart(geo.vstart), vcount(geo.vcount),
       istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
       StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
@@ -247,7 +247,7 @@ class ModelGeosetHD {
         BoundingBox[1] = geo.BoundingBox[1];
       }
 
-    ModelGeosetHD(const ModelGeosetHD & geo) :
+    M2SkinSectionHD(const M2SkinSectionHD & geo) :
       id(geo.id), vstart(geo.vstart), vcount(geo.vcount),
       istart(geo.istart), icount(geo.icount), nSkinnedBones(geo.nSkinnedBones),
       StartBones(geo.StartBones), rootBone(geo.rootBone), nBones(geo.nBones), 
@@ -276,7 +276,7 @@ class ModelGeosetHD {
 #define  TEXTUREUNIT_STATIC  0x10
 #define  TEXTUREUNIT_IGNORE_TEXTURE_WEIGHTS  0x40
 /// Lod part, A texture unit (sub of material)
-struct ModelTexUnit
+struct M2Batch
 {
   // probably the texture units size always >=number of materials it seems
   uint8_t flags;      // Usually 16 for static textures, and 0 for animated textures.
@@ -352,13 +352,13 @@ struct ModelRenderFlags {
 // Referenced from the Texture Unit blocks in the LOD part. Contains a separate timeline for transparency values. 
 // If no animation is used, the given value is constant.
 struct ModelColorDef {
-  AnimationBlock color; // ( glm::vec3) Three floats. One for each color.
-  AnimationBlock opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
+  M2Track color; // ( glm::vec3) Three floats. One for each color.
+  M2Track opacity; // (UInt16) 0 - transparent, 0x7FFF - opaque.
 };
 
 // block H - transparency defs
 struct ModelTransDef {
-  AnimationBlock trans; // (UInt16)
+  M2Track trans; // (UInt16)
 };
 
 struct ModelTextureDef {
@@ -372,13 +372,13 @@ struct ModelLightDef {
   int16 type; // 0: Directional, 1: Point light
   int16 bone; // If its attached to a bone, this is the bone. Else here is a nice -1.
   glm::vec3 pos; // Position, Where is this light?
-  AnimationBlock ambientColor; // ( glm::vec3) The ambient color. Three floats for RGB.
-  AnimationBlock ambientIntensity; // (Float) A float for the intensity.
-  AnimationBlock diffuseColor; // ( glm::vec3) The diffuse color. Three floats for RGB.
-  AnimationBlock diffuseIntensity; // (Float) A float for the intensity again.
-  AnimationBlock attenuationStart; // (Float) This defines, where the light starts to be.
-  AnimationBlock attenuationEnd; // (Float) And where it stops.
-  AnimationBlock useAttenuation; // (Uint32) Its an integer and usually 1.
+  M2Track ambientColor; // ( glm::vec3) The ambient color. Three floats for RGB.
+  M2Track ambientIntensity; // (Float) A float for the intensity.
+  M2Track diffuseColor; // ( glm::vec3) The diffuse color. Three floats for RGB.
+  M2Track diffuseIntensity; // (Float) A float for the intensity again.
+  M2Track attenuationStart; // (Float) This defines, where the light starts to be.
+  M2Track attenuationEnd; // (Float) And where it stops.
+  M2Track useAttenuation; // (Uint32) Its an integer and usually 1.
 };
 
 struct ModelCameraDef {
@@ -386,23 +386,23 @@ struct ModelCameraDef {
   float fov; // No radians, no degrees. Multiply by 35 to get degrees.
   float farclip; // Where it stops to be drawn.
   float nearclip; // Far and near. Both of them.
-  AnimationBlock transPos; // ( glm::vec3) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  M2Track transPos; // ( glm::vec3) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
   glm::vec3 pos; // float, Where the camera is located.
-  AnimationBlock transTarget; // ( glm::vec3) How the target moves. Should be 3*3 floats. (?)
+  M2Track transTarget; // ( glm::vec3) How the target moves. Should be 3*3 floats. (?)
   glm::vec3 target; // float, Where the camera points to.
-  AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
+  M2Track rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi.
 };
 
 struct ModelCameraDefV10 {
   int32 id; // 0 is potrait camera, 1 characterinfo camera; -1 if none; referenced in CamLookup_Table
   float farclip; // Where it stops to be drawn.
   float nearclip; // Far and near. Both of them.
-  AnimationBlock transPos; // ( glm::vec3) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
+  M2Track transPos; // ( glm::vec3) How the cameras position moves. Should be 3*3 floats. (? WoW parses 36 bytes = 3*3*sizeof(float))
   glm::vec3 pos; // float, Where the camera is located.
-  AnimationBlock transTarget; // ( glm::vec3) How the target moves. Should be 3*3 floats. (?)
+  M2Track transTarget; // ( glm::vec3) How the target moves. Should be 3*3 floats. (?)
   glm::vec3 target; // float, Where the camera points to.
-  AnimationBlock rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
-  AnimationBlock AnimBlock4; // (Float) One Float. cataclysm
+  M2Track rot; // (Quat) The camera can have some roll-effect. Its 0 to 2*Pi. 3 Floats!
+  M2Track AnimBlock4; // (Float) One Float. cataclysm
 };
 
 struct ModelParticleParams {
@@ -478,20 +478,20 @@ struct M2ParticleDef
   int16 TextureTileRotation; // TODO, Rotation for the texture tile. (Values: -1,0,1)
   uint16 rows; // How many different frames are on that texture? People should learn what rows and cols are.
   uint16 cols; // (2, 2) means slice texture to 2*2 pieces
-  AnimationBlock EmissionSpeed; // (Float) All of the following blocks should be floats.
-  AnimationBlock SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
-  AnimationBlock VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
-  AnimationBlock HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
-  AnimationBlock Gravity; // (Float)
-  AnimationBlock Lifespan; // (Float)
+  M2Track EmissionSpeed; // (Float) All of the following blocks should be floats.
+  M2Track SpeedVariation; // (Float) Variation in the flying-speed. (range: 0 to 1)
+  M2Track VerticalRange; // (Float) Drifting away vertically. (range: 0 to pi)
+  M2Track HorizontalRange; // (Float) They can do it horizontally too! (range: 0 to 2*pi)
+  M2Track Gravity; // (Float)
+  M2Track Lifespan; // (Float)
   int32 unknown;
-  AnimationBlock EmissionRate; // (Float) Spread your particles, emitter.
+  M2Track EmissionRate; // (Float) Spread your particles, emitter.
   int32 unknown2;
-  AnimationBlock EmissionAreaLength; // (Float) Well, you can do that in this area.
-  AnimationBlock EmissionAreaWidth; // (Float)
-  AnimationBlock zSource; // When greater than 0, the initial velocity of the particle is (particle.position - C3Vector(0, 0, zSource)).Normalize()
+  M2Track EmissionAreaLength; // (Float) Well, you can do that in this area.
+  M2Track EmissionAreaWidth; // (Float)
+  M2Track zSource; // When greater than 0, the initial velocity of the particle is (particle.position - C3Vector(0, 0, zSource)).Normalize()
   ModelParticleParams p;
-  AnimationBlock EnabledIn; // (UInt16)
+  M2Track EnabledIn; // (UInt16)
   vector_2fp_6_9 multiTextureParam0[2];
   vector_2fp_6_9 multiTextureParam1[2];
 };
@@ -504,16 +504,16 @@ struct ModelRibbonEmitterDef {
   int32 ofsTextures;
   int32 nUnknown;
   int32 ofsUnknown;
-  AnimationBlock color; // ( glm::vec3)
-  AnimationBlock opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
-  AnimationBlock above; // (Float) The height above.
-  AnimationBlock below; // (Float) The height below. Do not set these to the same!
+  M2Track color; // ( glm::vec3)
+  M2Track opacity; // (UInt16) And an alpha value in a short, where: 0 - transparent, 0x7FFF - opaque.
+  M2Track above; // (Float) The height above.
+  M2Track below; // (Float) The height below. Do not set these to the same!
   float res; // This defines how smooth the ribbon is. A low value may produce a lot of edges.
   float length; // The length aka Lifespan.
   float Emissionangle; // use arcsin(val) to get the angle in degree
   int16 s1, s2;
-  AnimationBlock unk1; // (short)
-  AnimationBlock unk2; // (boolean)
+  M2Track unk1; // (short)
+  M2Track unk2; // (boolean)
   int32 unknown; // This looks much like just some Padding to the fill up the 0x10 Bytes, always 0
 };
 
@@ -596,7 +596,7 @@ struct ModelAttachmentDef {
   uint32 id; // Just an id. Is referenced in the enum POSITION_SLOTS.
   uint32 bone; // Somewhere it has to be attached.
   glm::vec3 pos; // Relative to that bone of course.
-  AnimationBlock unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
+  M2Track unk; // (Int32) Its an integer in the data. It has been 1 on all models I saw. Whatever.
 };
 
 #pragma pack(pop)

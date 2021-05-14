@@ -563,8 +563,8 @@ void WoWModel::initCommon()
   showModel = true;
   alpha_ = 1.0f;
 
-  ModelVertex * buffer = new ModelVertex[header.nVertices];
-  memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(ModelVertex)*header.nVertices);
+  M2Vertex * buffer = new M2Vertex[header.nVertices];
+  memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(M2Vertex)*header.nVertices);
   rawVertices.assign(buffer, buffer + header.nVertices);
   delete[] buffer;
 
@@ -888,8 +888,8 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
 {
   for (uint i = 0; i < nAnimations; i++)
   {
-    ModelAnimation a;
-    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(ModelAnimation), sizeof(ModelAnimation));
+    M2Sequence a;
+    memcpy(&a, f->getBuffer() + ofsAnimation + i*sizeof(M2Sequence), sizeof(M2Sequence));
 
     anims.push_back(a);
 
@@ -1259,7 +1259,7 @@ void WoWModel::setLOD(int index)
     return;
   }
 
-  ModelView *view = (ModelView*)(g->getBuffer());
+  M2SkinProfile *view = (M2SkinProfile*)(g->getBuffer());
 
   if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N')
   {
@@ -1282,8 +1282,8 @@ void WoWModel::setLOD(int index)
   indices = rawIndices;
 
   // render ops
-  ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
-  ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
+  M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + view->ofsSub);
+  M2Batch *tex = (M2Batch*)(g->getBuffer() + view->ofsTex);
   ModelRenderFlags *renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.ofsTexFlags);
   uint16 *texlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexLookup);
   uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
@@ -1292,7 +1292,7 @@ void WoWModel::setLOD(int index)
   uint32 istart = 0;
   for (size_t i = 0; i < view->nSub; i++)
   {
-    ModelGeosetHD * hdgeo = new ModelGeosetHD(ops[i]);
+    M2SkinSectionHD * hdgeo = new M2SkinSectionHD(ops[i]);
     hdgeo->istart = istart;
     istart += hdgeo->icount;
     hdgeo->display = (hdgeo->id == 0);
@@ -1568,7 +1568,7 @@ void WoWModel::animate(ssize_t anim)
 {
   size_t t = 0;
 
-  ModelAnimation &a = anims[anim];
+  M2Sequence &a = anims[anim];
   int tmax = a.length;
   if (tmax == 0)
     tmax = 1;
@@ -2552,7 +2552,7 @@ void WoWModel::restoreRawGeosets()
  
   for (auto it : rawGeosets)
   {
-    ModelGeosetHD * geo = new ModelGeosetHD(*it);
+    M2SkinSectionHD * geo = new M2SkinSectionHD(*it);
     geosets.push_back(geo);
   }
 
@@ -2761,7 +2761,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   {
     out << "    <RenderPass id=\"" << i << "\">" << endl;
     ModelRenderPass * p = m.passes[i];
-    ModelGeosetHD * geoset = m.geosets[p->geoIndex];
+    M2SkinSectionHD * geoset = m.geosets[p->geoIndex];
     out << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
     out << "      <indexCount>" << geoset->icount << "</indexCount>" << endl;
     out << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;

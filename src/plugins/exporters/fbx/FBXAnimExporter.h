@@ -46,7 +46,7 @@
 
 
 class WoWModel;
-struct ModelAnimation;
+struct M2Sequence;
 
 // Namespaces used
 //--------------------------------------------------------------------

@@ -83,10 +83,10 @@ class WoWModel : public ManagedItem, public Displayable, public Model, public Co
   std::set<WoWModel *> mergedModels;
 
   // raw values read from file (useful for merging)
-  std::vector<ModelVertex> rawVertices;
+  std::vector<M2Vertex> rawVertices;
   std::vector<uint32> rawIndices;
   std::vector<ModelRenderPass *> rawPasses;
-  std::vector<ModelGeosetHD *> rawGeosets;
+  std::vector<M2SkinSectionHD *> rawGeosets;
   std::vector<uint32> skinFileIDs;
     
   void restoreRawGeosets();
@@ -130,7 +130,7 @@ public:
   // depending on whether its ParticleColorIndex is set to 11, 12 or 13:
   std::vector<particleColorSet> particleColorReplacements;
   // Raw Data
-  std::vector<ModelVertex> origVertices;
+  std::vector<M2Vertex> origVertices;
 
   typedef int GeosetNum;
 
@@ -148,7 +148,7 @@ public:
   std::string lodname;
 
   std::vector<ModelRenderPass *> passes;
-  std::vector<ModelGeosetHD *> geosets;
+  std::vector<M2SkinSectionHD *> geosets;
 
   // ===============================
   // Toggles
@@ -183,7 +183,7 @@ public:
   // ===============================
   // Bone & Animation data
   // ===============================
-  std::vector<ModelAnimation> anims;
+  std::vector<M2Sequence> anims;
   std::vector<int16> animLookups;
   AnimManager *animManager;
   std::vector<Bone> bones;

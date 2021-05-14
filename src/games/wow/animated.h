@@ -219,7 +219,7 @@ public:
 
   }
 
-  void init(AnimationBlock &b, GameFile * f, std::vector<uint32> & gs)
+  void init(M2Track &b, GameFile * f, std::vector<uint32> & gs)
   {
     globals = gs;
     type = b.type;
@@ -271,7 +271,7 @@ public:
     }
   }
 
-  void init(AnimationBlock &b, GameFile & f, const modelAnimData & modelData)
+  void init(M2Track &b, GameFile & f, const modelAnimData & modelData)
   {
     globals = modelData.globalSequences;
     type = b.type;

@@ -238,7 +238,7 @@ bool ModelRenderPass::init()
 
 void ModelRenderPass::render(bool animated)
 {
-  ModelGeosetHD * geoset = model->geosets[geoIndex];
+  M2SkinSectionHD * geoset = model->geosets[geoIndex];
   // we don't want to render completely transparent parts
   // render
   if (animated)
