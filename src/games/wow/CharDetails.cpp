@@ -34,25 +34,13 @@ void CharDetails::save(QXmlStreamWriter & stream)
 {
   stream.writeStartElement("CharDetails");
 
-  stream.writeStartElement("skinColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[SKIN_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("faceType");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("hairColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("hairStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("facialHair");
-  stream.writeAttribute("value", QString::number(currentCustomization_[ADDITIONAL_FACIAL_CUSTOMIZATION]));
-  stream.writeEndElement();
+  for (auto & opt : currentCustomization_)
+  {
+    stream.writeStartElement("customization");
+    stream.writeAttribute("id", QString::number(opt.first));
+    stream.writeAttribute("value", QString::number(opt.second));
+    stream.writeEndElement();
+  }
 
   stream.writeStartElement("eyeGlowType");
   stream.writeAttribute("value", QString::number((int)eyeGlowType));
@@ -80,22 +68,6 @@ void CharDetails::save(QXmlStreamWriter & stream)
 
   stream.writeStartElement("isDemonHunter");
   stream.writeAttribute("value", QString::number(isDemonHunter_));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHTattooStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHTattooColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHHornStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM2_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHBlindFolds");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM3_STYLE]));
   stream.writeEndElement();
 
   stream.writeEndElement(); // CharDetails
