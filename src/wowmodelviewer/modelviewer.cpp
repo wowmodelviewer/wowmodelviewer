@@ -965,6 +965,11 @@ void ModelViewer::LoadModel(GameFile * file)
   if (!canvas || !file)
     return;
 
+  LOG_INFO << "Loading model:" << file->fullname();
+
+  if (canvas->model() && canvas->model()->gamefile && (canvas->model()->gamefile->fullname() == file->fullname())) // don't reload same model
+    return;
+
   isModel = true;
 
   // check if this is a character model
@@ -2039,7 +2044,7 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
   stream.setAutoFormatting(true);
   stream.writeStartDocument();
   stream.writeStartElement("SavedCharacter");
-  stream.writeAttribute("version", "1.0");
+  stream.writeAttribute("version", "2.0");
   // save model itself
   WoWModel * m = const_cast<WoWModel *>(canvas->model());
   if (!equipmentOnly)
@@ -2079,12 +2084,9 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
       wxDELETE(canvas->wmo);
       canvas->wmo = NULL;
     }
-    else if (isModel)
-    {
-      canvas->clearAttachments();
-      canvas->setModel(NULL);
-    }
   }
+
+  bool loadCharDetails = true;
 
   QXmlStreamReader reader;
   reader.setDevice(&file);
@@ -2193,6 +2195,16 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
     if (reader.isStartElement())
     {
+      if (reader.name() == "SavedCharacter") // check file version
+      {
+        QString version = reader.attributes().value("version").toString();
+        if (version == "1.0" && !equipmentOnly)
+        {
+          loadCharDetails = false;
+          wxMessageBox(wxT("You are loading a character file customized before Shadowlands. Character customization won't be applied."), wxT("Character customization"), wxOK | wxICON_INFORMATION);
+        }
+      }
+
       if (reader.name() == "model" && !equipmentOnly)
       {
         reader.readNext();
@@ -2204,7 +2216,8 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
           QString modelname = reader.attributes().value("name").toString();
           LoadModel(GAMEDIRECTORY.getFile(modelname));
           WoWModel * m = const_cast<WoWModel *>(canvas->model());
-          m->load(fn);
+          if(loadCharDetails)
+            m->load(fn);
         }
         else
         {
