@@ -559,8 +559,18 @@ void CharDetails::refreshGeosets()
   {
     for (auto geo : elt.second.geosets)
     {
+      // don't display ears if option is unchecked
       if (geo.first == CG_EARS && !showEars)
         continue;
+
+      // don't display hair if option is unchecked
+      if (geo.first == CG_HAIRSTYLE && !showHair)
+        continue;
+
+      // ond't display facila hairs if option is unchecked
+      if ((geo.first == CG_GEOSET100 || geo.first == CG_GEOSET200 || geo.first == CG_GEOSET300) && !showFacialHair)
+        continue;
+
       geosets[geo.first] = geo.second;
     }
   }
