@@ -85,108 +85,36 @@ void CharDetails::load(QString & f)
   QXmlStreamReader reader;
   reader.setDevice(&file);
 
-  int nbValuesRead = 0;
-  while (!reader.atEnd() && nbValuesRead != 16)
+  while (!reader.atEnd())
   {
     if (reader.isStartElement())
     {
-      if (reader.name() == "skinColor")
-      {
-        set(SKIN_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "faceType")
-      {
-        set(FACE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "hairColor")
-      {
-        set(FACIAL_CUSTOMIZATION_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "hairStyle")
-      {
-        set(FACIAL_CUSTOMIZATION_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "facialHair")
-      {
-        set(ADDITIONAL_FACIAL_CUSTOMIZATION, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
+      if (reader.name() == "customization")
+        set(reader.attributes().value("id").toString().toUInt(), reader.attributes().value("value").toString().toUInt());
 
       if (reader.name() == "eyeGlowType")
-      {
         eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showUnderwear")
-      {
         showUnderwear = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showEars")
-      {
         showEars = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showHair")
-      {
         showHair = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showFacialHair")
-      {
         showFacialHair = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showFeet")
-      {
         showFeet = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "isDemonHunter")
       {
         LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
         setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
       }
-
-      if (reader.name() == "DHTattooStyle")
-      {
-        set(CUSTOM1_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHTattooColor")
-      {
-        set(CUSTOM1_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHHornStyle")
-      {
-        set(CUSTOM2_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHBlindFolds")
-      {
-        set(CUSTOM3_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
     }
     reader.readNext();
   }
