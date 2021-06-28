@@ -29,6 +29,7 @@ struct CharTextureComponent
   GameFile * file;
   int region;
   int layer;
+  int blendMode;
 
   bool operator<(const CharTextureComponent& c) const
   {
@@ -53,7 +54,7 @@ class _CHARTEXTURE_API_ CharTexture
       : layoutSizeId(_layoutSizeId)
     {}
 
-    void addLayer(GameFile * file, int region, int layer);
+    void addLayer(GameFile * file, int region, int layer, int blendMode = 1);
     void addComponent(CharTextureComponent c) { m_components.push_back(c); }
 
     void compose(GLuint texID);

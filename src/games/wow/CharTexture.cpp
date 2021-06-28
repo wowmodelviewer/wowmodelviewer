@@ -24,12 +24,12 @@
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 constexpr int LAYOUT_BASE_REGION = -1;
 
-void CharTexture::addLayer(GameFile * file, int region, int layer)
+void CharTexture::addLayer(GameFile * file, int region, int layer, int blendMode)
 {
   if (!file)
     return;
 
-  const CharTextureComponent ct = { file, region, layer };
+  const CharTextureComponent ct = { file, region, layer, blendMode };
   m_components.push_back(ct);
 }
 
@@ -127,18 +127,19 @@ void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct) c
 
 #if DEBUG_TEXTURE > 0
   const auto region = ct.region;
+  const auto layer = ct.layer;
   const auto x = coords.xpos;
   const auto y = coords.ypos;
   const auto width = coords.width;
   const auto height = coords.height;
-  LOG_INFO << __FUNCTION__ << ct.file->fullname() << region << x << y << width << height;
+  LOG_INFO << __FUNCTION__ << ct.file->fullname() << region << layer << x << y << width << height;
 #endif
 
 #if DEBUG_TEXTURE > 1
   newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
 #endif
 
-  if (ct.region == LAYOUT_BASE_REGION)
+  if (ct.region == LAYOUT_BASE_REGION && ct.layer == 0)
   {
     destImage = newImage;
   }
@@ -146,7 +147,23 @@ void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct) c
   {
     const auto destPos = QPoint(coords.xpos, coords.ypos);
     QPainter painter(&destImage);
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    
+    QPainter::CompositionMode mode = QPainter::CompositionMode_SourceOver;
+
+    switch(ct.blendMode)
+    {
+    case 4:
+      mode = QPainter::CompositionMode_Multiply;
+      break;
+    case 6:
+      mode = QPainter::CompositionMode_Overlay;
+      break;
+    default:
+      break;
+    }
+    
+    painter.setCompositionMode(mode);
+
     painter.drawImage(destPos, newImage);
     painter.end();
   }
