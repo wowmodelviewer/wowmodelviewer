@@ -24,12 +24,12 @@
 std::map<int, std::pair<LayoutSize, std::map<int,CharRegionCoords> > > CharTexture::LAYOUTS;
 constexpr int LAYOUT_BASE_REGION = -1;
 
-void CharTexture::addLayer(GameFile * file, int region, int layer)
+void CharTexture::addLayer(GameFile * file, int region, int layer, int blendMode)
 {
   if (!file)
     return;
 
-  const CharTextureComponent ct = { file, region, layer };
+  const CharTextureComponent ct = { file, region, layer, blendMode };
   m_components.push_back(ct);
 }
 

@@ -429,7 +429,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       else if (elt[2].toUInt() != 0) // texture customization
       {
         LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
-        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, TextureID FROM ChrCustomizationMaterial "
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, TextureID FROM ChrCustomizationMaterial "
           "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
           "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
           "AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
@@ -441,7 +441,11 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
           t.layer = vals.values[0][0].toUInt();
           t.region = bitMaskToSectionType(vals.values[0][1].toInt());
           t.type = vals.values[0][2].toUInt();
-          t.fileId = vals.values[0][3].toUInt();
+          t.blendMode = vals.values[0][3].toUInt();
+          t.fileId = vals.values[0][4].toUInt();
+
+          LOG_INFO << "texture ->" << "layer" << t.layer << "region" << t.region << "type" << t.type << "blendMode" << t.blendMode << "fileId" << t.fileId;
+
           customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
         }
       }

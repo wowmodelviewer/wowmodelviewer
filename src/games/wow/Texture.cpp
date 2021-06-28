@@ -57,6 +57,8 @@ void Texture::load()
   w = width;
   h = height;
 
+  LOG_INFO << "Loading texture" << itemName() << "type" << type << "attrs" << (uint)attr[0] << (uint)attr[1] << (uint)attr[2] << (uint)attr[3] << "width" << width << "height" << height;
+
   /*
   reference: http://en.wikipedia.org/wiki/.BLP
   */
