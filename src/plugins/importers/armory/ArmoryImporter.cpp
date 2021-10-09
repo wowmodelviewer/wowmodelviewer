@@ -671,6 +671,12 @@ QByteArray ArmoryImporter::getURLData(const QString & inputUrl) const
   QNetworkAccessManager manager;
   QNetworkRequest request(url);
   request.setRawHeader("User-Agent", "WoWModelViewer");
+
+  // disable ssl handshake (error when communicating with server as certifcate is self signed)
+  auto sslConfiguration = request.sslConfiguration();
+  sslConfiguration.setProtocol(QSsl::AnyProtocol);
+  sslConfiguration.setPeerVerifyMode(QSslSocket::QueryPeer);
+  request.setSslConfiguration(sslConfiguration);
   auto *response = manager.get(request);
   QEventLoop eventLoop;
   connect(response, SIGNAL(finished()), &eventLoop, SLOT(quit()));
