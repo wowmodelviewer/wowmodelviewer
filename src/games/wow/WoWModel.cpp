@@ -2463,7 +2463,7 @@ void WoWModel::refresh()
     }
     else
     {
-      tex.addLayer(GAMEDIRECTORY.getFile(t.fileId), t.region, t.layer);
+      tex.addLayer(GAMEDIRECTORY.getFile(t.fileId), t.region, t.layer, t.blendMode);
     }    
   }
 

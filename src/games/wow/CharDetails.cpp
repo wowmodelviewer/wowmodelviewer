@@ -34,25 +34,13 @@ void CharDetails::save(QXmlStreamWriter & stream)
 {
   stream.writeStartElement("CharDetails");
 
-  stream.writeStartElement("skinColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[SKIN_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("faceType");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("hairColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("hairStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[FACIAL_CUSTOMIZATION_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("facialHair");
-  stream.writeAttribute("value", QString::number(currentCustomization_[ADDITIONAL_FACIAL_CUSTOMIZATION]));
-  stream.writeEndElement();
+  for (auto & opt : currentCustomization_)
+  {
+    stream.writeStartElement("customization");
+    stream.writeAttribute("id", QString::number(opt.first));
+    stream.writeAttribute("value", QString::number(opt.second));
+    stream.writeEndElement();
+  }
 
   stream.writeStartElement("eyeGlowType");
   stream.writeAttribute("value", QString::number((int)eyeGlowType));
@@ -82,22 +70,6 @@ void CharDetails::save(QXmlStreamWriter & stream)
   stream.writeAttribute("value", QString::number(isDemonHunter_));
   stream.writeEndElement();
 
-  stream.writeStartElement("DHTattooStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHTattooColor");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM1_COLOR]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHHornStyle");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM2_STYLE]));
-  stream.writeEndElement();
-
-  stream.writeStartElement("DHBlindFolds");
-  stream.writeAttribute("value", QString::number(currentCustomization_[CUSTOM3_STYLE]));
-  stream.writeEndElement();
-
   stream.writeEndElement(); // CharDetails
 }
 
@@ -113,108 +85,36 @@ void CharDetails::load(QString & f)
   QXmlStreamReader reader;
   reader.setDevice(&file);
 
-  int nbValuesRead = 0;
-  while (!reader.atEnd() && nbValuesRead != 16)
+  while (!reader.atEnd())
   {
     if (reader.isStartElement())
     {
-      if (reader.name() == "skinColor")
-      {
-        set(SKIN_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "faceType")
-      {
-        set(FACE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "hairColor")
-      {
-        set(FACIAL_CUSTOMIZATION_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "hairStyle")
-      {
-        set(FACIAL_CUSTOMIZATION_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "facialHair")
-      {
-        set(ADDITIONAL_FACIAL_CUSTOMIZATION, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
+      if (reader.name() == "customization")
+        set(reader.attributes().value("id").toString().toUInt(), reader.attributes().value("value").toString().toUInt());
 
       if (reader.name() == "eyeGlowType")
-      {
         eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showUnderwear")
-      {
         showUnderwear = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showEars")
-      {
         showEars = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showHair")
-      {
         showHair = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showFacialHair")
-      {
         showFacialHair = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "showFeet")
-      {
         showFeet = reader.attributes().value("value").toString().toUInt();
-        nbValuesRead++;
-      }
 
       if (reader.name() == "isDemonHunter")
       {
         LOG_INFO << __FILE__ << __LINE__ << "reading demonHunter mode value";
         setDemonHunterMode(reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
       }
-
-      if (reader.name() == "DHTattooStyle")
-      {
-        set(CUSTOM1_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHTattooColor")
-      {
-        set(CUSTOM1_COLOR, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHHornStyle")
-      {
-        set(CUSTOM2_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
-      if (reader.name() == "DHBlindFolds")
-      {
-        set(CUSTOM3_STYLE, reader.attributes().value("value").toString().toUInt());
-        nbValuesRead++;
-      }
-
     }
     reader.readNext();
   }
@@ -529,7 +429,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       else if (elt[2].toUInt() != 0) // texture customization
       {
         LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
-        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, TextureID FROM ChrCustomizationMaterial "
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, TextureID FROM ChrCustomizationMaterial "
           "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
           "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
           "AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "
@@ -541,7 +441,11 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
           t.layer = vals.values[0][0].toUInt();
           t.region = bitMaskToSectionType(vals.values[0][1].toInt());
           t.type = vals.values[0][2].toUInt();
-          t.fileId = vals.values[0][3].toUInt();
+          t.blendMode = vals.values[0][3].toUInt();
+          t.fileId = vals.values[0][4].toUInt();
+
+          LOG_INFO << "texture ->" << "layer" << t.layer << "region" << t.region << "type" << t.type << "blendMode" << t.blendMode << "fileId" << t.fileId;
+
           customizationElementsPerOption_[chrCustomizationOption].textures.push_back(t);
         }
       }
@@ -659,8 +563,18 @@ void CharDetails::refreshGeosets()
   {
     for (auto geo : elt.second.geosets)
     {
+      // don't display ears if option is unchecked
       if (geo.first == CG_EARS && !showEars)
         continue;
+
+      // don't display hair if option is unchecked
+      if (geo.first == CG_HAIRSTYLE && !showHair)
+        continue;
+
+      // ond't display facila hairs if option is unchecked
+      if ((geo.first == CG_GEOSET100 || geo.first == CG_GEOSET200 || geo.first == CG_GEOSET300) && !showFacialHair)
+        continue;
+
       geosets[geo.first] = geo.second;
     }
   }

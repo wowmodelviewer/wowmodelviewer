@@ -102,6 +102,7 @@ public:
     int region;
     uint type;
     uint fileId;
+    uint blendMode;
   };
 
   EyeGlowTypes eyeGlowType;
