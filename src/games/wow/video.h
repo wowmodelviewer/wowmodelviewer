@@ -75,9 +75,6 @@ public:
   bool secondPass;
 
   // Video card support for OGL Extensions
-  bool supportFragProg;
-  bool supportVertexProg;
-  bool supportGLSL;
   bool supportCompression;// = false;
   bool supportMultiTex;//  = false;
   bool supportDrawRangeElements;//  = false;

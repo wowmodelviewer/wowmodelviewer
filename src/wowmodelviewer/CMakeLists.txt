@@ -113,8 +113,9 @@ set(common_files wowmodelviewer.json
                  ${WMV_BASE_PATH}/appveyor.yml
                  ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
-set(wow9_0_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
+source_group("common" FILES ${common_files})
+
+set(wow9_0_files ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv)
@@ -128,7 +129,12 @@ set(wow9_1_files
 source_group("wow9.0" FILES ${wow9_0_files})
 source_group("wow9.1" FILES ${wow9_1_files})
 
-set(useful_files ${common_files} ${cmake_files} ${wow9_0_files} ${wow9_1_files})
+set(shaders_files ${WMV_BASE_PATH}/bin_support/shaders/basic.vs
+                  ${WMV_BASE_PATH}/bin_support/shaders/basic.fs)
+
+source_group("shaders" FILES ${shaders_files})
+
+set(useful_files ${common_files} ${cmake_files} ${wow9_0_files} ${wow9_1_files} ${shaders_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -192,3 +198,4 @@ install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 install(FILES ${wow9_0_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.0)
 install(FILES ${wow9_1_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.1)
+install(FILES ${shaders_files} DESTINATION ${WMV_BASE_PATH}/bin/shaders)

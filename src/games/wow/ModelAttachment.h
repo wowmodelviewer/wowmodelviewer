@@ -22,7 +22,7 @@ struct ModelAttachment
   int bone;
   WoWModel *model;
 
-  void init(ModelAttachmentDef &mad);
+  void init(M2Attachment &mad);
   void setup() const;
   void setupParticle() const;
 };

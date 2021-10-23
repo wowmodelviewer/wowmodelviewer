@@ -6,7 +6,7 @@
 #include "Logger.h"
 
 #include "GameFile.h"
-#include "Texture.h"
+#include "TextureBLP.h"
 
 #include "GL/glew.h"
 
@@ -30,7 +30,7 @@ GLuint TextureManager::add(GameFile * file)
 
   // Else, create the texture
 
-  Texture *tex = new Texture(file);
+  auto *tex = new TextureBLP(file);
   if (tex) {
     // clear old texture memory from vid card
     glDeleteTextures(1, &id);

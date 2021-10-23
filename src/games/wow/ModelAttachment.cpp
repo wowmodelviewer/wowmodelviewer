@@ -15,9 +15,9 @@
 
 
 
-void ModelAttachment::init(ModelAttachmentDef &mad)
+void ModelAttachment::init(M2Attachment &mad)
 {
-  pos = mad.pos;
+  pos = mad.position;
   bone = mad.bone;
   id = mad.id;
 }

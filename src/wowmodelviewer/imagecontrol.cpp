@@ -3,6 +3,7 @@
 
 #include "Logger.h"
 #include "enums.h"
+#include "video.h"
 
 IMPLEMENT_CLASS(ImageControl, wxWindow)
 

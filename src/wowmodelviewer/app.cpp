@@ -24,6 +24,8 @@
 #include <QCoreApplication>
 #include <QSettings>
 
+#include "video.h"
+
 
 /*  THIS IS OUR MAIN "START UP" FILE.
 App.cpp creates our wxApp class object.
@@ -213,11 +215,8 @@ bool WowModelViewApp::OnInit()
   if (frame->canvas) {
     frame->canvas->Show(true);
 
-    if (!frame->canvas->init)
-      frame->canvas->InitGL();
-
-    if (frame->lightControl)
-      frame->lightControl->UpdateGL();
+  //  if (frame->lightControl)
+  //    frame->lightControl->UpdateGL();
   }
   // --
 

@@ -24,7 +24,7 @@ struct ModelLight
   Animated<float> diffIntensity, ambIntensity, AttenStart, AttenEnd;
   Animated<int> UseAttenuation;
 
-  void init(GameFile * f, ModelLightDef &mld, std::vector<uint32> & global);
+  void init(GameFile * f, M2Light &mld, std::vector<uint32> & global);
   void setup(size_t time, GLuint l);
 };
 

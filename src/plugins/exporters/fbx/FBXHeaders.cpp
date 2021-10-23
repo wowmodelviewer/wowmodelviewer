@@ -138,7 +138,7 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
     vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
     glm::vec3 vn = glm::normalize(v.normal);
     layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
-    layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
+    layer_texcoord->GetDirectArray().Add(FbxVector2(v.tex_coords[0].x, 1.0 - v.tex_coords[0].y));
   }
 
   // Create polygons.
@@ -165,13 +165,13 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
       meshNode->AddMaterial(material);
 
       M2SkinSectionHD * g = model->geosets[p->geoIndex];
-      size_t num_of_faces = g->icount / 3;
+      size_t num_of_faces = g->indexCount / 3;
       for (size_t j = 0; j < num_of_faces; j++)
       {
         mesh->BeginPolygon(mtrl_index);
-        mesh->AddPolygon(model->indices[g->istart + j * 3]);
-        mesh->AddPolygon(model->indices[g->istart + j * 3 + 1]);
-        mesh->AddPolygon(model->indices[g->istart + j * 3 + 2]);
+        mesh->AddPolygon(model->indices[g->indexStart + j * 3]);
+        mesh->AddPolygon(model->indices[g->indexStart + j * 3 + 1]);
+        mesh->AddPolygon(model->indices[g->indexStart + j * 3 + 2]);
         mesh->EndPolygon();
       }
 
@@ -363,16 +363,16 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
   anim_stack->AddMember(anim_layer);
 
   //LOG_INFO << "Animation length:" << cur_anim.length;
-  float timeInc = cur_anim.length / 60;
+  float timeInc = cur_anim.duration / 60;
   if (timeInc < 1.0f)
   {
-    timeInc = cur_anim.length;
+    timeInc = cur_anim.duration;
   }
   FbxTime::SetGlobalTimeMode(FbxTime::eFrames60);
   //LOG_INFO << "Skeleton Bone count:" << skeleton.size();
 
   //LOG_INFO << "Starting frame loop...";
-  for (uint32 t = 0; t < cur_anim.length; t += timeInc)
+  for (uint32 t = 0; t < cur_anim.duration; t += timeInc)
   {
     //LOG_INFO << "Starting frame" << t;
     FbxTime time;
@@ -383,9 +383,9 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
       int b = it.first;
       Bone& bone = l_model->bones[b];
 
-      bool rot = bone.rot.uses(cur_anim.Index);
-      bool scale = bone.scale.uses(cur_anim.Index);
-      bool trans = bone.trans.uses(cur_anim.Index);
+      bool rot = bone.rot.uses(cur_anim.aliasNext);
+      bool scale = bone.scale.uses(cur_anim.aliasNext);
+      bool trans = bone.trans.uses(cur_anim.aliasNext);
 
       if (!rot && !scale && !trans) // bone is not animated, skip it
         continue;
@@ -396,7 +396,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* t_curve_y = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* t_curve_z = skeleton[b]->LclTranslation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        glm::vec3 v = bone.trans.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.trans.getValue(cur_anim.aliasNext, t);
 
         if (bone.parent != -1)
         {
@@ -429,7 +429,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* r_curve_y = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* r_curve_z = skeleton[b]->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        auto r = glm::eulerAngles(bone.rot.getValue(cur_anim.Index, t));
+        auto r = glm::eulerAngles(bone.rot.getValue(cur_anim.aliasNext, t));
 
         auto x = glm::degrees(r.x);
         auto y = glm::degrees(r.y);
@@ -460,7 +460,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
         FbxAnimCurve* s_curve_y = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y, true);
         FbxAnimCurve* s_curve_z = skeleton[b]->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z, true);
 
-        glm::vec3 v = bone.scale.getValue(cur_anim.Index, t);
+        glm::vec3 v = bone.scale.getValue(cur_anim.aliasNext, t);
 
         s_curve_x->KeyModifyBegin();
         int key_index = s_curve_x->KeyAdd(time);

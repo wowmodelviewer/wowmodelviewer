@@ -193,6 +193,9 @@ void AnimControl::UpdateModel(WoWModel *m)
 {
   if (!m)
     return;
+
+  Freeze();
+
   PCRList.clear();
   CDIToTexGp.clear();
   // Clear skin/texture data from previous model - if there is any.
@@ -305,13 +308,13 @@ void AnimControl::UpdateModel(WoWModel *m)
     for (size_t i=0; i<m->anims.size(); i++)
     {
       std::wstringstream label;
-      label << animsVal[m->anims[i].animID];
+      label << animsVal[m->anims[i].id];
       label << " [";
       label << i;
       label << "]";
       wxString strName=label.str().c_str();
 
-      if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
+      if (g_selModel->anims[i].id == ANIM_STAND && useanim == -1)
       {
         strStand = strName;
         useanim = i;
@@ -343,7 +346,7 @@ void AnimControl::UpdateModel(WoWModel *m)
     animCList->Select(selectAnim); // anim position in selection
     animCList->Show(true);
 
-    UpdateFrameSlider(g_selModel->anims[useanim].length - 1, g_selModel->anims[useanim].playSpeed);
+    UpdateFrameSlider(g_selModel->anims[useanim].duration - 1, g_selModel->anims[useanim].movespeed); // @TODO movespeed is probably wrong here
 
     g_selModel->animManager->SetAnim(0, useanim, 0);
     if (bNextAnims && g_selModel)
@@ -351,7 +354,7 @@ void AnimControl::UpdateModel(WoWModel *m)
       int NextAnimation = useanim;
       for(size_t i=1; i<4; i++)
       {
-        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        NextAnimation = g_selModel->anims[NextAnimation].variationNext;
         if (NextAnimation >= 0)
           g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
         else
@@ -362,6 +365,8 @@ void AnimControl::UpdateModel(WoWModel *m)
   }
   wmoList->Show(false);
   wmoLabel->Show(false);
+
+  Thaw();
 }
 
 void AnimControl::UpdateWMO(WMO *w, int group)
@@ -1079,7 +1084,7 @@ void AnimControl::OnCheck(wxCommandEvent &event)
     if (bNextAnims && g_selModel) {
       int NextAnimation = selectedAnim;
       for(size_t i=1; i<4; i++) {
-        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        NextAnimation = g_selModel->anims[NextAnimation].variationNext;
         if (NextAnimation >= 0)
           g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
         else
@@ -1112,7 +1117,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         if (bNextAnims && g_selModel) {
           int NextAnimation = selectedAnim;
           for(size_t i=1; i<4; i++) {
-            NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+            NextAnimation = g_selModel->anims[NextAnimation].variationNext;
             if (NextAnimation >= 0)
               g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
             else
@@ -1121,7 +1126,7 @@ void AnimControl::OnAnim(wxCommandEvent &event)
         }
         g_selModel->animManager->Play();
         
-        UpdateFrameSlider(g_selModel->anims[selectedAnim].length - 1, g_selModel->anims[selectedAnim].playSpeed);
+        UpdateFrameSlider(g_selModel->anims[selectedAnim].duration - 1, g_selModel->anims[selectedAnim].movespeed); // @TODO modespeed is probably wrong
       }
     }
 
@@ -1219,7 +1224,7 @@ void AnimControl::OnLoop(wxCommandEvent &)
     if (bNextAnims && g_selModel) {
       int NextAnimation = selectedAnim;
       for(size_t i=1; i<4; i++) {
-        NextAnimation = g_selModel->anims[NextAnimation].NextAnimation;
+        NextAnimation = g_selModel->anims[NextAnimation].variationNext;
         if (NextAnimation >= 0)
           g_selModel->animManager->AddAnim(NextAnimation, loopList->GetSelection());
         else

@@ -80,11 +80,11 @@ void FBXAnimExporter::run()
   srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
   QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
   QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
-  QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
-  QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.Index).arg(wxT("Animations"));
+  QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.aliasNext);
+  QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.aliasNext).arg(wxT("Animations"));
   if (useAltNaming)
   {
-    file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.Index).arg(wxT("Animations"));
+    file_name = QString("%1_%5/%2_%4_%3.fbx").arg(srcfileName).arg(justfileName).arg(animationName).arg(curAnimation.aliasNext).arg(wxT("Animations"));
   }
   LOG_INFO << "FBX Animation Filename: " << qPrintable(file_name);
   QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));

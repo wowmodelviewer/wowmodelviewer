@@ -6,6 +6,7 @@
 #include "enums.h"
 #include "globalvars.h"
 #include "Quantize.h"
+#include "video.h"
 
 #include "Logger.h"
 

@@ -12,7 +12,6 @@
 #include <vector>
 
 class Displayable;
-class WoWModel;
 
 
 class Attachment

@@ -22,8 +22,7 @@ struct ModelCamera
   Animated<glm::vec3> tPos, tTarget;
   Animated<float> rot;
 
-  void init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname);
-  void initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname);
+  void init(GameFile * f, M2Camera &mcd, std::vector<uint32> & global, std::string modelname);
   void setup(size_t time=0);
 
   ModelCamera():ok(false), pos(glm::vec3()), target(glm::vec3()),

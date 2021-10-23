@@ -284,8 +284,8 @@ void FBXExporter::linkMeshAndSkeleton()
   {
     for (size_t j = 0; j < 4; j++)
     {
-      if (it.weights[j] > 0)
-        m_boneClusters[it.bones[j]]->AddControlPointIndex((int)i, static_cast<double>(it.weights[j]) / 255.0);
+      if (it.bone_weights[j] > 0)
+        m_boneClusters[it.bone_indices[j]]->AddControlPointIndex((int)i, static_cast<double>(it.bone_weights[j]) / 255.0);
     }
     i++;
   }
@@ -361,7 +361,7 @@ bool FBXExporter::createAnimationFiles()
     QMutexLocker locker(&m_mutex);
     M2Sequence curAnimation = m_p_model->anims[it];
     FBXAnimExporter *exporter = new FBXAnimExporter();
-    exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters, m_p_meshNode, it);
+    exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()), QString::fromWCharArray(animsMap[curAnimation.id].c_str()), m_p_model, m_boneClusters, m_p_meshNode, it);
     exporter->setAutoDelete(true);
     exporter->run();    // Remove this line before adding to the QThreadPool!
     //QThreadPool::globalInstance()->start(exporter);   // Queue this exporter for threaded execution. Automatically starts the run() function of an FBXAnimExporter when a thread is free.

@@ -108,8 +108,6 @@ class WoWModel : public ManagedItem, public Displayable, public Model, public Co
   std::vector<TXID> readTXIDSFromFile(GameFile * f);
 
 public:
-  bool model24500; // flag for build 24500 model changes to anim chunking and other things
-
   GameFile * gamefile;
 
   std::vector<uint> replacableParticleColorIDs;

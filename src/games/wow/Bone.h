@@ -21,7 +21,7 @@ class WoWModel;
 class Bone {
 public:
   Animated<glm::vec3> trans;
-  Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;
+  Animated<glm::fquat, M2CompQuat, Quat16ToQuat32> rot;
   Animated<glm::vec3> scale;
 
   glm::vec3 pivot, transPivot;
@@ -31,11 +31,11 @@ public:
   glm::mat4 mat;
   glm::mat4 mrot;
 
-  ModelBoneDef boneDef;
+  M2CompBone boneDef;
 
   bool calc;
   void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
-  void initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data);
+  void initV3(GameFile & f, M2CompBone &b, const modelAnimData & data);
 };
 
 

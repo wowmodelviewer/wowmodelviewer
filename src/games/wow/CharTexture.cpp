@@ -15,7 +15,7 @@
 
 #include "Game.h"
 #include "GameFile.h"
-#include "Texture.h"
+#include "TextureBLP.h"
 #include "TextureManager.h"
 #include "WoWDatabase.h"
 
@@ -180,7 +180,7 @@ QImage * CharTexture::gameFileToQImage(GameFile * file)
 {
   QImage * result = nullptr;
   const auto temptex = TEXTUREMANAGER.add(file);
-  auto * tex = dynamic_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
+  auto * tex = dynamic_cast<TextureBLP*>(TEXTUREMANAGER.items[temptex]);
 
   // Alfred 2009.07.03, tex width or height can't be zero
   if (tex->w == 0 || tex->h == 0)

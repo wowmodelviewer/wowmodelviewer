@@ -23,26 +23,29 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
       return interpolate<T>((life-mid) / (1.0f-mid),b,c);
 }
 
-void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> & globals)
+void ParticleSystem::init(GameFile * f, M2Particle &mta, std::vector<uint32> & globals)
 {
+  return;
+  /* 
+  @TODO : to be fixed
   flags = mta.flags;
   multitexture = flags & MODELPARTICLE_FLAGS_MULTITEXTURE;
   if (ParticleSystem::useDoNotTrail)
     doNotTrail = flags & MODELPARTICLE_FLAGS_DONOTTRAIL;
   else
     doNotTrail = false;
-  speed.init (mta.EmissionSpeed, f, globals);
-  variation.init (mta.SpeedVariation, f, globals);
-  spread.init (mta.VerticalRange, f, globals);
-  lat.init (mta.HorizontalRange, f, globals);
-  gravity.init (mta.Gravity, f, globals);
-  lifespan.init (mta.Lifespan, f, globals);
-  rate.init (mta.EmissionRate, f, globals);
-  areal.init (mta.EmissionAreaLength, f, globals);
-  areaw.init (mta.EmissionAreaWidth, f, globals);
+  speed.init (mta.emissionSpeed, f, globals);
+  variation.init (mta.speedVariation, f, globals);
+  spread.init (mta.verticalRange, f, globals);
+  lat.init (mta.horizontalRange, f, globals);
+  gravity.init (mta.gravity, f, globals);
+  lifespan.init (mta.lifespan, f, globals);
+  rate.init (mta.emissionRate, f, globals);
+  areal.init (mta.emissionAreaLength, f, globals);
+  areaw.init (mta.emissionAreaWidth, f, globals);
   // deacceleration.init (mta.Gravity2, f, globals);
-  enabled.init (mta.EnabledIn, f, globals);
-  particleColID = mta.ParticleColorIndex;
+  enabled.init (mta.enabledIn, f, globals);
+  particleColID = mta.particleColorIndex;
 
   glm::vec3 colors2[3];
   memcpy(colors2, f->getBuffer()+mta.p.colors.ofsKeys, sizeof(glm::vec3)*3);
@@ -88,7 +91,7 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
   billboard = !(flags & MODELPARTICLE_FLAGS_DONOTBILLBOARD);
 
   // diagnosis test info
-  EmitterType = mta.EmitterType;
+  EmitterType = mta.emitterType;
 
   manim = mtime = 0;
   rem = 0;
@@ -117,10 +120,12 @@ void ParticleSystem::init(GameFile * f, M2ParticleDef &mta, std::vector<uint32> 
     initTile(tc.tc, i);
     tiles.push_back(tc);
   }
+  */
 }
 
 void ParticleSystem::initTile(glm::vec2 *tc, int num)
 {
+  return;
   glm::vec2 otc[4];
   glm::vec2 a,b;
   int x = num % cols;
@@ -145,6 +150,7 @@ void ParticleSystem::initTile(glm::vec2 *tc, int num)
 
 void ParticleSystem::update(float dt)
 {
+  return;
   glm::vec4 colVals[3];
 
   if (replaceParticleColors && particleColID >= 11 && particleColID <= 13)
@@ -265,6 +271,7 @@ void ParticleSystem::update(float dt)
 
 void ParticleSystem::setup(size_t anim, size_t time)
 {
+  return;
   manim = anim;
   mtime = time;
 
@@ -285,6 +292,7 @@ void ParticleSystem::setup(size_t anim, size_t time)
 
 void ParticleSystem::draw()
 {
+  return;
   // ALPHA BLENDING
   // blend mode
   if (blend < 0)
@@ -500,6 +508,7 @@ static glm::mat4 SpreadMat;
 
 void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 {
+  return;
   int i,j;
   float a[2],c[2],s[2];
   glm::mat4 Temp(1.0f);
@@ -544,7 +553,7 @@ void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
-
+  return p;
   //Spread Calculation
   glm::mat4 mrot;
 
@@ -618,6 +627,7 @@ Particle PlaneParticleEmitter::newParticle(size_t anim, size_t time, float w, fl
 Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
+  return p;
   glm::vec3 dir;
   float radius;
 
@@ -727,15 +737,18 @@ Particle SphereParticleEmitter::newParticle(size_t anim, size_t time, float w, f
 
 
 
-void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<uint32> & globals)
+void RibbonEmitter::init(GameFile * f, M2Ribbon &mta, std::vector<uint32> & globals)
 {
-  color.init(mta.color, f, globals);
-  opacity.init(mta.opacity, f, globals);
-  above.init(mta.above, f, globals);
-  below.init(mta.below, f, globals);
+  return;
+  /*
+  @TODO : to be fixed
+  color.init(mta.colorTrack, f, globals);
+  opacity.init(mta.alphaTrack, f, globals);
+  above.init(mta.heightAboveTrack, f, globals);
+  below.init(mta.heightBelowTrack, f, globals);
 
-  parent = &(model->bones[mta.bone]);
-  int *texlist = (int*)(f->getBuffer() + mta.ofsTextures);
+  parent = &(model->bones[mta.boneIndex]);
+  int *texlist = (int*)(f->getBuffer() + mta..ofsTextures);
   // just use the first texture for now; most models I've checked only had one
   texture = model->getGLTexture(texlist[0]);
 
@@ -753,10 +766,12 @@ void RibbonEmitter::init(GameFile * f, ModelRibbonEmitterDef &mta, std::vector<u
   rs.pos = tpos;
   rs.len = 0;
   segs.push_back(rs);
+  */
 }
 
 void RibbonEmitter::setup(size_t anim, size_t time)
 {
+  return;
   glm::vec3 ntpos = glm::vec3(parent->mat * glm::vec4(pos,1.0f));
   glm::vec3 ntup = glm::vec3(parent->mat * (glm::vec4(pos,1.f) + glm::vec4(0,0,1,1)));
   ntup -= ntpos;
@@ -808,6 +823,7 @@ void RibbonEmitter::setup(size_t anim, size_t time)
 
 void RibbonEmitter::draw()
 {
+  return;
   /*
   // placeholders
   glDisable(GL_TEXTURE_2D);

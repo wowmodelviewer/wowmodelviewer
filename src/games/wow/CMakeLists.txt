@@ -39,8 +39,8 @@ set(src animated.cpp
       RaceInfos.cpp
       RenderTexture.cpp
       TabardDetails.cpp
-      Texture.cpp
       TextureAnim.cpp
+      TextureBLP.cpp
       TextureManager.cpp
       video.cpp
       wdb2file.cpp
@@ -90,6 +90,8 @@ set(headers animated.h
       RenderTexture.h
       TabardDetails.h
       TextureAnim.h
+      TextureBLP.h
+      TextureManager.h
       types.h
       video.h
       wdb2file.h
@@ -111,7 +113,6 @@ set(headers animated.h
 
 source_group("Header Files" FILES ${headers})
 
-use_log()
 use_core()
 use_glew()
 use_casclib()

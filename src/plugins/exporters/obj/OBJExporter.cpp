@@ -225,7 +225,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     if (p->init())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
       {
         uint32 a = model->indices[b];
         glm::vec4 vert;
@@ -269,10 +269,10 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     if (p->init())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
       {
         uint32 a = model->indices[b];
-        glm::vec2 tc =  model->origVertices[a].texcoords;
+        glm::vec2 tc =  model->origVertices[a].tex_coords[0];
         QString val;
         val.sprintf("vt %.06f %.06f", tc.x, 1-tc.y);
         file << val << "\n";
@@ -289,7 +289,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     if (p->init())
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
-      for (size_t k=0, b=geoset->istart; k<geoset->icount; k++,b++)
+      for (size_t k=0, b=geoset->indexStart; k<geoset->indexCount; k++,b++)
       {
         uint16 a = model->indices[b];
         glm::vec3 n = model->origVertices[a].normal;
@@ -313,11 +313,11 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
     {
       M2SkinSectionHD * geoset = model->geosets[p->geoIndex];
       // Build Vert2Point DB
-      uint16 *Vert2Point = new uint16[geoset->vstart + geoset->vcount];
-      for (uint16 v = geoset->vstart; v<(geoset->vstart + geoset->vcount); v++, pointnum++)
+      uint16 *Vert2Point = new uint16[geoset->vertexStart + geoset->vertexCount];
+      for (uint16 v = geoset->vertexStart; v<(geoset->vertexStart + geoset->vertexCount); v++, pointnum++)
         Vert2Point[v] = pointnum;
 
-      int g = geoset->id;
+      int g = geoset->skinSectionId;
 
       QString val;
       val.sprintf("Geoset_%03i",g);
@@ -343,7 +343,7 @@ bool OBJExporter::exportModelVertices(WoWModel * model, QTextStream & file, int 
       file << "usemtl " << matName << "\n";
       file << "s 1" << "\n";
       int triangles = 0;
-      for (size_t k=0; k<geoset->icount; k+=3)
+      for (size_t k=0; k<geoset->indexCount; k+=3)
       {
         file << "f ";
         file << QString("%1/%1/%1 ").arg(counter);
@@ -380,7 +380,7 @@ bool OBJExporter::exportModelMaterials(WoWModel * model, QTextStream & file, QSt
       glm::vec4 diff = p->ocol;
 
       QString val;
-      val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->id);
+      val.sprintf("Geoset_%03i", model->geosets[p->geoIndex]->skinSectionId);
       QString material = QString(model->modelname.c_str()) + "_" + val;
       material.replace("\\","_");
       if (p->unlit == true)

@@ -26,6 +26,8 @@
 
 #define _MODEL_CPP_
 #include "Model.h"
+
+#include "Logger.h"
 #undef _MODEL_CPP_
 
 // Includes / class Declarations
@@ -41,7 +43,7 @@
 // Other libraries
 
 // Current library
-
+//
 
 // Namespaces used
 //--------------------------------------------------------------------
@@ -52,20 +54,103 @@
 
 // Constructors
 //--------------------------------------------------------------------
-Model::~Model()
+Model::Model(GameFile* file)
 {
-
+  //load(file);
 }
 
 // Destructor
 //--------------------------------------------------------------------
+Model::~Model()
+{
+  for (auto* m : meshes_)
+    delete m;
+}
 
 
 // Public methods
 //--------------------------------------------------------------------
+void Model::draw(ShaderProgram & shader)
+{
+  for (auto* m : meshes_)
+    m->draw(shader);
+}
+
+void Model::addMesh(Mesh * mesh)
+{
+  meshes_.push_back(mesh);
+}
+
 
 // Protected methods
 //--------------------------------------------------------------------
 
 // Private methods
 //--------------------------------------------------------------------
+void Model::load(GameFile*)
+{
+  std::vector<glm::vec3> pos = {
+    // position
+
+   // front face
+   {-1.0f,  1.0f,  1.0f},
+   { 1.0f, -1.0f,  1.0f},
+   { 1.0f,  1.0f,  1.0f},
+   {-1.0f,  1.0f,  1.0f},
+   {-1.0f, -1.0f,  1.0f},
+   { 1.0f, -1.0f,  1.0f},
+
+   // back face
+   { 1.0f,  1.0f, -1.0f},
+   { 1.0f, -1.0f, -1.0f},
+   { 1.0f,  1.0f, -1.0f},
+   {-1.0f,  1.0f, -1.0f},
+   {-1.0f, -1.0f, -1.0f},
+   { 1.0f, -1.0f, -1.0f},
+
+   // left face
+   {-1.0f,  1.0f, -1.0f},
+   {-1.0f, -1.0f,  1.0f},
+   {-1.0f,  1.0f,  1.0f},
+   {-1.0f,  1.0f, -1.0f},
+   {-1.0f, -1.0f, -1.0f},
+   {-1.0f, -1.0f,  1.0f},
+
+   // right face
+   { 1.0f,  1.0f,  1.0f},
+   { 1.0f, -1.0f, -1.0f},
+   { 1.0f,  1.0f, -1.0f},
+   { 1.0f,  1.0f,  1.0f},
+   { 1.0f, -1.0f,  1.0f},
+   { 1.0f, -1.0f, -1.0f},
+
+   // top face
+   {-1.0f,  1.0f, -1.0f},
+   { 1.0f,  1.0f,  1.0f},
+   { 1.0f,  1.0f, -1.0f},
+   {-1.0f,  1.0f, -1.0f},
+   {-1.0f,  1.0f,  1.0f},
+   { 1.0f,  1.0f,  1.0f},
+
+   // bottom face
+   {-1.0f, -1.0f,  1.0f},
+   { 1.0f, -1.0f, -1.0f},
+   { 1.0f, -1.0f,  1.0f},
+   {-1.0f, -1.0f,  1.0f},
+   {-1.0f, -1.0f, -1.0f},
+   { 1.0f, -1.0f, -1.0f},
+  };
+
+  std::vector<Vertex> vertices;
+  for (auto & v : pos)
+  {
+    auto * vertex = new Vertex();
+    vertex->position = v;
+    vertices.push_back(*vertex);
+  }
+    
+ // meshes_.push_back(*(new Mesh(vertices)));
+
+  //std::vector<unsigned int> indices;
+}
+

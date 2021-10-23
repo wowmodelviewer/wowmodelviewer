@@ -10,6 +10,8 @@
 
 #include "modelheaders.h" // ModelAnimation
 
+#include "types.h"
+
 // This will be our animation manager
 // instead of using a STL vector or list or table, etc.
 // Decided to just limit it up to 4 animations to loop through - for experimental testing.

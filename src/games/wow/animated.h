@@ -86,16 +86,9 @@ public:
   }
 };
 
-// In WoW 2.0+ Blizzard are now storing rotation data in 16bit values instead of 32bit.
-// I don't really understand why as its only a very minor saving in model sizes and adds extra overhead in
-// processing the models.  Need this structure to read the data into.
-struct PACK_QUATERNION {  
-  int16 x,y,z,w;  
-}; 
-
 class Quat16ToQuat32 {
 public:
-  static const glm::fquat conv(const PACK_QUATERNION t)
+  static const glm::fquat conv(const M2CompQuat t)
   {
     return glm::fquat(
       float(t.w < 0 ? t.w + 32768 : t.w - 32767) / 32767.0f,
@@ -219,22 +212,22 @@ public:
 
   }
 
-  void init(M2Track &b, GameFile * f, std::vector<uint32> & gs)
+  void init(M2Track<D> &b, GameFile * f, std::vector<uint32> & gs)
   {
     globals = gs;
-    type = b.type;
-    seq = b.seq;
+    type = b.interpolation_type;
+    seq = b.global_sequence;
 
     // times
-    if (b.nTimes != b.nKeys)
+    if (b.timestamps.number != b.values.number)
       return;
-    //assert(b.nTimes == b.nKeys);
-    sizes = b.nTimes;
-    if( b.nTimes == 0 )
+    //assert(b.timestamps.number == b.values.number);
+    sizes = b.timestamps.number;
+    if( b.timestamps.number == 0 )
       return;
 
-    for(size_t j=0; j < b.nTimes; j++) {
-      AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+    for(size_t j=0; j < b.timestamps.number; j++) {
+      AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.timestamps.offset + j*sizeof(AnimationBlockHeader));
     
       unsigned int *ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
       for (size_t i=0; i < pHeadTimes->nEntrys; i++)
@@ -242,8 +235,8 @@ public:
     }
 
     // keyframes
-    for(size_t j=0; j < b.nKeys; j++) {
-      AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+    for(size_t j=0; j < b.values.number; j++) {
+      AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f->getBuffer() + b.values.offset + j*sizeof(AnimationBlockHeader));
 
       D *keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
       switch (type) {
@@ -271,21 +264,21 @@ public:
     }
   }
 
-  void init(M2Track &b, GameFile & f, const modelAnimData & modelData)
+  void init(M2Track<D> &b, GameFile & f, const modelAnimData & modelData)
   {
     globals = modelData.globalSequences;
-    type = b.type;
-    seq = b.seq;
+    type = b.interpolation_type;
+    seq = b.global_sequence;
 
     // times
-    if (b.nTimes != b.nKeys)
+    if (b.timestamps.number != b.values.number)
       return;
-    //assert(b.nTimes == b.nKeys);
-    sizes = b.nTimes;
-    if( b.nTimes == 0 )
+    //assert(b.timestamps.number == b.values.number);
+    sizes = b.timestamps.number;
+    if( b.timestamps.number == 0 )
       return;
 
-    for(size_t j=0; j < b.nTimes; j++) 
+    for(size_t j=0; j < b.timestamps.number; j++)
     {
       uint32 *ptimes;
       AnimationBlockHeader* pHeadTimes;
@@ -295,14 +288,14 @@ public:
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.timestamps.offset + j*sizeof(AnimationBlockHeader));
         ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
         if (animfile->getSize() < pHeadTimes->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j*sizeof(AnimationBlockHeader));
+        pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.timestamps.offset + j*sizeof(AnimationBlockHeader));
         ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
         if (f.getSize() < pHeadTimes->ofsEntrys)
           continue;
@@ -313,7 +306,7 @@ public:
     }
 
     // keyframes
-    for(size_t j=0; j < b.nKeys; j++) 
+    for(size_t j=0; j < b.values.number; j++)
     {
       D *keys;
       AnimationBlockHeader* pHeadKeys;
@@ -323,14 +316,14 @@ public:
         GameFile * animfile = it->second.first;
         GameFile * skelfile = it->second.second;
         skelfile->setChunk("SKB1");
-        pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.values.offset + j*sizeof(AnimationBlockHeader));
         keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
         if (animfile->getSize() < pHeadKeys->ofsEntrys)
           continue;
       }
       else
       {
-        pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j*sizeof(AnimationBlockHeader));
+        pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.values.offset + j*sizeof(AnimationBlockHeader));
         keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
         if (f.getSize() < pHeadKeys->ofsEntrys)
           continue;

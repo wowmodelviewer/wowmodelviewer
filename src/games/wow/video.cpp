@@ -19,6 +19,8 @@
     return glXGetProcAddress((GLubyte*)function_name);
   }
 #endif
+  
+#define OPENGL_CHECK { GLenum err = glGetError(); if (err) LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__; }
 
 
 #ifdef _WINDOWS
@@ -50,6 +52,7 @@ VideoSettings video;
 
 VideoSettings::VideoSettings()
 {
+  /*
 #ifdef _WINDOWS
   hWnd = NULL;
   hRC = NULL;
@@ -67,10 +70,12 @@ VideoSettings::VideoSettings()
 
   //useAntiAlias = true;
   useEnvMapping = true;
+  */
 }
 
 VideoSettings::~VideoSettings()
 {
+  /*
 #ifdef _WINDOWS
   // Clear the rendering context
   wglMakeCurrent(NULL, NULL); 
@@ -85,10 +90,11 @@ VideoSettings::~VideoSettings()
     hDC = NULL;
   }
 #endif
+*/
 }
-
 bool VideoSettings::Init()
 {
+  /*
   if(init)
     return true;
 
@@ -98,7 +104,7 @@ bool VideoSettings::Init()
   if (glewErr != GLEW_OK)
   {
     // problem: glewInit failed, something is seriously wrong
-    LOG_ERROR << "GLEW failed to initialize:" << glewGetErrorString(glewErr);
+    LOG_ERROR << "GLEW failed to initialize:" << glewErr;
     return false;
   }
   else
@@ -125,10 +131,6 @@ bool VideoSettings::Init()
   else
     supportNPOT = glewIsSupported("GL_ARB_texture_non_power_of_two") == GL_TRUE ? true : false;
 
-  supportFragProg = glewIsSupported("GL_ARB_fragment_program") == GL_TRUE ? true : false;
-  supportVertexProg = glewIsSupported("GL_ARB_vertex_program") == GL_TRUE ? true : false;
-  supportGLSL = glewIsSupported("GL_ARB_shading_language_100") == GL_TRUE ? true : false;
-  supportShaders = (supportFragProg && supportVertexProg);
   supportMultiTex = glewIsSupported("GL_ARB_multitexture") == GL_TRUE ? true : false;
   supportDrawRangeElements = glewIsSupported("GL_EXT_draw_range_elements") == GL_TRUE ? true : false;
 #if WIP_DH_SUPPORT > 0
@@ -173,9 +175,6 @@ bool VideoSettings::Init()
   LOG_INFO << "Support Draw Range Elements:" << (supportDrawRangeElements ? "true" : "false");
   LOG_INFO << "Support Vertex Buffer Objects:" << (supportVBO ? "true" : "false");
   LOG_INFO << "Support Point Sprites:" << (supportPointSprites ? "true" : "false");
-  LOG_INFO << "Support Pixel Shaders:"  << (supportFragProg ? "true" : "false");
-  LOG_INFO << "Support Vertex Shaders:" << (supportVertexProg ? "true" : "false");
-  LOG_INFO << "Support GLSL:" << (supportGLSL ? "true" : "false");
   LOG_INFO << "Support Anti-Aliasing:" << (supportAntiAlias ? "true" : "false");
   LOG_INFO << "Support Pixel Buffer Objects:" << (supportPBO ? "true" : "false");
   LOG_INFO << "Support Frame Buffer Objects:" << (supportFBO ? "true" : "false");
@@ -206,19 +205,17 @@ bool VideoSettings::Init()
   //supportTexRects = false;
 
   init = true;
-
-  return true;
+  */
+return true;
 }
 
 void VideoSettings::InitGL()
 {
+  /*
   if (!Init())
     return;
 
-  GLenum err = 0;
-  err = glGetError();
-  if (err)
-    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
+  OPENGL_CHECK
 
   if (supportDrawRangeElements && supportVBO) {
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -229,24 +226,26 @@ void VideoSettings::InitGL()
     glDisableClientState(GL_NORMAL_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   }
-  
+  OPENGL_CHECK
   if(supportAntiAlias && curCap.aaSamples>0)
     glEnable(GL_MULTISAMPLE_ARB);
-
+  OPENGL_CHECK
   // Colour and materials
   glEnable(GL_COLOR_MATERIAL);
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
   glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
   glColorMaterial(GL_FRONT_AND_BACK, GL_EMISSION);
   glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
-  
+  OPENGL_CHECK
   // For environmental mapped meshes
   glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 18.0f);
-
+  OPENGL_CHECK
 
   // TODO: Implement a scene graph, or scene manager to optimise OpenGL?
   // Default texture settings.
   glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE);
+  */
+  
   /*
   glTexEnvf(GL_TEXTURE_ENV,GL_RGB_SCALE, 1.000000);
   glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB, GL_PREVIOUS);
@@ -275,25 +274,26 @@ void VideoSettings::InitGL()
   glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_ALPHA, GL_MODULATE);
   */
 
+  /*
+  OPENGL_CHECK
   glAlphaFunc(GL_GEQUAL, 0.9f);
   glDepthFunc(GL_LEQUAL);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+  OPENGL_CHECK
   glPixelStorei(GL_PACK_ALIGNMENT, 1);
   glPixelStorei(GL_PACK_SWAP_BYTES, false);
   glPixelStorei(GL_PACK_LSB_FIRST, false);
-
+  OPENGL_CHECK
   glShadeModel(GL_SMOOTH);
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-
-  err = glGetError();
-  if (err)
-    LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
+  OPENGL_CHECK
+  */
 }
 
 
 void VideoSettings::EnumDisplayModes()
 {
+  /*
 #ifdef _WINDOWS
   if (!hasHardware)
     return;
@@ -369,20 +369,22 @@ void VideoSettings::EnumDisplayModes()
       caps.accum = results[9];
       caps.alpha = results[8];
       caps.colour = results[7];
-      //caps.pixelType = results[6]; /* WGL_TYPE_RGBA_ARB*/
+      //caps.pixelType = results[6]; // WGL_TYPE_RGBA_ARB
       caps.doubleBuffer = results[5];
       caps.zBuffer = results[3];
-      caps.hwAcc = results[2]; /*WGL_FULL_ACCELERATION_ARB / WGL_GENERIC_ACCELERATION_ARB / WGL_NO_ACCELERATION_ARB;*/
+      caps.hwAcc = results[2]; // WGL_FULL_ACCELERATION_ARB / WGL_GENERIC_ACCELERATION_ARB / WGL_NO_ACCELERATION_ARB;
       caps.stencil = results[1];
       capsList.push_back(caps);  // insert into the map
     }
   }
 #endif
+*/
 }
 
 // This function basically just uses any available display mode
 bool VideoSettings::GetAvailableMode()
 {
+  /*
 #ifdef _WINDOWS
   render = false;
 
@@ -436,11 +438,13 @@ bool VideoSettings::GetAvailableMode()
   SetCurrent();
   render = true;
 #endif
+*/
   return true;
 }
 
 bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
 {
+  /*
 #ifdef _WINDOWS
   if (!hasHardware)
     return false;
@@ -531,11 +535,14 @@ bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
   }
 #endif
   return false;
+  */
+  return true;
 }
 
 #ifdef _WINDOWS
 void VideoSettings::SetHandle(HWND hwnd, int bpp=16)
 {
+  /*
   hWnd = hwnd;
   desktopBPP = bpp;
 
@@ -554,11 +561,13 @@ void VideoSettings::SetHandle(HWND hwnd, int bpp=16)
   
   if (hasHardware && supportWGLPixelFormat)
     SetMode();
+    */
 }
 #endif
 
 void VideoSettings::Release()
 {
+  /*
 #ifdef _WINDOWS
   // Clear the rendering context
   wglMakeCurrent(NULL, NULL); 
@@ -573,10 +582,12 @@ void VideoSettings::Release()
     hDC = NULL;
   }
 #endif
+*/
 }
 
 void VideoSettings::SetMode()
 {
+  /*
 #ifdef _WINDOWS
   if (!hWnd)
     return;
@@ -660,10 +671,12 @@ void VideoSettings::SetMode()
     GetAvailableMode();
   }
 #endif
+*/
 }
 
 void VideoSettings::ResizeGLScene(int width, int height)    // Resize And Initialize The GL Window
 {
+  /*
   if (height==0)                    // Prevent A Divide By Zero By
     height=1;                    // Making Height Equal One
 
@@ -678,18 +691,22 @@ void VideoSettings::ResizeGLScene(int width, int height)    // Resize And Initia
 
   glMatrixMode(GL_MODELVIEW);              // Select The Modelview Matrix
   glLoadIdentity();                  // Reset The Modelview Matrix
+  */
 }
 
 
 void VideoSettings::SwapBuffers()
 {
+  /*
 #ifdef _WINDOWS
   ::SwapBuffers(hDC);
 #endif
+*/
 }
 
 void VideoSettings::SetCurrent()
 {
+  /*
 #ifdef _WINDOWS
   if(!wglMakeCurrent(hDC, hRC))
   {          // Try To Activate The Rendering Context
@@ -700,4 +717,5 @@ void VideoSettings::SetCurrent()
     render = true;
   }
 #endif
+*/
 }

@@ -85,11 +85,11 @@ void Bone::calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, b
   calc = true;
 }
 
-void Bone::initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data)
+void Bone::initV3(GameFile & f, M2CompBone &b, const modelAnimData & data)
 {
   calc = false;
 
-  parent = b.parent;
+  parent = b.parent_bone;
   pivot = b.pivot;
   billboard = (b.flags & MODELBONE_BILLBOARD) != 0;
 
@@ -97,6 +97,6 @@ void Bone::initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data)
 
   trans.init(b.translation, f, data);
   rot.init(b.rotation, f, data);
-  scale.init(b.scaling, f, data);
+  scale.init(b.scale, f, data);
 }
 

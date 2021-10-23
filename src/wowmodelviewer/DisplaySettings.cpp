@@ -10,6 +10,7 @@
 #include "globalvars.h"
 #include "Logger.h"
 #include "modelviewer.h"
+#include "video.h"
 
 IMPLEMENT_CLASS(DisplaySettings, wxWindow)
 
@@ -48,9 +49,6 @@ DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
   ADD_CONTROLS(CHECK_DRAWRANGEELEMENTS, wxID_ANY, _("Draw Range Elements"))
   ADD_CONTROLS(CHECK_ENVMAPPING, ID_CHECK_ENVMAPPING, _("Environmental Mapping"))
   ADD_CONTROLS(CHECK_NPOT, wxID_ANY, _("Non-Power of two"))
-  ADD_CONTROLS(CHECK_PIXELSHADERS, wxID_ANY, _("Pixel Shaders"))
-  ADD_CONTROLS(CHECK_VERTEXSHADERS, wxID_ANY, _("Vertex Shaders"))
-  ADD_CONTROLS(CHECK_GLSLSHADERS, wxID_ANY, _("GLSL Shaders"))
   #undef ADD_CONTROLS
 
   top->Add(gs,wxSizerFlags().Proportion(1).Expand().Border(wxALL, 10));
@@ -117,15 +115,6 @@ void DisplaySettings::Update()
 
   chkBox[CHECK_NPOT]->Disable();
   chkBox[CHECK_NPOT]->SetValue(video.supportNPOT);
-
-  chkBox[CHECK_PIXELSHADERS]->Disable();
-  chkBox[CHECK_PIXELSHADERS]->SetValue(video.supportFragProg);
-
-  chkBox[CHECK_VERTEXSHADERS]->Disable();
-  chkBox[CHECK_VERTEXSHADERS]->SetValue(video.supportVertexProg);
-
-  chkBox[CHECK_GLSLSHADERS]->Disable();
-  chkBox[CHECK_GLSLSHADERS]->SetValue(video.supportGLSL);
 }
 
 void DisplaySettings::OnButton(wxCommandEvent &event)

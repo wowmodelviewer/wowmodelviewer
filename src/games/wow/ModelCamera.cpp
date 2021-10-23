@@ -12,32 +12,21 @@
 #include "Logger.h"
 #include "GL/glew.h"
 
-void ModelCamera::init(GameFile * f, ModelCameraDef &mcd, std::vector<uint32> & global, std::string modelname)
+void ModelCamera::init(GameFile * f, M2Camera &mcd, std::vector<uint32> & global, std::string modelname)
 {
   LOG_INFO << "Using original Camera Model Definitions.";
   ok = true;
-  nearclip = mcd.nearclip;
-  farclip = mcd.farclip;
-  fov = mcd.fov;
-  pos = mcd.pos;
-  target = mcd.target;
+  nearclip = mcd.near_clip;
+  farclip = mcd.far_clip;
+  //fov = mcd.FoV; @TODO : to fix
+  pos = mcd.position_base;
+  target = mcd.target_position_base;
+  /*
+  @TODO : to fix
   tPos.init(mcd.transPos, f, global);
   tTarget.init(mcd.transTarget, f, global);
   rot.init(mcd.rot, f, global);
-}
-
-void ModelCamera::initv10(GameFile * f, ModelCameraDefV10 &mcd, std::vector<uint32> & global, std::string modelname)
-{
-  LOG_INFO << "Using version 10 Camera Model Definitions.";
-  ok = true;
-  nearclip = mcd.nearclip;
-  farclip = mcd.farclip;
-  pos = mcd.pos;
-  target = mcd.target;
-  tPos.init(mcd.transPos, f, global);
-  tTarget.init(mcd.transTarget, f, global);
-  rot.init(mcd.rot, f, global);
-  fov = 0.95f;
+  */
 }
 
 void ModelCamera::setup(size_t time)

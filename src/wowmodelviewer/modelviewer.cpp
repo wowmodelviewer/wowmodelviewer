@@ -38,6 +38,7 @@
 
 #include <fstream>
 
+#include "video.h"
 
 
 // default colour values
@@ -273,10 +274,6 @@ ModelViewer::ModelViewer()
     video.GetAvailableMode(); // Get first available display mode that supports the current desktop colour bitdepth
     }
     */
-
-    LOG_INFO << "Setting OpenGL render state...";
-    SetStatusText(wxT("Setting OpenGL render state..."));
-    video.InitGL();
 
     SetStatusText(wxEmptyString);
 
@@ -582,12 +579,13 @@ void ModelViewer::InitObjects()
   settingsControl->Show(false);
   modelbankControl = new ModelBankControl(this, ID_MODELBANK_FRAME);
 
-  canvas = new ModelCanvas(this);
+  int args[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 16, WX_GL_CORE_PROFILE, WX_GL_MAJOR_VERSION, 3, WX_GL_MINOR_VERSION, 3, 0 };
+  canvas = new ModelCanvas(this, args);
 
   if (video.secondPass) {
     canvas->Destroy();
     video.Release();
-    canvas = new ModelCanvas(this);
+    canvas = new ModelCanvas(this, args);
   }
 
   g_modelViewer = this;
@@ -2551,7 +2549,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
 
         for (size_t i = 0; i < canvas->model()->anims.size(); i++)
         {
-          wxString animName = animsMap[canvas->model()->anims[i].animID];
+          wxString animName = animsMap[canvas->model()->anims[i].id];
           animName << L" [";
           animName << i;
           animName << L"]";
@@ -2568,7 +2566,7 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
         for (unsigned int i = 0; i < selection.GetCount(); i++)
-          animsToExport.push_back(canvas->model()->anims[selection[i]].Index);
+          animsToExport.push_back(canvas->model()->anims[selection[i]].aliasNext);
 
         plugin->setAnimationsToExport(animsToExport);
 

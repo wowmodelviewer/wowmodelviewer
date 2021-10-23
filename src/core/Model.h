@@ -37,14 +37,17 @@
 // Other libraries
 
 // Current library
+#include "Mesh.h"
 
 
 // Namespaces used
 //--------------------------------------------------------------------
 
 
+class ShaderProgram;
 // Class Declaration
 //--------------------------------------------------------------------
+class GameFile;
 
 class Model
 {
@@ -52,12 +55,15 @@ class Model
     // Constants / Enums
 
     // Constructors
-    Model() {};
+    Model(GameFile *);
 
     // Destructors
-    virtual ~Model() = 0;
+    virtual ~Model();
 
     // Methods
+    void draw(ShaderProgram &);
+
+    void addMesh(Mesh * mesh);
 
     // Members
 
@@ -80,8 +86,11 @@ class Model
     // Destructors
 
     // Methods
+    void load(GameFile *);
 
     // Members
+    std::vector<Mesh *> meshes_;
+    
 
     // friend class declarations
 

@@ -20,7 +20,7 @@ struct ModelColor
   Animated<glm::vec3> color;
   AnimatedShort opacity;
 
-  void init(GameFile * f, ModelColorDef &mcd, std::vector<uint32> & global);
+  void init(GameFile * f, M2Color &mcd, std::vector<uint32> & global);
 };
 
 

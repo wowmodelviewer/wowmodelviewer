@@ -88,6 +88,7 @@ glGetAll()
 
 void glInitAll()
 {
+  return;
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_BLEND);
   glDisable(GL_COLOR_MATERIAL);
@@ -110,10 +111,10 @@ void glInitAll()
   glDepthFunc(GL_NEVER);
 }
 
-WoWModel::WoWModel(GameFile * file, bool forceAnim):
-ManagedItem(""),
-forceAnim(forceAnim),
-gamefile(file)
+WoWModel::WoWModel(GameFile * file, bool forceAnim) :
+  ManagedItem(""),
+  forceAnim(forceAnim),
+  gamefile(file), Model(file)
 {
   // Initiate our model variables.
   trans = 1.0f;
@@ -188,7 +189,7 @@ WoWModel::~WoWModel()
     // There is a small memory leak somewhere with the textures.
     // Especially if the texture was built into the model.
     // No matter what I try though I can't find the memory to unload.
-    if (header.nTextures)
+    if (header.textures.number)
     {
       // For character models, the texture isn't loaded into the texture manager, manually remove it
       glDeleteTextures(1, &replaceTextures[1]);
@@ -243,80 +244,50 @@ void WoWModel::displayHeader(ModelHeader & a_header)
 {
   LOG_INFO << "id:" << a_header.id[0] << a_header.id[1] << a_header.id[2] << a_header.id[3];
   LOG_INFO << "version:" << (int)a_header.version[0] << (int)a_header.version[1] << (int)a_header.version[2] << (int)a_header.version[3];
-  LOG_INFO << "nameLength:" << a_header.nameLength;
-  LOG_INFO << "nameOfs:" << a_header.nameOfs;
-  LOG_INFO << "GlobalModelFlags:" << a_header.GlobalModelFlags;
-  LOG_INFO << "nGlobalSequences:" << a_header.nGlobalSequences;
-  LOG_INFO << "ofsGlobalSequences:" << a_header.ofsGlobalSequences;
-  LOG_INFO << "nAnimations:" << a_header.nAnimations;
-  LOG_INFO << "ofsAnimations:" << a_header.ofsAnimations;
-  LOG_INFO << "nAnimationLookup:" << a_header.nAnimationLookup;
-  LOG_INFO << "ofsAnimationLookup:" << a_header.ofsAnimationLookup;
-  LOG_INFO << "nBones:" << a_header.nBones;
-  LOG_INFO << "ofsBones:" << a_header.ofsBones;
-  LOG_INFO << "nKeyBoneLookup:" << a_header.nKeyBoneLookup;
-  LOG_INFO << "ofsKeyBoneLookup:" << a_header.ofsKeyBoneLookup;
-  LOG_INFO << "nVertices:" << a_header.nVertices;
-  LOG_INFO << "ofsVertices:" << a_header.ofsVertices;
-  LOG_INFO << "nViews:" << a_header.nViews;
-  LOG_INFO << "nColors:" << a_header.nColors;
-  LOG_INFO << "ofsColors:" << a_header.ofsColors;
-  LOG_INFO << "nTextures:" << a_header.nTextures;
-  LOG_INFO << "ofsTextures:" << a_header.ofsTextures;
-  LOG_INFO << "nTransparency:" << a_header.nTransparency;
-  LOG_INFO << "ofsTransparency:" << a_header.ofsTransparency;
-  LOG_INFO << "nTexAnims:" << a_header.nTexAnims;
-  LOG_INFO << "ofsTexAnims:" << a_header.ofsTexAnims;
-  LOG_INFO << "nTexReplace:" << a_header.nTexReplace;
-  LOG_INFO << "ofsTexReplace:" << a_header.ofsTexReplace;
-  LOG_INFO << "nTexFlags:" << a_header.nTexFlags;
-  LOG_INFO << "ofsTexFlags:" << a_header.ofsTexFlags;
-  LOG_INFO << "nBoneLookup:" << a_header.nBoneLookup;
-  LOG_INFO << "ofsBoneLookup:" << a_header.ofsBoneLookup;
-  LOG_INFO << "nTexLookup:" << a_header.nTexLookup;
-  LOG_INFO << "ofsTexLookup:" << a_header.ofsTexLookup;
-  LOG_INFO << "nTexUnitLookup:" << a_header.nTexUnitLookup;
-  LOG_INFO << "ofsTexUnitLookup:" << a_header.ofsTexUnitLookup;
-  LOG_INFO << "nTransparencyLookup:" << a_header.nTransparencyLookup;
-  LOG_INFO << "ofsTransparencyLookup:" << a_header.ofsTransparencyLookup;
-  LOG_INFO << "nTexAnimLookup:" << a_header.nTexAnimLookup;
-  LOG_INFO << "ofsTexAnimLookup:" << a_header.ofsTexAnimLookup;
+  LOG_INFO << "nameOfs:" << a_header.name.offset;
+  LOG_INFO << "global_loops:" << a_header.global_loops.number;
+  LOG_INFO << "sequences:" << a_header.sequences.number;
+  LOG_INFO << "sequenceIdxHashById:" << a_header.sequenceIdxHashById.number;
+  LOG_INFO << "bones:" << a_header.bones.number;
+  LOG_INFO << "boneIndicesById:" << a_header.boneIndicesById.number;
+  LOG_INFO << "vertices:" << a_header.vertices.number;
+  LOG_INFO << "num_skin_profiles:" << a_header.num_skin_profiles;
+  LOG_INFO << "colors:" << a_header.colors.number;
+  LOG_INFO << "textures:" << a_header.textures.number;
+  LOG_INFO << "texture_weights:" << a_header.texture_weights.number;
+  LOG_INFO << "texture_transforms:" << a_header.texture_transforms.number;
+  LOG_INFO << "textureIndicesById:" << a_header.textureIndicesById.number;
+  LOG_INFO << "materials:" << a_header.materials.number;
+  LOG_INFO << "boneCombos:" << a_header.boneCombos.number;
+  LOG_INFO << "textureCombos:" << a_header.textureCombos.number;
+  LOG_INFO << "textureTransformBoneMap:" << a_header.textureTransformBoneMap.number;
+  LOG_INFO << "textureWeightCombos:" << a_header.textureWeightCombos.number;
+  LOG_INFO << "textureTransformCombos:" << a_header.textureTransformCombos.number;
+  
+  LOG_INFO << "bounding_sphere_radius:" << a_header.bounding_sphere_radius;
+  LOG_INFO << "collision_sphere_radius:" << a_header.collision_sphere_radius;
 
-  //  LOG_INFO << "collisionSphere :";
-  //  displaySphere(a_header.collisionSphere);
-  //  LOG_INFO << "boundSphere :";
-  //  displaySphere(a_header.boundSphere);
+  LOG_INFO << "collisionIndices:" << a_header.collisionIndices.number;
+  LOG_INFO << "collisionPositions:" << a_header.collisionPositions.number;
+  LOG_INFO << "collisionFaceNormals:" << a_header.collisionFaceNormals.number;
 
-  LOG_INFO << "nBoundingTriangles:" << a_header.nBoundingTriangles;
-  LOG_INFO << "ofsBoundingTriangles:" << a_header.ofsBoundingTriangles;
-  LOG_INFO << "nBoundingVertices:" << a_header.nBoundingVertices;
-  LOG_INFO << "ofsBoundingVertices:" << a_header.ofsBoundingVertices;
-  LOG_INFO << "nBoundingNormals:" << a_header.nBoundingNormals;
-  LOG_INFO << "ofsBoundingNormals:" << a_header.ofsBoundingNormals;
+  LOG_INFO << "attachments:" << a_header.attachments.number;
+  LOG_INFO << "attachmentIndicesById:" << a_header.attachmentIndicesById.number;
+  LOG_INFO << "events:" << a_header.events.number;
+  LOG_INFO << "lights:" << a_header.lights.number;
+  LOG_INFO << "cameras:" << a_header.cameras.number;
+  LOG_INFO << "cameraIndicesById:" << a_header.cameraIndicesById.number;
+  LOG_INFO << "ribbon_emitters:" << a_header.ribbon_emitters.number;
+  LOG_INFO << "particle_emitters:" << a_header.particle_emitters.number;
 
-  LOG_INFO << "nAttachments:" << a_header.nAttachments;
-  LOG_INFO << "ofsAttachments:" << a_header.ofsAttachments;
-  LOG_INFO << "nAttachLookup:" << a_header.nAttachLookup;
-  LOG_INFO << "ofsAttachLookup:" << a_header.ofsAttachLookup;
-  LOG_INFO << "nEvents:" << a_header.nEvents;
-  LOG_INFO << "ofsEvents:" << a_header.ofsEvents;
-  LOG_INFO << "nLights:" << a_header.nLights;
-  LOG_INFO << "ofsLights:" << a_header.ofsLights;
-  LOG_INFO << "nCameras:" << a_header.nCameras;
-  LOG_INFO << "ofsCameras:" << a_header.ofsCameras;
-  LOG_INFO << "nCameraLookup:" << a_header.nCameraLookup;
-  LOG_INFO << "ofsCameraLookup:" << a_header.ofsCameraLookup;
-  LOG_INFO << "nRibbonEmitters:" << a_header.nRibbonEmitters;
-  LOG_INFO << "ofsRibbonEmitters:" << a_header.ofsRibbonEmitters;
-  LOG_INFO << "nParticleEmitters:" << a_header.nParticleEmitters;
-  LOG_INFO << "ofsParticleEmitters:" << a_header.ofsParticleEmitters;
+  LOG_INFO << "textureCombinerCombos:" << a_header.textureCombinerCombos.number;
 }
 
 
 bool WoWModel::isAnimated()
 {
   // see if we have any animated bones
-  ModelBoneDef *bo = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
+  M2CompBone *bo = (M2CompBone*)(gamefile->getBuffer() + header.bones.offset);
 
   animGeometry = false;
   animBones = false;
@@ -326,10 +297,10 @@ bool WoWModel::isAnimated()
   {
     for (size_t b = 0; b < 4; b++)
     {
-      if (ov_it->weights[b]>0)
+      if (ov_it->bone_weights[b]>0)
       {
-        ModelBoneDef &bb = bo[ov_it->bones[b]];
-        if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
+        M2CompBone &bb = bo[ov_it->bone_indices[b]];
+        if (bb.translation.interpolation_type || bb.rotation.interpolation_type || bb.scale.interpolation_type || (bb.flags & MODELBONE_BILLBOARD))
         {
           if (bb.flags & MODELBONE_BILLBOARD)
           {
@@ -351,8 +322,8 @@ bool WoWModel::isAnimated()
   {
     for (uint i = 0; i < bones.size() ; i++)
     {
-      ModelBoneDef &bb = bo[i];
-      if (bb.translation.type || bb.rotation.type || bb.scaling.type)
+      M2CompBone &bb = bo[i];
+      if (bb.translation.interpolation_type || bb.rotation.interpolation_type || bb.scale.interpolation_type)
       {
         animBones = true;
         animGeometry = true;
@@ -361,21 +332,21 @@ bool WoWModel::isAnimated()
     }
   }
 
-  bool animMisc = header.nCameras > 0 || // why waste time, pretty much all models with cameras need animation
-    header.nLights > 0 || // same here
-    header.nParticleEmitters > 0 ||
-    header.nRibbonEmitters > 0;
+  bool animMisc = header.cameras.number > 0 || // why waste time, pretty much all models with cameras need animation
+    header.lights.number > 0 || // same here
+    header.particle_emitters.number > 0 ||
+    header.ribbon_emitters.number > 0;
 
   if (animMisc)
     animBones = true;
 
   // animated colors
-  if (header.nColors)
+  if (header.colors.number != 0)
   {
-    ModelColorDef *cols = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
-    for (size_t i = 0; i < header.nColors; i++)
+    M2Color *cols = (M2Color*)(gamefile->getBuffer() + header.colors.offset);
+    for (size_t i = 0; i < header.colors.number; i++)
     {
-      if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
+      if (cols[i].color.interpolation_type != 0 || cols[i].alpha.interpolation_type != 0)
       {
         animMisc = true;
         break;
@@ -384,12 +355,12 @@ bool WoWModel::isAnimated()
   }
 
   // animated opacity
-  if (header.nTransparency && !animMisc)
+  if (header.texture_weights.number && !animMisc)
   {
-    ModelTransDef *trs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
-    for (size_t i = 0; i < header.nTransparency; i++)
+    M2TextureWeight *trs = (M2TextureWeight*)(gamefile->getBuffer() + header.texture_weights.offset);
+    for (size_t i = 0; i < header.texture_weights.number; i++)
     {
-      if (trs[i].trans.type != 0)
+      if (trs[i].weight.interpolation_type != 0)
       {
         animMisc = true;
         break;
@@ -398,7 +369,7 @@ bool WoWModel::isAnimated()
   }
 
   // guess not...
-  return animGeometry || (header.nTexAnims > 0) || animMisc;
+  return animGeometry || (header.texture_transforms.number > 0) || animMisc;
 }
 
 void WoWModel::initCommon()
@@ -438,7 +409,7 @@ void WoWModel::initCommon()
 
   LOG_INFO << "Loading model:" << tempname << "size:" << gamefile->getSize();
 
-  // displayHeader(header);
+  displayHeader(header);
 
   if (header.id[0] != 'M' && header.id[1] != 'D' && header.id[2] != '2' && header.id[3] != '0')
   {
@@ -448,9 +419,6 @@ void WoWModel::initCommon()
     gamefile->close();
     return;
   }
-
-  if (header.GlobalModelFlags & 0x200000)
-    model24500 = true;
 
   modelname = tempname.toStdString();
   QStringList list = tempname.split("\\");
@@ -464,7 +432,7 @@ void WoWModel::initCommon()
   // 4 1 0 0 = WoW 2.0 models
   // 0 1 0 0 = WoW 1.0 models
 
-  if (gamefile->getSize() < header.ofsParticleEmitters)
+  if (gamefile->getSize() < header.particle_emitters.offset)
   {
     LOG_ERROR << "Unable to load the Model \"" << tempname << "\", appears to be corrupted.";
     gamefile->close();
@@ -527,23 +495,23 @@ void WoWModel::initCommon()
     }
     gamefile->setChunk("MD21");
   }
-  else if (header.nGlobalSequences)
+  else if (header.global_loops.number != 0)
   {
     // vector.assign() isn't working:
     // globalSequences.assign(gamefile->getBuffer() + header.ofsGlobalSequences, gamefile->getBuffer() + header.ofsGlobalSequences + header.nGlobalSequences);
-    uint32 * buffer = new uint32[header.nGlobalSequences];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsGlobalSequences, sizeof(uint32)*header.nGlobalSequences);
-    globalSequences.assign(buffer, buffer + header.nGlobalSequences);
+    uint32 * buffer = new uint32[header.global_loops.number];
+    memcpy(buffer, gamefile->getBuffer() + header.global_loops.offset, sizeof(uint32)*header.global_loops.number);
+    globalSequences.assign(buffer, buffer + header.global_loops.number);
     delete[] buffer;
   }
 
   if (gamefile->isChunked() && gamefile->setChunk("SFID"))
   {
     uint32 skinfile;
-    
-    if (header.nViews > 0)
-    { 
-      for (uint i = 0; i < header.nViews; i++)
+
+    if (header.num_skin_profiles > 0)
+    {
+      for (uint i = 0; i < header.num_skin_profiles; i++)
       {
         gamefile->read(&skinfile, sizeof(skinfile));
         skinFileIDs.push_back(skinfile);
@@ -563,9 +531,9 @@ void WoWModel::initCommon()
   showModel = true;
   alpha_ = 1.0f;
 
-  M2Vertex * buffer = new M2Vertex[header.nVertices];
-  memcpy(buffer, gamefile->getBuffer() + header.ofsVertices, sizeof(M2Vertex)*header.nVertices);
-  rawVertices.assign(buffer, buffer + header.nVertices);
+  M2Vertex * buffer = new M2Vertex[header.vertices.number];
+  memcpy(buffer, gamefile->getBuffer() + header.vertices.offset, sizeof(M2Vertex)*header.vertices.number);
+  rawVertices.assign(buffer, buffer + header.vertices.number);
   delete[] buffer;
 
   origVertices = rawVertices;
@@ -592,25 +560,25 @@ void WoWModel::initCommon()
   rad = sqrtf(rad);
 
   // bounds
-  if (header.nBoundingVertices > 0)
+  if (header.collisionPositions.number > 0)
   {
-    glm::vec3 * buffer = new glm::vec3[header.nBoundingVertices];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
-    bounds.assign(buffer, buffer + header.nBoundingVertices);
+    glm::vec3 * buffer = new glm::vec3[header.collisionPositions.number];
+    memcpy(buffer, gamefile->getBuffer() + header.collisionPositions.offset, sizeof(glm::vec3)*header.collisionPositions.number);
+    bounds.assign(buffer, buffer + header.collisionPositions.number);
     delete[] buffer;
   }
 
-  if (header.nBoundingTriangles > 0)
+  if (header.collisionIndices.number > 0)
   {
-    uint16 * buffer = new uint16[header.nBoundingTriangles];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
-    boundTris.assign(buffer, buffer + header.nBoundingTriangles);
+    uint16 * buffer = new uint16[header.collisionIndices.number];
+    memcpy(buffer, gamefile->getBuffer() + header.collisionIndices.offset, sizeof(uint16_t)*header.collisionIndices.number);
+    boundTris.assign(buffer, buffer + header.collisionIndices.number);
     delete[] buffer;
   }
 
   // textures
-  ModelTextureDef *texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
-  if (header.nTextures)
+  M2Texture *texdef = (M2Texture*)(gamefile->getBuffer() + header.textures.offset);
+  if (header.textures.number)
   {
     textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
@@ -622,7 +590,7 @@ void WoWModel::initCommon()
       gamefile->setChunk("MD21", false);
     }
 
-    for (size_t i = 0; i < header.nTextures; i++)
+    for (size_t i = 0; i < header.textures.number; i++)
     {
       /*
       Texture Types
@@ -664,7 +632,7 @@ void WoWModel::initCommon()
         }
         else
         {
-          QString texname((char*)(gamefile->getBuffer() + texdef[i].nameOfs));
+          QString texname((char*)(gamefile->getBuffer() + texdef[i].filename.offset));
           tex = GAMEDIRECTORY.getFile(texname);
         }
         textures[i] = TEXTUREMANAGER.add(tex);
@@ -702,8 +670,8 @@ void WoWModel::initCommon()
       {
         SKA1 ska1;
         memcpy(&ska1, skelFile->getBuffer(), sizeof(SKA1));
-        header.nAttachments = ska1.nAttachments;
-        ModelAttachmentDef *attachments = (ModelAttachmentDef*)(skelFile->getBuffer() + ska1.ofsAttachments);
+        header.attachments.number = ska1.nAttachments;
+        M2Attachment *attachments = (M2Attachment*)(skelFile->getBuffer() + ska1.ofsAttachments);
         for (size_t i = 0; i < ska1.nAttachments; i++)
         {
           ModelAttachment att;
@@ -712,7 +680,7 @@ void WoWModel::initCommon()
           atts.push_back(att);
         }
 
-        header.nAttachLookup = ska1.nAttachLookup;
+        header.attachmentIndicesById.number = ska1.nAttachLookup;
         if (ska1.nAttachLookup > 0)
         {
           int16 *p = (int16*)(skelFile->getBuffer() + ska1.ofsAttachLookup);
@@ -733,10 +701,10 @@ void WoWModel::initCommon()
   else
   {
     // attachments
-    if (header.nAttachments)
+    if (header.attachments.number)
     {
-      ModelAttachmentDef *attachments = (ModelAttachmentDef*)(gamefile->getBuffer() + header.ofsAttachments);
-      for (size_t i = 0; i < header.nAttachments; i++)
+      M2Attachment *attachments = (M2Attachment*)(gamefile->getBuffer() + header.attachments.offset);
+      for (size_t i = 0; i < header.attachments.number; i++)
       {
         ModelAttachment att;
         att.model = this;
@@ -745,12 +713,12 @@ void WoWModel::initCommon()
       }
     }
 
-    if (header.nAttachLookup)
+    if (header.attachmentIndicesById.number)
     {
-      int16 *p = (int16*)(gamefile->getBuffer() + header.ofsAttachLookup);
-      if (header.nAttachLookup > ATT_MAX)
-        LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
-      for (size_t i = 0; i < header.nAttachLookup; i++)
+      int16 *p = (int16*)(gamefile->getBuffer() + header.attachmentIndicesById.offset);
+      if (header.attachmentIndicesById.number > ATT_MAX)
+        LOG_ERROR << "Model AttachLookup" << header.attachmentIndicesById.number << "over" << ATT_MAX;
+      for (size_t i = 0; i < header.attachmentIndicesById.number; i++)
       {
         if (i > ATT_MAX - 1)
           break;
@@ -761,24 +729,24 @@ void WoWModel::initCommon()
 
 
   // init colors
-  if (header.nColors)
+  if (header.colors.number)
   {
-    colors.resize(header.nColors);
-    ModelColorDef *colorDefs = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
+    colors.resize(header.colors.number);
+    M2Color *colorDefs = (M2Color*)(gamefile->getBuffer() + header.colors.offset);
     for (uint i = 0; i < colors.size(); i++)
       colors[i].init(gamefile, colorDefs[i], globalSequences);
   }
 
   // init transparency
-  if (header.nTransparency)
+  if (header.texture_weights.number)
   {
-    transparency.resize(header.nTransparency);
-    ModelTransDef *trDefs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
-    for (uint i = 0; i < header.nTransparency; i++)
+    transparency.resize(header.texture_weights.number);
+    M2TextureWeight *trDefs = (M2TextureWeight*)(gamefile->getBuffer() + header.texture_weights.offset);
+    for (uint i = 0; i < header.texture_weights.number; i++)
       transparency[i].init(gamefile, trDefs[i], globalSequences);
   }
 
-  if (header.nViews)
+  if (header.num_skin_profiles)
   {
     // just use the first LOD/view
     // First LOD/View being the worst?
@@ -806,7 +774,7 @@ void WoWModel::initCommon()
   {
     creatureGeosetDataID = r.values[0][0].toInt();
   }
-  
+
   gamefile->close();
 }
 
@@ -900,7 +868,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     {
       for (auto it : afids)
       {
-        if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
+        if ((it.animId == anims[i].id) && (it.subAnimId == anims[i].variationIndex))
         {
           anim = GAMEDIRECTORY.getFile(it.fileId);
           break;
@@ -910,7 +878,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     else // else use file naming to get them
     {
       QString tempname = QString::fromStdString(modelname).replace(".m2", "");
-      tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
+      tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].id, 4, 10, QChar('0')).arg(anims[i].variationIndex, 2, 10, QChar('0'));
       anim = GAMEDIRECTORY.getFile(tempname);
     }
 
@@ -918,12 +886,12 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     {
       anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
       {     
-        auto animIt = data.animfiles.find(anims[i].animID);
+        auto animIt = data.animfiles.find(anims[i].id);
         if (animIt != data.animfiles.end())
-          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
+          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].id].first->fullname() << "by" << anim->fullname();
       }
       
-      data.animfiles[anims[i].animID] = std::make_pair(anim, f);
+      data.animfiles[anims[i].id] = std::make_pair(anim, f);
     }
   }
 
@@ -1011,10 +979,10 @@ void WoWModel::initAnimated()
           fileToUse->read(&skb1, sizeof(skb1));
           memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
           bones.resize(skb1.nBones);
-          ModelBoneDef *mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
+          M2CompBone *mb = (M2CompBone*)(fileToUse->getBuffer() + skb1.ofsBones);
 
           for (uint i = 0; i < anims.size(); i++)
-            data.animIndexToAnimId[i] = anims[i].animID;
+            data.animIndexToAnimId[i] = anims[i].id;
 
           for (size_t i = 0; i < skb1.nBones; i++)
             bones[i].initV3(*fileToUse, mb[i], data);
@@ -1036,7 +1004,7 @@ void WoWModel::initAnimated()
     }
     gamefile->setChunk("MD21", false);
   }
-  else if (header.nAnimations > 0)
+  else if (header.sequences.number > 0)
   {
     std::vector<AFID> afids;
 
@@ -1046,29 +1014,29 @@ void WoWModel::initAnimated()
       gamefile->setChunk("MD21", false);
     }
 
-    readAnimsFromFile(gamefile, afids, data, header.nAnimations, header.ofsAnimations, header.nAnimationLookup, header.ofsAnimationLookup);
+    readAnimsFromFile(gamefile, afids, data, header.sequences.number, header.sequences.offset, header.sequenceIdxHashById.number, header.sequenceIdxHashById.offset);
 
     animManager = new AnimManager(*this);
 
     // init bones...
-    bones.resize(header.nBones);
-    ModelBoneDef *mb = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
+    bones.resize(header.bones.number);
+    M2CompBone *mb = (M2CompBone*)(gamefile->getBuffer() + header.bones.offset);
 
     for (uint i = 0; i < anims.size(); i++)
-      data.animIndexToAnimId[i] = anims[i].animID;
+      data.animIndexToAnimId[i] = anims[i].id;
 
     for (uint i = 0; i < bones.size(); i++)
       bones[i].initV3(*gamefile, mb[i], data);
 
     // Block keyBoneLookup is a lookup table for Key Skeletal Bones, hands, arms, legs, etc.
-    if (header.nKeyBoneLookup < BONE_MAX)
+    if (header.boneIndicesById.number < BONE_MAX)
     {
-      memcpy(keyBoneLookup, gamefile->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*header.nKeyBoneLookup);
+      memcpy(keyBoneLookup, gamefile->getBuffer() + header.boneIndicesById.offset, sizeof(int16)*header.boneIndicesById.number);
     }
     else
     {
-      memcpy(keyBoneLookup, gamefile->getBuffer() + header.ofsKeyBoneLookup, sizeof(int16)*BONE_MAX);
-      LOG_ERROR << "KeyBone number" << header.nKeyBoneLookup << "over" << BONE_MAX;
+      memcpy(keyBoneLookup, gamefile->getBuffer() + header.boneIndicesById.offset, sizeof(int16)*BONE_MAX);
+      LOG_ERROR << "KeyBone number" << header.boneIndicesById.number << "over" << BONE_MAX;
     }
   }
 
@@ -1085,7 +1053,7 @@ void WoWModel::initAnimated()
   texCoords = new glm::vec2[origVertices.size()];
   auto ov_it = origVertices.begin();
   for (size_t i = 0; i < origVertices.size(); i++, ++ov_it)
-    texCoords[i] = ov_it->texcoords;
+    texCoords[i] = ov_it->tex_coords[0];
 
   if (video.supportVBO)
   {
@@ -1111,34 +1079,34 @@ void WoWModel::initAnimated()
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   }
 
-  if (header.nTexAnims > 0)
+  if (header.texture_transforms.number > 0)
   {
-    texAnims.resize(header.nTexAnims);
-    ModelTexAnimDef *ta = (ModelTexAnimDef*)(gamefile->getBuffer() + header.ofsTexAnims);
+    texAnims.resize(header.texture_transforms.number);
+    M2TextureTransform *ta = (M2TextureTransform*)(gamefile->getBuffer() + header.texture_transforms.offset);
                                                                  
     for (uint i = 0; i < texAnims.size(); i++)
       texAnims[i].init(gamefile, ta[i], globalSequences);
   }
 
-  if (header.nEvents)
+  if (header.events.number > 0)
   {
-    ModelEventDef *edefs = (ModelEventDef *)(gamefile->getBuffer() + header.ofsEvents);
-    events.resize(header.nEvents);
+    M2Event *edefs = (M2Event *)(gamefile->getBuffer() + header.events.offset);
+    events.resize(header.events.number);
     for (uint i = 0; i < events.size(); i++)
       events[i].init(edefs[i]);
   }
 
   // particle systems
-  if (header.nParticleEmitters)
+  if (header.particle_emitters.number > 0)
   {
-    M2ParticleDef *pdefs = (M2ParticleDef *)(gamefile->getBuffer() + header.ofsParticleEmitters);
-    M2ParticleDef *pdef;
-    particleSystems.resize(header.nParticleEmitters);
+    M2Particle *pdefs = (M2Particle *)(gamefile->getBuffer() + header.particle_emitters.offset);
+    M2Particle *pdef;
+    particleSystems.resize(header.particle_emitters.number);
     hasParticles = true;
     showParticles = true;
     for (uint i = 0; i < particleSystems.size(); i++)
     {
-      pdef = (M2ParticleDef *)&pdefs[i];
+      pdef = (M2Particle *)&pdefs[i];
       particleSystems[i].model = this;
       particleSystems[i].init(gamefile, *pdef, globalSequences);
       int pci = particleSystems[i].particleColID;
@@ -1149,10 +1117,10 @@ void WoWModel::initAnimated()
   }
 
   // ribbons
-  if (header.nRibbonEmitters)
+  if (header.ribbon_emitters.number > 0)
   {
-    ModelRibbonEmitterDef *rdefs = (ModelRibbonEmitterDef *)(gamefile->getBuffer() + header.ofsRibbonEmitters);
-    ribbons.resize(header.nRibbonEmitters);
+    M2Ribbon *rdefs = (M2Ribbon *)(gamefile->getBuffer() + header.ribbon_emitters.offset);
+    ribbons.resize(header.ribbon_emitters.number);
     for (uint i = 0; i < ribbons.size(); i++)
     {
       ribbons[i].model = this;
@@ -1161,28 +1129,16 @@ void WoWModel::initAnimated()
   }
 
   // Cameras
-  if (header.nCameras > 0)
+  if (header.cameras.number > 0)
   {
-    if (header.version[0] <= 9)
+    M2Camera *camDefs = (M2Camera*)(gamefile->getBuffer() + header.cameras.offset);
+    for (size_t i = 0; i < header.cameras.number; i++)
     {
-      ModelCameraDef *camDefs = (ModelCameraDef*)(gamefile->getBuffer() + header.ofsCameras);
-      for (size_t i = 0; i < header.nCameras; i++)
-      {
-        ModelCamera a;
-        a.init(gamefile, camDefs[i], globalSequences, modelname);
-        cam.push_back(a);
-      }
+      ModelCamera a;
+      a.init(gamefile, camDefs[i], globalSequences, modelname);
+      cam.push_back(a);
     }
-    else if (header.version[0] <= 16)
-    {
-      ModelCameraDefV10 *camDefs = (ModelCameraDefV10*)(gamefile->getBuffer() + header.ofsCameras);
-      for (size_t i = 0; i < header.nCameras; i++)
-      {
-        ModelCamera a;
-        a.initv10(gamefile, camDefs[i], globalSequences, modelname);
-        cam.push_back(a);
-      }
-    }
+   
     if (cam.size() > 0)
     {
       hasCamera = true;
@@ -1190,10 +1146,10 @@ void WoWModel::initAnimated()
   }
 
   // init lights
-  if (header.nLights)
+  if (header.lights.number > 0)
   {
-    lights.resize(header.nLights);
-    ModelLightDef *lDefs = (ModelLightDef*)(gamefile->getBuffer() + header.ofsLights);
+    lights.resize(header.lights.number);
+    M2Light *lDefs = (M2Light*)(gamefile->getBuffer() + header.lights.offset);
     for (uint i = 0; i < lights.size(); i++)
       lights[i].init(gamefile, lDefs[i], globalSequences);
   }
@@ -1247,10 +1203,10 @@ void WoWModel::setLOD(int index)
   }
   
   // Texture definitions
-  ModelTextureDef *texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
+  M2Texture *texdef = (M2Texture*)(gamefile->getBuffer() + header.textures.offset);
 
   // Transparency
-  int16 *transLookup = (int16*)(gamefile->getBuffer() + header.ofsTransparencyLookup);
+  int16 *transLookup = (int16*)(gamefile->getBuffer() + header.texture_weights.offset);
 
   if (g->isEof())
   {
@@ -1268,13 +1224,30 @@ void WoWModel::setLOD(int index)
     return;
   }
 
-  // Indices,  Triangles
-  uint16 *indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
-  uint16 *triangles = (uint16*)(g->getBuffer() + view->ofsTris);
-  rawIndices.clear();
-  rawIndices.resize(view->nTris);
+  LOG_INFO << "ModelView";
+  LOG_INFO << "vertices number" << view->vertices.number;
+  LOG_INFO << "vertices offset" << view->vertices.offset;
+  LOG_INFO << "indices number" << view->indices.number;
+  LOG_INFO << "incindicesides offset" << view->indices.offset;
+  LOG_INFO << "bones number" << view->bones.number;
+  LOG_INFO << "bones offset" << view->bones.offset;
+  LOG_INFO << "submeshes number" << view->submeshes.number;
+  LOG_INFO << "submeshes offset" << view->submeshes.offset;
+  LOG_INFO << "batches number" << view->batches.number;
+  LOG_INFO << "batches offset" << view->batches.offset;
+  LOG_INFO << "shadow batches number" << view->shadow_batches.number;
+  LOG_INFO << "shadow batches offset" << view->shadow_batches.offset;
+  LOG_INFO << "bone count max" << view->boneCountMax;
+  ;
 
-  for (size_t i = 0; i < view->nTris; i++)
+
+  // Indices,  Triangles
+  uint16 *indexLookup = (uint16*)(g->getBuffer() + view->vertices.offset);
+  uint16 *triangles = (uint16*)(g->getBuffer() + view->indices.offset);
+  rawIndices.clear();
+  rawIndices.resize(view->indices.number);
+
+  for (size_t i = 0; i < view->indices.number; i++)
   {
     rawIndices[i] = indexLookup[triangles[i]];
   }
@@ -1282,20 +1255,20 @@ void WoWModel::setLOD(int index)
   indices = rawIndices;
 
   // render ops
-  M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + view->ofsSub);
-  M2Batch *tex = (M2Batch*)(g->getBuffer() + view->ofsTex);
-  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.ofsTexFlags);
-  uint16 *texlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexLookup);
-  uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
-  int16 *texunitlookup = (int16*)(gamefile->getBuffer() + header.ofsTexUnitLookup);
+  M2SkinSection *ops = (M2SkinSection*)(g->getBuffer() + view->submeshes.offset);
+  M2Batch *tex = (M2Batch*)(g->getBuffer() + view->batches.offset);
+  ModelRenderFlags *renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.materials.offset);
+  uint16 *texlookup = (uint16*)(gamefile->getBuffer() + header.textureCombos.offset);
+  uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.textureTransformCombos.offset);
+  int16 *texunitlookup = (int16*)(gamefile->getBuffer() + header.textureTransformBoneMap.offset);
 
   uint32 istart = 0;
-  for (size_t i = 0; i < view->nSub; i++)
+  for (size_t i = 0; i < view->submeshes.number; i++)
   {
     M2SkinSectionHD * hdgeo = new M2SkinSectionHD(ops[i]);
-    hdgeo->istart = istart;
-    istart += hdgeo->icount;
-    hdgeo->display = (hdgeo->id == 0);
+    hdgeo->indexStart = istart;
+    istart += hdgeo->indexCount;
+    hdgeo->display = (hdgeo->skinSectionId == 0);
     rawGeosets.push_back(hdgeo);
   }
 
@@ -1303,20 +1276,20 @@ void WoWModel::setLOD(int index)
 
   rawPasses.clear();
  
-  for (size_t j = 0; j < view->nTex; j++)
+  for (size_t j = 0; j < view->batches.number; j++)
   {
-    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
+    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].geosetIndex);
 
     uint texOffset = 0;
-    uint texCount = tex[j].op_count;
+    uint texCount = tex[j].textureCount;
     // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
     // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
     // displaying one randomly. So for now we try to guess which one is the most important by checking
     // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
-    pass->specialTex = specialTextures[texlookup[tex[j].textureid]];
+    pass->specialTex = specialTextures[texlookup[tex[j].textureComboIndex]];
     for (size_t k = 0; k < texCount; k++)
     {
-      int special = specialTextures[texlookup[tex[j].textureid + k]];
+      int special = specialTextures[texlookup[tex[j].textureComboIndex + k]];
       if (special == 11 || special == 12 || special == 13)
       {
         texOffset = k;
@@ -1326,10 +1299,10 @@ void WoWModel::setLOD(int index)
         break;
       }
     }
-    pass->tex = texlookup[tex[j].textureid + texOffset];
+    pass->tex = texlookup[tex[j].textureComboIndex + texOffset];
  
     // TODO: figure out these flags properly -_-
-    ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
+    ModelRenderFlags &rf = renderFlags[tex[j].materialIndex];
 
     pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
@@ -1337,7 +1310,7 @@ void WoWModel::setLOD(int index)
 
     pass->color = tex[j].colorIndex;
 
-    pass->opacity = transLookup[tex[j].transid + texOffset];
+    pass->opacity = transLookup[tex[j].textureWeightComboIndex + texOffset];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
@@ -1346,7 +1319,7 @@ void WoWModel::setLOD(int index)
     pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
 
     // Use environmental reflection effects?
-    pass->useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
+    pass->useEnvMap = (texunitlookup[tex[j].materialLayer] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
 
     // Disable environmental mapping if its been unchecked.
     if (pass->useEnvMap && !video.useEnvMapping)
@@ -1364,7 +1337,7 @@ void WoWModel::setLOD(int index)
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
     if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass->texanim = texanimlookup[tex[j].texanimid + texOffset];
+      pass->texanim = texanimlookup[tex[j].textureTransformComboIndex + texOffset];
     }
 
     rawPasses.push_back(pass);
@@ -1569,7 +1542,7 @@ void WoWModel::animate(ssize_t anim)
   size_t t = 0;
 
   M2Sequence &a = anims[anim];
-  int tmax = a.length;
+  int tmax = a.duration;
   if (tmax == 0)
     tmax = 1;
 
@@ -1608,12 +1581,12 @@ void WoWModel::animate(ssize_t anim)
 
       for (size_t b = 0; b < 4; b++)
       {
-        if (ov_it->weights[b] > 0)
+        if (ov_it->bone_weights[b] > 0)
         {
-          glm::vec3 tv = glm::vec3(bones[ov_it->bones[b]].mat * glm::vec4(ov_it->pos, 1.0f));
-          glm::vec3 tn = glm::vec3(bones[ov_it->bones[b]].mrot * glm::vec4(ov_it->normal, 1.0f));
-          v += tv * ((float)ov_it->weights[b] / 255.0f);
-          n += tn * ((float)ov_it->weights[b] / 255.0f);
+          glm::vec3 tv = glm::vec3(bones[ov_it->bone_indices[b]].mat * glm::vec4(ov_it->pos, 1.0f));
+          glm::vec3 tn = glm::vec3(bones[ov_it->bone_indices[b]].mrot * glm::vec4(ov_it->normal, 1.0f));
+          v += tv * ((float)ov_it->bone_weights[b] / 255.0f);
+          n += tn * ((float)ov_it->bone_weights[b] / 255.0f);
         }
       }
 
@@ -1775,6 +1748,10 @@ inline void WoWModel::draw()
   if (!ok)
     return;
 
+
+
+  /*
+
   if (!animated)
   {
     if (showModel)
@@ -1814,6 +1791,7 @@ inline void WoWModel::draw()
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_LIGHTING);
   }
+  */
 }
 
 // These aren't really needed in the model viewer.. only wowmapviewer
@@ -2009,7 +1987,7 @@ std::map<int, std::wstring> WoWModel::getAnimsMap()
     QString query = "SELECT ID,NAME FROM AnimationData WHERE ID IN(";
     for (unsigned int i = 0; i < anims.size(); i++)
     {
-      query += QString::number(anims[i].animID);
+      query += QString::number(anims[i].id);
       if (i < anims.size() - 1)
         query += ",";
       else
@@ -2103,7 +2081,7 @@ void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
   // geosets member
   for (uint i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    int id = geosets[i]->skinSectionId;
     if (id > a && id < b)
       showGeoset(i, (id == geosetID));
   }
@@ -2145,7 +2123,7 @@ void WoWModel::setCreatureGeosetData(std::set<GeosetNum> cgd)
   // we switch off ALL geosets from 1 to 899 that aren't specified by it:
   for (uint i = 0; i < rawGeosets.size(); i++)
   {
-    int id = geosets[i]->id;
+    int id = geosets[i]->skinSectionId;
     if (id > 0 && id < geomax)
       showGeoset(i, cgd.count(id) > 0);
   }
@@ -2243,13 +2221,13 @@ void WoWModel::refreshMerging()
 
     for (auto it : modelsIt->geosets)
     {
-      it->istart += nbIndices;
-      it->vstart += nbVertices;
+      it->indexStart += nbIndices;
+      it->vertexStart += nbVertices;
       geosets.push_back(it);
     }
 
     // build bone correspondence table
-    uint32 nbBonesInNewModel = modelsIt->header.nBones;
+    uint32 nbBonesInNewModel = modelsIt->header.bones.number;
     int16 * boneConvertTable = new int16[nbBonesInNewModel];
 
     for (uint i = 0; i < nbBonesInNewModel; ++i)
@@ -2261,7 +2239,7 @@ void WoWModel::refreshMerging()
       for (uint b = 0; b < bones.size(); ++b)
       { 
         if (glm::all(glm::epsilonEqual(bones[b].pivot, pivot, glm::vec3(0.0001f))) &&
-            (bones[b].boneDef.unknown == modelsIt->bones[i].boneDef.unknown))
+            (bones[b].boneDef.boneNameCRC == modelsIt->bones[i].boneDef.boneNameCRC))
         {
           boneConvertTable[i] = b;
           break;
@@ -2279,8 +2257,8 @@ void WoWModel::refreshMerging()
     {
       for (uint i = 0; i < 4; ++i)
       {
-        if (it.weights[i] > 0)
-          it.bones[i] = boneConvertTable[it.bones[i]];
+        if (it.bone_weights[i] > 0)
+          it.bone_indices[i] = boneConvertTable[it.bone_indices[i]];
       }
     }
 
@@ -2298,7 +2276,7 @@ void WoWModel::refreshMerging()
     uint16 handTex = ModelRenderPass::INVALID_TEX;
     for (auto it : passes)
     {
-      if (geosets[it->geoIndex]->id / 100 == 23)
+      if (geosets[it->geoIndex]->skinSectionId / 100 == 23)
         handTex = it->tex;
     }
 
@@ -2307,7 +2285,7 @@ void WoWModel::refreshMerging()
       ModelRenderPass * p = new ModelRenderPass(*it);
       p->model = this;
       p->geoIndex += nbGeosets;
-      if (geosets[it->geoIndex]->id / 100 != 23) // don't copy texture for hands
+      if (geosets[it->geoIndex]->skinSectionId / 100 != 23) // don't copy texture for hands
         p->tex += (mergeIndex * TEXTURE_MAX);
       else
         p->tex = handTex; // use regular model texture instead
@@ -2364,23 +2342,23 @@ void WoWModel::refreshMerging()
 
   if (video.supportVBO)
   {
-    glDeleteBuffersARB(1, &nbuf);
-    glDeleteBuffersARB(1, &vbuf);
+    glDeleteBuffers(1, &nbuf);
+    glDeleteBuffers(1, &vbuf);
 
     // Vert buffer
-    glGenBuffersARB(1, &vbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
+    glGenBuffers(1, &vbuf);
+    glBindBuffer(GL_ARRAY_BUFFER, vbuf);
+    glBufferData(GL_ARRAY_BUFFER, vbufsize, vertices, GL_STATIC_DRAW);
     delete[] vertices; vertices = 0;
 
     // normals buffer
-    glGenBuffersARB(1, &nbuf);
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
+    glGenBuffers(1, &nbuf);
+    glBindBuffer(GL_ARRAY_BUFFER, nbuf);
+    glBufferData(GL_ARRAY_BUFFER, vbufsize, normals, GL_STATIC_DRAW);
     delete[] normals; normals = 0;
 
     // clean bind
-    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+    glBindBufferARB(GL_ARRAY_BUFFER, 0);
   }
 }
 
@@ -2510,7 +2488,7 @@ void WoWModel::refresh()
   const int egtId = CG_EYEGLOW * 100 + egt + 1;   // CG_EYEGLOW = 17
   for (size_t i = 0; i < rawGeosets.size(); i++)
   {
-    const int id = geosets[i]->id;
+    const int id = geosets[i]->skinSectionId;
     if ((int)(id / 100) == CG_EYEGLOW)  // geosets 1700..1799
       showGeoset(i, (id == egtId));
   }
@@ -2572,16 +2550,15 @@ void WoWModel::hideAllGeosets()
 
 std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 {
+  /*
   out << "<m2>" << endl;
   out << "  <info>" << endl;
   out << "    <modelname>" << m.modelname.c_str() << "</modelname>" << endl;
   out << "  </info>" << endl;
   out << "  <header>" << endl;
   //  out << "    <id>" << m.header.id << "</id>" << endl;
-  out << "    <nameLength>" << m.header.nameLength << "</nameLength>" << endl;
-  out << "    <nameOfs>" << m.header.nameOfs << "</nameOfs>" << endl;
+  out << "    <nameOfs>" << m.header.name.offset << "</nameOfs>" << endl;
   //  out << "    <name>" << f.getBuffer()+m.header.nameOfs << "</name>" << endl; // @TODO
-  out << "    <GlobalModelFlags>" << m.header.GlobalModelFlags << "</GlobalModelFlags>" << endl;
   out << "    <nGlobalSequences>" << m.header.nGlobalSequences << "</nGlobalSequences>" << endl;
   out << "    <ofsGlobalSequences>" << m.header.ofsGlobalSequences << "</ofsGlobalSequences>" << endl;
   out << "    <nAnimations>" << m.header.nAnimations << "</nAnimations>" << endl;
@@ -2969,6 +2946,6 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
   out << "  </TextureLists>" << endl;
 
   out << "</m2>" << endl;
-
+  */
   return out;
 }

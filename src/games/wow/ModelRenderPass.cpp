@@ -31,6 +31,7 @@ ModelRenderPass::ModelRenderPass(WoWModel * m, int geo):
 
 void ModelRenderPass::deinit()
 {
+  return;
   glDisable(GL_BLEND);
   glDisable(GL_ALPHA_TEST);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -88,6 +89,7 @@ void ModelRenderPass::deinit()
 
 bool ModelRenderPass::init()
 {
+  return true;
   // May as well check that we're going to render the geoset before doing all this crap.
   if (!model || geoIndex == -1 || !model->geosets[geoIndex]->display)
     return false;
@@ -238,6 +240,7 @@ bool ModelRenderPass::init()
 
 void ModelRenderPass::render(bool animated)
 {
+  return;
   M2SkinSectionHD * geoset = model->geosets[geoIndex];
   // we don't want to render completely transparent parts
   // render
@@ -249,16 +252,16 @@ void ModelRenderPass::render(bool animated)
     // I can't notice a difference but I guess it can't hurt
     if (video.supportVBO && video.supportDrawRangeElements)
     {
-      glDrawRangeElements(GL_TRIANGLES, geoset->vstart, geoset->vstart + geoset->vcount, geoset->icount, GL_UNSIGNED_SHORT, &model->indices[geoset->istart]);
+      glDrawRangeElements(GL_TRIANGLES, geoset->vertexStart, geoset->vertexStart + geoset->vertexCount, geoset->indexCount, GL_UNSIGNED_SHORT, &model->indices[geoset->indexStart]);
     }
     else
     {
       glBegin(GL_TRIANGLES);
-      for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+      for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
       {
         uint32 a = model->indices[b];
         glNormal3fv(glm::value_ptr(model->normals[a]));
-        glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
+        glTexCoord2fv(glm::value_ptr(model->origVertices[a].tex_coords[0]));
         glVertex3fv(glm::value_ptr(model->vertices[a]));
         /*
         if (geoset->id == 2401 && k < 10)
@@ -277,11 +280,11 @@ void ModelRenderPass::render(bool animated)
   else
   {
     glBegin(GL_TRIANGLES);
-    for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
+    for (size_t k = 0, b = geoset->indexStart; k < geoset->indexCount; k++, b++)
     {
       uint16 a = model->indices[b];
       glNormal3fv(glm::value_ptr(model->normals[a]));
-      glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
+      glTexCoord2fv(glm::value_ptr(model->origVertices[a].tex_coords[0]));
       glVertex3fv(glm::value_ptr(model->vertices[a]));
     }
     glEnd();

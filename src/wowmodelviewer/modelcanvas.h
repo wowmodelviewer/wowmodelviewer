@@ -9,7 +9,6 @@
 
 // wx
 #include <wx/glcanvas.h>
-#include <wx/window.h>
 
 // stl
 #include <string>
@@ -23,8 +22,8 @@
 #include "maptile.h"
 #include "OrbitCamera.h"
 #include "RenderTexture.h"
+#include "ShaderProgram.h"
 #include "util.h"
-#include "video.h"
 #include "wmo.h"
 #include "WoWModel.h"
 
@@ -52,18 +51,13 @@ struct SceneState {
 };
 
 
-class ModelCanvas:
-#ifdef _WINDOWS
-    public wxWindow
-#else
-    public wxGLCanvas
-#endif
+class ModelCanvas: public wxGLCanvas
 {
   DECLARE_CLASS(ModelCanvas)
   DECLARE_EVENT_TABLE()
 
 public:
-  ModelCanvas(wxWindow *parent, VideoCaps *cap = nullptr);
+  ModelCanvas(wxWindow *parent, int * args);
   ~ModelCanvas();
 
   // GUI Control Panels
@@ -73,7 +67,6 @@ public:
   RenderTexture *rt;
 
   // Event Handlers
-  void OnPaint(wxPaintEvent& WXUNUSED(event));
   void Render(wxPaintEvent& WXUNUSED(event));
   void OnSize(wxSizeEvent& event);
   void OnMouse(wxMouseEvent& event);
@@ -87,10 +80,7 @@ public:
   wxTimer timer;
 
   // OGL related functions
-  void InitGL();
   void InitView();
-  void InitShaders();
-  void UninitShaders();
 
   // Main render routines which call the sub routines
   void RenderToTexture();
@@ -112,9 +102,6 @@ public:
   void SaveSceneState(int id);
   void LoadSceneState(int id);
 
-  void SetCurrent();
-  void SwapBuffers();
-
   void setModel(WoWModel * m, bool keepPrevious = false);
   WoWModel const * model() const { return model_; }
 
@@ -130,10 +117,11 @@ public:
   void LoadWMO(wxString fn);
   void LoadADT(wxString fn);
   //void TogglePause();
+
+  void testGL();
   
   // Various toggles
   bool init;
-  bool initShaders;
   bool drawLightDir, drawBackground, drawSky, drawGrid, drawAVIBackground;
   bool useCamera; //, useLights;
 
@@ -167,6 +155,10 @@ public:
 
 private:
   void displayDebugInfos() const;
+  int getWidth() const;
+  int getHeight() const;
+
+  void InitGL();
 
   float time;
   DWORD lastTime;
@@ -175,12 +167,16 @@ private:
 
   GLuint fogTex;
 
-  bool fxBlur, fxGlow, fxFog;
-
   OrbitCamera camera;
 
   WoWModel * model_;
   bool openGLDebug_;
+
+
+  Model * testModel_;
+  wxGLContext* context_;
+  ShaderProgram shaderProgram_;
+  GLuint vao_;
 };
 
 

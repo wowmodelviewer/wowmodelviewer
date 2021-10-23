@@ -7,7 +7,7 @@
 
 #include "ModelEvent.h"
 
-void ModelEvent::init(ModelEventDef &me)
+void ModelEvent::init(M2Event &me)
 {
   def = me;
 }

@@ -27,10 +27,12 @@ set(src CharInfos.cpp
     GlobalSettings.cpp
     ImporterPlugin.cpp
     MemoryUtils.cpp
+    Mesh.cpp
     Model.cpp
     NPCInfos.cpp
     Plugin.cpp
     PluginManager.cpp
+    ShaderProgram.cpp
     VersionManager.cpp
     metaclasses/Component.cpp
     metaclasses/Event.cpp
@@ -49,10 +51,12 @@ set(headers CharInfos.h
       GlobalSettings.h
       ImporterPlugin.h
       MemoryUtils.h
+      Mesh.h
       Model.h
       NPCInfos.h
       Plugin.h
       PluginManager.h
+      ShaderProgram.cpp
       VersionManager.h
       metaclasses/BaseIterator.h
       metaclasses/Component.h

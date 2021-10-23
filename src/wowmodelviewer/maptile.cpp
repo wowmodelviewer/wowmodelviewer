@@ -8,6 +8,7 @@
 #include "Game.h"
 #include "GameFile.h"
 #include "modelviewer.h"
+#include "video.h"
 
 using namespace std;
 

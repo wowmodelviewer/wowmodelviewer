@@ -11,7 +11,7 @@
 #include "globalvars.h"
 #include "Logger.h"
 #include "modelviewer.h"
-#include "Texture.h"
+#include "TextureBLP.h"
 
 IMPLEMENT_CLASS(FileControl, wxWindow)
 
@@ -246,7 +246,7 @@ wxString FileControl::ExportPNG(wxString val)
     return _T("");
 
   TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
-  Texture &tex = *((Texture*)TEXTUREMANAGER.items[temptex]);
+  TextureBLP &tex = *((TextureBLP*)TEXTUREMANAGER.items[temptex]);
   if (tex.w == 0 || tex.h == 0)
     return _T("");
 

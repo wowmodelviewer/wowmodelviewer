@@ -22,15 +22,10 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "Logger.h"
+#include "ModelRenderPass.h"
 
-
-#ifdef  _WINDOWS
-IMPLEMENT_CLASS(ModelCanvas, wxWindow)
-BEGIN_EVENT_TABLE(ModelCanvas, wxWindow)
-#else
 IMPLEMENT_CLASS(ModelCanvas, wxGLCanvas)
 BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
-#endif
   EVT_SIZE(ModelCanvas::OnSize)
   EVT_PAINT(ModelCanvas::Render)
   EVT_ERASE_BACKGROUND(ModelCanvas::OnEraseBackground)
@@ -39,34 +34,11 @@ BEGIN_EVENT_TABLE(ModelCanvas, wxGLCanvas)
   EVT_KEY_DOWN(ModelCanvas::OnKey)
 END_EVENT_TABLE()
 
-
-#if _MSC_VER // The following time related functions COULD be 64bit incompatible.
-  // for timeGetTime:
-  #pragma comment(lib,"Winmm.lib")
-#endif
-
-#ifndef _WINDOWS // for linux
-  #include <sys/time.h>
-
-  //typedef int DWORD;
-  int timeGetTime()
-  {
-    static int start=0;
-    static struct timeval t;
-    gettimeofday(&t, NULL);
-    if (start==0){
-      start = t.tv_sec;
-    }
-
-    return (int)((t.tv_sec-start)*1000 + t.tv_usec/1000);
-  }
-#endif
-
-#ifndef _WINDOWS
-namespace {
-  int attrib[] = { WX_GL_RGBA, WX_GL_DOUBLEBUFFER, WX_GL_DEPTH_SIZE, 24, 0 };
+void ModelCanvas::testGL()
+{
+  shaderProgram_.loadShaders("shaders/basic.vs", "shaders/basic.fs");
 }
-#endif
+
 
 void drawPoint(const glm::vec3 & coord, const glm::vec3 & color)
 {
@@ -117,15 +89,14 @@ void drawAxis(const glm::vec3 & coord, float size, const glm::vec3 & xcolor, con
 
 
 
-ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
-#ifndef _WINDOWS
-: wxGLCanvas(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"), attrib, wxNullPalette)
-#endif
+ModelCanvas::ModelCanvas(wxWindow *parent, int * args)
+: wxGLCanvas(parent, wxID_ANY, args)
 {
   LOG_INFO << "Creating OpenGL Canvas...";
 
-    init = false;
-  initShaders = false;
+  context_ = new wxGLContext(this);
+
+  init = false;
 
   // Init time related stuff
   srand(timeGetTime());
@@ -145,14 +116,6 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 
   fogTex = 0;
 
-  /*
-  blurShader = NULL;
-  deathShader = NULL;
-  desaturateShader = NULL;
-  glowShader = NULL;
-  boxShader = NULL;
-  */
-
   lightType = LIGHT_DYNAMIC;
 
   // Setup our default colour values.
@@ -167,34 +130,13 @@ ModelCanvas::ModelCanvas(wxWindow *parent, VideoCaps *caps)
 
   openGLDebug_ = false;
   
-  //wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE
-#ifdef _WINDOWS
-  if(!Create(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER|wxCLIP_CHILDREN|wxFULL_REPAINT_ON_RESIZE, wxT("ModelCanvas"))) {
-    LOG_ERROR << "Unable to create a window to handle our OpenGL rendering. Won't be able to continue.";
-    parent->Close();
-    return;
-  } else 
-#endif
-  {
-#ifndef  _LINUX // buggy
-    SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-#endif
-    Show(true);
+  Show(true);
 
-    // Initiate the timer that handles our animation and setting the canvas to redraw
-    timer.SetOwner(this, ID_TIMER);
-    timer.Start(TIME_STEP);
+  testModel_ = nullptr;
 
-    // Initiate our default OpenGL settings
-    LOG_INFO << "Initiating OpenGL...";
-#ifdef _WINDOWS
-    wxDisplay *disp = new wxDisplay((unsigned)0);
-    int bpp = disp->GetCurrentMode().bpp;
-    video.SetHandle((HWND)this->GetHandle(), bpp);
-#else
-    video.render = true;
-#endif
-  }
+  // Initiate the timer that handles our animation and setting the canvas to redraw
+  timer.SetOwner(this, ID_TIMER);
+  timer.Start(TIME_STEP);
 }
 
 ModelCanvas::~ModelCanvas()
@@ -206,9 +148,6 @@ ModelCanvas::~ModelCanvas()
 
   // Clear remaining textures.
   TEXTUREMANAGER.clear();
-
-  // Uninitialise shaders
-  UninitShaders();
 
   // Clear model attachments
   clearAttachments();
@@ -235,8 +174,9 @@ void ModelCanvas::OnSize(wxSizeEvent& event)
 {
   event.Skip();
 
-  if (init) 
-    InitView();
+  Refresh();
+  //if (init) 
+  //  InitView();
 
   if(g_modelViewer)
     g_modelViewer->UpdateCanvasStatus();
@@ -257,100 +197,57 @@ void ModelCanvas::InitView()
   video.yRes = h;
 }
 
-void ModelCanvas::InitShaders()
-{
-
-  fxBlur = false;
-  fxGlow = false;
-  fxFog = false;
-
-  /*
-  // GLSL Shaders
-  if (video.supportGLSL && video.supportFBO) {
-    // Render-to-texture initialisation
-    for(int i=0; i<2; i++) {
-      rtt[i] = new RenderTexture();
-      rtt[i]->Init((HWND)this->GetHandle(), 512, 512, video.supportFBO);
-    }
-
-    perpixelShader.InitShaders("shaders/perpixellighting.vp", "shaders/perpixellighting.fp");
-    //perpixelShader.InitShaders("Shaders/phongLighting.vp", "Shaders/phongLighting.fp");
-    perpixelShader.Disable();
-
-    toonShader.InitShaders("shaders/ToonShader.vp", "shaders/toonShader.fp");
-    toonShader.Disable();
-
-    blurShader.InitShaders("Shaders/Blur.vp", "Shaders/Blur.fp");
-    GLint radius_x = blurShader.GetVariable("radius_x");
-    GLint radius_y = blurShader.GetVariable("radius_y");
-    if(radius_x>=0 && radius_y>=0) {
-      blurShader.SetFloat(radius_x, 1.5f / rtt[0]->nWidth); 
-      blurShader.SetFloat(radius_y, 1.5f / rtt[0]->nHeight);
-    }
-    blurShader.Disable();
-    
-    glowShader.InitShaders("Shaders/Glow.vp", "Shaders/Glow.fp");
-    glowShader.Disable();
-
-    multitexShader.InitShaders("Shaders/MultiTexturing.vp", "Shaders/MultiTexturing.fp");
-    multitexShader.Disable();
-    CreateTexture("fog.bmp", fogTex);
-  }
-  */
-
-  initShaders = true;
-}
-
-void ModelCanvas::UninitShaders()
-{
-  if (!initShaders)
-    return;
-
-  /*
-  wxDELETE(blurShader);
-  wxDELETE(deathShader);
-  wxDELETE(desaturateShader);
-  wxDELETE(glowShader);
-  wxDELETE(boxShader);
-  */
-
-  /*
-  if (video.supportGLSL) {
-    perpixelShader.Disable();
-    perpixelShader.Release();
-
-    toonShader.Disable();
-    toonShader.Release();
-
-    blurShader.Disable();
-    blurShader.Release();
-
-    glowShader.Disable();
-    glowShader.Release();
-
-    // Render-to-texture memory clearance
-    if (rtt[0]) {
-      rtt[0]->Shutdown();
-      wxDELETE(rtt[0]);
-    }
-
-    if (rtt[1]) {
-      rtt[1]->Shutdown();
-      wxDELETE(rtt[1]);
-    }
-  }
-  */
-}
 
 Attachment* ModelCanvas::LoadModel(GameFile * file)
 {
+  const auto * m = new WoWModel(file, true);
+
+  delete testModel_;
+
+  testModel_ = new Model(nullptr);
+  for (const auto & p : m->passes)
+  {
+    const auto* g = m->geosets[p->geoIndex];
+
+    std::vector<Vertex> vertices;
+    for (auto i = g->vertexStart; i < (g->vertexStart + g->vertexCount); i++)
+    {
+      auto * v = new Vertex();
+      v->position = m->origVertices[i].pos;
+      v->texCoords = m->origVertices[i].tex_coords[0];
+      v->normal = m->origVertices[i].normal;
+      vertices.push_back(*v);
+    }
+
+    std::vector<unsigned int> indices;
+    for (auto i = g->indexStart; i < (g->indexStart + g->indexCount); i++)
+      indices.push_back((m->indices[i] - g->vertexStart));
+
+      std::vector<unsigned int> textures;
+    if (p->blendmode == 0)
+    {
+    
+      textures.push_back(m->getGLTexture(p->tex));
+    }
+
+    LOG_INFO << p->blendmode;
+    LOG_INFO << p->useTex2;
+
+    auto * mesh = new Mesh(vertices, indices, textures);
+    mesh->blendmode_ = p->blendmode;
+
+    testModel_->addMesh(mesh);
+  }
+
+  return nullptr;
+
   clearAttachments();
   root->setModel(nullptr);
   delete wmo;
   wmo = nullptr;
 
   // Create new one
-  model_ = new WoWModel(file, true);
+ 
   if (!model_->ok)
   {
     LOG_INFO << "Model is not OK !";
@@ -361,7 +258,6 @@ Attachment* ModelCanvas::LoadModel(GameFile * file)
   auto *att = root->addChild(model_, 0, -1);
 
   camera.reset(model_);
-
   return att;
 }
 
@@ -457,42 +353,39 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 
 void ModelCanvas::InitGL()
 {
-  // Initiate our default OpenGL settings
-  SetCurrent();
-  video.InitGL();
-
-  // If no g_modelViewer->lightControl object, exit for now
-  if (!g_modelViewer || !g_modelViewer->lightControl)
+  if (init)
     return;
 
+  // Initialize GLEW
+  glewExperimental = GL_TRUE;
+  if (glewInit() != GLEW_OK)
+  {
+    std::cerr << "Failed to initialize GLEW" << std::endl;
+    return;
+  }
+
+  LOG_INFO << "GLEW successfully initiated.";
+
+  glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
+
+  glEnable(GL_DEPTH_TEST);
+
+  // If no g_modelViewer->lightControl object, exit for now
+  //if (!g_modelViewer || !g_modelViewer->lightControl)
+  //  return;
+
   // Setup lighting
-  g_modelViewer->lightControl->Init();
-  g_modelViewer->lightControl->UpdateGL();
+  //g_modelViewer->lightControl->Init();
+  //g_modelViewer->lightControl->UpdateGL();
+
+  testGL();
 
   init = true;
-
-  // load up our shaders
-  InitShaders();
-}
-
-void ModelCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
-{
-
-
-
-
-  if (video.render) {
-    if (wmo)
-      RenderWMO();
-    else if (model_)
-      RenderModel();
-    else if (adt)
-      RenderADT();
-  }
 }
 
 inline void ModelCanvas::RenderGrid() 
 {
+  return;
   int count = 0;
 
   const GLfloat white[] = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -535,6 +428,7 @@ inline void ModelCanvas::RenderGrid()
 
 inline void ModelCanvas::RenderLight(Light *l)
 {
+  return;
   GLUquadricObj *quadratic = gluNewQuadric();    // Storage For Our Quadratic Object & // Create A Pointer To The Quadric Object
   gluQuadricNormals(quadratic, GLU_SMOOTH);    // Create Smooth Normals
 
@@ -589,6 +483,7 @@ inline void ModelCanvas::RenderSkybox()
 
 inline void ModelCanvas::RenderObjects()
 {
+  return;
   // ***************** MODEL RENDERING **********************
   // ************* Setup our render state *********
   //glEnable(GL_COLOR_MATERIAL);
@@ -604,25 +499,6 @@ inline void ModelCanvas::RenderObjects()
     glDepthFunc(GL_LEQUAL);
     //glEnable(GL_CULL_FACE);
 
-    if (video.supportGLSL) {
-      /*
-      // Per pixel lighting, experimental
-      perpixelShader.Enable();
-      int texture_location = perpixelShader.GetVariable("base_texture");
-      perpixelShader.SetInt(texture_location, 0);
-      // */      
-
-      // Toon (cel) Shading, experimental effect
-      //toonShader.Enable();
-      //int texture_location = toonShader.GetVariable("base_texture");
-      //toonShader.SetInt(texture_location, 0);
-
-      // Glow shader
-      //glowShader.Enable();
-
-      // Blur shader
-      //blurShader.Enable();
-    }
   }
   // ===============================================
   
@@ -631,15 +507,9 @@ inline void ModelCanvas::RenderObjects()
   //glEnable(GL_NORMALIZE);
   root->draw();
   //glDisable(GL_NORMALIZE);
-
-  if (video.supportGLSL) {
-    //perpixelShader.Disable();
-    //toonShader.Disable();
-    //glowShader.Disable();
-    //blurShader.Disable();
-  }
   
-  if (!video.useMasking) {
+  //if (!video.useMasking)
+  {
     // render our particles, we do this afterwards so that all the particles display "OK" without having things like shields "overwriting" the particles.
     glEnable(GL_TEXTURE_2D);
     glDisable(GL_LIGHTING);
@@ -659,6 +529,7 @@ inline void ModelCanvas::RenderObjects()
 
 inline void ModelCanvas::RenderBackground()
 {
+  return;
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
@@ -724,8 +595,11 @@ inline void ModelCanvas::RenderBackground()
 
 void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 {
-  // Set this window handler as the reference to draw to.
   wxPaintDC dc(this);
+
+  // Set this window handler as the reference to draw to.
+  wxGLCanvas::SetCurrent(*context_);
+
 
   if (!init)
     InitGL();
@@ -735,34 +609,42 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 
   int w = 0, h = 0;
   GetClientSize(&w, &h);
-
   glViewport(0, 0, w, h);
-
   // Sets the "clear" colour.  Without this you get the "ghosting" effecting 
   // as the buffer doesn't get set/cleared.
-  if (video.useMasking)
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-  else
-    glClearColor(vecBGColor.x, vecBGColor.y, vecBGColor.z, 0.0f);
-
-  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+ // if (video.useMasking)
+ //   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+ // else
+  
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  const glm::mat4 model(1.0);
 
   // setup projection (use perspective camera)
-  glMatrixMode(GL_PROJECTION); 
-  glLoadIdentity();
+  //glMatrixMode(GL_PROJECTION); 
+  //glLoadIdentity();
 
-  glm::mat4 projection = glm::perspective(video.fov, (float)w / (float)h, 0.1f, 1280 * 5.f);
-  glMultMatrixf((glm::value_ptr(projection)));
+  const auto projection = glm::perspective(glm::radians(60.0f), (float)getWidth() / (float)getHeight(), 0.1f, 100.f);
+  //glMultMatrixf((glm::value_ptr(projection)));
 
   // setup camera
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
+  //glMatrixMode(GL_MODELVIEW);
+  //glLoadIdentity();
 
-  glm::mat4 view = camera.getViewMatrix();
-  glMultMatrixf((glm::value_ptr(view)));
+  const auto view = camera.getViewMatrix();
+  //glMultMatrixf((glm::value_ptr(view)));
+
+  shaderProgram_.use();
+
+  // Pass the matrices to the shader
+  shaderProgram_.setUniform("model", model);
+  shaderProgram_.setUniform("view", view);
+  shaderProgram_.setUniform("projection", projection);
+
+  if(testModel_)
+    testModel_->draw(shaderProgram_);
 
   // If masking isn't enabled
-  if (!video.useMasking) 
+  ////if (!video.useMasking) 
   {
     if (openGLDebug_)
     {
@@ -772,7 +654,7 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
       // draw lookAt axis
       drawAxis(camera.lookAt(), 0.5f, glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
     }
-
+    /*
     // Draw the background image if any
     if(drawBackground)
       RenderBackground();
@@ -783,10 +665,11 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 
     if (drawGrid)
       RenderGrid();
+      */
   }
 
-  RenderObjects();
-
+  //RenderObjects();
+  glFlush();
   SwapBuffers();
 }
 
@@ -805,7 +688,8 @@ inline void ModelCanvas::RenderModel()
 //  InitView();
 
   // If masking isn't enabled
-  if (!video.useMasking) {
+  //if (!video.useMasking)
+  {
     // Draw the background image if any
     if(drawBackground)
       RenderBackground();
@@ -897,22 +781,9 @@ inline void ModelCanvas::RenderModel()
 
   // render our main model
   if (model_) {
-    if (video.supportGLSL) {
-      // Per pixel lighting, experimental
-      //perpixelShader.Enable();
-      //int texture_location = perpixelShader.GetVariable("base_texture");
-      //perpixelShader.SetInt(texture_location, 0);
-    }
-
     glEnable(GL_NORMALIZE);
     RenderObjects();
     glDisable(GL_NORMALIZE);
-
-    // Blur/Glowing effects
-    if (video.supportGLSL) {
-      //perpixelShader.Disable();
-      //RenderToTexture();
-    }
   }
 
   
@@ -989,109 +860,7 @@ inline void ModelCanvas::RenderToTexture()
   glViewport( 0, 0, rtt[0]->nWidth, rtt[0]->nHeight);
   glDisable(GL_DEPTH_TEST); 
 
-  // ==========================================================
-  // BLURRING SCREEN SPACE TEXTURE
-  if (fxBlur) {
-    blurShader.Enable();
-    rtt[0]->BindTexture();
-    
-    // How many passes do we want?   The more passes the more bluring.
-    for(int i=0; i<5; i++, buff_index=!buff_index) {
-      rtt[!buff_index]->BeginRender();
-      rtt[buff_index]->BindTexture(); // binding buffer to a texture
-      
-      glBegin(GL_QUADS);
-      glTexCoord2d(0,  0);  glVertex3d(0, 0, -1); 
-      glTexCoord2d(1, 0);  glVertex3d(1, 0, -1);
-      glTexCoord2d(1, 1);  glVertex3d(1, 1, -1);
-      glTexCoord2d(0, 1);  glVertex3d(0, 1, -1);
-      glEnd();
-
-      rtt[buff_index]->ReleaseTexture();
-      rtt[!buff_index]->EndRender();
-    }
-
-    blurShader.Disable();
-  }
   // =============================================================
-
-  
-  // =============================================================
-  // RENDERING SCREEN SPACE TEXTURE TO FRAMEBUFFER
-  if (fxGlow) {
-    glowShader.Enable();
-    rtt[buff_index]->BindTexture();
-
-    // additive blending setup
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    
-    glBegin(GL_QUADS);
-    glTexCoord2d(0,  0);  glVertex3d(0, 0, -1); 
-    glTexCoord2d(1, 0);  glVertex3d(1, 0, -1);
-    glTexCoord2d(1, 1);  glVertex3d(1, 1, -1);
-    glTexCoord2d(0, 1);  glVertex3d(0, 1, -1);
-    glEnd();
-
-    glDisable(GL_BLEND);
-    glowShader.Disable();
-    rtt[buff_index]->ReleaseTexture();  // release pbuffer texture for further rendering
-  }
-  
-  // =============================================================
-  // RENDERING FOG-LIKE EFFECTS USING MULTI TEXTURING
-  if (fxFog) {
-    multitexShader.Enable();
-
-    // Activate the first texture ID and bind the background texture to it
-    glActiveTextureARB(GL_TEXTURE0_ARB);
-    //glBindTexture(GL_TEXTURE_2D,  g_Texture[0]);
-    //rtt[0]->BindTexture();
-    glEnable(GL_TEXTURE_2D);
-
-    // Activate the second texture ID and bind the fog texture to it
-    glActiveTextureARB(GL_TEXTURE1_ARB);
-    glBindTexture(GL_TEXTURE_2D,  fogTex);
-    glEnable(GL_TEXTURE_2D);
-
-    // Here pass in our texture unit 0 (GL_TEXTURE0_ARB) for "texture1" in the shader.
-    multitexShader.SetInt(multitexShader.GetVariable("texture1"), 0);
-
-    // Here pass in our texture unit 1 (GL_TEXTURE1_ARB) for "texture2" in the shader.
-    multitexShader.SetInt(multitexShader.GetVariable("texture2"), 1);
-
-    // Like our "time" variable in the first shader tutorial, we pass in a continually
-    // increasing float to create the animated wrapping effect of the fog.
-    static float wrap = 0.0f;
-    multitexShader.SetFloat(multitexShader.GetVariable("wrap"), wrap);
-    wrap += 0.002f;
-    
-    // Display a multitextured quad texture to the screen
-    glBegin(GL_QUADS);
-      // Display the top left vertice with each texture's texture coordinates
-      glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 0.0f, 1.0f);
-      glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0.0f, 1.0f);
-      glVertex2f(0, 1);
-
-      // Display the bottom left vertice with each texture's coordinates
-      glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 0.0f, 0.0f);
-      glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 0.0f, 0.0f);
-      glVertex2f(0, 0);
-
-      // Display the bottom right vertice with each texture's coordinates
-      glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 1.0f, 0.0f);
-      glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 1.0f, 0.0f);
-      glVertex2f(1, 0);
-
-      // Display the top right vertice with each texture's coordinates
-      glMultiTexCoord2fARB(GL_TEXTURE0_ARB, 1.0f, 1.0f);
-      glMultiTexCoord2fARB(GL_TEXTURE1_ARB, 1.0f, 1.0f);
-      glVertex2f(1, 1);
-    glEnd();
-
-    multitexShader.Disable();
-  }
-
   glPopAttrib();
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -1326,7 +1095,8 @@ void ModelCanvas::RenderToBuffer()
   */
   
   // If masking isn't enabled
-  if (!video.useMasking) {
+  //if (!video.useMasking)
+  {
     // Draw the background image if any
     if(drawBackground)
       RenderBackground();
@@ -1436,10 +1206,10 @@ void ModelCanvas::RenderToBuffer()
 
 void ModelCanvas::OnTimer(wxTimerEvent& event)
 {
-  if (video.render && init) {
+  if (init) {
     CheckMovement();
     tick();
-    Refresh(false);
+    Refresh();
   }
 }
 
@@ -1740,24 +1510,6 @@ void ModelCanvas::LoadSceneState(int id)
   }
 }
 
-void ModelCanvas::SetCurrent()
-{
-#ifdef _WINDOWS
-  video.SetCurrent();
-#else
-  wxGLCanvas::SetCurrent();
-#endif
-}
-
-void ModelCanvas::SwapBuffers()
-{
-#ifdef _WINDOWS
-  video.SwapBuffers();
-#else
-  wxGLCanvas::SwapBuffers();
-#endif
-}
-
 void ModelCanvas::displayDebugInfos() const
 {
   static wxString appTitle = GLOBALSETTINGS.appTitle();
@@ -1787,6 +1539,18 @@ void ModelCanvas::displayDebugInfos() const
 
   frameCount++;
 }
+
+int ModelCanvas::getWidth() const
+{
+  return GetSize().x;
+}
+
+int ModelCanvas::getHeight() const
+{
+  return GetSize().y;
+}
+
+
 
 void ModelCanvas::toggleOpenGLDebug()
 {
