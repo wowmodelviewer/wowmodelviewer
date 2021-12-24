@@ -134,7 +134,7 @@ set(wow9_2_files
 
 source_group("wow9.0" FILES ${wow9_0_files})
 source_group("wow9.1" FILES ${wow9_1_files})
-source_group("wow9.1" FILES ${wow9_2_files})
+source_group("wow9.2" FILES ${wow9_2_files})
 
 set(useful_files ${common_files} ${cmake_files} ${wow9_0_files} ${wow9_1_files} ${wow9_2_files})
 
