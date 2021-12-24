@@ -126,10 +126,17 @@ set(wow9_1_files
                  ${WMV_BASE_PATH}/bin_support/wow/9.1/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.1/ChrRacesCustomization.csv)
 
+set(wow9_2_files 
+                 ${WMV_BASE_PATH}/bin_support/wow/9.2/listfile.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/9.2/database.xml
+                 ${WMV_BASE_PATH}/bin_support/wow/9.2/AnimationData.csv
+                 ${WMV_BASE_PATH}/bin_support/wow/9.2/ChrRacesCustomization.csv)
+
 source_group("wow9.0" FILES ${wow9_0_files})
 source_group("wow9.1" FILES ${wow9_1_files})
+source_group("wow9.2" FILES ${wow9_2_files})
 
-set(useful_files ${common_files} ${cmake_files} ${wow9_0_files} ${wow9_1_files})
+set(useful_files ${common_files} ${cmake_files} ${wow9_0_files} ${wow9_1_files} ${wow9_2_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -193,3 +200,4 @@ install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 install(FILES ${wow9_0_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.0)
 install(FILES ${wow9_1_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.1)
+install(FILES ${wow9_2_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.2)
