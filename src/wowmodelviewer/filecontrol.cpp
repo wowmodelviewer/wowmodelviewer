@@ -133,8 +133,13 @@ void FileControl::Init(ModelViewer* mv)
 
   LOG_INFO << "Initializing File Controls - Filtering done - files found" << files.size();
   TreeStackItem root;
-  for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it) {
+  for (std::set<GameFile *>::iterator it = files.begin(); it != files.end(); ++it)
+  {
     QString name = (*it)->fullname();
+    name += " [";
+    name += QString::number((*it)->fileDataId());
+    name += "]";
+
     beautifyFileName(name);
 
     QStringList items = name.split("\\");
