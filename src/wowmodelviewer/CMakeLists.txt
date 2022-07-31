@@ -192,8 +192,8 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
 
 set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
-                $ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
-                $ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll
+                ${CMAKE_SOURCE_DIR}/lib/libeay32.dll
+                ${CMAKE_SOURCE_DIR}/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})

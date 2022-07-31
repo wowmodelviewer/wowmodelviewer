@@ -24,7 +24,7 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-include_directories($ENV{WMV_SDK_BASEDIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${WMV_BASE_PATH}/src/wowmodelviewer) # needed for util.h inclusion
 
 set(src FBXExporter.cpp
@@ -49,7 +49,7 @@ add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
 target_link_libraries(${NAME} Qt5::Core ${extralibs} 
-  $ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.lib)
+${CMAKE_SOURCE_DIR}/lib/libfbxsdk.lib)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 
@@ -64,5 +64,5 @@ endif()
 
 if(WIN32)
   install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-  install(FILES "$ENV{WMV_SDK_BASEDIR}/lib/libfbxsdk.dll" DESTINATION "${WMV_BASE_PATH}/bin")
+  install(FILES "${CMAKE_SOURCE_DIR}/lib/libfbxsdk.dll" DESTINATION "${WMV_BASE_PATH}/bin")
 endif(WIN32)

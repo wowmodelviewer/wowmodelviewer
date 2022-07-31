@@ -48,15 +48,15 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 if (WIN32)
-    include_directories($ENV{WMV_SDK_BASEDIR}/include)
+    include_directories(${CMAKE_SOURCE_DIR}/include)
   add_definitions(-D_WINDOWS)
   add_definitions(-D_WIN32)
 endif()
 
 add_library(cximage STATIC ${SRC_FILES})
 set_property(TARGET cximage PROPERTY FOLDER "3rdparty libraries")
-target_link_libraries(cximage $ENV{WMV_SDK_BASEDIR}/lib/jpeg.lib 
-            $ENV{WMV_SDK_BASEDIR}/lib/libpng.lib)
+target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/lib/jpeg.lib 
+  ${CMAKE_SOURCE_DIR}/lib/libpng.lib)
 
 #if(WIN32)
 #  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
