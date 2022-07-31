@@ -18,10 +18,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
 # define policies to avoid warnings
 include(${WMV_CMAKE_FOLDER}/policies.cmake)
 
-# clean up a bit weird backslashes in sdk path
-string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
-SET(ENV{WMV_SDK_BASEDIR} ${WMV_SDK_BASEDIR})
-
 # Qt5 stuff
 # init cmake with our qt install directory
 set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Qt/lib/cmake)

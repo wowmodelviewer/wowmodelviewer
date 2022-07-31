@@ -9,9 +9,7 @@ include_directories(.)
 # search for required package (wxwidgets)
 set(wxWidgets_USE_UNICODE ON)
 set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/wxWidgets)
-set(wxWidgets_LIB_DIR ${CMAKE_SOURCE_DIR}/wxWidgets/lib/vc_lib)
-set(wxWidgets_CONFIGURATION mswu)
-find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+find_package(wxWidgets REQUIRED net aui xml adv core base)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
@@ -191,7 +189,7 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
 
-set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
+set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
                 ${CMAKE_SOURCE_DIR}/lib/libeay32.dll
                 ${CMAKE_SOURCE_DIR}/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)

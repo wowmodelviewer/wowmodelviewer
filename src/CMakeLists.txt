@@ -34,5 +34,5 @@ add_custom_target(release
           COMMAND
           "${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
-          $ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                  ${CMAKE_SOURCE_DIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
           )

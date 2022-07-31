@@ -7,8 +7,6 @@ message(STATUS "Building wowhead importer")
 
 set(wxWidgets_USE_UNICODE ON)
 set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/wxWidgets)
-set(wxWidgets_LIB_DIR ${CMAKE_SOURCE_DIR}/wxWidgets/lib/vc_lib)
-set(wxWidgets_CONFIGURATION mswu)
 find_package(wxWidgets COMPONENTS net core base REQUIRED)
 
 # Qt5 stuff
