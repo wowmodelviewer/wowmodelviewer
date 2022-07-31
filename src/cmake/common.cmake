@@ -24,7 +24,7 @@ SET(ENV{WMV_SDK_BASEDIR} ${WMV_SDK_BASEDIR})
 
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Qt/lib/cmake)
 
 #############################
 #  platform specific part   #
@@ -55,7 +55,7 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${WMV_BASE_PATH}/src/games/wow)
-  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Qt/lib)
   find_package(Qt5Core)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
@@ -65,7 +65,7 @@ endmacro()
 
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
-  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Qt/lib)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)
