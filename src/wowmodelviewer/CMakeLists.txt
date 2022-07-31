@@ -8,11 +8,14 @@ include_directories(.)
 
 # search for required package (wxwidgets)
 set(wxWidgets_USE_UNICODE ON)
+set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/wxWidgets)
+set(wxWidgets_LIB_DIR ${CMAKE_SOURCE_DIR}/wxWidgets/lib/vc_lib)
+set(wxWidgets_CONFIGURATION mswu)
 find_package(wxWidgets REQUIRED net gl aui xml adv core base)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} $ENV{WMV_SDK_BASEDIR}/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 
 # find required Qt packages
 find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)
