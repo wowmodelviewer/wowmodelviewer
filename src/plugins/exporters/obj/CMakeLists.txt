@@ -6,7 +6,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 message(STATUS "Building OBJ exporter")
 
 set(wxWidgets_USE_UNICODE ON)
-set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/wxWidgets)
+set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
 find_package(wxWidgets REQUIRED core)
 include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})

@@ -8,7 +8,7 @@ include_directories(.)
 
 # search for required package (wxwidgets)
 set(wxWidgets_USE_UNICODE ON)
-set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/wxWidgets)
+set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
 find_package(wxWidgets REQUIRED net aui xml adv core base)
 
 # add wx widgets inclusions
