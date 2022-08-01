@@ -47,7 +47,7 @@ add_library(${NAME} SHARED ${src} ${headers} ${useful_files})
 set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
 target_link_libraries(${NAME} Qt5::Core ${extralibs} 
-${CMAKE_SOURCE_DIR}/lib/libfbxsdk.lib)
+${CMAKE_SOURCE_DIR}/Dependencies/lib/libfbxsdk.lib)
 
 set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
 
@@ -62,5 +62,5 @@ endif()
 
 if(WIN32)
   install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-  install(FILES "${CMAKE_SOURCE_DIR}/lib/libfbxsdk.dll" DESTINATION "${WMV_BASE_PATH}/bin")
+  install(FILES "${CMAKE_SOURCE_DIR}/Dependencies/lib/libfbxsdk.dll" DESTINATION "${WMV_BASE_PATH}/bin")
 endif(WIN32)

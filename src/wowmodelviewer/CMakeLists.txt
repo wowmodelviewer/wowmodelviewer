@@ -190,8 +190,8 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
-                ${CMAKE_SOURCE_DIR}/lib/libeay32.dll
-                ${CMAKE_SOURCE_DIR}/lib/ssleay32.dll
+                ${CMAKE_SOURCE_DIR}/Dependencies/lib/libeay32.dll
+                ${CMAKE_SOURCE_DIR}/Dependencies/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})

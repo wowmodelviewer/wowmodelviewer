@@ -55,8 +55,8 @@ endif()
 
 add_library(cximage STATIC ${SRC_FILES})
 set_property(TARGET cximage PROPERTY FOLDER "3rdparty libraries")
-target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/lib/jpeg.lib 
-  ${CMAKE_SOURCE_DIR}/lib/libpng.lib)
+target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/Dependencies/lib/jpeg.lib 
+  ${CMAKE_SOURCE_DIR}/Dependencies/lib/libpng.lib)
 
 #if(WIN32)
 #  install(TARGETS cximage RUNTIME DESTINATION "${WMV_BASE_PATH}/../bin/")
