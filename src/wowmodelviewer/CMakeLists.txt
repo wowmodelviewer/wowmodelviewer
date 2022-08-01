@@ -13,7 +13,7 @@ find_package(wxWidgets REQUIRED net aui xml adv core base)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
 
 # find required Qt packages
 find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)

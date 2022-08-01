@@ -22,7 +22,7 @@ set(CMAKE_AUTOMOC ON)
 
 add_definitions(-DQT_PLUGIN)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_SOURCE_DIR}/Dependencies/include)
 include_directories(${WMV_BASE_PATH}/src/wowmodelviewer) # needed for util.h inclusion
 
 set(src FBXExporter.cpp

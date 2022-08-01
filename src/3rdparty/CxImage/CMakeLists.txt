@@ -48,7 +48,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 if (WIN32)
-    include_directories(${CMAKE_SOURCE_DIR}/include)
+    include_directories(${CMAKE_SOURCE_DIR}/Dependencies/include)
   add_definitions(-D_WINDOWS)
   add_definitions(-D_WIN32)
 endif()
