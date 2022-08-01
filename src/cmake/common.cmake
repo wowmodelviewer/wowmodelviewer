@@ -37,13 +37,13 @@ endif()
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories(${WMV_BASE_PATH}/src/3rdparty)
+  include_directories(${CMAKE_SOURCE_DIR}/Dependencies/3rdparty)
   add_definitions(-DGLEW_STATIC)
-  list(APPEND extralibs opengl32 ${WMV_BASE_PATH}/src/3rdparty/libs/glew32s.lib)
+  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/Dependencies/3rdparty/libs/glew32s.lib)
 endmacro()
 
 macro(use_cximage)
-  include_directories(${WMV_BASE_PATH}/src/3rdparty/CxImage)
+  include_directories(${CMAKE_SOURCE_DIR}/Dependencies/3rdparty/CxImage)
   list(APPEND extralibs cximage)
 endmacro()
 
