@@ -7,7 +7,7 @@
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # define base repo path to use it cross folder
-SET(WMV_BASE_PATH ${CMAKE_CURRENT_LIST_DIR}/../..)
+SET(WMV_BASE_PATH ${CMAKE_SOURCE_DIR}/..)
 
 # define cmake folder to be reusable cross scripts
 SET(WMV_CMAKE_FOLDER ${WMV_BASE_PATH}/src/cmake)
@@ -18,13 +18,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
 # define policies to avoid warnings
 include(${WMV_CMAKE_FOLDER}/policies.cmake)
 
-# clean up a bit weird backslashes in sdk path
-string (REPLACE "\\" "/" WMV_SDK_BASEDIR $ENV{WMV_SDK_BASEDIR})
-SET(ENV{WMV_SDK_BASEDIR} ${WMV_SDK_BASEDIR})
-
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib/cmake)
 
 #############################
 #  platform specific part   #
@@ -41,13 +37,13 @@ endif()
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories(${WMV_BASE_PATH}/src/3rdparty)
+  include_directories(${CMAKE_SOURCE_DIR}/Dependencies/3rdparty)
   add_definitions(-DGLEW_STATIC)
-  list(APPEND extralibs opengl32 ${WMV_BASE_PATH}/src/3rdparty/libs/glew32s.lib)
+  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/Dependencies/3rdparty/libs/glew32s.lib)
 endmacro()
 
 macro(use_cximage)
-  include_directories(${WMV_BASE_PATH}/src/3rdparty/CxImage)
+  include_directories(${CMAKE_SOURCE_DIR}/Dependencies/3rdparty/CxImage)
   list(APPEND extralibs cximage)
 endmacro()
 
@@ -55,7 +51,7 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${WMV_BASE_PATH}/src/games/wow)
-  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
   find_package(Qt5Core)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
@@ -65,7 +61,7 @@ endmacro()
 
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
-  link_directories(${WMV_SDK_BASEDIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)

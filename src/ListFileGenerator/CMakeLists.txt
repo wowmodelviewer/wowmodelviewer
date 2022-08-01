@@ -1,14 +1,14 @@
 project(ListFileGenerator)
 include(${WMV_BASE_PATH}/src/cmake/common.cmake)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.16)
 message(STATUS "Building ListFileGenerator")
 
 cmake_policy(SET CMP0020 NEW)
 include_directories(.)
 
 # Qt5 stuff
-set(CMAKE_PREFIX_PATH $ENV{WMV_SDK_BASEDIR}/Qt/lib/cmake)
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib/cmake)
 find_package(Qt5Core)
 
 set(src main.cpp)

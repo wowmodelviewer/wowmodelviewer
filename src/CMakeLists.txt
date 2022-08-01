@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
 
@@ -11,11 +11,11 @@ if(DEFINED BUILDNUMBER)
 endif()
 
 # add external libraries compilation
-add_subdirectory(3rdparty/CxImage)
+add_subdirectory(Dependencies/3rdparty/CxImage)
 
 # configure CASC lib for our usage
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
-add_subdirectory(3rdparty/casclib)
+add_subdirectory(Dependencies/3rdparty/casclib)
 
 # add internal libraries compilation 
 add_subdirectory(core)
@@ -34,5 +34,5 @@ add_custom_target(release
           COMMAND
           "${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
-          $ENV{WMV_SDK_BASEDIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                  ${CMAKE_SOURCE_DIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
           )

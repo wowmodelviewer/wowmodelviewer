@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 
 project(wowmodelviewer)
 
@@ -8,11 +8,12 @@ include_directories(.)
 
 # search for required package (wxwidgets)
 set(wxWidgets_USE_UNICODE ON)
-find_package(wxWidgets REQUIRED net gl aui xml adv core base)
+set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
+find_package(wxWidgets REQUIRED net aui xml adv core base)
 
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} $ENV{WMV_SDK_BASEDIR}/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
 
 # find required Qt packages
 find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)
@@ -173,14 +174,14 @@ target_link_libraries(${NAME}
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
 # additional files needed to let WMV correctly works
-set(QT_BIN_DIR  $ENV{WMV_SDK_BASEDIR}/Qt/bin)
+set(QT_BIN_DIR  ${CMAKE_SOURCE_DIR}/Dependencies/Qt/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
              ${QT_BIN_DIR}/Qt5Gui.dll
              ${QT_BIN_DIR}/Qt5Network.dll
              ${QT_BIN_DIR}/Qt5Widgets.dll
              ${QT_BIN_DIR}/Qt5Xml.dll)
 
-set(QT_PLUGIN_DIR $ENV{WMV_SDK_BASEDIR}/Qt/plugins)
+set(QT_PLUGIN_DIR ${CMAKE_SOURCE_DIR}/Dependencies/Qt/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
@@ -188,9 +189,9 @@ set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
 
-set(EXTRA_FILES $ENV{WMV_SDK_BASEDIR}/bin_support/vcredist_x86.exe
-                $ENV{WMV_SDK_BASEDIR}/lib/libeay32.dll
-                $ENV{WMV_SDK_BASEDIR}/lib/ssleay32.dll
+set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
+                ${CMAKE_SOURCE_DIR}/Dependencies/lib/libeay32.dll
+                ${CMAKE_SOURCE_DIR}/Dependencies/lib/ssleay32.dll
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
