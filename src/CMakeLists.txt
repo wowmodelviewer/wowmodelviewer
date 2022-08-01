@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
 
