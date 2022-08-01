@@ -7,7 +7,7 @@
 SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 # define base repo path to use it cross folder
-SET(WMV_BASE_PATH ${CMAKE_CURRENT_LIST_DIR}/../..)
+SET(WMV_BASE_PATH ${CMAKE_SOURCE_DIR}/..)
 
 # define cmake folder to be reusable cross scripts
 SET(WMV_CMAKE_FOLDER ${WMV_BASE_PATH}/src/cmake)
@@ -20,7 +20,7 @@ include(${WMV_CMAKE_FOLDER}/policies.cmake)
 
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Qt/lib/cmake)
+set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib/cmake)
 
 #############################
 #  platform specific part   #
@@ -51,7 +51,7 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${WMV_BASE_PATH}/src/games/wow)
-  link_directories(${CMAKE_SOURCE_DIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
   find_package(Qt5Core)
   find_package(Qt5Xml)
   find_package(Qt5Gui)
@@ -61,7 +61,7 @@ endmacro()
 
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
-  link_directories(${CMAKE_SOURCE_DIR}/Qt/lib)
+  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
   find_package(Qt5Core) 
   find_package(Qt5Gui) # Qt5Gui is needed for QImage
   find_package(Qt5Network)
