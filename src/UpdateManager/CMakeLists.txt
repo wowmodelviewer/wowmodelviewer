@@ -8,12 +8,11 @@ cmake_policy(SET CMP0020 NEW)
 include_directories(.)
 
 # Qt5 stuff
-set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib/cmake)
-find_package(Qt5Core)
-find_package(Qt5Gui)
-find_package(Qt5Xml)
-find_package(Qt5Widgets)
-find_package(Qt5Network)
+find_package(Qt5Core ${QT_VERSION})
+find_package(Qt5Gui ${QT_VERSION})
+find_package(Qt5Xml ${QT_VERSION})
+find_package(Qt5Widgets ${QT_VERSION})
+find_package(Qt5Network ${QT_VERSION})
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

@@ -12,7 +12,7 @@ include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})
 
 # Qt5 stuff
-find_package(Qt5Core)
+find_package(Qt5Core ${QT_VERSION})
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

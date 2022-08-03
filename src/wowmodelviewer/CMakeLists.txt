@@ -16,8 +16,8 @@ include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
 
 # find required Qt packages
-find_package(Qt5 COMPONENTS Core Network Widgets REQUIRED)
-find_package(Qt5 COMPONENTS Xml Gui)
+find_package(Qt5 ${QT_VERSION} COMPONENTS Core Network Widgets REQUIRED)
+find_package(Qt5 ${QT_VERSION} COMPONENTS Xml Gui)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -174,14 +174,14 @@ target_link_libraries(${NAME}
 install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
 # additional files needed to let WMV correctly works
-set(QT_BIN_DIR  ${CMAKE_SOURCE_DIR}/Dependencies/Qt/bin)
+set(QT_BIN_DIR  ${QT_LOCATION}/bin)
 set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
              ${QT_BIN_DIR}/Qt5Gui.dll
              ${QT_BIN_DIR}/Qt5Network.dll
              ${QT_BIN_DIR}/Qt5Widgets.dll
              ${QT_BIN_DIR}/Qt5Xml.dll)
 
-set(QT_PLUGIN_DIR ${CMAKE_SOURCE_DIR}/Dependencies/Qt/plugins)
+set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
                         ${QT_PLUGIN_DIR}/platforms/qwindows.dll)

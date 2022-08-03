@@ -13,14 +13,17 @@ SET(WMV_BASE_PATH ${CMAKE_SOURCE_DIR}/..)
 SET(WMV_CMAKE_FOLDER ${WMV_BASE_PATH}/src/cmake)
 
 # add wmv cmake directory to search path
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
+#set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
 
 # define policies to avoid warnings
 include(${WMV_CMAKE_FOLDER}/policies.cmake)
 
 # Qt5 stuff
 # init cmake with our qt install directory
-set(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib/cmake)
+SET(QT_LOCATION C:/Qt/5.13.2/msvc2017)
+SET(QT_VERSION 5.13.2)
+SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
+
 
 #############################
 #  platform specific part   #
@@ -51,20 +54,20 @@ macro(use_wow)
   use_core() # if you use wow lib, you are underneath using core lib
   use_casclib() # if you use wow lib, you are underneath using casc lib 
   include_directories(${WMV_BASE_PATH}/src/games/wow)
-  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
-  find_package(Qt5Core)
-  find_package(Qt5Xml)
-  find_package(Qt5Gui)
-  find_package(Qt5Network)
+  link_directories(${QT_LOCATION}/lib)
+  find_package(Qt5Core ${QT_VERSION})
+  find_package(Qt5Xml ${QT_VERSION})
+  find_package(Qt5Gui ${QT_VERSION})
+  find_package(Qt5Network ${QT_VERSION})
   list(APPEND extralibs wow)
 endmacro()
 
 macro(use_core)
   include_directories(${WMV_BASE_PATH}/src/core)
-  link_directories(${CMAKE_SOURCE_DIR}/Dependencies/Qt/lib)
-  find_package(Qt5Core) 
-  find_package(Qt5Gui) # Qt5Gui is needed for QImage
-  find_package(Qt5Network)
+  link_directories(${QT_LOCATION}/lib)
+  find_package(Qt5Core ${QT_VERSION}) 
+  find_package(Qt5Gui ${QT_VERSION}) # Qt5Gui is needed for QImage
+  find_package(Qt5Network ${QT_VERSION})
   list(APPEND extralibs core)
 endmacro()
   

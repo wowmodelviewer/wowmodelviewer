@@ -1,2 +1,0 @@
-# bitcode (release mode) is incompatible with splitting sections.
-!bitcode|!release: load(gc_binaries)

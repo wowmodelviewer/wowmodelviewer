@@ -8,10 +8,10 @@ message(STATUS "Building nextgen Core")
 include_directories(.)
 
 # Qt5 stuff
-find_package(Qt5Core) 
-find_package(Qt5Gui) # Qt5Gui is needed for QImage
-find_package(Qt5Network)
-find_package(Qt5Xml)
+find_package(Qt5Core ${QT_VERSION}) 
+find_package(Qt5Gui ${QT_VERSION}) # Qt5Gui is needed for QImage
+find_package(Qt5Network ${QT_VERSION})
+find_package(Qt5Xml ${QT_VERSION})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 
