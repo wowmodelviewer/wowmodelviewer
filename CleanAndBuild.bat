@@ -1,4 +1,3 @@
-cd build
-cmake --build . --target release --config Release --clean-first
+cmake --build build --config Release --target release --clean-first
 
 cmd /k

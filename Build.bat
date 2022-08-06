@@ -1,4 +1,3 @@
-cd build
-cmake --build . --target release --config Release
+cmake --build build --config Release --target release
 
 cmd /k
