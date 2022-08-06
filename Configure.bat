@@ -1,5 +1,5 @@
 mkdir build
 cd build
-cmake -G "Visual Studio 15 2017" -DBUILDNUMBER=0 ..\src
+cmake -G "Visual Studio 15 2017" ..\src
 
 cmd /k
