@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.16)
+# wow lib
 include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/common.cmake)
-
-project(wow)
 
 message(STATUS "Building wow library")
 

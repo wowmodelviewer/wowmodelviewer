@@ -2,18 +2,11 @@
 #   common part   #
 ###################
 
-# set build type you want
-# available values are None Debug Release RelWithDebInfo MinSizeRel (will strip exe for minimal output size)
-SET(CMAKE_BUILD_TYPE RelWithDebInfo)
-
 # define base repo path to use it cross folder
 SET(WMV_BASE_PATH ${CMAKE_SOURCE_DIR}/..)
 
 # define cmake folder to be reusable cross scripts
 SET(WMV_CMAKE_FOLDER ${WMV_BASE_PATH}/src/cmake)
-
-# add wmv cmake directory to search path
-#set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" "${WMV_CMAKE_FOLDER}")
 
 # define policies to avoid warnings
 include(${WMV_CMAKE_FOLDER}/policies.cmake)
@@ -30,10 +23,6 @@ SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
 #############################
 if(WIN32)
   include(${WMV_BASE_PATH}/src/cmake/windows.cmake)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
-  include(${WMV_BASE_PATH}/src/cmake/linux.cmake)
-elseif(APPLE)
-  include(${WMV_BASE_PATH}/src/cmake/macos.cmake)    
 endif()
 
 ######################################

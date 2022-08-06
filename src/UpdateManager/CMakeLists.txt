@@ -1,7 +1,6 @@
-project(UpdateManager)
+# updatemanager exe
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
-cmake_minimum_required(VERSION 3.16)
 message(STATUS "Building UpdateManager")
 
 cmake_policy(SET CMP0020 NEW)

@@ -1,7 +1,4 @@
-cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
-
-project(wowmodelviewer)
-
+# wowmodelviewer exe
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
 include_directories(.)

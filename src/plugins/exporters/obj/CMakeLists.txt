@@ -1,5 +1,4 @@
-project(obj_exporter)
-cmake_minimum_required(VERSION 3.16)
+#obj_exporter lib
 
 include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 

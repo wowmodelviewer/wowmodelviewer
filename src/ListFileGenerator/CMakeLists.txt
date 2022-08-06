@@ -1,7 +1,6 @@
-project(ListFileGenerator)
+# ListFileGenerator ext
 include(${WMV_BASE_PATH}/src/cmake/common.cmake)
 
-cmake_minimum_required(VERSION 3.16)
 message(STATUS "Building ListFileGenerator")
 
 cmake_policy(SET CMP0020 NEW)

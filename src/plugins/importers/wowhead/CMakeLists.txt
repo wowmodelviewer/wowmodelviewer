@@ -1,6 +1,4 @@
-project(wowhead)
-cmake_minimum_required(VERSION 3.16)
-
+# wowhead lib
 include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building wowhead importer")
