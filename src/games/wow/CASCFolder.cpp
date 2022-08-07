@@ -143,7 +143,7 @@ void CASCFolder::initBuildInfo()
       continue;
 
     // grab version for this line
-    QRegularExpression re("^(\\d).(\\d).(\\d).(\\d+)");
+    QRegularExpression re("^(\\d+).(\\d+).(\\d+).(\\d+)$");
     QRegularExpressionMatch result = re.match(values[versionIndex]);
     if (result.hasMatch())
       version = result.captured(1) + "." + result.captured(2) + "." + result.captured(3) + "." + result.captured(4);
