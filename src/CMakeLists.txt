@@ -1,11 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 
-# Qt5 stuff
-# init cmake with our qt install directory
+# Dependencies.
+# Qt5
 SET(QT_LOCATION C:/Qt/5.13.2/msvc2017)
 SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
+
+#wxwidgets
+set(wxWidgets_USE_UNICODE ON)
+find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
+# add wx widgets inclusions
+include(${wxWidgets_USE_FILE})
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
+
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

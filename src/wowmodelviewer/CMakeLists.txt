@@ -3,15 +3,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
 
 include_directories(.)
 
-# search for required package (wxwidgets)
-set(wxWidgets_USE_UNICODE ON)
-set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
-find_package(wxWidgets REQUIRED net aui xml adv core base)
-
-# add wx widgets inclusions
-include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
-
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

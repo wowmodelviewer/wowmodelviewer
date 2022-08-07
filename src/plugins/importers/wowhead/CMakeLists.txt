@@ -3,10 +3,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building wowhead importer")
 
-set(wxWidgets_USE_UNICODE ON)
-set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
-find_package(wxWidgets COMPONENTS net core base REQUIRED)
-
 add_definitions(-DQT_PLUGIN)
 
 set(src WowheadImporter.cpp)
