@@ -224,10 +224,8 @@ void CASCFolder::addExtraEncryptionKeys()
 
       bool ok, ok2;
       ok2 = CascAddStringEncryptionKey(hStorage, keyName.toULongLong(&ok, 16), keyValue.toStdString().c_str());
-      if (ok2)
-        LOG_INFO << "Adding TACT key from file, Name:" << keyName << ", Value:" << keyValue ;
-      else
-        LOG_ERROR << "Failed to add TACT key from file, Name:" << keyName << ", Value:" << keyValue ;  
+      if (!ok2)
+          LOG_ERROR << "Failed to add TACT key from file, Name:" << keyName << ", Value:" << keyValue;
     }
   }
 }
