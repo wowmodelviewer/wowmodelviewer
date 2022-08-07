@@ -1,6 +1,17 @@
 cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 
+# Qt5 stuff
+# init cmake with our qt install directory
+SET(QT_LOCATION C:/Qt/5.13.2/msvc2017)
+SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
+find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
+
+# Find includes in corresponding build directories
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio

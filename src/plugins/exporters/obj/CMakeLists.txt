@@ -10,14 +10,6 @@ find_package(wxWidgets REQUIRED core)
 include(${wxWidgets_USE_FILE})
 include_directories(${wxWidgets_INCLUDE_DIRS})
 
-# Qt5 stuff
-find_package(Qt5Core ${QT_VERSION})
-#find_package(Qt5Network)
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
 add_definitions(-DQT_PLUGIN)
 
 set(src OBJExporter.cpp)

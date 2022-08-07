@@ -6,18 +6,6 @@ message(STATUS "Building UpdateManager")
 cmake_policy(SET CMP0020 NEW)
 include_directories(.)
 
-# Qt5 stuff
-find_package(Qt5Core ${QT_VERSION})
-find_package(Qt5Gui ${QT_VERSION})
-find_package(Qt5Xml ${QT_VERSION})
-find_package(Qt5Widgets ${QT_VERSION})
-find_package(Qt5Network ${QT_VERSION})
-
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
 set(src main.cpp
         UpdateManager.cpp)
 

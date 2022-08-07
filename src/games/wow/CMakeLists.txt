@@ -3,16 +3,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../cmake/common.cmake)
 
 message(STATUS "Building wow library")
 
-# Qt5 stuff
-find_package(Qt5Core ${QT_VERSION})
-find_package(Qt5Xml ${QT_VERSION})
-find_package(Qt5Gui ${QT_VERSION})
-find_package(Qt5Network ${QT_VERSION})
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
 set(src animated.cpp
       AnimManager.cpp
       Attachment.cpp

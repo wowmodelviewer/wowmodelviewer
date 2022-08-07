@@ -7,14 +7,6 @@ set(wxWidgets_USE_UNICODE ON)
 set(wxWidgets_ROOT_DIR ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
 find_package(wxWidgets COMPONENTS net core base REQUIRED)
 
-# Qt5 stuff
-find_package(Qt5Core ${QT_VERSION})
-find_package(Qt5Network ${QT_VERSION})
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
 add_definitions(-DQT_PLUGIN)
 
 set(src WowheadImporter.cpp)

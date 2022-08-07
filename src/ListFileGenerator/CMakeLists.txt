@@ -6,9 +6,6 @@ message(STATUS "Building ListFileGenerator")
 cmake_policy(SET CMP0020 NEW)
 include_directories(.)
 
-# Qt5 stuff
-find_package(Qt5Core ${QT_VERSION})
-
 set(src main.cpp)
         
 use_wow()

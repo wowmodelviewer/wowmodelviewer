@@ -5,12 +5,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
 
 message(STATUS "Building armory importer")
 
-# Qt5 stuff
-# Find includes in corresponding build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-# Instruct CMake to run moc automatically when needed.
-set(CMAKE_AUTOMOC ON)
-
 add_definitions(-DQT_PLUGIN)
 
 set(src ArmoryImporter.cpp)
