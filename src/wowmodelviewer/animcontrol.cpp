@@ -492,7 +492,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                     "WHERE CreatureModelData.FileID = %1")
                     .arg( m->gamefile->fileDataId());
   } 
-  else // BfA:
+  else if (GAMEDIRECTORY.version().contains("8.3"))
   {
     query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
                     "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
@@ -500,6 +500,15 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                     "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
                     "WHERE CreatureModelData.FileID = %1")
                     .arg( m->gamefile->fileDataId());
+  }
+  else
+  {
+      query = QString("SELECT Texture1, Texture2, Texture3, Texture4, ParticleColorID, "
+          "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+          "LEFT JOIN CreatureModelData "
+          "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+          "WHERE CreatureModelData.FileID = %1")
+          .arg(m->gamefile->fileDataId());
   }
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
