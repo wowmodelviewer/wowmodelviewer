@@ -48,21 +48,21 @@
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="ClientPrefix" pos="0" />
-    <field type="uint" name="Flags" pos="16" />
-    <field type="int"  name="BaseRaceID" pos="29" />
-    <field type="int"  name="MaleModelFallbackRaceID" pos="41" />
-    <field type="int"  name="MaleModelFallbackSex" pos="42" />
-    <field type="int"  name="FemaleModelFallbackRaceID" pos="43" />
-    <field type="int"  name="FemaleModelFallbackSex" pos="44" />
-    <field type="int"  name="MaleTextureFallbackRaceID" pos="45" />
-    <field type="int"  name="MaleTextureFallbackSex" pos="46" />
-    <field type="int"  name="FemaleTextureFallbackRaceID" pos="47" />
-    <field type="int"  name="FemaleTextureFallbackSex" pos="48" />
+    <field type="uint" name="Flags" pos="15" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="37" />
+	<field type="int"  name="FemaleModelFallbackRaceID" pos="38" />
+	<field type="int"  name="MaleTextureFallbackRaceID" pos="39" />
+	<field type="int"  name="FemaleTextureFallbackRaceID" pos="40" />
+    <field type="int"  name="MaleModelFallbackSex" pos="48" />
+    <field type="int"  name="FemaleModelFallbackSex" pos="49" />
+    <field type="int"  name="MaleTextureFallbackSex" pos="50" />
+    <field type="int"  name="FemaleTextureFallbackSex" pos="51" />
   </table>
   <table name="ChrRaceXChrModel">
     <field type="uint" name="ID" primary="yes" />
     <field type="int"  name="ChrRacesID" relationshipData="yes" />
     <field type="int"  name="ChrModelID" pos="1" />
+	<field type="int"  name="Sex" pos="2" />
   </table>
   <table name="ChrModel">
     <field type="uint" name="ID" primary="yes" />
