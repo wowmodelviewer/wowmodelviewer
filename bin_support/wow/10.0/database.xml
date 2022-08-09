@@ -135,9 +135,9 @@
     <field type="uint" name="Layer" pos="1" />
     <field type="uint" name="Flags" pos="2" />
     <field type="uint" name="BlendMode" pos="3" />
-    <field type="int" name="TextureSectionTypeBitMask" pos="4" />
-    <field type="uint" name="ChrModelTextureTargetID" arraySize="2" pos="6" />
-    <field type="uint" name="CharComponentTextureLayoutsID" pos="7"  relationshipData="yes" />
+    <field type="int"  name="TextureSectionTypeBitMask" pos="4" />
+    <field type="uint" name="ChrModelTextureTargetID" arraySize="2" pos="7" />
+    <field type="uint" name="CharComponentTextureLayoutsID" pos="8"  relationshipData="yes" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
     <field primary="yes" type="uint" name="ID" />
