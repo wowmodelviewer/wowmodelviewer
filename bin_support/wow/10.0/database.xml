@@ -49,10 +49,10 @@
     <field type="uint" name="ID" primary="yes" />
     <field type="text" name="ClientPrefix" pos="0" />
     <field type="uint" name="Flags" pos="15" />
-    <field type="int"  name="MaleModelFallbackRaceID" pos="37" />
-	<field type="int"  name="FemaleModelFallbackRaceID" pos="38" />
-	<field type="int"  name="MaleTextureFallbackRaceID" pos="39" />
-	<field type="int"  name="FemaleTextureFallbackRaceID" pos="40" />
+    <field type="int"  name="MaleModelFallbackRaceID" pos="33" />
+	<field type="int"  name="FemaleModelFallbackRaceID" pos="34" />
+	<field type="int"  name="MaleTextureFallbackRaceID" pos="35" />
+	<field type="int"  name="FemaleTextureFallbackRaceID" pos="36" />
     <field type="int"  name="MaleModelFallbackSex" pos="48" />
     <field type="int"  name="FemaleModelFallbackSex" pos="49" />
     <field type="int"  name="MaleTextureFallbackSex" pos="50" />
@@ -137,7 +137,7 @@
     <field type="uint" name="BlendMode" pos="3" />
     <field type="int"  name="TextureSectionTypeBitMask" pos="4" />
     <field type="uint" name="ChrModelTextureTargetID" arraySize="2" pos="7" />
-    <field type="uint" name="CharComponentTextureLayoutsID" pos="8"  relationshipData="yes" />
+    <field type="uint" name="CharComponentTextureLayoutsID" relationshipData="yes" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
     <field primary="yes" type="uint" name="ID" />
