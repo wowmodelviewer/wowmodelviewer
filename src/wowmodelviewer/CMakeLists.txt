@@ -94,31 +94,29 @@ set(cmake_files ${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake
 
 source_group("cmake" FILES ${cmake_files})
 
-set(common_files wowmodelviewer.json
+set(common_files 
+                 wowmodelviewer.json
                  ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
                  ${WMV_BASE_PATH}/appveyor.yml
+                 ${WMV_BASE_PATH}/bin_support/wow/listfile.csv
                  ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(wow9_0_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.0/listfile.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv)
 
 set(wow9_1_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.1/listfile.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.1/database.xml
                  ${WMV_BASE_PATH}/bin_support/wow/9.1/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.1/ChrRacesCustomization.csv)
 
 set(wow9_2_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.2/listfile.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.2/database.xml
                  ${WMV_BASE_PATH}/bin_support/wow/9.2/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/9.2/ChrRacesCustomization.csv)
 
-set(wow10_0_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/10.0/listfile.csv
+set(wow10_0_files
                  ${WMV_BASE_PATH}/bin_support/wow/10.0/database.xml
                  ${WMV_BASE_PATH}/bin_support/wow/10.0/AnimationData.csv
                  ${WMV_BASE_PATH}/bin_support/wow/10.0/ChrRacesCustomization.csv)
@@ -183,6 +181,7 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
                 ${CMAKE_SOURCE_DIR}/Dependencies/lib/libeay32.dll
                 ${CMAKE_SOURCE_DIR}/Dependencies/lib/ssleay32.dll
+                ${WMV_BASE_PATH}/bin_support/wow/listfile.csv
                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})

@@ -1800,7 +1800,7 @@ void ModelViewer::LoadWoW()
   LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
   core::Game::instance().setConfigFolder(baseConfigFolder);
  
-  GAMEDIRECTORY.initFromListfile("listfile.csv");
+  GAMEDIRECTORY.initFromListfile("../../../listfile.csv");
   
   if (!customDirectoryPath.IsEmpty())
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
