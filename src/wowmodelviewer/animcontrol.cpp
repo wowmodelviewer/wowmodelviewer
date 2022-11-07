@@ -492,7 +492,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
                     "WHERE CreatureModelData.FileID = %1")
                     .arg( m->gamefile->fileDataId());
   } 
-  else if (GAMEDIRECTORY.version().contains("8.3"))
+  else if (GAMEDIRECTORY.version().contains("8.3") || GAMEDIRECTORY.version().contains("9.2"))
   {
     query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
                     "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
