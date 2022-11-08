@@ -8,7 +8,8 @@
 #ifndef _WOW_ENUMS_H_
 #define _WOW_ENUMS_H_
 
-enum CharSlots {
+enum CharSlots
+{
   CS_HEAD,
   CS_SHOULDER,
   CS_BOOTS,
@@ -27,7 +28,8 @@ enum CharSlots {
   NUM_CHAR_SLOTS
 };
 
-enum CharGeosets {
+enum CharGeosets
+{
   CG_HAIRSTYLE        = 0,
   CG_GEOSET100        = 1,
   CG_GEOSET200        = 2,
@@ -74,7 +76,8 @@ enum CharGeosets {
 
 #define  UPPER_BODY_BONES  5
 
-enum POSITION_SLOTS { // wxString Attach_Names[]
+enum POSITION_SLOTS
+{ // wxString Attach_Names[]
   ATT_LEFT_WRIST = 0, // Mountpoint
   ATT_RIGHT_PALM,
   ATT_LEFT_PALM,
@@ -133,7 +136,8 @@ enum POSITION_SLOTS { // wxString Attach_Names[]
   ATT_HEAD_TOP
 };
 
-enum CharRegions {
+enum CharRegions
+{
   // Corresponds to "Section" column in CharComponentTextureSection table
   CR_ARM_UPPER = 0,
   CR_ARM_LOWER = 1,
@@ -157,7 +161,8 @@ enum CharRegions {
   CR_TABARD_6
 };
 
-enum KeyBoneTable { // wxString Bone_Names[]
+enum KeyBoneTable
+{ // wxString Bone_Names[]
   //Block F - Key Bone lookup table.
   //---------------------------------
   BONE_LARM = 0,    // 0, ArmL: Left upper arm
@@ -198,7 +203,8 @@ enum KeyBoneTable { // wxString Bone_Names[]
   BONE_MAX
 };
 
-enum ModelType {
+enum ModelType
+{
   MT_NORMAL,
   MT_CHAR,
   MT_WMO,
@@ -250,7 +256,8 @@ enum ItemTypes
   NUM_ITEM_TYPES
 };
 
-enum ModelLightTypes {
+enum ModelLightTypes
+{
   MODELLIGHT_DIRECTIONAL = 0,
   MODELLIGHT_POINT
 };
@@ -267,7 +274,8 @@ Value   Mapped to   Meaning
 5   4   Combiners_Fade
 6   4   Used in the Deeprun Tram subway glass, supposedly (src=dest_color, dest=src_color) (?)
 */
-enum BlendModes {
+enum BlendModes
+{
   BM_OPAQUE,
   BM_TRANSPARENT,
   BM_ALPHA_BLEND,
@@ -280,7 +288,10 @@ enum BlendModes {
 
 /*
 Texture Types
-Texture type is 0 for regular textures, nonzero for skinned textures (filename not referenced in the M2 file!) For instance, in the NightElfFemale model, her eye glow is a type 0 texture and has a file name, the other 3 textures have types of 1, 2 and 6. The texture filenames for these come from client database files:
+Texture type is 0 for regular textures, nonzero for skinned textures (filename not referenced in the M2 file!) For instance, 
+in the NightElfFemale model, her eye glow is a type 0 texture and has a file name, 
+the other 3 textures have types of 1, 2 and 6.
+The texture filenames for these come from client database files:
 DBFilesClient\CharSections.dbc
 DBFilesClient\CreatureDisplayInfo.dbc
 DBFilesClient\ItemDisplayInfo.dbc
@@ -309,7 +320,8 @@ enum TextureTypes
   TEXTURE_18 = 18               // Guild Emblem 
 };
 
-enum EyeGlowTypes {
+enum EyeGlowTypes
+{
   EGT_NONE = 0,
   EGT_DEFAULT,
   EGT_DEATHKNIGHT
@@ -363,7 +375,16 @@ enum Races
   RACE_DARK_IRON_DWARF = 34,
   RACE_VULPERA = 35,
   RACE_MAGHAR_ORC = 36,
-  RACE_MECHAGNOME = 37
+  RACE_MECHAGNOME = 37,
+  RACE_DRACTHYR = 52,
+  RACE_DRACTHYR2 = 70,
+  RACE_COMPANIONDRAKE = 71,
+  RACE_COMPANIONPROTODRAGON = 72,
+  RACE_COMPANIONSERPENT = 73,
+  RACE_COMPANIONWYVERN = 74,
+  RACE_DRACTHYR3 = 75, // UnalteredVisualRaceID for RACE_DRACTHYR (Alliance)
+  RACE_DRACTHYR4 = 76, // UnalteredVisualRaceID for RACE_DRACTHYR2 (Horde)
+  RACE_COMPANIONPTERRODAX = 77
 };
 
 // Class value is index in ChrClasses.db*
@@ -381,7 +402,9 @@ enum Classes
   CLASS_WARLOCK = 9,
   CLASS_MONK = 10,
   CLASS_DRUID = 11,
-  CLASS_DEMONHUNTER = 12
+  CLASS_DEMONHUNTER = 12,
+  CLASS_EVOKER = 13,
+  CLASS_ADVENTURER = 14 // Not sure what this is, added in Dragonflight
 };
 
 #endif /* _WOW_ENUMS_H_ */
