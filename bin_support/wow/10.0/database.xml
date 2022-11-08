@@ -3,10 +3,10 @@
   <!-- Character tables - BEGIN -->
   <table name="CharacterFacialHairStyles">
     <field type="uint" name="ID" primary="yes" />
+	<field type="uint" name="Geoset" arraySize="5" pos="0" />
     <field type="byte" name="RaceID" pos="1" />
     <field type="byte" name="SexID" pos="2" />
     <field type="byte" name="VariationID" pos="3" />
-    <field type="uint" name="Geoset" arraySize="5" pos="0" />
   </table>
   <table name="CharBaseSection">
     <field type="uint" name="ID" primary="yes" />
@@ -21,7 +21,7 @@
   </table>
   <table name="CharComponentTextureSections">
     <field type="uint" name="ID" primary="yes" />
-    <field type="byte" name="LayoutID" pos="0" />
+    <field type="byte" name="LayoutID" pos="0" relationshipData="yes" />
     <field type="byte" name="Section" pos="1" />
     <field type="uint16" name="X" pos="2" />
     <field type="uint16" name="Y" pos="3" />
@@ -29,21 +29,21 @@
     <field type="uint16" name="Height" pos="5" />
   </table>
   <table name="CharHairGeoSets">
-    <field primary="yes" type="uint" name="ID" />
-    <field type="byte" name="RaceID" pos="0" />
+    <field type="uint" name="ID" primary="yes" />
+    <field type="byte" name="RaceID" pos="0" relationshipData="yes" />
     <field type="byte" name="SexID" pos="1" />
     <field type="byte" name="VariationID" pos="2" />
+	<field type="byte" name="GeoSetID" pos="3" />
+	<field type="byte" name="ShowScalp" pos="4" />
     <field type="byte" name="VariationType" pos="5" />
-    <field type="byte" name="GeoSetID" pos="3" />
     <field type="byte" name="GeoSetType" pos="6" />
-    <field type="byte" name="ShowScalp" pos="4" />
     <field type="uint" name="ColorIndex" pos="7" />
     <field type="uint" name="CustomGeoFileDataID" pos="8" />
     <field type="uint" name="HdCustomGeoFileDataID" pos="9" />
   </table>
   <table name="ChrClasses">
-    <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="1" />
+	<field type="uint" name="ID" primary="yes" pos="10" />
   </table>
   <table name="ChrRaces">
     <field type="uint" name="ID" primary="yes" />
@@ -60,14 +60,14 @@
   </table>
   <table name="ChrRaceXChrModel">
     <field type="uint" name="ID" primary="yes" />
-    <field type="int"  name="ChrRacesID" relationshipData="yes" />
+    <field type="int"  name="ChrRacesID" relationshipData="yes" pos="0" />
     <field type="int"  name="ChrModelID" pos="1" />
 	<field type="int"  name="Sex" pos="2" />
   </table>
   <table name="ChrModel">
-    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ID" primary="yes" pos="2"/>
     <field type="int"  name="Sex" pos="3" />
-    <field type="int"  name="DisplayID" pos="4" />
+    <field type="int"  name="DisplayID" relationshipData="yes" pos="4" />
     <field type="int"  name="CharComponentTextureLayoutID" pos="5" />
     <field type="int"  name="Flags" pos="6" />
     <field type="int"  name="SkeletonFileDataID" pos="7" />
@@ -83,8 +83,8 @@
     <field type="uint" name="RaceId" relationshipData="yes" />
   </table>
   <table name="ChrCustomizationOption">
-    <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
+	<field type="uint" name="ID" primary="yes" pos="1" />
     <field type="uint" name="Flags" pos="3" />
     <field type="uint" name="ChrModelID" pos="4"  relationshipData="yes" />
     <field type="uint" name="OrderIndex" pos="5" />
@@ -93,13 +93,13 @@
     <field type="uint" name="ChrCustomizationID" pos="9" />
   </table>
   <table name="ChrCustomizationChoice">
-    <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
+	<field type="uint" name="ID" primary="yes" pos="1" />
     <field type="uint" name="ChrCustomizationOptionID" pos="2"  relationshipData="yes" />
-    <field type="uint16" name="OrderIndex" pos="4" />
-    <field type="uint16" name="OrderIndex2" pos="5" />
-    <field type="uint" name="Flags" pos="6" />
-    <field type="uint" name="Color" arraySize="2" pos="7" />
+    <field type="uint16" name="OrderIndex" pos="5" />
+    <field type="uint16" name="OrderIndex2" pos="6" />
+    <field type="uint" name="Flags" pos="7" />
+    <field type="uint" name="Color" arraySize="2" pos="9" />
   </table>
   <table name="ChrCustomizationElement">
     <field type="uint" name="ID" primary="yes" />
@@ -146,14 +146,14 @@
     <field type="text" name="HairCustomization" />
   </table>
   <table name="ComponentModelFileData">
-    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="ID" primary="yes" />
     <field type="byte" name="GenderIndex" pos="0"/>
     <field type="byte" name="ClassID" pos="1"/>
     <field type="byte" name="RaceID" pos="2"/>
     <field type="byte" name="PositionIndex" pos="3"/>
   </table>
   <table name="ComponentTextureFileData">
-    <field primary="yes" type="uint" name="ID" />
+    <field type="uint" name="ID" primary="yes" />
     <field type="byte" name="GenderIndex" pos="0"/>
     <field type="byte" name="ClassID" pos="1"/>
     <field type="byte" name="RaceID" pos="2"/>
@@ -164,9 +164,9 @@
   <!-- Creature tables - BEGIN -->
   <table name="Creature">
     <field type="uint" name="ID" primary="yes" />
+	<field type="text" name="Name" pos="0"/>
     <field type="byte" name="CreatureTypeID" pos="5" />
     <field type="uint" name="DisplayID" arraySize="4" pos="8" />
-    <field type="text" name="Name" pos="0"/>
   </table>
   <table name="CreatureType">
     <field type="uint" name="ID" primary="yes" />
@@ -174,11 +174,12 @@
     <field type="byte" name="Flags" pos="1" />
   </table>
   <table name="CreatureDisplayInfo">
-    <field type="uint" name="ID" primary="yes" />
+    <field type="uint" name="ID" primary="yes" pos="0" />
     <field type="uint16" name="ModelID" pos="1" />
     <field type="uint" name="ExtendedDisplayInfoID" pos="7" />
+	<field type="uint16" name="ParticleColorID" pos="9" />
     <field type="uint" name="Texture" arraySize="4" pos="24" />
-    <field type="uint16" name="ParticleColorID" pos="9" />
+
   </table>
   <!--
   <table name="CreatureDisplayInfoExtra">
@@ -200,9 +201,9 @@
 
   <table name="NpcModelItemSlotDisplayInfo">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="CreatureDisplayInfoExtraID" relationshipData="yes" createIndex="yes" />
     <field type="uint" name="ItemDisplayInfoID" pos="0" />
     <field type="byte" name="ItemType" pos="1" />
+	<field type="uint" name="CreatureDisplayInfoExtraID" relationshipData="yes" />
   </table>  
   <table name="CreatureModelData">
     <field type="uint" name="ID" primary="yes" />
@@ -221,16 +222,14 @@
     <field type="byte" name="Sheath" pos="4" />
   </table>
   <table name="ItemClass">
-    <field type="uint" name="col0" primary="yes" />
+    <field type="uint" name="ID" primary="yes"/>
     <field type="text" name="Name" pos="0" />
-    <field type="uint" name="ID" pos="1" createIndex="yes" />
   </table>
   <table name="ItemSubClass">
-    <field type="uint" name="col0" primary="yes" />
+    <field type="text" name="Name" pos="0" />
+	<field type="text" name="VerboseName" pos="1" />
     <field type="byte" name="ClassID" pos="3" relationshipData="yes"/>
     <field type="byte" name="SubClassID" pos="4" />
-    <field type="text" name="Name" pos="0" />
-    <field type="text" name="VerboseName" pos="1" />
   </table>
   <table name="ItemSparse">
     <field type="uint" name="ID" primary="yes" />
@@ -246,8 +245,8 @@
     <field type="uint" name="ItemDisplayInfoID" pos="1" />
   </table>
   <table name="ItemModifiedAppearance">
-    <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemID" pos="1" />
+    <field type="uint" name="ID" primary="yes"  pos="0" />
+    <field type="uint" name="ItemID" pos="1" relationshipData="yes" />
     <field type="byte" name="ItemAppearanceModifierID" pos="2" />
     <field type="uint" name="ItemAppearanceID" pos="3" />
     <field type="byte" name="ItemLevel" pos="4" />
@@ -264,8 +263,8 @@
   </table>
   <table name="ItemDisplayInfoMaterialRes">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" createIndex="yes" />
-    <field type="uint" name="TextureFileDataID" pos="1" />
+	<field type="uint" name="TextureFileDataID" pos="1" />
+    <field type="uint" name="ItemDisplayInfoID" relationshipData="yes" />
   </table>
   <table name="HelmetGeosetData">
     <field type="uint" name="ID" primary="yes" />
@@ -291,8 +290,8 @@
     <field type="uint" name="MaterialResourcesID" relationshipData="yes" createIndex="yes" />
   </table>
   <table name="ModelFileData">
-    <field type="uint" name="ModelID" primary="yes" />
-    <field type="uint" name="ID" pos="2" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="ModelID" primary="yes" pos="1"/>
+    <field type="uint" name="ID" pos="4" relationshipData="yes" />
   </table>
   <table name="ParticleColor">
     <field type="uint" name="ID" primary="yes" />
@@ -301,13 +300,13 @@
     <field type="int" name="EndColor" arraySize="3"  pos="2" />
   </table>
   <table name="Mount">
-    <field type="uint" name="ID" primary="yes" />
     <field type="text" name="Name" pos="0" />
+    <field type="uint" name="ID" primary="yes" pos="3" />
   </table>
   <table name="MountXDisplay">
     <field type="uint" name="ID" primary="yes" />
-    <field type="uint" name="MountID" relationshipData="yes" createIndex="yes" />
     <field type="uint" name="DisplayID" pos="0" />
+	<field type="uint" name="MountID" relationshipData="yes" />
   </table>
   
   <!-- Misc tables - END -->
@@ -318,7 +317,7 @@
     <field type="uint" name="Tier" pos="0" />
     <field type="uint" name="Component" pos="1" />
     <field type="uint" name="FileDataID" pos="2" />
-    <field type="uint" name="Color" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="Color" relationshipData="yes" />
   </table>
   
   <table name="GuildTabardBorder">
@@ -327,7 +326,7 @@
     <field type="uint" name="Tier" pos="1" />
     <field type="uint" name="Component" pos="2" />
     <field type="uint" name="FileDataID" pos="3" />
-    <field type="uint" name="Color" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="Color" relationshipData="yes" />
   </table>
   
   <table name="GuildTabardEmblem">
@@ -335,7 +334,7 @@
     <field type="uint" name="Component" pos="0" />
     <field type="uint" name="Color" pos="1" />
     <field type="uint" name="FileDataID" pos="2" />
-    <field type="uint" name="EmblemID" relationshipData="yes" createIndex="yes" />
+    <field type="uint" name="EmblemID" relationshipData="yes" />
   </table>
   
   <!-- Guild tabard tables - END -->  
