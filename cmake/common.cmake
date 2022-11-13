@@ -3,13 +3,13 @@
 ###################
 
 # define policies to avoid warnings
-include(${CMAKE_SOURCE_DIR}/src/cmake/policies.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/policies.cmake)
 
 #############################
 #  platform specific part   #
 #############################
 if(WIN32)
-  include(${CMAKE_SOURCE_DIR}/src/cmake/windows.cmake)
+  include(${CMAKE_SOURCE_DIR}/cmake/windows.cmake)
 endif()
 
 ######################################

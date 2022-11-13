@@ -1,5 +1,5 @@
 # wowmodelviewer exe
-include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 include_directories(.)
 
@@ -86,11 +86,11 @@ use_casclib()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
-set(cmake_files ${CMAKE_SOURCE_DIR}/src/cmake/common.cmake
-                ${CMAKE_SOURCE_DIR}/src/cmake/linux.cmake
-                ${CMAKE_SOURCE_DIR}/src/cmake/macos.cmake
-                ${CMAKE_SOURCE_DIR}/src/cmake/policies.cmake
-                ${CMAKE_SOURCE_DIR}/src/cmake/windows.cmake)
+set(cmake_files ${CMAKE_SOURCE_DIR}/cmake/common.cmake
+                ${CMAKE_SOURCE_DIR}/cmake/linux.cmake
+                ${CMAKE_SOURCE_DIR}/cmake/macos.cmake
+                ${CMAKE_SOURCE_DIR}/cmake/policies.cmake
+                ${CMAKE_SOURCE_DIR}/cmake/windows.cmake)
 
 source_group("cmake" FILES ${cmake_files})
 

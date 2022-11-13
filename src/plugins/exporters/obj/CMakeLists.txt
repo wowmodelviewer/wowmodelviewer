@@ -1,6 +1,6 @@
 #obj_exporter lib
 
-include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 message(STATUS "Building OBJ exporter")
 

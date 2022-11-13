@@ -21,7 +21,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

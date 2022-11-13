@@ -1,5 +1,5 @@
 # core lib
-include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/cmake/common.cmake)
 
 message(STATUS "Building nextgen Core")
 
