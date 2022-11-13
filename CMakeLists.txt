@@ -8,12 +8,12 @@ SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
 
 #wxwidgets
-SET(CMAKE_PREFIX_PATH ${CMAKE_SOURCE_DIR}/Dependencies/wxWidgets)
+SET(CMAKE_PREFIX_PATH src/Dependencies/wxWidgets)
 SET(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Dependencies/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src/Dependencies/include)
 
 
 # Find includes in corresponding build directories
@@ -21,7 +21,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 # group cmake auto targets  in a dedicated folder for Visual Studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -32,22 +32,22 @@ if(DEFINED BUILDNUMBER)
 endif()
 
 # add external libraries compilation
-add_subdirectory(Dependencies/3rdparty/CxImage)
+add_subdirectory(src/Dependencies/3rdparty/CxImage)
 
 # configure CASC lib for our usage
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
-add_subdirectory(Dependencies/3rdparty/casclib)
+add_subdirectory(src/Dependencies/3rdparty/casclib)
 
 # add internal libraries compilation 
-add_subdirectory(core)
-add_subdirectory(games)
+add_subdirectory(src/core)
+add_subdirectory(src/games)
 
 # then trigs executables compilation
-add_subdirectory(wowmodelviewer)
-add_subdirectory(UpdateManager)
+add_subdirectory(src/wowmodelviewer)
+add_subdirectory(src/UpdateManager)
 
 # add plugins compilation
-add_subdirectory(plugins)
+add_subdirectory(src/plugins)
 
 add_custom_target(release
           COMMAND
@@ -55,5 +55,5 @@ add_custom_target(release
           COMMAND
           "${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
-                  ${CMAKE_SOURCE_DIR}/NSIS/makensis.exe "${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                  ${CMAKE_SOURCE_DIR}/src/NSIS/makensis.exe "${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
           )

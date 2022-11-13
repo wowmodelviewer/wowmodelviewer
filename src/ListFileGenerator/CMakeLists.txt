@@ -1,5 +1,5 @@
 # ListFileGenerator ext
-include(${WMV_BASE_PATH}/src/cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 message(STATUS "Building ListFileGenerator")
 
@@ -16,7 +16,7 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
 target_link_libraries(${NAME} wow Qt5::Core)
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 if (MSVC_IDE)
 	# Enable Qt in Visual Studio

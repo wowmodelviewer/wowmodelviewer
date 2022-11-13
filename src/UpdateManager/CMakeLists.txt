@@ -1,5 +1,5 @@
 # updatemanager exe
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 message(STATUS "Building UpdateManager")
 
@@ -22,7 +22,7 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
 target_link_libraries(${NAME} ${extralibs} Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Network)
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 if (MSVC_IDE)
   # Enable Qt in Visual Studio

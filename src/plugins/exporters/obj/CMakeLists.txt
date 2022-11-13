@@ -1,6 +1,6 @@
 #obj_exporter lib
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../../cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 message(STATUS "Building OBJ exporter")
 
@@ -25,7 +25,7 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "plugins")
 
 target_link_libraries(${NAME} Qt5::Core ${extralibs})
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/plugins/")
+set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/plugins/")
 
 if (MSVC_IDE)
   # Enable Qt in Visual Studio

@@ -1,5 +1,5 @@
 # core lib
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 message(STATUS "Building nextgen Core")
 
@@ -74,7 +74,7 @@ set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Network Qt5::Xml Qt5::Gui ${extralibs})
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 if (MSVC_IDE)
   # Enable Qt in Visual Studio

@@ -1,5 +1,5 @@
 # wowmodelviewer exe
-include(${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake)
+include(${CMAKE_SOURCE_DIR}/src/cmake/common.cmake)
 
 include_directories(.)
 
@@ -86,40 +86,40 @@ use_casclib()
 set(RES_FILES "wmv.rc")
 
 # extra useful files for visual studio project
-set(cmake_files ${CMAKE_CURRENT_LIST_DIR}/../cmake/common.cmake
-                ${CMAKE_CURRENT_LIST_DIR}/../cmake/linux.cmake
-                ${CMAKE_CURRENT_LIST_DIR}/../cmake/macos.cmake
-                ${CMAKE_CURRENT_LIST_DIR}/../cmake/policies.cmake
-                ${CMAKE_CURRENT_LIST_DIR}/../cmake/windows.cmake)
+set(cmake_files ${CMAKE_SOURCE_DIR}/src/cmake/common.cmake
+                ${CMAKE_SOURCE_DIR}/src/cmake/linux.cmake
+                ${CMAKE_SOURCE_DIR}/src/cmake/macos.cmake
+                ${CMAKE_SOURCE_DIR}/src/cmake/policies.cmake
+                ${CMAKE_SOURCE_DIR}/src/cmake/windows.cmake)
 
 source_group("cmake" FILES ${cmake_files})
 
 set(common_files 
                  wowmodelviewer.json
-                 ${WMV_BASE_PATH}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
-                 ${WMV_BASE_PATH}/appveyor.yml
-                 ${WMV_BASE_PATH}/bin_support/wow/listfile.csv
-                 ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
+                 ${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi
+                 ${CMAKE_SOURCE_DIR}/appveyor.yml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(wow9_0_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.0/database.xml
-                 ${WMV_BASE_PATH}/bin_support/wow/9.0/AnimationData.csv
-                 ${WMV_BASE_PATH}/bin_support/wow/9.0/ChrRacesCustomization.csv)
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.0/database.xml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.0/AnimationData.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.0/ChrRacesCustomization.csv)
 
 set(wow9_1_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.1/database.xml
-                 ${WMV_BASE_PATH}/bin_support/wow/9.1/AnimationData.csv
-                 ${WMV_BASE_PATH}/bin_support/wow/9.1/ChrRacesCustomization.csv)
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.1/database.xml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.1/AnimationData.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.1/ChrRacesCustomization.csv)
 
 set(wow9_2_files 
-                 ${WMV_BASE_PATH}/bin_support/wow/9.2/database.xml
-                 ${WMV_BASE_PATH}/bin_support/wow/9.2/AnimationData.csv
-                 ${WMV_BASE_PATH}/bin_support/wow/9.2/ChrRacesCustomization.csv)
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/database.xml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/AnimationData.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/9.2/ChrRacesCustomization.csv)
 
 set(wow10_0_files
-                 ${WMV_BASE_PATH}/bin_support/wow/10.0/database.xml
-                 ${WMV_BASE_PATH}/bin_support/wow/10.0/AnimationData.csv
-                 ${WMV_BASE_PATH}/bin_support/wow/10.0/ChrRacesCustomization.csv)
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/database.xml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/AnimationData.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/ChrRacesCustomization.csv)
 
 source_group("wow9.0" FILES ${wow9_0_files})
 source_group("wow9.1" FILES ${wow9_1_files})
@@ -135,7 +135,7 @@ add_executable(${NAME} WIN32 ${src} ${headers} ${RES_FILES} ${useful_files} )
 
 set_property(TARGET ${NAME} PROPERTY FOLDER "executables")
 
-set(BIN_DIR "${WMV_BASE_PATH}/bin/")
+set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 
 if (MSVC_IDE)
   # Enable Qt in Visual Studio
@@ -179,17 +179,17 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
-                ${CMAKE_SOURCE_DIR}/Dependencies/lib/libeay32.dll
-                ${CMAKE_SOURCE_DIR}/Dependencies/lib/ssleay32.dll
-                ${WMV_BASE_PATH}/bin_support/wow/listfile.csv
-                ${WMV_BASE_PATH}/bin_support/Encryption/extraEncryptionKeys.csv)
+                ${CMAKE_SOURCE_DIR}/src/Dependencies/lib/libeay32.dll
+                ${CMAKE_SOURCE_DIR}/src/Dependencies/lib/ssleay32.dll
+                ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
+                ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
 set(files ${QT_FILES} ${EXTRA_FILES})
 
 install(FILES ${files} DESTINATION ${BIN_DIR})
 install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
-install(FILES ${wow9_0_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.0)
-install(FILES ${wow9_1_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.1)
-install(FILES ${wow9_2_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/9.2)
-install(FILES ${wow10_0_files} DESTINATION ${WMV_BASE_PATH}/bin/games/wow/10.0)
+install(FILES ${wow9_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.0)
+install(FILES ${wow9_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.1)
+install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
+install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
