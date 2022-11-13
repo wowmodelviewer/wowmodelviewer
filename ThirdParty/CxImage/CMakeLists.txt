@@ -47,12 +47,12 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
 endif()
 
 if (WIN32)
-    include_directories(${CMAKE_SOURCE_DIR}/Source/Dependencies/include)
+    include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/include)
   add_definitions(-D_WINDOWS)
   add_definitions(-D_WIN32)
 endif()
 
 add_library(cximage STATIC ${SRC_FILES})
-set_property(TARGET cximage PROPERTY FOLDER "3rdparty libraries")
-target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/Source/Dependencies/lib/jpeg.lib 
-  ${CMAKE_SOURCE_DIR}/Source/Dependencies/lib/libpng.lib)
+set_property(TARGET cximage PROPERTY FOLDER "ThirdParty libraries")
+target_link_libraries(cximage ${CMAKE_SOURCE_DIR}/ThirdParty/lib/jpeg.lib 
+  ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libpng.lib)

@@ -13,7 +13,7 @@ SET(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Source/Dependencies/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/ThirdParty/include)
 
 
 # Find includes in corresponding build directories

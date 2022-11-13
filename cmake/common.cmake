@@ -16,9 +16,9 @@ endif()
 # macro to be reused across projects #
 ######################################
 macro(use_glew)
-  include_directories(${CMAKE_SOURCE_DIR}/Source/Dependencies/3rdparty)
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty)
   add_definitions(-DGLEW_STATIC)
-  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/Source/Dependencies/3rdparty/libs/glew32s.lib)
+  list(APPEND extralibs opengl32 ${CMAKE_SOURCE_DIR}/ThirdParty/libs/glew32s.lib)
 endmacro()
 
 macro(use_cximage)
