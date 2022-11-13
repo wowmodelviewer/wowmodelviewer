@@ -8,7 +8,7 @@ SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
 
 #wxwidgets
-SET(CMAKE_PREFIX_PATH src/Dependencies/wxWidgets)
+SET(CMAKE_PREFIX_PATH ThirdParty/wxWidgets)
 SET(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
 # add wx widgets inclusions
