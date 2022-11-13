@@ -32,7 +32,7 @@ if(DEFINED BUILDNUMBER)
 endif()
 
 # add external libraries compilation
-add_subdirectory(src/Dependencies/3rdparty/CxImage)
+add_subdirectory(ThirdParty/CxImage)
 
 # configure CASC lib for our usage
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)

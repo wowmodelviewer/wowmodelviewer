@@ -22,7 +22,7 @@ macro(use_glew)
 endmacro()
 
 macro(use_cximage)
-  include_directories(${CMAKE_SOURCE_DIR}/src/Dependencies/3rdparty/CxImage)
+  include_directories(${CMAKE_SOURCE_DIR}/ThirdParty/CxImage)
   list(APPEND extralibs cximage)
 endmacro()
 
