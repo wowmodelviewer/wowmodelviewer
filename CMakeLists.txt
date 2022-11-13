@@ -13,7 +13,7 @@ SET(wxWidgets_USE_UNICODE ON)
 find_package(wxWidgets COMPONENTS net aui xml adv core base REQUIRED)
 # add wx widgets inclusions
 include(${wxWidgets_USE_FILE})
-include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/src/Dependencies/include)
+include_directories(${wxWidgets_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/Source/Dependencies/include)
 
 
 # Find includes in corresponding build directories
@@ -39,15 +39,15 @@ set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
 add_subdirectory(ThirdParty/casclib)
 
 # add internal libraries compilation 
-add_subdirectory(src/core)
-add_subdirectory(src/games)
+add_subdirectory(Source/core)
+add_subdirectory(Source/games)
 
 # then trigs executables compilation
-add_subdirectory(src/wowmodelviewer)
-add_subdirectory(src/UpdateManager)
+add_subdirectory(Source/wowmodelviewer)
+add_subdirectory(Source/UpdateManager)
 
 # add plugins compilation
-add_subdirectory(src/plugins)
+add_subdirectory(Source/plugins)
 
 add_custom_target(release
           COMMAND
@@ -55,5 +55,5 @@ add_custom_target(release
           COMMAND
           "${CMAKE_COMMAND}" --build . --target install --config Release
                   COMMAND
-                  ${CMAKE_SOURCE_DIR}/src/NSIS/makensis.exe "${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
+                  ${CMAKE_SOURCE_DIR}/Source/NSIS/makensis.exe "${CMAKE_SOURCE_DIR}/Installers/Windows/NSIS/WMVInstallerMUI.nsi"
           )

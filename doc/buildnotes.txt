@@ -19,7 +19,7 @@ an OS not currently supported.
 
 Once wxWidgets is built, you need to add the include and lib paths to the project. Please remember to link ONLY the lib
 paths for the versions you're working on. IE: Don't link a path from a 64-bit Windows build, when you're working on a
-Mac OSX version. (Again, there are websites that can help you figure out how to include the paths.) Be sure to include the lib folder in the src directory too.
+Mac OSX version. (Again, there are websites that can help you figure out how to include the paths.) Be sure to include the lib folder in the Source directory too.
 
 -=Program Flow=-
 The program's "flow" all starts with App.cpp,  these initiates the program using wxWidgets to handle all events, etc.

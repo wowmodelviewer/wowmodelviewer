@@ -1,0 +1,7 @@
+{
+  "name" : "Battle.net armory importer plugin",
+  "internalname" : "armory",
+  "category" : "importer",
+  "version" : "0.5",
+  "coreVersion" : "0.8.5"
+}

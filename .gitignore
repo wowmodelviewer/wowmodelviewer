@@ -1,8 +1,8 @@
 syntax: glob
 bin/*
 CMakeBuild/*
-src/latex/*
-src/html/*
+Source/latex/*
+Source/html/*
 .project
 .cproject
 .settings/*

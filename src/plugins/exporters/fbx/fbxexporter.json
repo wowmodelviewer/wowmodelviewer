@@ -1,7 +1,0 @@
-{
-  "name" : "FBX exporter plugin",
-  "internalname" : "fbx_exporter",
-  "category" : "exporter",
-  "version" : "0.5",
-  "coreVersion" : "0.9.0"
-}

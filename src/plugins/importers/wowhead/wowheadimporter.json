@@ -1,7 +1,0 @@
-{
-  "name" : "Wowhead importer plugin",
-  "internalname" : "wowhead",
-  "category" : "importer",
-  "version" : "0.3",
-  "coreVersion" : "0.8.5"
-}
