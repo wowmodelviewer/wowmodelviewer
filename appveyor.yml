@@ -3,8 +3,7 @@ image: Visual Studio 2017
 
 before_build:
 - cmd: >-
-    git submodule
-    git submodule update
+    git submodule update --init --recursive
     cmake -B build -G "Visual Studio 15 2017" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
