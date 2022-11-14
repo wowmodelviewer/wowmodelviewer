@@ -7,7 +7,6 @@ clone_script:
 
 before_build:
 - cmd: >-
-    git submodule update --init --recursive
     cmake -B build -G "Visual Studio 15 2017" -DBUILDNUMBER=%APPVEYOR_BUILD_NUMBER%
 
 build_script:
