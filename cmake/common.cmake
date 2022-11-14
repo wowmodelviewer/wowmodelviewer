@@ -43,7 +43,7 @@ endmacro()
 macro(use_casclib)
   include_directories(${CASCLIB_INSTALL_LOCATION}/include)
   link_directories(${CASCLIB_INSTALL_LOCATION}/lib)
-  list(APPEND extralibs casc)
+  list(APPEND extralibs casc_static)
 endmacro()
 
 macro(use_sqlite)

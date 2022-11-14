@@ -110,7 +110,7 @@ add_library(${NAME} SHARED ${src} ${headers})
 set_property(TARGET ${NAME} PROPERTY FOLDER "libraries")
 
 target_link_libraries(${NAME} Qt5::Core Qt5::Xml Qt5::Gui ${extralibs} glu32)
-add_dependencies(${NAME} casclib)
+add_dependencies(${NAME} casc_static)
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/")
 

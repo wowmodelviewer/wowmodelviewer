@@ -1,0 +1,4 @@
+[submodule "ThirdParty/casclib"]
+	path = ThirdParty/casclib
+	url = https://github.com/ladislav-zezula/CascLib
+	branch = master
