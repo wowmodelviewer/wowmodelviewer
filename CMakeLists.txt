@@ -45,16 +45,8 @@ set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
 add_subdirectory(ThirdParty/casclib)
 set_property(TARGET casc_static PROPERTY FOLDER "ThirdParty libraries")
 
-# add internal libraries compilation 
-add_subdirectory(Source/core)
-add_subdirectory(Source/games)
-
-# then trigs executables compilation
-add_subdirectory(Source/wowmodelviewer)
-add_subdirectory(Source/UpdateManager)
-
-# add plugins compilation
-add_subdirectory(Source/plugins)
+# Main source files.
+add_subdirectory(Source)
 
 add_custom_target(release
           COMMAND
