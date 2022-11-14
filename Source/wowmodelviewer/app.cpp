@@ -66,16 +66,16 @@ void WowModelViewApp::setInterfaceLocale()
   // This chunk of code is all related to locale translation (if a translation is available).
   // Only use locale for non-english?
   wxString fn;
-  fn.Printf(wxT("mo%c%s.mo"), SLASH, locales[0].c_str());
+  fn.Printf(wxT("localisation%c%s.mo"), SLASH, locales[0].c_str());
 
   if (interfaceID >= 0)
-    fn.Printf(wxT("mo%c%s.mo"), SLASH, locales[interfaceID].c_str());
+    fn.Printf(wxT("localisation%c%s.mo"), SLASH, locales[interfaceID].c_str());
 
   if (wxFileExists(fn))
   {
     locale.Init(langIds[interfaceID], wxLOCALE_CONV_ENCODING);
 
-    wxLocale::AddCatalogLookupPathPrefix(wxT("mo"));
+    wxLocale::AddCatalogLookupPathPrefix(wxT("localisation"));
     //wxLocale::AddCatalogLookupPathPrefix(wxT(".."));
 
     //locale.AddCatalog(wxT("wowmodelview")); // Initialize the catalogs we'll be using
