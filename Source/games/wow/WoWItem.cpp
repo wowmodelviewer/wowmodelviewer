@@ -375,11 +375,11 @@ void WoWItem::load()
       // geosets
       // Boots: {geosetGroup[0] = 501, geosetGroup[1] = 2000*}
       itemGeosets_[CG_BOOTS] = 1 + geosetGroup[0];
-      // geoset group 20 (CG_HDFEET) is handled a bit differently, according to wowdev.wiki:
+      // geoset group 20 (CG_FEET) is handled a bit differently, according to wowdev.wiki:
       if (geosetGroup[1] == 0)
-        itemGeosets_[CG_HDFEET] = 2;
+        itemGeosets_[CG_FEET] = 2;
       else if (geosetGroup[1] > 0)
-        itemGeosets_[CG_HDFEET] = geosetGroup[1];
+        itemGeosets_[CG_FEET] = geosetGroup[1];
       // else ? should we do anything if geosetGroup[1] < 0?
 
       // 'collections' models:
@@ -387,7 +387,7 @@ void WoWItem::load()
       {
         mergeModel(CS_BOOTS, models[0], textures[0]);
         mergedModel_->setGeosetGroupDisplay(CG_BOOTS, 1 + attachmentGeosetGroup[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_HDFEET, 1 + attachmentGeosetGroup[1]);
+        mergedModel_->setGeosetGroupDisplay(CG_FEET, 1 + attachmentGeosetGroup[1]);
       }
 
       break;
@@ -415,7 +415,7 @@ void WoWItem::load()
     {
       // geosets
       // Pants: {geosetGroup[0] = 1101, geosetGroup[1] = 901, geosetGroup[2] = 1301}
-      itemGeosets_[CG_PANTS2] = 1 + geosetGroup[0];
+      itemGeosets_[CG_PANTS] = 1 + geosetGroup[0];
       itemGeosets_[CG_KNEEPADS] = 1 + geosetGroup[1];
       itemGeosets_[CG_TROUSERS] = 1 + geosetGroup[2];
       
@@ -423,7 +423,7 @@ void WoWItem::load()
       if (models[0] != 0)
       {
         mergeModel(CS_PANTS, models[0], textures[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_PANTS2, 1 + attachmentGeosetGroup[0]);
+        mergedModel_->setGeosetGroupDisplay(CG_PANTS, 1 + attachmentGeosetGroup[0]);
         mergedModel_->setGeosetGroupDisplay(CG_KNEEPADS, 1 + attachmentGeosetGroup[1]);
         mergedModel_->setGeosetGroupDisplay(CG_TROUSERS, 1 + attachmentGeosetGroup[2]);
       }
@@ -435,20 +435,20 @@ void WoWItem::load()
     {
       // geosets
       // Chest: {geosetGroup[0] = 801, geosetGroup[1] = 1001, geosetGroup[2] = 1301, geosetGroup[3] = 2201, geosetGroup[4] = 2801}
-      itemGeosets_[CG_WRISTBANDS] = 1 + geosetGroup[0];
-      itemGeosets_[CG_PANTS] = 1 + geosetGroup[1];
+      itemGeosets_[CG_SLEEVES] = 1 + geosetGroup[0];
+      itemGeosets_[CG_CHEST] = 1 + geosetGroup[1];
       itemGeosets_[CG_TROUSERS] = 1 + geosetGroup[2];
-      itemGeosets_[CG_GEOSET2200] = 1 + geosetGroup[3];
+      itemGeosets_[CG_TORSO] = 1 + geosetGroup[3];
       itemGeosets_[CG_GEOSET2800] = 1 + geosetGroup[4];
       
       // 'collections' models:
       if (models[0] != 0)
       {
         mergeModel(CS_CHEST, models[0], textures[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_WRISTBANDS, 1 + attachmentGeosetGroup[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_PANTS, 1 + attachmentGeosetGroup[1]);
+        mergedModel_->setGeosetGroupDisplay(CG_SLEEVES, 1 + attachmentGeosetGroup[0]);
+        mergedModel_->setGeosetGroupDisplay(CG_CHEST, 1 + attachmentGeosetGroup[1]);
         mergedModel_->setGeosetGroupDisplay(CG_TROUSERS, 1 + attachmentGeosetGroup[2]);
-        mergedModel_->setGeosetGroupDisplay(CG_GEOSET2200, 1 + attachmentGeosetGroup[3]);
+        mergedModel_->setGeosetGroupDisplay(CG_TORSO, 1 + attachmentGeosetGroup[3]);
         mergedModel_->setGeosetGroupDisplay(CG_GEOSET2800, 1 + attachmentGeosetGroup[4]);
       }
       
@@ -464,14 +464,14 @@ void WoWItem::load()
       // geosets 
       // Gloves: {geosetGroup[0] = 401, geosetGroup[1] = 2301}
       itemGeosets_[CG_GLOVES] = 1 + geosetGroup[0];
-      itemGeosets_[CG_HANDS] = 1 + geosetGroup[1];
+      itemGeosets_[CG_HAND_ATTACHMENT] = 1 + geosetGroup[1];
       
       // 'collections' models:
       if (models[0] != 0)
       {
         mergeModel(CS_GLOVES, models[0], textures[0]);
         mergedModel_->setGeosetGroupDisplay(CG_GLOVES, 1 + attachmentGeosetGroup[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_HANDS, 1 + attachmentGeosetGroup[1]);
+        mergedModel_->setGeosetGroupDisplay(CG_HAND_ATTACHMENT, 1 + attachmentGeosetGroup[1]);
       }
     
       break;
@@ -493,13 +493,13 @@ void WoWItem::load()
       
       // geosets
       // Cape: {geosetGroup[0] = 1501}
-      itemGeosets_[CG_CAPE] = 1 + geosetGroup[0];
+      itemGeosets_[CG_CLOAK] = 1 + geosetGroup[0];
       
       // 'collections' models:
       if (models[0] != 0)
       {
         mergeModel(CS_CAPE, models[0], textures[0]);
-        mergedModel_->setGeosetGroupDisplay(CG_CAPE, 1 + attachmentGeosetGroup[0]);
+        mergedModel_->setGeosetGroupDisplay(CG_CLOAK, 1 + attachmentGeosetGroup[0]);
       }
       
       break;

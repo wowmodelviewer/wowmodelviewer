@@ -2062,12 +2062,50 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
   QString result = "";
 
   static std::map<CharGeosets, QString> groups =
-  { { CG_HAIRSTYLE, "Main" }, { CG_GEOSET100, "Facial1" }, { CG_GEOSET200, "Facial2" }, { CG_GEOSET300, "Facial3" },
-  { CG_GLOVES, "Bracers" }, { CG_BOOTS, "Boots" }, { CG_EARS, "Ears" }, { CG_WRISTBANDS, "Wristbands" },
-  { CG_KNEEPADS, "Kneepads" }, { CG_PANTS, "Pants" }, { CG_PANTS2, "Pants2" }, { CG_TABARD, "Tabard" },
-  { CG_TROUSERS, "Trousers" }, { CG_TABARD2, "Tabard2" }, { CG_CAPE, "Cape" }, { CG_EYEGLOW, "Eyeglows" },
-  { CG_BELT, "Belt" }, { CG_TAIL, "Tail" }, { CG_HDFEET, "Feet" }, { CG_HANDS, "Hands" },
-  { CG_DH_HORNS, "Horns" }, { CG_DH_BLINDFOLDS, "BlindFolds" } };
+  {
+      { CG_SKIN_OR_HAIR, "Skin or Hair" },
+      { CG_FACE_1, "Face 1" },
+      { CG_FACE_2, "Face 2" },
+      { CG_FACE_3, "Face 3" },
+      { CG_GLOVES, "Bracers" },
+      { CG_BOOTS,  "Boots" },
+      { CG_EARS, "Ears" },
+      { CG_SLEEVES, "Sleeves" },
+      { CG_KNEEPADS, "Kneepads" },
+      { CG_CHEST, "Chest" },
+      { CG_PANTS, "Pants" },
+      { CG_TABARD, "Tabard" },
+      { CG_TROUSERS, "Trousers" },
+      { CG_DH_LOINCLOTH, "Demon Hunter Loincloth" },
+      { CG_CLOAK, "Cloak" },
+      { CG_EYEGLOW, "Eye Glow" },
+      { CG_BELT, "Belt" },
+      { CG_BONE, "Bone" },
+      { CG_FEET, "Feet" },
+      { CG_GEOSET2100, "Geoset2100" },
+      { CG_TORSO, "Torso" },
+      { CG_HAND_ATTACHMENT, "Hand Attachment" },
+      { CG_HEAD_ATTACHMENT, "Head Attachment" },
+      { CG_DH_BLINDFOLDS, "Demon Hunter Blindfolds" },
+      { CG_GEOSET2600, "Geoset2600" },
+      { CG_GEOSET2700, "Geoset2700" },
+      { CG_GEOSET2800, "Geoset2800" },
+      { CG_MECHAGNOME_ARMS_OR_HANDS, "Mechagnome Arms or Hands" },
+      { CG_MECHAGNOME_LEGS, "Mechagnome Legs" },
+      { CG_MECHAGNOME_FEET, "Mechagnome Feet" },
+      { CG_FACE, "Face" },
+      { CG_EYES, "Eyes" },
+      { CG_EYEBROWS, "Eyebrows" },
+      { CG_EARRINGS, "Earrings" },
+      { CG_NECKLACE, "Necklace" },
+      { CG_HEADDRESS, "Headdress" },
+      { CG_TAILS, "Tails" },
+      { CG_VINES, "Vines" },
+      { CG_TUSKS, "Tusks" },
+      { CG_NOSES, "Noses" },
+      { CG_HAIR_DECORATION, "Hair Decoration" },
+      { CG_HORN_DECORATION, "Horn Decoration" }
+  };
 
   auto it = groups.find(cg);
   if (it != groups.end())
@@ -2489,7 +2527,7 @@ void WoWModel::refresh()
 
   // gloves - this is so gloves have preference over shirt sleeves.
   if (cd.geosets[CG_GLOVES] > 1)
-    cd.geosets[CG_WRISTBANDS] = 0;
+    cd.geosets[CG_SLEEVES] = 0;
 
   // If model is one of these races, show the feet (don't wear boots)
   cd.showFeet = infos.barefeet;

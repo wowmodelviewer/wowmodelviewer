@@ -556,7 +556,7 @@ void CharDetails::refreshGeosets()
   else
     geosets[CG_EARS] = 0;
 
-  geosets[CG_GEOSET100] = geosets[CG_GEOSET200] = geosets[CG_GEOSET300] = 0;
+  geosets[CG_FACE_1] = geosets[CG_FACE_2] = geosets[CG_FACE_3] = 0;
 
   // apply customization elements
   for (const auto& elt : customizationElementsPerOption_)
@@ -568,11 +568,11 @@ void CharDetails::refreshGeosets()
         continue;
 
       // don't display hair if option is unchecked
-      if (geo.first == CG_HAIRSTYLE && !showHair)
+      if (geo.first == CG_SKIN_OR_HAIR && !showHair)
         continue;
 
       // ond't display facila hairs if option is unchecked
-      if ((geo.first == CG_GEOSET100 || geo.first == CG_GEOSET200 || geo.first == CG_GEOSET300) && !showFacialHair)
+      if ((geo.first == CG_FACE_1 || geo.first == CG_FACE_2 || geo.first == CG_FACE_3) && !showFacialHair)
         continue;
 
       geosets[geo.first] = geo.second;
@@ -586,13 +586,13 @@ void CharDetails::refreshGeosets()
     {
       // demon hunters and female pandaren use the TABARD2 geoset for part of their underwear:
       if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
-        geosets[CG_TABARD2] = 1;
+        geosets[CG_DH_LOINCLOTH] = 1;
     }
     else  // hide underwear
     {
       // demon hunters and female pandaren - need to hide the TABARD2 geoset when no underwear:
       if (isDemonHunter_ || ((model_->infos.raceID == RACE_PANDAREN) && (model_->infos.sexID == GENDER_FEMALE)))
-        geosets[CG_TABARD2] = 0;
+        geosets[CG_DH_LOINCLOTH] = 0;
     }
   }
 
