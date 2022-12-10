@@ -410,7 +410,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       {
         LOG_INFO << "ChrCustomizationGeosetID based customization for" << elt[6] << "/" << elt[0];
 
-        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeoSetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT GeosetType, GeosetID FROM ChrCustomizationGeoset WHERE ID = %1").arg(elt[0].toUInt()));
 
         if (vals.valid)
         {
@@ -421,7 +421,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       else if (elt[1].toUInt() != 0) // added model customization
       {
         LOG_INFO << "ChrCustomizationSkinnedModelID based customization for" << elt[6] << "/" << elt[1];
-        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT CollectionsFileDataID, GeosetType, GeoSetID FROM ChrCustomizationSkinnedModel WHERE ID = %1").arg(elt[1].toUInt()));
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT CollectionsFileDataID, GeosetType, GeosetID FROM ChrCustomizationSkinnedModel WHERE ID = %1").arg(elt[1].toUInt()));
 
         if (vals.valid)
           customizationElementsPerOption_[chrCustomizationOption].models.emplace_back(vals.values[0][0].toInt(), std::make_pair(vals.values[0][1].toInt(), vals.values[0][2].toInt()));
@@ -429,7 +429,7 @@ bool CharDetails::applyChrCustomizationElements(uint chrCustomizationOption, sql
       else if (elt[2].toUInt() != 0) // texture customization
       {
         LOG_INFO << "ChrCustomizationMaterialID based customization for" << elt[6] << "/" << elt[2];
-        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, TextureID FROM ChrCustomizationMaterial "
+        auto vals = GAMEDATABASE.sqlQuery(QString("SELECT ChrModelTextureLayer.Layer, ChrModelTextureLayer.TextureSectionTypeBitMask, ChrModelTextureLayer.TextureType, ChrModelTextureLayer.BlendMode, FileDataID FROM ChrCustomizationMaterial "
           "LEFT JOIN TextureFileData ON ChrCustomizationMaterial.MaterialResourcesID = TextureFileData.MaterialResourcesID "
           "LEFT JOIN ChrModelTextureLayer ON ChrCustomizationMaterial.ChrModelTextureTargetID = ChrModelTextureLayer.ChrModelTextureTargetID1 "
           "AND ChrModelTextureLayer.CharComponentTextureLayoutsID = %1 "

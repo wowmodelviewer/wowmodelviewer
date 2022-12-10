@@ -474,7 +474,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar *caption)
 
   std::map<std::pair<int, int>, int> subclasslookup;
 
-  sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ClassID, SubClassID, Name, VerboseName FROM ItemSubClass");
+  sqlResult itemClasses = GAMEDATABASE.sqlQuery("SELECT ClassID, SubClassID, DisplayName_Lang, VerboseName_Lang FROM ItemSubClass");
 
   if (itemClasses.valid && !itemClasses.empty())
   {
@@ -550,7 +550,7 @@ void CharControl::selectSet()
   n.name = wxT("---- None ----");
   items.push_back(n);
 
-  sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name FROM ItemSet");
+  sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name_Lang FROM ItemSet");
 
   if (itemSet.valid && !itemSet.empty())
   {
@@ -588,7 +588,7 @@ void CharControl::selectStart()
 
   LOG_INFO << "race =" << infos.raceID << "sex = " << infos.sexID;
 
-  QString query = QString("SELECT ChrClasses.name, CSO.ID "
+  QString query = QString("SELECT ChrClasses.Filename, CSO.ID "
                           "FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
                           "WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
 
@@ -632,7 +632,7 @@ void CharControl::selectMount()
 
   // Proper player mounts:
   sqlResult mountQuery = GAMEDATABASE.sqlQuery(
-    "SELECT MountXDisplay.DisplayID, Mount.Name FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
+    "SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
   if (mountQuery.valid && !mountQuery.empty())
   {
     for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
@@ -701,7 +701,7 @@ void CharControl::selectNPC(ssize_t type)
 
   std::map<int, int> typeLookup;
 
-  sqlResult npccats = GAMEDATABASE.sqlQuery("SELECT ID,Name FROM CreatureType");
+  sqlResult npccats = GAMEDATABASE.sqlQuery("SELECT ID,Name_Lang FROM CreatureType");
 
   if (npccats.valid && !npccats.empty())
   {
@@ -794,8 +794,8 @@ void CharControl::OnUpdateItem(int type, int id)
 
       if (id && model)
       {
-        QString query = QString("SELECT item1, item2, item3, item4, item5, "
-                                "item6, item7,  item8 FROM ItemSet WHERE ID = %1").arg(id);
+        QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
+                                "itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = %1").arg(id);
 
         sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
 
@@ -886,8 +886,8 @@ void CharControl::OnUpdateItem(int type, int id)
       {
         morphID = numbers[id];
         // Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-        QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                                "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3 FROM CreatureDisplayInfo "
+        QString query = QString("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
+                                "CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3 FROM CreatureDisplayInfo "
                                 "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
                                 "WHERE CreatureDisplayInfo.ID = %1;").arg(morphID);
 

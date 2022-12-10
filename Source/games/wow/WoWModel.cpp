@@ -799,7 +799,7 @@ void WoWModel::initCommon()
   
   QString query = QString("SELECT CreatureGeosetDataID "
                           "FROM CreatureModelData "
-                          "WHERE FileID = %1")
+                          "WHERE FileDataID = %1")
                           .arg(gamefile->fileDataId() );
   sqlResult r = GAMEDATABASE.sqlQuery(query);
   if(r.valid && !r.values.empty())
@@ -2473,8 +2473,8 @@ void WoWModel::refresh()
 
   if (headItemId != -1 && cd.autoHideGeosetsForHeadItems)
   {
-    const auto query = QString("SELECT GeoSetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
-      "AND HelmetGeosetData.GeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
+    const auto query = QString("SELECT HideGeosetGroup FROM HelmetGeosetData WHERE HelmetGeosetData.RaceID = %1 "
+      "AND HelmetGeosetData.HelmetGeosetVisDataID = (SELECT %2 FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = "
       "(SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = (SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %3)))")
       .arg(infos.raceID)
       .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")

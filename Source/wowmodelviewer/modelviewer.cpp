@@ -633,7 +633,7 @@ void ModelViewer::InitDatabase()
   initDB = true;
 
   {
-    sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID1, CreatureTypeID, Name From Creature;");
+    sqlResult npc = GAMEDATABASE.sqlQuery("SELECT ID, DisplayID1, CreatureType, Name_Lang From Creature;");
 
     if (npc.valid && !npc.empty())
     {
@@ -655,7 +655,7 @@ void ModelViewer::InitDatabase()
   }
   
   {
-    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Name, Item.Type, Item.Class, Item.SubClass, Item.Sheath FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.Type !=0 AND ItemSparse.Name != \"\"");
+    sqlResult item = GAMEDATABASE.sqlQuery("SELECT Item.ID, ItemSparse.Display_Lang, Item.InventoryType, Item.ClassID, Item.SubclassID, Item.SheathType FROM Item LEFT JOIN ItemSparse ON Item.ID = ItemSparse.ID WHERE Item.InventoryType !=0 AND ItemSparse.Display_Lang != \"\"");
 
     if (item.valid && !item.empty())
     {
@@ -1111,8 +1111,8 @@ void ModelViewer::LoadNPC(unsigned int modelid)
   isWMO = false;
 
 
-  QString query = QString("SELECT CreatureModelData.FileID, CreatureDisplayInfo.Texture1, "
-                          "CreatureDisplayInfo.Texture2, CreatureDisplayInfo.Texture3, "
+  QString query = QString("SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
+                          "CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3, "
                           "CreatureDisplayInfo.ExtendedDisplayInfoID, CreatureDisplayInfo.ID FROM Creature "
                           "LEFT JOIN CreatureDisplayInfo ON Creature.DisplayID1 = CreatureDisplayInfo.ID "
                           "LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
@@ -1148,7 +1148,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
         g_charControl->model->cd.set(CharDetails::ADDITIONAL_FACIAL_CUSTOMIZATION, r.values[0][4].toInt());
       }
 
-      query = QString("SELECT ItemDisplayInfoID, ItemType FROM NpcModelItemSlotDisplayInfo WHERE CreatureDisplayInfoExtraID = %1").arg(extraId);
+      query = QString("SELECT ItemDisplayInfoID, ItemSlot FROM NpcModelItemSlotDisplayInfo WHERE NpcModelID = %1").arg(extraId);
 
       r = GAMEDATABASE.sqlQuery(query);
 
@@ -1191,8 +1191,8 @@ void ModelViewer::LoadItem(unsigned int id)
   try
   {
     QString query = QString("SELECT ModelID, TextureID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
-                            "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.TextureItemID1 = TextureFileData.MaterialResourcesID "
+                            "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
+                            "LEFT JOIN TextureFileData ON ItemDisplayInfo.ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
                             "WHERE ItemDisplayInfo.ID = (SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ItemAppearance.ID = "
                             "(SELECT ItemAppearanceID FROM ItemModifiedAppearance WHERE ItemID = %1))").arg(id);
 

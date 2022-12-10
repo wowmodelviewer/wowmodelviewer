@@ -76,7 +76,7 @@ void WoWItem::setId(int id)
       return;
     }
 
-    auto itemlevels = GAMEDATABASE.sqlQuery(QString("SELECT ItemLevel, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id));
+    auto itemlevels = GAMEDATABASE.sqlQuery(QString("SELECT OrderIndex, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1").arg(id));
 
     if (itemlevels.valid && !itemlevels.values.empty())
     {
@@ -229,7 +229,7 @@ void WoWItem::load()
   // query geosets infos
   if (!queryItemInfo(QString("SELECT GeoSetGroup1, GeoSetGroup2, GeoSetGroup3, GeoSetGroup4, GeoSetGroup5, GeoSetGroup6, "
                              "AttachmentGeoSetGroup1, AttachmentGeoSetGroup2, AttachmentGeoSetGroup3, "
-                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6, DisplayFlags "
+                             "AttachmentGeoSetGroup4, AttachmentGeoSetGroup5, AttachmentGeoSetGroup6, Flags "
                              "FROM ItemDisplayInfo WHERE ItemDisplayInfo.ID = %1").arg(displayId_), 
                      iteminfos))
     return;
@@ -259,9 +259,9 @@ void WoWItem::load()
     if (charModel_ && charModel_->cd.isDemonHunter())
       classFilter = QString("(ComponentTextureFileData.ClassID = %1 OR ComponentTextureFileData.ClassID = %2)").arg(CLASS_DEMONHUNTER).arg(CLASS_ANY);
     
-    if (queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfoMaterialRes "
-                              "LEFT JOIN TextureFileData ON TextureFileDataID = TextureFileData.MaterialResourcesID "
-                              "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.TextureID "
+    if (queryItemInfo(QString("SELECT FileDataID FROM ItemDisplayInfoMaterialRes "
+                              "LEFT JOIN TextureFileData ON ItemDisplayInfoMaterialRes.MaterialResourcesID = TextureFileData.MaterialResourcesID "
+                              "INNER JOIN ComponentTextureFileData ON ComponentTextureFileData.ID = TextureFileData.FileDataID "
                               "WHERE (ComponentTextureFileData.GenderIndex = %1 OR ComponentTextureFileData.GenderIndex = %2) "
                               "AND ItemDisplayInfoID = %3 AND %4 "
                               "ORDER BY ComponentTextureFileData.GenderIndex, ComponentTextureFileData.ClassID DESC")
@@ -1075,9 +1075,9 @@ bool WoWItem::queryItemInfo(const QString & query, sqlResult & result) const
 int WoWItem::getCustomModelId(size_t index) const 
 {
   sqlResult infos;
-  if (!queryItemInfo(QString("SELECT ModelID FROM ItemDisplayInfo "
-                             "LEFT JOIN ModelFileData ON %1 = ModelFileData.ID "
-                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"Model1":"Model2").arg(displayId_),
+  if (!queryItemInfo(QString("SELECT FileDataID FROM ItemDisplayInfo "
+                             "LEFT JOIN ModelFileData ON %1 = ModelFileData.ModelResourcesID "
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"ModelResourcesID1":"ModelResourcesID2").arg(displayId_),
                      infos))
     return 0;
 
@@ -1146,9 +1146,9 @@ int WoWItem::getCustomModelId(size_t index) const
 int WoWItem::getCustomTextureId(size_t index) const
 {
   sqlResult infos;
-  if (!queryItemInfo(QString("SELECT TextureID FROM ItemDisplayInfo "
+  if (!queryItemInfo(QString("SELECT FileDataID FROM ItemDisplayInfo "
                              "LEFT JOIN TextureFileData ON %1 = TextureFileData.MaterialResourcesID "
-                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"TextureItemID1":"TextureItemID2").arg(displayId_),
+                             "WHERE ItemDisplayInfo.ID = %2").arg((index == 0)?"ModelMaterialResourcesID1":"ModelMaterialResourcesID2").arg(displayId_),
                      infos))
     return 0;
 

@@ -28,7 +28,7 @@ CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent,
 
   details_.attach(this);
 
-  auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
+  auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
 
   if(option.valid && !option.values.empty())
   {
@@ -81,7 +81,7 @@ void CharDetailsCustomizationChoice::buildList()
     if (ids.empty())
       return;
 
-    auto query = QString("SELECT OrderIndex,Name,ID FROM ChrCustomizationChoice WHERE ID IN (");
+    auto query = QString("SELECT OrderIndex,Name_Lang,ID FROM ChrCustomizationChoice WHERE ID IN (");
     for(auto id:ids)
     {
       query += QString::number(id);

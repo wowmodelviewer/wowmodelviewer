@@ -87,7 +87,7 @@ void CharTexture::initRegions()
     auto curLayout = value[0].toInt();
 
     // search all regions for this layout
-    auto regions = GAMEDATABASE.sqlQuery(QString("SELECT Section, X, Y, Width, Height  FROM CharComponentTextureSections WHERE LayoutID = %1").arg(curLayout));
+    auto regions = GAMEDATABASE.sqlQuery(QString("SELECT SectionType, X, Y, Width, Height  FROM CharComponentTextureSections WHERE CharComponentTextureLayoutID = %1").arg(curLayout));
 
     if(!regions.valid || regions.empty())
     {

@@ -485,30 +485,30 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
 
   if (GAMEDIRECTORY.version().contains("7.3"))
   { 
-    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
+    query = QString("SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, ParticleColorID, "
                     "CreatureDisplayInfo.ID, CreatureGeosetData FROM CreatureDisplayInfo "
                     "LEFT JOIN CreatureModelData "
                     "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-                    "WHERE CreatureModelData.FileID = %1")
+                    "WHERE CreatureModelData.FileDataID = %1")
                     .arg( m->gamefile->fileDataId());
   } 
   else if (GAMEDIRECTORY.version().contains("8.3") || GAMEDIRECTORY.version().contains("9.2"))
   {
-    query = QString("SELECT Texture1, Texture2, Texture3, ParticleColorID, "
-                    "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
-                    "LEFT JOIN CreatureModelData "
-                    "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-                    "WHERE CreatureModelData.FileID = %1")
-                    .arg( m->gamefile->fileDataId());
+      query = QString("SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, ParticleColorID, "
+                      "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                      "LEFT JOIN CreatureModelData "
+                      "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                      "WHERE CreatureModelData.FileDataID = %1")
+                      .arg( m->gamefile->fileDataId());
   }
   else
   {
-      query = QString("SELECT Texture1, Texture2, Texture3, Texture4, ParticleColorID, "
-          "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
-          "LEFT JOIN CreatureModelData "
-          "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
-          "WHERE CreatureModelData.FileID = %1")
-          .arg(m->gamefile->fileDataId());
+      query = QString("SELECT TextureVariationFileDataID1, TextureVariationFileDataID2, TextureVariationFileDataID3, TextureVariationFileDataID4, ParticleColorID, "
+                      "CreatureDisplayInfo.ID FROM CreatureDisplayInfo "
+                      "LEFT JOIN CreatureModelData "
+                      "ON CreatureDisplayInfo.ModelID = CreatureModelData.ID "
+                      "WHERE CreatureModelData.FileDataID = %1")
+                      .arg(m->gamefile->fileDataId());
   }
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
@@ -555,9 +555,9 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
       }
       else // BfA:
       {
-        QString query2 = QString("SELECT GeosetType, GeosetID "
+        QString query2 = QString("SELECT GeosetIndex, GeosetValue "
                                  "FROM CreatureDisplayInfoGeosetData "
-                                 "WHERE DisplayID = %1")
+                                 "WHERE CreatureDisplayInfoID = %1")
                                 .arg( cdi );
         sqlResult r2 = GAMEDATABASE.sqlQuery(query2);
         if(r2.valid && !r2.values.empty())
@@ -693,10 +693,11 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   LOG_INFO << "Searching skins for" << m->itemName();
 
   // query textures for model1
-  QString query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
-                         "LEFT JOIN TextureFileData ON TextureItemID1 = TextureFileData.MaterialResourcesID "
-                         "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                         "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
+
+  QString query = QString("SELECT FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+                          "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
+                          "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
+                          "WHERE FileDataID = %1").arg(m->gamefile->fileDataId());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -716,8 +717,8 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
       if (pci)
       {
         grp.particleColInd = pci;
-        QString pciquery = QString("SELECT StartColor1, MidColor1, EndColor1, "
-        "StartColor2, MidColor2, EndColor2, StartColor3, MidColor3, EndColor3 FROM ParticleColor "
+        QString pciquery = QString("SELECT Start1, Mid1, End1, "
+        "Start2, Mid2, End2, Start3, Mid3, End3 FROM ParticleColor "
         "WHERE ID = %1;").arg(pci);
         sqlResult pcir = GAMEDATABASE.sqlQuery(pciquery);
         if(pcir.valid && !pcir.empty())
@@ -742,10 +743,10 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   }
   
   // do the same for model2
-  query= QString("SELECT TextureID, ParticleColorID, ItemDisplayInfo.ID  FROM ItemDisplayInfo "
-                 "LEFT JOIN TextureFileData ON TextureItemID2 = TextureFileData.MaterialResourcesID "
-                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.Model1 = ModelFileData.ID "
-                 "WHERE ModelID = %1").arg(m->gamefile->fileDataId());
+  query= QString("SELECT FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+                 "LEFT JOIN TextureFileData ON ModelMaterialResourcesID2 = TextureFileData.MaterialResourcesID "
+                 "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
+                 "WHERE FileDataID = %1").arg(m->gamefile->fileDataId());
 
   r = GAMEDATABASE.sqlQuery(query);
 

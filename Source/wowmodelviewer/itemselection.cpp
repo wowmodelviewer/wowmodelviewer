@@ -248,7 +248,7 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event){
         if (rec.model > 0) {
           npcs.push_back(rec);
           id = npcs.size()-1;
-          QString query = QString("INSERT INTO Creature(ID,CreatureTypeID,DisplayID1,Name) VALUES (%1,%2,%3,\"%4\")").arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
+          QString query = QString("INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")").arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
           GAMEDATABASE.sqlQuery(query);
         }
       }
