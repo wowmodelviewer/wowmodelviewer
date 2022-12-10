@@ -694,7 +694,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
 
   // query textures for model1
 
-  QString query = QString("SELECT FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+  QString query = QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                           "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
                           "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
                           "WHERE FileDataID = %1").arg(m->gamefile->fileDataId());
