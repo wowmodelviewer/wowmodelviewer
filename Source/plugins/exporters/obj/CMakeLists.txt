@@ -27,15 +27,4 @@ target_link_libraries(${NAME} Qt5::Core ${extralibs})
 
 set(BIN_DIR "${CMAKE_SOURCE_DIR}/bin/plugins/")
 
-if (MSVC_IDE)
-  # Enable Qt in Visual Studio
-  set_property(TARGET ${NAME} PROPERTY VS_GLOBAL_KEYWORD "Qt4VSv1.0")
-  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
-  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${BIN_DIR})
-  set_target_properties(${NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${BIN_DIR})
-endif()
-
-if(WIN32)
-  install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
-endif(WIN32)
+install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
