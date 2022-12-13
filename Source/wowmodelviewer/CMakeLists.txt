@@ -138,19 +138,49 @@ install(TARGETS ${NAME} RUNTIME DESTINATION ${BIN_DIR})
   
 # additional files needed to let WMV correctly works
 set(QT_BIN_DIR  ${QT_LOCATION}/bin)
-set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll 
+set(QT_FILES ${QT_BIN_DIR}/Qt5Core.dll
+             ${QT_BIN_DIR}/Qt5Core.pdb
+             ${QT_BIN_DIR}/Qt5Cored.dll
+             ${QT_BIN_DIR}/Qt5Cored.pdb 
              ${QT_BIN_DIR}/Qt5Gui.dll
+             ${QT_BIN_DIR}/Qt5Gui.pdb
+             ${QT_BIN_DIR}/Qt5Guid.dll
+             ${QT_BIN_DIR}/Qt5Guid.pdb
              ${QT_BIN_DIR}/Qt5Network.dll
+             ${QT_BIN_DIR}/Qt5Network.pdb
+             ${QT_BIN_DIR}/Qt5Networkd.dll
+             ${QT_BIN_DIR}/Qt5Networkd.pdb
              ${QT_BIN_DIR}/Qt5Widgets.dll
-             ${QT_BIN_DIR}/Qt5Xml.dll)
+             ${QT_BIN_DIR}/Qt5Widgets.pdb
+             ${QT_BIN_DIR}/Qt5Widgetsd.dll
+             ${QT_BIN_DIR}/Qt5Widgetsd.pdb
+             ${QT_BIN_DIR}/Qt5Xml.dll
+             ${QT_BIN_DIR}/Qt5Xml.pdb
+             ${QT_BIN_DIR}/Qt5Xmld.dll
+             ${QT_BIN_DIR}/Qt5Xmld.pdb)
 
 set(QT_PLUGIN_DIR ${QT_LOCATION}/plugins)
 set(QT_PLUGIN_SYS_FILES ${QT_PLUGIN_DIR}/platforms/qminimal.dll
+                        ${QT_PLUGIN_DIR}/platforms/qminimal.pdb
+                        ${QT_PLUGIN_DIR}/platforms/qminimald.dll
+                        ${QT_PLUGIN_DIR}/platforms/qminimald.pdb
                         ${QT_PLUGIN_DIR}/platforms/qoffscreen.dll
-                        ${QT_PLUGIN_DIR}/platforms/qwindows.dll)
+                        ${QT_PLUGIN_DIR}/platforms/qoffscreen.pdb
+                        ${QT_PLUGIN_DIR}/platforms/qoffscreend.dll
+                        ${QT_PLUGIN_DIR}/platforms/qoffscreend.pdb
+                        ${QT_PLUGIN_DIR}/platforms/qwindows.dll
+                        ${QT_PLUGIN_DIR}/platforms/qwindows.pdb
+                        ${QT_PLUGIN_DIR}/platforms/qwindowsd.dll
+                        ${QT_PLUGIN_DIR}/platforms/qwindowsd.pdb)
 
 set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
-                          ${QT_PLUGIN_DIR}/imageformats/qtga.dll)
+                          ${QT_PLUGIN_DIR}/imageformats/qjpeg.pdb
+                          ${QT_PLUGIN_DIR}/imageformats/qjpegd.dll
+                          ${QT_PLUGIN_DIR}/imageformats/qjpegd.pdb
+                          ${QT_PLUGIN_DIR}/imageformats/qtga.dll
+                          ${QT_PLUGIN_DIR}/imageformats/qtga.pdb
+                          ${QT_PLUGIN_DIR}/imageformats/qtgad.dll
+                          ${QT_PLUGIN_DIR}/imageformats/qtgad.pdb)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
                 ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libeay32.dll
