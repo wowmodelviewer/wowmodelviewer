@@ -50,14 +50,6 @@ SetOutPath $INSTDIR\plugins\imageformats
 File "${wmvroot}\bin\plugins\imageformats\*"
 
 CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\9.0
-File "${wmvroot}\bin_support\wow\9.0\*"
-
-CreateDirectory $INSTDIR\games\wow
-SetOutPath $INSTDIR\games\wow\9.1
-File "${wmvroot}\bin_support\wow\9.1\*"
-
-CreateDirectory $INSTDIR\games\wow
 SetOutPath $INSTDIR\games\wow\9.2
 File "${wmvroot}\bin_support\wow\9.2\*"
 
