@@ -151,7 +151,7 @@ struct WaterLayer
 
 void fprintbu8( FILE* file, uint8 value )
 {
-  bool b[8];
+  bool b[8]{ };
   unsigned int x = 1;
   for( unsigned i = 0; i < 8; i++ )
   {
@@ -1425,7 +1425,7 @@ void MapChunk::init(MapTile* Mt, GameFile &f, bool bigAlpha)
     }
     else if (strncmp(fcc,"MCSH", 4) == 0) {
       // shadow map 64 x 64
-      unsigned char sbuf[64*64], *p, c[8];
+      unsigned char sbuf[64 * 64]{ }, *p{ }, c[8]{ };
       p = sbuf;
       for (ssize_t j=0; j<64; j++) {
         f.read(c,8);
