@@ -178,15 +178,15 @@ bool OBJExporter::exportModel(Model * m, std::wstring target)
 
           // find matrix
           int l = model->attLookup[It->first];
-          glm::mat4 m;
+          glm::mat4 M;
           glm::vec3 pos;
           if (l>-1)
           {
-            m = model->bones[model->atts[l].bone].mat;
+            M = model->bones[model->atts[l].bone].mat;
             pos = model->atts[l].pos;
           }
 
-          if(!exportModelVertices(itemModel, obj, counter, m, pos))
+          if(!exportModelVertices(itemModel, obj, counter, M, pos))
           {
             LOG_ERROR << "Error during obj export for model" << itemModel->modelname.c_str();
             return false;

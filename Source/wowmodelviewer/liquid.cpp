@@ -138,9 +138,9 @@ void Liquid::initGeometry(GameFile &f)
   // draw tiles
   for (ssize_t j=0; j<ytiles; j++) {
     for (int i=0; i<xtiles; i++) {
-      unsigned char f = flags[j*xtiles+i];
-      if ((f&8)==0) {
-        tmpflag = f;
+      unsigned char F = flags[j*xtiles+i];
+      if ((F&8)==0) {
+        tmpflag = F;
         // 15 seems to be "don't draw"
         int p = j*(xtiles+1)+i;
 
