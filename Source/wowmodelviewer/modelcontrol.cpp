@@ -697,7 +697,7 @@ void ModelControl::OnColourChange(wxColourPickerEvent &event)
     return;
 
   glm::vec4 col = fromColWidget(event.GetColour());
-  wxColourPickerCtrl *cpc;
+  wxColourPickerCtrl *cpc{ };
 
   switch (event.GetId())
   {
