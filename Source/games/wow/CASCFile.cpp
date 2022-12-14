@@ -187,20 +187,20 @@ void CASCFile::doPostOpenOperation()
       //LOG_INFO << "Parsing chunks for file" << filepath << "First chunk read :" << magic.c_str();
       while (offset < size)
       {
-        chunkHeader chunkHead;
-        memcpy(&chunkHead, buffer + offset, sizeof(chunkHeader));
+        chunkHeader ChunkHead;
+        memcpy(&ChunkHead, buffer + offset, sizeof(chunkHeader));
         offset += sizeof(chunkHeader);
 
         Chunk * chunk = new Chunk();
-        chunk->magic = std::string(chunkHead.magic, 4);
+        chunk->magic = std::string(ChunkHead.magic, 4);
         chunk->start = offset;
-        chunk->size = chunkHead.size;
+        chunk->size = ChunkHead.size;
         chunk->pointer = 0;
         chunks.push_back(*chunk);
 
         //LOG_INFO << "Chunk :" << chunk->magic.c_str() << chunk->start << chunk->size;
 
-        offset += chunkHead.size;
+        offset += ChunkHead.size;
       }
 
       // if there is only one chunk, set it

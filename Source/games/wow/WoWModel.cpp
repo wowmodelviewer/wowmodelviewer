@@ -507,14 +507,14 @@ void WoWModel::initCommon()
 
           if (parentFile && parentFile->open() && parentFile->setChunk("SKS1"))
           {
-            SKS1 sks1;
-            memcpy(&sks1, parentFile->getBuffer(), sizeof(SKS1));
+            SKS1 Sks1;
+            memcpy(&Sks1, parentFile->getBuffer(), sizeof(SKS1));
 
-            if (sks1.nGlobalSequences > 0)
+            if (Sks1.nGlobalSequences > 0)
             {
-              uint32 * buffer = new uint32[sks1.nGlobalSequences];
-              memcpy(buffer, parentFile->getBuffer() + sks1.ofsGlobalSequences, sizeof(uint32)*sks1.nGlobalSequences);
-              for (uint i = 0; i < sks1.nGlobalSequences; i++)
+              uint32 * buffer = new uint32[Sks1.nGlobalSequences];
+              memcpy(buffer, parentFile->getBuffer() + Sks1.ofsGlobalSequences, sizeof(uint32)*Sks1.nGlobalSequences);
+              for (uint i = 0; i < Sks1.nGlobalSequences; i++)
                 globalSequences.push_back(buffer[i]);
             }
 
@@ -594,18 +594,18 @@ void WoWModel::initCommon()
   // bounds
   if (header.nBoundingVertices > 0)
   {
-    glm::vec3 * buffer = new glm::vec3[header.nBoundingVertices];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
-    bounds.assign(buffer, buffer + header.nBoundingVertices);
-    delete[] buffer;
+    glm::vec3 * Buffer = new glm::vec3[header.nBoundingVertices];
+    memcpy(Buffer, gamefile->getBuffer() + header.ofsBoundingVertices, sizeof(glm::vec3)*header.nBoundingVertices);
+    bounds.assign(Buffer, Buffer + header.nBoundingVertices);
+    delete[] Buffer;
   }
 
   if (header.nBoundingTriangles > 0)
   {
-    uint16 * buffer = new uint16[header.nBoundingTriangles];
-    memcpy(buffer, gamefile->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
-    boundTris.assign(buffer, buffer + header.nBoundingTriangles);
-    delete[] buffer;
+    uint16 * Buffer = new uint16[header.nBoundingTriangles];
+    memcpy(Buffer, gamefile->getBuffer() + header.ofsBoundingTriangles, sizeof(uint16)*header.nBoundingTriangles);
+    boundTris.assign(Buffer, Buffer + header.nBoundingTriangles);
+    delete[] Buffer;
   }
 
   // textures
@@ -622,7 +622,7 @@ void WoWModel::initCommon()
       gamefile->setChunk("MD21", false);
     }
 
-    for (size_t i = 0; i < header.nTextures; i++)
+    for (size_t I = 0; I < header.nTextures; I++)
     {
       /*
       Texture Types
@@ -655,27 +655,27 @@ void WoWModel::initCommon()
       2  Texture wrap Y
       */
 
-      if (texdef[i].type == TEXTURE_FILENAME)  // 0
+      if (texdef[I].type == TEXTURE_FILENAME)  // 0
       {
         GameFile * Tex;
         if (txids.size() > 0)
         {
-          Tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
+          Tex = GAMEDIRECTORY.getFile(txids[I].fileDataId);
         }
         else
         {
-          QString texname((char*)(gamefile->getBuffer() + texdef[i].nameOfs));
+          QString texname((char*)(gamefile->getBuffer() + texdef[I].nameOfs));
           Tex = GAMEDIRECTORY.getFile(texname);
         }
-        textures[i] = TEXTUREMANAGER.add(Tex);
+        textures[I] = TEXTUREMANAGER.add(Tex);
       }
       else  // non-zero
       {
         // special texture - only on characters and such...
-        specialTextures[i] = texdef[i].type;
+        specialTextures[I] = texdef[I].type;
 
-        if (texdef[i].type == TEXTURE_WEAPON_BLADE) // a fix for weapons with type-3 textures.
-          replaceTextures[texdef[i].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
+        if (texdef[I].type == TEXTURE_WEAPON_BLADE) // a fix for weapons with type-3 textures.
+          replaceTextures[texdef[I].type] = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
       }
     }
   }
@@ -704,11 +704,11 @@ void WoWModel::initCommon()
         memcpy(&ska1, skelFile->getBuffer(), sizeof(SKA1));
         header.nAttachments = ska1.nAttachments;
         ModelAttachmentDef *attachments = (ModelAttachmentDef*)(skelFile->getBuffer() + ska1.ofsAttachments);
-        for (size_t i = 0; i < ska1.nAttachments; i++)
+        for (size_t I = 0; I < ska1.nAttachments; I++)
         {
           ModelAttachment att;
           att.model = this;
-          att.init(attachments[i]);
+          att.init(attachments[I]);
           atts.push_back(att);
         }
 
@@ -718,11 +718,11 @@ void WoWModel::initCommon()
           int16 *p = (int16*)(skelFile->getBuffer() + ska1.ofsAttachLookup);
           if (ska1.nAttachLookup > ATT_MAX)
             LOG_ERROR << "Model AttachLookup" << ska1.nAttachLookup << "over" << ATT_MAX;
-          for (size_t i = 0; i < ska1.nAttachLookup; i++)
+          for (size_t I = 0; I < ska1.nAttachLookup; I++)
           {
-            if (i > ATT_MAX - 1)
+            if (I > ATT_MAX - 1)
               break;
-            attLookup[i] = p[i];
+            attLookup[I] = p[I];
           }
         }
       }
@@ -736,11 +736,11 @@ void WoWModel::initCommon()
     if (header.nAttachments)
     {
       ModelAttachmentDef *attachments = (ModelAttachmentDef*)(gamefile->getBuffer() + header.ofsAttachments);
-      for (size_t i = 0; i < header.nAttachments; i++)
+      for (size_t I = 0; I < header.nAttachments; I++)
       {
         ModelAttachment att;
         att.model = this;
-        att.init(attachments[i]);
+        att.init(attachments[I]);
         atts.push_back(att);
       }
     }
@@ -750,11 +750,11 @@ void WoWModel::initCommon()
       int16 *p = (int16*)(gamefile->getBuffer() + header.ofsAttachLookup);
       if (header.nAttachLookup > ATT_MAX)
         LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
-      for (size_t i = 0; i < header.nAttachLookup; i++)
+      for (size_t I = 0; I < header.nAttachLookup; I++)
       {
-        if (i > ATT_MAX - 1)
+        if (I > ATT_MAX - 1)
           break;
-        attLookup[i] = p[i];
+        attLookup[I] = p[I];
       }
     }
   }
@@ -765,8 +765,8 @@ void WoWModel::initCommon()
   {
     colors.resize(header.nColors);
     ModelColorDef *colorDefs = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
-    for (uint i = 0; i < colors.size(); i++)
-      colors[i].init(gamefile, colorDefs[i], globalSequences);
+    for (uint I = 0; I < colors.size(); I++)
+      colors[I].init(gamefile, colorDefs[I], globalSequences);
   }
 
   // init transparency
@@ -774,8 +774,8 @@ void WoWModel::initCommon()
   {
     transparency.resize(header.nTransparency);
     ModelTransDef *trDefs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
-    for (uint i = 0; i < header.nTransparency; i++)
-      transparency[i].init(gamefile, trDefs[i], globalSequences);
+    for (uint I = 0; I < header.nTransparency; I++)
+      transparency[I].init(gamefile, trDefs[I], globalSequences);
   }
 
   if (header.nViews)
@@ -978,9 +978,9 @@ void WoWModel::initAnimated()
 
             if (parentFile->setChunk("SKS1"))
             {
-              SKS1 sks1;
-              parentFile->read(&sks1, sizeof(sks1));
-              readAnimsFromFile(parentFile, afids, data, sks1.nAnimations, sks1.ofsAnimations, sks1.nAnimationLookup, sks1.ofsAnimationLookup);
+              SKS1 Sks1;
+              parentFile->read(&Sks1, sizeof(Sks1));
+              readAnimsFromFile(parentFile, afids, data, Sks1.nAnimations, Sks1.ofsAnimations, Sks1.nAnimationLookup, Sks1.ofsAnimationLookup);
             }
 
             parentFile->close();

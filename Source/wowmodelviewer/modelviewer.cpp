@@ -2550,14 +2550,14 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         ids.resize(animsMap.size());
         unsigned int i = 0;
 
-        for (size_t i = 0; i < canvas->model()->anims.size(); i++)
+        for (size_t I = 0; I < canvas->model()->anims.size(); I++)
         {
-          wxString animName = animsMap[canvas->model()->anims[i].animID];
+          wxString animName = animsMap[canvas->model()->anims[I].animID];
           animName << L" [";
-          animName << i;
+          animName << I;
           animName << L"]";
           values.Add(animName);
-          selection.Add(i);
+          selection.Add(I);
         }
 
         AnimationExportChoiceDialog animChoiceDlg(this, L"", wxT("Animation Choice"), values);
@@ -2568,8 +2568,8 @@ void ModelViewer::OnExport(wxCommandEvent &event)
         selection = animChoiceDlg.GetSelections();
         vector<int> animsToExport;
         animsToExport.reserve(selection.GetCount());
-        for (unsigned int i = 0; i < selection.GetCount(); i++)
-          animsToExport.push_back(canvas->model()->anims[selection[i]].Index);
+        for (unsigned int I = 0; I < selection.GetCount(); I++)
+          animsToExport.push_back(canvas->model()->anims[selection[I]].Index);
 
         plugin->setAnimationsToExport(animsToExport);
 

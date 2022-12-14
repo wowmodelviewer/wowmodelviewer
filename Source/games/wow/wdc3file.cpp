@@ -536,9 +536,9 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
     if (field->isRelationshipData)
     {
       std::stringstream ss;
-      auto it = m_relationShipData.find(recordIndex);
-      if (it != m_relationShipData.end())
-        result.push_back(it->second);
+      auto It = m_relationShipData.find(recordIndex);
+      if (It != m_relationShipData.end())
+        result.push_back(It->second);
       else
         result.push_back("");
       continue;
@@ -568,8 +568,8 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
             }
             else
             {
-              std::string val(reinterpret_cast<char *>(ptr));
-              ptr = ptr + val.size() + 1;
+              std::string Val(reinterpret_cast<char *>(ptr));
+              ptr = ptr + Val.size() + 1;
             }
           }
           stringPtr = reinterpret_cast<char *>(ptr);

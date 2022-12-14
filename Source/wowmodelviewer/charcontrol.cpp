@@ -344,9 +344,9 @@ void CharControl::RefreshEquipment()
         tabardSpins[SPIN_TABARD_BORDERCOLOR]->SetValue(model->td.getBorderColor());
         tabardSpins[SPIN_TABARD_BACKGROUND]->SetValue(model->td.getBackground());
 
-        for (size_t i = 0; i < NUM_TABARD_BTNS; i++) {
-          tabardSpins[i]->Refresh(false);
-          spinTbLabels[i]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[i]->GetValue(), tabardSpins[i]->GetMax()));
+        for (size_t I = 0; I < NUM_TABARD_BTNS; I++) {
+          tabardSpins[I]->Refresh(false);
+          spinTbLabels[I]->SetLabel(wxString::Format(wxT("%i / %i"), tabardSpins[I]->GetValue(), tabardSpins[I]->GetMax()));
         }
       }
     }

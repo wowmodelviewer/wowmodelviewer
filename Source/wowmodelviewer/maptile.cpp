@@ -1374,7 +1374,7 @@ void MapChunk::init(MapTile* Mt, GameFile &f, bool bigAlpha)
             unsigned char *p;
             p = amap;
             for (ssize_t j=0; j<64; j++) {
-              for (size_t i=0; i<64; i++) {
+              for (size_t I=0; I<64; I++) {
                 *p++ = *abuf++;
               }
 
@@ -1444,8 +1444,8 @@ void MapChunk::init(MapTile* Mt, GameFile &f, bool bigAlpha)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
       if (video.supportShaders) {
-        for (ssize_t p=0; p<64*64; p++) {
-          blendbuf[p*4+3] = sbuf[p];
+        for (ssize_t P=0; P<64*64; P++) {
+          blendbuf[P*4+3] = sbuf[P];
         }
       }
     }

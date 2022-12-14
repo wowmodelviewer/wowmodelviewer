@@ -148,16 +148,16 @@ void UpdateManager::updateTable()
       continue;
 
     m_table->insertRow(row);
-    QTableWidgetItem *newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).first));
-    m_table->setItem(row, column, newItem);
+    QTableWidgetItem *NewItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).first));
+    m_table->setItem(row, column, NewItem);
     column++;
-    newItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).second));
-    newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    m_table->setItem(row, column, newItem);
+    NewItem = new QTableWidgetItem(tr("%1").arg((*versionsIt).second));
+    NewItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    m_table->setItem(row, column, NewItem);
     column++;
-    newItem = new QTableWidgetItem(tr("N/A"));
-    newItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
-    m_table->setItem(row, column, newItem);
+    NewItem = new QTableWidgetItem(tr("N/A"));
+    NewItem->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+    m_table->setItem(row, column, NewItem);
     row++;
     m_table->resizeColumnsToContents();
   }

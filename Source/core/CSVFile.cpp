@@ -29,11 +29,11 @@ bool CSVFile::open()
   
   while (!in.atEnd())
   {
-    QStringList list = in.readLine().split(";");
+    QStringList List = in.readLine().split(";");
 
     std::vector<std::string> vals;
 
-    for (auto it : list)
+    for (auto it : List)
       vals.push_back(it.toStdString());
 
     m_values.push_back(vals);

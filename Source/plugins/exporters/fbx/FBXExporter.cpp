@@ -150,10 +150,10 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
       std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
       if (!itemModels.empty())
       {
-        for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+        for (std::map<POSITION_SLOTS, WoWModel *>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
         {
-          if (m_attachBoneClusters.find(it->first) != m_attachBoneClusters.end() && m_attachMeshNodes.find(it->first) != m_attachMeshNodes.end())
-            FBXHeaders::storeBindPose(m_p_scene, m_attachBoneClusters[it->first], m_attachMeshNodes[it->first]);
+          if (m_attachBoneClusters.find(It->first) != m_attachBoneClusters.end() && m_attachMeshNodes.find(It->first) != m_attachMeshNodes.end())
+            FBXHeaders::storeBindPose(m_p_scene, m_attachBoneClusters[It->first], m_attachMeshNodes[It->first]);
           //if (m_attachSkeletonNode.find(it->first) != m_attachSkeletonNode.end())
             //FBXHeaders::storeRestPose(m_p_scene, m_attachSkeletonNode[it->first]);
         }
@@ -214,12 +214,12 @@ void FBXExporter::createMeshes()
     std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
     if (!itemModels.empty())
     {
-      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
       {
-        WoWModel * itemModel = it->second;
+        WoWModel * itemModel = It->second;
         LOG_INFO << "Found attached item:" << itemModel->modelname.c_str();
 
-        int l = m_p_model->attLookup[it->first];
+        int l = m_p_model->attLookup[It->first];
         glm::mat4 m;
         glm::vec3 pos;
         if (l > -1)
@@ -228,7 +228,7 @@ void FBXExporter::createMeshes()
         }
 
         FbxNode* itemMeshNode = FBXHeaders::createMesh(m_p_manager, m_p_scene, itemModel, m);
-        m_attachMeshNodes[it->first] = itemMeshNode;
+        m_attachMeshNodes[It->first] = itemMeshNode;
 
         root_node->AddChild(itemMeshNode);
       }
@@ -248,9 +248,9 @@ void FBXExporter::createSkeletons()
     std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
     if (!itemModels.empty())
     {
-      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
       {
-        WoWModel * itemModel = it->second;
+        WoWModel * itemModel = It->second;
         if (itemModel->animated == false || itemModel->bones.size() < 2)
           continue;
 
@@ -259,8 +259,8 @@ void FBXExporter::createSkeletons()
 
         FBXHeaders::createSkeleton(itemModel, m_p_scene, itemSkeleton, itemboneNodes);
 
-        m_attachSkeletonNode[it->first] = itemSkeleton;
-        m_attachBoneNodes[it->first] = itemboneNodes;
+        m_attachSkeletonNode[It->first] = itemSkeleton;
+        m_attachBoneNodes[It->first] = itemboneNodes;
         root_node->AddChild(itemSkeleton);
       }
     }
@@ -423,9 +423,9 @@ void FBXExporter::createMaterials()
     std::map<POSITION_SLOTS, WoWModel *> itemModels = (*it)->models();
     if (!itemModels.empty())
     {
-      for (std::map<POSITION_SLOTS, WoWModel *>::iterator it = itemModels.begin(); it != itemModels.end(); ++it)
+      for (std::map<POSITION_SLOTS, WoWModel *>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
       {
-        WoWModel* model = it->second;
+        WoWModel* model = It->second;
         for (unsigned int i = 0; i < model->passes.size(); i++)
         {
           ModelRenderPass * pass = model->passes[i];
@@ -466,7 +466,7 @@ void FBXExporter::createMaterials()
             material->Diffuse.ConnectSrcObject(texture);
 
             // Add material to the scene.
-            m_attachMeshNodes[it->first]->AddMaterial(material);
+            m_attachMeshNodes[It->first]->AddMaterial(material);
           }
         }
       }

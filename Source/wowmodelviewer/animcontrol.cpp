@@ -309,17 +309,17 @@ void AnimControl::UpdateModel(WoWModel *m)
       label << " [";
       label << i;
       label << "]";
-      wxString strName=label.str().c_str();
+      wxString StrName=label.str().c_str();
 
       if (g_selModel->anims[i].animID == ANIM_STAND && useanim == -1)
       {
-        strStand = strName;
+        strStand = StrName;
         useanim = i;
       }
 
-      animCList->Append(strName);
-      animCList2->Append(strName);
-      animCList3->Append(strName);
+      animCList->Append(StrName);
+      animCList2->Append(StrName);
+      animCList3->Append(StrName);
     }
 
     if (useanim != -1)
@@ -545,10 +545,10 @@ bool AnimControl::UpdateCreatureModel(WoWModel *m)
         // that position represents the geoset. So 0x00200000
         // means geoset 2 of group 600, therefore 602.
         int cgd = r.values[i][5].toInt();
-        for (int i = 0; i < 8; i++)
+        for (int I = 0; I < 8; I++)
         {
-          int geotype = 100 * (i + 1);
-          int geoid = (cgd >> (i * 4)) & 0x0F;
+          int geotype = 100 * (I + 1);
+          int geoid = (cgd >> (I * 4)) & 0x0F;
           if (geoid > 0)
             grp.creatureGeosetData.insert(geotype + geoid);
         }

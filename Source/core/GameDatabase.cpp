@@ -181,14 +181,14 @@ bool core::GameDatabase::readStructureFromXML(const QString & file)
     {
       core::FieldStructure * fieldStruct = createFieldStructure();
       fieldStruct->id = fieldId;
-      QDomNamedNodeMap attributes = child.attributes();
+      QDomNamedNodeMap Attributes = child.attributes();
 
       // search if name and type are here
-      QDomNode name = attributes.namedItem("name");
-      QDomNode type = attributes.namedItem("type");
-      QDomNode key = attributes.namedItem("primary");
-      QDomNode arraySize = attributes.namedItem("arraySize");
-      QDomNode index = attributes.namedItem("createIndex");
+      QDomNode name = Attributes.namedItem("name");
+      QDomNode type = Attributes.namedItem("type");
+      QDomNode key = Attributes.namedItem("primary");
+      QDomNode arraySize = Attributes.namedItem("arraySize");
+      QDomNode index = Attributes.namedItem("createIndex");
 
       if (!name.isNull() && !type.isNull())
       {

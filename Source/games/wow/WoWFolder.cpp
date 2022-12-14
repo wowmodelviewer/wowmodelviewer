@@ -55,9 +55,9 @@ void wow::WoWFolder::initFromListfile(const QString & filename)
     m_nameIdMap[fileName] = id;
     if (m_CASCFolder.fileExists(id))
     {
-      CASCFile * file = new CASCFile(fileName, id);
-      file->setName(line.mid(line.lastIndexOf('/') + 1));
-      addChild(file);
+      CASCFile * File = new CASCFile(fileName, id);
+      File->setName(line.mid(line.lastIndexOf('/') + 1));
+      addChild(File);
     }
   }
   LOG_INFO << "WoWFolder - Hierarchy creation done";

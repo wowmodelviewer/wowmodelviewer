@@ -115,8 +115,8 @@ void ModelBankControl::LoadModel()
     for (size_t i=0; i<grp.count; i++) 
       grp.tex[i] = cd.textures[i];
 
-    int val = g_animControl->AddSkin(grp);
-    g_animControl->SetSkin(val);
+    int Val = g_animControl->AddSkin(grp);
+    g_animControl->SetSkin(Val);
   }
 }
 
