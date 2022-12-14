@@ -182,7 +182,7 @@ void CharControl::UpdateModel(Attachment *a)
 
   Init();
 
-  const auto infos = model->infos;
+  const auto& infos = model->infos;
   if (infos.raceID != -1) // fails if it is a creature
   {
     cdFrame->Enable(true);
@@ -578,7 +578,7 @@ void CharControl::selectSet()
 
 void CharControl::selectStart()
 {
-  const auto infos = model->infos;
+  const auto& infos = model->infos;
   if (infos.raceID == -1)
     return;
 

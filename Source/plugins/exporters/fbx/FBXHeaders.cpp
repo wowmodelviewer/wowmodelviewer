@@ -378,7 +378,7 @@ void FBXHeaders::createAnimation(WoWModel * l_model, FbxScene *& l_scene, QStrin
     FbxTime time;
     time.SetSecondDouble((float)t / 1000.0);
 
-    for (auto it : skeleton)
+    for (auto& it : skeleton)
     {
       int b = it.first;
       Bone& bone = l_model->bones[b];

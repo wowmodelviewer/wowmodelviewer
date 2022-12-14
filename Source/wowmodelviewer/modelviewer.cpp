@@ -2472,7 +2472,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
     }
 
     // Update the model
-    for (const auto customization : result->customizations)
+    for (const auto& customization : result->customizations)
       g_charControl->model->cd.set(customization.first, customization.second);
 
     g_charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(result->eyeGlowType);
