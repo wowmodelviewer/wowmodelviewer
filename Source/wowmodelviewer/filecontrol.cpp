@@ -142,22 +142,22 @@ void FileControl::Init(ModelViewer* mv)
 
     beautifyFileName(name);
 
-    QStringList items = name.split("\\");
+    QStringList Items = name.split("\\");
     TreeStackItem * curparent = &root;
-    for(int i=0; i < items.size() -1; i++)
+    for(int i=0; i < Items.size() -1; i++)
     {
-      TreeStackItem * child = curparent->getChildByName(items[i]);
+      TreeStackItem * child = curparent->getChildByName(Items[i]);
       if(!child)
       {
         child = new TreeStackItem();
-        child->setName(items[i]);
+        child->setName(Items[i]);
         curparent->addChild(child);
       }
       curparent = child;
     }
     TreeStackItem * child = new TreeStackItem();
     child->file = *it;
-    child->setName(items[items.size()-1]);
+    child->setName(Items[Items.size()-1]);
     curparent->addChild(child);
   }
 

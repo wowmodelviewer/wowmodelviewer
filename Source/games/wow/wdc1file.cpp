@@ -221,11 +221,11 @@ bool WDC1File::open()
           }
           case FIELD_COMPRESSION::BITPACKED:
           {
-            unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+            unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
             unsigned int offset = info.field_offset_bits / 8;
-            unsigned char * val = new unsigned char[size];
+            unsigned char * val = new unsigned char[Size];
 
-            memcpy(val, recordOffset + offset, size);
+            memcpy(val, recordOffset + offset, Size);
 
             unsigned int id = (*reinterpret_cast<unsigned int*>(val));
             id = id & ((1ull << info.field_size_bits) - 1);
@@ -615,11 +615,11 @@ bool WDC1File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 
 uint32 WDC1File::readBitpackedValue(field_storage_info info, unsigned char * recordOffset) const
 {
-  unsigned int size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+  unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
   unsigned int offset = info.field_offset_bits / 8;
-  unsigned char * v = new unsigned char[size];
+  unsigned char * v = new unsigned char[Size];
 
-  memcpy(v, recordOffset + offset, size);
+  memcpy(v, recordOffset + offset, Size);
 
   uint32 result = (*reinterpret_cast<unsigned int*>(v));
   result = result >> (info.field_offset_bits & 7);

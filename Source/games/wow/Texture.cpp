@@ -309,19 +309,19 @@ unsigned char r, g, b;
 };
 */
 
-void Texture::decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest)
+void Texture::decompressDXTC(GLint format, int W, int H, size_t size, unsigned char *src, unsigned char *dest)
 {
   // DXT1 Textures, currently being handles by our routine below
   if (format == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT) 
   {
-    DDSDecompressDXT1(src, w, h, dest);
+    DDSDecompressDXT1(src, W, H, dest);
     return;
   }
 
   // DXT3 Textures
   if (format == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT) 
   {
-    DDSDecompressDXT3(src, w, h, dest);
+    DDSDecompressDXT3(src, W, H, dest);
     return;
   }
 
@@ -329,7 +329,7 @@ void Texture::decompressDXTC(GLint format, int w, int h, size_t size, unsigned c
   if (format == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT)  
   {
     //DXT5UnpackAlphaValues(src, w, h, dest);
-    DDSDecompressDXT5(src, w, h, dest);
+    DDSDecompressDXT5(src, W, H, dest);
     return;
   }
 

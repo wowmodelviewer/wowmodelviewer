@@ -104,24 +104,24 @@ void Attachment::setupParticle()
     parent->model_->setupAtt2(id);
 }
 
-Attachment* Attachment::addChild(std::string modelfn, int id, int slot)
+Attachment* Attachment::addChild(std::string modelfn, int Id, int Slot)
 {
-  if (modelfn.length() == 0 || id < 0)
+  if (modelfn.length() == 0 || Id < 0)
     return nullptr;
 
   auto *m = new WoWModel(GAMEDIRECTORY.getFile(modelfn.c_str()), true);
 
   if (m->ok)
-    return addChild(m, id, slot);
+    return addChild(m, Id, Slot);
  
   delete m;
   return nullptr;
 }
 
-Attachment* Attachment::addChild(Displayable *disp, int id, int slot)
+Attachment* Attachment::addChild(Displayable *disp, int Id, int Slot)
 {
-  LOG_INFO << "Attach on id" << id << "slot" << slot;
-  auto *att = new Attachment(this, disp, id, slot);
+  LOG_INFO << "Attach on id" << Id << "slot" << Slot;
+  auto *att = new Attachment(this, disp, Id, Slot);
   children.push_back(att);
   return att;
 }
@@ -138,11 +138,11 @@ void Attachment::delChildren()
   children.clear();
 }
 
-void Attachment::delSlot(int slot)
+void Attachment::delSlot(int Slot)
 {
   for (size_t i = 0; i < children.size(); i++)
   {
-    if (children[i]->slot == slot)
+    if (children[i]->slot == Slot)
       children.erase(children.begin() + i);
   }
 }

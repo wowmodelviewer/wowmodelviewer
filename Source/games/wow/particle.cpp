@@ -403,7 +403,7 @@ void ParticleSystem::draw()
    * 2  seems to be the same as 0 (found some in the Deeprun Tram blinky-lights-sign thing)
    */
 
-  glm::vec3 vert1, vert2, vert3, vert4, pos;
+  glm::vec3 vert1, vert2, vert3, vert4, Pos;
   float size;
 
   glBegin(GL_QUADS);
@@ -415,9 +415,9 @@ void ParticleSystem::draw()
     glColor4fv(glm::value_ptr(it->color));
     size = it->size;
     if (doNotTrail)
-      pos = it->tpos;
+      Pos = it->tpos;
     else
-      pos = it->pos;
+      Pos = it->pos;
     if (ParticleType == 0 || ParticleType > 1)
     {
       // TODO: figure out type 2 (deeprun tram subway sign)
@@ -425,23 +425,23 @@ void ParticleSystem::draw()
       if (billboard)
       {
 
-        vert1 = pos - (vRight + vUp) * size;
-        vert2 = pos + (vRight - vUp) * size;
-        vert3 = pos + (vRight + vUp) * size;
-        vert4 = pos - (vRight - vUp) * size;
+        vert1 = Pos - (vRight + vUp) * size;
+        vert2 = Pos + (vRight - vUp) * size;
+        vert3 = Pos + (vRight + vUp) * size;
+        vert4 = Pos - (vRight - vUp) * size;
       }
       else
       {
-        vert1 = pos + it->corners[0] * size;
-        vert2 = pos + it->corners[1] * size;
-        vert3 = pos + it->corners[2] * size;
-        vert4 = pos + it->corners[3] * size;
+        vert1 = Pos + it->corners[0] * size;
+        vert2 = Pos + it->corners[1] * size;
+        vert3 = Pos + it->corners[2] * size;
+        vert4 = Pos + it->corners[3] * size;
       }
     }
     else if (ParticleType == 1)
     {
-      vert1 = pos + bv0 * size;
-      vert2 = pos + bv1 * size;
+      vert1 = Pos + bv0 * size;
+      vert2 = Pos + bv1 * size;
       vert3 = it->origin + bv1 * size;
       vert4 = it->origin + bv0 * size;
     }

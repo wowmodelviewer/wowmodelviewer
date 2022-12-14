@@ -657,17 +657,17 @@ void WoWModel::initCommon()
 
       if (texdef[i].type == TEXTURE_FILENAME)  // 0
       {
-        GameFile * tex;
+        GameFile * Tex;
         if (txids.size() > 0)
         {
-          tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
+          Tex = GAMEDIRECTORY.getFile(txids[i].fileDataId);
         }
         else
         {
           QString texname((char*)(gamefile->getBuffer() + texdef[i].nameOfs));
-          tex = GAMEDIRECTORY.getFile(texname);
+          Tex = GAMEDIRECTORY.getFile(texname);
         }
-        textures[i] = TEXTUREMANAGER.add(tex);
+        textures[i] = TEXTUREMANAGER.add(Tex);
       }
       else  // non-zero
       {
@@ -893,7 +893,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
 
     anims.push_back(a);
 
-    GameFile * anim = 0;
+    GameFile * Anim = 0;
 
     // if we have animation file ids from AFID chunk, use them
     if (afids.size() > 0)
@@ -902,7 +902,7 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
       {
         if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
         {
-          anim = GAMEDIRECTORY.getFile(it.fileId);
+          Anim = GAMEDIRECTORY.getFile(it.fileId);
           break;
         }
       }
@@ -911,19 +911,19 @@ void WoWModel::readAnimsFromFile(GameFile * f, std::vector<AFID> & afids, modelA
     {
       QString tempname = QString::fromStdString(modelname).replace(".m2", "");
       tempname = QString("%1%2-%3.anim").arg(tempname).arg(anims[i].animID, 4, 10, QChar('0')).arg(anims[i].subAnimID, 2, 10, QChar('0'));
-      anim = GAMEDIRECTORY.getFile(tempname);
+      Anim = GAMEDIRECTORY.getFile(tempname);
     }
 
-    if (anim && anim->open())
+    if (Anim && Anim->open())
     {
-      anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
+      Anim->setChunk("AFSB"); // try to set chunk if it exist, no effect if there is no AFSB chunk present
       {     
         auto animIt = data.animfiles.find(anims[i].animID);
         if (animIt != data.animfiles.end())
-          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << anim->fullname();
+          LOG_INFO << "WARNING - replacing" << data.animfiles[anims[i].animID].first->fullname() << "by" << Anim->fullname();
       }
       
-      data.animfiles[anims[i].animID] = std::make_pair(anim, f);
+      data.animfiles[anims[i].animID] = std::make_pair(Anim, f);
     }
   }
 
@@ -1283,7 +1283,7 @@ void WoWModel::setLOD(int index)
 
   // render ops
   ModelGeoset *ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
-  ModelTexUnit *tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
+  ModelTexUnit *Tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
   ModelRenderFlags *renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.ofsTexFlags);
   uint16 *texlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexLookup);
   uint16 *texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
@@ -1305,18 +1305,18 @@ void WoWModel::setLOD(int index)
  
   for (size_t j = 0; j < view->nTex; j++)
   {
-    ModelRenderPass * pass = new ModelRenderPass(this, tex[j].op);
+    ModelRenderPass * pass = new ModelRenderPass(this, Tex[j].op);
 
     uint texOffset = 0;
-    uint texCount = tex[j].op_count;
+    uint texCount = Tex[j].op_count;
     // THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
     // Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
     // displaying one randomly. So for now we try to guess which one is the most important by checking
     // if any are special textures (11, 12 or 13). If so, we choose the first one that fits this criterion.
-    pass->specialTex = specialTextures[texlookup[tex[j].textureid]];
+    pass->specialTex = specialTextures[texlookup[Tex[j].textureid]];
     for (size_t k = 0; k < texCount; k++)
     {
-      int special = specialTextures[texlookup[tex[j].textureid + k]];
+      int special = specialTextures[texlookup[Tex[j].textureid + k]];
       if (special == 11 || special == 12 || special == 13)
       {
         texOffset = k;
@@ -1326,18 +1326,18 @@ void WoWModel::setLOD(int index)
         break;
       }
     }
-    pass->tex = texlookup[tex[j].textureid + texOffset];
+    pass->tex = texlookup[Tex[j].textureid + texOffset];
  
     // TODO: figure out these flags properly -_-
-    ModelRenderFlags &rf = renderFlags[tex[j].flagsIndex];
+    ModelRenderFlags &rf = renderFlags[Tex[j].flagsIndex];
 
     pass->blendmode = rf.blend;
     //if (rf.blend == 0) // Test to disable/hide different blend types
     //  continue;
 
-    pass->color = tex[j].colorIndex;
+    pass->color = Tex[j].colorIndex;
 
-    pass->opacity = transLookup[tex[j].transid + texOffset];
+    pass->opacity = transLookup[Tex[j].transid + texOffset];
 
     pass->unlit = (rf.flags & RENDERFLAGS_UNLIT) != 0;
 
@@ -1346,7 +1346,7 @@ void WoWModel::setLOD(int index)
     pass->billboard = (rf.flags & RENDERFLAGS_BILLBOARD) != 0;
 
     // Use environmental reflection effects?
-    pass->useEnvMap = (texunitlookup[tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
+    pass->useEnvMap = (texunitlookup[Tex[j].texunit] == -1) && pass->billboard && rf.blend > 2; //&& rf.blend<5;
 
     // Disable environmental mapping if its been unchecked.
     if (pass->useEnvMap && !video.useEnvMapping)
@@ -1362,9 +1362,9 @@ void WoWModel::setLOD(int index)
     pass->twrap = (texdef[pass->tex].flags & TEXTURE_WRAPY) != 0; // Texture wrap Y
 
     // tex[j].flags: Usually 16 for static textures, and 0 for animated textures.
-    if ((tex[j].flags & TEXTUREUNIT_STATIC) == 0)
+    if ((Tex[j].flags & TEXTUREUNIT_STATIC) == 0)
     {
-      pass->texanim = texanimlookup[tex[j].texanimid + texOffset];
+      pass->texanim = texanimlookup[Tex[j].texanimid + texOffset];
     }
 
     rawPasses.push_back(pass);
@@ -1384,7 +1384,7 @@ bool WoWModel::sortPasses(ModelRenderPass* mrp1, ModelRenderPass* mrp2)
   return mrp1->blendmode < mrp2->blendmode;
 }
 
-void WoWModel::calcBones(ssize_t anim, size_t time)
+void WoWModel::calcBones(ssize_t Anim, size_t time)
 {
   // Reset all bones to 'false' which means they haven't been animated yet.
   for (auto & it : bones)
@@ -1401,7 +1401,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     {
       for (int i = 0; i <= keyBoneLookup[BONE_ROOT]; i++)
       {
-        bones[i].calcMatrix(bones, anim, time);
+        bones[i].calcMatrix(bones, Anim, time);
       }
     }
 
@@ -1431,7 +1431,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = Anim;
       t = time;
     }
 
@@ -1473,7 +1473,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = Anim;
       t = time;
     }
 
@@ -1490,7 +1490,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = Anim;
       t = time;
     }
 
@@ -1504,7 +1504,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
   {
     for (ssize_t i = 0; i < keyBoneLookup[BONE_ROOT]; i++)
     {
-      bones[i].calcMatrix(bones, anim, time);
+      bones[i].calcMatrix(bones, Anim, time);
     }
 
     // The following line fixes 'mounts' in that the character doesn't get rotated, but it also screws up the rotation for the entire model :(
@@ -1522,7 +1522,7 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
     }
     else
     {
-      a = anim;
+      a = Anim;
       t = time;
     }
 
@@ -1560,15 +1560,15 @@ void WoWModel::calcBones(ssize_t anim, size_t time)
   // Animate everything thats left with the 'default' animation
   for (auto & it : bones)
   {
-    it.calcMatrix(bones, anim, time);
+    it.calcMatrix(bones, Anim, time);
   }
 }
 
-void WoWModel::animate(ssize_t anim)
+void WoWModel::animate(ssize_t Anim)
 {
   size_t t = 0;
 
-  ModelAnimation &a = anims[anim];
+  ModelAnimation &a = anims[Anim];
   int tmax = a.length;
   if (tmax == 0)
     tmax = 1;
@@ -1582,11 +1582,11 @@ void WoWModel::animate(ssize_t anim)
     t = animManager->GetFrame();
 
   this->animtime = t;
-  this->anim = anim;
+  this->anim = Anim;
 
   if (animBones) // && (!animManager->IsPaused() || !animManager->IsParticlePaused()))
   {
-    calcBones(anim, t);
+    calcBones(Anim, t);
   }
 
   if (animGeometry)
@@ -1644,14 +1644,14 @@ void WoWModel::animate(ssize_t anim)
   {
     // random time distribution for teh win ..?
     //int pt = a.timeStart + (t + (int)(tmax*particleSystems[i].tofs)) % tmax;
-    it.setup(anim, t);
+    it.setup(Anim, t);
   }
 
   for (auto & it : ribbons)
-    it.setup(anim, t);
+    it.setup(Anim, t);
 
   for (auto & it : texAnims)
-    it.calc(anim, t);
+    it.calc(Anim, t);
 }
 
 inline void WoWModel::drawModel()
@@ -1986,7 +1986,7 @@ void WoWModel::update(int dt) // (float dt)
   updateEmitters((dt/1000.0f));
 }
 
-void WoWModel::updateTextureList(GameFile * tex, int special)
+void WoWModel::updateTextureList(GameFile * Tex, int special)
 {
   for (size_t i = 0; i < specialTextures.size(); i++)
   {
@@ -1995,7 +1995,7 @@ void WoWModel::updateTextureList(GameFile * tex, int special)
       if (replaceTextures[special] != ModelRenderPass::INVALID_TEX)
         TEXTUREMANAGER.del(replaceTextures[special]);
 
-      replaceTextures[special] = TEXTUREMANAGER.add(tex);
+      replaceTextures[special] = TEXTUREMANAGER.add(Tex);
       break;
     }
   }
@@ -2557,23 +2557,23 @@ void WoWModel::refresh()
   refreshMerging();
 }
 
-QString WoWModel::getNameForTex(uint16 tex)
+QString WoWModel::getNameForTex(uint16 Tex)
 {
-  if (specialTextures[tex] == TEXTURE_SKIN)
+  if (specialTextures[Tex] == TEXTURE_SKIN)
     return "Body.blp";
   else
-    return TEXTUREMANAGER.get(getGLTexture(tex));
+    return TEXTUREMANAGER.get(getGLTexture(Tex));
 }
 
-GLuint WoWModel::getGLTexture(uint16 tex) const
+GLuint WoWModel::getGLTexture(uint16 Tex) const
 {
-  if (tex >= specialTextures.size())
+  if (Tex >= specialTextures.size())
     return ModelRenderPass::INVALID_TEX;
 
-  if (specialTextures[tex] == -1)
-    return textures[tex];
+  if (specialTextures[Tex] == -1)
+    return textures[Tex];
   else
-    return replaceTextures[specialTextures[tex]];
+    return replaceTextures[specialTextures[Tex]];
 }
 
 void WoWModel::restoreRawGeosets()

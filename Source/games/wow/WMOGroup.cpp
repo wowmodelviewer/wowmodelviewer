@@ -638,7 +638,7 @@ void WMOGroup::updateModels(bool load)
   }
 }
 
-void WMOGroup::init(WMO *wmo, GameFile &f, int num, char *names)
+void WMOGroup::init(WMO *Wmo, GameFile &f, int Num, char *names)
 {
   /*
   Groups don't have placement or orientation information, because the coordinates for the
@@ -653,8 +653,8 @@ void WMOGroup::init(WMO *wmo, GameFile &f, int num, char *names)
   Roots cannot be used indoors).
   */
 
-  this->wmo = wmo;
-  this->num = num;
+  this->wmo = Wmo;
+  this->num = Num;
 
   // extract group info from f
   f.read(&flags, 4);

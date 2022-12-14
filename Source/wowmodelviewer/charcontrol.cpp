@@ -542,13 +542,13 @@ void CharControl::selectSet()
 {
   ClearItemDialog();
 
-  std::vector<NumStringPair> items;
+  std::vector<NumStringPair> Items;
 
   // Adds "none" to select
   NumStringPair n;
   n.id = -1;
   n.name = wxT("---- None ----");
-  items.push_back(n);
+  Items.push_back(n);
 
   sqlResult itemSet = GAMEDATABASE.sqlQuery("SELECT ID, Name_Lang FROM ItemSet");
 
@@ -559,14 +559,14 @@ void CharControl::selectSet()
       NumStringPair p;
       p.id = itemSet.values[i][0].toInt();
       p.name = itemSet.values[i][1].toStdWString();
-      items.push_back(p);
+      Items.push_back(p);
     }
   }
 
-  std::sort(items.begin(), items.end());
+  std::sort(Items.begin(), Items.end());
   numbers.clear();
   choices.Clear();
-  for (std::vector<NumStringPair>::iterator it = items.begin(); it != items.end(); ++it) {
+  for (std::vector<NumStringPair>::iterator it = Items.begin(); it != Items.end(); ++it) {
     choices.Add(it->name);
     numbers.push_back(it->id);
   }

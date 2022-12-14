@@ -984,31 +984,31 @@ void MapChunk::initTextures(wxString basename, int first, int last)
 
 static unsigned char blendbuf[64*64*4]; // make unstable when new/delete, just make it global
 static unsigned char amap[64*64];
-void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
+void MapChunk::init(MapTile* Mt, GameFile &f, bool bigAlpha)
 {
   //glm::vec3 tn[mapbufsize], tv[mapbufsize];
   
-  maptile = mt;
+  maptile = Mt;
 
   char fcc[5];
-  uint32 size;
+  uint32 Size;
 
   size_t mcnk_pos = f.getPos();
 
   f.read(fcc,4); // MCNK
-  f.read(&size, 4);
+  f.read(&Size, 4);
 //  flipcc(fcc); // in former mpq.h
   fcc[4] = 0;
 
-  if (strncmp(fcc, "MCNK", 4)!=0 || size == 0) {
-    LOG_ERROR << "mcnk main chunk" << fcc << "[" << size << "].";
+  if (strncmp(fcc, "MCNK", 4)!=0 || Size == 0) {
+    LOG_ERROR << "mcnk main chunk" << fcc << "[" << Size << "].";
     return;
   }
 
   // okay here we go ^_^
   mBigAlpha=bigAlpha;
   
-  size_t lastpos = f.getPos() + size;
+  size_t lastpos = f.getPos() + Size;
 
   //char header[0x80];
   //MapChunkHeader header;
@@ -1085,23 +1085,23 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 
   while (f.getPos() < lastpos) {
     memset(fcc, 0, 4);
-    size = 0;
+    Size = 0;
     f.read(fcc,4);
-    f.read(&size, 4);
+    f.read(&Size, 4);
 //    flipcc(fcc); // in former mpq.h
     fcc[4] = 0;
 
     //gLog("fcc: %s, size: %d, pos: %d, size: %d.\n", fcc, size, f.getPos(), f.getSize());
 
-    if (size == 0) {
+    if (Size == 0) {
       // MCAL always has wrong size....
-      if (strncmp(fcc, "MCAL", 4) == 0 && (size+8) != header.sizeAlpha) {
+      if (strncmp(fcc, "MCAL", 4) == 0 && (Size+8) != header.sizeAlpha) {
         f.read(fcc,4);
 //        flipcc(fcc); // in former mpq.h
         fcc[4] = 0;
         size_t nextpos;
         if (strncmp(fcc, "MCLQ", 4) == 0) {
-          nextpos = f.getPos() + size;
+          nextpos = f.getPos() + Size;
         } else {
           nextpos = mcnk_pos+header.ofsAlpha+header.sizeAlpha;
         }
@@ -1111,13 +1111,13 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
       // MCLQ sometimes has wrong size, like StratholmeCOT
       if (strncmp(fcc, "MCLQ", 4) == 0) // nothing behind MCLQ, just break;
         break;
-      if (strncmp(fcc, "MCLQ", 4) == 0 && (size+8) != header.sizeLiquid) {
+      if (strncmp(fcc, "MCLQ", 4) == 0 && (Size+8) != header.sizeLiquid) {
         f.read(fcc,4);
 //        flipcc(fcc); // in former mpq.h
         fcc[4] = 0;
         size_t nextpos;
         if (strncmp(fcc, "MCSE", 4) == 0) {
-          nextpos = f.getPos() + size;
+          nextpos = f.getPos() + Size;
         } else {
           nextpos = mcnk_pos+header.ofsSndEmitters;
           f.seek((int)nextpos);
@@ -1128,15 +1128,15 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
             break; // nothing behind MCLQ, just break;
         }
         f.seek((int)nextpos);
-        //gLog("mcnk %d, pos %d, size %d, ofsAlpha %d, sizeAlpha %d, nextpos %d\n", mcnk_pos, f.getPos(), size, header.ofsAlpha, header.sizeAlpha, nextpos);
+        //gLog("mcnk %d, pos %d, Size %d, ofsAlpha %d, sizeAlpha %d, nextpos %d\n", mcnk_pos, f.getPos(), size, header.ofsAlpha, header.sizeAlpha, nextpos);
       }
       continue;
     }
 
-    size_t nextpos = f.getPos() + size;
+    size_t nextpos = f.getPos() + Size;
 
     if (fcc[0] != 'M' || f.getPos() > f.getSize()) {
-      LOG_ERROR << "mcnk chunk initial error, fcc:" << fcc << ", size:" << size << ", pos: " << f.getPos() << ", size:" << f.getSize();
+      LOG_ERROR << "mcnk chunk initial error, fcc:" << fcc << ", size:" << Size << ", pos: " << f.getPos() << ", size:" << f.getSize();
       break;
     }
 
@@ -1242,7 +1242,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
       0x400   Shiny! This layer adds reflection of the skybox in the texture. You should add a MTFX chunk.
       */
       // texture info
-      nTextures = size / 16;
+      nTextures = Size / 16;
       //gLog("=\n");
       for (size_t i=0; i<nTextures; i++) {
         f.read(&mcly[i], sizeof(struct MCLY));
@@ -1253,7 +1253,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
           animated[i] = 0;
         }
 
-        textures[i] = TEXTUREMANAGER.get(mt->textures[mcly[i].textureId].c_str());
+        textures[i] = TEXTUREMANAGER.get(Mt->textures[mcly[i].textureId].c_str());
       }
     }
     else if (strncmp(fcc, "MCRF", 4) == 0) {
@@ -1417,7 +1417,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
 
       }
       // some MCAL chunks have incorrect sizes! :(
-      if ((size+8) != header.sizeAlpha) {
+      if ((Size+8) != header.sizeAlpha) {
         // continue;
         nextpos = mcnk_pos+header.ofsAlpha+header.sizeAlpha;
         //gLog("mcnk %d, pos %d, size %d, ofsAlpha %d, sizeAlpha %d, nextpos %d\n", mcnk_pos, f.getPos(), size, header.ofsAlpha, header.sizeAlpha, nextpos);
@@ -1520,7 +1520,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
       //gLog("No implement mcnk subchunk %s [%d].\n", fcc, size);
     }
     else {
-      LOG_ERROR << "No implement mcnk subchunk" << fcc << "[" << size << "]";
+      LOG_ERROR << "No implement mcnk subchunk" << fcc << "[" << Size << "]";
     }
     f.seek((int)nextpos);
   }
@@ -1544,7 +1544,7 @@ void MapChunk::init(MapTile* mt, GameFile &f, bool bigAlpha)
   }
   */
 
-  this->mt = mt;
+  this->mt = Mt;
 
   vcenter = (vmin + vmax) * 0.5f;
 
@@ -2068,8 +2068,8 @@ void MapNode::cleanup()
   }
 }
 
-MapChunk *MapTile::getChunk(unsigned int x, unsigned int z)
+MapChunk *MapTile::getChunk(unsigned int X, unsigned int Z)
 {
-  assert(x < CHUNKS_IN_TILE && z < CHUNKS_IN_TILE);
-  return &chunks[z][x];
+  assert(X < CHUNKS_IN_TILE && Z < CHUNKS_IN_TILE);
+  return &chunks[Z][X];
 }

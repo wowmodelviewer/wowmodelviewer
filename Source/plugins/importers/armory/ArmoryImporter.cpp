@@ -143,9 +143,9 @@ CharInfos * ArmoryImporter::importChar(QString url) const
 
     // Gather Items
     result->hasTransmogGear = false;
-    const auto items = root.value("items").toArray();
+    const auto Items = root.value("items").toArray();
     
-    for (const auto& item : items)
+    for (const auto& item : Items)
     {
       const auto slot = armorySlotToCharSlot(item["internal_slot_id"].toInt());
       result->equipment[slot] = item["id"].toInt();

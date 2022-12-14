@@ -321,8 +321,8 @@ void ModelViewer::InitMenu()
   // --== Continue regular menu ==--
 
   // export menu
-  wxMenu *exportMenu = new wxMenu;
-  exportMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
+  wxMenu *ExportMenu = new wxMenu;
+  ExportMenu->Append(ID_FILE_MODEL_INFO, wxT("Export ModelInfo.xml"));
 
   PluginManager::iterator it = PLUGINMANAGER.begin();
   int subMenuId = 10000;
@@ -332,13 +332,13 @@ void ModelViewer::InitMenu()
 
     if (plugin)
     {
-      exportMenu->Append(subMenuId, plugin->menuLabel());
+      ExportMenu->Append(subMenuId, plugin->menuLabel());
       Connect(subMenuId,
               wxEVT_COMMAND_MENU_SELECTED,
               wxCommandEventHandler(ModelViewer::OnExport));
     }
   }
-  fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), exportMenu);
+  fileMenu->Append(ID_EXPORT_MODEL, wxT("Export Model"), ExportMenu);
 
 
 
@@ -379,16 +379,16 @@ void ModelViewer::InitMenu()
   try {
 
     // Camera Menu
-    wxMenu *camMenu = new wxMenu;
-    camMenu->AppendCheckItem(ID_USE_CAMERA, _("Use model camera"));
-    camMenu->AppendSeparator();
-    camMenu->Append(ID_CAM_FRONT, _("Front"));
-    camMenu->Append(ID_CAM_BACK, _("Back"));
-    camMenu->Append(ID_CAM_SIDE, _("Side"));
-    camMenu->Append(ID_CAM_ISO, _("Perspective"));
-    camMenu->Append(ID_CAM_RESET, _("Reset to default"));
+    wxMenu *CamMenu = new wxMenu;
+    CamMenu->AppendCheckItem(ID_USE_CAMERA, _("Use model camera"));
+    CamMenu->AppendSeparator();
+    CamMenu->Append(ID_CAM_FRONT, _("Front"));
+    CamMenu->Append(ID_CAM_BACK, _("Back"));
+    CamMenu->Append(ID_CAM_SIDE, _("Side"));
+    CamMenu->Append(ID_CAM_ISO, _("Perspective"));
+    CamMenu->Append(ID_CAM_RESET, _("Reset to default"));
 
-    viewMenu->Append(ID_CAMERA, _("Camera"), camMenu);
+    viewMenu->Append(ID_CAMERA, _("Camera"), CamMenu);
     viewMenu->AppendSeparator();
 
     wxMenu *setSize = new wxMenu;

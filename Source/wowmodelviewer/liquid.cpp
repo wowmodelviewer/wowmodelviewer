@@ -117,7 +117,7 @@ void Liquid::initGeometry(GameFile &f)
 
   // generate vertices
   glm::vec3 *verts = new glm::vec3[(xtiles+1)*(ytiles+1)];
-  float *col = new float[(xtiles+1)*(ytiles+1)];
+  float *Col = new float[(xtiles+1)*(ytiles+1)];
 
   for (int j=0; j<ytiles+1; j++) {
     for (int i=0; i<xtiles+1; i++) {
@@ -125,7 +125,7 @@ void Liquid::initGeometry(GameFile &f)
       float h = map[p].h;
       if (h > 100000) h = pos.y;
             verts[p] = glm::vec3(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
-      col[p] = (map[p].w1 / 255.0f)*0.5f + 0.5f;
+      Col[p] = (map[p].w1 / 255.0f)*0.5f + 0.5f;
     }
   }
 
@@ -147,16 +147,16 @@ void Liquid::initGeometry(GameFile &f)
         // HACK: pack the vertex color selection into the 2nd texture coordinate
         //float fc;
         
-        glTexCoord3f(i / texRepeats, j / texRepeats, col[p]);
+        glTexCoord3f(i / texRepeats, j / texRepeats, Col[p]);
         glVertex3fv(glm::value_ptr(verts[p]));
         
-        glTexCoord3f((i+1) / texRepeats, j / texRepeats, col[p+1]);
+        glTexCoord3f((i+1) / texRepeats, j / texRepeats, Col[p+1]);
         glVertex3fv(glm::value_ptr(verts[p+1]));
         
-        glTexCoord3f((i+1) / texRepeats, (j+1) / texRepeats, col[p+xtiles+1+1]);
+        glTexCoord3f((i+1) / texRepeats, (j+1) / texRepeats, Col[p+xtiles+1+1]);
         glVertex3fv(glm::value_ptr(verts[p+xtiles+1+1]));
         
-        glTexCoord3f(i / texRepeats, (j+1) / texRepeats, col[p+xtiles+1]);
+        glTexCoord3f(i / texRepeats, (j+1) / texRepeats, Col[p+xtiles+1]);
         glVertex3fv(glm::value_ptr(verts[p+xtiles+1]));
 
       }
@@ -214,7 +214,7 @@ void Liquid::initGeometry(GameFile &f)
 
   glEndList();
   delete[] verts;
-  delete[] col;
+  delete[] Col;
 
   /*
   // only log .wmo

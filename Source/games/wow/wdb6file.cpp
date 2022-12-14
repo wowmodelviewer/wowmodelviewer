@@ -67,15 +67,15 @@ bool WDB6File::open()
 
       std::map<uint32, uint32> values;
 
-      uint32 size = 4;
+      uint32 Size = 4;
 
       // starting from 7.3 version, data in common data is stored in 4 bytes, not dynamic size anymore
       if (!GAMEDIRECTORY.version().contains("7.3"))
       {
         if (type == 1)
-          size = 2;
+          Size = 2;
         else if (type == 2)
-          size = 1;
+          Size = 1;
       }
 
       for (uint i = 0; i < nbrecords; i++)
@@ -84,7 +84,7 @@ bool WDB6File::open()
         read(&id, sizeof(id));
 
         uint32 val = 0;
-        read(&val, size);
+        read(&val, Size);
 
         values[id] = val;
       }
