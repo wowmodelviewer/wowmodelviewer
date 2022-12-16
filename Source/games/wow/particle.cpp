@@ -501,7 +501,7 @@ static glm::mat4 SpreadMat;
 void CalcSpreadMatrix(float Spread1,float Spread2, float w, float l)
 {
   int i,j;
-  float a[2],c[2],s[2];
+  float a[2]{}, c[2]{}, s[2]{};
   glm::mat4 Temp(1.0f);
 
   SpreadMat = glm::mat4(1.0f);

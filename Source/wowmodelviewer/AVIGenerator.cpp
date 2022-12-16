@@ -286,7 +286,7 @@ void CAVIGenerator::GetFrame()
 
   //Creates a full-color (no palette) DIB from a pointer to a full-color memory DIB
   //get the BitmapInfoHeader
-  BITMAPINFOHEADER bih;
+  BITMAPINFOHEADER bih{ };
   RtlMoveMemory(&bih.biSize, pDIB, sizeof(BITMAPINFOHEADER));
 
   //now get the bitmap bits

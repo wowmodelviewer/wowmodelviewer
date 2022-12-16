@@ -356,7 +356,7 @@ void VideoSettings::EnumDisplayModes()
     if(results[0] == GL_TRUE && results[4] == GL_TRUE && results[3]>0) {
       // what we have here is a contect which is drawable to a window, is in rgba format and is accelerated in some way
       // so now we pull the infomation, fill a structure and shove it into our map
-      VideoCaps caps;
+        VideoCaps caps{};
 
       if(glewIsSupported("GL_ARB_multisample")) {
         caps.sampleBuffer = results[10];

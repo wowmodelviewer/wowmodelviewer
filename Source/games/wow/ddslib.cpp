@@ -112,7 +112,7 @@ floatSwapUnion;
     
   float DDSBigFloat( float src )
   {
-    floatSwapUnion in,out;
+    floatSwapUnion in{}, out{};
     in.f = src;
     out.c[ 0 ] = in.c[ 3 ];
     out.c[ 1 ] = in.c[ 2 ];
@@ -352,7 +352,7 @@ static void DDSDecodeAlphaExplicit( unsigned int *pixel, ddsAlphaBlockExplicit_t
 {  
   int        row, pix;
   unsigned short  word;
-  ddsColor_t    color;
+  ddsColor_t color{};
   
   
   /* clear color */
@@ -391,9 +391,9 @@ static void DDSDecodeAlpha3BitLinear( unsigned int *pixel, ddsAlphaBlock3BitLine
   
   int          row, pix;
   unsigned int    stuff;
-  unsigned char    bits[ 4 ][ 4 ];
-  unsigned short    alphas[ 8 ];
-  ddsColor_t      aColors[ 4 ][ 4 ];
+  unsigned char    bits[4][4]{};
+  unsigned short    alphas[8]{};
+  ddsColor_t      aColors[4][4]{};
   
   
   /* get initial alphas */
@@ -541,7 +541,7 @@ int DDSDecompressDXT3(unsigned char *src, int width, int height, unsigned char *
   unsigned int      *pixel, alphaZero;
   ddsColorBlock_t      *block;
   ddsAlphaBlockExplicit_t  *alphaBlock;
-  ddsColor_t        colors[ 4 ];
+  ddsColor_t        colors[4]{};
 
 
   /* setup */
@@ -596,7 +596,7 @@ int DDSDecompressDXT5(unsigned char *src, int width, int height, unsigned char *
   unsigned int        *pixel, alphaZero;
   ddsColorBlock_t        *block;
   ddsAlphaBlock3BitLinear_t  *alphaBlock;
-  ddsColor_t          colors[ 4 ];
+  ddsColor_t          colors[4]{};
 
 
   /* setup */

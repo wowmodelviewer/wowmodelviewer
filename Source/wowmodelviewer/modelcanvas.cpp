@@ -1737,7 +1737,7 @@ void ModelCanvas::LoadSceneState(int id)
     m->pos_ = sceneState[id].pos;
     m->rot_ = sceneState[id].rot;
 
-    int screenSize[4];
+    int screenSize[4]{ };
     glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
     video.ResizeGLScene(screenSize[2], screenSize[3]);
   }

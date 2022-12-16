@@ -196,7 +196,7 @@ void CAnimationExporter::CreateGif()
   else
   {
     glReadBuffer(GL_BACK);
-    int screenSize[4];
+    int screenSize[4]{ };
     glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
     m_iWidth = screenSize[2];
     m_iHeight = screenSize[3];
@@ -416,8 +416,9 @@ void CAnimationExporter::OnCheck(wxCommandEvent &event)
     m_bShrink = event.IsChecked();
     txtSizeX->Enable(m_bShrink);
     txtSizeY->Enable(m_bShrink);
-    if (m_bShrink) {
-      int screenSize[4];
+    if (m_bShrink)
+    {
+      int screenSize[4]{ };
       glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);        // get the width/height of the canvas
       txtSizeX->Clear();
       *txtSizeX << screenSize[2];
@@ -490,7 +491,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 
   CAVIGenerator AviGen;
 
-  BITMAPINFOHEADER bmHeader;
+  BITMAPINFOHEADER bmHeader{ };
   bmHeader.biWidth = (LONG)m_iWidth;
   bmHeader.biHeight = (LONG)m_iHeight;
   bmHeader.biSize = sizeof(BITMAPINFOHEADER);
