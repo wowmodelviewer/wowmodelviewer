@@ -139,7 +139,9 @@ void CharTexture::burnComponent(QImage & destImage, CharTextureComponent & ct) c
   newImage.save(QString("./tex__%1_%2_%3_%4_%5.png").arg(region, x, y, width, height));
 #endif
 
-  if (ct.region == LAYOUT_BASE_REGION && ct.layer == 0)
+  if ((ct.region == LAYOUT_BASE_REGION 
+       || ct.region == 11) // Dracthyr dragon base section
+      && ct.layer == 0)
   {
     destImage = newImage;
   }
