@@ -697,7 +697,7 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   QString query = QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                           "LEFT JOIN TextureFileData ON ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
                           "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-                          "WHERE FileDataID = %1").arg(m->gamefile->fileDataId());
+                          "WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
   sqlResult r = GAMEDATABASE.sqlQuery(query);
 
@@ -743,10 +743,10 @@ bool AnimControl::UpdateItemModel(WoWModel *m)
   }
   
   // do the same for model2
-  query= QString("SELECT FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
+  query= QString("SELECT TextureFileData.FileDataID, ParticleColorID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
                  "LEFT JOIN TextureFileData ON ModelMaterialResourcesID2 = TextureFileData.MaterialResourcesID "
                  "LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
-                 "WHERE FileDataID = %1").arg(m->gamefile->fileDataId());
+                 "WHERE TextureFileData.FileDataID = %1").arg(m->gamefile->fileDataId());
 
   r = GAMEDATABASE.sqlQuery(query);
 
