@@ -181,8 +181,10 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
 
   layer->SetNormals(layer_normal);
 
-  // Set mesh smoothness.
-  mesh->SetMeshSmoothness(FbxMesh::eFine);
+  FbxGeometryConverter lGeometryConverter(l_manager);
+  lGeometryConverter.ComputeEdgeSmoothingFromNormals(mesh);
+  //convert soft/hard edge info to smoothing group info
+  lGeometryConverter.ComputePolygonSmoothingFromEdgeSmoothing(mesh);
 
   // Set the mesh as the node attribute of the node.
   meshNode->SetNodeAttribute(mesh);
