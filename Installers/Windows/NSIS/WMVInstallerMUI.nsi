@@ -57,6 +57,10 @@ CreateDirectory $INSTDIR\games\wow
 SetOutPath $INSTDIR\games\wow\10.0
 File "${wmvroot}\bin_support\wow\10.0\*"
 
+CreateDirectory $INSTDIR\games\wow
+SetOutPath $INSTDIR\games\wow\10.1
+File "${wmvroot}\bin_support\wow\10.1\*"
+
 CreateDirectory $INSTDIR\localisation
 SetOutPath $INSTDIR\localisation
 File "${wmvroot}\bin_support\localisation\*.mo"

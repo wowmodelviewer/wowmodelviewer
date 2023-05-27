@@ -111,10 +111,16 @@ set(wow10_0_files
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/AnimationData.csv
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/ChrRacesCustomization.csv)
 
+set(wow10_0_files
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/database.xml
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/AnimationData.csv
+                 ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/ChrRacesCustomization.csv)
+
 source_group("wow9.2" FILES ${wow9_2_files})
 source_group("wow10.0" FILES ${wow10_0_files})
+source_group("wow10.1" FILES ${wow10_1_files})
 
-set(useful_files ${common_files} ${cmake_files} ${wow9_2_files} ${wow10_0_files})
+set(useful_files ${common_files} ${cmake_files} ${wow9_2_files} ${wow10_0_files} ${wow10_1_files})
 
 set_source_files_properties(${useful_files} PROPERTIES HEADER_FILE_ONLY TRUE)
 
@@ -195,3 +201,4 @@ install(FILES ${QT_PLUGIN_SYS_FILES} DESTINATION ${BIN_DIR}platforms)
 install(FILES ${QT_PLUGIN_IMAGE_FILES} DESTINATION ${BIN_DIR}plugins/imageformats)
 install(FILES ${wow9_2_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/9.2)
 install(FILES ${wow10_0_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.0)
+install(FILES ${wow10_1_files} DESTINATION ${CMAKE_SOURCE_DIR}/bin/games/wow/10.1)
