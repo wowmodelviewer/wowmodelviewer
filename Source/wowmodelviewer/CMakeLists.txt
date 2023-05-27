@@ -111,7 +111,7 @@ set(wow10_0_files
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/AnimationData.csv
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.0/ChrRacesCustomization.csv)
 
-set(wow10_0_files
+set(wow10_1_files
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/database.xml
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/AnimationData.csv
                  ${CMAKE_SOURCE_DIR}/bin_support/wow/10.1/ChrRacesCustomization.csv)
