@@ -113,6 +113,8 @@ DBFile * wow::TableStructure::createDBFile()
         result = new WDC2File(fileToOpen->fullname());
       else if (strncmp(header, "WDC3", 4) == 0)
         result = new WDC3File(fileToOpen->fullname());
+      else if (strncmp(header, "WDC4", 4) == 0)
+        result = new WDC3File(fileToOpen->fullname());
       else
         LOG_ERROR << "Unsupported database file" << header[0] << header[1] << header[2] << header[3];
 
