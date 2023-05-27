@@ -209,6 +209,7 @@ bool WDC3File::open()
   else
     sectionSize = m_sectionHeader[1].file_offset - m_sectionHeader[0].file_offset;                                                      
 
+  seek(m_sectionHeader[0].file_offset);
   m_sectionData = new unsigned char[sectionSize];
   read(m_sectionData, sectionSize);
 
