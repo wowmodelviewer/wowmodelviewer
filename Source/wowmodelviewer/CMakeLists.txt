@@ -189,8 +189,8 @@ set(QT_PLUGIN_IMAGE_FILES ${QT_PLUGIN_DIR}/imageformats/qjpeg.dll
                           ${QT_PLUGIN_DIR}/imageformats/qtgad.pdb)
 
 set(EXTRA_FILES ${CMAKE_SOURCE_DIR}/bin_support/vcredist_x86.exe
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libeay32.dll
-                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/ssleay32.dll
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libssl-1_1.dll
+                ${CMAKE_SOURCE_DIR}/ThirdParty/lib/libcrypto-1_1.dll
                 ${CMAKE_SOURCE_DIR}/bin_support/wow/listfile.csv
                 ${CMAKE_SOURCE_DIR}/bin_support/Encryption/extraEncryptionKeys.csv)
 
