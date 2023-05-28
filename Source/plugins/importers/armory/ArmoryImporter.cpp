@@ -73,7 +73,7 @@
 //--------------------------------------------------------------------
 bool ArmoryImporter::acceptURL(QString url) const
 {
-  return ((url.indexOf("battle.net") != -1) || (url.indexOf("worldofwarcraft.com") != -1));
+  return ((url.indexOf("battle.net") != -1) || (url.indexOf("worldofwarcraft.com") != -1) || (url.indexOf("blizzard.com") != -1));
 }
 
 
@@ -583,10 +583,11 @@ As you can see, this will give us almost all the data we need to properly rebuil
         charName = strList.at(strList.size() - 2).mid(0, strUrl.lastIndexOf("?") - 1);
         LOG_INFO << "Battle Net, CharName: " << charName << " Realm: " << realm << " Region: " << region;
       }
-      else if (strUrl.indexOf("worldofwarcraft.com") != -1)
+      else if ((strUrl.indexOf("worldofwarcraft.com") != -1) || (url.indexOf("blizzard.com") != -1))
       {
         // Import from https://worldofwarcraft.com/fr-fr/character/les-sentinelles/jeromnimo
         // or (new form) https://worldofwarcraft.com/fr-fr/character/eu/les-sentinelles/jeromnimo
+        // or (new in 2023) https://worldofwarcraft.blizzard.com/en-gb/character/eu/silvermoon/n%C3%A1tnat
 
         LOG_INFO << qPrintable(strUrl);
         const auto strList = strUrl.mid(8).split("/");
@@ -615,7 +616,7 @@ As you can see, this will give us almost all the data we need to properly rebuil
       {
         // QMessageBox msg(QMessageBox::Icon::Critical, tr("Bad Armory Link"), tr("Improperly Formatted URL.\n\nThe domain should be worldofwarcraft.com"), QMessageBox::StandardButton::Ok);
         // msg.exec();
-        LOG_ERROR << "Improperly Formatted URL. The domain should be worldofwarcraft.com";
+        LOG_ERROR << "Improperly Formatted URL. The domain should be worldofwarcraft.com or blizzard.com";
         return 2;
       }
 
