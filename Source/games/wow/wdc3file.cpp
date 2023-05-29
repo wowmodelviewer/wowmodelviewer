@@ -589,7 +589,7 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
         std::stringstream ss;
         ss << *reinterpret_cast<float *>(&val);
         result.push_back(ss.str());
-      } // new
+      }
       else if (field->type == "int8")
       {
           std::stringstream ss;

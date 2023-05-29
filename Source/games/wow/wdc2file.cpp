@@ -573,28 +573,64 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
         ss << *reinterpret_cast<float *>(&val);
         result.push_back(ss.str());
       }
+      else if (field->type == "int8")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<int8 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "uint8")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<uint8 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "int16")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<int16 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "uint16")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<uint16 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "int32")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<int32 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "uint32")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<uint32 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "int64")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<int64 *>(&val);
+          result.push_back(ss.str());
+      }
+      else if (field->type == "uint64")
+      {
+          std::stringstream ss;
+          ss << *reinterpret_cast<uint64 *>(&val);
+          result.push_back(ss.str());
+      }
       else if (field->type == "int")
       {
         std::stringstream ss;
         ss << *reinterpret_cast<int32 *>(&val);
         result.push_back(ss.str());
       }
-      else if (field->type == "uint16")
-      {
-        std::stringstream ss;
-        ss << *reinterpret_cast<uint16 *>(&val);
-        result.push_back(ss.str());
-      }
       else if (field->type == "byte")
       {
         std::stringstream ss;
         ss << (*reinterpret_cast<uint16 *>(&val) & 0x000000FF);
-        result.push_back(ss.str());
-      }
-      else if (field->type == "uint64")
-      {
-        std::stringstream ss;
-        ss << *reinterpret_cast<long *>(&val);
         result.push_back(ss.str());
       }
       else
