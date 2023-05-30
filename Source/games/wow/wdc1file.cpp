@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include <bitset>
+#include <cstdint>
 
 #include "WoWDatabase.h"
 
@@ -505,69 +506,100 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
       }
       else if (field->type == "float")
       {
-        std::stringstream ss;
-        ss << *reinterpret_cast<float *>(&val);
-        result.push_back(ss.str());
+          std::stringstream ss;
+          float floatValue;
+          std::memcpy(&floatValue, &val, sizeof(float));
+          ss << floatValue;
+          result.push_back(ss.str());
       }
       else if (field->type == "int8")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<int8 *>(&val);
+          std::int8_t intValue;
+          std::memcpy(&intValue, &val, sizeof(std::int8_t));
+          ss << static_cast<int>(intValue);
           result.push_back(ss.str());
       }
       else if (field->type == "uint8")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<uint8 *>(&val);
+          std::uint8_t uintValue;
+          std::memcpy(&uintValue, &val, sizeof(std::uint8_t));
+          ss << static_cast<unsigned int>(uintValue);
           result.push_back(ss.str());
       }
       else if (field->type == "int16")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<int16 *>(&val);
+          std::int16_t intValue;
+          std::memcpy(&intValue, &val, sizeof(std::int16_t));
+          ss << static_cast<int>(intValue);
           result.push_back(ss.str());
       }
       else if (field->type == "uint16")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<uint16 *>(&val);
+          std::uint16_t uintValue;
+          std::memcpy(&uintValue, &val, sizeof(std::uint16_t));
+          ss << static_cast<unsigned int>(uintValue);
           result.push_back(ss.str());
       }
       else if (field->type == "int32")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<int32 *>(&val);
+          std::int32_t intValue;
+          std::memcpy(&intValue, &val, sizeof(std::int32_t));
+          ss << intValue;
           result.push_back(ss.str());
       }
       else if (field->type == "uint32")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<uint32 *>(&val);
+          std::uint32_t uintValue;
+          std::memcpy(&uintValue, &val, sizeof(std::uint32_t));
+          ss << uintValue;
           result.push_back(ss.str());
       }
       else if (field->type == "int64")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<int64 *>(&val);
+          std::int64_t intValue;
+          std::memcpy(&intValue, &val, sizeof(std::int64_t));
+          ss << intValue;
           result.push_back(ss.str());
       }
       else if (field->type == "uint64")
       {
           std::stringstream ss;
-          ss << *reinterpret_cast<uint64 *>(&val);
+          std::uint64_t uintValue;
+          std::memcpy(&uintValue, &val, sizeof(std::uint64_t));
+          ss << uintValue;
           result.push_back(ss.str());
       }
       else if (field->type == "int")
       {
-        std::stringstream ss;
-        ss << *reinterpret_cast<int *>(&val);
-        result.push_back(ss.str());
+          std::stringstream ss;
+          std::int32_t intValue;
+          std::memcpy(&intValue, &val, sizeof(std::int32_t));
+          ss << intValue;
+          result.push_back(ss.str());
+      }
+      else if (field->type == "byte")
+      {
+          std::stringstream ss;
+          uint16_t value;
+          std::memcpy(&value, &val, sizeof(uint16_t));
+          uint8_t byte = value & 0xFF;
+          ss << static_cast<unsigned int>(byte);
+          result.push_back(ss.str());
       }
       else
       {
-        std::stringstream ss;
-        ss << *reinterpret_cast<uint *>(&val);
-        result.push_back(ss.str());
+          std::stringstream ss;
+          std::uint32_t uintValue;
+          std::memcpy(&uintValue, &val, sizeof(std::uint32_t));
+          ss << uintValue;
+          result.push_back(ss.str());
       }
     }
   }
