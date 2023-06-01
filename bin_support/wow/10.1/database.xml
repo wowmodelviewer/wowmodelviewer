@@ -53,10 +53,10 @@
 	<field type="int32"  name="FemaleModelFallbackRaceID" pos="34" />
 	<field type="int32"  name="MaleTextureFallbackRaceID" pos="35" />
 	<field type="int32"  name="FemaleTextureFallbackRaceID" pos="36" />
-    <field type="int8"  name="MaleModelFallbackSex" pos="47" />
-    <field type="int8"  name="FemaleModelFallbackSex" pos="48" />
-    <field type="int8"  name="MaleTextureFallbackSex" pos="49" />
-    <field type="int8"  name="FemaleTextureFallbackSex" pos="50" />
+    <field type="int8"  name="MaleModelFallbackSex" pos="48" />
+    <field type="int8"  name="FemaleModelFallbackSex" pos="49" />
+    <field type="int8"  name="MaleTextureFallbackSex" pos="50" />
+    <field type="int8"  name="FemaleTextureFallbackSex" pos="51" />
   </table>
   <table name="ChrRaceXChrModel">
     <field type="int32" name="ID" primary="yes" />
@@ -99,7 +99,7 @@
     <field type="uint16" name="OrderIndex" pos="5" />
     <field type="uint16" name="UIOrderIndex" pos="6" />
     <field type="int32" name="Flags" pos="7" />
-    <field type="int32" name="SwatchColor" arraySize="2" pos="9" />
+    <field type="int32" name="SwatchColor" arraySize="2" pos="10" />
   </table>
   <table name="ChrCustomizationElement">
     <field type="int32" name="ID" primary="yes" />
