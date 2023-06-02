@@ -230,7 +230,7 @@
   </table>
   <table name="ItemSparse">
     <field type="int32" name="ID" primary="yes" />
-    <field type="int64" name="AllowableRace" pos="0" />
+    <field type="uint64" name="AllowableRace" pos="0" /> <!-- This should be int64, but some completely unknown reason, changing it or removing it breaks item names in lists -->
     <field type="text" name="Description_lang" pos="1" />
     <field type="text" name="Display3_Lang" pos="2" />
     <field type="text" name="Display2_Lang" pos="3" />
