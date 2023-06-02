@@ -140,7 +140,7 @@
     <field type="int32" name="CharComponentTextureLayoutsID" relationshipData="yes" />
   </table>
   <table name="ChrRacesCustomization" dbfile="ChrRacesCustomization.csv">
-    <field primary="yes" type="uint32" name="ID" />
+    <field type="int32" name="ID" primary="yes"/>
     <field type="text" name="FacialHairCustomization1" />
     <field type="text" name="FacialHairCustomization2" />
     <field type="text" name="HairCustomization" />
@@ -179,7 +179,6 @@
     <field type="int32" name="ExtendedDisplayInfoID" pos="7" />
 	<field type="uint16" name="ParticleColorID" pos="9" />
     <field type="int32" name="TextureVariationFileDataID" arraySize="4" pos="24" />
-
   </table>
   <!--
   <table name="CreatureDisplayInfoExtra">
@@ -191,14 +190,12 @@
     <field type="byte" name="FacialHair" pos="7" />
   </table>
   -->
-
   <table name="CreatureDisplayInfoGeosetData">
     <field type="int32" name="ID" primary="yes" />
     <field type="uint8" name="GeosetIndex" pos="0" />
     <field type="uint8" name="GeosetValue" pos="1" />
     <field type="int32" name="CreatureDisplayInfoID" relationshipData="yes" />
   </table>
-
   <table name="NpcModelItemSlotDisplayInfo">
     <field type="int32" name="ID" primary="yes" />
     <field type="int32" name="ItemDisplayInfoID" pos="0" />
