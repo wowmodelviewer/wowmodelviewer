@@ -3,7 +3,7 @@ image: Visual Studio 2017
 
 clone_script:
 - cmd: >-
-    git clone -v --branch=develop --recursive --progress https://bitbucket.org/wowmodelviewer/wowmodelviewer.git C:\projects\wowmodelviewer
+    git clone -v --branch=develop --recursive --progress https://github.com/wowmodelviewer/wowmodelviewer.git C:\projects\wowmodelviewer
 
 before_build:
 - cmd: >-
