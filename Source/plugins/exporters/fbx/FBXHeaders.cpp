@@ -245,8 +245,7 @@ void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode
     if (pid > -1)
       trans -= l_model->bones[pid].pivot;
 
-    FbxString bone_name(qPrintable(l_model->name()));
-    bone_name += "_bone_";
+    FbxString bone_name("bone_");
     bone_name += static_cast<int>(i);
 
     FbxNode* skeleton_node = FbxNode::Create(l_scene, bone_name);
