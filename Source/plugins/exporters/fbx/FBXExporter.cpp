@@ -122,7 +122,7 @@ bool FBXExporter::exportModel(Model * model, std::wstring target)
 
   // add some info to exported scene
   FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(m_p_manager,"SceneInfo");
-  sceneInfo->mTitle = m_p_model->name().toStdString().c_str();
+  sceneInfo->mTitle = m_p_model->name().mid(m_p_model->name().lastIndexOf('/') + 1).toStdString().c_str();
   sceneInfo->mAuthor = QString::fromStdWString(GLOBALSETTINGS.appName()).toStdString().c_str();
   sceneInfo->mRevision = QString::fromStdWString(GLOBALSETTINGS.appVersion()).toStdString().c_str();
   m_p_scene->SetSceneInfo(sceneInfo);
@@ -380,7 +380,7 @@ void FBXExporter::createMaterials()
     if (pass->init())
     {
       // Build material name.
-      FbxString mtrl_name = m_p_model->name().toStdString().c_str();
+      FbxString mtrl_name = m_p_model->name().mid(m_p_model->name().lastIndexOf('/') + 1).toStdString().c_str();
       mtrl_name.Append("_", 1);
       char tmp[32];
       _itoa((int)i, tmp, 10);
@@ -432,7 +432,7 @@ void FBXExporter::createMaterials()
           if (pass->init())
           {
             // Build material name.
-            FbxString mtrl_name = model->name().toStdString().c_str();
+            FbxString mtrl_name = model->name().mid(model->name().lastIndexOf('/') + 1).toStdString().c_str();
             mtrl_name.Append("_", 1);
             char tmp[32];
             _itoa((int)i, tmp, 10);

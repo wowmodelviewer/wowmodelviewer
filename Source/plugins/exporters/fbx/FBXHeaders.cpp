@@ -98,14 +98,14 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel * model, const glm::mat4 & matrix, const glm::vec3 & offset)
 {
   // Create a node for the mesh.
-  FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable(model->name()));
+  FbxNode *meshNode = FbxNode::Create(l_manager, qPrintable((model->name().mid(model->name().lastIndexOf('/') + 1))));
 
   // Create new Matrix Data
   const auto m = glm::scale(glm::vec3(matrix[0][0], matrix[1][1], matrix[2][2]));
 
   // Create mesh.
   const auto num_of_vertices = model->origVertices.size();
-  FbxMesh* mesh = FbxMesh::Create(l_manager, model->name().toStdString().c_str());
+  FbxMesh* mesh = FbxMesh::Create(l_manager, model->name().mid(model->name().lastIndexOf('/') + 1).toStdString().c_str());
   mesh->InitControlPoints((int)num_of_vertices);
   FbxVector4* vertices = mesh->GetControlPoints();
 
@@ -197,7 +197,7 @@ FbxNode * FBXHeaders::createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoW
 
 void FBXHeaders::createSkeleton(WoWModel * l_model, FbxScene *& l_scene, FbxNode *& l_skeletonNode, std::map<int, FbxNode*>& l_boneNodes)
 {
-  l_skeletonNode = FbxNode::Create(l_scene, qPrintable(QString::fromWCharArray(wxT("%1_rig")).arg(l_model->name())));
+  l_skeletonNode = FbxNode::Create(l_scene, qPrintable((l_model->name().mid(l_model->name().lastIndexOf('/') + 1) + "_rig")));
   FbxSkeleton* bone_group_skeleton_attribute = FbxSkeleton::Create(l_scene, "");
   bone_group_skeleton_attribute->SetSkeletonType(FbxSkeleton::eRoot);
   bone_group_skeleton_attribute->Size.Set(10.0 * SCALE_FACTOR);
