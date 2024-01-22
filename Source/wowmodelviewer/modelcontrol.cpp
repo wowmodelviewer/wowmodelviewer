@@ -408,8 +408,11 @@ void ModelControl::Update()
     GeosetTreeItemIds.push_back(item);
   }
 
-  //for (size_t i=0; i<model->geosets.size(); i++)
-  //  clbGeosets->Check((unsigned int)i, model->showGeosets[i]);
+  //Enable all geosets(combined meshes) for easy exporting.
+  for (size_t i = 0; i < model->geosets.size(); i++)
+  {
+      model->showGeoset(i, true);
+  }
 
   bones->SetValue(model->showBones);
   box->SetValue(model->showBounds);
