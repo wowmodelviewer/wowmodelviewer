@@ -123,8 +123,8 @@ bool WowModelViewApp::OnInit()
         wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
         2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
         wxBORDER_NONE);
-    wxYield();
-    Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
+    //wxYield();
+    //Sleep(1000);
   }
 
 
