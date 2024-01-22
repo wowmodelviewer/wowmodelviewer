@@ -1806,7 +1806,7 @@ void ModelViewer::LoadWoW()
     core::Game::instance().addCustomFiles(QString::fromWCharArray(customDirectoryPath.c_str()), customFilesConflictPolicy);
 
   // init database
-  InitDatabase();
+  //InitDatabase();
  
   /*
   // Error check
