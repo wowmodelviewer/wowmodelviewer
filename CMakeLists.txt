@@ -34,12 +34,11 @@ endif()
 # add external libraries compilation
 add_subdirectory(ThirdParty/CxImage)
 
-# configure CASC lib for our usage
+# CascLib
 option(CASC_UNICODE ON)
-option(CASC_BUILD_SHARED_LIB OFF)
-option(CASC_BUILD_TESTS OFF)
-set(CASC_BUILD_STATIC_LIB ON CACHE BOOL "Force Static library building" FORCE)
-option(CASC_BUILD_STATIC_LIB ON)
+set(CASC_BUILD_STATIC_LIB ON CACHE BOOL "Force Static library building")
+set(CASC_BUILD_SHARED_LIB OFF CACHE BOOL "Compile dynamically linked library")
+include_directories(ThirdParty/casclib/src)
 set(CASCLIB_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/casclib)
 set(CMAKE_INSTALL_PREFIX ${CASCLIB_INSTALL_LOCATION})
 add_subdirectory(ThirdParty/casclib)
