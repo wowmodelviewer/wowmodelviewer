@@ -68,7 +68,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
     if (it != locales.end())
     {
       HANDLE dummy;
-      QString cascParams = m_folder + ":" + m_currentConfig.product;
+      QString cascParams = m_folder + "*" + m_currentConfig.product;
       LOG_INFO << "Loading Game Folder:" << cascParams;
       // locale found => try to open it
       if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))
