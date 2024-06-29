@@ -513,7 +513,6 @@ void ModelViewer::InitMenu()
     aboutMenu->Enable(ID_HELP, false);
     aboutMenu->Append(ID_ABOUT, _("About"));
     aboutMenu->AppendSeparator();
-    aboutMenu->Append(ID_CHECKFORUPDATE, _("Check for Update"));
 
     menuBar = new wxMenuBar();
     menuBar->Append(fileMenu, _("&File"));

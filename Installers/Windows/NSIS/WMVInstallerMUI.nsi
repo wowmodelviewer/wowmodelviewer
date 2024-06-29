@@ -38,7 +38,6 @@ setOutPath $INSTDIR
 # specify file to go in output path
 !define wmvroot "..\..\..\"
 File "${wmvroot}\bin\wowmodelviewer.exe"
-File "${wmvroot}\bin\UpdateManager.exe"
 File "${wmvroot}\bin\*.dll"
 File "${wmvroot}\bin\extraEncryptionKeys.csv"
 File "${wmvroot}\bin\listfile.csv"
