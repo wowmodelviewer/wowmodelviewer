@@ -16,7 +16,6 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
-
 /*
  * Event.h
  *
@@ -24,77 +23,26 @@
  *   Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _CHARDETAILSEVENT_H_
-#define _CHARDETAILSEVENT_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
-
-// Externals
-
-// Other libraries
 #include "metaclasses/Event.h"
 
-// Current library
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class CharDetailsEvent : public Event
 {
-  public :
-    // Constants / Enums
-    enum EventType
-    {
-      DH_MODE_CHANGED = 0x10000000,
-      CHOICE_LIST_CHANGED = 0x10000001
-    };
+public:
+	enum EventType
+	{
+		DH_MODE_CHANGED = 0x10000000,
+		CHOICE_LIST_CHANGED = 0x10000001
+	};
 
-  // Constructors
-  CharDetailsEvent(Observable * obs, EventType type) : Event(obs, (Event::EventType)type) {}
+	CharDetailsEvent(Observable* obs, EventType type) : Event(obs, (Event::EventType)type)
+	{
+	}
 
-  // Destructors
+	void setCustomizationOptionId(const uint id) { customizationOptionId_ = id; }
+	uint getCustomizationOptionId() const { return customizationOptionId_; }
 
-  // Methods
-  void setCustomizationOptionId(const uint id) { customizationOptionId_ = id; }
-  uint getCustomizationOptionId() const { return customizationOptionId_; }
-
-
-  protected :
-  // Constants / Enums
-
-  // Constructors
-
-  // Destructors
-
-  // Methods
-
-  // Members
-
-  private :
-  // Constants / Enums
-
-  // Constructors
-
-  // Destructors
-
-  // Methods
-
-  // Members
-    uint customizationOptionId_;
-
-  // friend class declarations
+private:
+	uint customizationOptionId_;
 };
-
-// static members definition
-#ifdef _CHARDETAILSEVENT_CPP_
-
-#endif
-
-#endif /* _CHARDETAILSEVENT_H_ */

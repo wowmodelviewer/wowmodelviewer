@@ -1,5 +1,4 @@
-#ifndef WDB2FILE_H
-#define WDB2FILE_H
+#pragma once
 
 #include <QString>
 
@@ -17,46 +16,44 @@
 #    define _WDB2FILE_API_
 #endif
 
-
 class _WDB2FILE_API_ WDB2File : public DBFile, public CASCFile
 {
 public:
-  explicit WDB2File(const QString & file);
-  ~WDB2File();
+	explicit WDB2File(const QString& file);
+	~WDB2File();
 
-  bool open();
+	bool open();
 
-  bool close();
+	bool close();
 
-  float getFloat(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<float*>(recordOffset + field * 4);
-  }
-  unsigned int getUInt(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<unsigned int*>(recordOffset + (field * 4));
-  }
-  int getInt(unsigned char * recordOffset, size_t field) const
-  {
-    return *reinterpret_cast<int*>(recordOffset + field * 4);
-  }
-  unsigned char getByte(unsigned char * recordOffset, size_t ofs) const
-  {
-    return *reinterpret_cast<unsigned char*>(recordOffset + ofs);
-  }
+	float getFloat(unsigned char* recordOffset, size_t field) const
+	{
+		return *reinterpret_cast<float*>(recordOffset + field * 4);
+	}
 
-  std::string getStdString(unsigned char * recordOffset, size_t field) const
-  {
-    size_t stringOffset = getUInt(recordOffset, field);
-    if (stringOffset >= stringSize)
-      stringOffset = 0;
+	unsigned int getUInt(unsigned char* recordOffset, size_t field) const
+	{
+		return *reinterpret_cast<unsigned int*>(recordOffset + (field * 4));
+	}
 
-    return std::string(reinterpret_cast<char*>(stringTable + stringOffset));
-  }
+	int getInt(unsigned char* recordOffset, size_t field) const
+	{
+		return *reinterpret_cast<int*>(recordOffset + field * 4);
+	}
 
-  std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure * structure) const;
+	unsigned char getByte(unsigned char* recordOffset, size_t ofs) const
+	{
+		return *reinterpret_cast<unsigned char*>(recordOffset + ofs);
+	}
 
-private:
+	std::string getStdString(unsigned char* recordOffset, size_t field) const
+	{
+		size_t stringOffset = getUInt(recordOffset, field);
+		if (stringOffset >= stringSize)
+			stringOffset = 0;
+
+		return std::string(reinterpret_cast<char*>(stringTable + stringOffset));
+	}
+
+	std::vector<std::string> get(unsigned int recordIndex, const core::TableStructure* structure) const;
 };
-
-#endif

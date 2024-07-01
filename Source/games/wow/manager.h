@@ -1,7 +1,5 @@
-#ifndef MANAGER_H
-#define MANAGER_H
+#pragma once
 
-// STL
 #include <map>
 
 #include <QString>
@@ -9,8 +7,6 @@
 #include "GameFile.h"
 
 #include "logger/Logger.h"
-
-// base class for manager objects
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -24,144 +20,154 @@
 
 class _MANAGEDITEM_API_ ManagedItem
 {
-  int m_refcount;
-  QString m_itemName;
+	int m_refcount;
+	QString m_itemName;
+
 public:
-  ManagedItem(QString n): m_refcount(0), m_itemName(n) {}
-  virtual ~ManagedItem() {}
+	ManagedItem(QString n): m_refcount(0), m_itemName(n)
+	{
+	}
 
-  void addref()
-  {
-    ++m_refcount;
-  }
+	virtual ~ManagedItem()
+	{
+	}
 
-  bool delref()
-  {
-    return --m_refcount == 0;
-  }
-  
-  void setItemName(QString name) { m_itemName = name; }
-  QString itemName() { return m_itemName; }
-  int refCount() { return m_refcount; }
+	void addref()
+	{
+		++m_refcount;
+	}
+
+	bool delref()
+	{
+		return --m_refcount == 0;
+	}
+
+	void setItemName(QString name) { m_itemName = name; }
+	QString itemName() { return m_itemName; }
+	int refCount() { return m_refcount; }
 };
-
-
 
 template <class IDTYPE>
-class Manager {
+class Manager
+{
 public:
-  std::map<QString, IDTYPE> names;
-  std::map<IDTYPE, ManagedItem*> items;
+	std::map<QString, IDTYPE> names;
+	std::map<IDTYPE, ManagedItem*> items;
 
-  Manager()
-  {
-  }
+	Manager()
+	{
+	}
 
-  ~Manager()
-  {
-    names.clear();
-    items.clear();
-  }
+	~Manager()
+	{
+		names.clear();
+		items.clear();
+	}
 
-  virtual IDTYPE add(GameFile *) = 0;
+	virtual IDTYPE add(GameFile*) = 0;
 
-  virtual void del(IDTYPE id)
-  {
-    if (items.find(id) == items.end())  {
-      doDelete(id);
-      return; // if we can't find the item id, delete the texture
-    }
+	virtual void del(IDTYPE id)
+	{
+		if (items.find(id) == items.end())
+		{
+			doDelete(id);
+			return; // if we can't find the item id, delete the texture
+		}
 
-    if (items[id]->delref()) {
-      ManagedItem *i = items[id];
+		if (items[id]->delref())
+		{
+			ManagedItem* i = items[id];
 
-      if (!i)
-        return;
+			if (!i)
+				return;
 
-      doDelete(id);
-      names.erase(names.find(i->itemName()));
-      items.erase(items.find(id));
+			doDelete(id);
+			names.erase(names.find(i->itemName()));
+			items.erase(items.find(id));
 
-      delete i;
-    }
-  }
+			delete i;
+		}
+	}
 
-  void delbyname(QString name)
-  {
-    if (has(name)) 
-      del(get(name));
-  }
+	void delbyname(QString name)
+	{
+		if (has(name))
+			del(get(name));
+	}
 
-  virtual void doDelete(IDTYPE) {}
+	virtual void doDelete(IDTYPE)
+	{
+	}
 
-  bool has(QString name)
-  {
-    return (names.find(name) != names.end());
-  }
+	bool has(QString name)
+	{
+		return (names.find(name) != names.end());
+	}
 
-  IDTYPE get(QString name)
-  {
-    auto it = names.find(name);
-    if(it != names.end())
-      return it->second;
+	IDTYPE get(QString name)
+	{
+		auto it = names.find(name);
+		if (it != names.end())
+			return it->second;
 
-    return 0;
-  }
+		return 0;
+	}
 
-  QString get(IDTYPE id)
-  {
-    QString result = "";
-    for (auto const& it : names)
-    {
-      if (it.second == id)
-      {
-        result = it.first;
-        break;
-      }
-    }
-    return result;
-  }
+	QString get(IDTYPE id)
+	{
+		QString result = "";
+		for (auto const& it : names)
+		{
+			if (it.second == id)
+			{
+				result = it.first;
+				break;
+			}
+		}
+		return result;
+	}
 
-  void clear()
-  {
-    for (size_t i=0; i<50; i++) {
-      if(items.find((const unsigned int)i) != items.end()) {
-        del((GLuint)i);
-      }
-    }
-    
-    names.clear();
-    items.clear();
-  }
+	void clear()
+	{
+		for (size_t i = 0; i < 50; i++)
+		{
+			if (items.find((const unsigned int)i) != items.end())
+			{
+				del((GLuint)i);
+			}
+		}
 
-  void dump()
-  {
-    for (auto it : items)
-      LOG_INFO << it.first << "->" << it.second->itemName() << "(" << it.second->refCount() << ")";
-  }
+		names.clear();
+		items.clear();
+	}
+
+	void dump()
+	{
+		for (auto it : items)
+			LOG_INFO << it.first << "->" << it.second->itemName() << "(" << it.second->refCount() << ")";
+	}
 
 protected:
-  void do_add(QString name, IDTYPE id, ManagedItem* item)
-  {
-    names[name] = id;
-    item->addref();
-    items[id] = item;
-  }
+	void do_add(QString name, IDTYPE id, ManagedItem* item)
+	{
+		names[name] = id;
+		item->addref();
+		items[id] = item;
+	}
 };
 
-class SimpleManager : public Manager<int> {
-  int baseid;
+class SimpleManager : public Manager<int>
+{
+	int baseid;
+
 public:
-  SimpleManager() : baseid(0)
-  {
-  }
+	SimpleManager() : baseid(0)
+	{
+	}
 
 protected:
-  int nextID()
-  {
-    return baseid++;
-  }
+	int nextID()
+	{
+		return baseid++;
+	}
 };
-
-#endif
-

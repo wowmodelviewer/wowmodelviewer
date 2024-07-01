@@ -1,5 +1,4 @@
-#ifndef _WMO_LIGHT_H_
-#define _WMO_LIGHT_H_
+#pragma once
 
 #include "glm/glm.hpp"
 
@@ -7,20 +6,19 @@ typedef int GLint;
 
 class GameFile;
 
-struct WMOLight {
-  unsigned int lighttype, type, useatten, color;
-  glm::vec3 pos;
-  float intensity;
-  float attenStart, attenEnd;
-  float unk[3];
-  float r;
+struct WMOLight
+{
+	unsigned int lighttype, type, useatten, color;
+	glm::vec3 pos;
+	float intensity;
+	float attenStart, attenEnd;
+	float unk[3];
+	float r;
 
-  glm::vec4 fcolor;
+	glm::vec4 fcolor;
 
-  void init(GameFile &f);
-  void setup(GLint light);
+	void init(GameFile& f);
+	void setup(GLint light);
 
-  static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol);
+	static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 lcol);
 };
-
-#endif

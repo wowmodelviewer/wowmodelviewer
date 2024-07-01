@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef _BONE_H_
-#define _BONE_H_
+#pragma once
 
 #include "animated.h"
 #include "modelheaders.h" // ModelBoneDef
@@ -16,27 +15,23 @@
 class GameFile;
 class WoWModel;
 
-
-
-class Bone {
+class Bone
+{
 public:
-  Animated<glm::vec3> trans;
-  Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;
-  Animated<glm::vec3> scale;
+	Animated<glm::vec3> trans;
+	Animated<glm::fquat, PACK_QUATERNION, Quat16ToQuat32> rot;
+	Animated<glm::vec3> scale;
 
-  glm::vec3 pivot, transPivot;
-  int16 parent;
+	glm::vec3 pivot, transPivot;
+	int16 parent;
 
-  bool billboard;
-  glm::mat4 mat;
-  glm::mat4 mrot;
+	bool billboard;
+	glm::mat4 mat;
+	glm::mat4 mrot;
 
-  ModelBoneDef boneDef;
+	ModelBoneDef boneDef;
 
-  bool calc;
-  void calcMatrix(std::vector<Bone> & allbones, ssize_t anim, size_t time, bool rotate=true);
-  void initV3(GameFile & f, ModelBoneDef &b, const modelAnimData & data);
+	bool calc;
+	void calcMatrix(std::vector<Bone>& allbones, ssize_t anim, size_t time, bool rotate = true);
+	void initV3(GameFile& f, ModelBoneDef& b, const modelAnimData& data);
 };
-
-
-#endif /* _BONE_H_ */

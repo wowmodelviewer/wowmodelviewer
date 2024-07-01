@@ -1,28 +1,19 @@
-/*
- * ModelManager.h
- *
- *  Created on: 20 oct. 2013
- *
- */
-
-#ifndef _MODELMANAGER_H_
-#define _MODELMANAGER_H_
+#pragma once
 
 #include "manager.h"
 
-class ModelManager: public SimpleManager {
+class ModelManager : public SimpleManager
+{
 public:
-  int add(GameFile *);
+	int add(GameFile*);
 
-  ModelManager() : v(0) {}
+	ModelManager() : v(0)
+	{
+	}
 
-  int v;
+	int v;
 
-  void resetAnim();
-  void updateEmitters(float dt);
-  void clear();
-
+	void resetAnim();
+	void updateEmitters(float dt);
+	void clear();
 };
-
-
-#endif /* _MODELMANAGER_H_ */

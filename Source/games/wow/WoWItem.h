@@ -16,15 +16,7 @@
 | If not, see <http://www.gnu.org/licenses/>.                            |
 \*----------------------------------------------------------------------*/
 
-/*
- * WoWItem.h
- *
- *  Created on: 5 feb. 2015
- *      Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
- */
-
-#ifndef _WOWITEM_H_
-#define _WOWITEM_H_
+#pragma once
 
 #include <map>
 #include <string>
@@ -53,70 +45,67 @@ class QXmlStreamReader;
 
 class _WOWITEM_API_ WoWItem : public Component
 {
-  public:
-    WoWItem(CharSlots slot);
+public:
+	WoWItem(CharSlots slot);
 
-    void setId(int id);
-    int id() const { return id_; }
+	void setId(int id);
+	int id() const { return id_; }
 
-    void setDisplayId(int id);
-    void setLevel(int level);
-    void setModifierId(int id);
+	void setDisplayId(int id);
+	void setLevel(int level);
+	void setModifierId(int id);
 
-    CharSlots slot() const { return slot_; }
+	CharSlots slot() const { return slot_; }
 
-    int quality() const { return quality_; }
+	int quality() const { return quality_; }
 
-    void refresh();
+	void refresh();
 
-    void onParentSet(Component *) override;
+	void onParentSet(Component*) override;
 
-    void load();
+	void load();
 
-    unsigned int nbLevels() const { return nbLevels_; }
+	unsigned int nbLevels() const { return nbLevels_; }
 
-    std::map<POSITION_SLOTS, WoWModel *> models() const { return itemModels_; }
+	std::map<POSITION_SLOTS, WoWModel*> models() const { return itemModels_; }
 
-    void save(QXmlStreamWriter &) const ;
-    void load(QString &);
+	void save(QXmlStreamWriter&) const;
+	void load(QString&);
 
-  private:
-    void unload();
+private:
+	void unload();
 
-    bool isCustomizableTabard() const;
+	bool isCustomizableTabard() const;
 
-    WoWModel * charModel_ = nullptr;
+	WoWModel* charModel_ = nullptr;
 
-    int id_ = -1;
-    int displayId_ = -1;
-    int quality_ = 0;
-    int level_ = 0;
-    int type_ = 0;
-    int displayFlags_ = 0;
-    unsigned int nbLevels_ = 0;
+	int id_ = -1;
+	int displayId_ = -1;
+	int quality_ = 0;
+	int level_ = 0;
+	int type_ = 0;
+	int displayFlags_ = 0;
+	unsigned int nbLevels_ = 0;
 
-    CharSlots slot_;
+	CharSlots slot_;
 
-    static std::map<CharSlots,int> SLOT_LAYERS_;
-    static std::map<std::string, int> MODELID_OFFSETS_;
+	static std::map<CharSlots, int> SLOT_LAYERS_;
+	static std::map<std::string, int> MODELID_OFFSETS_;
 
-    std::map<CharRegions, GameFile *> itemTextures_;
-    std::map<CharGeosets, int> itemGeosets_;
-    std::map<int, int> levelDisplayMap_;
-    std::map<int, int> modifierIdDisplayMap_;
-    std::map<POSITION_SLOTS, WoWModel *> itemModels_;
-    WoWModel * mergedModel_ = nullptr;
+	std::map<CharRegions, GameFile*> itemTextures_;
+	std::map<CharGeosets, int> itemGeosets_;
+	std::map<int, int> levelDisplayMap_;
+	std::map<int, int> modifierIdDisplayMap_;
+	std::map<POSITION_SLOTS, WoWModel*> itemModels_;
+	WoWModel* mergedModel_ = nullptr;
 
-    void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
-    void mergeModel(CharSlots slot, int modelId, int textureId);
+	void updateItemModel(POSITION_SLOTS pos, int modelId, int textureId);
+	void mergeModel(CharSlots slot, int modelId, int textureId);
 
-    CharRegions getRegionForTexture(GameFile * file) const;
+	CharRegions getRegionForTexture(GameFile* file) const;
 
-    bool queryItemInfo(const QString & query, sqlResult & result) const;
+	bool queryItemInfo(const QString& query, sqlResult& result) const;
 
-    int getCustomModelId(size_t index) const;
-    int getCustomTextureId(size_t index) const;
+	int getCustomModelId(size_t index) const;
+	int getCustomTextureId(size_t index) const;
 };
-
-
-#endif /* _WOWITEM_H_ */

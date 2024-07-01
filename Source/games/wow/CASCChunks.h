@@ -5,53 +5,50 @@
  *
  */
 
-#ifndef _CASCCHUNKS_H_
-#define _CASCCHUNKS_H_
+#pragma once
 
 #include "types.h"
 
 struct AFID
 {
-  uint16 animId;
-  uint16 subAnimId;
-  uint32 fileId;
+	uint16 animId;
+	uint16 subAnimId;
+	uint32 fileId;
 };
 
 struct SKS1
 {
-  uint32 nGlobalSequences;
-  uint32 ofsGlobalSequences;
-  uint32 nAnimations;
-  uint32 ofsAnimations;
-  uint32 nAnimationLookup;
-  uint32 ofsAnimationLookup;
+	uint32 nGlobalSequences;
+	uint32 ofsGlobalSequences;
+	uint32 nAnimations;
+	uint32 ofsAnimations;
+	uint32 nAnimationLookup;
+	uint32 ofsAnimationLookup;
 };
 
 struct SKA1
 {
-  uint32 nAttachments;
-  uint32 ofsAttachments;
-  uint32 nAttachLookup;
-  uint32 ofsAttachLookup;
+	uint32 nAttachments;
+	uint32 ofsAttachments;
+	uint32 nAttachLookup;
+	uint32 ofsAttachLookup;
 };
 
 struct SKB1
 {
-  uint32 nBones;
-  uint32 ofsBones;
-  uint32 nKeyBoneLookup;
-  uint32 ofsKeyBoneLookup;
+	uint32 nBones;
+	uint32 ofsBones;
+	uint32 nKeyBoneLookup;
+	uint32 ofsKeyBoneLookup;
 };
 
 struct SKPD
 {
-  uint8 unknown00[8];
-  uint32 parentFileId;
+	uint8 unknown00[8];
+	uint32 parentFileId;
 };
 
 struct TXID
 {
-  uint32 fileDataId;
+	uint32 fileDataId;
 };
-
-#endif /* _CASCCHUNKS_H_ */

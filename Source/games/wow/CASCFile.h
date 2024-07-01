@@ -5,8 +5,7 @@
  *      Author: Jerome
  */
 
-#ifndef _CASCFILE_H_
-#define _CASCFILE_H_
+#pragma once
 
 #include "GameFile.h"
 
@@ -26,28 +25,23 @@ class CASCFolder;
 
 class _CASCFILE_API_ CASCFile : public GameFile
 {
-  public:
-    CASCFile(QString path, int id = -1);
-    ~CASCFile();
+public:
+	CASCFile(QString path, int id = -1);
+	~CASCFile();
 
-    // re implemented from GameFile
-    size_t read(void* dest, size_t bytes);
-    void seek(size_t offset);
-    void dumpStructure();
+	// re implemented from GameFile
+	size_t read(void* dest, size_t bytes);
+	void seek(size_t offset);
+	void dumpStructure();
 
-  protected:
-    virtual bool openFile();
-    virtual bool isAlreadyOpened();
-    virtual bool getFileSize(unsigned long long & s);
-    virtual unsigned long readFile();
-    virtual void doPostOpenOperation();
-    virtual bool doPostCloseOperation();
+protected:
+	virtual bool openFile();
+	virtual bool isAlreadyOpened();
+	virtual bool getFileSize(unsigned long long& s);
+	virtual unsigned long readFile();
+	virtual void doPostOpenOperation();
+	virtual bool doPostCloseOperation();
 
-  private:
-    HANDLE m_handle;
+private:
+	HANDLE m_handle;
 };
-
-
-
-
-#endif /* _CASCFILE_H_ */

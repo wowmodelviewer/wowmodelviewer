@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef _ATTACHMENT_H_
-#define _ATTACHMENT_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -28,35 +27,31 @@ class WoWModel;
 
 class _ATTACHMENT_API_ Attachment
 {
-  public:
-    Attachment(Attachment *parent, Displayable *model, int id, int slot);
+public:
+	Attachment(Attachment* parent, Displayable* model, int id, int slot);
+	~Attachment();
 
-    ~Attachment();
+	void setup();
+	void setupParticle();
+	Attachment* addChild(std::string fn, int id, int slot);
+	Attachment* addChild(Displayable* disp, int id, int slot);
+	void delSlot(int slot);
+	void delChildren();
 
-    void setup();
-    void setupParticle();
-    Attachment* addChild(std::string fn, int id, int slot);
-    Attachment* addChild(Displayable *disp, int id, int slot);
-    void delSlot(int slot);
-    void delChildren();
+	void draw();
+	void drawParticles();
+	void tick(float dt);
 
-    void draw();
-    void drawParticles();
-    void tick(float dt);
+	void setModel(Displayable* newmodel);
+	Displayable* model() const { return model_; }
 
-    void setModel(Displayable * newmodel);
-    Displayable * model() const { return model_;}
+	Attachment* parent;
 
-    Attachment *parent;
+	std::vector<Attachment*> children;
 
-    std::vector<Attachment*> children;
+	int id;
+	int slot;
 
-    int id;
-    int slot;
-
-  private:
-    Displayable *model_;
+private:
+	Displayable* model_;
 };
-
-
-#endif /* _ATTACHMENT_H_ */

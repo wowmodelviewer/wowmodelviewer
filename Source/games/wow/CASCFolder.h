@@ -5,8 +5,7 @@
  *      Author: Jeromnimo
  */
 
-#ifndef _CASCFOLDER_H_
-#define _CASCFOLDER_H_
+#pragma once
 
 #include <vector>
 
@@ -26,44 +25,40 @@ typedef void* HANDLE;
 
 class _CASCFOLDER_API_ CASCFolder
 {
-  public:
-    CASCFolder();
+public:
+	CASCFolder();
 
-    void init(const QString & path);
+	void init(const QString& path);
 
-    QString locale() { return m_currentConfig.locale; }
-    QString version() { return m_currentConfig.version; }
+	QString locale() { return m_currentConfig.locale; }
+	QString version() { return m_currentConfig.version; }
 
-    std::vector<core::GameConfig> configsFound() { return m_configs; }
-    bool setConfig(core::GameConfig config);
-    
-    int lastError() { return m_openError; }
+	std::vector<core::GameConfig> configsFound() { return m_configs; }
+	bool setConfig(core::GameConfig config);
 
-    bool fileExists(int id);
+	int lastError() { return m_openError; }
 
-    bool openFile(int id, HANDLE * result);
-    bool closeFile(HANDLE file);
+	bool fileExists(int id);
 
-    // int fileDataId(std::string & filename);
+	bool openFile(int id, HANDLE* result);
+	bool closeFile(HANDLE file);
 
-  private:
-    CASCFolder(const CASCFolder &);
+	// int fileDataId(std::string & filename);
 
-    void initLocales();
-    void initVersion();
-    void initBuildInfo();
-    void addExtraEncryptionKeys();
+private:
+	CASCFolder(const CASCFolder&);
 
-    int m_currentCascLocale;
-    core::GameConfig m_currentConfig;
+	void initLocales();
+	void initVersion();
+	void initBuildInfo();
+	void addExtraEncryptionKeys();
 
-    QString m_folder;
-    int m_openError;
-    HANDLE hStorage;
+	int m_currentCascLocale;
+	core::GameConfig m_currentConfig;
 
-    std::vector<core::GameConfig> m_configs;
+	QString m_folder;
+	int m_openError;
+	HANDLE hStorage;
+
+	std::vector<core::GameConfig> m_configs;
 };
-
-
-
-#endif /* _CASCFOLDER_H_ */

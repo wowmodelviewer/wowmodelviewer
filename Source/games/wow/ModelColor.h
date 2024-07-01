@@ -5,8 +5,7 @@
  *
  */
 
-#ifndef _MODELCOLOR_H_
-#define _MODELCOLOR_H_
+#pragma once
 
 #include "animated.h"
 #include "modelheaders.h"
@@ -15,13 +14,10 @@
 
 class GameFile;
 
-struct ModelColor 
+struct ModelColor
 {
-  Animated<glm::vec3> color;
-  AnimatedShort opacity;
+	Animated<glm::vec3> color;
+	AnimatedShort opacity;
 
-  void init(GameFile * f, ModelColorDef &mcd, std::vector<uint32> & global);
+	void init(GameFile* f, ModelColorDef& mcd, std::vector<uint32>& global);
 };
-
-
-#endif /* _MODELCOLOR_H_ */

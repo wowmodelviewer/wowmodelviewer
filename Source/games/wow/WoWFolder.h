@@ -1,12 +1,4 @@
-/*
- * WoWFolder.h
- *
- *  Created on: 7 Aug. 2017
- *      Author: Jeromnimo
- */
-
-#ifndef _WOWFOLDER_H_
-#define _WOWFOLDER_H_
+#pragma once
 
 #include <map>
 
@@ -28,40 +20,41 @@
 
 namespace wow
 {
-  class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
-  {
-    public:
-      WoWFolder(const QString & path);
-      virtual ~WoWFolder() {}
+	class _WOWFOLDER_API_ WoWFolder : public core::GameFolder
+	{
+	public:
+		WoWFolder(const QString& path);
 
-      void init() override;
-      void initFromListfile(const QString & file) override;
-      void addCustomFiles(const QString & path, bool bypassOriginalFiles) override;
+		virtual ~WoWFolder()
+		{
+		}
 
-      GameFile * getFile(int id) override;
+		void init() override;
+		void initFromListfile(const QString& file) override;
+		void addCustomFiles(const QString& path, bool bypassOriginalFiles) override;
 
-      bool openFile(int id, HANDLE * result) override;
-      bool openFile(std::string file, HANDLE * result) override;
+		GameFile* getFile(int id) override;
 
-      QString version() override;
-      int majorVersion() override;
-      QString locale() override;
-      bool setConfig(core::GameConfig config) override;
-      std::vector<core::GameConfig> configsFound() override;
+		bool openFile(int id, HANDLE* result) override;
+		bool openFile(std::string file, HANDLE* result) override;
 
-      int lastError() override;
+		QString version() override;
+		int majorVersion() override;
+		QString locale() override;
+		bool setConfig(core::GameConfig config) override;
+		std::vector<core::GameConfig> configsFound() override;
 
-      void onChildAdded(GameFile *) override;
-      void onChildRemoved(GameFile *) override;
-      QString fileName(int id);
-      int fileID(QString fileName);
-    private:
-      CASCFolder m_CASCFolder;
-      std::map<int, GameFile *> m_idMap;
-      std::map<int, QString> m_idNameMap;
-      std::map<QString, int> m_nameIdMap;
-  };
+		int lastError() override;
+
+		void onChildAdded(GameFile*) override;
+		void onChildRemoved(GameFile*) override;
+		QString fileName(int id);
+		int fileID(QString fileName);
+
+	private:
+		CASCFolder m_CASCFolder;
+		std::map<int, GameFile*> m_idMap;
+		std::map<int, QString> m_idNameMap;
+		std::map<QString, int> m_nameIdMap;
+	};
 }
-
-
-#endif /* _WOWFOLDER_H_ */

@@ -1,12 +1,4 @@
-/*
- * WoWDatabase.h
- *
- *  Created on: 9 nov. 2014
- *      Author: Jerome
- */
-
-#ifndef _WOWDATABASE_H_
-#define _WOWDATABASE_H_
+#pragma once
 
 #include "GameDatabase.h"
 
@@ -14,7 +6,6 @@ class DBFile;
 class GameFile;
 
 class QDomElement;
-
 
 #ifdef _WIN32
 #    ifdef BUILDING_WOW_DLL
@@ -28,48 +19,46 @@ class QDomElement;
 
 namespace wow
 {
-  class TableStructure : public core::TableStructure
-  {
-  public:
-    TableStructure() :
-      core::TableStructure(), hash(0)
-    {
-    }
+	class TableStructure : public core::TableStructure
+	{
+	public:
+		TableStructure() :
+			core::TableStructure(), hash(0)
+		{
+		}
 
-    unsigned int hash;
+		unsigned int hash;
 
-    DBFile * createDBFile();
+		DBFile* createDBFile();
+	};
 
-  };
+	class FieldStructure : public core::FieldStructure
+	{
+	public:
+		FieldStructure() :
+			core::FieldStructure(), pos(-1), isCommonData(false), isRelationshipData(false)
+		{
+		}
 
-  class FieldStructure : public core::FieldStructure
-  {
-  public:
-    FieldStructure() :
-      core::FieldStructure(), pos(-1), isCommonData(false), isRelationshipData(false)
-    {
-    }
+		int pos;
+		bool isCommonData;
+		bool isRelationshipData;
+	};
 
-    int pos;
-    bool isCommonData;
-    bool isRelationshipData;
-  };
+	class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
+	{
+	public:
+		WoWDatabase();
+		WoWDatabase(WoWDatabase&);
 
-  class _WOWDATABASE_API_ WoWDatabase : public core::GameDatabase
-  {
-    public:
-      WoWDatabase();
-      WoWDatabase(WoWDatabase &);
+		~WoWDatabase()
+		{
+		}
 
-      ~WoWDatabase() {}
+		core::TableStructure* createTableStructure();
+		core::FieldStructure* createFieldStructure();
 
-      core::TableStructure * createTableStructure();
-      core::FieldStructure * createFieldStructure();
-
-      void readSpecificTableAttributes(QDomElement &, core::TableStructure *);
-      void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *);
-  };
-
+		void readSpecificTableAttributes(QDomElement&, core::TableStructure*);
+		void readSpecificFieldAttributes(QDomElement&, core::FieldStructure*);
+	};
 }
-
-#endif /* _WOWDATABASE_H_ */

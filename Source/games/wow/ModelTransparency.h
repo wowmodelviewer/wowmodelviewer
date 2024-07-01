@@ -1,25 +1,13 @@
-/*
- * ModelTransparency.h
- *
- *  Created on: 22 oct. 2013
- *
- */
-
-#ifndef _MODELTRANSPARENCY_H_
-#define _MODELTRANSPARENCY_H_
+#pragma once
 
 #include "animated.h"
 #include "modelheaders.h"
 
 class GameFile;
 
-struct ModelTransparency 
+struct ModelTransparency
 {
-  AnimatedShort trans;
+	AnimatedShort trans;
 
-  void init(GameFile * f, ModelTransDef &mtd, std::vector<uint32> & global);
+	void init(GameFile* f, ModelTransDef& mtd, std::vector<uint32>& global);
 };
-
-
-
-#endif /* _MODELTRANSPARENCY_H_ */
