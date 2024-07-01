@@ -23,93 +23,39 @@
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _ARMORYIMPORTER_H_
-#define _ARMORYIMPORTER_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
 #include <QtPlugin>
 
-// Externals
-
-// Other libraries
 #define _IMPORTERPLUGIN_CPP_ // to define interface
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
 
-// Current library
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class ArmoryImporter final : public ImporterPlugin
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "armoryimporter.json")
+	Q_INTERFACES(ImporterPlugin)
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "armoryimporter.json")
 
-  public :
-    // Constants / Enums
+public:
+	ArmoryImporter() = default;
+	~ArmoryImporter() = default;
 
-    // Constructors
-    ArmoryImporter() = default;
+	bool acceptURL(QString url) const override;
 
-    // Destructors
-    ~ArmoryImporter() = default;
+	NPCInfos* importNPC(QString url) const override { return nullptr; };
+	CharInfos* importChar(QString url) const override;
+	ItemRecord* importItem(QString url) const override;
 
-    // Methods
-    bool acceptURL(QString url) const override;
+private:
+	enum ImportType
+	{
+		CHARACTER,
+		ITEM
+	};
 
-    NPCInfos * importNPC(QString url) const override { return nullptr; };
-    CharInfos * importChar(QString url) const override;
-    ItemRecord * importItem(QString url) const override;
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-    enum ImportType
-    {
-      CHARACTER,
-      ITEM
-    };
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    int readJSONValues(ImportType type, const QString & url, QJsonObject & result) const;
-    QByteArray getURLData(const QString & inputUrl) const;
-    static bool hasMember(const QJsonValueRef & check, const QString & lookfor);
-    static bool hasTransmog(const QJsonValueRef & check);
-
-    // Members
-
-    // friend class declarations
-
+	int readJSONValues(ImportType type, const QString& url, QJsonObject& result) const;
+	QByteArray getURLData(const QString& inputUrl) const;
+	static bool hasMember(const QJsonValueRef& check, const QString& lookfor);
+	static bool hasTransmog(const QJsonValueRef& check);
 };
-
-// static members definition
-#ifdef _ARMORYIMPORTER_CPP_
-
-#endif
-
-#endif /* _ARMORYIMPORTER_H_ */
