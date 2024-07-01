@@ -1,8 +1,6 @@
-#ifndef TEXTURE_H
-#define TEXTURE_H
+#pragma once
 
 #include "manager.h"
-
 #include "GL/glew.h"
 
 typedef GLuint TextureID;
@@ -16,7 +14,6 @@ typedef GLuint TextureID;
 #else
 #    define _TEXTURE_API_
 #endif
-
 
 class _TEXTURE_API_ Texture : public ManagedItem 
 {
@@ -32,9 +29,4 @@ public:
 
 private:
 	void decompressDXTC(GLint format, int w, int h, size_t size, unsigned char *src, unsigned char *dest);
-
 };
-
-
-#endif
-

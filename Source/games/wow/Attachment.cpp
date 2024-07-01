@@ -1,10 +1,3 @@
-/*
- * Attachment.cpp
- *
- *  Created on: 26 oct. 2013
- *
- */
-
 #include "Attachment.h"
 
 #include <string>
@@ -17,144 +10,138 @@
 
 #include "logger/Logger.h"
 
-
-
-Attachment::Attachment(Attachment *parent, Displayable *model, int id, int slot)
-  : parent(parent), id(id), slot(slot), model_(nullptr)
+Attachment::Attachment(Attachment* parent, Displayable* model, int id, int slot)
+	: parent(parent), id(id), slot(slot), model_(nullptr)
 {
-  setModel(model);
+	setModel(model);
 }
 
 Attachment::~Attachment()
 {
-  delChildren();
+	delChildren();
 
-  parent = nullptr;
+	parent = nullptr;
 
-  if (model_)
-    model_->attachment = nullptr;
-
+	if (model_)
+		model_->attachment = nullptr;
 }
 
 void Attachment::draw()
 {
-  glPushMatrix();
-  if (model_)
-  {
-    setup();
-    model_->draw();
-  }
+	glPushMatrix();
+	if (model_)
+	{
+		setup();
+		model_->draw();
+	}
 
-  // children
-  for (auto& c : children)
-    c->draw();
+	// children
+	for (auto& c : children)
+		c->draw();
 
-  glPopMatrix();
+	glPopMatrix();
 }
 
 void Attachment::drawParticles()
 {
-  glPushMatrix();
+	glPushMatrix();
 
-  if (model_)
-  {
-    auto *m = dynamic_cast<WoWModel*>(model_);
-    if (!m)
-    {
-      glPopMatrix();
-      return;
-    }
+	if (model_)
+	{
+		auto* m = dynamic_cast<WoWModel*>(model_);
+		if (!m)
+		{
+			glPopMatrix();
+			return;
+		}
 
-    model_->reset();
-    setupParticle();
+		model_->reset();
+		setupParticle();
 
-    m->drawParticles();
-  }
+		m->drawParticles();
+	}
 
-  // children:
-  for (size_t i = 0; i < children.size(); i++)
-    children[i]->drawParticles();
+	// children:
+	for (size_t i = 0; i < children.size(); i++)
+		children[i]->drawParticles();
 
-  glPopMatrix();
+	glPopMatrix();
 }
-
-
 
 void Attachment::tick(float dt)
 {
-  if (model_)
-    model_->update(dt);
-  for (size_t i = 0; i < children.size(); i++)
-    children[i]->tick(dt);
+	if (model_)
+		model_->update(dt);
+	for (size_t i = 0; i < children.size(); i++)
+		children[i]->tick(dt);
 }
 
 void Attachment::setup()
 {
-  if (parent == nullptr)
-    return;
-  if (parent->model_)
-    parent->model_->setupAtt(id);
+	if (parent == nullptr)
+		return;
+	if (parent->model_)
+		parent->model_->setupAtt(id);
 }
 
 void Attachment::setupParticle()
 {
-  if (parent == nullptr)
-    return;
-  if (parent->model_)
-    parent->model_->setupAtt2(id);
+	if (parent == nullptr)
+		return;
+	if (parent->model_)
+		parent->model_->setupAtt2(id);
 }
 
 Attachment* Attachment::addChild(std::string modelfn, int Id, int Slot)
 {
-  if (modelfn.length() == 0 || Id < 0)
-    return nullptr;
+	if (modelfn.length() == 0 || Id < 0)
+		return nullptr;
 
-  auto *m = new WoWModel(GAMEDIRECTORY.getFile(modelfn.c_str()), true);
+	auto* m = new WoWModel(GAMEDIRECTORY.getFile(modelfn.c_str()), true);
 
-  if (m->ok)
-    return addChild(m, Id, Slot);
- 
-  delete m;
-  return nullptr;
+	if (m->ok)
+		return addChild(m, Id, Slot);
+
+	delete m;
+	return nullptr;
 }
 
-Attachment* Attachment::addChild(Displayable *disp, int Id, int Slot)
+Attachment* Attachment::addChild(Displayable* disp, int Id, int Slot)
 {
-  LOG_INFO << "Attach on id" << Id << "slot" << Slot;
-  auto *att = new Attachment(this, disp, Id, Slot);
-  children.push_back(att);
-  return att;
+	LOG_INFO << "Attach on id" << Id << "slot" << Slot;
+	auto* att = new Attachment(this, disp, Id, Slot);
+	children.push_back(att);
+	return att;
 }
 
 void Attachment::delChildren()
 {
-  for (size_t i = 0; i < children.size(); i++)
-  {
-    children[i]->delChildren();
-    delete children[i];
-    children[i] = nullptr;
-  }
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		children[i]->delChildren();
+		delete children[i];
+		children[i] = nullptr;
+	}
 
-  children.clear();
+	children.clear();
 }
 
 void Attachment::delSlot(int Slot)
 {
-  for (size_t i = 0; i < children.size(); i++)
-  {
-    if (children[i]->slot == Slot)
-      children.erase(children.begin() + i);
-  }
+	for (size_t i = 0; i < children.size(); i++)
+	{
+		if (children[i]->slot == Slot)
+			children.erase(children.begin() + i);
+	}
 }
 
-void Attachment::setModel(Displayable * newmodel)
+void Attachment::setModel(Displayable* newmodel)
 {
-  if (model_)
-    model_->attachment = nullptr;
+	if (model_)
+		model_->attachment = nullptr;
 
-  model_ = newmodel;
+	model_ = newmodel;
 
-  if (model_)
-    model_->attachment = this;
+	if (model_)
+		model_->attachment = this;
 }
-

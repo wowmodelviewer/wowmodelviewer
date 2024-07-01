@@ -1,9 +1,7 @@
-#ifndef TEXTUREMANAGER_H
-#define TEXTUREMANAGER_H
+#pragma once
 
 #include <vector>
 #include "Gl/glew.h"
-
 #include "manager.h"
 
 #ifdef _WIN32
@@ -28,6 +26,3 @@ public:
 };
 
 _TEXTUREMANAGER_API_ extern TextureManager TEXTUREMANAGER;
-
-#endif
-
