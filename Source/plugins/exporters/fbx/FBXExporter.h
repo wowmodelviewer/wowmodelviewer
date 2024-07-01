@@ -23,24 +23,17 @@
  *   Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _FBXEXPORTER_H_
-#define _FBXEXPORTER_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
 #include <map>
 #include <string>
 
-// Qt
 #include <QtPlugin>
 #include <qlist.h>
 #include <qmutex.h>
 
-// Externals
 #include "fbxsdk.h"
 
-// Other libraries
 class WoWModel;
 struct ModelAnimation;
 
@@ -48,97 +41,52 @@ struct ModelAnimation;
 #include "ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
 
-// Current library
-
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class FBXExporter : public ExporterPlugin
 {
-    Q_INTERFACES(ExporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.FBXExporter" FILE "fbxexporter.json")
+	Q_INTERFACES(ExporterPlugin)
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.FBXExporter" FILE "fbxexporter.json")
 
-  public :
-    // Constants / Enums
+public:
+	FBXExporter();
 
-    // Constructors
-    FBXExporter();
+	~FBXExporter()
+	{
+	}
 
-    // Destructors
-    ~FBXExporter() {}
+	std::wstring menuLabel() const;
+	std::wstring fileSaveTitle() const;
+	std::wstring fileSaveFilter() const;
 
-    // Methods
-   std::wstring menuLabel() const;
+	bool exportModel(Model*, std::wstring file);
 
-   std::wstring fileSaveTitle() const;
-   std::wstring fileSaveFilter() const;
+private:
+	void createMaterials();
+	void createMeshes();
+	void createSkeletons();
+	void linkMeshAndSkeleton();
+	void createAnimations();
+	bool createAnimationFiles();
+	void reset();
 
-   bool exportModel(Model *, std::wstring file);
+	FbxManager* m_p_manager;
+	FbxScene* m_p_scene;
+	WoWModel* m_p_model;
+	FbxNode* m_p_meshNode;
+	FbxNode* m_p_skeletonNode;
+	QList<WoWModel*> m_p_attachedModels;
 
-    // Members
+	mutable QMutex m_mutex;
+	bool useAltAnimNaming = false;
+	FbxString m_fileVersion;
+	std::wstring m_filename;
+	std::map<int, FbxNode*> m_boneNodes;
+	std::vector<FbxCluster*> m_boneClusters;
 
-  protected :
-    // Constants / Enums
+	std::map<int, FbxNode*> m_attachSkeletonNode;
+	std::map<int, FbxNode*> m_attachMeshNodes;
+	std::map<int, std::map<int, FbxNode*>> m_attachBoneNodes;
+	std::map<int, std::vector<FbxCluster*>> m_attachBoneClusters;
 
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-    
-    // Methods
-    void createMaterials();
-    void createMeshes();
-    void createSkeletons();
-    void linkMeshAndSkeleton();
-    void createAnimations();
-    bool createAnimationFiles();
-    void reset();
-
-
-    // Members
-    FbxManager        * m_p_manager;
-    FbxScene          * m_p_scene;
-    WoWModel          * m_p_model;
-    FbxNode           * m_p_meshNode;
-    FbxNode           * m_p_skeletonNode;
-    QList<WoWModel*>    m_p_attachedModels;
-
-    mutable QMutex m_mutex;
-    bool useAltAnimNaming = false;
-    FbxString m_fileVersion;
-    std::wstring m_filename;
-    std::map<int,FbxNode*> m_boneNodes;
-    std::vector<FbxCluster*> m_boneClusters;
-
-    std::map<int, FbxNode*> m_attachSkeletonNode;
-    std::map<int, FbxNode*> m_attachMeshNodes;
-    std::map<int, std::map<int, FbxNode*>> m_attachBoneNodes;
-    std::map<int, std::vector<FbxCluster*>> m_attachBoneClusters;
-
-    std::map<std::wstring, GLuint> m_texturesToExport;
-
-    // friend class declarations
-
+	std::map<std::wstring, GLuint> m_texturesToExport;
 };
-
-// static members definition
-#ifdef _FBXEXPORTER_CPP_
-
-#endif
-
-#endif /* _FBXEXPORTER_H_ */

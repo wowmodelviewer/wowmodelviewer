@@ -23,91 +23,34 @@
  *   Copyright: 2019 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _FBXANIMEXPORTER_H_
-#define _FBXANIMEXPORTER_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
 #include <vector>
 
-// Qt
 #include <QString>
 #include <QRunnable>
 #include <QMutex>
 
-// Externals
 #include "fbxsdk.h"
-
-// Other libraries
-
-
-// Current library
-
 
 class WoWModel;
 struct ModelAnimation;
 
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class FBXAnimExporter : public QRunnable
 {
+public:
+	void run() override;
+	void setValues(FbxString fileVersion, QString fn, QString an, WoWModel* m, std::vector<FbxCluster*> bc,
+	               FbxNode* & meshnode, int aID, bool uan = false);
 
-  public :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-    void run() override;
-    void setValues(FbxString fileVersion, QString fn, QString an, WoWModel *m, std::vector<FbxCluster*> bc, FbxNode* &meshnode, int aID, bool uan = false);
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-    FbxString l_fileVersion;
-    QString srcfileName;
-    QString animationName;
-    WoWModel *l_model;
-    std::vector<FbxCluster*> l_boneClusters;
-    FbxNode *l_meshNode;
-    int animID;
-    bool useAltNaming = false;
-    mutable QMutex m_mutex;
-
-    // friend class declarations
-
+private:
+	FbxString l_fileVersion;
+	QString srcfileName;
+	QString animationName;
+	WoWModel* l_model;
+	std::vector<FbxCluster*> l_boneClusters;
+	FbxNode* l_meshNode;
+	int animID;
+	bool useAltNaming = false;
+	mutable QMutex m_mutex;
 };
-
-// static members definition
-#ifdef _FBXANIMEXPORTER_CPP_
-
-#endif
-
-#endif /* _FBXANIMEXPORTER_H_ */

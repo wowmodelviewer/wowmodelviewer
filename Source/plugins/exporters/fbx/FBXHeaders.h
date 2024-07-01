@@ -23,50 +23,27 @@
  *   Copyright: 2019 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _FBXHEADERS_H_
-#define _FBXHEADERS_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
 #include <qmutex.h>
 
-// Externals
 #include "fbxsdk.h"
 #include "glm/glm.hpp"
 
-// Other libraries
 #include "WoWModel.h"
 
-// Current library
-
-
-// Beginning of implementation
-//--------------------------------------------------------------------
 #define SCALE_FACTOR 50.0f
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Functions
-//--------------------------------------------------------------------
 
 namespace FBXHeaders
 {
-  bool createFBXHeaders(FbxString fileVersion, QString l_FileName, FbxManager* &l_Manager, FbxExporter* &l_Exporter, FbxScene* &l_Scene);
-  FbxNode* createMesh(FbxManager* &l_manager, FbxScene* &l_scene, WoWModel* model, const glm::mat4 & matrix = glm::mat4(1.0f), const glm::vec3 & offset = glm::vec3(0.0f));
-  void createSkeleton(WoWModel* l_model, FbxScene* &l_scene, FbxNode* &l_skeletonNode, std::map<int, FbxNode*> &l_boneNodes);
-  void storeBindPose(FbxScene* &l_scene, std::vector<FbxCluster*> l_boneClusters, FbxNode* l_meshNode);
-  void storeRestPose(FbxScene* &l_scene, FbxNode* &l_SkeletonRoot);
-  void createAnimation(WoWModel *l_model, FbxScene *& l_scene, QString animName, ModelAnimation cur_anim, std::map<int, FbxNode*>& skeleton);
+	bool createFBXHeaders(FbxString fileVersion, QString l_FileName, FbxManager* & l_Manager, FbxExporter* & l_Exporter,
+	                      FbxScene* & l_Scene);
+	FbxNode* createMesh(FbxManager* & l_manager, FbxScene* & l_scene, WoWModel* model,
+	                    const glm::mat4& matrix = glm::mat4(1.0f), const glm::vec3& offset = glm::vec3(0.0f));
+	void createSkeleton(WoWModel* l_model, FbxScene* & l_scene, FbxNode* & l_skeletonNode,
+	                    std::map<int, FbxNode*>& l_boneNodes);
+	void storeBindPose(FbxScene* & l_scene, std::vector<FbxCluster*> l_boneClusters, FbxNode* l_meshNode);
+	void storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot);
+	void createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString animName, ModelAnimation cur_anim,
+	                     std::map<int, FbxNode*>& skeleton);
 }
-
-// static members definition
-#ifdef _FBXHEADERS_CPP_
-
-#endif
-
-#endif /* _FBXHEADERS_H_ */
