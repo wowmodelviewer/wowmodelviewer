@@ -23,14 +23,8 @@
  *   Copyright: 2015 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _OBJEXPORTER_H_
-#define _OBJEXPORTER_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
 #include <QtPlugin>
 
 // Externals
@@ -43,73 +37,29 @@ class WoWModel;
 #include "ExporterPlugin.h"
 #undef _EXPORTERPLUGIN_CPP_
 
-// Current library
-
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class OBJExporter : public ExporterPlugin
 {
-    Q_INTERFACES(ExporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.OBJExporter" FILE "objexporter.json")
+	Q_INTERFACES(ExporterPlugin)
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.OBJExporter" FILE "objexporter.json")
 
-  public :
-    // Constants / Enums
+public:
+	OBJExporter()
+	{
+	}
 
-    // Constructors
-    OBJExporter() {}
+	~OBJExporter()
+	{
+	}
 
-    // Destructors
-    ~OBJExporter() {}
+	std::wstring menuLabel() const;
+	std::wstring fileSaveTitle() const;
+	std::wstring fileSaveFilter() const;
 
-    // Methods
-   std::wstring menuLabel() const;
+	bool exportModel(Model*, std::wstring file);
 
-   std::wstring fileSaveTitle() const;
-   std::wstring fileSaveFilter() const;
-
-   bool exportModel(Model *, std::wstring file);
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-     bool exportModelVertices(WoWModel * model, QTextStream & file, int & counter, glm::mat4 m = glm::mat4(1.0), glm::vec3 pos = glm::vec3(0.0f)) const;
-     bool exportModelMaterials(WoWModel * model, QTextStream & file, QString mtlFile) const;
-
-
-    // Members
-
-    // friend class declarations
-
+private:
+	bool exportModelVertices(WoWModel* model, QTextStream& file, int& counter, glm::mat4 m = glm::mat4(1.0),
+	                         glm::vec3 pos = glm::vec3(0.0f)) const;
+	bool exportModelMaterials(WoWModel* model, QTextStream& file, QString mtlFile) const;
 };
-
-// static members definition
-#ifdef _OBJPORTER_CPP_
-
-#endif
-
-#endif /* _OBJEXPORTER_H_ */
