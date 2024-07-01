@@ -23,86 +23,36 @@
  *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
  */
 
-#ifndef _WOWHEADIMPORTER_H_
-#define _WOWHEADIMPORTER_H_
+#pragma once
 
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
 #include <QtPlugin>
 
-// Externals
-
-// Other libraries
 #define _IMPORTERPLUGIN_CPP_ // to define interface
 #include "ImporterPlugin.h"
 #undef _IMPORTERPLUGIN_CPP_
-// Current library
 
-
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 class WowheadImporter : public ImporterPlugin
 {
-    Q_INTERFACES(ImporterPlugin)
-    Q_OBJECT
-    Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
+	Q_INTERFACES(ImporterPlugin)
+	Q_OBJECT
+	Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
 
-  public :
-    // Constants / Enums
+public:
+	WowheadImporter()
+	{
+	}
 
-    // Constructors
-    WowheadImporter() {}
+	~WowheadImporter()
+	{
+	}
 
-    // Destructors
-    ~WowheadImporter() {}
+	bool acceptURL(QString url) const;
 
-    // Methods
-  bool acceptURL(QString url) const;
+	NPCInfos* importNPC(QString url) const;
+	CharInfos* importChar(QString url) const { return NULL; }
+	ItemRecord* importItem(QString url) const;
 
-    NPCInfos * importNPC(QString url) const;
-  CharInfos * importChar(QString url) const { return NULL; }
-  ItemRecord * importItem(QString url) const;
-
-    // Members
-
-  protected :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-
-    // Members
-
-  private :
-    // Constants / Enums
-
-    // Constructors
-
-    // Destructors
-
-    // Methods
-  QString extractSubString(QString & datas, QString beginPattern, QString endPattern = QString()) const;
-  QByteArray getURLData(QString inputUrl) const;
-
-    // Members
-
-    // friend class declarations
-
+private:
+	QString extractSubString(QString& datas, QString beginPattern, QString endPattern = QString()) const;
+	QByteArray getURLData(QString inputUrl) const;
 };
-
-// static members definition
-#ifdef _WOWHEADIMPORTER_CPP_
-
-#endif
-
-#endif /* _WOWHEADIMPORTER_H_ */
