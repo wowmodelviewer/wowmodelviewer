@@ -67,8 +67,8 @@ void Plugin::onExec()
 	if (QCoreApplication::instance() == nullptr)
 	{
 		int argc = 1;
-		char* argv[] = {"plugin.app", nullptr};
-		app = new QCoreApplication(argc, argv);
+		const char* argv[] = {"plugin.app", nullptr};
+		app = new QCoreApplication(argc, const_cast<char**>(argv));
 		app->exec();
 		if (app)
 			delete app;
