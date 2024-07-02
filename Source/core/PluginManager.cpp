@@ -6,7 +6,7 @@
 #include "Game.h"
 #include "GlobalSettings.h"
 
-PluginManager* PluginManager::m_instance = 0;
+PluginManager* PluginManager::m_instance = nullptr;
 
 PluginManager::PluginManager()
 {

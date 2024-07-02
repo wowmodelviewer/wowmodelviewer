@@ -18,12 +18,12 @@ ModelBankControl::ModelBankControl(wxWindow* parent, wxWindowID id)
 {
 	LOG_INFO << "Creating Model Bank Control...";
 
-	txtName = NULL;
-	lblName = NULL;
-	btnAdd = NULL;
-	btnRemove = NULL;
-	btnDisplay = NULL;
-	lstBank = NULL;
+	txtName = nullptr;
+	lblName = nullptr;
+	btnAdd = nullptr;
+	btnRemove = nullptr;
+	btnDisplay = nullptr;
+	lstBank = nullptr;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(270, 280), 0, wxT("ModelBankControlFrame")) == false)
 	{
@@ -45,7 +45,7 @@ ModelBankControl::ModelBankControl(wxWindow* parent, wxWindowID id)
 	btnRemove = new wxButton(this, ID_MODELBANK_REMOVE, wxT("Remove"), wxPoint(200, 40), wxDefaultSize);
 	btnDisplay = new wxButton(this, ID_MODELBANK_DISPLAY, wxT("Display"), wxPoint(200, 70), wxDefaultSize);
 
-	lstBank = new wxListBox(this, wxID_ANY, wxPoint(5, 40), wxSize(190, 250), 0, NULL, wxLB_SINGLE | wxLB_ALWAYS_SB);
+	lstBank = new wxListBox(this, wxID_ANY, wxPoint(5, 40), wxSize(190, 250), 0, nullptr, wxLB_SINGLE | wxLB_ALWAYS_SB);
 
 	LoadList();
 }

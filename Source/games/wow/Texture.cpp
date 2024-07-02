@@ -68,7 +68,7 @@ void Texture::load()
 		*/
 		LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type=" << type;
 
-		BYTE* buffer = NULL;
+		BYTE* buffer = nullptr;
 		unsigned char* buf = new unsigned char[sizes[0]];
 
 		file->seek(offsets[0]);
@@ -109,7 +109,7 @@ void Texture::load()
 			The image data are formatted using DXT5 compression.
 			*/
 			// encoding 2, directx compressed
-			unsigned char* ucbuf = NULL;
+			unsigned char* ucbuf = nullptr;
 			if (!video.supportCompression)
 				ucbuf = new unsigned char[width * height * 4];
 
@@ -199,8 +199,8 @@ void Texture::load()
 
 			unsigned char* buf = new unsigned char[sizes[0]];
 			unsigned int* buf2 = new unsigned int[width * height];
-			unsigned int* p = NULL;
-			unsigned char *c = NULL, *a = NULL;
+			unsigned int* p = nullptr;
+			unsigned char *c = nullptr, *a = nullptr;
 
 			int alphabits = attr[1];
 			bool hasalpha = (alphabits != 0);

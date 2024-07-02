@@ -65,7 +65,7 @@ void CAnimationExporter::Init(const wxString fn)
 	if (!g_canvas)
 		return;
 
-	m_pPal = NULL;
+	m_pPal = nullptr;
 	m_fAnimSpeed = 0.0f;
 
 	m_bTransparent = false;
@@ -120,7 +120,7 @@ void CAnimationExporter::CreateGif()
 		return;
 	}
 
-	CxImage** gifImages = NULL; // Our pointer array of images
+	CxImage** gifImages = nullptr; // Our pointer array of images
 
 	// Reset the state of our GUI objects
 	btnStart->Enable(false);
@@ -355,7 +355,7 @@ void CAnimationExporter::CreateGif()
 		wxString filen = m_strFilename;
 		filen << wxT(".gif");
 
-		FILE* hFile = NULL;
+		FILE* hFile = nullptr;
 #if  defined(_WINDOWS)
 		fopen_s(&hFile, filen.mb_str(), "wb");
 #else
@@ -395,7 +395,7 @@ void CAnimationExporter::CreateGif()
 	if (m_pPal)
 	{
 		free(m_pPal);
-		m_pPal = NULL;
+		m_pPal = nullptr;
 	}
 
 	LOG_INFO << "GIF Animation successfully created.";

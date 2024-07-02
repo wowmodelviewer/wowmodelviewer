@@ -80,7 +80,7 @@ void beautifyFileName(QString& file)
 
 FileControl::FileControl(wxWindow* parent, wxWindowID id)
 {
-	modelviewer = NULL;
+	modelviewer = nullptr;
 	filterMode = FILE_FILTER_MODEL;
 
 	if (Create(parent, id, wxDefaultPosition, wxSize(170, 700), 0, wxT("ModelControlFrame")) == false)
@@ -110,7 +110,7 @@ FileControl::~FileControl()
 	if (fileTree)
 	{
 		fileTree->Destroy();
-		fileTree = NULL;
+		fileTree = nullptr;
 	}
 	txtContent->Destroy();
 	btnSearch->Destroy();
@@ -135,7 +135,7 @@ bool filterSearch(QString s)
 
 void FileControl::Init(ModelViewer* mv)
 {
-	if (modelviewer == NULL)
+	if (modelviewer == nullptr)
 		modelviewer = mv;
 
 	LOG_INFO << "Initializing File Controls - Start";
@@ -228,7 +228,7 @@ void FileControl::Export(wxString val, int select)
 
 	wxFileName fn(val);
 
-	FILE* hFile = NULL;
+	FILE* hFile = nullptr;
 	wxString filename;
 	if (select == 1)
 	{
@@ -314,7 +314,7 @@ void FileControl::OnPopupClick(wxCommandEvent& evt)
 		}
 		else
 		{
-			wxMessageDialog dial(NULL, wxT("Error during file export."));
+			wxMessageDialog dial(nullptr, wxT("Error during file export."));
 			dial.ShowModal();
 		}
 	}
@@ -346,7 +346,7 @@ void FileControl::OnTreeMenu(wxTreeEvent& event)
 	if (temp.EndsWith(wxT("blp")))
 		infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));
 
-	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, NULL, this);
+	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, nullptr, this);
 	PopupMenu(&infoMenu);
 }
 
@@ -360,7 +360,7 @@ void FileControl::ClearCanvas()
 	{
 		//canvas->clearAttachments();
 		wxDELETE(modelviewer->canvas->wmo);
-		modelviewer->canvas->wmo = NULL;
+		modelviewer->canvas->wmo = nullptr;
 	}
 	else if (modelviewer->isModel)
 	{
@@ -384,15 +384,15 @@ void FileControl::ClearCanvas()
 		*/
 		if (modelviewer->isChar)
 		{
-			modelviewer->charControl->charAtt = NULL;
+			modelviewer->charControl->charAtt = nullptr;
 		}
 		//wxDELETE(modelviewer->canvas->model); // may memory leak
-		modelviewer->canvas->setModel(NULL);
+		modelviewer->canvas->setModel(nullptr);
 	}
 	else if (modelviewer->isADT)
 	{
 		wxDELETE(modelviewer->canvas->adt);
-		modelviewer->canvas->adt = NULL;
+		modelviewer->canvas->adt = nullptr;
 	}
 
 #ifdef _DEBUG
@@ -421,7 +421,7 @@ void FileControl::UpdateInterface()
 	// Disable whatever formats can't be export yet.
 
 	// Don't run if there aren't any models loaded!
-	if (modelviewer == NULL)
+	if (modelviewer == nullptr)
 		return;
 
 	// You MUST put true in one if the other is false! Otherwise, if they open the other model type and go back,

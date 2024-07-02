@@ -77,7 +77,7 @@ void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFile
 					originalId = originalFile->fileDataId();
 					removeChild(originalFile);
 					delete originalFile;
-					originalFile = 0;
+					originalFile = nullptr;
 					addnewfile = true;
 				}
 				else
@@ -107,7 +107,7 @@ void wow::WoWFolder::addCustomFiles(const QString& path, bool bypassOriginalFile
 
 GameFile* wow::WoWFolder::getFile(int id)
 {
-	GameFile* result = 0;
+	GameFile* result = nullptr;
 
 	if (id <= 0) // bad id given
 		return result;

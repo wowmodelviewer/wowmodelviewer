@@ -4,10 +4,10 @@
 
 CAVIGenerator::CAVIGenerator()
 {
-	m_pAVIFile = NULL;
-	m_pStream = NULL;
-	m_pStreamCompressed = NULL;
-	m_pGetFrame = NULL;
+	m_pAVIFile = nullptr;
+	m_pStream = nullptr;
+	m_pStreamCompressed = nullptr;
+	m_pGetFrame = nullptr;
 	memset(&m_bih, 0, sizeof(BITMAPINFOHEADER));
 
 	// Default file name.
@@ -62,7 +62,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	hr = AVIFileOpen(&m_pAVIFile, // Address to contain the new file interface pointer
 	                 m_sFile, // Null-terminated string containing the name of the file to open
 	                 OF_WRITE | OF_CREATE, // Access mode to use when opening the file. 
-	                 NULL); // use handler determined from file extension.
+	nullptr); // use handler determined from file extension.
 	// Name your file .avi -> very important
 
 	if (hr != AVIERR_OK)
@@ -130,7 +130,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	}
 
 	// Step 5:  Create a compressed stream using codec options.
-	hr = AVIMakeCompressedStream(&m_pStreamCompressed, m_pStream, &opts, NULL);
+	hr = AVIMakeCompressedStream(&m_pStreamCompressed, m_pStream, &opts, nullptr);
 
 	if (hr != AVIERR_OK)
 	{
@@ -195,7 +195,7 @@ void CAVIGenerator::InitEngineForRead()
 	AVIFileInit();
 
 	// Opens The AVI Stream
-	if (AVIStreamOpenFromFile(&m_pStream, m_sFile, streamtypeVIDEO, 0, OF_READ, NULL) != 0)
+	if (AVIStreamOpenFromFile(&m_pStream, m_sFile, streamtypeVIDEO, 0, OF_READ, nullptr) != 0)
 	{
 		// An Error Occurred Opening The Stream
 		LOG_ERROR << "Failed To Open The AVI Stream.";
@@ -225,8 +225,8 @@ void CAVIGenerator::InitEngineForRead()
 	//m_hBitmap = CreateDIBSection(hdc, (BITMAPINFO*)(&m_bih), DIB_RGB_COLORS, (void**)(&data), NULL, NULL);
 	//SelectObject(hdc, hBitmap);                // Select hBitmap Into Our Device Context (hdc)
 
-	m_pGetFrame = AVIStreamGetFrameOpen(m_pStream, NULL); // Create The PGETFRAME  Using Our Request Mode
-	if (m_pGetFrame == NULL)
+	m_pGetFrame = AVIStreamGetFrameOpen(m_pStream, nullptr); // Create The PGETFRAME  Using Our Request Mode
+	if (m_pGetFrame == nullptr)
 	{
 		// An Error Occurred Opening The Frame
 		LOG_ERROR << "Failed To Open The AVI Frame.";
@@ -240,25 +240,25 @@ void CAVIGenerator::ReleaseEngine()
 	if (m_pGetFrame)
 	{
 		AVIStreamGetFrameClose(m_pGetFrame); // Deallocates The GetFrame Resources
-		m_pGetFrame = NULL;
+		m_pGetFrame = nullptr;
 	}
 
 	if (m_pStream)
 	{
 		AVIStreamRelease(m_pStream);
-		m_pStream = NULL;
+		m_pStream = nullptr;
 	}
 
 	if (m_pStreamCompressed)
 	{
 		AVIStreamRelease(m_pStreamCompressed);
-		m_pStreamCompressed = NULL;
+		m_pStreamCompressed = nullptr;
 	}
 
 	if (m_pAVIFile)
 	{
 		AVIFileRelease(m_pAVIFile);
-		m_pAVIFile = NULL;
+		m_pAVIFile = nullptr;
 	}
 
 	// Close engine
@@ -276,8 +276,8 @@ HRESULT CAVIGenerator::AddFrame(BYTE* bmBits)
 	                    bmBits, // image buffer
 	                    m_bih.biSizeImage, // size of this frame
 	                    AVIIF_KEYFRAME, // flags....
-	                    NULL,
-	                    NULL);
+	                    nullptr,
+	nullptr);
 
 	// updating frame counter
 	m_iLastFrame++;

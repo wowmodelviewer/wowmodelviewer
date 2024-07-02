@@ -23,7 +23,7 @@ class _VERSIONMANAGER_API_ VersionManager : public QObject
 	Q_OBJECT
 
 public:
-	VersionManager(QObject* parent = 0);
+	VersionManager(QObject* parent = nullptr);
 	~VersionManager()
 	{
 	}

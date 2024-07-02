@@ -50,7 +50,7 @@ public:
 	//! \name  AVI engine function
 	//! \brief  Initialize engine and choose codex
 	//Some asserts are made to check that bitmap has been properly initialized
-	HRESULT InitEngineForWrite(HWND parent = NULL);
+	HRESULT InitEngineForWrite(HWND parent = nullptr);
 	void InitEngineForRead();
 
 	//! \brief Adds a frame to the movie. 

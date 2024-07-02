@@ -40,7 +40,7 @@ class ShaderPair
 	Shader* fragment;
 
 public:
-	ShaderPair(): vertex(0), fragment(0)
+	ShaderPair(): vertex(nullptr), fragment(nullptr)
 	{
 	}
 

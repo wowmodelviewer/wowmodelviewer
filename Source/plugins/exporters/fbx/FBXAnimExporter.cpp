@@ -85,8 +85,8 @@ void FBXAnimExporter::run()
 	ios->SetBoolProp(EXP_FBX_ANIMATION, true);
 	ios->SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
-	fbxsdk::FbxExporter* exporter = 0;
-	FbxScene* l_animscene = 0;
+	fbxsdk::FbxExporter* exporter = nullptr;
+	FbxScene* l_animscene = nullptr;
 	if (!FBXHeaders::createFBXHeaders(l_fileVersion, file_name, lSdkManager, exporter, l_animscene))
 	{
 		LOG_ERROR << "Unable to create Animation Headers. Aborting Export...";
@@ -104,7 +104,7 @@ void FBXAnimExporter::run()
 	//LOG_INFO << "Scene Info added to animated scene...";
 
 	std::map<int, FbxNode*> l_boneNodes;
-	FbxNode* l_skeletonNode = 0;
+	FbxNode* l_skeletonNode = nullptr;
 	FBXHeaders::createSkeleton(l_model, l_animscene, l_skeletonNode, l_boneNodes);
 	//LOG_INFO << "Skeleton created for animation...";
 

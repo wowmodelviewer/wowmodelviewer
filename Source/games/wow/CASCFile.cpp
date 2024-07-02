@@ -79,7 +79,7 @@ std::vector<std::string> KNOWN_CHUNKS =
 	*/
 };
 
-CASCFile::CASCFile(QString path, int id) : GameFile(path, id), m_handle(0)
+CASCFile::CASCFile(QString path, int id) : GameFile(path, id), m_handle(nullptr)
 {
 }
 
@@ -112,7 +112,7 @@ void CASCFile::seek(size_t offset)
 	}
 	else
 	{
-		if (CascSetFilePointer(m_handle, offset, 0, FILE_BEGIN) == CASC_INVALID_POS)
+		if (CascSetFilePointer(m_handle, offset, nullptr, FILE_BEGIN) == CASC_INVALID_POS)
 			LOG_ERROR << "Seek in file" << filepath << "to position" << offset << "failed. Error" << GetLastError();
 	}
 }
@@ -142,7 +142,7 @@ bool CASCFile::getFileSize(unsigned long long& s)
 
 	if (m_handle)
 	{
-		s = CascGetFileSize(m_handle, 0);
+		s = CascGetFileSize(m_handle, nullptr);
 
 		if (s == CASC_INVALID_SIZE)
 			LOG_ERROR << "Opening" << filepath << "failed." << "Error" << GetLastError();
@@ -209,7 +209,7 @@ bool CASCFile::doPostCloseOperation()
 	if (m_handle)
 	{
 		HANDLE savedHandle = m_handle;
-		m_handle = 0;
+		m_handle = nullptr;
 
 #ifdef DEBUG_READ
     bool result = CascCloseFile(savedHandle);

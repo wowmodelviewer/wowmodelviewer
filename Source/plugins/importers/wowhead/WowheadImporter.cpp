@@ -41,12 +41,12 @@ bool WowheadImporter::acceptURL(QString url) const
 
 NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 {
-	NPCInfos* result = NULL;
+	NPCInfos* result = nullptr;
 
 	// Get the HTML...
 	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
 	if (htmldata.isNull() || htmldata.isEmpty())
-		return NULL;
+		return nullptr;
 
 	// let's go : finding name
 	// extract global infos
@@ -82,12 +82,12 @@ NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 
 ItemRecord* WowheadImporter::importItem(QString urlToGrab) const
 {
-	ItemRecord* result = NULL;
+	ItemRecord* result = nullptr;
 
 	// Get the HTML...
 	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
 	if (htmldata.isNull() || htmldata.isEmpty())
-		return NULL;
+		return nullptr;
 
 	// let's go : finding name
 	// extract global infos

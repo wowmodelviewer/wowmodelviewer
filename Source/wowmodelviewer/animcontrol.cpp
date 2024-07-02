@@ -63,9 +63,9 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	};
 
 	animCList = new wxComboBox(this, ID_ANIM, _("Animation"), wxPoint(10, 10), wxSize(150, 16), 0,
-	                           NULL, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Animation"));
+	                           nullptr, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Animation"));
 	animCList2 = new wxComboBox(this, ID_ANIM_SECONDARY, _("Secondary"), wxPoint(10, 95), wxSize(150, 16), 0,
-	                            NULL, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
+	                            nullptr, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
 	animCList2->Enable(false);
 	animCList2->Show(false);
 
@@ -77,7 +77,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 
 	// Our hidden head/mouth related controls
 	animCList3 = new wxComboBox(this, ID_ANIM_MOUTH, _("Mouth"), wxPoint(170, 95), wxSize(150, 16), 0,
-	                            NULL, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
+	                            nullptr, wxCB_READONLY | wxCB_SORT, wxDefaultValidator, wxT("Secondary"));
 	animCList3->Enable(false);
 	animCList3->Show(false);
 
@@ -95,7 +95,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	                          strLoops, wxCB_READONLY, wxDefaultValidator, wxT("Loops"));
 	btnAdd = new wxButton(this, ID_ADDANIM, _("Add"), wxPoint(380, 10), wxSize(45, 20));
 
-	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170, 10), wxSize(150, 16), 0, NULL, wxCB_READONLY);
+	skinList = new wxComboBox(this, ID_SKIN, _("Skin"), wxPoint(170, 10), wxSize(150, 16), 0, nullptr, wxCB_READONLY);
 	skinList->Show(false);
 
 	BLPSkinsLabel = new wxStaticText(this, wxID_ANY, wxT("All skins in folder :"), wxPoint(600, 5), wxSize(150, 16));
@@ -107,19 +107,19 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 
 	BLPSkinLabel1 = new wxStaticText(this, wxID_ANY, wxT("Skin 1"), wxPoint(600, 29), wxSize(30, 16));
 	BLPSkinLabel1->Show(false);
-	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635, 25), wxSize(150, 16), 0, NULL,
+	BLPSkinList1 = new wxComboBox(this, ID_BLP_SKIN1, _("Skin"), wxPoint(635, 25), wxSize(150, 16), 0, nullptr,
 	                              wxCB_READONLY);
 	BLPSkinList1->Show(false);
 
 	BLPSkinLabel2 = new wxStaticText(this, wxID_ANY, wxT("Skin 2"), wxPoint(600, 59), wxSize(30, 16));
 	BLPSkinLabel2->Show(false);
-	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635, 55), wxSize(150, 16), 0, NULL,
+	BLPSkinList2 = new wxComboBox(this, ID_BLP_SKIN2, _("Skin"), wxPoint(635, 55), wxSize(150, 16), 0, nullptr,
 	                              wxCB_READONLY);
 	BLPSkinList2->Show(false);
 
 	BLPSkinLabel3 = new wxStaticText(this, wxID_ANY, wxT("Skin 3"), wxPoint(600, 89), wxSize(30, 16));
 	BLPSkinLabel3->Show(false);
-	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635, 85), wxSize(150, 16), 0, NULL,
+	BLPSkinList3 = new wxComboBox(this, ID_BLP_SKIN3, _("Skin"), wxPoint(635, 85), wxSize(150, 16), 0, nullptr,
 	                              wxCB_READONLY);
 	BLPSkinList3->Show(false);
 
@@ -127,7 +127,7 @@ AnimControl::AnimControl(wxWindow* parent, wxWindowID id)
 	modelFolderChanged = true;
 	BLPListFilled = false;
 
-	wmoList = new wxComboBox(this, ID_ITEMSET, _("Item set"), wxPoint(220, 10), wxSize(128, 16), 0, NULL,
+	wmoList = new wxComboBox(this, ID_ITEMSET, _("Item set"), wxPoint(220, 10), wxSize(128, 16), 0, nullptr,
 	                         wxCB_READONLY);
 	wmoList->Show(FALSE);
 	wmoLabel = new wxStaticText(this, -1, wxEmptyString, wxPoint(10, 15), wxSize(192, 16));
@@ -606,7 +606,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 			else
 				grp.PCRIndex = -1;
 
-			if (grp.tex[0] != 0 && std::find(skins.begin(), skins.end(), grp) == skins.end())
+			if (grp.tex[0] != nullptr && std::find(skins.begin(), skins.end(), grp) == skins.end())
 				skins.insert(grp);
 			CDIToTexGp[cdi] = grp;
 		}
@@ -751,7 +751,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			else
 				grp.PCRIndex = -1;
 
-			if (grp.tex[0] != 0)
+			if (grp.tex[0] != nullptr)
 				skins.insert(grp);
 			CDIToTexGp[cdi] = grp;
 		}
@@ -802,7 +802,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 			else
 				grp.PCRIndex = -1;
 
-			if (grp.tex[0] != 0)
+			if (grp.tex[0] != nullptr)
 				skins.insert(grp);
 			CDIToTexGp[cdi] = grp;
 		}

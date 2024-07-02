@@ -66,10 +66,10 @@ DBFile* wow::TableStructure::createDBFile()
 {
 	DBFile* result = core::TableStructure::createDBFile();
 
-	if (result != 0)
+	if (result != nullptr)
 		return result;
 
-	GameFile* fileToOpen = 0;
+	GameFile* fileToOpen = nullptr;
 	// loop over possible extension to check if file exists
 	for (unsigned int i = 0; i < POSSIBLE_DB_EXT.size(); i++)
 	{
@@ -79,7 +79,7 @@ DBFile* wow::TableStructure::createDBFile()
 	}
 
 	if (!fileToOpen)
-		return 0;
+		return nullptr;
 
 	if (fileToOpen)
 	{

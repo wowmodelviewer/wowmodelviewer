@@ -7,7 +7,7 @@
 bool supportShaders = false;
 static bool initedShaders = false;
 
-ShaderPair *terrainShaders[4] = {0, 0, 0, 0}, *wmoShader = 0, *waterShaders[1] = {0};
+ShaderPair *terrainShaders[4] = {nullptr, nullptr, nullptr, nullptr}, *wmoShader = nullptr, *waterShaders[1] = {nullptr};
 
 // TODO
 bool isExtensionSupported(std::string s)
@@ -55,12 +55,12 @@ void OldreloadShaders()
 	delete wmoShader;
 	delete waterShaders[0];
 
-	terrainShaders[0] = new ShaderPair(0, "shaders/terrain1.fs", true);
-	terrainShaders[1] = new ShaderPair(0, "shaders/terrain2.fs", true);
-	terrainShaders[2] = new ShaderPair(0, "shaders/terrain3.fs", true);
-	terrainShaders[3] = new ShaderPair(0, "shaders/terrain4.fs", true);
-	wmoShader = new ShaderPair(0, "shaders/wmospecular.fs", true);
-	waterShaders[0] = new ShaderPair(0, "shaders/wateroutdoor.fs", true);
+	terrainShaders[0] = new ShaderPair(nullptr, "shaders/terrain1.fs", true);
+	terrainShaders[1] = new ShaderPair(nullptr, "shaders/terrain2.fs", true);
+	terrainShaders[2] = new ShaderPair(nullptr, "shaders/terrain3.fs", true);
+	terrainShaders[3] = new ShaderPair(nullptr, "shaders/terrain4.fs", true);
+	wmoShader = new ShaderPair(nullptr, "shaders/wmospecular.fs", true);
+	waterShaders[0] = new ShaderPair(nullptr, "shaders/wateroutdoor.fs", true);
 }
 
 Shader::Shader(GLenum target, const char* program, bool fromFile): target(target), id(0)
@@ -72,7 +72,7 @@ Shader::Shader(GLenum target, const char* program, bool fromFile): target(target
 	}
 
 	const char* progtext;
-	char* buf = 0;
+	char* buf = nullptr;
 	if (fromFile)
 	{
 		FILE* f = fopen(program, "rb");
@@ -135,20 +135,20 @@ ShaderPair::ShaderPair(const char* vprog, const char* fprog, bool fromFile)
 		if (!vertex->ok)
 		{
 			delete vertex;
-			vertex = 0;
+			vertex = nullptr;
 		}
 	}
-	else vertex = 0;
+	else vertex = nullptr;
 	if (fprog && strlen(fprog))
 	{
 		fragment = new Shader(GL_FRAGMENT_PROGRAM_ARB, fprog, fromFile);
 		if (!fragment->ok)
 		{
 			delete fragment;
-			fragment = 0;
+			fragment = nullptr;
 		}
 	}
-	else fragment = 0;
+	else fragment = nullptr;
 }
 
 void ShaderPair::bind()

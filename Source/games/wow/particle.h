@@ -116,7 +116,7 @@ public:
 	// whether its ParticleColorIndex is set to 11, 12 or 13:
 	std::vector<particleColorSet> particleColorReplacements;
 
-	ParticleSystem(): mid(0), emitter(0), rem(0)
+	ParticleSystem(): mid(0), emitter(nullptr), rem(0)
 	{
 		multitexture = 0;
 		particleColID = 0;
@@ -129,8 +129,8 @@ public:
 		mtime = 0;
 		rows = 0;
 		cols = 0;
-		model = 0;
-		parent = 0;
+		model = nullptr;
+		parent = nullptr;
 		texture = 0;
 		texture2 = 0;
 		texture3 = 0;

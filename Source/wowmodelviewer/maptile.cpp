@@ -843,12 +843,12 @@ void MapTile::draw()
 	glClientActiveTextureARB(GL_TEXTURE0_ARB);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, gdetailtexcoords);
-	glTexCoordPointer(2, GL_FLOAT, 0, 0);
+	glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 
 	glClientActiveTextureARB(GL_TEXTURE1_ARB);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, galphatexcoords);
-	glTexCoordPointer(2, GL_FLOAT, 0, 0);
+	glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 
 	glClientActiveTextureARB(GL_TEXTURE0_ARB);
 
@@ -1812,9 +1812,9 @@ void MapChunk::draw()
 
 	// setup vertex buffers
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glVertexPointer(3, GL_FLOAT, 0, nullptr);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, normals);
-	glNormalPointer(GL_FLOAT, 0, 0);
+	glNormalPointer(GL_FLOAT, 0, nullptr);
 	// ASSUME: texture coordinates set up already
 
 	if (video.supportShaders)
@@ -1971,7 +1971,7 @@ void MapChunk::drawNoDetail()
 
 	// low detail version
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, vertices);
-	glVertexPointer(3, GL_FLOAT, 0, 0);
+	glVertexPointer(3, GL_FLOAT, 0, nullptr);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDrawElements(GL_TRIANGLE_STRIP, striplen, GL_UNSIGNED_SHORT, strip);
 	glEnableClientState(GL_NORMAL_ARRAY);

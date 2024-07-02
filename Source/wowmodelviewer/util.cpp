@@ -78,7 +78,7 @@ wxString getGamePath(bool noSet)
 		if (l == ERROR_SUCCESS)
 		{
 			s = sizeof(path);
-			l = RegQueryValueEx(key, wxT("InstallPath"), 0, &t, (LPBYTE)path, &s);
+			l = RegQueryValueEx(key, wxT("InstallPath"), nullptr, &t, (LPBYTE)path, &s);
 			wxString spath = QString::fromLatin1(path).toStdWString();
 			if (l == ERROR_SUCCESS && wxDir::Exists(spath) && sNames.Index(spath) == wxNOT_FOUND)
 				sNames.Add(spath);
@@ -132,9 +132,9 @@ wxString getGamePath(bool noSet)
 wxBitmap* createBitmapFromResource(const wxString& t_name, long type /* = wxBITMAP_TYPE_PNG */, int width /* = 0 */,
                                    int height /* = 0 */)
 {
-	wxBitmap* r_bitmapPtr = 0;
+	wxBitmap* r_bitmapPtr = nullptr;
 
-	char* a_data = 0;
+	char* a_data = nullptr;
 	DWORD a_dataSize = 0;
 
 	if (loadDataFromResource(a_data, a_dataSize, t_name))
@@ -148,18 +148,18 @@ wxBitmap* createBitmapFromResource(const wxString& t_name, long type /* = wxBITM
 bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_name)
 {
 	bool r_result = false;
-	HGLOBAL a_resHandle = 0;
+	HGLOBAL a_resHandle = nullptr;
 	HRSRC a_resource;
 
-	a_resource = FindResource(0, t_name.c_str(), RT_RCDATA);
+	a_resource = FindResource(nullptr, t_name.c_str(), RT_RCDATA);
 
-	if (0 != a_resource)
+	if (nullptr != a_resource)
 	{
-		a_resHandle = LoadResource(NULL, a_resource);
-		if (0 != a_resHandle)
+		a_resHandle = LoadResource(nullptr, a_resource);
+		if (nullptr != a_resHandle)
 		{
 			t_data = (char*)LockResource(a_resHandle);
-			t_dataSize = SizeofResource(NULL, a_resource);
+			t_dataSize = SizeofResource(nullptr, a_resource);
 			r_result = true;
 		}
 	}

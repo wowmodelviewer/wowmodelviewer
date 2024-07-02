@@ -89,7 +89,7 @@ void ParticleSystem::init(GameFile* f, M2ParticleDef& mta, std::vector<uint32>& 
 	manim = mtime = 0;
 	rem = 0;
 
-	emitter = 0;
+	emitter = nullptr;
 	switch (EmitterType)
 	{
 	case MODELPARTICLE_EMITTER_PLANE:

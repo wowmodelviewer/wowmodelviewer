@@ -44,9 +44,9 @@ _VIDEO_API_ VideoSettings video;
 VideoSettings::VideoSettings()
 {
 #ifdef _WINDOWS
-	hWnd = NULL;
-	hRC = NULL;
-	hDC = NULL;
+	hWnd = nullptr;
+	hRC = nullptr;
+	hDC = nullptr;
 #endif
 
 	pixelFormat = 0;
@@ -66,18 +66,18 @@ VideoSettings::~VideoSettings()
 {
 #ifdef _WINDOWS
 	// Clear the rendering context
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 
 	if (hRC)
 	{
 		wglDeleteContext(hRC);
-		hRC = NULL;
+		hRC = nullptr;
 	}
 
 	if (hDC)
 	{
 		ReleaseDC(hWnd, hDC);
-		hDC = NULL;
+		hDC = nullptr;
 	}
 #endif
 }
@@ -400,22 +400,22 @@ bool VideoSettings::GetAvailableMode()
 		return false;
 
 	// Clear the rendering context
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 
 	if (hRC)
 	{
 		wglDeleteContext(hRC);
-		hRC = NULL;
+		hRC = nullptr;
 	}
 
 	if (hDC)
 	{
 		ReleaseDC(hWnd, hDC);
-		hDC = NULL;
+		hDC = nullptr;
 	}
 
 	hDC = GetDC(hWnd); // Grab A Device Context For This Window
-	if (hDC == 0)
+	if (hDC == nullptr)
 	{
 		// Did We Get A Device Context?
 		// Failed
@@ -444,7 +444,7 @@ bool VideoSettings::GetAvailableMode()
 	}
 
 	hRC = wglCreateContext(hDC); // Try To Get A Rendering Context
-	if (hRC == 0)
+	if (hRC == nullptr)
 	{
 		// Did We Get A Rendering Context?
 		// Failed
@@ -592,18 +592,18 @@ void VideoSettings::Release()
 {
 #ifdef _WINDOWS
 	// Clear the rendering context
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 
 	if (hRC)
 	{
 		wglDeleteContext(hRC);
-		hRC = NULL;
+		hRC = nullptr;
 	}
 
 	if (hDC)
 	{
 		ReleaseDC(hWnd, hDC);
-		hDC = NULL;
+		hDC = nullptr;
 	}
 #endif
 }
@@ -615,18 +615,18 @@ void VideoSettings::SetMode()
 		return;
 
 	// Clear the rendering context
-	wglMakeCurrent(NULL, NULL);
+	wglMakeCurrent(nullptr, nullptr);
 
 	if (hRC)
 	{
 		wglDeleteContext(hRC);
-		hRC = NULL;
+		hRC = nullptr;
 	}
 
 	if (hDC)
 	{
 		ReleaseDC(hWnd, hDC);
-		hDC = NULL;
+		hDC = nullptr;
 	}
 
 	hDC = GetDC(hWnd);

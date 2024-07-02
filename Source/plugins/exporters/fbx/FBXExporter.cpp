@@ -35,7 +35,7 @@
 #include "util.h" // SLASH
 
 FBXExporter::FBXExporter():
-	m_p_manager(0), m_p_scene(0), m_p_model(0), m_p_meshNode(0)
+	m_p_manager(nullptr), m_p_scene(nullptr), m_p_model(nullptr), m_p_meshNode(nullptr)
 {
 	m_canExportAnimation = true;
 }
@@ -84,7 +84,7 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 	ios->SetBoolProp(EXP_FBX_ANIMATION, false);
 	ios->SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
 
-	FbxExporter* exporter = 0;
+	FbxExporter* exporter = nullptr;
 
 	m_fileVersion = FBX_2014_00_COMPATIBLE;
 
@@ -456,14 +456,14 @@ void FBXExporter::reset()
 	if (m_p_manager)
 		m_p_manager->Destroy();
 
-	m_p_manager = 0;
+	m_p_manager = nullptr;
 
 	// scene is destroyed by manager's destroy call
-	m_p_scene = 0;
+	m_p_scene = nullptr;
 
-	m_p_model = 0;
-	m_p_meshNode = 0;
-	m_p_skeletonNode = 0;
+	m_p_model = nullptr;
+	m_p_meshNode = nullptr;
+	m_p_skeletonNode = nullptr;
 
 	m_filename = L"";
 

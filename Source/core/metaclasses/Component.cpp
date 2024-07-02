@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-Component::Component() : m_p_parent(0), m_refCounter(0)
+Component::Component() : m_p_parent(nullptr), m_refCounter(0)
 {
 	m_name = "Component";
 }
@@ -67,7 +67,7 @@ void Component::print(int a_depth /*= 0*/)
 		std::cout << "  ";
 	}
 
-	if (m_p_parent != 0)
+	if (m_p_parent != nullptr)
 	{
 		std::cout << "|-";
 	}

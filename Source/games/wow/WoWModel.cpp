@@ -161,17 +161,17 @@ WoWModel::WoWModel(GameFile* file, bool forceAnim):
 	vbuf = nbuf = tbuf = 0;
 
 	origVertices.clear();
-	vertices = 0;
-	normals = 0;
-	texCoords = 0;
+	vertices = nullptr;
+	normals = nullptr;
+	texCoords = nullptr;
 	indices.clear();
 
 	animtime = 0;
 	anim = 0;
-	animManager = 0;
+	animManager = nullptr;
 	currentAnim = 0;
 	modelType = MT_NORMAL;
-	attachment = 0;
+	attachment = nullptr;
 
 	rawVertices.clear();
 	rawIndices.clear();
@@ -188,7 +188,7 @@ WoWModel::~WoWModel()
 	if (ok)
 	{
 		if (attachment)
-			attachment->setModel(0);
+			attachment->setModel(nullptr);
 
 		// There is a small memory leak somewhere with the textures.
 		// Especially if the texture was built into the model.
@@ -198,7 +198,7 @@ WoWModel::~WoWModel()
 			// For character models, the texture isn't loaded into the texture manager, manually remove it
 			glDeleteTextures(1, &replaceTextures[1]);
 			delete animManager;
-			animManager = 0;
+			animManager = nullptr;
 
 			if (animated)
 			{
@@ -211,15 +211,15 @@ WoWModel::~WoWModel()
 					glDeleteBuffersARB(1, &vbuf);
 					glDeleteBuffersARB(1, &tbuf);
 
-					vertices = NULL;
+					vertices = nullptr;
 				}
 
 				delete[] normals;
-				normals = 0;
+				normals = nullptr;
 				delete[] vertices;
-				vertices = 0;
+				vertices = nullptr;
 				delete[] texCoords;
-				texCoords = 0;
+				texCoords = nullptr;
 
 				indices.clear();
 				rawIndices.clear();
@@ -833,9 +833,9 @@ void WoWModel::initStatic()
 
 	// clean up vertices, indices etc
 	delete[] vertices;
-	vertices = 0;
+	vertices = nullptr;
 	delete[] normals;
-	normals = 0;
+	normals = nullptr;
 	indices.clear();
 }
 
@@ -910,7 +910,7 @@ void WoWModel::readAnimsFromFile(GameFile* f, std::vector<AFID>& afids, modelAni
 
 		anims.push_back(a);
 
-		GameFile* Anim = 0;
+		GameFile* Anim = nullptr;
 
 		// if we have animation file ids from AFID chunk, use them
 		if (afids.size() > 0)
@@ -981,7 +981,7 @@ void WoWModel::initAnimated()
 				SKS1 sks1;
 
 				// let's try if there is a parent skel file to read
-				GameFile* parentFile = 0;
+				GameFile* parentFile = nullptr;
 				if (skelFile->setChunk("SKPD"))
 				{
 					SKPD skpd;
@@ -1098,7 +1098,7 @@ void WoWModel::initAnimated()
 	// free MPQFile
 	for (auto it : data.animfiles)
 	{
-		if (it.second.first != 0)
+		if (it.second.first != nullptr)
 			it.second.first->close();
 	}
 
@@ -1117,21 +1117,21 @@ void WoWModel::initAnimated()
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
 		delete[] vertices;
-		vertices = 0;
+		vertices = nullptr;
 
 		// Texture buffer
 		glGenBuffersARB(1, &tbuf);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * size, texCoords, GL_STATIC_DRAW_ARB);
 		delete[] texCoords;
-		texCoords = 0;
+		texCoords = nullptr;
 
 		// normals buffer
 		glGenBuffersARB(1, &nbuf);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
 		delete[] normals;
-		normals = 0;
+		normals = nullptr;
 
 		// clean bind
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
@@ -1628,7 +1628,7 @@ void WoWModel::animate(ssize_t Anim)
 		if (video.supportVBO)
 		{
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-			glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, NULL, GL_STREAM_DRAW_ARB);
+			glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, nullptr, GL_STREAM_DRAW_ARB);
 
 			vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
 		}
@@ -1749,15 +1749,15 @@ inline void WoWModel::drawModel()
 		else
 		{
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
-			glNormalPointer(GL_FLOAT, 0, 0);
+			glNormalPointer(GL_FLOAT, 0, nullptr);
 		}
 
 		// Bind the vertex buffer
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
-		glVertexPointer(3, GL_FLOAT, 0, 0);
+		glVertexPointer(3, GL_FLOAT, 0, nullptr);
 		// Bind the texture coordinates buffer
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, tbuf);
-		glTexCoordPointer(2, GL_FLOAT, 0, 0);
+		glTexCoordPointer(2, GL_FLOAT, 0, nullptr);
 	}
 	else if (animated)
 	{
@@ -2007,7 +2007,7 @@ bool WoWModel::isWearingARobe()
 
 void WoWModel::update(int dt) // (float dt)
 {
-	if (animated && animManager != NULL)
+	if (animated && animManager != nullptr)
 		animManager->Tick(dt);
 	updateEmitters((dt / 1000.0f));
 }
@@ -4199,14 +4199,14 @@ void WoWModel::refreshMerging()
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, vertices, GL_STATIC_DRAW_ARB);
 		delete[] vertices;
-		vertices = 0;
+		vertices = nullptr;
 
 		// normals buffer
 		glGenBuffersARB(1, &nbuf);
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, nbuf);
 		glBufferDataARB(GL_ARRAY_BUFFER_ARB, vbufsize, normals, GL_STATIC_DRAW_ARB);
 		delete[] normals;
-		normals = 0;
+		normals = nullptr;
 
 		// clean bind
 		glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);

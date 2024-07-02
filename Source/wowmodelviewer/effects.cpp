@@ -18,8 +18,8 @@ EnchantsDialog::EnchantsDialog(wxWindow* parent, CharControl* cc)
 	LHandEnchant = -1;
 	RHandEnchant = -1;
 
-	slot = NULL;
-	effectsListbox = NULL;
+	slot = nullptr;
+	effectsListbox = nullptr;
 
 	Create(parent, -1, wxT("Weapon Enchants"), wxDefaultPosition, wxSize(200, 350), wxDEFAULT_DIALOG_STYLE);
 	Show(false);

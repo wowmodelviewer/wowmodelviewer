@@ -23,7 +23,7 @@ namespace core
 
 		static GlobalSettings& instance()
 		{
-			if (GlobalSettings::m_instance == 0)
+			if (GlobalSettings::m_instance == nullptr)
 				GlobalSettings::m_instance = new GlobalSettings();
 
 			return *m_instance;

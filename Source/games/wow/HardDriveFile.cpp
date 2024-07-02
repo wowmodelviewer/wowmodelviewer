@@ -5,7 +5,7 @@
 #include "logger/Logger.h"
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
-	: CASCFile(path, id), opened(false), realpath(real), file(0)
+	: CASCFile(path, id), opened(false), realpath(real), file(nullptr)
 {
 }
 
@@ -53,7 +53,7 @@ unsigned long HardDriveFile::readFile()
 	unsigned long s = file->read((char*)buffer, size);
 	file->close();
 	delete file;
-	file = 0;
+	file = nullptr;
 	return s;
 }
 

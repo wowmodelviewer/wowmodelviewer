@@ -23,13 +23,13 @@ namespace core
 	public:
 		static Game& instance()
 		{
-			if (Game::m_instance == 0)
+			if (Game::m_instance == nullptr)
 				Game::m_instance = new Game();
 			return *m_instance;
 		}
 
 		void init(core::GameFolder* folder, core::GameDatabase* db);
-		bool initDone() { return ((m_db != 0) && (m_folder != 0)); }
+		bool initDone() { return ((m_db != nullptr) && (m_folder != nullptr)); }
 		void addCustomFiles(const QString& path, bool bypassOriginalFiles);
 
 		core::GameFolder& folder() { return *m_folder; }

@@ -14,7 +14,7 @@ void WMOModelInstance::init(char* fname, GameFile& f)
 	filename.replace(".mdx", ".m2");
 	filename.replace(".mdl", ".m2");
 
-	model = 0;
+	model = nullptr;
 
 	float ff[3];
 	f.read(ff, 12); // Position (X,Z,-Y)
@@ -58,5 +58,5 @@ void WMOModelInstance::loadModel(ModelManager& mm)
 void WMOModelInstance::unloadModel(ModelManager& mm)
 {
 	mm.delbyname(filename);
-	model = 0;
+	model = nullptr;
 }

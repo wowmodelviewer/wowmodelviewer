@@ -7,7 +7,7 @@
 
 using namespace WMVLog;
 
-Logger* Logger::m_instance = 0;
+Logger* Logger::m_instance = nullptr;
 
 Logger::Logger()
 {

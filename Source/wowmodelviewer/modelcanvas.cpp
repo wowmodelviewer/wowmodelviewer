@@ -365,7 +365,7 @@ void ModelCanvas::LoadADT(wxString fn)
 {
 	OldinitShaders();
 
-	root->setModel(0);
+	root->setModel(nullptr);
 	wxDELETE(adt);
 
 	if (!adt)
@@ -1683,7 +1683,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
 	delete rt;
-	rt = 0;
+	rt = nullptr;
 
 	wxFileName temp(fn, wxPATH_NATIVE);
 
@@ -1754,7 +1754,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 		rt->EndRender();
 		rt->Shutdown();
 		delete rt;
-		rt = 0;
+		rt = nullptr;
 	}
 
 	// Set back to normal

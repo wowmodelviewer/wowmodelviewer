@@ -141,7 +141,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 			// This is our dynamic texture, which will be loaded with new pixel data
 			// after we're finshed rendering to the p-buffer.
-			glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+			glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 			glTexParameteri(m_texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(m_texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
@@ -193,7 +193,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		int iPixelFormat = 0;
 		// g_hdc = wxglcanvas hdc
 
-		wglChoosePixelFormatARB(canvas_hDC, (const int*)pf_attr, NULL, 1, &iPixelFormat, &iCount);
+		wglChoosePixelFormatARB(canvas_hDC, (const int*)pf_attr, nullptr, 1, &iPixelFormat, &iCount);
 
 		if (iCount == 0)
 		{
@@ -285,7 +285,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		// after we're finshed rendering to the p-buffer.
 		glGenTextures(1, &m_texID);
 		glBindTexture(m_texFormat, m_texID);
-		glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //GL_FLOAT
+		glTexImage2D(m_texFormat, 0, GL_RGBA8, nWidth, nHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr); //GL_FLOAT
 		glTexParameteri(m_texFormat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(m_texFormat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//glTexParameteri(texFormat, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
@@ -394,7 +394,7 @@ void RenderTexture::Shutdown()
 		if (m_hRC)
 		{
 			wglDeleteContext(m_hRC);
-			m_hRC = NULL;
+			m_hRC = nullptr;
 		}
 
 		wglMakeCurrent(canvas_hDC, canvas_hRC);

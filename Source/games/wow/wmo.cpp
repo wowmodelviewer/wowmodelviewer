@@ -31,15 +31,15 @@ WMO::WMO(QString name) :
 	uint32 size;
 	float ff[3];
 
-	char* ddnames = NULL;
-	groupnames = 0;
-	skybox = 0;
-	groups = 0;
-	mat = 0;
+	char* ddnames = nullptr;
+	groupnames = nullptr;
+	skybox = nullptr;
+	groups = nullptr;
+	mat = nullptr;
 	doodadset = -1;
 	includeDefaultDoodads = true;
 
-	char* texbuf = 0;
+	char* texbuf = nullptr;
 
 	while (!f.isEof())
 	{

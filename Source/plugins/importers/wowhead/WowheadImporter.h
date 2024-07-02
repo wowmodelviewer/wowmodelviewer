@@ -49,7 +49,7 @@ public:
 	bool acceptURL(QString url) const;
 
 	NPCInfos* importNPC(QString url) const;
-	CharInfos* importChar(QString url) const { return NULL; }
+	CharInfos* importChar(QString url) const { return nullptr; }
 	ItemRecord* importItem(QString url) const;
 
 private:

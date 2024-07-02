@@ -40,7 +40,7 @@ namespace WMVLog
 
 		static Logger &instance()
 		{
-			if (Logger::m_instance == 0)
+			if (Logger::m_instance == nullptr)
 				Logger::m_instance = new Logger();
 
 			return *m_instance;

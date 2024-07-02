@@ -51,13 +51,13 @@ ChoiceDialog::ChoiceDialog(CharControl* dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-	: wxSingleChoiceDialog(parent, message, caption, choices, (char**)NULL, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER,
+	: wxSingleChoiceDialog(parent, message, caption, choices, (char**)nullptr, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER,
 	                       wxDefaultPosition)
 {
 	cc = dest;
 	this->type = type;
 
-	m_listctrl = NULL;
+	m_listctrl = nullptr;
 
 	// New Item Selection stuff
 	// Objective is to change over from a wxListBox to a wxListCtrl
@@ -178,7 +178,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl* dest, int type, wxWindow
 	sizer->Add(m_pattern, 1, 0);
 	sizer->Add(new wxButton(this, ID_FILTER_CLEAR, wxT("Clear"), wxDefaultPosition, wxSize(40, -1)), 0, 0);
 
-	wxBoxSizer* sizerImport = 0;
+	wxBoxSizer* sizerImport = nullptr;
 	if (type == UPDATE_NPC)
 	{
 		sizerImport = new wxBoxSizer(wxHORIZONTAL);

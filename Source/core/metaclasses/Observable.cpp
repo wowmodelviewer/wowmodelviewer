@@ -54,7 +54,7 @@ void Observable::notify(Event& event)
 std::list<Observer*>::iterator Observable::observerAttached(Observer* observer)
 {
 	std::list<Observer*>::iterator l_result = m_observerList.end();
-	if (observer != 0)
+	if (observer != nullptr)
 	{
 		std::list<Observer*>::iterator l_it;
 		for (l_it = m_observerList.begin(); l_it != m_observerList.end(); l_it++)

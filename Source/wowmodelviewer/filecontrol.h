@@ -27,7 +27,7 @@ public:
 	FileControl(wxWindow* parent, wxWindowID id);
 	~FileControl();
 
-	void Init(ModelViewer* mv = NULL);
+	void Init(ModelViewer* mv = nullptr);
 	void OnTreeSelect(wxTreeEvent& event);
 	void OnTreeCollapsedOrExpanded(wxTreeEvent& event);
 	void OnButton(wxCommandEvent& event);
@@ -56,7 +56,7 @@ private:
 		wxTreeItemId id;
 		GameFile* file;
 
-		TreeStackItem() : file(0)
+		TreeStackItem() : file(nullptr)
 		{
 		}
 
@@ -67,7 +67,7 @@ private:
 			if (it != m_childrenMap.end())
 				return it->second;
 
-			return 0;
+			return nullptr;
 		}
 
 		void onChildAdded(TreeStackItem* child)
@@ -83,7 +83,7 @@ private:
 			{
 				TreeStackItem* child = it->second;
 				child->id = tree->AppendItem(id, it->second->name().toStdWString(), -1, -1,
-				                             ((it->second->file) ? new FileTreeData(it->second->file) : 0));
+				                             ((it->second->file) ? new FileTreeData(it->second->file) : nullptr));
 				child->createTreeItems(tree);
 			}
 		}

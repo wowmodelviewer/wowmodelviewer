@@ -22,7 +22,7 @@ class _FILEDOWNLOADER_API_ FileDownloader : public QObject
 	Q_OBJECT
 
 public:
-	explicit FileDownloader(QObject* parent = 0);
+	explicit FileDownloader(QObject* parent = nullptr);
 	~FileDownloader();
 
 	void get(QUrl url);

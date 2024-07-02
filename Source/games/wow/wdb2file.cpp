@@ -41,7 +41,7 @@ bool WDB2File::open()
 	if (db_type == FT_UNK)
 	{
 		close();
-		data = NULL;
+		data = nullptr;
 		LOG_ERROR << "An error occured while trying to read the DBCFile" << fullname() << "header:" << header[0] <<
 			header[1] << header[2] << header[3];
 		return false;

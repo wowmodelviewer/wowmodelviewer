@@ -35,7 +35,7 @@ public:
 	{
 		for (size_t i = 0; i < num; i++)
 		{
-			tex[i] = 0;
+			tex[i] = nullptr;
 		}
 		particleColInd = 0;
 		PCRIndex = -1;

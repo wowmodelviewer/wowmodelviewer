@@ -87,8 +87,8 @@ bool WowModelViewApp::OnInit()
 	GLOBALSETTINGS.bZeroParticle = true;
 
 	QCoreApplication::addLibraryPath(QLatin1String("./plugins"));
-	frame = NULL;
-	wxSplashScreen* splash = NULL;
+	frame = nullptr;
+	wxSplashScreen* splash = nullptr;
 	{
 		wxLogNull logNo;
 
@@ -101,7 +101,7 @@ bool WowModelViewApp::OnInit()
 		wxString splashname = L"SPLASH";
 		if (randomSplash2 == true)
 		{
-			srand(time(NULL));
+			srand(time(nullptr));
 			int randomchoice = rand() % 10; // Random number between 0-9
 			if (randomchoice >= 5)
 			{
@@ -115,7 +115,7 @@ bool WowModelViewApp::OnInit()
 		else
 			splash = new wxSplashScreen(*bitmap,
 			                            wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-			                            2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+			                            2000, nullptr, -1, wxDefaultPosition, wxDefaultSize,
 			                            wxBORDER_NONE);
 		wxYield();
 		Sleep(1000); // let's our beautiful spash beeing displayed a few second :)
@@ -322,10 +322,10 @@ void WowModelViewApp::OnFatalException()
 	LOG_ERROR << __FUNCTION__;
 	dumpStackInLogs();
 
-	if (frame != NULL)
+	if (frame != nullptr)
 	{
 		frame->Destroy();
-		frame = NULL;
+		frame = nullptr;
 	}
 }
 

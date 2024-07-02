@@ -165,27 +165,27 @@ ModelViewer::ModelViewer()
 	PLUGINMANAGER.init("./plugins");
 	// our main class objects
 	animControl = nullptr;
-	canvas = NULL;
-	charControl = NULL;
-	enchants = NULL;
-	lightControl = NULL;
-	modelControl = NULL;
-	imageControl = NULL;
-	settingsControl = NULL;
-	modelbankControl = NULL;
-	animExporter = NULL;
-	fileControl = NULL;
+	canvas = nullptr;
+	charControl = nullptr;
+	enchants = nullptr;
+	lightControl = nullptr;
+	modelControl = nullptr;
+	imageControl = nullptr;
+	settingsControl = nullptr;
+	modelbankControl = nullptr;
+	animExporter = nullptr;
+	fileControl = nullptr;
 
 	//wxWidget objects
-	menuBar = NULL;
-	charMenu = NULL;
-	charGlowMenu = NULL;
-	viewMenu = NULL;
-	optMenu = NULL;
-	lightMenu = NULL;
-	exportMenu = NULL;
-	fileMenu = NULL;
-	camMenu = NULL;
+	menuBar = nullptr;
+	charMenu = nullptr;
+	charGlowMenu = nullptr;
+	viewMenu = nullptr;
+	optMenu = nullptr;
+	lightMenu = nullptr;
+	exportMenu = nullptr;
+	fileMenu = nullptr;
+	camMenu = nullptr;
 
 	isWoWLoaded = false;
 	isModel = false;
@@ -196,7 +196,7 @@ ModelViewer::ModelViewer()
 
 	//wxCAPTION|wxRESIZE_BORDER|wxSYSTEM_MENU
 	// create our main frame
-	if (Create(NULL, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768),
+	if (Create(nullptr, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768),
 	           wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame")))
 	{
 		SetIcon(wxICON(IDI_ICON1));
@@ -262,7 +262,7 @@ void ModelViewer::InitMenu()
 {
 	LOG_INFO << "Initializing File Menu...";
 
-	if (GetStatusBar() == NULL)
+	if (GetStatusBar() == nullptr)
 	{
 		CreateStatusBar(5);
 		int widths[] = {-1, 100, 50, 125, 125};
@@ -844,14 +844,14 @@ void ModelViewer::SaveSession()
 					wxAUI_DOCK_LEFT))
 				{
 					int x = 0;
-					charControl->GetClientSize(&x, NULL);
+					charControl->GetClientSize(&x, nullptr);
 					canvx += x + 6; // 6 seems to cover margins and borders...
 				}
 				else if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_TOP || info.dock_direction ==
 					wxAUI_DOCK_BOTTOM))
 				{
 					int y = 0;
-					charControl->GetClientSize(NULL, &y);
+					charControl->GetClientSize(nullptr, &y);
 					canvy += y + 23; // 23 covers the margins, borders, and title bar...
 				}
 			}
@@ -946,7 +946,7 @@ void ModelViewer::LoadModel(GameFile* file)
 	// check if this is a character model
 	isChar = (file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith(
 		"alternate\\char", Qt::CaseInsensitive));
-	Attachment* modelAtt = NULL;
+	Attachment* modelAtt = nullptr;
 
 	if (isChar)
 	{
@@ -1076,7 +1076,7 @@ void ModelViewer::LoadModel(GameFile* file)
 void ModelViewer::LoadNPC(unsigned int modelid)
 {
 	canvas->clearAttachments();
-	canvas->setModel(NULL);
+	canvas->setModel(nullptr);
 
 	isModel = true;
 	isChar = false;
@@ -1159,7 +1159,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 void ModelViewer::LoadItem(unsigned int id)
 {
 	canvas->clearAttachments();
-	canvas->setModel(NULL);
+	canvas->setModel(nullptr);
 
 	isModel = true;
 	isChar = false;
@@ -1279,49 +1279,49 @@ ModelViewer::~ModelViewer()
 	{
 		canvas->Disable();
 		canvas->Destroy();
-		canvas = NULL;
+		canvas = nullptr;
 	}
 
 	if (fileControl)
 	{
 		fileControl->Destroy();
-		fileControl = NULL;
+		fileControl = nullptr;
 	}
 
 	if (animControl)
 	{
 		animControl->Destroy();
-		animControl = NULL;
+		animControl = nullptr;
 	}
 
 	if (charControl)
 	{
 		charControl->Destroy();
-		charControl = NULL;
+		charControl = nullptr;
 	}
 
 	if (lightControl)
 	{
 		lightControl->Destroy();
-		lightControl = NULL;
+		lightControl = nullptr;
 	}
 
 	if (settingsControl)
 	{
 		settingsControl->Destroy();
-		settingsControl = NULL;
+		settingsControl = nullptr;
 	}
 
 	if (modelControl)
 	{
 		modelControl->Destroy();
-		modelControl = NULL;
+		modelControl = nullptr;
 	}
 
 	if (enchants)
 	{
 		enchants->Destroy();
-		enchants = NULL;
+		enchants = nullptr;
 	}
 }
 
@@ -1783,7 +1783,7 @@ void ModelViewer::LoadWoW()
 	{
 		wxString message = wxString::Format(
 			wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
-		wxMessageDialog* dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft No locale found"),
+		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft No locale found"),
 		                                            wxOK | wxICON_ERROR);
 		dial->ShowModal();
 		return;
@@ -1816,7 +1816,7 @@ void ModelViewer::LoadWoW()
 		wxString message = wxString::Format(
 			wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."),
 			GAMEDIRECTORY.lastError());
-		wxMessageDialog* dial = new wxMessageDialog(NULL, message, wxT("World of Warcraft Not Found"),
+		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft Not Found"),
 		                                            wxOK | wxICON_ERROR);
 		dial->ShowModal();
 		return;
@@ -1830,7 +1830,7 @@ void ModelViewer::LoadWoW()
 			"This version of WoW Model Viewer is intended to be used with WoW Shadowlands(9.x.x) or above only\n"
 			"For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
 			"https://download.wowmodelviewer.net"));
-		wxMessageDialog* dial = new wxMessageDialog(NULL, message, wxT("Wrong World of Warcraft version"),
+		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("Wrong World of Warcraft version"),
 		                                            wxOK | wxICON_ERROR);
 		dial->ShowModal();
 		return;
@@ -2163,7 +2163,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 		{
 			//canvas->clearAttachments();
 			wxDELETE(canvas->wmo);
-			canvas->wmo = NULL;
+			canvas->wmo = nullptr;
 		}
 	}
 
@@ -2527,7 +2527,7 @@ void ModelViewer::UpdateControls()
 
 void ModelViewer::ImportArmoury(wxString strURL)
 {
-	CharInfos* result = NULL;
+	CharInfos* result = nullptr;
 
 	QString url = strURL.utf8_str();
 	LOG_INFO << "Importing character from the Armory:" << url;

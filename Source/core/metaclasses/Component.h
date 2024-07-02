@@ -28,8 +28,8 @@ public:
 	virtual unsigned int nbChildren() const { return 0; }
 
 	virtual bool findChildComponent(Component* /* component */, bool /* recursive */) { return false; }
-	virtual Component* getChild(unsigned int /* index */) { return 0; }
-	virtual const Component* getChild(unsigned int /* index */) const { return 0; }
+	virtual Component* getChild(unsigned int /* index */) { return nullptr; }
+	virtual const Component* getChild(unsigned int /* index */) const { return nullptr; }
 
 	// parent management
 	void setParentComponent(Component*);
@@ -68,13 +68,13 @@ private:
 template <class DataType>
 const DataType* Component::firstParentOfType()
 {
-	if (parent() != 0)
+	if (parent() != nullptr)
 	{
 		DataType* l_p_parent = dynamic_cast<DataType*>(parent());
-		if (l_p_parent != 0)
+		if (l_p_parent != nullptr)
 			return l_p_parent;
 		else
 			return parent()->firstParentOfType<DataType>();
 	}
-	return 0;
+	return nullptr;
 }

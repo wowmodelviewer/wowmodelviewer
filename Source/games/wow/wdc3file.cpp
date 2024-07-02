@@ -9,7 +9,7 @@
 #define WDC3_READ_DEBUG 0
 #define WDC3_READ_DEBUG_FIRST_RECORDS 0
 
-WDC3File::WDC3File(const QString& file): WDB5File(file), m_sectionData(0), m_palletData(0)
+WDC3File::WDC3File(const QString& file): WDB5File(file), m_sectionData(nullptr), m_palletData(nullptr)
 {
 }
 
@@ -142,7 +142,7 @@ bool WDC3File::open()
 	}
 
 	// read common data
-	unsigned char* commonData = 0;
+	unsigned char* commonData = nullptr;
 	if (m_header.common_data_size > 0)
 	{
 		commonData = new unsigned char[m_header.common_data_size];

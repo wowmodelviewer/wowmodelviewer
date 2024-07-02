@@ -69,8 +69,8 @@ bool GameFile::open(bool useMemoryBuffer /* = true */)
 bool GameFile::close()
 {
 	delete[] originalBuffer;
-	originalBuffer = 0;
-	buffer = 0;
+	originalBuffer = nullptr;
+	buffer = nullptr;
 	eof = true;
 	chunks.clear();
 	return doPostCloseOperation();

@@ -45,7 +45,7 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 	//LOG_INFO << "Building FBX Header...";
 
 	// Create an exporter.
-	l_Exporter = 0;
+	l_Exporter = nullptr;
 	l_Exporter = FbxExporter::Create(l_Manager, "");
 
 	if (!l_Exporter->Initialize(l_FileName.toStdString().c_str(), -1, l_Manager->GetIOSettings()))
@@ -282,7 +282,7 @@ void FBXHeaders::storeRestPose(FbxScene* & l_scene, FbxNode* & l_SkeletonRoot)
 	// Not ready yet...
 	return;
 
-	if (l_SkeletonRoot == NULL || l_SkeletonRoot == nullptr)
+	if (l_SkeletonRoot == nullptr || l_SkeletonRoot == nullptr)
 		return;
 	FbxString lNodeName;
 	FbxNode* lKFbxNode;

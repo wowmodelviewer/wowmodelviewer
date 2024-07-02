@@ -7,7 +7,7 @@
 #include "GlobalSettings.h"
 #include "PluginManager.h"
 
-VersionManager::VersionManager(QObject* parent) : QObject(parent), m_standaloneVersion(parent == 0)
+VersionManager::VersionManager(QObject* parent) : QObject(parent), m_standaloneVersion(parent == nullptr)
 {
 	m_fileDownloader = new FileDownloader(this);
 	connect(m_fileDownloader, SIGNAL(downloadFinished(QString &)),

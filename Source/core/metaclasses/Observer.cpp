@@ -52,7 +52,7 @@ std::list<Observable*>::iterator Observer::findObservable(Observable* obs)
 {
 	std::list<Observable*>::iterator l_result = m_observableList.end();
 
-	if (obs != 0)
+	if (obs != nullptr)
 	{
 		std::list<Observable*>::iterator l_it;
 		for (l_it = m_observableList.begin(); l_it != m_observableList.end(); l_it++)

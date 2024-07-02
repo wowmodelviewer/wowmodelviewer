@@ -85,16 +85,16 @@ ItemImporterDialog::ItemImporterDialog(wxWindow* parent /* = NULL */, wxWindowID
 	SetSizer(mainsizer);
 	mainsizer->SetSizeHints(this);
 
-	m_importedItem = 0;
+	m_importedItem = nullptr;
 }
 
 void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 {
 	delete m_importedItem;
-	m_importedItem = 0;
+	m_importedItem = nullptr;
 	if (m_URLname->IsEmpty())
 	{
-		wxMessageDialog* dial = new wxMessageDialog(NULL, wxT("You must enter a URL before clicking Import !"),
+		wxMessageDialog* dial = new wxMessageDialog(nullptr, wxT("You must enter a URL before clicking Import !"),
 		                                            wxT("No URL given"), wxOK | wxICON_WARNING);
 		dial->ShowModal();
 	}
@@ -124,7 +124,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	else
 	{
 		wxMessageDialog* dial = new wxMessageDialog(
-			NULL, wxT(
+			nullptr, wxT(
 				"The URL you entered cannot be reached. Please verify your syntax and check your network connection."),
 			wxT("URL Error"), wxOK | wxICON_WARNING);
 		dial->ShowModal();

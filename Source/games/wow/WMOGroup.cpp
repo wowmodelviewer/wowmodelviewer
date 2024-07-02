@@ -54,17 +54,17 @@ void setGLColor(unsigned int col)
 
 void WMOGroup::initDisplayList()
 {
-	vertices = NULL;
-	normals = NULL;
-	texcoords = NULL;
-	indices = NULL;
-	materials = NULL;
-	batches = 0;
+	vertices = nullptr;
+	normals = nullptr;
+	texcoords = nullptr;
+	indices = nullptr;
+	materials = nullptr;
+	batches = nullptr;
 	nBatches = 0;
 
 	WMOGroupHeader gh;
 
-	short* useLights = 0;
+	short* useLights = nullptr;
 	int nLR = 0;
 
 	// open group file
@@ -94,7 +94,7 @@ void WMOGroup::initDisplayList()
 
 	uint32 size;
 
-	cv = 0;
+	cv = nullptr;
 	hascv = false;
 
 	while (!gf.isEof())
@@ -608,8 +608,8 @@ void WMOGroup::setupFog()
 }
 
 WMOGroup::WMOGroup() :
-	dl(0), ddr(0), vertices(NULL), normals(NULL), texcoords(NULL),
-	indices(NULL), materials(NULL), nTriangles(0), nVertices(0),
+	dl(0), ddr(nullptr), vertices(nullptr), normals(nullptr), texcoords(nullptr),
+	indices(nullptr), materials(nullptr), nTriangles(0), nVertices(0),
 	nIndices(0), nBatches(0)
 {
 }
@@ -629,17 +629,17 @@ void WMOGroup::cleanup()
 	ok = false;
 
 	delete vertices;
-	vertices = 0;
+	vertices = nullptr;
 	delete normals;
-	normals = 0;
+	normals = nullptr;
 	delete texcoords;
-	texcoords = 0;
+	texcoords = nullptr;
 	delete indices;
-	indices = 0;
+	indices = nullptr;
 	delete materials;
-	materials = 0;
+	materials = nullptr;
 	delete batches;
-	batches = 0;
+	batches = nullptr;
 }
 
 void WMOGroup::updateModels(bool load)
@@ -712,7 +712,7 @@ void WMOGroup::init(WMO* Wmo, GameFile& f, int Num, char* names)
 	} else name = "(no name)";
 	*/
 
-	ddr = 0;
+	ddr = nullptr;
 	nDoodads = 0;
 
 	//lq = 0;

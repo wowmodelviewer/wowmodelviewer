@@ -1,6 +1,6 @@
 #include "Game.h"
 
-core::Game* core::Game::m_instance = 0;
+core::Game* core::Game::m_instance = nullptr;
 
 core::Game::Game() : m_folder(nullptr), m_db(nullptr)
 {

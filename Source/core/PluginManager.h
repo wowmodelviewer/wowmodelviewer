@@ -20,7 +20,7 @@ class _PLUGINMANAGER_API_ PluginManager : public Container<Plugin>
 public:
 	static PluginManager& instance()
 	{
-		if (PluginManager::m_instance == 0)
+		if (PluginManager::m_instance == nullptr)
 			PluginManager::m_instance = new PluginManager();
 
 		return *m_instance;

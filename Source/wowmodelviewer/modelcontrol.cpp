@@ -58,8 +58,8 @@ END_EVENT_TABLE()
 ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 	: wxWindow(parent, id, wxDefaultPosition, wxSize(120, 550), 0, wxT("ModelControlFrame"))
 {
-	model = NULL;
-	att = NULL;
+	model = nullptr;
+	att = nullptr;
 
 	LOG_INFO << "Creating Model Control...";
 
@@ -336,7 +336,7 @@ void ModelControl::UpdateModel(Attachment* a)
 
 	init = false;
 
-	WoWModel* m = NULL;
+	WoWModel* m = nullptr;
 	if (a->model())
 		m = static_cast<WoWModel*>(a->model());
 
@@ -764,7 +764,7 @@ bool ModelControl::IsReplacingParticleColors()
 }
 
 ScrWindow::ScrWindow(const wxString& title)
-	: wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxSize(512, 512))
+	: wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(512, 512))
 {
 	wxImage::AddHandler(new wxPNGHandler);
 	sw = new wxScrolledWindow(this);

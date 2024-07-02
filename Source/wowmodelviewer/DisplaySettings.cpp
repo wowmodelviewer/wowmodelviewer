@@ -24,7 +24,7 @@ DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
 
 	top->Add(new wxStaticText(this, wxID_ANY, _("OpenGL Display Mode:"), wxDefaultPosition, wxDefaultSize, 0), 1,
 	         wxEXPAND | wxALL, 10);
-	top->Add(oglMode = new wxComboBox(this, wxID_ANY, _("Default"), wxDefaultPosition, wxSize(360, 25), 0, 0,
+	top->Add(oglMode = new wxComboBox(this, wxID_ANY, _("Default"), wxDefaultPosition, wxSize(360, 25), 0, nullptr,
 	                                  wxCB_READONLY), 1, wxEXPAND, 10);
 
 	top->Add(new wxStaticText(this, wxID_ANY, _("Field of View:"), wxDefaultPosition, wxDefaultSize, 0), 1,

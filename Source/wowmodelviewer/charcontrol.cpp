@@ -71,8 +71,8 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 
 	for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
 	{
-		buttons[i] = NULL;
-		labels[i] = NULL;
+		buttons[i] = nullptr;
+		labels[i] = nullptr;
 	}
 
 	top->Add(new wxStaticText(this, -1, _("Equipment"), wxDefaultPosition, wxSize(200, 20), wxALIGN_CENTRE),
@@ -142,9 +142,9 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	SetScrollRate(5, 5);
 
 	choosingSlot = 0;
-	itemDialog = 0;
-	model = 0;
-	charAtt = 0;
+	itemDialog = nullptr;
+	model = nullptr;
+	charAtt = nullptr;
 }
 
 CharControl::~CharControl()
@@ -576,7 +576,7 @@ void CharControl::selectSet()
 	}
 
 	itemDialog = new FilteredChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"),
-	                                      choices, NULL);
+	                                      choices, nullptr);
 	itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
 	itemDialog->Show();
 }
@@ -680,7 +680,7 @@ void CharControl::selectMount()
 	}
 
 	itemDialog = new CategoryChoiceDialog(this, UPDATE_MOUNT, g_modelViewer, wxT("Choose a mount"),
-	                                      wxT("Mounts"), choices, cats, catnames, 0, true);
+	                                      wxT("Mounts"), choices, cats, catnames, nullptr, true);
 	itemDialog->Move(itemDialog->GetParent()->GetPosition() + wxPoint(4, 64));
 	itemDialog->Check(1, false);
 	itemDialog->DoFilter();
@@ -865,8 +865,8 @@ void CharControl::OnUpdateItem(int type, int id)
 				return;
 			if (g_canvas->root->model())
 			{
-				g_canvas->root->setModel(0);
-				g_canvas->setModel(0);
+				g_canvas->root->setModel(nullptr);
+				g_canvas->setModel(nullptr);
 			}
 			if (numbers[id] < 0) // The user selected "None". Remove existing mount.
 			{

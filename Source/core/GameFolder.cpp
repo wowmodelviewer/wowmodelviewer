@@ -53,7 +53,7 @@ GameFile* core::GameFolder::getFile(QString filename)
 {
 	filename = filename.toLower().replace('\\', '/');
 
-	GameFile* result = 0;
+	GameFile* result = nullptr;
 
 	auto it = m_nameMap.find(filename);
 	if (it != m_nameMap.end())

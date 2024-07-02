@@ -4,11 +4,11 @@
 #include <QPluginLoader>
 #include <QThread>
 
-core::GlobalSettings* Plugin::globalSettings = 0;
-core::Game* Plugin::game = 0;
+core::GlobalSettings* Plugin::globalSettings = nullptr;
+core::Game* Plugin::game = nullptr;
 
-QCoreApplication* Plugin::app = NULL;
-QThread* Plugin::thread = NULL;
+QCoreApplication* Plugin::app = nullptr;
+QThread* Plugin::thread = nullptr;
 
 Plugin::Plugin() : Component(), m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
 {
@@ -18,7 +18,7 @@ Plugin::Plugin() : Component(), m_internalName(""), m_category(""), m_version(""
 Plugin* Plugin::load(std::string path, core::GlobalSettings& settings, core::Game& Game)
 {
 	QString pluginToLoad = QString::fromStdString(path);
-	Plugin* newPlugin = NULL;
+	Plugin* newPlugin = nullptr;
 
 	QPluginLoader loader(pluginToLoad);
 
@@ -64,10 +64,10 @@ void Plugin::transmitSingletonsFromCore(core::GlobalSettings& settings, core::Ga
 
 void Plugin::onExec()
 {
-	if (QCoreApplication::instance() == NULL)
+	if (QCoreApplication::instance() == nullptr)
 	{
 		int argc = 1;
-		char* argv[] = {"plugin.app", NULL};
+		char* argv[] = {"plugin.app", nullptr};
 		app = new QCoreApplication(argc, argv);
 		app->exec();
 		if (app)

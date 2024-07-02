@@ -89,7 +89,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 {
 	if (m_URLname->IsEmpty())
 	{
-		wxMessageDialog* dial = new wxMessageDialog(NULL, wxT("You must enter a URL before clicking Import !"),
+		wxMessageDialog* dial = new wxMessageDialog(nullptr, wxT("You must enter a URL before clicking Import !"),
 		                                            wxT("No URL given"), wxOK | wxICON_WARNING);
 		dial->ShowModal();
 	}
@@ -97,7 +97,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	{
 		QString url = m_URLname->GetValue().utf8_str();
 
-		NPCInfos* result = NULL;
+		NPCInfos* result = nullptr;
 		for (PluginManager::iterator it = PLUGINMANAGER.begin();
 		     it != PLUGINMANAGER.end();
 		     ++it)
@@ -120,7 +120,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 		else
 		{
 			wxMessageDialog* dial = new wxMessageDialog(
-				NULL, wxT(
+				nullptr, wxT(
 					"The URL you entered cannot be reached. Please verify your syntax and check your network connection."),
 				wxT("URL Error"), wxOK | wxICON_WARNING);
 			dial->ShowModal();

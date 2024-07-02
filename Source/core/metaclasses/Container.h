@@ -108,7 +108,7 @@ int Container<DataType>::removeAllChildrenOfType()
 	std::list<DataType*> l_childrenToRemove;
 	for (l_it = m_children.begin(); l_it != m_children.end(); l_it++)
 	{
-		if (dynamic_cast<ChildType*>(*l_it) != 0)
+		if (dynamic_cast<ChildType*>(*l_it) != nullptr)
 		{
 			l_childrenToRemove.push_back(*l_it);
 		}
@@ -149,7 +149,7 @@ bool Container<DataType>::findChildComponent(Component* child, bool recursive /*
 template <class DataType>
 Component* Container<DataType>::getChild(unsigned int index)
 {
-	DataType* l_p_result = 0;
+	DataType* l_p_result = nullptr;
 	if (index < m_children.size())
 	{
 		unsigned int l_index = 0;
@@ -166,7 +166,7 @@ Component* Container<DataType>::getChild(unsigned int index)
 template <class DataType>
 const Component* Container<DataType>::getChild(unsigned int index) const
 {
-	const DataType* l_p_result = 0;
+	const DataType* l_p_result = nullptr;
 	if (index < m_children.size())
 	{
 		unsigned int l_index = 0;

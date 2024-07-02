@@ -12,7 +12,7 @@ core::GameDatabase::~GameDatabase()
 		sqlite3_close(m_db);
 }
 
-core::GameDatabase::GameDatabase() : m_db(NULL), m_fastMode(false)
+core::GameDatabase::GameDatabase() : m_db(nullptr), m_fastMode(false)
 {
 }
 
@@ -44,7 +44,7 @@ sqlResult core::GameDatabase::sqlQuery(const QString& query)
 {
 	sqlResult result;
 
-	char* zErrMsg = 0;
+	char* zErrMsg = nullptr;
 	int rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, (void*)&result, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
@@ -369,7 +369,7 @@ bool core::TableStructure::fill()
 
 DBFile* core::TableStructure::createDBFile()
 {
-	DBFile* result = 0;
+	DBFile* result = nullptr;
 	if (file.contains(".csv"))
 		result = new CSVFile(file);
 

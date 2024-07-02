@@ -37,9 +37,9 @@ public:
 
 	RenderTexture()
 	{
-		m_hPBuffer = NULL;
-		m_hDC = NULL;
-		m_hRC = NULL;
+		m_hPBuffer = nullptr;
+		m_hDC = nullptr;
+		m_hRC = nullptr;
 		m_texID = 0;
 
 		nWidth = 0;
@@ -53,7 +53,7 @@ public:
 
 	~RenderTexture()
 	{
-		if (m_hRC != NULL)
+		if (m_hRC != nullptr)
 			Shutdown();
 	}
 

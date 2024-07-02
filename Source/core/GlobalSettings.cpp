@@ -9,7 +9,7 @@
 #define _BUILDNUMBER 0
 #endif
 
-core::GlobalSettings* core::GlobalSettings::m_instance = 0;
+core::GlobalSettings* core::GlobalSettings::m_instance = nullptr;
 
 core::GlobalSettings::GlobalSettings()
 {
