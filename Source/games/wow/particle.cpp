@@ -748,7 +748,7 @@ void RibbonEmitter::init(GameFile* f, ModelRibbonEmitterDef& mta, std::vector<ui
 	below.init(mta.below, f, globals);
 
 	parent = &(model->bones[mta.bone]);
-	int* texlist = (int*)(f->getBuffer() + mta.ofsTextures);
+	int* texlist = reinterpret_cast<int*>(f->getBuffer() + mta.ofsTextures);
 	// just use the first texture for now; most models I've checked only had one
 	texture = model->getGLTexture(texlist[0]);
 
@@ -757,7 +757,7 @@ void RibbonEmitter::init(GameFile* f, ModelRibbonEmitterDef& mta, std::vector<ui
 	// TODO: figure out actual correct way to calculate length
 	// in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
 	// in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
-	numsegs = (int)mta.res;
+	numsegs = static_cast<int>(mta.res);
 	seglen = mta.length;
 	length = mta.res * seglen;
 

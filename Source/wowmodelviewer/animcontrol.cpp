@@ -612,7 +612,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 		}
 	}
 
-	int count = (int)skins.size();
+	int count = static_cast<int>(skins.size());
 
 	LOG_INFO << "Found" << skins.size() << "skins (Database)";
 
@@ -682,7 +682,7 @@ bool AnimControl::UpdateCreatureModel(WoWModel* m)
 		ret = FillSkinSelector(skins);
 
 		if (!count) // No entries on .dbc and skins.txt
-			count = (int)skins.size();
+			count = static_cast<int>(skins.size());
 
 		if (ret)
 		{
@@ -891,7 +891,7 @@ bool AnimControl::UpdateItemModel(WoWModel* m)
 		if (ret)
 		{
 			// Don't call SetSkin without a skin
-			int mySkin = useRandomLooks ? randint(0, (int)skins.size() - 1) : 0;
+			int mySkin = useRandomLooks ? randint(0, static_cast<int>(skins.size()) - 1) : 0;
 			SetSkin(mySkin);
 		}
 	}
@@ -922,7 +922,7 @@ void AnimControl::SyncBLPSkinList()
 	int sel = skinList->GetSelection();
 	if (sel < 0) // model not currently using a proper texture set, possibly custom
 		return;
-	TextureGroup* grp = (TextureGroup*)skinList->GetClientData(sel);
+	TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(sel));
 
 	for (size_t i = 0; i < 3; i++)
 	{
@@ -1288,7 +1288,7 @@ void AnimControl::SetSkin(int num)
 		g_selModel->replaceParticleColors = false;
 		return;
 	}
-	TextureGroup* grp = (TextureGroup*)skinList->GetClientData(num);
+	TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(num));
 
 	if (!grp) // invalid texture group
 	{
@@ -1337,13 +1337,13 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 	switch (texnum)
 	{
 	case 1:
-		grp = (TextureGroup*)BLPSkinList1->GetClientData(num);
+		grp = static_cast<TextureGroup*>(BLPSkinList1->GetClientData(num));
 		break;
 	case 2:
-		grp = (TextureGroup*)BLPSkinList2->GetClientData(num);
+		grp = static_cast<TextureGroup*>(BLPSkinList2->GetClientData(num));
 		break;
 	case 3:
-		grp = (TextureGroup*)BLPSkinList3->GetClientData(num);
+		grp = static_cast<TextureGroup*>(BLPSkinList3->GetClientData(num));
 		break;
 	default:
 		return;
@@ -1383,7 +1383,7 @@ void AnimControl::SetAnimFrame(size_t frame)
 	g_selModel->animManager->SetFrame(frame);
 
 	frameLabel->SetLabel(wxString::Format(_("Frame: %i"), frame));
-	frameSlider->SetValue((int)frame);
+	frameSlider->SetValue(static_cast<int>(frame));
 }
 
 void AnimControl::UpdateFrameSlider(int maxRange, int tickFreq)

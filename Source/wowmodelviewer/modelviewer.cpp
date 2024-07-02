@@ -1426,7 +1426,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 				{
 					for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
 					{
-						WoWItem* item = charControl->model->getItem((CharSlots)i);
+						WoWItem* item = charControl->model->getItem(static_cast<CharSlots>(i));
 						if (item)
 							item->setId(0);
 					}
@@ -1459,7 +1459,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 				{
 					for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
 					{
-						WoWItem* item = charControl->model->getItem((CharSlots)i);
+						WoWItem* item = charControl->model->getItem(static_cast<CharSlots>(i));
 						if (item)
 							item->setId(0);
 					}
@@ -2228,7 +2228,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 			if (multiVal.size() >= 7)
 			{
 				LOG_INFO << "reading eyeglow from file:" << multiVal[6].toInt();
-				charControl->model->cd.eyeGlowType = (EyeGlowTypes)multiVal[6].toInt();
+				charControl->model->cd.eyeGlowType = static_cast<EyeGlowTypes>(multiVal[6].toInt());
 			}
 			else
 			{
@@ -2581,7 +2581,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 
 		for (unsigned int i = 0; i < NUM_CHAR_SLOTS; i++)
 		{
-			WoWItem* item = g_charControl->model->getItem((CharSlots)i);
+			WoWItem* item = g_charControl->model->getItem(static_cast<CharSlots>(i));
 			if (item)
 			{
 				item->setId(result->equipment[i]);

@@ -620,7 +620,7 @@ void WoWModel::initCommon()
 	}
 
 	// textures
-	ModelTextureDef* texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
+	ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(gamefile->getBuffer() + header.ofsTextures);
 	if (header.nTextures)
 	{
 		textures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
@@ -675,7 +675,7 @@ void WoWModel::initCommon()
 				}
 				else
 				{
-					QString texname((char*)(gamefile->getBuffer() + texdef[I].nameOfs));
+					QString texname(reinterpret_cast<char*>(gamefile->getBuffer() + texdef[I].nameOfs));
 					Tex = GAMEDIRECTORY.getFile(texname);
 				}
 				textures[I] = TEXTUREMANAGER.add(Tex);
@@ -715,7 +715,7 @@ void WoWModel::initCommon()
 				SKA1 ska1;
 				memcpy(&ska1, skelFile->getBuffer(), sizeof(SKA1));
 				header.nAttachments = ska1.nAttachments;
-				ModelAttachmentDef* attachments = (ModelAttachmentDef*)(skelFile->getBuffer() + ska1.ofsAttachments);
+				ModelAttachmentDef* attachments = reinterpret_cast<ModelAttachmentDef*>(skelFile->getBuffer() + ska1.ofsAttachments);
 				for (size_t I = 0; I < ska1.nAttachments; I++)
 				{
 					ModelAttachment att;
@@ -727,7 +727,7 @@ void WoWModel::initCommon()
 				header.nAttachLookup = ska1.nAttachLookup;
 				if (ska1.nAttachLookup > 0)
 				{
-					int16* p = (int16*)(skelFile->getBuffer() + ska1.ofsAttachLookup);
+					int16* p = reinterpret_cast<int16*>(skelFile->getBuffer() + ska1.ofsAttachLookup);
 					if (ska1.nAttachLookup > ATT_MAX)
 						LOG_ERROR << "Model AttachLookup" << ska1.nAttachLookup << "over" << ATT_MAX;
 					for (size_t I = 0; I < ska1.nAttachLookup; I++)
@@ -747,7 +747,7 @@ void WoWModel::initCommon()
 		// attachments
 		if (header.nAttachments)
 		{
-			ModelAttachmentDef* attachments = (ModelAttachmentDef*)(gamefile->getBuffer() + header.ofsAttachments);
+			ModelAttachmentDef* attachments = reinterpret_cast<ModelAttachmentDef*>(gamefile->getBuffer() + header.ofsAttachments);
 			for (size_t I = 0; I < header.nAttachments; I++)
 			{
 				ModelAttachment att;
@@ -759,7 +759,7 @@ void WoWModel::initCommon()
 
 		if (header.nAttachLookup)
 		{
-			int16* p = (int16*)(gamefile->getBuffer() + header.ofsAttachLookup);
+			int16* p = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsAttachLookup);
 			if (header.nAttachLookup > ATT_MAX)
 				LOG_ERROR << "Model AttachLookup" << header.nAttachLookup << "over" << ATT_MAX;
 			for (size_t I = 0; I < header.nAttachLookup; I++)
@@ -776,7 +776,7 @@ void WoWModel::initCommon()
 	if (header.nColors)
 	{
 		colors.resize(header.nColors);
-		ModelColorDef* colorDefs = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
+		ModelColorDef* colorDefs = reinterpret_cast<ModelColorDef*>(gamefile->getBuffer() + header.ofsColors);
 		for (uint I = 0; I < colors.size(); I++)
 			colors[I].init(gamefile, colorDefs[I], globalSequences);
 	}
@@ -785,7 +785,7 @@ void WoWModel::initCommon()
 	if (header.nTransparency)
 	{
 		transparency.resize(header.nTransparency);
-		ModelTransDef* trDefs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
+		ModelTransDef* trDefs = reinterpret_cast<ModelTransDef*>(gamefile->getBuffer() + header.ofsTransparency);
 		for (uint I = 0; I < header.nTransparency; I++)
 			transparency[I].init(gamefile, trDefs[I], globalSequences);
 	}
@@ -1031,7 +1031,7 @@ void WoWModel::initAnimated()
 					fileToUse->read(&skb1, sizeof(skb1));
 					memcpy(&skb1, fileToUse->getBuffer(), sizeof(SKB1));
 					bones.resize(skb1.nBones);
-					ModelBoneDef* mb = (ModelBoneDef*)(fileToUse->getBuffer() + skb1.ofsBones);
+					ModelBoneDef* mb = reinterpret_cast<ModelBoneDef*>(fileToUse->getBuffer() + skb1.ofsBones);
 
 					for (uint i = 0; i < anims.size(); i++)
 						data.animIndexToAnimId[i] = anims[i].animID;
@@ -1074,7 +1074,7 @@ void WoWModel::initAnimated()
 
 		// init bones...
 		bones.resize(header.nBones);
-		ModelBoneDef* mb = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
+		ModelBoneDef* mb = reinterpret_cast<ModelBoneDef*>(gamefile->getBuffer() + header.ofsBones);
 
 		for (uint i = 0; i < anims.size(); i++)
 			data.animIndexToAnimId[i] = anims[i].animID;
@@ -1140,7 +1140,7 @@ void WoWModel::initAnimated()
 	if (header.nTexAnims > 0)
 	{
 		texAnims.resize(header.nTexAnims);
-		ModelTexAnimDef* ta = (ModelTexAnimDef*)(gamefile->getBuffer() + header.ofsTexAnims);
+		ModelTexAnimDef* ta = reinterpret_cast<ModelTexAnimDef*>(gamefile->getBuffer() + header.ofsTexAnims);
 
 		for (uint i = 0; i < texAnims.size(); i++)
 			texAnims[i].init(gamefile, ta[i], globalSequences);
@@ -1148,7 +1148,7 @@ void WoWModel::initAnimated()
 
 	if (header.nEvents)
 	{
-		ModelEventDef* edefs = (ModelEventDef*)(gamefile->getBuffer() + header.ofsEvents);
+		ModelEventDef* edefs = reinterpret_cast<ModelEventDef*>(gamefile->getBuffer() + header.ofsEvents);
 		events.resize(header.nEvents);
 		for (uint i = 0; i < events.size(); i++)
 			events[i].init(edefs[i]);
@@ -1157,7 +1157,7 @@ void WoWModel::initAnimated()
 	// particle systems
 	if (header.nParticleEmitters)
 	{
-		M2ParticleDef* pdefs = (M2ParticleDef*)(gamefile->getBuffer() + header.ofsParticleEmitters);
+		M2ParticleDef* pdefs = reinterpret_cast<M2ParticleDef*>(gamefile->getBuffer() + header.ofsParticleEmitters);
 		M2ParticleDef* pdef;
 		particleSystems.resize(header.nParticleEmitters);
 		hasParticles = true;
@@ -1177,7 +1177,7 @@ void WoWModel::initAnimated()
 	// ribbons
 	if (header.nRibbonEmitters)
 	{
-		ModelRibbonEmitterDef* rdefs = (ModelRibbonEmitterDef*)(gamefile->getBuffer() + header.ofsRibbonEmitters);
+		ModelRibbonEmitterDef* rdefs = reinterpret_cast<ModelRibbonEmitterDef*>(gamefile->getBuffer() + header.ofsRibbonEmitters);
 		ribbons.resize(header.nRibbonEmitters);
 		for (uint i = 0; i < ribbons.size(); i++)
 		{
@@ -1191,7 +1191,7 @@ void WoWModel::initAnimated()
 	{
 		if (header.version[0] <= 9)
 		{
-			ModelCameraDef* camDefs = (ModelCameraDef*)(gamefile->getBuffer() + header.ofsCameras);
+			ModelCameraDef* camDefs = reinterpret_cast<ModelCameraDef*>(gamefile->getBuffer() + header.ofsCameras);
 			for (size_t i = 0; i < header.nCameras; i++)
 			{
 				ModelCamera a;
@@ -1201,7 +1201,7 @@ void WoWModel::initAnimated()
 		}
 		else if (header.version[0] <= 16)
 		{
-			ModelCameraDefV10* camDefs = (ModelCameraDefV10*)(gamefile->getBuffer() + header.ofsCameras);
+			ModelCameraDefV10* camDefs = reinterpret_cast<ModelCameraDefV10*>(gamefile->getBuffer() + header.ofsCameras);
 			for (size_t i = 0; i < header.nCameras; i++)
 			{
 				ModelCamera a;
@@ -1219,7 +1219,7 @@ void WoWModel::initAnimated()
 	if (header.nLights)
 	{
 		lights.resize(header.nLights);
-		ModelLightDef* lDefs = (ModelLightDef*)(gamefile->getBuffer() + header.ofsLights);
+		ModelLightDef* lDefs = reinterpret_cast<ModelLightDef*>(gamefile->getBuffer() + header.ofsLights);
 		for (uint i = 0; i < lights.size(); i++)
 			lights[i].init(gamefile, lDefs[i], globalSequences);
 	}
@@ -1274,10 +1274,10 @@ void WoWModel::setLOD(int index)
 	}
 
 	// Texture definitions
-	ModelTextureDef* texdef = (ModelTextureDef*)(gamefile->getBuffer() + header.ofsTextures);
+	ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(gamefile->getBuffer() + header.ofsTextures);
 
 	// Transparency
-	int16* transLookup = (int16*)(gamefile->getBuffer() + header.ofsTransparencyLookup);
+	int16* transLookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTransparencyLookup);
 
 	if (g->isEof())
 	{
@@ -1286,7 +1286,7 @@ void WoWModel::setLOD(int index)
 		return;
 	}
 
-	ModelView* view = (ModelView*)(g->getBuffer());
+	ModelView* view = reinterpret_cast<ModelView*>(g->getBuffer());
 
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N')
 	{
@@ -1296,8 +1296,8 @@ void WoWModel::setLOD(int index)
 	}
 
 	// Indices,  Triangles
-	uint16* indexLookup = (uint16*)(g->getBuffer() + view->ofsIndex);
-	uint16* triangles = (uint16*)(g->getBuffer() + view->ofsTris);
+	uint16* indexLookup = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsIndex);
+	uint16* triangles = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsTris);
 	rawIndices.clear();
 	rawIndices.resize(view->nTris);
 
@@ -1309,12 +1309,12 @@ void WoWModel::setLOD(int index)
 	indices = rawIndices;
 
 	// render ops
-	ModelGeoset* ops = (ModelGeoset*)(g->getBuffer() + view->ofsSub);
-	ModelTexUnit* Tex = (ModelTexUnit*)(g->getBuffer() + view->ofsTex);
-	ModelRenderFlags* renderFlags = (ModelRenderFlags*)(gamefile->getBuffer() + header.ofsTexFlags);
-	uint16* texlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexLookup);
-	uint16* texanimlookup = (uint16*)(gamefile->getBuffer() + header.ofsTexAnimLookup);
-	int16* texunitlookup = (int16*)(gamefile->getBuffer() + header.ofsTexUnitLookup);
+	ModelGeoset* ops = reinterpret_cast<ModelGeoset*>(g->getBuffer() + view->ofsSub);
+	ModelTexUnit* Tex = reinterpret_cast<ModelTexUnit*>(g->getBuffer() + view->ofsTex);
+	ModelRenderFlags* renderFlags = reinterpret_cast<ModelRenderFlags*>(gamefile->getBuffer() + header.ofsTexFlags);
+	uint16* texlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexLookup);
+	uint16* texanimlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexAnimLookup);
+	int16* texunitlookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTexUnitLookup);
 
 	uint32 istart = 0;
 	for (size_t i = 0; i < view->nSub; i++)
@@ -1630,7 +1630,7 @@ void WoWModel::animate(ssize_t Anim)
 			glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbuf);
 			glBufferDataARB(GL_ARRAY_BUFFER_ARB, 2 * vbufsize, nullptr, GL_STREAM_DRAW_ARB);
 
-			vertices = (glm::vec3*)glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY);
+			vertices = static_cast<glm::vec3*>(glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_WRITE_ONLY));
 		}
 
 		// transform vertices
@@ -1646,8 +1646,8 @@ void WoWModel::animate(ssize_t Anim)
 				{
 					glm::vec3 tv = glm::vec3(bones[ov_it->bones[b]].mat * glm::vec4(ov_it->pos, 1.0f));
 					glm::vec3 tn = glm::vec3(bones[ov_it->bones[b]].mrot * glm::vec4(ov_it->normal, 1.0f));
-					v += tv * ((float)ov_it->weights[b] / 255.0f);
-					n += tn * ((float)ov_it->weights[b] / 255.0f);
+					v += tv * (static_cast<float>(ov_it->weights[b]) / 255.0f);
+					n += tn * (static_cast<float>(ov_it->weights[b]) / 255.0f);
 				}
 			}
 
@@ -3919,8 +3919,8 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
-	int a = (int)group * 100;
-	int b = ((int)group + 1) * 100;
+	int a = static_cast<int>(group) * 100;
+	int b = (static_cast<int>(group) + 1) * 100;
 	int geosetID = a + val;
 
 	// This loop must be done only on first geosets (original ones) in case of merged models
@@ -4273,7 +4273,7 @@ void WoWModel::refresh()
 		{
 			for (auto it : helmetInfos.values)
 			{
-				setGeosetGroupDisplay((CharGeosets)it[0].toInt(), 0);
+				setGeosetGroupDisplay(static_cast<CharGeosets>(it[0].toInt()), 0);
 			}
 		}
 	}
@@ -4321,7 +4321,7 @@ void WoWModel::refresh()
 
 	// Reset geosets
 	for (auto geo : cd.geosets)
-		setGeosetGroupDisplay((CharGeosets)geo.first, geo.second);
+		setGeosetGroupDisplay(static_cast<CharGeosets>(geo.first), geo.second);
 
 	// finalize character texture
 	const GLuint charTex = 0;

@@ -1130,7 +1130,7 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 				{
 					nextpos = mcnk_pos + header.ofsAlpha + header.sizeAlpha;
 				}
-				f.seek((int)nextpos);
+				f.seek(static_cast<int>(nextpos));
 				//gLog("mcnk %d, pos %d, size %d, ofsAlpha %d, sizeAlpha %d, nextpos %d\n", mcnk_pos, f.getPos(), size, header.ofsAlpha, header.sizeAlpha, nextpos);
 			}
 			// MCLQ sometimes has wrong size, like StratholmeCOT
@@ -1149,14 +1149,14 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 				else
 				{
 					nextpos = mcnk_pos + header.ofsSndEmitters;
-					f.seek((int)nextpos);
+					f.seek(static_cast<int>(nextpos));
 					f.read(fcc, 4);
 					//          flipcc(fcc); // in former mpq.h
 					fcc[4] = 0;
 					if (strncmp(fcc, "MCSE", 4) != 0)
 						break; // nothing behind MCLQ, just break;
 				}
-				f.seek((int)nextpos);
+				f.seek(static_cast<int>(nextpos));
 				//gLog("mcnk %d, pos %d, Size %d, ofsAlpha %d, sizeAlpha %d, nextpos %d\n", mcnk_pos, f.getPos(), size, header.ofsAlpha, header.sizeAlpha, nextpos);
 			}
 			continue;
@@ -1243,7 +1243,7 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 					f.read(nor, 3);
 					// order Z,X,Y ?
 					//*ttn++ = glm::vec3((float)nor[0]/127.0f, (float)nor[2]/127.0f, (float)nor[1]/127.0f);
-					*ttn++ = glm::vec3(-(float)nor[1] / 127.0f, (float)nor[2] / 127.0f, -(float)nor[0] / 127.0f);
+					*ttn++ = glm::vec3(-static_cast<float>(nor[1]) / 127.0f, static_cast<float>(nor[2]) / 127.0f, -static_cast<float>(nor[0]) / 127.0f);
 				}
 			}
 		}
@@ -1444,13 +1444,13 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 								unsigned char c = *abuf++;
 								if (i != 31)
 								{
-									*p++ = (unsigned char)((255 * ((int)(c & 0x0f))) / 0x0f);
-									*p++ = (unsigned char)((255 * ((int)(c & 0xf0))) / 0xf0);
+									*p++ = static_cast<unsigned char>((255 * ((int)(c & 0x0f))) / 0x0f);
+									*p++ = static_cast<unsigned char>((255 * ((int)(c & 0xf0))) / 0xf0);
 								}
 								else
 								{
-									*p++ = (unsigned char)((255 * ((int)(c & 0x0f))) / 0x0f);
-									*p++ = (unsigned char)((255 * ((int)(c & 0x0f))) / 0x0f);
+									*p++ = static_cast<unsigned char>((255 * ((int)(c & 0x0f))) / 0x0f);
+									*p++ = static_cast<unsigned char>((255 * ((int)(c & 0x0f))) / 0x0f);
 								}
 							}
 						}
@@ -1589,7 +1589,7 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 		{
 			LOG_ERROR << "No implement mcnk subchunk" << fcc << "[" << Size << "]";
 		}
-		f.seek((int)nextpos);
+		f.seek(static_cast<int>(nextpos));
 	}
 
 	// create vertex buffers
@@ -2042,10 +2042,10 @@ void MapChunk::drawWater()
 					a1 = a2 = a3 = a4 = 1.0f;
 					if (layer.alphas.size() != 0)
 					{
-						a1 = (float)layer.alphas[p1] / 255.f * 1.5f + 0.3f; // whats the magic formular here ???
-						a2 = (float)layer.alphas[p2] / 255.f * 1.5f + 0.3f;
-						a3 = (float)layer.alphas[p3] / 255.f * 1.5f + 0.3f;
-						a4 = (float)layer.alphas[p4] / 255.f * 1.5f + 0.3f;
+						a1 = static_cast<float>(layer.alphas[p1]) / 255.f * 1.5f + 0.3f; // whats the magic formular here ???
+						a2 = static_cast<float>(layer.alphas[p2]) / 255.f * 1.5f + 0.3f;
+						a3 = static_cast<float>(layer.alphas[p3]) / 255.f * 1.5f + 0.3f;
+						a4 = static_cast<float>(layer.alphas[p4]) / 255.f * 1.5f + 0.3f;
 					}
 
 					// height values helper

@@ -357,7 +357,7 @@ void FBXHeaders::createAnimation(WoWModel* l_model, FbxScene*& l_scene, QString 
 	{
 		//LOG_INFO << "Starting frame" << t;
 		FbxTime time;
-		time.SetSecondDouble((float)t / 1000.0);
+		time.SetSecondDouble(static_cast<float>(t) / 1000.0);
 
 		for (auto& it : skeleton)
 		{

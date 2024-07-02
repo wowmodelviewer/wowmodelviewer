@@ -275,7 +275,7 @@ void FBXExporter::linkMeshAndSkeleton()
 	}
 
 	// add cluster to skin
-	FbxGeometry* lMeshAttribute = (FbxGeometry*)m_p_meshNode->GetNodeAttribute();
+	FbxGeometry* lMeshAttribute = static_cast<FbxGeometry*>(m_p_meshNode->GetNodeAttribute());
 	FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
 
 	for (auto it : m_boneClusters)
@@ -354,7 +354,7 @@ void FBXExporter::createMaterials()
 			FbxString mtrl_name = m_p_model->name().mid(m_p_model->name().lastIndexOf('/') + 1).toStdString().c_str();
 			mtrl_name.Append("_", 1);
 			char tmp[32];
-			_itoa((int)i, tmp, 10);
+			_itoa(static_cast<int>(i), tmp, 10);
 			mtrl_name.Append(tmp, strlen(tmp));
 
 			// Create material.
@@ -407,7 +407,7 @@ void FBXExporter::createMaterials()
 						                             c_str();
 						mtrl_name.Append("_", 1);
 						char tmp[32];
-						_itoa((int)i, tmp, 10);
+						_itoa(static_cast<int>(i), tmp, 10);
 						mtrl_name.Append(tmp, strlen(tmp));
 
 						// Create material.

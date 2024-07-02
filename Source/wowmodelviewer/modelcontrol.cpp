@@ -467,7 +467,7 @@ void ModelControl::UpdateGeosetSelection()
 		return;
 	for (auto it = begin(GeosetTreeItemIds); it != end(GeosetTreeItemIds); ++it)
 	{
-		GeosetTreeItemData* data = (GeosetTreeItemData*)clbGeosets->GetItemData(*it);
+		GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(*it));
 		size_t id = data->geosetId;
 		clbGeosets->SetItemBackgroundColour(*it,
 		                                    (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
@@ -590,7 +590,7 @@ void ModelControl::OnCombo(wxCommandEvent& event)
 	{
 		/* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
 		int CurrentSelection = modelname->GetCurrentSelection();
-		if (CurrentSelection < (int)attachments.size())
+		if (CurrentSelection < static_cast<int>(attachments.size()))
 		{
 			UpdateModel(attachments[CurrentSelection]);
 			att = attachments[CurrentSelection];
@@ -612,7 +612,7 @@ void ModelControl::OnList(wxTreeEvent& event)
 	if (id == ID_MODEL_GEOSETS)
 	{
 		wxTreeItemId curItem = clbGeosets->GetSelection();
-		GeosetTreeItemData* data = (GeosetTreeItemData*)clbGeosets->GetItemData(curItem);
+		GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(curItem));
 		if (data)
 		{
 			size_t geosetIndex = data->geosetId;
@@ -648,7 +648,7 @@ void ModelControl::OnSlider(wxScrollEvent& event)
 
 glm::vec4 ModelControl::fromColWidget(wxColour col)
 {
-	return glm::vec4((float)col.Red() / 255.0f, (float)col.Green() / 255.0f, (float)col.Blue() / 255.0f, 1.0);
+	return glm::vec4(static_cast<float>(col.Red()) / 255.0f, static_cast<float>(col.Green()) / 255.0f, static_cast<float>(col.Blue()) / 255.0f, 1.0);
 }
 
 void ModelControl::OnEnter(wxCommandEvent& event)

@@ -278,7 +278,7 @@ public:
 			AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsKeys + j * sizeof(
 				AnimationBlockHeader));
 
-			D* keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
+			D* keys = reinterpret_cast<D*>(f->getBuffer() + pHeadKeys->ofsEntrys);
 			switch (type)
 			{
 			case INTERPOLATION_NONE:
@@ -362,14 +362,14 @@ public:
 				skelfile->setChunk("SKB1");
 				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(skelfile->getBuffer() + b.ofsKeys + j * sizeof(
 					AnimationBlockHeader));
-				keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
+				keys = reinterpret_cast<D*>(animfile->getBuffer() + pHeadKeys->ofsEntrys);
 				if (animfile->getSize() < pHeadKeys->ofsEntrys)
 					continue;
 			}
 			else
 			{
 				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j * sizeof(AnimationBlockHeader));
-				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
+				keys = reinterpret_cast<D*>(f.getBuffer() + pHeadKeys->ofsEntrys);
 				if (f.getSize() < pHeadKeys->ofsEntrys)
 					continue;
 			}

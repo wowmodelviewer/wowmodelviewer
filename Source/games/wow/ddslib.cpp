@@ -575,27 +575,27 @@ int DDSDecompressDXT5(unsigned char* src, int width, int height, unsigned char* 
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	alphaZero = *((unsigned int*)&colors[0]);
+	alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
 	for (y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
-		block = (ddsColorBlock_t*)(src + y * xBlocks * 16);
+		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
 
 		/* walk x */
 		for (x = 0; x < xBlocks; x++, block++)
 		{
 			/* get alpha block */
-			alphaBlock = (ddsAlphaBlock3BitLinear_t*)block;
+			alphaBlock = reinterpret_cast<ddsAlphaBlock3BitLinear_t*>(block);
 
 			/* get color block */
 			block++;
 			DDSGetColorBlockColors(block, colors);
 
 			/* decode color block */
-			pixel = (unsigned int*)(dest + x * 16 + (y * 4) * width * 4);
-			DDSDecodeColorBlock(pixel, block, width, (unsigned int*)colors);
+			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 
 			/* overwrite alpha bits with alpha block */
 			DDSDecodeAlpha3BitLinear(pixel, alphaBlock, width, alphaZero);

@@ -768,7 +768,7 @@ void ModelCanvas::Render(wxPaintEvent& WXUNUSED(event))
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	glm::mat4 projection = glm::perspective(video.fov, (float)w / (float)h, 0.1f, 1280 * 5.f);
+	glm::mat4 projection = glm::perspective(video.fov, static_cast<float>(w) / static_cast<float>(h), 0.1f, 1280 * 5.f);
 	glMultMatrixf((glm::value_ptr(projection)));
 
 	// setup camera
@@ -1389,7 +1389,7 @@ void ModelCanvas::RenderToBuffer()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	glm::mat4 projection = glm::perspective(video.fov, (float)rt->nWidth / (float)rt->nHeight, 0.1f, 1280 * 5.f);
+	glm::mat4 projection = glm::perspective(video.fov, static_cast<float>(rt->nWidth) / static_cast<float>(rt->nHeight), 0.1f, 1280 * 5.f);
 	glMultMatrixf((glm::value_ptr(projection)));
 
 	// setup camera
@@ -1826,7 +1826,7 @@ void ModelCanvas::displayDebugInfos() const
 	if (elapsedTime > 0.25) // update 4 times per second
 	{
 		previousTime = currentTime;
-		const auto fps = (double)frameCount / elapsedTime;
+		const auto fps = static_cast<double>(frameCount) / elapsedTime;
 		const auto msPerFrame = 1000.0 / fps;
 
 		wxString title;
@@ -1838,7 +1838,7 @@ void ModelCanvas::displayDebugInfos() const
 			appTitle, fps, msPerFrame, camera.yaw(), camera.pitch(), camera.radius(), look.x, look.y, look.z, pos.x,
 			pos.y, pos.z, right.x, right.y, right.z);
 
-		((wxTopLevelWindow*)wxTheApp->GetTopWindow())->SetTitle(title);
+		static_cast<wxTopLevelWindow*>(wxTheApp->GetTopWindow())->SetTitle(title);
 
 		frameCount = 0;
 	}
@@ -1851,7 +1851,7 @@ void ModelCanvas::toggleOpenGLDebug()
 	openGLDebug_ = !openGLDebug_;
 
 	if (!openGLDebug_)
-		((wxTopLevelWindow*)wxTheApp->GetTopWindow())->SetTitle(GLOBALSETTINGS.appTitle());
+		static_cast<wxTopLevelWindow*>(wxTheApp->GetTopWindow())->SetTitle(GLOBALSETTINGS.appTitle());
 }
 
 void ModelCanvas::setModel(WoWModel* m, bool keepPrevious)

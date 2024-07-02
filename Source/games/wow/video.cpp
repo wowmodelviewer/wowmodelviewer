@@ -551,7 +551,7 @@ bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
 				capsList[i].sampleBuffer == curCap.sampleBuffer &&
 				capsList[i].aaSamples == curCap.aaSamples)
 			{
-				capIndex = (int)i;
+				capIndex = static_cast<int>(i);
 				break;
 			}
 		}
@@ -718,7 +718,7 @@ void VideoSettings::ResizeGLScene(int width, int height) // Resize And Initializ
 	glLoadIdentity(); // Reset The Projection Matrix
 
 	// Calculate The Aspect Ratio Of The Window
-	gluPerspective(fov, (float)width / (float)height, 0.1f, 1280 * 5);
+	gluPerspective(fov, static_cast<float>(width) / static_cast<float>(height), 0.1f, 1280 * 5);
 
 	glMatrixMode(GL_MODELVIEW); // Select The Modelview Matrix
 	glLoadIdentity(); // Reset The Modelview Matrix

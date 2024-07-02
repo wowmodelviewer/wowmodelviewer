@@ -493,21 +493,21 @@ void LightControl::Update()
 	//colour->SetBackgroundColour(col);
 
 	// Ambience
-	wxColour col = wxColour((unsigned char)(lights[activeLight].ambience.x * 255.0f),
-	                        (unsigned char)(lights[activeLight].ambience.y * 255.0f),
-	                        (unsigned char)(lights[activeLight].ambience.z * 255.0f));
+	wxColour col = wxColour(static_cast<unsigned char>(lights[activeLight].ambience.x * 255.0f),
+	                        static_cast<unsigned char>(lights[activeLight].ambience.y * 255.0f),
+	                        static_cast<unsigned char>(lights[activeLight].ambience.z * 255.0f));
 	ambience->SetBackgroundColour(col);
 
 	// Diffuse
-	col = wxColour((unsigned char)(lights[activeLight].diffuse.x * 255.0f),
-	               (unsigned char)(lights[activeLight].diffuse.y * 255.0f),
-	               (unsigned char)(lights[activeLight].diffuse.z * 255.0f));
+	col = wxColour(static_cast<unsigned char>(lights[activeLight].diffuse.x * 255.0f),
+	               static_cast<unsigned char>(lights[activeLight].diffuse.y * 255.0f),
+	               static_cast<unsigned char>(lights[activeLight].diffuse.z * 255.0f));
 	diffuse->SetBackgroundColour(col);
 
 	// Specular
-	col = wxColour((unsigned char)(lights[activeLight].specular.x * 255.0f),
-	               (unsigned char)(lights[activeLight].specular.y * 255.0f),
-	               (unsigned char)(lights[activeLight].specular.z * 255.0f));
+	col = wxColour(static_cast<unsigned char>(lights[activeLight].specular.x * 255.0f),
+	               static_cast<unsigned char>(lights[activeLight].specular.y * 255.0f),
+	               static_cast<unsigned char>(lights[activeLight].specular.z * 255.0f));
 	specular->SetBackgroundColour(col);
 	// -- -- -- --
 
@@ -548,10 +548,10 @@ void LightControl::Update()
 	txtTarZ->SetValue(pos);
 	// -- -- --
 
-	cintensity->SetValue(int(lights[activeLight].constant_int * 100));
-	lintensity->SetValue(int(lights[activeLight].linear_int * 100));
-	qintensity->SetValue(int(lights[activeLight].quadradic_int * 100));
-	alpha->SetValue(int(lights[activeLight].arc));
+	cintensity->SetValue(static_cast<int>(lights[activeLight].constant_int * 100));
+	lintensity->SetValue(static_cast<int>(lights[activeLight].linear_int * 100));
+	qintensity->SetValue(static_cast<int>(lights[activeLight].quadradic_int * 100));
+	alpha->SetValue(static_cast<int>(lights[activeLight].arc));
 
 	cintensity->Enable(false);
 	lintensity->Enable(false);

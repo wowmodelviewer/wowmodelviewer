@@ -709,7 +709,7 @@ void CharControl::selectNPC(ssize_t type)
 		for (auto& value : npccats.values)
 		{
 			catnames.Add(value[1].toStdWString());
-			typeLookup[value[0].toInt()] = (int)catnames.size() - 1;
+			typeLookup[value[0].toInt()] = static_cast<int>(catnames.size()) - 1;
 		}
 	}
 
@@ -767,7 +767,7 @@ void CharControl::OnUpdateItem(int type, int id)
 	{
 	case UPDATE_ITEM:
 		{
-			WoWItem* item = model->getItem((CharSlots)choosingSlot);
+			WoWItem* item = model->getItem(static_cast<CharSlots>(choosingSlot));
 			if (item)
 			{
 				item->setId(numbers[id]);
@@ -921,7 +921,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			{
 				model->animManager->Stop();
 				model->currentAnim = model->animLookups[ANIMATION_MOUNT];
-				model->animManager->SetAnim(0, (short)model->currentAnim, 0);
+				model->animManager->SetAnim(0, static_cast<short>(model->currentAnim), 0);
 			}
 
 			if (charAtt)
@@ -1073,7 +1073,7 @@ void CharControl::tryToEquipItem(int id)
 		int itemSlot = itemr.slot();
 		if (itemSlot != -1)
 		{
-			WoWItem* item = model->getItem((CharSlots)itemSlot);
+			WoWItem* item = model->getItem(static_cast<CharSlots>(itemSlot));
 			if (item)
 			{
 				item->setId(id);

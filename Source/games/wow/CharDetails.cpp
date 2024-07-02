@@ -651,7 +651,7 @@ void CharDetails::refreshSkinnedModels()
 		for (const auto m : elt.second.models)
 		{
 			auto* model = model_->mergeModel(m.first);
-			model->setGeosetGroupDisplay((CharGeosets)m.second.first, m.second.second);
+			model->setGeosetGroupDisplay(static_cast<CharGeosets>(m.second.first), m.second.second);
 			models_.emplace_back(m.first, m.second);
 		}
 	}

@@ -537,10 +537,10 @@ void WMOGroup::drawDoodads(int doodadset)
 		}
 		else
 		{
-			inSet = (((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + (int)wmo->
-					doodadsets[doodadset].size)))
+			inSet = (((dd >= wmo->doodadsets[doodadset].start) && (dd < (wmo->doodadsets[doodadset].start + static_cast<int>(wmo->
+					doodadsets[doodadset].size))))
 				|| (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start +
-					(int)wmo->doodadsets[0].size)))));
+					static_cast<int>(wmo->doodadsets[0].size))))));
 		}
 
 		if (inSet)
@@ -659,10 +659,9 @@ void WMOGroup::updateModels(bool load)
 		}
 		else
 		{
-			inSet = (((dd >= wmo->doodadsets[wmo->doodadset].start) && (dd < (wmo->doodadsets[wmo->doodadset].start + (
-					int)wmo->doodadsets[wmo->doodadset].size)))
+			inSet = (((dd >= wmo->doodadsets[wmo->doodadset].start) && (dd < (wmo->doodadsets[wmo->doodadset].start + static_cast<int>(wmo->doodadsets[wmo->doodadset].size))))
 				|| (wmo->includeDefaultDoodads && (dd >= wmo->doodadsets[0].start) && ((dd < (wmo->doodadsets[0].start +
-					(int)wmo->doodadsets[0].size)))));
+					static_cast<int>(wmo->doodadsets[0].size))))));
 		}
 
 		if (inSet)

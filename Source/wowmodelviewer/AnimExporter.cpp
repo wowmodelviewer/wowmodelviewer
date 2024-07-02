@@ -540,7 +540,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	AviGen.SetBitmapHeader(bmHeader);
 	AviGen.SetFileName(fn.fn_str());
 
-	AviGen.InitEngineForWrite((HWND)this->GetParent()->GetHandle());
+	AviGen.InitEngineForWrite(static_cast<HWND>(this->GetParent()->GetHandle()));
 
 	// Stop our animation
 	g_canvas->model()->animManager->Pause(true);
@@ -553,7 +553,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	for (unsigned int i = 0; i < m_iTotalFrames; i++)
 	{
 		g_canvas->RenderToBuffer();
-		glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
+		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGR_EXT, GL_UNSIGNED_BYTE, buffer);
 		AviGen.AddFrame(buffer);
 
 		// not needed due to the code just below
@@ -562,9 +562,9 @@ void CAnimationExporter::CreateAvi(wxString fn)
 
 		// Animate particles
 		if (g_canvas->root)
-			g_canvas->root->tick((float)m_iTimeStep);
+			g_canvas->root->tick(static_cast<float>(m_iTimeStep));
 		if (g_canvas->sky)
-			g_canvas->sky->tick((float)m_iTimeStep);
+			g_canvas->sky->tick(static_cast<float>(m_iTimeStep));
 	}
 
 	// Release our Avi writing object
