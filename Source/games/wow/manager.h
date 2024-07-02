@@ -24,7 +24,7 @@ class _MANAGEDITEM_API_ ManagedItem
 	QString m_itemName;
 
 public:
-	ManagedItem(QString n): m_refcount(0), m_itemName(n)
+	ManagedItem(QString n): m_refcount(0), m_itemName(std::move(n))
 	{
 	}
 

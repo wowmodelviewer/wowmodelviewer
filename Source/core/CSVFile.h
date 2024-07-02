@@ -16,7 +16,7 @@
 class _CSVFILE_API_ CSVFile : public DBFile
 {
 public:
-	explicit CSVFile(const QString& file);
+	explicit CSVFile(QString file);
 	~CSVFile();
 
 	bool open();

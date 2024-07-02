@@ -3,7 +3,7 @@
 #include <QFile>
 #include "Game.h"
 
-CSVFile::CSVFile(const QString& file) : DBFile(), m_file(file)
+CSVFile::CSVFile(QString file) : DBFile(), m_file(std::move(file))
 {
 }
 

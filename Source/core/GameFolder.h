@@ -28,7 +28,7 @@ namespace core
 	class _GAMEFOLDER_API_ GameFolder : public Container<GameFile>
 	{
 	public:
-		explicit GameFolder(const QString& path);
+		explicit GameFolder(QString path);
 
 		virtual ~GameFolder()
 		{

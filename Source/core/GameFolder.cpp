@@ -2,7 +2,7 @@
 #include <QRegularExpression>
 #include "logger/Logger.h"
 
-core::GameFolder::GameFolder(const QString& path) : m_path(path)
+core::GameFolder::GameFolder(QString path) : m_path(std::move(path))
 {
 }
 

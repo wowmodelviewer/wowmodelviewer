@@ -5,7 +5,7 @@
 #include "logger/Logger.h"
 
 HardDriveFile::HardDriveFile(QString path, QString real, int id)
-	: CASCFile(path, id), opened(false), realpath(real), file(nullptr)
+	: CASCFile(path, id), opened(false), realpath(std::move(real)), file(nullptr)
 {
 }
 
