@@ -9,10 +9,10 @@ core::GameFolder::GameFolder(const QString& path) : m_path(path)
 QString core::GameFolder::getFullPathForFile(QString file)
 {
 	file = file.toLower();
-	for (GameFolder::iterator it = begin(); it != end(); ++it)
+	for (auto it : *this)
 	{
-		if ((*it)->name() == file)
-			return (*it)->fullname();
+		if (it->name() == file)
+			return it->fullname();
 	}
 
 	return "";
@@ -20,9 +20,8 @@ QString core::GameFolder::getFullPathForFile(QString file)
 
 void core::GameFolder::getFilesForFolder(std::vector<GameFile*>& fileNames, QString folderPath, QString extension)
 {
-	for (GameFolder::iterator it = begin(); it != end(); ++it)
+	for (auto file : *this)
 	{
-		GameFile* file = *it;
 		if (file->fullname().startsWith(folderPath, Qt::CaseInsensitive) &&
 			(!extension.size() || file->fullname().endsWith(extension, Qt::CaseInsensitive)))
 		{
@@ -40,11 +39,11 @@ void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filt
 		LOG_ERROR << regex.errorString();
 		return;
 	}
-	for (GameFolder::iterator it = begin(); it != end(); ++it)
+	for (auto it : *this)
 	{
-		if ((*it)->name().contains(regex))
+		if (it->name().contains(regex))
 		{
-			dest.insert(*it);
+			dest.insert(it);
 		}
 	}
 }

@@ -94,8 +94,8 @@ public:
 	MapNode(int x, int y, int s)
 		: px(x), py(y), size(s), vmin(0), vmax(0), vcenter(0), mt(nullptr)
 	{
-		for (int i = 0; i < 4; i++)
-			children[i] = nullptr;
+		for (auto& i : children)
+			i = nullptr;
 	}
 
 	virtual ~MapNode()
@@ -154,13 +154,13 @@ public:
 	{
 		waterlevel[0] = 0;
 		waterlevel[1] = 0;
-		for (int i = 0; i < 4; i++)
+		for (unsigned int& texture : textures)
 		{
-			textures[i] = 0;
+			texture = 0;
 		}
-		for (int i = 0; i < 3; i++)
+		for (unsigned int& alphamap : alphamaps)
 		{
-			alphamaps[i] = 0;
+			alphamap = 0;
 		}
 	}
 

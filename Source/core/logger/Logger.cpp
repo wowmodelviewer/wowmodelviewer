@@ -22,10 +22,8 @@ void Logger::init()
 void Logger::writeLog(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
 	QString message = Logger::formatLog(type, context, msg);
-	for (Logger::iterator it = LOGGER.begin();
-	     it != LOGGER.end();
-	     ++it)
-		(*it)->write(message);
+	for (auto it : LOGGER)
+		it->write(message);
 }
 
 QString Logger::formatLog(QtMsgType type, const QMessageLogContext& context, const QString& msg)

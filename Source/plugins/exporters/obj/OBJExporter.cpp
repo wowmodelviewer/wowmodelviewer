@@ -139,15 +139,13 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 				obj << "# " << "\n";
 				obj << "# " << (*it)->name() << "\n";
 				obj << "# " << "\n";
-				for (std::map<POSITION_SLOTS, WoWModel*>::iterator It = itemModels.begin();
-				     It != itemModels.end();
-				     ++It)
+				for (auto& It : itemModels)
 				{
-					WoWModel* itemModel = It->second;
+					WoWModel* itemModel = It.second;
 					LOG_INFO << "Exporting attached item" << itemModel->modelname.c_str();
 
 					// find matrix
-					int l = model->attLookup[It->first];
+					int l = model->attLookup[It.first];
 					glm::mat4 M;
 					glm::vec3 pos;
 					if (l > -1)

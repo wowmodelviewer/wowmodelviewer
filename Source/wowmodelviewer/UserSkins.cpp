@@ -70,15 +70,15 @@ void UserSkins::LoadFile(const wxString& filename)
 		{
 			TextureGroup grp;
 			int count = 0;
-			for (size_t i = 0; i < TextureGroup::num; ++i)
+			for (auto& i : grp.tex)
 			{
 				if (!readline(in, line, lineNr))
 				{
 					LOG_ERROR << "UserSkins: unexpected EOF at line" << lineNr;
 					return;
 				}
-				grp.tex[i] = GAMEDIRECTORY.getFile(line.c_str());
-				if (grp.tex[i])
+				i = GAMEDIRECTORY.getFile(line.c_str());
+				if (i)
 					count++;
 			}
 			grp.base = TEXTURE_GAMEOBJECT1;
@@ -103,8 +103,8 @@ bool UserSkins::AddUserSkins(const wxString& model, TextureSet& set)
 		return false;
 
 	TextureSet& myset = it->second;
-	for (TextureSet::iterator i = myset.begin(); i != myset.end(); ++i)
-		set.insert(*i);
+	for (const auto& i : myset)
+		set.insert(i);
 	return true;
 }
 

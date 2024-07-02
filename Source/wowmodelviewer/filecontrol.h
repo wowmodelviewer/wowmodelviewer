@@ -77,13 +77,11 @@ private:
 
 		void createTreeItems(wxTreeCtrl* tree)
 		{
-			for (std::map<QString, TreeStackItem*>::iterator it = m_childrenMap.begin();
-			     it != m_childrenMap.end();
-			     ++it)
+			for (auto& it : m_childrenMap)
 			{
-				TreeStackItem* child = it->second;
-				child->id = tree->AppendItem(id, it->second->name().toStdWString(), -1, -1,
-				                             ((it->second->file) ? new FileTreeData(it->second->file) : nullptr));
+				TreeStackItem* child = it.second;
+				child->id = tree->AppendItem(id, it.second->name().toStdWString(), -1, -1,
+				                             ((it.second->file) ? new FileTreeData(it.second->file) : nullptr));
 				child->createTreeItems(tree);
 			}
 		}

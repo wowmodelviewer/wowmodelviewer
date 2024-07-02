@@ -25,23 +25,21 @@ void VersionManager::updateCurrentVersionInfo()
 	m_currentVersionsMap.insert(std::make_pair(appName, appVersion));
 
 	// init plugins infos
-	for (PluginManager::iterator it = PLUGINMANAGER.begin();
-	     it != PLUGINMANAGER.end();
-	     ++it)
+	for (auto it : PLUGINMANAGER)
 	{
-		QString pluginName((*it)->name());
-		QString pluginVersion((*it)->version().c_str());
+		QString pluginName(it->name());
+		QString pluginVersion(it->version().c_str());
 		m_currentVersionsMap.insert(std::make_pair(pluginName, pluginVersion));
 	}
 }
 
 QString VersionManager::getLastVersionFor(QString& name)
 {
-	for (unsigned int i = 0; i < m_lastVersionInfos.size(); i++)
+	for (auto& m_lastVersionInfo : m_lastVersionInfos)
 	{
-		if (m_lastVersionInfos[i]["name"].toString() == name)
+		if (m_lastVersionInfo["name"].toString() == name)
 		{
-			return m_lastVersionInfos[i]["version"].toString();
+			return m_lastVersionInfo["version"].toString();
 		}
 	}
 	return "";
@@ -102,9 +100,9 @@ void VersionManager::fileDownloaded(QString& filename)
 		QJsonDocument datas = QJsonDocument::fromJson(m_fileDownloader->m_datas, &error);
 		QJsonArray values = datas.array();
 
-		for (int i = 0; i < values.size(); i++)
+		for (auto&& value : values)
 		{
-			m_lastVersionInfos.push_back(values[i].toObject());
+			m_lastVersionInfos.push_back(value.toObject());
 		}
 		emit downloadFinished(filename);
 

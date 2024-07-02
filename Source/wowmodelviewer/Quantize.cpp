@@ -171,9 +171,9 @@ void CQuantizer::ReduceTree(UINT nColorBits, UINT* pLeafCount, NODE** pReducible
 
 void CQuantizer::DeleteTree(NODE** ppNode)
 {
-	for (int i = 0; i < 8; i++)
+	for (auto& i : (*ppNode)->pChild)
 	{
-		if ((*ppNode)->pChild[i] != nullptr) DeleteTree(&((*ppNode)->pChild[i]));
+		if (i != nullptr) DeleteTree(&i);
 	}
 	free(*ppNode);
 	*ppNode = nullptr;
@@ -194,10 +194,10 @@ void CQuantizer::GetPaletteColors(NODE* pTree, RGBQUAD* prgb, UINT* pIndex, UINT
 		}
 		else
 		{
-			for (int i = 0; i < 8; i++)
+			for (auto& i : pTree->pChild)
 			{
-				if (pTree->pChild[i] != nullptr)
-					GetPaletteColors(pTree->pChild[i], prgb, pIndex, pSum);
+				if (i != nullptr)
+					GetPaletteColors(i, prgb, pIndex, pSum);
 			}
 		}
 	}

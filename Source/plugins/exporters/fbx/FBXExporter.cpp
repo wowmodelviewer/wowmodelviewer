@@ -117,18 +117,17 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 		FBXHeaders::storeBindPose(m_p_scene, m_boneClusters, m_p_meshNode);
 		FBXHeaders::storeRestPose(m_p_scene, m_p_skeletonNode);
 
-		for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
+		for (auto it : *m_p_model)
 		{
-			std::map<POSITION_SLOTS, WoWModel*> itemModels = (*it)->models();
+			std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 			if (!itemModels.empty())
 			{
-				for (std::map<POSITION_SLOTS, WoWModel*>::iterator It = itemModels.begin(); It != itemModels.end(); ++
-				     It)
+				for (auto& itemModel : itemModels)
 				{
-					if (m_attachBoneClusters.find(It->first) != m_attachBoneClusters.end() && m_attachMeshNodes.
-						find(It->first) != m_attachMeshNodes.end())
-						FBXHeaders::storeBindPose(m_p_scene, m_attachBoneClusters[It->first],
-						                          m_attachMeshNodes[It->first]);
+					if (m_attachBoneClusters.find(itemModel.first) != m_attachBoneClusters.end() && m_attachMeshNodes.
+						find(itemModel.first) != m_attachMeshNodes.end())
+						FBXHeaders::storeBindPose(m_p_scene, m_attachBoneClusters[itemModel.first],
+						                          m_attachMeshNodes[itemModel.first]);
 					//if (m_attachSkeletonNode.find(it->first) != m_attachSkeletonNode.end())
 					//FBXHeaders::storeRestPose(m_p_scene, m_attachSkeletonNode[it->first]);
 				}
@@ -178,17 +177,17 @@ void FBXExporter::createMeshes()
 	FbxNode* root_node = m_p_scene->GetRootNode();
 	root_node->AddChild(m_p_meshNode);
 
-	for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
+	for (auto it : *m_p_model)
 	{
-		std::map<POSITION_SLOTS, WoWModel*> itemModels = (*it)->models();
+		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (std::map<POSITION_SLOTS, WoWModel*>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
+			for (auto& It : itemModels)
 			{
-				WoWModel* itemModel = It->second;
+				WoWModel* itemModel = It.second;
 				LOG_INFO << "Found attached item:" << itemModel->modelname.c_str();
 
-				int l = m_p_model->attLookup[It->first];
+				int l = m_p_model->attLookup[It.first];
 				glm::mat4 m;
 				glm::vec3 pos;
 				if (l > -1)
@@ -197,7 +196,7 @@ void FBXExporter::createMeshes()
 				}
 
 				FbxNode* itemMeshNode = FBXHeaders::createMesh(m_p_manager, m_p_scene, itemModel, m);
-				m_attachMeshNodes[It->first] = itemMeshNode;
+				m_attachMeshNodes[It.first] = itemMeshNode;
 
 				root_node->AddChild(itemMeshNode);
 			}
@@ -212,14 +211,14 @@ void FBXExporter::createSkeletons()
 	FbxNode* root_node = m_p_scene->GetRootNode();
 	root_node->AddChild(m_p_skeletonNode);
 
-	for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
+	for (auto it : *m_p_model)
 	{
-		std::map<POSITION_SLOTS, WoWModel*> itemModels = (*it)->models();
+		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (std::map<POSITION_SLOTS, WoWModel*>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
+			for (auto& It : itemModels)
 			{
-				WoWModel* itemModel = It->second;
+				WoWModel* itemModel = It.second;
 				if (itemModel->animated == false || itemModel->bones.size() < 2)
 					continue;
 
@@ -228,8 +227,8 @@ void FBXExporter::createSkeletons()
 
 				FBXHeaders::createSkeleton(itemModel, m_p_scene, itemSkeleton, itemboneNodes);
 
-				m_attachSkeletonNode[It->first] = itemSkeleton;
-				m_attachBoneNodes[It->first] = itemboneNodes;
+				m_attachSkeletonNode[It.first] = itemSkeleton;
+				m_attachBoneNodes[It.first] = itemboneNodes;
 				root_node->AddChild(itemSkeleton);
 			}
 		}
@@ -390,14 +389,14 @@ void FBXExporter::createMaterials()
 		}
 	}
 
-	for (WoWModel::iterator it = m_p_model->begin(); it != m_p_model->end(); ++it)
+	for (auto it : *m_p_model)
 	{
-		std::map<POSITION_SLOTS, WoWModel*> itemModels = (*it)->models();
+		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (std::map<POSITION_SLOTS, WoWModel*>::iterator It = itemModels.begin(); It != itemModels.end(); ++It)
+			for (auto& itemModel : itemModels)
 			{
-				WoWModel* model = It->second;
+				WoWModel* model = itemModel.second;
 				for (unsigned int i = 0; i < model->passes.size(); i++)
 				{
 					ModelRenderPass* pass = model->passes[i];
@@ -440,7 +439,7 @@ void FBXExporter::createMaterials()
 						material->Diffuse.ConnectSrcObject(texture);
 
 						// Add material to the scene.
-						m_attachMeshNodes[It->first]->AddMaterial(material);
+						m_attachMeshNodes[itemModel.first]->AddMaterial(material);
 					}
 				}
 			}

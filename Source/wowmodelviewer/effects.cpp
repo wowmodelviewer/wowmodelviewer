@@ -47,11 +47,11 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 			return;
 		}
 
-		for (std::map<int, EnchantsRec>::iterator it = enchants.begin(); it != enchants.end(); ++it)
+		for (auto& it : enchants)
 		{
-			if (it->second.name == sel)
+			if (it.second.name == sel)
 			{
-				EnchantsRec enchant = it->second;
+				EnchantsRec enchant = it.second;
 				int s = slot->GetSelection();
 				s += 10;
 
@@ -62,16 +62,16 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 					return;
 
 				if (slot->GetSelection() == 0)
-					RHandEnchant = it->first;
+					RHandEnchant = it.first;
 				else
-					LHandEnchant = it->first;
+					LHandEnchant = it.first;
 
 				// children:
-				for (size_t i = 0; i < charControl->charAtt->children.size(); i++)
+				for (auto& i : charControl->charAtt->children)
 				{
-					if (charControl->charAtt->children[i]->slot == s)
+					if (i->slot == s)
 					{
-						Attachment* att = charControl->charAtt->children[i];
+						Attachment* att = i;
 						if (att->children.size() > 0)
 							att->delChildren();
 
@@ -135,22 +135,22 @@ void EnchantsDialog::InitEnchants()
 	if (!enchantsInfos.valid || enchantsInfos.values.empty())
 		return;
 
-	for (int i = 0, imax = enchantsInfos.values.size(); i < imax; i++)
+	for (auto& value : enchantsInfos.values)
 	{
 		EnchantsRec rec;
 		rec.name = wxConvLocal.cWC2WX(
-			wxConvUTF8.cMB2WC(wxString(enchantsInfos.values[i][1].toStdString().c_str(), wxConvUTF8).mb_str()));;
-		rec.models[0] = enchantsInfos.values[i][2].toStdString();
-		rec.models[1] = enchantsInfos.values[i][3].toStdString();
-		rec.models[2] = enchantsInfos.values[i][4].toStdString();
-		rec.models[3] = enchantsInfos.values[i][5].toStdString();
-		rec.models[4] = enchantsInfos.values[i][6].toStdString();
-		enchants[enchantsInfos.values[i][0].toInt()] = rec;
+			wxConvUTF8.cMB2WC(wxString(value[1].toStdString().c_str(), wxConvUTF8).mb_str()));;
+		rec.models[0] = value[2].toStdString();
+		rec.models[1] = value[3].toStdString();
+		rec.models[2] = value[4].toStdString();
+		rec.models[3] = value[5].toStdString();
+		rec.models[4] = value[6].toStdString();
+		enchants[value[0].toInt()] = rec;
 	}
 
 	choices.Clear();
-	for (std::map<int, EnchantsRec>::iterator it = enchants.begin(); it != enchants.end(); ++it)
-		choices.Add(it->second.name.c_str());
+	for (auto& enchant : enchants)
+		choices.Add(enchant.second.name.c_str());
 
 	EnchantsInitiated = true;
 }

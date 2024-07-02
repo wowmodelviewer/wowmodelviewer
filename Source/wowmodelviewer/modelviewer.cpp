@@ -604,9 +604,9 @@ void ModelViewer::InitDatabase()
 		if (npc.valid && !npc.empty())
 		{
 			LOG_INFO << "Found" << npc.values.size() << "NPCs";
-			for (int i = 0, imax = npc.values.size(); i < imax; i++)
+			for (const auto& value : npc.values)
 			{
-				NPCRecord rec(npc.values[i]);
+				NPCRecord rec(value);
 				if (rec.model != 0)
 					npcs.push_back(rec);
 			}
@@ -626,9 +626,9 @@ void ModelViewer::InitDatabase()
 		if (item.valid && !item.empty())
 		{
 			LOG_INFO << "Found" << item.values.size() << "items";
-			for (int i = 0, imax = item.values.size(); i < imax; i++)
+			for (const auto& value : item.values)
 			{
-				ItemRecord rec(item.values[i]);
+				ItemRecord rec(value);
 				items.items.push_back(rec);
 			}
 		}
@@ -1133,11 +1133,11 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 					{0, CS_HEAD}, {1, CS_SHOULDER}, {2, CS_SHIRT}, {3, CS_CHEST}, {4, CS_BELT}, {5, CS_PANTS},
 					{6, CS_BOOTS}, {7, CS_BRACERS}, {8, CS_GLOVES}, {9, CS_TABARD}, {10, CS_CAPE}
 				};
-				for (uint i = 0; i < r.values.size(); i++)
+				for (auto& value : r.values)
 				{
-					WoWItem* item = g_charControl->model->getItem(ItemTypeToInternal[r.values[i][1].toInt()]);
+					WoWItem* item = g_charControl->model->getItem(ItemTypeToInternal[value[1].toInt()]);
 					if (item)
-						item->setDisplayId(r.values[i][0].toInt());
+						item->setDisplayId(value[0].toInt());
 				}
 			}
 
@@ -2089,9 +2089,9 @@ void ModelViewer::OnBackground(wxCommandEvent& event)
 
 			if (skyboxesInfos.valid && !skyboxesInfos.values.empty())
 			{
-				for (unsigned int i = 0, imax = skyboxesInfos.values.size(); i < imax; i++)
+				for (auto& value : skyboxesInfos.values)
 				{
-					skyboxes.Add(skyboxesInfos.values[i][0].replace(".mdx", ".m2").toStdWString());
+					skyboxes.Add(value[0].replace(".mdx", ".m2").toStdWString());
 				}
 			}
 
@@ -2134,10 +2134,8 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 	// then save equipment
 	stream.writeStartElement("equipment");
 
-	for (WoWModel::iterator it = m->begin();
-	     it != m->end();
-	     ++it)
-		(*it)->save(stream);
+	for (auto it : *m)
+		it->save(stream);
 
 	stream.writeEndElement(); // equipment
 
@@ -2316,10 +2314,8 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 			if (reader.name() == "equipment")
 			{
 				WoWModel* m = const_cast<WoWModel*>(canvas->model());
-				for (WoWModel::iterator it = m->begin();
-				     it != m->end();
-				     ++it)
-					(*it)->load(fn);
+				for (auto it : *m)
+					it->load(fn);
 			}
 		}
 	}
@@ -2517,10 +2513,8 @@ void ModelViewer::UpdateControls()
 	else
 	{
 		//refresh equipment
-		for (WoWModel::iterator it = m->begin();
-		     it != m->end();
-		     ++it)
-			(*it)->refresh();
+		for (auto it : *m)
+			it->refresh();
 	}
 	modelControl->RefreshModel(canvas->root);
 }
@@ -2532,11 +2526,9 @@ void ModelViewer::ImportArmoury(wxString strURL)
 	QString url = strURL.utf8_str();
 	LOG_INFO << "Importing character from the Armory:" << url;
 
-	for (PluginManager::iterator it = PLUGINMANAGER.begin();
-	     it != PLUGINMANAGER.end();
-	     ++it)
+	for (auto it : PLUGINMANAGER)
 	{
-		const auto* plugin = dynamic_cast<ImporterPlugin*>(*it);
+		const auto* plugin = dynamic_cast<ImporterPlugin*>(it);
 		if (plugin && plugin->acceptURL(url))
 		{
 			result = plugin->importChar(url);

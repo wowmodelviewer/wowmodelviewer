@@ -95,10 +95,10 @@ ItemDatabase::ItemDatabase()
 
 const ItemRecord& ItemDatabase::getById(int id)
 {
-	for (std::vector<ItemRecord>::iterator it = items.begin(); it != items.end(); ++it)
+	for (auto& item : items)
 	{
-		if (it->id == id)
-			return *it;
+		if (item.id == id)
+			return item;
 	}
 	return items[0];
 }

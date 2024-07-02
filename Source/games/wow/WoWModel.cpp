@@ -130,11 +130,11 @@ WoWModel::WoWModel(GameFile* file, bool forceAnim):
 	specialTextures.resize(TEXTURE_MAX, -1);
 	replaceTextures.resize(TEXTURE_MAX, ModelRenderPass::INVALID_TEX);
 
-	for (size_t i = 0; i < ATT_MAX; i++)
-		attLookup[i] = -1;
+	for (short& i : attLookup)
+		i = -1;
 
-	for (size_t i = 0; i < BONE_MAX; i++)
-		keyBoneLookup[i] = -1;
+	for (short& i : keyBoneLookup)
+		i = -1;
 
 	dlist = 0;
 
@@ -1665,12 +1665,12 @@ void WoWModel::animate(ssize_t Anim)
 		}
 	}
 
-	for (uint i = 0; i < lights.size(); i++)
+	for (auto& light : lights)
 	{
-		if (lights[i].parent >= 0)
+		if (light.parent >= 0)
 		{
-			lights[i].tpos = glm::vec3(bones[lights[i].parent].mat * glm::vec4(lights[i].pos, 1.0f));
-			lights[i].tdir = glm::vec3(bones[lights[i].parent].mrot * glm::vec4(lights[i].dir, 1.0f));
+			light.tpos = glm::vec3(bones[light.parent].mat * glm::vec4(light.pos, 1.0f));
+			light.tdir = glm::vec3(bones[light.parent].mrot * glm::vec4(light.dir, 1.0f));
 		}
 	}
 
@@ -1916,9 +1916,8 @@ void WoWModel::drawBoundingVolume()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
-	for (uint i = 0; i < boundTris.size(); i++)
+	for (unsigned int v : boundTris)
 	{
-		size_t v = boundTris[i];
 		if (v < bounds.size())
 			glVertex3fv(glm::value_ptr(bounds[v]));
 		else
@@ -1973,12 +1972,10 @@ void WoWModel::drawParticles()
 
 WoWItem* WoWModel::getItem(CharSlots slot)
 {
-	for (auto it = this->begin();
-	     it != this->end();
-	     ++it)
+	for (auto it : *this)
 	{
-		if ((*it)->slot() == slot)
-			return *it;
+		if (it->slot() == slot)
+			return it;
 	}
 
 	return nullptr;
@@ -2014,9 +2011,9 @@ void WoWModel::update(int dt) // (float dt)
 
 void WoWModel::updateTextureList(GameFile* Tex, int special)
 {
-	for (size_t i = 0; i < specialTextures.size(); i++)
+	for (int specialTexture : specialTextures)
 	{
-		if (specialTextures[i] == special)
+		if (specialTexture == special)
 		{
 			if (replaceTextures[special] != ModelRenderPass::INVALID_TEX)
 				TEXTUREMANAGER.del(replaceTextures[special]);
@@ -4487,8 +4484,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 	out << "  <SkeletonAndAnimation>" << endl;
 
 	out << "  <GlobalSequences size=\"" << m.globalSequences.size() << "\">" << endl;
-	for (size_t i = 0; i < m.globalSequences.size(); i++)
-		out << "<Sequence>" << m.globalSequences[i] << "</Sequence>" << endl;
+	for (unsigned int globalSequence : m.globalSequences)
+		out << "<Sequence>" << globalSequence << "</Sequence>" << endl;
 	out << "  </GlobalSequences>" << endl;
 
 	out << "  <Animations size=\"" << m.anims.size() << "\">" << endl;

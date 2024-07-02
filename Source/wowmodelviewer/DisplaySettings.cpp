@@ -66,22 +66,22 @@ void DisplaySettings::Update()
 {
 	oglMode->Clear();
 
-	for (size_t i = 0; i < video.capsList.size(); i++)
+	for (auto& i : video.capsList)
 	{
 		wxString mode = wxString::Format(
-			wxT("Colour:%i Depth:%i Alpha:%i "), video.capsList[i].colour, video.capsList[i].zBuffer,
-			video.capsList[i].alpha);
+			wxT("Colour:%i Depth:%i Alpha:%i "), i.colour, i.zBuffer,
+			i.alpha);
 
-		if (video.capsList[i].sampleBuffer)
-			mode.Append(wxString::Format(wxT("FSAA:%i "), video.capsList[i].aaSamples));
+		if (i.sampleBuffer)
+			mode.Append(wxString::Format(wxT("FSAA:%i "), i.aaSamples));
 
-		if (video.capsList[i].doubleBuffer)
+		if (i.doubleBuffer)
 			mode.Append(wxT("DoubleBuffer "));
 
 #ifdef _WINDOWS
-		if (video.capsList[i].hwAcc == WGL_FULL_ACCELERATION_ARB)
+		if (i.hwAcc == WGL_FULL_ACCELERATION_ARB)
 			mode.Append(wxT("Hardware mode"));
-		else if (video.capsList[i].hwAcc == WGL_GENERIC_ACCELERATION_ARB)
+		else if (i.hwAcc == WGL_GENERIC_ACCELERATION_ARB)
 			mode.Append(wxT("Emulation mode"));
 		else //WGL_NO_ACCELERATION_ARB
 			mode.Append(wxT("Software mode"));

@@ -146,11 +146,11 @@ void CASCFolder::initBuildInfo()
 
 		// grab locale(s) for this line
 		values = values[tagIndex].split(':');
-		for (int i = 0; i < values.size(); i++)
+		for (const auto& value : values)
 		{
-			if (values[i].contains("text?"))
+			if (value.contains("text?"))
 			{
-				QStringList tags = values[i].split(" ");
+				QStringList tags = value.split(" ");
 				core::GameConfig config;
 				config.locale = tags[tags.size() - 2];
 				config.version = version;

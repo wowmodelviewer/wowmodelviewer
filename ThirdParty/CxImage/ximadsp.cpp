@@ -3512,9 +3512,10 @@ bool CxImage::FloodFill(const long xStart, const long yStart, const RGBQUAD cFil
       point = q.front();
       q.pop();
 
-      for (int z=0; z<4; z++){
-        int x = point.x + offset[z].x;
-        int y = point.y + offset[z].y;
+      for (auto& z : offset)
+      {
+        int x = point.x + z.x;
+        int y = point.y + z.y;
         if(IsInside(x,y)){
 #if CXIMAGE_SUPPORT_SELECTION
           if (BlindSelectionIsInside(x,y))
@@ -3553,9 +3554,10 @@ bool CxImage::FloodFill(const long xStart, const long yStart, const RGBQUAD cFil
       point = q.front();
       q.pop();
 
-      for (int z=0; z<4; z++){
-        int x = point.x + offset[z].x;
-        int y = point.y + offset[z].y;
+      for (auto& z : offset)
+      {
+        int x = point.x + z.x;
+        int y = point.y + z.y;
         if(IsInside(x,y)){
 #if CXIMAGE_SUPPORT_SELECTION
           if (BlindSelectionIsInside(x,y))

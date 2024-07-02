@@ -21,27 +21,27 @@ int ModelManager::add(GameFile* file)
 // Resets the animation back to default.
 void ModelManager::resetAnim()
 {
-	for (std::map<int, ManagedItem*>::iterator it = items.begin(); it != items.end(); ++it)
+	for (auto& item : items)
 	{
-		((WoWModel*)it->second)->animcalc = false;
+		((WoWModel*)item.second)->animcalc = false;
 	}
 }
 
 // same as other updateEmitter except does it for the all the models being managed - for WMO's
 void ModelManager::updateEmitters(float dt)
 {
-	for (std::map<int, ManagedItem*>::iterator it = items.begin(); it != items.end(); ++it)
+	for (auto& item : items)
 	{
-		((WoWModel*)it->second)->updateEmitters(dt);
+		((WoWModel*)item.second)->updateEmitters(dt);
 	}
 }
 
 void ModelManager::clear()
 {
-	for (std::map<int, ManagedItem*>::iterator it = items.begin(); it != items.end(); ++it)
+	for (auto& item : items)
 	{
-		doDelete(it->first);
-		delete it->second;
+		doDelete(item.first);
+		delete item.second;
 	}
 	items.clear();
 	names.clear();

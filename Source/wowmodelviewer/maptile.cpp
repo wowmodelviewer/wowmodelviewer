@@ -148,15 +148,15 @@ void fprintbu8(FILE* file, uint8 value)
 {
 	bool b[8]{};
 	unsigned int x = 1;
-	for (unsigned i = 0; i < 8; i++)
+	for (bool& i : b)
 	{
-		b[i] = (value & x) ? true : false;
+		i = (value & x) ? true : false;
 		x <<= 1;
 	}
 
-	for (unsigned i = 0; i < 8; i++)
+	for (bool i : b)
 	{
-		if (b[i])
+		if (i)
 			fprintf(file, "1");
 		else
 			fprintf(file, "0");
@@ -766,17 +766,17 @@ MapTile::~MapTile()
 
 	topnode.cleanup();
 
-	for (ssize_t j = 0; j < CHUNKS_IN_TILE; j++)
+	for (auto& chunk : chunks)
 	{
 		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
 		{
-			chunks[j][i].destroy();
+			chunk[i].destroy();
 		}
 	}
 
-	for (size_t j = 0; j < textures.size(); j++)
+	for (const auto& texture : textures)
 	{
-		TEXTUREMANAGER.delbyname(textures[j].c_str());
+		TEXTUREMANAGER.delbyname(texture.c_str());
 	}
 
 	/*
@@ -852,12 +852,12 @@ void MapTile::draw()
 
 	glClientActiveTextureARB(GL_TEXTURE0_ARB);
 
-	for (ssize_t j = 0; j < CHUNKS_IN_TILE; j++)
+	for (auto& chunk : chunks)
 	{
 		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
 		{
-			chunks[j][i].visible = false;
-			chunks[j][i].draw();
+			chunk[i].visible = false;
+			chunk[i].draw();
 		}
 	}
 
@@ -868,12 +868,12 @@ void MapTile::drawWater()
 {
 	if (!ok) return;
 
-	for (ssize_t j = 0; j < CHUNKS_IN_TILE; j++)
+	for (auto& chunk : chunks)
 	{
 		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
 		{
-			if (chunks[j][i].visible)
-				chunks[j][i].drawWater();
+			if (chunk[i].visible)
+				chunk[i].drawWater();
 		}
 	}
 }
@@ -1485,11 +1485,11 @@ void MapChunk::init(MapTile* Mt, GameFile& f, bool bigAlpha)
 			for (ssize_t j = 0; j < 64; j++)
 			{
 				f.read(c, 8);
-				for (size_t i = 0; i < 8; i++)
+				for (unsigned char i : c)
 				{
 					for (ssize_t b = 0x01; b != 0x100; b <<= 1)
 					{
-						*p++ = (c[i] & b) ? 85 : 0;
+						*p++ = (i & b) ? 85 : 0;
 					}
 				}
 			}
@@ -2014,10 +2014,8 @@ void MapChunk::drawWater()
 			glEnable(GL_TEXTURE_2D);
 		}
 
-		for (unsigned l = 0; l < waterLayer.size(); l++)
+		for (auto& layer : waterLayer)
 		{
-			SWaterLayer& layer = waterLayer[l];
-
 			unsigned ox = layer.x;
 			unsigned oy = layer.y;
 
@@ -2103,8 +2101,8 @@ void MapNode::draw()
 {
 	//if (!gWorld->frustum.intersects(vmin,vmax)) 
 	//  return;
-	for (size_t i = 0; i < 4; i++)
-		children[i]->draw();
+	for (auto& i : children)
+		i->draw();
 }
 
 void MapNode::setup(MapTile* t)
@@ -2127,19 +2125,19 @@ void MapNode::setup(MapTile* t)
 		children[1] = new MapNode(px + half, py, half);
 		children[2] = new MapNode(px, py + half, half);
 		children[3] = new MapNode(px + half, py + half, half);
-		for (size_t i = 0; i < 4; i++)
+		for (auto& i : children)
 		{
-			children[i]->setup(mt);
+			i->setup(mt);
 		}
 	}
-	for (size_t i = 0; i < 4; i++)
+	for (auto& i : children)
 	{
-		if (children[i]->vmin.x < vmin.x) vmin.x = children[i]->vmin.x;
-		if (children[i]->vmin.y < vmin.y) vmin.y = children[i]->vmin.y;
-		if (children[i]->vmin.z < vmin.z) vmin.z = children[i]->vmin.z;
-		if (children[i]->vmax.x > vmax.x) vmax.x = children[i]->vmax.x;
-		if (children[i]->vmax.y > vmax.y) vmax.y = children[i]->vmax.y;
-		if (children[i]->vmax.z > vmax.z) vmax.z = children[i]->vmax.z;
+		if (i->vmin.x < vmin.x) vmin.x = i->vmin.x;
+		if (i->vmin.y < vmin.y) vmin.y = i->vmin.y;
+		if (i->vmin.z < vmin.z) vmin.z = i->vmin.z;
+		if (i->vmax.x > vmax.x) vmax.x = i->vmax.x;
+		if (i->vmax.y > vmax.y) vmax.y = i->vmax.y;
+		if (i->vmax.z > vmax.z) vmax.z = i->vmax.z;
 	}
 }
 
@@ -2147,10 +2145,10 @@ void MapNode::cleanup()
 {
 	if (size > 2)
 	{
-		for (size_t i = 0; i < 4; i++)
+		for (auto& i : children)
 		{
-			children[i]->cleanup();
-			delete children[i];
+			i->cleanup();
+			delete i;
 		}
 	}
 }

@@ -476,48 +476,48 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 
 	if (itemClasses.valid && !itemClasses.empty())
 	{
-		for (int i = 0, imax = itemClasses.values.size(); i < imax; i++)
+		for (auto& value : itemClasses.values)
 		{
 			// first set verbose name
-			wxString name = itemClasses.values[i][3].toStdWString();
+			wxString name = value[3].toStdWString();
 			// if empty, fall back to normal one
 			if (name.IsEmpty())
-				name = itemClasses.values[i][2].toStdWString();
+				name = value[2].toStdWString();
 
 			catnames.Add(name);
-			subclasslookup[std::pair<int, int>(itemClasses.values[i][0].toInt(), itemClasses.values[i][1].toInt())] = (
+			subclasslookup[std::pair<int, int>(value[0].toInt(), value[1].toInt())] = (
 				int)catnames.size() - 1;
 		}
 	}
 
-	for (std::vector<ItemRecord>::iterator it = items.items.begin(); it != items.items.end(); ++it)
+	for (auto& item : items.items)
 	{
 		if (type == UPDATE_SINGLE_ITEM)
 		{
-			if (it->type == IT_SHOULDER || it->type == IT_SHIELD ||
-				it->type == IT_BOW || it->type == IT_2HANDED || it->type == IT_LEFTHANDED ||
-				it->type == IT_RIGHTHANDED || it->type == IT_OFFHAND || it->type == IT_GUN ||
-				it->type == IT_DAGGER)
+			if (item.type == IT_SHOULDER || item.type == IT_SHIELD ||
+				item.type == IT_BOW || item.type == IT_2HANDED || item.type == IT_LEFTHANDED ||
+				item.type == IT_RIGHTHANDED || item.type == IT_OFFHAND || item.type == IT_GUN ||
+				item.type == IT_DAGGER)
 			{
-				choices.Add(getItemName(*it).toStdWString());
-				numbers.push_back(it->id);
-				quality.push_back(it->quality);
+				choices.Add(getItemName(item).toStdWString());
+				numbers.push_back(item.id);
+				quality.push_back(item.quality);
 
-				subclassesFound.insert(std::pair<int, int>(it->itemclass, it->subclass));
-				cats.push_back(subclasslookup[std::pair<int, int>(it->itemclass, it->subclass)]);
+				subclassesFound.insert(std::pair<int, int>(item.itemclass, item.subclass));
+				cats.push_back(subclasslookup[std::pair<int, int>(item.itemclass, item.subclass)]);
 			}
 		}
-		else if (correctType((ssize_t)it->type, slot))
+		else if (correctType((ssize_t)item.type, slot))
 		{
-			choices.Add(getItemName(*it).toStdWString());
-			numbers.push_back(it->id);
-			quality.push_back(it->quality);
+			choices.Add(getItemName(item).toStdWString());
+			numbers.push_back(item.id);
+			quality.push_back(item.quality);
 
-			if (it->itemclass > 0)
+			if (item.itemclass > 0)
 			{
-				subclassesFound.insert(std::pair<int, int>(it->itemclass, it->subclass));
+				subclassesFound.insert(std::pair<int, int>(item.itemclass, item.subclass));
 			}
-			cats.push_back(subclasslookup[std::pair<int, int>(it->itemclass, it->subclass)]);
+			cats.push_back(subclasslookup[std::pair<int, int>(item.itemclass, item.subclass)]);
 		}
 	}
 
@@ -557,11 +557,11 @@ void CharControl::selectSet()
 
 	if (itemSet.valid && !itemSet.empty())
 	{
-		for (int i = 0, imax = itemSet.values.size(); i < imax; i++)
+		for (auto& value : itemSet.values)
 		{
 			NumStringPair p;
-			p.id = itemSet.values[i][0].toInt();
-			p.name = itemSet.values[i][1].toStdWString();
+			p.id = value[0].toInt();
+			p.name = value[1].toStdWString();
 			Items.push_back(p);
 		}
 	}
@@ -569,10 +569,10 @@ void CharControl::selectSet()
 	std::sort(Items.begin(), Items.end());
 	numbers.clear();
 	choices.Clear();
-	for (std::vector<NumStringPair>::iterator it = Items.begin(); it != Items.end(); ++it)
+	for (auto& Item : Items)
 	{
-		choices.Add(it->name);
-		numbers.push_back(it->id);
+		choices.Add(Item.name);
+		numbers.push_back(Item.id);
 	}
 
 	itemDialog = new FilteredChoiceDialog(this, UPDATE_SET, g_modelViewer, wxT("Choose an item set"), wxT("Item sets"),
@@ -601,10 +601,10 @@ void CharControl::selectStart()
 
 	if (startOutfit.valid && !startOutfit.empty())
 	{
-		for (int i = 0, imax = startOutfit.values.size(); i < imax; i++)
+		for (auto& value : startOutfit.values)
 		{
-			choices.Add(startOutfit.values[i][0].toStdWString());
-			numbers.push_back(startOutfit.values[i][1].toInt());
+			choices.Add(value[0].toStdWString());
+			numbers.push_back(value[1].toInt());
 		}
 	}
 
@@ -640,19 +640,19 @@ void CharControl::selectMount()
 		"SELECT MountXDisplay.CreatureDisplayInfoID, Mount.Name_Lang FROM Mount LEFT JOIN MountXDisplay ON Mount.ID = MountXDisplay.MountID");
 	if (mountQuery.valid && !mountQuery.empty())
 	{
-		for (int i = 0, imax = mountQuery.values.size(); i < imax; i++)
+		for (auto& value : mountQuery.values)
 		{
 			NumStringPair p;
-			p.id = mountQuery.values[i][0].toInt();
-			p.name = mountQuery.values[i][1].toStdWString();
+			p.id = value[0].toInt();
+			p.name = value[1].toStdWString();
 			mounts.push_back(p);
 		}
 	}
 	std::sort(mounts.begin(), mounts.end());
-	for (std::vector<NumStringPair>::iterator it = mounts.begin(); it != mounts.end(); it++)
+	for (auto& mount : mounts)
 	{
-		choices.Add(it->name);
-		numbers.push_back(it->id);
+		choices.Add(mount.name);
+		numbers.push_back(mount.id);
 		cats.push_back(0);
 	}
 
@@ -709,32 +709,32 @@ void CharControl::selectNPC(ssize_t type)
 
 	if (npccats.valid && !npccats.empty())
 	{
-		for (int i = 0, imax = npccats.values.size(); i < imax; i++)
+		for (auto& value : npccats.values)
 		{
-			catnames.Add(npccats.values[i][1].toStdWString());
-			typeLookup[npccats.values[i][0].toInt()] = (int)catnames.size() - 1;
+			catnames.Add(value[1].toStdWString());
+			typeLookup[value[0].toInt()] = (int)catnames.size() - 1;
 		}
 	}
 
 	std::vector<int> typesFound;
 
-	for (std::vector<NPCRecord>::iterator it = npcs.begin(); it != npcs.end(); ++it)
+	for (auto& npc : npcs)
 	{
-		if (it->model > 0)
+		if (npc.model > 0)
 		{
-			QString NPCName = it->name;
+			QString NPCName = npc.name;
 
 			if (displayItemAndNPCId != 0)
-				NPCName += QString(" [%1]").arg(it->id);
+				NPCName += QString(" [%1]").arg(npc.id);
 
 			choices.Add(NPCName.toStdWString());
-			numbers.push_back(it->id);
+			numbers.push_back(npc.id);
 			quality.push_back(0);
 
-			if (it->type >= 0)
+			if (npc.type >= 0)
 			{
-				cats.push_back(typeLookup[it->type]);
-				typesFound.push_back(it->type);
+				cats.push_back(typeLookup[npc.type]);
+				typesFound.push_back(npc.type);
 			}
 			else
 			{
@@ -808,10 +808,8 @@ void CharControl::OnUpdateItem(int type, int id)
 				{
 					// reset previously equipped items
 
-					for (WoWModel::iterator it = model->begin();
-					     it != model->end();
-					     ++it)
-						(*it)->setId(0);
+					for (auto it : *model)
+						it->setId(0);
 
 					for (unsigned i = 0; i < 8; i++)
 						tryToEquipItem(itemSet.values[0][i].toInt());
@@ -838,10 +836,8 @@ void CharControl::OnUpdateItem(int type, int id)
 			if (startOutfit.valid && !startOutfit.empty())
 			{
 				// reset previously equipped items
-				for (WoWModel::iterator it = model->begin();
-				     it != model->end();
-				     ++it)
-					(*it)->setId(0);
+				for (auto it : *model)
+					it->setId(0);
 
 				for (unsigned i = 0; i < 24; i++)
 				{

@@ -95,13 +95,13 @@ bool core::GameDatabase::createDatabaseFromXML(const QString& file)
 
 	bool result = true; // ok until we found an issue
 
-	for (auto it = m_dbStruct.begin(), itEnd = m_dbStruct.end(); it != itEnd; ++it)
+	for (auto& it : m_dbStruct)
 	{
-		if ((*it)->create())
+		if (it->create())
 		{
-			if (!(*it)->fill() && !m_fastMode)
+			if (!it->fill() && !m_fastMode)
 			{
-				LOG_ERROR << "Error during table filling" << (*it)->name;
+				LOG_ERROR << "Error during table filling" << it->name;
 				result = false;
 			}
 		}
@@ -109,7 +109,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString& file)
 		{
 			if (!m_fastMode) // if table already exists in fast mode, continue
 			{
-				LOG_ERROR << "Error during table creation" << (*it)->name;
+				LOG_ERROR << "Error during table creation" << it->name;
 				result = false;
 			}
 		}
@@ -228,33 +228,33 @@ bool core::TableStructure::create()
 
 	std::list<QString> indexesToCreate;
 
-	for (auto it = fields.begin(), itEnd = fields.end(); it != itEnd; ++it)
+	for (auto& field : fields)
 	{
-		if ((*it)->arraySize == 1) // simple field
+		if (field->arraySize == 1) // simple field
 		{
-			create += (*it)->name;
+			create += field->name;
 			create += " ";
-			create += (*it)->type;
+			create += field->type;
 
-			if ((*it)->isKey)
+			if (field->isKey)
 				create += " PRIMARY KEY NOT NULL";
 
 			create += ",";
 		}
 		else // complex field
 		{
-			for (unsigned int i = 1; i <= (*it)->arraySize; i++)
+			for (unsigned int i = 1; i <= field->arraySize; i++)
 			{
-				create += (*it)->name;
+				create += field->name;
 				create += QString::number(i);
 				create += " ";
-				create += (*it)->type;
+				create += field->type;
 				create += ",";
 			}
 		}
 
-		if ((*it)->needIndex)
-			indexesToCreate.push_back((*it)->name);
+		if (field->needIndex)
+			indexesToCreate.push_back(field->name);
 	}
 
 	// remove spurious "," at the end of string, if any
@@ -271,9 +271,9 @@ bool core::TableStructure::create()
 		LOG_INFO << "Table" << name << "successfully created";
 
 		// create indexes
-		for (auto it = indexesToCreate.begin(), itEnd = indexesToCreate.end(); it != itEnd; ++it)
+		for (auto& it : indexesToCreate)
 		{
-			QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(*it);
+			QString query = QString("CREATE INDEX %1_%2 ON %1(%2)").arg(name).arg(it);
 			core::Game::instance().database().sqlQuery(query);
 		}
 	}

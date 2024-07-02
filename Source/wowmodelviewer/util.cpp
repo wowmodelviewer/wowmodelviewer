@@ -71,9 +71,9 @@ wxString getGamePath(bool noSet)
 		wxT("SOFTWARE\\Blizzard Entertainment\\World of Warcraft\\Beta"),
 	};
 
-	for (size_t i = 0; i < WXSIZEOF(regpaths); i++)
+	for (const auto& regpath : regpaths)
 	{
-		l = RegOpenKeyEx((HKEY)HKEY_LOCAL_MACHINE, regpaths[i], 0, KEY_QUERY_VALUE, &key);
+		l = RegOpenKeyEx((HKEY)HKEY_LOCAL_MACHINE, regpath, 0, KEY_QUERY_VALUE, &key);
 
 		if (l == ERROR_SUCCESS)
 		{

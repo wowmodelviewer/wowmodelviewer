@@ -98,11 +98,9 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 		QString url = m_URLname->GetValue().utf8_str();
 
 		NPCInfos* result = nullptr;
-		for (PluginManager::iterator it = PLUGINMANAGER.begin();
-		     it != PLUGINMANAGER.end();
-		     ++it)
+		for (auto it : PLUGINMANAGER)
 		{
-			ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(*it);
+			ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
 			if (plugin && plugin->acceptURL(url))
 			{
 				result = plugin->importNPC(url);

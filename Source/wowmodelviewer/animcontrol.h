@@ -33,9 +33,9 @@ public:
 
 	TextureGroup() : count(0), base(0)
 	{
-		for (size_t i = 0; i < num; i++)
+		for (auto& i : tex)
 		{
-			tex[i] = nullptr;
+			i = nullptr;
 		}
 		particleColInd = 0;
 		PCRIndex = -1;

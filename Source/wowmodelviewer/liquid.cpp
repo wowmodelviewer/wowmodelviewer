@@ -342,8 +342,8 @@ void Liquid::initTextures(wxString basename, int first, int last)
 
 Liquid::~Liquid()
 {
-	for (size_t i = 0; i < textures.size(); i++)
+	for (unsigned int texture : textures)
 	{
-		TEXTUREMANAGER.del(textures[i]);
+		TEXTUREMANAGER.del(texture);
 	}
 }

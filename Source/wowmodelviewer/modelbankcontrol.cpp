@@ -204,9 +204,9 @@ void ModelBankControl::RemoveModel()
 	}
 
 	bankList.clear();
-	for (size_t i = 0; i < temp.size(); i++)
+	for (const auto& i : temp)
 	{
-		bankList.push_back(temp[i]);
+		bankList.push_back(i);
 	}
 
 	UpdateList();
@@ -216,9 +216,9 @@ void ModelBankControl::UpdateList()
 {
 	lstBank->Clear();
 
-	for (size_t i = 0; i < bankList.size(); i++)
+	for (auto& i : bankList)
 	{
-		lstBank->Append(bankList[i].name);
+		lstBank->Append(i.name);
 	}
 }
 

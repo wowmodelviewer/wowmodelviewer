@@ -62,8 +62,8 @@ void Attachment::drawParticles()
 	}
 
 	// children:
-	for (size_t i = 0; i < children.size(); i++)
-		children[i]->drawParticles();
+	for (auto& i : children)
+		i->drawParticles();
 
 	glPopMatrix();
 }
@@ -72,8 +72,8 @@ void Attachment::tick(float dt)
 {
 	if (model_)
 		model_->update(dt);
-	for (size_t i = 0; i < children.size(); i++)
-		children[i]->tick(dt);
+	for (auto& i : children)
+		i->tick(dt);
 }
 
 void Attachment::setup()
@@ -116,11 +116,11 @@ Attachment* Attachment::addChild(Displayable* disp, int Id, int Slot)
 
 void Attachment::delChildren()
 {
-	for (size_t i = 0; i < children.size(); i++)
+	for (auto& i : children)
 	{
-		children[i]->delChildren();
-		delete children[i];
-		children[i] = nullptr;
+		i->delChildren();
+		delete i;
+		i = nullptr;
 	}
 
 	children.clear();

@@ -322,9 +322,9 @@ WMO::~WMO()
 		//gLog("Unloading WMO %s\n", name.c_str());
 		delete[] groups;
 
-		for (size_t i = 0; i < textures.size(); i++)
+		for (const auto& texture : textures)
 		{
-			TEXTUREMANAGER.delbyname(textures[i]);
+			TEXTUREMANAGER.delbyname(texture);
 		}
 
 		/*

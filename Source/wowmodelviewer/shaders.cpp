@@ -51,7 +51,7 @@ void OldinitShaders()
 
 void OldreloadShaders()
 {
-	for (size_t i = 0; i < 4; i++) delete terrainShaders[i];
+	for (auto& terrainShader : terrainShaders) delete terrainShader;
 	delete wmoShader;
 	delete waterShaders[0];
 
