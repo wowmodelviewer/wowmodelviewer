@@ -687,7 +687,7 @@ void WoWModel::initCommon()
 
 				if (texdef[I].type == TEXTURE_WEAPON_BLADE) // a fix for weapons with type-3 textures.
 					replaceTextures[texdef[I].type] = TEXTUREMANAGER.add(
-						GAMEDIRECTORY.getFile("Item\\ObjectComponents\\Weapon\\ArmorReflect4.BLP"));
+						GAMEDIRECTORY.getFile(R"(Item\ObjectComponents\Weapon\ArmorReflect4.BLP)"));
 			}
 		}
 	}
