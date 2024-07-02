@@ -3839,9 +3839,9 @@ bool WoWModel::canSetTextureFromFile(int texnum)
 	for (size_t i = 0; i < TEXTURE_MAX; i++)
 	{
 		if (specialTextures[i] == texnum)
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 QString WoWModel::getCGGroupName(CharGeosets cg)

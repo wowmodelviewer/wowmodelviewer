@@ -118,7 +118,7 @@ public:
 
 	ParticleSystem(): mid(0), emitter(nullptr), rem(0)
 	{
-		multitexture = 0;
+		multitexture = false;
 		particleColID = 0;
 		replaceParticleColors = false;
 		doNotTrail = false;

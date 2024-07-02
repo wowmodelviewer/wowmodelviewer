@@ -198,7 +198,7 @@ void CharControl::UpdateModel(Attachment* a)
 		//model->cd.reset();
 		model->td.showCustom = false;
 
-		g_modelViewer->charMenu->Check(ID_SHOW_FEET, 0);
+		g_modelViewer->charMenu->Check(ID_SHOW_FEET, false);
 
 		model->td.setIcon(randint(0, model->td.GetMaxIcon()));
 		model->td.setIconColor(randint(0, model->td.GetMaxIconColor(model->td.getIcon())));
@@ -881,7 +881,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			model->bSheathe = true;
 			RefreshEquipment();
 			RefreshModel();
-			g_modelViewer->charMenu->Check(ID_SHEATHE, 1);
+			g_modelViewer->charMenu->Check(ID_SHEATHE, true);
 
 			if (cats[id] == 0) // create proper mount from model ID
 			{
