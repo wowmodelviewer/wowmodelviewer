@@ -1,12 +1,4 @@
-/*
- * Game.h
- *
- *  Created on: 12 dec. 2015
- *      Author: Jeromnimo
- */
-
-#ifndef _GAME_H_
-#define _GAME_H_
+#pragma once
 
 #include "GameFolder.h"
 #include "GameDatabase.h"
@@ -26,42 +18,42 @@
 
 namespace core
 {
-  class _GAME_API_ Game
-  {
-    public:
-      static Game & instance()
-      {
-        if (Game::m_instance == 0)
-          Game::m_instance = new Game();
-        return *m_instance;
-      }
+	class _GAME_API_ Game
+	{
+	public:
+		static Game& instance()
+		{
+			if (Game::m_instance == 0)
+				Game::m_instance = new Game();
+			return *m_instance;
+		}
 
-      void init(core::GameFolder * folder, core::GameDatabase * db);
-      bool initDone() { return ((m_db != 0) && (m_folder != 0)); }
-      void addCustomFiles(const QString &path, bool bypassOriginalFiles);
+		void init(core::GameFolder* folder, core::GameDatabase* db);
+		bool initDone() { return ((m_db != 0) && (m_folder != 0)); }
+		void addCustomFiles(const QString& path, bool bypassOriginalFiles);
 
-      core::GameFolder & folder() { return *m_folder; }
-      core::GameDatabase & database() { return *m_db; }
+		core::GameFolder& folder() { return *m_folder; }
+		core::GameDatabase& database() { return *m_db; }
 
-      void setConfigFolder(const QString & folder) { m_configFolder = folder; }
-      QString configFolder() { return m_configFolder; }
+		void setConfigFolder(const QString& folder) { m_configFolder = folder; }
+		QString configFolder() { return m_configFolder; }
 
-    private:
+	private:
+		// disable explicit construct and destruct
+		Game();
 
-      // disable explicit construct and destruct
-      Game();
-      virtual ~Game() {}
-      Game(const Game &);
-      void operator=(const Game &);
+		virtual ~Game()
+		{
+		}
 
-      core::GameFolder * m_folder;
-      core::GameDatabase * m_db;
+		Game(const Game&);
+		void operator=(const Game&);
 
-      QString m_configFolder;
+		core::GameFolder* m_folder;
+		core::GameDatabase* m_db;
 
-      static Game * m_instance;
-  };
+		QString m_configFolder;
+
+		static Game* m_instance;
+	};
 }
-
-
-#endif /* _GAME_H_ */

@@ -1,19 +1,10 @@
-/*
- * GameDatabase.h
- *
- *  Created on: 7 Aug. 2017
- *      Author: Jeromnimo
- */
-
-#ifndef _GAMEDATABASE_H_
-#define _GAMEDATABASE_H_
+#pragma once
 
 #include <vector>
 #include "sqlite3.h"
 
 class DBFile;
 class GameFile;
-
 class QDomElement;
 #include <QString>
 
@@ -30,99 +21,103 @@ class QDomElement;
 class _GAMEDATABASE_API_ sqlResult
 {
 public:
-  sqlResult() : valid(false), nbcols(0) {}
-  ~sqlResult() { /* TODO :free char** */ }
-  bool empty() { return values.size() == 0; }
-  bool valid;
-  int nbcols;
-  std::vector<std::vector<QString> > values;
+	sqlResult() : valid(false), nbcols(0)
+	{
+	}
+
+	~sqlResult()
+	{
+		/* TODO :free char** */
+	}
+
+	bool empty() { return values.size() == 0; }
+	bool valid;
+	int nbcols;
+	std::vector<std::vector<QString>> values;
 };
 
 namespace core
 {
-  // table structures as defined in xml file
-  class _GAMEDATABASE_API_ FieldStructure
-  {
-  public:
-    FieldStructure() :
-      name(""),
-      type(""),
-      isKey(false),
-      needIndex(false),
-    arraySize(1),
-    id(0)
-    {}
+	// table structures as defined in xml file
+	class _GAMEDATABASE_API_ FieldStructure
+	{
+	public:
+		FieldStructure() :
+			name(""),
+			type(""),
+			isKey(false),
+			needIndex(false),
+			arraySize(1),
+			id(0)
+		{
+		}
 
-    virtual ~FieldStructure() {}
+		virtual ~FieldStructure()
+		{
+		}
 
-    QString name;
-    QString type;
-    bool isKey;
-    bool needIndex;
-    unsigned int arraySize;
-    int id;
-  };
+		QString name;
+		QString type;
+		bool isKey;
+		bool needIndex;
+		unsigned int arraySize;
+		int id;
+	};
 
-  class _GAMEDATABASE_API_ TableStructure
-  {
-  public:
-    TableStructure() :
-      name(""),
-      file("")
-    {}
+	class _GAMEDATABASE_API_ TableStructure
+	{
+	public:
+		TableStructure() :
+			name(""),
+			file("")
+		{
+		}
 
-    virtual ~TableStructure();
+		virtual ~TableStructure();
 
-    QString name;
-    QString file;
-    std::vector<FieldStructure *> fields;
+		QString name;
+		QString file;
+		std::vector<FieldStructure*> fields;
 
-    bool create();
-    bool fill();
+		bool create();
+		bool fill();
 
-    virtual DBFile * createDBFile();
-  };
+		virtual DBFile* createDBFile();
+	};
 
+	class _GAMEDATABASE_API_ GameDatabase
+	{
+	public:
+		GameDatabase();
+		GameDatabase(GameDatabase&);
 
-  class _GAMEDATABASE_API_ GameDatabase
-  {
-  public:
-    GameDatabase();
-    GameDatabase(GameDatabase &);
+		bool initFromXML(const QString& file);
 
-    bool initFromXML(const QString & file);
+		sqlResult sqlQuery(const QString& query);
 
-    sqlResult sqlQuery(const QString &query);
+		void setFastMode() { m_fastMode = true; }
 
-    void setFastMode() { m_fastMode = true; }
+		virtual ~GameDatabase();
 
-    virtual ~GameDatabase();
+		void addTable(TableStructure*);
 
-    void addTable(TableStructure *);
+		virtual core::TableStructure* createTableStructure() = 0;
+		virtual core::FieldStructure* createFieldStructure() = 0;
 
-    virtual core::TableStructure * createTableStructure() = 0;
-    virtual core::FieldStructure * createFieldStructure() = 0;
+		virtual void readSpecificTableAttributes(QDomElement&, core::TableStructure*) = 0;
+		virtual void readSpecificFieldAttributes(QDomElement&, core::FieldStructure*) = 0;
 
-    virtual void readSpecificTableAttributes(QDomElement &, core::TableStructure *) = 0;
-    virtual void readSpecificFieldAttributes(QDomElement &, core::FieldStructure *) = 0;
+	private:
+		static int treatQuery(void* NotUsed, int nbcols, char** values, char** cols);
+		static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
 
-  protected:
+		bool createDatabaseFromXML(const QString& file);
+		bool readStructureFromXML(const QString& file);
 
-  private:
-    static int treatQuery(void *NotUsed, int nbcols, char ** values, char ** cols);
-    static void logQueryTime(void* aDb, const char* aQueryStr, sqlite3_uint64 aTimeInNs);
+		sqlite3* m_db;
 
-    bool createDatabaseFromXML(const QString & file);
-    bool readStructureFromXML(const QString & file);
+		std::vector<TableStructure*> m_dbStruct;
 
-    sqlite3 *m_db;
-
-    std::vector<TableStructure * > m_dbStruct;
-
-    bool m_fastMode;
-  };
-
+		bool m_fastMode;
+	};
 }
-
-
-#endif /* _WOWDATABASE_H_ */

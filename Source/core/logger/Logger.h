@@ -1,56 +1,14 @@
-/*----------------------------------------------------------------------*\
-| This file is part of WoW Model Viewer                                  |
-|                                                                        |
-| WoW Model Viewer is free software: you can redistribute it and/or      |
-| modify it under the terms of the GNU General Public License as         |
-| published by the Free Software Foundation, either version 3 of the     |
-| License, or (at your option) any later version.                        |
-|                                                                        |
-| WoW Model Viewer is distributed in the hope that it will be useful,    |
-| but WITHOUT ANY WARRANTY; without even the implied warranty of         |
-| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          |
-| GNU General Public License for more details.                           |
-|                                                                        |
-| You should have received a copy of the GNU General Public License      |
-| along with WoW Model Viewer.                                           |
-| If not, see <http://www.gnu.org/licenses/>.                            |
-\*----------------------------------------------------------------------*/
+#pragma once
 
-/*
- * Logger.h
- *
- *  Created on: 29 dec. 2013
- *   Copyright: 2013 , WoW Model Viewer (http://wowmodelviewer.net)
- */
-
-#ifndef _LOGGER_H_
-#define _LOGGER_H_
-
-// Includes / class Declarations
-//--------------------------------------------------------------------
-// STL
-
-// Qt
 #include <QDebug>
 #include <QtGlobal>
 #include <QString>
 
 class QMessageLogContext;
 
-// Externals
-
-// Other libraries
 #include "../metaclasses/Container.h"
-
-// Current library
 #include "LogOutput.h"
 
-// Namespaces used
-//--------------------------------------------------------------------
-
-
-// Class Declaration
-//--------------------------------------------------------------------
 #ifdef _WIN32
 #    ifdef BUILDING_CORE_DLL
 #        define _LOGGER_API_ __declspec(dllexport)
@@ -61,9 +19,7 @@ class QMessageLogContext;
 #    define _LOGGER_API_
 #endif
 
-
 #define LOGGER WMVLog::Logger::instance()
-
 #define LOG_INFO LOGGER(WMVLog::Logger::INFO_LOG)
 #define LOG_ERROR LOGGER(WMVLog::Logger::ERROR_LOG)
 #define LOG_WARNING LOGGER(WMVLog::Logger::WARNING_LOG)
@@ -71,75 +27,37 @@ class QMessageLogContext;
 
 namespace WMVLog
 {
-class _LOGGER_API_ Logger : public Container<LogOutput>
-{
-  public :
-    // Constants / Enums
-    enum LogType
-    {
-      INFO_LOG = 0,
-      WARNING_LOG,
-      ERROR_LOG,
-      FATAL_LOG
-    };
+	class _LOGGER_API_ Logger : public Container<LogOutput>
+	{
+	public:
+		enum LogType
+		{
+			INFO_LOG = 0,
+			WARNING_LOG,
+			ERROR_LOG,
+			FATAL_LOG
+		};
 
-    // Constructors
-  
-    // Destructors
-  
-    // Methods
-    static Logger & instance()
-    {
-      if(Logger::m_instance == 0)
-        Logger::m_instance = new Logger();
+		static Logger &instance()
+		{
+			if (Logger::m_instance == 0)
+				Logger::m_instance = new Logger();
 
-      return *m_instance;
-    }
-    
-    static void init();
+			return *m_instance;
+		}
 
-    static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+		static void init();
 
-    static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
+		static void writeLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    QDebug operator()(Logger::LogType type);
+		static QString formatLog(QtMsgType type, const QMessageLogContext &context, const QString &msg);
 
-    // Members
-    
-  protected :
-    // Constants / Enums
-  
-    // Constructors
-  
-    // Destructors
-  
-    // Methods
-    
-    // Members
-    
-  private :
-    // Constants / Enums
-  
-    // Constructors
-    // prevent unwanted constructions
-    Logger();
-    Logger(Logger &);
+		QDebug operator()(Logger::LogType type);
 
-    // Destructors
-  
-    // Methods
-    
-    // Members
-    static Logger * m_instance;
+	private:
+		Logger();
+		Logger(Logger &);
 
-    // friend class declarations
-  
-};
-
-// static members definition
-#ifdef _LOGGER_CPP_
-
-#endif
-
-} // WMVLog
-#endif /* _LOGGER_H_ */
+		static Logger *m_instance;
+	};
+}
