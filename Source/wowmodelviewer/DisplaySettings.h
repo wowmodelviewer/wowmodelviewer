@@ -41,9 +41,7 @@ class DisplaySettings : public wxWindow
 public:
 	DisplaySettings(wxWindow* parent, wxWindowID id);
 
-	~DisplaySettings()
-	{
-	};
+	~DisplaySettings() = default;
 
 	void Update();
 	void OnButton(wxCommandEvent& event);

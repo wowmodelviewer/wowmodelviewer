@@ -103,11 +103,11 @@ void CAnimationExporter::Init(const wxString fn)
 	cbShrink->SetValue(false);
 }
 
-CAnimationExporter::~CAnimationExporter()
-{
+CAnimationExporter::~CAnimationExporter() = default;
+/*{
 	//canvas = NULL;
 	//this = NULL;
-}
+}*/
 
 // This must be called before any frame-saving is attempted.
 void CAnimationExporter::CreateGif()

@@ -42,9 +42,7 @@ class GeneralSettings : public wxWindow
 
 public:
 	GeneralSettings(wxWindow* parent, wxWindowID id);
-	~GeneralSettings()
-	{
-	};
+	~GeneralSettings() = default;
 
 	void Update();
 

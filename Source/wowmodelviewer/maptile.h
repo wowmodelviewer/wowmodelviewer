@@ -102,9 +102,7 @@ public:
 			i = nullptr;
 	}
 
-	virtual ~MapNode()
-	{
-	}
+	virtual ~MapNode() = default;
 
 	int px, py, size;
 

@@ -20,9 +20,7 @@ class _DBFILE_API_ DBFile
 public:
 	explicit DBFile();
 
-	virtual ~DBFile()
-	{
-	};
+	virtual ~DBFile() = default;
 
 	virtual bool open() = 0;
 

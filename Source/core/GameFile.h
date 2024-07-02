@@ -24,9 +24,7 @@ public:
 	{
 	}
 
-	virtual ~GameFile()
-	{
-	}
+	virtual ~GameFile() = default;
 
 	virtual size_t read(void* dest, size_t bytes);
 	size_t getSize();

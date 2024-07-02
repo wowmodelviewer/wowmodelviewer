@@ -44,13 +44,9 @@ class OBJExporter : public ExporterPlugin
 	Q_PLUGIN_METADATA(IID "wowmodelviewer.exporters.OBJExporter" FILE "objexporter.json")
 
 public:
-	OBJExporter()
-	{
-	}
+	OBJExporter() = default;
 
-	~OBJExporter()
-	{
-	}
+	~OBJExporter() = default;
 
 	std::wstring menuLabel() const;
 	std::wstring fileSaveTitle() const;

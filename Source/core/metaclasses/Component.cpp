@@ -7,9 +7,7 @@ Component::Component() : m_p_parent(nullptr), m_refCounter(0)
 	m_name = "Component";
 }
 
-Component::~Component()
-{
-}
+Component::~Component() = default;
 
 bool Component::addChild(Component*)
 {

@@ -30,9 +30,7 @@ AnimManager::AnimManager(WoWModel& m) : model(m)
 	Paused = false;
 }
 
-AnimManager::~AnimManager()
-{
-}
+AnimManager::~AnimManager() = default;
 
 void AnimManager::SetCount(int count)
 {

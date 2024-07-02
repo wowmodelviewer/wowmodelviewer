@@ -42,9 +42,7 @@ namespace core
 		// disable explicit construct and destruct
 		Game();
 
-		virtual ~Game()
-		{
-		}
+		virtual ~Game() = default;
 
 		Game(const Game&);
 		void operator=(const Game&);

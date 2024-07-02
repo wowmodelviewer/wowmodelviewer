@@ -147,9 +147,7 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	charAtt = nullptr;
 }
 
-CharControl::~CharControl()
-{
-}
+CharControl::~CharControl() = default;
 
 bool CharControl::Init()
 {

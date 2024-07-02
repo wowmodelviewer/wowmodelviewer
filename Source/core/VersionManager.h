@@ -24,9 +24,7 @@ class _VERSIONMANAGER_API_ VersionManager : public QObject
 
 public:
 	VersionManager(QObject* parent = nullptr);
-	~VersionManager()
-	{
-	}
+	~VersionManager() = default;
 
 	QString getLastVersionFor(QString&);
 	static int compareVersion(const QString& v1, const QString& v2);

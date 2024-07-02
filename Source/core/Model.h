@@ -13,9 +13,7 @@
 class _MODEL_API_ Model
 {
 public:
-	Model()
-	{
-	};
+	Model() = default;
 
 	virtual ~Model() = 0;
 };

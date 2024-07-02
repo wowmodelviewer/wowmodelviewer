@@ -76,9 +76,7 @@ core::GlobalSettings::GlobalSettings()
 	bInitPoseOnlyExport = false;
 }
 
-core::GlobalSettings::~GlobalSettings()
-{
-}
+core::GlobalSettings::~GlobalSettings() = default;
 
 std::wstring core::GlobalSettings::appVersion(std::wstring a_prefix)
 {

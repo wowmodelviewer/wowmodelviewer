@@ -9,9 +9,7 @@ class NPCInfos;
 class ImporterPlugin : public Plugin
 {
 public:
-	ImporterPlugin()
-	{
-	}
+	ImporterPlugin() = default;
 
 	virtual bool acceptURL(QString url) const = 0;
 	virtual NPCInfos* importNPC(QString url) const = 0;

@@ -4,9 +4,7 @@ FileDownloader::FileDownloader(QObject* parent) : QObject(parent)
 {
 }
 
-FileDownloader::~FileDownloader()
-{
-}
+FileDownloader::~FileDownloader() = default;
 
 void FileDownloader::get(QUrl url)
 {

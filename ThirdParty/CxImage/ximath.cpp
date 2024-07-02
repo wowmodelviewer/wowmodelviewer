@@ -32,9 +32,7 @@ float CxPoint2::Distance(float const x_, float const y_)
   return (float)sqrt((x-x_)*(x-x_)+(y-y_)*(y-y_));
 }
 
-CxRect2::CxRect2()
-{
-}
+CxRect2::CxRect2() = default;
 
 CxRect2::CxRect2(float const x1_, float const y1_, float const x2_, float const y2_)
 {

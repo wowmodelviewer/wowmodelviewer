@@ -12,9 +12,7 @@ class AnimationExportChoiceDialog : public wxMultiChoiceDialog
 public:
 	AnimationExportChoiceDialog(wxWindow* parent, const wxString& message, const wxString& caption,
 	                            const wxArrayString& choices);
-	~AnimationExportChoiceDialog()
-	{
-	}
+	~AnimationExportChoiceDialog() = default;
 
 private:
 	void updateButtons(wxCommandEvent& event);

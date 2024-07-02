@@ -38,13 +38,9 @@ class WowheadImporter : public ImporterPlugin
 	Q_PLUGIN_METADATA(IID "wowmodelviewer.importers.WowheadImporter" FILE "wowheadimporter.json")
 
 public:
-	WowheadImporter()
-	{
-	}
+	WowheadImporter() = default;
 
-	~WowheadImporter()
-	{
-	}
+	~WowheadImporter() = default;
 
 	bool acceptURL(QString url) const;
 

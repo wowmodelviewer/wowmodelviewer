@@ -8,9 +8,7 @@
 
 PluginManager* PluginManager::m_instance = nullptr;
 
-PluginManager::PluginManager()
-{
-}
+PluginManager::PluginManager() = default;
 
 void PluginManager::init(const std::string& dir)
 {

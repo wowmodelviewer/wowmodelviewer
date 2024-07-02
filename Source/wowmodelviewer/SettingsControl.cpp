@@ -34,9 +34,7 @@ SettingsControl::SettingsControl(wxWindow* parent, wxWindowID id)
 	notebook->AddPage(page3, _("Export"), false);
 }
 
-SettingsControl::~SettingsControl()
-{
-}
+SettingsControl::~SettingsControl() = default;
 
 void SettingsControl::Open()
 {

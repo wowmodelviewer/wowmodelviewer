@@ -27,9 +27,7 @@ class ExportSettings : public wxWindow
 
 public:
 	ExportSettings(wxWindow* parent, wxWindowID id);
-	~ExportSettings()
-	{
-	};
+	~ExportSettings() = default;
 
 	void Update();
 

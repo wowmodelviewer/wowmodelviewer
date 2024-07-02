@@ -26,9 +26,7 @@ public:
 	glm::vec3 ldir;
 	glm::vec3 lcol;
 
-	WMOModelInstance()
-	{
-	}
+	WMOModelInstance() = default;
 
 	void init(char* fname, GameFile& f);
 	void draw();

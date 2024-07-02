@@ -54,9 +54,7 @@ public:
 	std::map<QString, IDTYPE> names;
 	std::map<IDTYPE, ManagedItem*> items;
 
-	Manager()
-	{
-	}
+	Manager() = default;
 
 	~Manager()
 	{

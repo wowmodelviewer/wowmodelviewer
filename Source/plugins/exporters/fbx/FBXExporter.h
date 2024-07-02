@@ -50,9 +50,7 @@ class FBXExporter : public ExporterPlugin
 public:
 	FBXExporter();
 
-	~FBXExporter()
-	{
-	}
+	~FBXExporter() = default;
 
 	std::wstring menuLabel() const;
 	std::wstring fileSaveTitle() const;

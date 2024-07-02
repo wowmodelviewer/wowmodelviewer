@@ -47,9 +47,7 @@ public:
 	virtual Particle newParticle(size_t anim, size_t time, float w, float l, float spd, float var, float spr,
 	                             float spr2) = 0;
 
-	virtual ~ParticleEmitter()
-	{
-	}
+	virtual ~ParticleEmitter() = default;
 };
 
 class PlaneParticleEmitter : public ParticleEmitter
