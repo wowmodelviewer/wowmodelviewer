@@ -100,8 +100,8 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	strHdr.dwRate = m_dwRate; // fps
 	strHdr.dwSuggestedBufferSize = m_bih.biSizeImage; // Recommended buffer size, in bytes, for the stream.
 	SetRect(&strHdr.rcFrame, 0, 0, // rectangle for stream
-	        (int)m_bih.biWidth,
-	        (int)m_bih.biHeight);
+	        static_cast<int>(m_bih.biWidth),
+	        static_cast<int>(m_bih.biHeight));
 
 	// Step 3 : Create the stream;
 	hr = AVIFileCreateStream(m_pAVIFile, // file pointer
@@ -123,9 +123,9 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	memset(&opts, 0, sizeof(opts));
 	// Poping codec dialog
 	if (!AVISaveOptions(parent, ICMF_CHOOSE_KEYFRAME | ICMF_CHOOSE_DATARATE, 1, &m_pStream,
-	                    (LPAVICOMPRESSOPTIONS FAR *)&aopts))
+	                    reinterpret_cast<LPAVICOMPRESSOPTIONS*>(&aopts)))
 	{
-		AVISaveOptionsFree(1, (LPAVICOMPRESSOPTIONS FAR *)&aopts);
+		AVISaveOptionsFree(1, reinterpret_cast<LPAVICOMPRESSOPTIONS*>(&aopts));
 		return S_FALSE;
 	}
 
@@ -154,7 +154,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	}
 
 	// releasing memory allocated by AVISaveOptionFree
-	hr = AVISaveOptionsFree(1, (LPAVICOMPRESSOPTIONS FAR *)&aopts);
+	hr = AVISaveOptionsFree(1, reinterpret_cast<LPAVICOMPRESSOPTIONS*>(&aopts));
 	if (hr != AVIERR_OK)
 	{
 		LOG_ERROR << "Problem releasing memory";

@@ -87,7 +87,7 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 	const auto num_of_vertices = model->origVertices.size();
 	FbxMesh* mesh = FbxMesh::Create(
 		l_manager, model->name().mid(model->name().lastIndexOf('/') + 1).toStdString().c_str());
-	mesh->InitControlPoints((int)num_of_vertices);
+	mesh->InitControlPoints(static_cast<int>(num_of_vertices));
 	FbxVector4* vertices = mesh->GetControlPoints();
 
 	// Set the normals on Layer 0.
@@ -140,7 +140,7 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 			FbxString mtrl_name = "testToChange";
 			mtrl_name.Append("_", 1);
 			char tmp[32];
-			_itoa((int)i, tmp, 10);
+			_itoa(static_cast<int>(i), tmp, 10);
 			mtrl_name.Append(tmp, strlen(tmp));
 			FbxSurfaceMaterial* material = l_scene->GetMaterial(mtrl_name.Buffer());
 			meshNode->AddMaterial(material);

@@ -129,7 +129,7 @@ public:
 	{
 		for (size_t i = 0; i < 50; i++)
 		{
-			if (items.find((const unsigned int)i) != items.end())
+			if (items.find(static_cast<const unsigned int>(i)) != items.end())
 			{
 				del((GLuint)i);
 			}

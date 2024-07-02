@@ -48,10 +48,10 @@ void ParticleSystem::init(GameFile* f, M2ParticleDef& mta, std::vector<uint32>& 
 
 	for (size_t i = 0; i < 3; i++)
 	{
-		float opacity = *(short*)(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
+		float opacity = *reinterpret_cast<short*>(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
 		colors[i] = glm::vec4(colors2[i].x / 255.0f, colors2[i].y / 255.0f,
 		                      colors2[i].z / 255.0f, opacity / 32767.0f);
-		sizes[i] = (*(float*)(f->getBuffer() + mta.p.sizes.ofsKeys + i * sizeof(glm::vec2))) * mta.p.scales[i];
+		sizes[i] = (*reinterpret_cast<float*>(f->getBuffer() + mta.p.sizes.ofsKeys + i * sizeof(glm::vec2))) * mta.p.scales[i];
 	}
 	mid = 0.5; // mid can't be 0 or 1, TODO, Alfred
 
@@ -202,7 +202,7 @@ void ParticleSystem::update(float dt)
 		}
 		else
 		{
-			unsigned int tospawn = (int)ftospawn;
+			unsigned int tospawn = static_cast<int>(ftospawn);
 
 			if ((tospawn + particles.size()) > MAX_PARTICLES)
 				// Error check to prevent the program from trying to load insane amounts of particles.

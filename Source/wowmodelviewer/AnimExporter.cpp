@@ -84,7 +84,7 @@ void CAnimationExporter::Init(const wxString fn)
 
 	size_t i = (m_iTotalAnimFrames / 50);
 	txtFrames->SetLabel(wxEmptyString);
-	*txtFrames << (int)i;
+	*txtFrames << static_cast<int>(i);
 
 	btnStart->Enable(true);
 	btnCancel->Enable(true);
@@ -141,8 +141,8 @@ void CAnimationExporter::CreateGif()
 	g_canvas->model()->animManager->SetSpeed(1.0f); // Set it to the normal speed.
 
 	m_iTotalAnimFrames = g_canvas->model()->animManager->GetFrameCount();
-	wxString(txtFrames->GetValue()).ToLong((long*)&m_iTotalFrames);
-	wxString(txtDelay->GetValue()).ToLong((long*)&m_iDelay);
+	wxString(txtFrames->GetValue()).ToLong(reinterpret_cast<long*>(&m_iTotalFrames));
+	wxString(txtDelay->GetValue()).ToLong(reinterpret_cast<long*>(&m_iDelay));
 
 	// will crash program - prevent this from happening
 	if (m_iTotalFrames > m_iTotalAnimFrames)

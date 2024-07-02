@@ -96,7 +96,7 @@ Shader::Shader(GLenum target, const char* program, bool fromFile): target(target
 
 	glGenProgramsARB(1, &id);
 	glBindProgramARB(target, id);
-	glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)strlen(progtext), progtext);
+	glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB, static_cast<GLsizei>(strlen(progtext)), progtext);
 	if (glGetError() != 0)
 	{
 		int errpos;

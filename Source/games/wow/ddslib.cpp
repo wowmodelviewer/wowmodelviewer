@@ -193,15 +193,15 @@ static void DDSGetColorBlockColors(ddsColorBlock_t* block, ddsColor_t colors[4])
 	colors[0].a = 0xff;
 
 	/* extract rgb bits */
-	colors[0].b = (unsigned char)(word & 0xFF);
+	colors[0].b = static_cast<unsigned char>(word & 0xFF);
 	colors[0].b <<= 3;
 	colors[0].b |= (colors[0].b >> 5);
 	word >>= 5;
-	colors[0].g = (unsigned char)(word & 0xFF);
+	colors[0].g = static_cast<unsigned char>(word & 0xFF);
 	colors[0].g <<= 2;
 	colors[0].g |= (colors[0].g >> 5);
 	word >>= 6;
-	colors[0].r = (unsigned char)(word & 0xFF);
+	colors[0].r = static_cast<unsigned char>(word & 0xFF);
 	colors[0].r <<= 3;
 	colors[0].r |= (colors[0].r >> 5);
 

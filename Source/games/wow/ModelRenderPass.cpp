@@ -88,7 +88,7 @@ bool ModelRenderPass::init()
 	ecol = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
 	// emissive colors
-	if (color != -1 && color < (int16)model->colors.size() && model->colors[color].color.uses(0))
+	if (color != -1 && color < static_cast<int16>(model->colors.size()) && model->colors[color].color.uses(0))
 	{
 		glm::vec3 c;
 		/* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
@@ -111,7 +111,7 @@ bool ModelRenderPass::init()
 
 	// opacity
 	if (opacity != -1 &&
-		opacity < (int16)model->transparency.size() &&
+		opacity < static_cast<int16>(model->transparency.size()) &&
 		model->transparency[opacity].trans.uses(0))
 	{
 		// Alfred 2008.10.02 buggy opacity make model invisible, TODO
@@ -205,7 +205,7 @@ bool ModelRenderPass::init()
 	}
 
 	if (texanim != -1 &&
-		texanim < (int16)model->texAnims.size())
+		texanim < static_cast<int16>(model->texAnims.size()))
 	{
 		glMatrixMode(GL_TEXTURE);
 		glPushMatrix();

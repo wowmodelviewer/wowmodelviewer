@@ -78,7 +78,7 @@ wxString getGamePath(bool noSet)
 		if (l == ERROR_SUCCESS)
 		{
 			s = sizeof(path);
-			l = RegQueryValueEx(key, wxT("InstallPath"), nullptr, &t, (LPBYTE)path, &s);
+			l = RegQueryValueEx(key, wxT("InstallPath"), nullptr, &t, reinterpret_cast<LPBYTE>(path), &s);
 			wxString spath = QString::fromLatin1(path).toStdWString();
 			if (l == ERROR_SUCCESS && wxDir::Exists(spath) && sNames.Index(spath) == wxNOT_FOUND)
 				sNames.Add(spath);
@@ -158,7 +158,7 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 		a_resHandle = LoadResource(nullptr, a_resource);
 		if (nullptr != a_resHandle)
 		{
-			t_data = (char*)LockResource(a_resHandle);
+			t_data = static_cast<char*>(LockResource(a_resHandle));
 			t_dataSize = SizeofResource(nullptr, a_resource);
 			r_result = true;
 		}

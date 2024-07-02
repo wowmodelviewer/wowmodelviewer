@@ -88,7 +88,7 @@ void CharDetails::load(QString& f)
 				    reader.attributes().value("value").toString().toUInt());
 
 			if (reader.name() == "eyeGlowType")
-				eyeGlowType = (EyeGlowTypes)reader.attributes().value("value").toString().toUInt();
+				eyeGlowType = static_cast<EyeGlowTypes>(reader.attributes().value("value").toString().toUInt());
 
 			if (reader.name() == "showUnderwear")
 				showUnderwear = reader.attributes().value("value").toString().toUInt();

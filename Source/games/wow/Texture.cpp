@@ -50,8 +50,9 @@ void Texture::load()
 	w = width;
 	h = height;
 
-	LOG_INFO << "Loading texture" << itemName() << "type" << type << "attrs" << (uint)attr[0] << (uint)attr[1] << (uint)
-		attr[2] << (uint)attr[3] << "width" << width << "height" << height;
+	LOG_INFO << "Loading texture" << itemName() << "type" << type << "attrs"
+	<< static_cast<uint>(attr[0]) << static_cast<uint>(attr[1]) << static_cast<uint>(attr[2])
+	<< static_cast<uint>(attr[3]) << "width" << width << "height" << height;
 
 	/*
 	reference: http://en.wikipedia.org/wiki/.BLP
@@ -155,12 +156,12 @@ void Texture::load()
 
 					if (video.supportCompression)
 					{
-						glCompressedTexImage2DARB(GL_TEXTURE_2D, (GLint)i, format, width, height, 0, size, buf);
+						glCompressedTexImage2DARB(GL_TEXTURE_2D, static_cast<GLint>(i), format, width, height, 0, size, buf);
 					}
 					else
 					{
 						decompressDXTC(format, width, height, size, buf, ucbuf);
-						glTexImage2D(GL_TEXTURE_2D, (GLint)i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+						glTexImage2D(GL_TEXTURE_2D, static_cast<GLint>(i), GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 						             ucbuf);
 					}
 				}

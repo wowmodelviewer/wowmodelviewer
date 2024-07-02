@@ -220,7 +220,7 @@ void AnimManager::SetFrame(size_t f) // Only called by the animation slider, or 
 	{
 		for (uint j = 0; j < i; j++)
 		{
-			ForceModelUpdate((float)TimeDiff / i);
+			ForceModelUpdate(static_cast<float>(TimeDiff) / i);
 		}
 	}
 	else

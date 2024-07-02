@@ -127,7 +127,7 @@ WMO::WMO(QString name) :
 			// Group information for WMO groups, 32 bytes per group, nGroups entries.
 			for (size_t i = 0; i < nGroups; i++)
 			{
-				groups[i].init(this, f, (int)i, groupnames);
+				groups[i].init(this, f, static_cast<int>(i), groupnames);
 			}
 		}
 		else if (fourcc == "MOLT")
@@ -148,7 +148,7 @@ WMO::WMO(QString name) :
 			// A block of zero-padded, zero-terminated strings. There are nModels file names in this list. They have to be .MDX!
 			if (size)
 			{
-				ddnames = (char*)f.getPointer();
+				ddnames = reinterpret_cast<char*>(f.getPointer());
 				//fixnamen(ddnames, size);
 
 				char *p = ddnames, *end = p + size;
@@ -160,7 +160,7 @@ WMO::WMO(QString name) :
 					while ((p < end) && (*p == 0)) p++;
 					models.push_back(path.toStdString());
 				}
-				f.seekRelative((int)size);
+				f.seekRelative(static_cast<int>(size));
 			}
 		}
 		else if (fourcc == "MODS")

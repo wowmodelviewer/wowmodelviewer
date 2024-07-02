@@ -185,7 +185,7 @@ QImage* CharTexture::gameFileToQImage(GameFile* file)
 		return result;
 	}
 
-	auto* tempbuf = (unsigned char*)malloc(tex->w * tex->h * 4);
+	auto* tempbuf = static_cast<unsigned char*>(malloc(tex->w * tex->h * 4));
 
 	tex->getPixels(tempbuf, GL_BGRA_EXT);
 	result = new QImage(tempbuf, tex->w, tex->h, QImage::Format_ARGB32, imageCleanUpHandler, tempbuf);

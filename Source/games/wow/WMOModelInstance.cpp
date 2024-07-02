@@ -51,7 +51,7 @@ void WMOModelInstance::draw()
 
 void WMOModelInstance::loadModel(ModelManager& mm)
 {
-	model = (WoWModel*)mm.items[mm.add(GAMEDIRECTORY.getFile(filename))];
+	model = static_cast<WoWModel*>(mm.items[mm.add(GAMEDIRECTORY.getFile(filename))]);
 	model->isWMO = true;
 }
 

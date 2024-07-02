@@ -27,7 +27,7 @@ public:
 	template <class ChildType>
 	int removeAllChildrenOfType();
 
-	unsigned int nbChildren() const { return (unsigned int)m_children.size(); }
+	unsigned int nbChildren() const { return static_cast<unsigned int>(m_children.size()); }
 
 	bool findChildComponent(Component* child, bool recursive = false);
 	Component* getChild(unsigned int index);

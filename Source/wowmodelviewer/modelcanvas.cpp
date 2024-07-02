@@ -149,7 +149,7 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 	lightType = LIGHT_DYNAMIC;
 
 	// Setup our default colour values.
-	vecBGColor = glm::vec3((float)(71.0 / 255), (float)(95.0 / 255), (float)(121.0 / 255));
+	vecBGColor = glm::vec3(static_cast<float>(71.0 / 255), static_cast<float>(95.0 / 255), static_cast<float>(121.0 / 255));
 
 	drawLightDir = false;
 	drawBackground = false;
@@ -186,7 +186,7 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 #ifdef _WINDOWS
 		wxDisplay* disp = new wxDisplay(0);
 		int bpp = disp->GetCurrentMode().bpp;
-		video.SetHandle((HWND)this->GetHandle(), bpp);
+		video.SetHandle(static_cast<HWND>(this->GetHandle()), bpp);
 #else
     video.render = true;
 #endif

@@ -63,7 +63,7 @@ void ImageControl::OnShow(wxAuiManager* m)
 
 	maxsize->SetLabel(wxString::Format(wxT("Max Size: %i"), maxSize));
 
-	aspect = ((float)screenSize[2] / (float)screenSize[3]);
+	aspect = (static_cast<float>(screenSize[2]) / static_cast<float>(screenSize[3]));
 
 	wxString tmp = wxT("screenshot_");
 	tmp << ssCounter;

@@ -146,7 +146,7 @@ void DisplaySettings::OnButton(wxCommandEvent& event)
 		double fov;
 		txtFov->GetValue().ToDouble(&fov);
 		if ((fov > 0) && (fov < 270.0))
-			video.fov = (float)fov;
+			video.fov = static_cast<float>(fov);
 
 		g_modelViewer->SaveSession();
 		g_modelViewer->interfaceManager.GetPane(this->GetParent()).Show(false);

@@ -68,7 +68,7 @@ void core::GameDatabase::addTable(TableStructure* tbl)
 
 int core::GameDatabase::treatQuery(void* resultPtr, int nbcols, char** vals, char** cols)
 {
-	sqlResult* r = (sqlResult*)resultPtr;
+	sqlResult* r = static_cast<sqlResult*>(resultPtr);
 	if (!r)
 		return 1;
 

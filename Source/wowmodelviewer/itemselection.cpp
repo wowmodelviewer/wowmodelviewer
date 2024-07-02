@@ -51,7 +51,7 @@ ChoiceDialog::ChoiceDialog(CharControl* dest, int type,
                            const wxString& message,
                            const wxString& caption,
                            const wxArrayString& choices)
-	: wxSingleChoiceDialog(parent, message, caption, choices, (char**)nullptr, wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER,
+	: wxSingleChoiceDialog(parent, message, caption, choices, static_cast<char**>(nullptr), wxCHOICEDLG_STYLE & ~wxCANCEL & ~wxCENTER,
 	                       wxDefaultPosition)
 {
 	cc = dest;
@@ -107,7 +107,7 @@ ChoiceDialog::ChoiceDialog(CharControl* dest, int type,
 		//m_listctrl->InsertItem(i, choices[i]);
 	}
 
-	wxBoxSizer* frameSizer = (wxBoxSizer*)this->GetSizer();
+	wxBoxSizer* frameSizer = static_cast<wxBoxSizer*>(this->GetSizer());
 	if (frameSizer)
 	{
 		frameSizer->Detach(m_listbox);

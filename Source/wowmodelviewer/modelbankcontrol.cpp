@@ -119,7 +119,7 @@ void ModelBankControl::LoadModel()
 	else if (cd.modelType == MT_NORMAL)
 	{
 		TextureGroup grp;
-		grp.count = (int)cd.textures.size();
+		grp.count = static_cast<int>(cd.textures.size());
 		grp.base = TEXTURE_GAMEOBJECT1;
 		for (size_t i = 0; i < grp.count; i++)
 			grp.tex[i] = cd.textures[i];

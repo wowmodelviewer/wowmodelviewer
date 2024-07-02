@@ -38,7 +38,7 @@ void ModelCamera::setup(size_t time)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(fov * 34.5f, (GLfloat)video.xRes / (GLfloat)video.yRes, nearclip, farclip * 5);
+	gluPerspective(fov * 34.5f, static_cast<GLfloat>(video.xRes) / static_cast<GLfloat>(video.yRes), nearclip, farclip * 5);
 
 	glm::vec3 p = pos + tPos.getValue(0, time);
 	glm::vec3 t = target + tTarget.getValue(0, time);

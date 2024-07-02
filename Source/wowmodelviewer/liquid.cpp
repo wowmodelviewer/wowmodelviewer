@@ -119,7 +119,7 @@ void Liquid::initGeometry(GameFile& f)
 {
 	// assume: f is at the appropriate starting position
 
-	LiquidVertex* map = (LiquidVertex*)f.getPointer();
+	LiquidVertex* map = reinterpret_cast<LiquidVertex*>(f.getPointer());
 	unsigned char* flags = (unsigned char*)(f.getPointer() + (xtiles + 1) * (ytiles + 1) * sizeof(LiquidVertex));
 
 	// generate vertices

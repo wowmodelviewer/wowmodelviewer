@@ -23,7 +23,7 @@ void ModelManager::resetAnim()
 {
 	for (auto& item : items)
 	{
-		((WoWModel*)item.second)->animcalc = false;
+		static_cast<WoWModel*>(item.second)->animcalc = false;
 	}
 }
 
@@ -32,7 +32,7 @@ void ModelManager::updateEmitters(float dt)
 {
 	for (auto& item : items)
 	{
-		((WoWModel*)item.second)->updateEmitters(dt);
+		static_cast<WoWModel*>(item.second)->updateEmitters(dt);
 	}
 }
 

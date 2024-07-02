@@ -10,7 +10,7 @@ CQuantizer::CQuantizer(UINT nMaxColors, UINT nColorBits)
 
 	m_pTree = nullptr;
 	m_nLeafCount = 0;
-	for (int i = 0; i <= (int)m_nColorBits; i++)
+	for (int i = 0; i <= static_cast<int>(m_nColorBits); i++)
 		m_pReducibleNodes[i] = nullptr;
 	m_nMaxColors = m_nOutputMaxColors = nMaxColors;
 	if (m_nMaxColors < 16) m_nMaxColors = 16;
@@ -33,7 +33,7 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 
 	int nPad = effwdt - (((ds.biWidth * ds.biBitCount) + 7) / 8);
 
-	BYTE* pbBits = (BYTE*)hImage + *(DWORD*)hImage + ds.biClrUsed * sizeof(RGBQUAD);
+	BYTE* pbBits = static_cast<BYTE*>(hImage) + *static_cast<DWORD*>(hImage) + ds.biClrUsed * sizeof(RGBQUAD);
 
 	switch (ds.biBitCount)
 	{
@@ -45,7 +45,7 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 			for (j = 0; j < ds.biWidth; j++)
 			{
 				BYTE idx = GetPixelIndex(j, i, ds.biBitCount, effwdt, pbBits);
-				BYTE* pal = (BYTE*)(hImage) + sizeof(BITMAPINFOHEADER);
+				BYTE* pal = static_cast<BYTE*>(hImage) + sizeof(BITMAPINFOHEADER);
 				long ldx = idx * sizeof(RGBQUAD);
 				b = pal[ldx];
 				g = pal[ldx + 1];
@@ -90,7 +90,7 @@ void CQuantizer::AddColor(NODE** ppNode, BYTE r, BYTE g, BYTE b, BYTE a,
 
 	// If the node doesn't exist, create it.
 	if (*ppNode == nullptr)
-		*ppNode = (NODE*)CreateNode(nLevel, nColorBits, pLeafCount, pReducibleNodes);
+		*ppNode = static_cast<NODE*>(CreateNode(nLevel, nColorBits, pLeafCount, pReducibleNodes));
 
 	// Update color  information  if it's  a leaf node.
 	if ((*ppNode)->bIsLeaf)
@@ -116,7 +116,7 @@ void CQuantizer::AddColor(NODE** ppNode, BYTE r, BYTE g, BYTE b, BYTE a,
 void* CQuantizer::CreateNode(UINT nLevel, UINT nColorBits, UINT* pLeafCount,
                              NODE** pReducibleNodes)
 {
-	NODE* pNode = (NODE*)calloc(1, sizeof(NODE));
+	NODE* pNode = static_cast<NODE*>(calloc(1, sizeof(NODE)));
 
 	if (pNode == nullptr) return nullptr;
 
@@ -185,10 +185,10 @@ void CQuantizer::GetPaletteColors(NODE* pTree, RGBQUAD* prgb, UINT* pIndex, UINT
 	{
 		if (pTree->bIsLeaf)
 		{
-			prgb[*pIndex].rgbRed = (BYTE)((pTree->nRedSum) / (pTree->nPixelCount));
-			prgb[*pIndex].rgbGreen = (BYTE)((pTree->nGreenSum) / (pTree->nPixelCount));
-			prgb[*pIndex].rgbBlue = (BYTE)((pTree->nBlueSum) / (pTree->nPixelCount));
-			prgb[*pIndex].rgbReserved = (BYTE)((pTree->nAlphaSum) / (pTree->nPixelCount));
+			prgb[*pIndex].rgbRed = static_cast<BYTE>((pTree->nRedSum) / (pTree->nPixelCount));
+			prgb[*pIndex].rgbGreen = static_cast<BYTE>((pTree->nGreenSum) / (pTree->nPixelCount));
+			prgb[*pIndex].rgbBlue = static_cast<BYTE>((pTree->nBlueSum) / (pTree->nPixelCount));
+			prgb[*pIndex].rgbReserved = static_cast<BYTE>((pTree->nAlphaSum) / (pTree->nPixelCount));
 			if (pSum) pSum[*pIndex] = pTree->nPixelCount;
 			(*pIndex)++;
 		}
