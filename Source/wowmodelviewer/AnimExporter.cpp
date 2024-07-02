@@ -31,7 +31,7 @@ CAnimationExporter::CAnimationExporter(wxWindow* parent, wxWindowID id, const wx
 	{
 		wxMessageBox(wxT("Failed to create the Gif Exporter window!"), wxT("Error"));
 		LOG_ERROR << "Failed to create the Gif Exporter window!";
-		this->Destroy();
+		this->wxTopLevelWindowBase::Destroy();
 		return;
 	}
 

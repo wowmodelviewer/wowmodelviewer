@@ -92,7 +92,7 @@ bool WDB2File::close()
 
 WDB2File::~WDB2File()
 {
-	close();
+	WDB2File::close();
 }
 
 std::vector<std::string> WDB2File::get(unsigned int recordIndex, const core::TableStructure* structure) const

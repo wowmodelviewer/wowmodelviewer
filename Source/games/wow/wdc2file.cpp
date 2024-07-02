@@ -666,7 +666,7 @@ std::vector<std::string> WDC2File::get(unsigned int recordIndex, const core::Tab
 
 WDC2File::~WDC2File()
 {
-	close();
+	WDC2File::close();
 }
 
 bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex, uint arrayIndex, uint arraySize,

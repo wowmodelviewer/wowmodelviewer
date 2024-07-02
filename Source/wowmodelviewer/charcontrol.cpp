@@ -134,11 +134,11 @@ CharControl::CharControl(wxWindow* parent, wxWindowID id)
 	//p->SetSizer(top);
 
 	top->SetSizeHints(this);
-	Show(true);
+	wxWindow::Show(true);
 	//SetAutoLayout(true);
 	SetSizer(top);
-	Layout();
-	FitInside(); // ask the sizer about the needed size
+	wxScrolledWindow::Layout();
+	wxWindowBase::FitInside(); // ask the sizer about the needed size
 	SetScrollRate(5, 5);
 
 	choosingSlot = 0;

@@ -155,5 +155,5 @@ std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::Tab
 
 WDB6File::~WDB6File()
 {
-	close();
+	WDB6File::close();
 }

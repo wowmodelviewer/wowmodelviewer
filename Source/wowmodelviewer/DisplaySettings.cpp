@@ -59,7 +59,7 @@ DisplaySettings::DisplaySettings(wxWindow* parent, wxWindowID id)
 	top->SetSizeHints(this);
 	SetSizer(top);
 	SetAutoLayout(true);
-	Layout();
+	wxWindowBase::Layout();
 }
 
 void DisplaySettings::Update()

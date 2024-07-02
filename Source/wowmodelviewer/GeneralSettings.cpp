@@ -92,7 +92,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 	top->SetMinSize(350, 550);
 	SetSizer(top);
 	SetAutoLayout(true);
-	Layout();
+	wxWindowBase::Layout();
 }
 
 void GeneralSettings::OnCheck(wxCommandEvent& event)

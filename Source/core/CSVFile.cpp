@@ -48,7 +48,7 @@ bool CSVFile::close()
 
 CSVFile::~CSVFile()
 {
-	close();
+	CSVFile::close();
 }
 
 std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::TableStructure* structure) const

@@ -22,7 +22,7 @@ EnchantsDialog::EnchantsDialog(wxWindow* parent, CharControl* cc)
 	effectsListbox = nullptr;
 
 	Create(parent, -1, wxT("Weapon Enchants"), wxDefaultPosition, wxSize(200, 350), wxDEFAULT_DIALOG_STYLE);
-	Show(false);
+	wxDialog::Show(false);
 }
 
 void EnchantsDialog::OnClick(wxCommandEvent& event)

@@ -680,7 +680,7 @@ std::vector<std::string> WDC3File::get(unsigned int recordIndex, const core::Tab
 
 WDC3File::~WDC3File()
 {
-	close();
+	WDC3File::close();
 	delete [] m_sectionData;
 	delete [] m_palletData;
 }

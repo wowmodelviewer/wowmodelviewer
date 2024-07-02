@@ -173,9 +173,9 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 #endif
 	{
 #ifndef  _LINUX // buggy
-		SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+		wxWindowBase::SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 #endif
-		Show(true);
+		wxWindow::Show(true);
 
 		// Initiate the timer that handles our animation and setting the canvas to redraw
 		timer.SetOwner(this, ID_TIMER);
@@ -186,7 +186,7 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 #ifdef _WINDOWS
 		wxDisplay* disp = new wxDisplay(0);
 		int bpp = disp->GetCurrentMode().bpp;
-		video.SetHandle(static_cast<HWND>(this->GetHandle()), bpp);
+		video.SetHandle(static_cast<HWND>(this->wxWindow::GetHandle()), bpp);
 #else
     video.render = true;
 #endif

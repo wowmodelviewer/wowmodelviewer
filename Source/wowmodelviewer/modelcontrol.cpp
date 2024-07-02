@@ -200,11 +200,11 @@ ModelControl::ModelControl(wxWindow* parent, wxWindowID id)
 	top->Add(gbox, 1);
 	top->SetSizeHints(this);
 	TogglePCRFields();
-	Show(true);
+	wxWindow::Show(true);
 	SetAutoLayout(true);
 	padding->Add(top, 1, wxEXPAND | wxLEFT | wxTOP, 10);
 	SetSizer(padding);
-	Layout();
+	wxWindowBase::Layout();
 }
 
 ModelControl::~ModelControl()
@@ -775,10 +775,10 @@ ScrWindow::ScrWindow(const wxString& title)
 	int width = bmp.GetWidth();
 	int height = bmp.GetHeight();
 
-	CreateStatusBar();
+	wxFrameBase::CreateStatusBar();
 	wxString sbarText;
 	sbarText.Printf(wxT("%ix%i"), width, height);
-	SetStatusText(sbarText);
+	wxFrameBase::SetStatusText(sbarText);
 
 	sw->SetScrollbars(10, 10, width / 10, height / 10);
 	//  sw->Scroll(50,10);

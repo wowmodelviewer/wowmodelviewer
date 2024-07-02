@@ -199,16 +199,16 @@ ModelViewer::ModelViewer()
 	if (Create(nullptr, wxID_ANY, wxString(GLOBALSETTINGS.appTitle()), wxDefaultPosition, wxSize(1024, 768),
 	           wxDEFAULT_FRAME_STYLE | wxCLIP_CHILDREN, wxT("ModelViewerFrame")))
 	{
-		SetIcon(wxICON(IDI_ICON1));
-		SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
+		wxTopLevelWindowMSW::SetIcon(wxICON(IDI_ICON1));
+		wxWindow::SetExtraStyle(wxWS_EX_VALIDATE_RECURSIVELY);
 #ifndef  _LINUX // buggy
-		SetBackgroundStyle(wxBG_STYLE_CUSTOM);
+		wxWindowBase::SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 #endif
 
 		InitObjects(); // create our canvas, anim control, character control, etc
 
 		// Show our window
-		Show(false);
+		wxTopLevelWindowMSW::Show(false);
 		// Display the window
 		Centre();
 
@@ -227,8 +227,8 @@ ModelViewer::ModelViewer()
 		interfaceManager.Update();
 
 		// Are these really needed?
-		Refresh();
-		Update();
+		wxWindow::Refresh();
+		wxWindow::Update();
 
 		/*
 		// Set our display mode
@@ -243,10 +243,10 @@ ModelViewer::ModelViewer()
 		*/
 
 		LOG_INFO << "Setting OpenGL render state...";
-		SetStatusText(wxT("Setting OpenGL render state..."));
+		wxFrameBase::SetStatusText(wxT("Setting OpenGL render state..."));
 		video.InitGL();
 
-		SetStatusText(wxEmptyString);
+		wxFrameBase::SetStatusText(wxEmptyString);
 
 		timer.SetOwner(this, ID_STATUS_REFRESH_TIMER);
 		timer.Start(2000);
