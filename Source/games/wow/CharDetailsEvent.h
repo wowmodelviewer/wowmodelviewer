@@ -36,7 +36,7 @@ public:
 		CHOICE_LIST_CHANGED = 0x10000001
 	};
 
-	CharDetailsEvent(Observable* obs, EventType type) : Event(obs, (Event::EventType)type)
+	CharDetailsEvent(Observable* obs, EventType type) : Event(obs, static_cast<Event::EventType>(type))
 	{
 	}
 

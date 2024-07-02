@@ -298,7 +298,7 @@ bool OBJExporter::exportModelVertices(WoWModel* model, QTextStream& file, int& c
 			// Part Names
 			int mesh = g / 100;
 
-			QString cgGroupName = WoWModel::getCGGroupName((CharGeosets)mesh);
+			QString cgGroupName = WoWModel::getCGGroupName(static_cast<CharGeosets>(mesh));
 
 			if ((model->modelType == MT_CHAR) && (cgGroupName != ""))
 				partName += QString("-%1").arg(cgGroupName);

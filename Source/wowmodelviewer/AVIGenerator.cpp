@@ -288,7 +288,7 @@ HRESULT CAVIGenerator::AddFrame(BYTE* bmBits)
 // Grabs the next frame from the stream
 void CAVIGenerator::GetFrame()
 {
-	BYTE* pDIB = (BYTE*)AVIStreamGetFrame(m_pGetFrame, m_iCurFrame);
+	BYTE* pDIB = static_cast<BYTE*>(AVIStreamGetFrame(m_pGetFrame, m_iCurFrame));
 	//ASSERT(pDIB!=NULL);
 	if (!pDIB)
 		return;

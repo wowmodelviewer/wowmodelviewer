@@ -208,7 +208,7 @@ void ParticleSystem::update(float dt)
 				// Error check to prevent the program from trying to load insane amounts of particles.
 				tospawn = (unsigned int)(MAX_PARTICLES - particles.size());
 
-			rem = ftospawn - (float)tospawn;
+			rem = ftospawn - static_cast<float>(tospawn);
 
 			float w = areal.getValue(l_manim, mtime) * 0.5f;
 			float l = areaw.getValue(l_manim, mtime) * 0.5f;

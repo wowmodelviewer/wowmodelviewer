@@ -190,7 +190,7 @@ WMO::WMO(QString name) :
 			// coordinates in WMOs and models also have to be read as (X,Z,-Y) to work in my system. 
 			// But then again, the ADT files have the "correct" order of coordinates. Weird.
 
-			nModels = (int)size / 0x28;
+			nModels = static_cast<int>(size) / 0x28;
 			for (size_t i = 0; i < nModels; i++)
 			{
 				int ofs;
@@ -207,7 +207,7 @@ WMO::WMO(QString name) :
 			// Contained a M2 filename that was used as skybox.
 			if (size > 4)
 			{
-				QString path = QString::fromLatin1((char*)f.getPointer());
+				QString path = QString::fromLatin1(reinterpret_cast<char*>(f.getPointer()));
 				//fixname(path);
 				if (path.length())
 				{
@@ -255,7 +255,7 @@ WMO::WMO(QString name) :
 			// Portal <> group relationship? 2*nPortals entries of 8 bytes.
 			// I think this might specify the two WMO groups that a portal connects.
 			size_t nn = size / 8;
-			WMOPR* pr = (WMOPR*)f.getPointer();
+			WMOPR* pr = reinterpret_cast<WMOPR*>(f.getPointer());
 			for (size_t i = 0; i < nn; i++)
 			{
 				prs.push_back(*pr++);
@@ -357,13 +357,13 @@ void WMO::loadGroup(int id)
 			groups[i].visible = true;
 		}
 	}
-	else if (id >= 0 && (unsigned int)id < nGroups)
+	else if (id >= 0 && static_cast<unsigned int>(id) < nGroups)
 	{
 		groups[id].initDisplayList();
 		for (size_t i = 0; i < nGroups; i++)
 		{
-			groups[i].visible = ((int)i == id);
-			if ((int)i != id) groups[i].cleanup();
+			groups[i].visible = (static_cast<int>(i) == id);
+			if (static_cast<int>(i) != id) groups[i].cleanup();
 		}
 	}
 	updateModels();

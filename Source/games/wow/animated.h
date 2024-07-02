@@ -217,7 +217,7 @@ public:
 				}
 				t1 = times[anim][pos];
 				t2 = times[anim][pos + 1];
-				r = (time - t1) / (float)(t2 - t1);
+				r = (time - t1) / static_cast<float>(t2 - t1);
 
 				if (type == INTERPOLATION_NONE)
 					return data[anim][pos];
@@ -264,10 +264,10 @@ public:
 
 		for (size_t j = 0; j < b.nTimes; j++)
 		{
-			AnimationBlockHeader* pHeadTimes = (AnimationBlockHeader*)(f->getBuffer() + b.ofsTimes + j * sizeof(
+			AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsTimes + j * sizeof(
 				AnimationBlockHeader));
 
-			unsigned int* ptimes = (unsigned int*)(f->getBuffer() + pHeadTimes->ofsEntrys);
+			unsigned int* ptimes = reinterpret_cast<unsigned int*>(f->getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
 				times[j].push_back(ptimes[i]);
 		}
@@ -275,7 +275,7 @@ public:
 		// keyframes
 		for (size_t j = 0; j < b.nKeys; j++)
 		{
-			AnimationBlockHeader* pHeadKeys = (AnimationBlockHeader*)(f->getBuffer() + b.ofsKeys + j * sizeof(
+			AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsKeys + j * sizeof(
 				AnimationBlockHeader));
 
 			D* keys = (D*)(f->getBuffer() + pHeadKeys->ofsEntrys);
@@ -331,16 +331,16 @@ public:
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
 				skelfile->setChunk("SKB1");
-				pHeadTimes = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsTimes + j * sizeof(
+				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(skelfile->getBuffer() + b.ofsTimes + j * sizeof(
 					AnimationBlockHeader));
-				ptimes = (uint32*)(animfile->getBuffer() + pHeadTimes->ofsEntrys);
+				ptimes = reinterpret_cast<uint32*>(animfile->getBuffer() + pHeadTimes->ofsEntrys);
 				if (animfile->getSize() < pHeadTimes->ofsEntrys)
 					continue;
 			}
 			else
 			{
-				pHeadTimes = (AnimationBlockHeader*)(f.getBuffer() + b.ofsTimes + j * sizeof(AnimationBlockHeader));
-				ptimes = (uint32*)(f.getBuffer() + pHeadTimes->ofsEntrys);
+				pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsTimes + j * sizeof(AnimationBlockHeader));
+				ptimes = reinterpret_cast<uint32*>(f.getBuffer() + pHeadTimes->ofsEntrys);
 				if (f.getSize() < pHeadTimes->ofsEntrys)
 					continue;
 			}
@@ -360,7 +360,7 @@ public:
 				GameFile* animfile = it->second.first;
 				GameFile* skelfile = it->second.second;
 				skelfile->setChunk("SKB1");
-				pHeadKeys = (AnimationBlockHeader*)(skelfile->getBuffer() + b.ofsKeys + j * sizeof(
+				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(skelfile->getBuffer() + b.ofsKeys + j * sizeof(
 					AnimationBlockHeader));
 				keys = (D*)(animfile->getBuffer() + pHeadKeys->ofsEntrys);
 				if (animfile->getSize() < pHeadKeys->ofsEntrys)
@@ -368,7 +368,7 @@ public:
 			}
 			else
 			{
-				pHeadKeys = (AnimationBlockHeader*)(f.getBuffer() + b.ofsKeys + j * sizeof(AnimationBlockHeader));
+				pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f.getBuffer() + b.ofsKeys + j * sizeof(AnimationBlockHeader));
 				keys = (D*)(f.getBuffer() + pHeadKeys->ofsEntrys);
 				if (f.getSize() < pHeadKeys->ofsEntrys)
 					continue;

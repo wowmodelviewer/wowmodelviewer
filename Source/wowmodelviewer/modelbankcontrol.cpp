@@ -197,7 +197,7 @@ void ModelBankControl::RemoveModel()
 	std::vector<ModelBank> temp;
 	for (size_t i = 0; i < bankList.size(); i++)
 	{
-		if ((int)i != val)
+		if (static_cast<int>(i) != val)
 		{
 			temp.push_back(bankList[i]);
 		}

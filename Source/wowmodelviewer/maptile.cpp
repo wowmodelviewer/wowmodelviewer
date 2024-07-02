@@ -297,7 +297,7 @@ void MapTile::initDisplay()
 	// default strip indices
 	short* defstrip = new short[stripsize2];
 	for (size_t i = 0; i < stripsize2; i++)
-		defstrip[i] = (short)i; // note: this is ugly and should be handled in stripify
+		defstrip[i] = static_cast<short>(i); // note: this is ugly and should be handled in stripify
 	//mapstrip2 = new short[stripsize2];
 	stripify2<short>(defstrip, mapstrip2);
 	delete[] defstrip;

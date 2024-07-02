@@ -210,15 +210,15 @@ static void DDSGetColorBlockColors(ddsColorBlock_t* block, ddsColor_t colors[4])
 	colors[1].a = 0xff;
 
 	/* extract rgb bits */
-	colors[1].b = (unsigned char)(word & 0xFF);
+	colors[1].b = static_cast<unsigned char>(word & 0xFF);
 	colors[1].b <<= 3;
 	colors[1].b |= (colors[1].b >> 5);
 	word >>= 5;
-	colors[1].g = (unsigned char)(word & 0xFF);
+	colors[1].g = static_cast<unsigned char>(word & 0xFF);
 	colors[1].g <<= 2;
 	colors[1].g |= (colors[1].g >> 5);
 	word >>= 6;
-	colors[1].r = (unsigned char)(word & 0xFF);
+	colors[1].r = static_cast<unsigned char>(word & 0xFF);
 	colors[1].r <<= 3;
 	colors[1].r |= (colors[1].r >> 5);
 
@@ -230,22 +230,22 @@ static void DDSGetColorBlockColors(ddsColorBlock_t* block, ddsColor_t colors[4])
 		   these two bit codes correspond to the 2-bit fields 
 		   stored in the 64-bit block. */
 
-		word = ((unsigned short)colors[0].r * 2 + (unsigned short)colors[1].r) / 3;
+		word = (static_cast<unsigned short>(colors[0].r) * 2 + static_cast<unsigned short>(colors[1].r)) / 3;
 		/* no +1 for rounding */
 		/* as bits have been shifted to 888 */
-		colors[2].r = (unsigned char)word;
-		word = ((unsigned short)colors[0].g * 2 + (unsigned short)colors[1].g) / 3;
-		colors[2].g = (unsigned char)word;
-		word = ((unsigned short)colors[0].b * 2 + (unsigned short)colors[1].b) / 3;
-		colors[2].b = (unsigned char)word;
+		colors[2].r = static_cast<unsigned char>(word);
+		word = (static_cast<unsigned short>(colors[0].g) * 2 + static_cast<unsigned short>(colors[1].g)) / 3;
+		colors[2].g = static_cast<unsigned char>(word);
+		word = (static_cast<unsigned short>(colors[0].b) * 2 + static_cast<unsigned short>(colors[1].b)) / 3;
+		colors[2].b = static_cast<unsigned char>(word);
 		colors[2].a = 0xff;
 
-		word = ((unsigned short)colors[0].r + (unsigned short)colors[1].r * 2) / 3;
-		colors[3].r = (unsigned char)word;
-		word = ((unsigned short)colors[0].g + (unsigned short)colors[1].g * 2) / 3;
-		colors[3].g = (unsigned char)word;
-		word = ((unsigned short)colors[0].b + (unsigned short)colors[1].b * 2) / 3;
-		colors[3].b = (unsigned char)word;
+		word = (static_cast<unsigned short>(colors[0].r) + static_cast<unsigned short>(colors[1].r) * 2) / 3;
+		colors[3].r = static_cast<unsigned char>(word);
+		word = (static_cast<unsigned short>(colors[0].g) + static_cast<unsigned short>(colors[1].g) * 2) / 3;
+		colors[3].g = static_cast<unsigned char>(word);
+		word = (static_cast<unsigned short>(colors[0].b) + static_cast<unsigned short>(colors[1].b) * 2) / 3;
+		colors[3].b = static_cast<unsigned char>(word);
 		colors[3].a = 0xff;
 	}
 	else
@@ -256,12 +256,12 @@ static void DDSGetColorBlockColors(ddsColorBlock_t* block, ddsColor_t colors[4])
 		   These two bit codes correspond to the 2-bit fields 
 		   stored in the 64-bit block */
 
-		word = ((unsigned short)colors[0].r + (unsigned short)colors[1].r) / 2;
-		colors[2].r = (unsigned char)(word & 0xFF);
-		word = ((unsigned short)colors[0].g + (unsigned short)colors[1].g) / 2;
-		colors[2].g = (unsigned char)(word & 0xFF);
-		word = ((unsigned short)colors[0].b + (unsigned short)colors[1].b) / 2;
-		colors[2].b = (unsigned char)(word & 0xFF);
+		word = (static_cast<unsigned short>(colors[0].r) + static_cast<unsigned short>(colors[1].r)) / 2;
+		colors[2].r = static_cast<unsigned char>(word & 0xFF);
+		word = (static_cast<unsigned short>(colors[0].g) + static_cast<unsigned short>(colors[1].g)) / 2;
+		colors[2].g = static_cast<unsigned char>(word & 0xFF);
+		word = (static_cast<unsigned short>(colors[0].b) + static_cast<unsigned short>(colors[1].b)) / 2;
+		colors[2].b = static_cast<unsigned char>(word & 0xFF);
 		colors[2].a = 0xff;
 
 		/* random color to indicate alpha */
@@ -351,9 +351,9 @@ static void DDSDecodeAlphaExplicit(unsigned int* pixel, ddsAlphaBlockExplicit_t*
 		{
 			/* zero the alpha bits of image pixel */
 			*pixel &= alphaZero;
-			color.a = (unsigned char)(word & 0x000F);
+			color.a = static_cast<unsigned char>(word & 0x000F);
 			color.a = color.a | (color.a << 4);
-			*pixel |= *((unsigned int*)&color);
+			*pixel |= *reinterpret_cast<unsigned int*>(&color);
 			word >>= 4; /* move next bits to lowest 4 */
 			pixel++; /* move to next pixel in the row */
 		}
@@ -406,40 +406,40 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
 	/* first two rows of 4 pixels each */
 	stuff = *((unsigned char*)&(alphaBlock->stuff[0]));
 
-	bits[0][0] = (unsigned char)(stuff & 0x00000007);
+	bits[0][0] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[0][1] = (unsigned char)(stuff & 0x00000007);
+	bits[0][1] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[0][2] = (unsigned char)(stuff & 0x00000007);
+	bits[0][2] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[0][3] = (unsigned char)(stuff & 0x00000007);
+	bits[0][3] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[1][0] = (unsigned char)(stuff & 0x00000007);
+	bits[1][0] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[1][1] = (unsigned char)(stuff & 0x00000007);
+	bits[1][1] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[1][2] = (unsigned char)(stuff & 0x00000007);
+	bits[1][2] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[1][3] = (unsigned char)(stuff & 0x00000007);
+	bits[1][3] = static_cast<unsigned char>(stuff & 0x00000007);
 
 	/* last two rows */
 	stuff = *((unsigned char*)&(alphaBlock->stuff[3])); /* last 3 bytes */
 
-	bits[2][0] = (unsigned char)(stuff & 0x00000007);
+	bits[2][0] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[2][1] = (unsigned char)(stuff & 0x00000007);
+	bits[2][1] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[2][2] = (unsigned char)(stuff & 0x00000007);
+	bits[2][2] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[2][3] = (unsigned char)(stuff & 0x00000007);
+	bits[2][3] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[3][0] = (unsigned char)(stuff & 0x00000007);
+	bits[3][0] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[3][1] = (unsigned char)(stuff & 0x00000007);
+	bits[3][1] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[3][2] = (unsigned char)(stuff & 0x00000007);
+	bits[3][2] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
-	bits[3][3] = (unsigned char)(stuff & 0x00000007);
+	bits[3][3] = static_cast<unsigned char>(stuff & 0x00000007);
 
 	/* decode the codes into alpha values */
 	for (row = 0; row < 4; row++)
@@ -449,7 +449,7 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
 			aColors[row][pix].r = 0;
 			aColors[row][pix].g = 0;
 			aColors[row][pix].b = 0;
-			aColors[row][pix].a = (unsigned char)alphas[bits[row][pix]];
+			aColors[row][pix].a = static_cast<unsigned char>(alphas[bits[row][pix]]);
 		}
 	}
 
@@ -462,7 +462,7 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
 			*pixel &= alphaZero;
 
 			/* or the bits into the prev. nulled alpha */
-			*pixel |= *((unsigned int*)&(aColors[row][pix]));
+			*pixel |= *reinterpret_cast<unsigned int*>(&(aColors[row][pix]));
 			pixel++;
 		}
 	}
@@ -488,14 +488,14 @@ int DDSDecompressDXT1(unsigned char* src, int width, int height, unsigned char* 
 	for (y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block */
-		block = (ddsColorBlock_t*)(src + y * xBlocks * 8);
+		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 8);
 
 		/* walk x */
 		for (x = 0; x < xBlocks; x++, block++)
 		{
 			DDSGetColorBlockColors(block, colors);
-			pixel = (unsigned int*)(dest + x * 16 + (y * 4) * width * 4);
-			DDSDecodeColorBlock(pixel, block, width, (unsigned int*)colors);
+			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 		}
 	}
 
@@ -524,27 +524,27 @@ int DDSDecompressDXT3(unsigned char* src, int width, int height, unsigned char* 
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	alphaZero = *((unsigned int*)&colors[0]);
+	alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
 	for (y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
-		block = (ddsColorBlock_t*)(src + y * xBlocks * 16);
+		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
 
 		/* walk x */
 		for (x = 0; x < xBlocks; x++, block++)
 		{
 			/* get alpha block */
-			alphaBlock = (ddsAlphaBlockExplicit_t*)block;
+			alphaBlock = reinterpret_cast<ddsAlphaBlockExplicit_t*>(block);
 
 			/* get color block */
 			block++;
 			DDSGetColorBlockColors(block, colors);
 
 			/* decode color block */
-			pixel = (unsigned int*)(dest + x * 16 + (y * 4) * width * 4);
-			DDSDecodeColorBlock(pixel, block, width, (unsigned int*)colors);
+			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 
 			/* overwrite alpha bits with alpha block */
 			DDSDecodeAlphaExplicit(pixel, alphaBlock, width, alphaZero);

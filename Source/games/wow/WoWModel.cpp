@@ -324,7 +324,7 @@ void WoWModel::displayHeader(ModelHeader& a_header)
 bool WoWModel::isAnimated()
 {
 	// see if we have any animated bones
-	ModelBoneDef* bo = (ModelBoneDef*)(gamefile->getBuffer() + header.ofsBones);
+	ModelBoneDef* bo = reinterpret_cast<ModelBoneDef*>(gamefile->getBuffer() + header.ofsBones);
 
 	animGeometry = false;
 	animBones = false;
@@ -380,7 +380,7 @@ bool WoWModel::isAnimated()
 	// animated colors
 	if (header.nColors)
 	{
-		ModelColorDef* cols = (ModelColorDef*)(gamefile->getBuffer() + header.ofsColors);
+		ModelColorDef* cols = reinterpret_cast<ModelColorDef*>(gamefile->getBuffer() + header.ofsColors);
 		for (size_t i = 0; i < header.nColors; i++)
 		{
 			if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
@@ -394,7 +394,7 @@ bool WoWModel::isAnimated()
 	// animated opacity
 	if (header.nTransparency && !animMisc)
 	{
-		ModelTransDef* trs = (ModelTransDef*)(gamefile->getBuffer() + header.ofsTransparency);
+		ModelTransDef* trs = reinterpret_cast<ModelTransDef*>(gamefile->getBuffer() + header.ofsTransparency);
 		for (size_t i = 0; i < header.nTransparency; i++)
 		{
 			if (trs[i].trans.type != 0)

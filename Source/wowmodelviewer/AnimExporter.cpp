@@ -165,8 +165,8 @@ void CAnimationExporter::CreateGif()
 
 	if (m_bShrink)
 	{
-		wxString(txtSizeX->GetValue()).ToLong((long*)&m_iNewWidth);
-		wxString(txtSizeY->GetValue()).ToLong((long*)&m_iNewHeight);
+		wxString(txtSizeX->GetValue()).ToLong(reinterpret_cast<long*>(&m_iNewWidth));
+		wxString(txtSizeY->GetValue()).ToLong(reinterpret_cast<long*>(&m_iNewHeight));
 
 		// Just a minor check,  final image size can not be smaller than 32x32 pixels.
 		if (m_iNewWidth < 32 || m_iNewHeight < 32)
@@ -228,7 +228,7 @@ void CAnimationExporter::CreateGif()
 
 		g_canvas->RenderToBuffer();
 
-		glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
 		newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth * 4), false);
 
 		// not needed due to the code just below, which fixes the issue with particles
@@ -236,9 +236,9 @@ void CAnimationExporter::CreateGif()
 		//g_canvas->model()->animManager->Tick(m_iTimeStep);
 
 		if (g_canvas->root)
-			g_canvas->root->tick((float)m_iTimeStep);
+			g_canvas->root->tick(static_cast<float>(m_iTimeStep));
 		if (g_canvas->sky)
-			g_canvas->sky->tick((float)m_iTimeStep);
+			g_canvas->sky->tick(static_cast<float>(m_iTimeStep));
 
 
 #ifdef _WINDOWS
@@ -254,7 +254,7 @@ void CAnimationExporter::CreateGif()
 		{
 			CQuantizer q(256, 8);
 			q.ProcessImage((HANDLE)newImage->GetDIB());
-			m_pPal = (RGBQUAD*)calloc(256 * sizeof(RGBQUAD), 1); //This creates our gifs optimised global colour palette
+			m_pPal = static_cast<RGBQUAD*>(calloc(256 * sizeof(RGBQUAD), 1)); //This creates our gifs optimised global colour palette
 			q.SetColorTable(m_pPal);
 		}
 
@@ -285,7 +285,7 @@ void CAnimationExporter::CreateGif()
 		g_canvas->RenderToBuffer();
 		wxString stat;
 
-		glReadPixels(0, 0, (GLsizei)m_iWidth, (GLsizei)m_iHeight, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+		glReadPixels(0, 0, static_cast<GLsizei>(m_iWidth), static_cast<GLsizei>(m_iHeight), GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
 
 		newImage->CreateFromArray(buffer, (DWORD)m_iWidth, (DWORD)m_iHeight, 32, (DWORD)(m_iWidth * 4), false);
 
@@ -310,9 +310,9 @@ void CAnimationExporter::CreateGif()
 		//g_canvas->model()->animManager->SetTimeDiff(m_iTimeStep);
 		//g_canvas->model()->animManager->Tick(m_iTimeStep);
 		if (g_canvas->root)
-			g_canvas->root->tick((float)m_iTimeStep);
+			g_canvas->root->tick(static_cast<float>(m_iTimeStep));
 		if (g_canvas->sky)
-			g_canvas->sky->tick((float)m_iTimeStep);
+			g_canvas->sky->tick(static_cast<float>(m_iTimeStep));
 
 
 #ifdef _WINDOWS
@@ -375,7 +375,7 @@ void CAnimationExporter::CreateGif()
 		multiImage.SetLoops(0); // Set the animation to loop indefinately.
 
 		// Create/Compose the animated gif
-		multiImage.Encode(hFile, gifImages, (int)m_iTotalFrames, false);
+		multiImage.Encode(hFile, gifImages, static_cast<int>(m_iTotalFrames), false);
 
 		// ALL DONE, START THE CLEAN UP
 		// --------------------------------------------------------
@@ -523,8 +523,8 @@ void CAnimationExporter::CreateAvi(wxString fn)
 	CAVIGenerator AviGen;
 
 	BITMAPINFOHEADER bmHeader{};
-	bmHeader.biWidth = (LONG)m_iWidth;
-	bmHeader.biHeight = (LONG)m_iHeight;
+	bmHeader.biWidth = static_cast<LONG>(m_iWidth);
+	bmHeader.biHeight = static_cast<LONG>(m_iHeight);
 	bmHeader.biSize = sizeof(BITMAPINFOHEADER);
 	bmHeader.biPlanes = 1;
 	bmHeader.biBitCount = 24;

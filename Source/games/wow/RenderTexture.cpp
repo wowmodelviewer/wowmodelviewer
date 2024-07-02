@@ -193,7 +193,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		int iPixelFormat = 0;
 		// g_hdc = wxglcanvas hdc
 
-		wglChoosePixelFormatARB(canvas_hDC, (const int*)pf_attr, nullptr, 1, &iPixelFormat, &iCount);
+		wglChoosePixelFormatARB(canvas_hDC, static_cast<const int*>(pf_attr), nullptr, 1, &iPixelFormat, &iCount);
 
 		if (iCount == 0)
 		{

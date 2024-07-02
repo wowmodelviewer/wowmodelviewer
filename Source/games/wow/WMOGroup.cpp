@@ -201,8 +201,8 @@ void WMOGroup::initDisplayList()
 			//      Light references, one 16-bit integer per light reference.
 			//      This is basically a list of lights used in this WMO group, the numbers are indices into the WMO root file's MOLT table.
 			//      For some WMO groups there is a large number of lights specified here, more than what a typical video card will handle at once. I wonder how they do lighting properly. Currently, I just turn on the first GL_MAX_LIGHTS and hope for the best. :(
-			nLR = (int)size / 2;
-			useLights = (short*)gf.getPointer();
+			nLR = static_cast<int>(size) / 2;
+			useLights = reinterpret_cast<short*>(gf.getPointer());
 		}
 		else if (fourcc == "MODR")
 		{
@@ -306,7 +306,7 @@ void WMOGroup::initDisplayList()
 
 			//gLog("CV: %d\n", size);
 			//hascv = true;
-			cv = (unsigned int*)gf.getPointer();
+			cv = reinterpret_cast<unsigned int*>(gf.getPointer());
 
 			// Temp, until we get this fully working.
 			gf.seek(spos);
@@ -469,7 +469,7 @@ void WMOGroup::initLighting(int nLR, short* useLights)
 				{
 					lenmin = ll;
 					dirmin = dir;
-					lmin = (int)j;
+					lmin = static_cast<int>(j);
 				}
 			}
 			mi.light = lmin;

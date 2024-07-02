@@ -351,7 +351,7 @@ void VideoSettings::EnumDisplayModes()
 
 	for (size_t i = 0; i < num_pfd; i++)
 	{
-		if (!wglGetPixelFormatAttribivARB(hDC, (int)i + 1, 0, (UINT)iAttributes.size(), &iAttributes[0], &results[0]))
+		if (!wglGetPixelFormatAttribivARB(hDC, static_cast<int>(i) + 1, 0, (UINT)iAttributes.size(), &iAttributes[0], &results[0]))
 			return;
 
 		// once we make it here we can look at the pixel data to make sure this is a context we want to use

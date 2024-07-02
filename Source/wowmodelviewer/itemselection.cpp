@@ -166,7 +166,7 @@ FilteredChoiceDialog::FilteredChoiceDialog(CharControl* dest, int type, wxWindow
 	m_choices = &choices;
 	m_indices.resize(m_choices->GetCount());
 	for (size_t i = 0; i < m_choices->GetCount(); ++i)
-		m_indices[i] = (int)i;
+		m_indices[i] = static_cast<int>(i);
 
 	wxSizer* topsizer = GetSizer();
 
@@ -319,7 +319,7 @@ void FilteredChoiceDialog::DoFilter()
 	m_listctrl->DeleteAllItems();
 
 	wxListItem item;
-	for (int i = 0; i < (int)m_choices->GetCount(); ++i)
+	for (int i = 0; i < static_cast<int>(m_choices->GetCount()); ++i)
 	{
 		if (FilterFunc(i))
 		{
@@ -367,7 +367,7 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl* dest, int type,
 	{
 		for (size_t j = keepfirst ? 1 : 0; j < m_cats.size(); j++)
 		{
-			if (m_cats[j] == (int)i)
+			if (m_cats[j] == static_cast<int>(i))
 			{
 				realcatnames.push_back(catnames[i]);
 				m_catsConvert[m_cats[j]] = realcatnames.size() - 1;
@@ -380,7 +380,7 @@ CategoryChoiceDialog::CategoryChoiceDialog(CharControl* dest, int type,
 	for (size_t i = 0; i < realcatnames.GetCount(); i++)
 		m_catlist->Check((unsigned int)i);
 
-	numcats = (int)realcatnames.GetCount();
+	numcats = static_cast<int>(realcatnames.GetCount());
 
 	wxSizer* topsizer = GetSizer();
 

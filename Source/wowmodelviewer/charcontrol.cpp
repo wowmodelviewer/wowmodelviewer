@@ -244,7 +244,7 @@ void CharControl::UpdateModel(Attachment* a)
 
 	for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
 	{
-		WoWItem* item = model->getItem((CharSlots)i);
+		WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 		if (item)
 		{
 			if (buttons[i])
@@ -310,7 +310,7 @@ void CharControl::RefreshEquipment()
 	{
 		if (labels[i])
 		{
-			WoWItem* item = model->getItem((CharSlots)i);
+			WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 			if (item)
 			{
 				labels[i]->SetLabel(item->name().toStdWString());
@@ -362,7 +362,7 @@ void CharControl::OnButton(wxCommandEvent& event)
 		{
 			for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
 			{
-				WoWItem* item = model->getItem((CharSlots)i);
+				WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 				if (item)
 					item->setId(0);
 			}
@@ -388,7 +388,7 @@ void CharControl::OnButton(wxCommandEvent& event)
 		{
 			for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
 			{
-				if (buttons[i] && (wxButton*)event.GetEventObject() == buttons[i])
+				if (buttons[i] && static_cast<wxButton*>(event.GetEventObject()) == buttons[i])
 				{
 					selectItem(UPDATE_ITEM, i, buttons[i]->GetLabel().GetData());
 					break;
@@ -405,9 +405,9 @@ void CharControl::OnItemLevelChange(wxCommandEvent& event)
 {
 	for (ssize_t i = 0; i < NUM_CHAR_SLOTS; i++)
 	{
-		if (levelboxes[i] && (wxComboBox*)event.GetEventObject() == levelboxes[i])
+		if (levelboxes[i] && static_cast<wxComboBox*>(event.GetEventObject()) == levelboxes[i])
 		{
-			WoWItem* item = model->getItem((CharSlots)i);
+			WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 			if (item)
 			{
 				item->setLevel(levelboxes[i]->GetSelection());
@@ -483,8 +483,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 				name = value[2].toStdWString();
 
 			catnames.Add(name);
-			subclasslookup[std::pair<int, int>(value[0].toInt(), value[1].toInt())] = (
-				int)catnames.size() - 1;
+			subclasslookup[std::pair<int, int>(value[0].toInt(), value[1].toInt())] = static_cast<int>(catnames.size()) - 1;
 		}
 	}
 

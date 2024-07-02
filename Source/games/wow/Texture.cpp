@@ -264,7 +264,7 @@ void Texture::load()
 						}
 					}
 
-					glTexImage2D(GL_TEXTURE_2D, (GLint)i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
+					glTexImage2D(GL_TEXTURE_2D, static_cast<GLint>(i), GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf2);
 				}
 				else break;
 

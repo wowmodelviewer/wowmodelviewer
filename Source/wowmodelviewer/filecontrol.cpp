@@ -271,7 +271,7 @@ wxString FileControl::ExportPNG(wxString val)
 		return _T("");
 
 	TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
-	Texture& tex = *((Texture*)TEXTUREMANAGER.items[temptex]);
+	Texture& tex = *static_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return _T("");
 
@@ -283,7 +283,7 @@ wxString FileControl::ExportPNG(wxString val)
 		filename = wxGetCwd() + SLASH + wxT("Export") + SLASH + fn.GetName() + wxT(".png");
 	}
 
-	unsigned char* tempbuf = (unsigned char*)malloc(tex.w * tex.h * 4);
+	unsigned char* tempbuf = static_cast<unsigned char*>(malloc(tex.w * tex.h * 4));
 	tex.getPixels(tempbuf, GL_BGRA_EXT);
 
 	QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
@@ -295,7 +295,7 @@ wxString FileControl::ExportPNG(wxString val)
 
 void FileControl::OnPopupClick(wxCommandEvent& evt)
 {
-	FileTreeData* data = (FileTreeData*)(static_cast<wxMenu*>(evt.GetEventObject())->GetClientData());
+	FileTreeData* data = static_cast<FileTreeData*>(static_cast<wxMenu*>(evt.GetEventObject())->GetClientData());
 	wxString val(data->file->fullname().toStdWString());
 
 	int id = evt.GetId();
@@ -328,7 +328,7 @@ void FileControl::OnTreeMenu(wxTreeEvent& event)
 		return;
 
 	void* data = reinterpret_cast<void*>(fileTree->GetItemData(item));
-	FileTreeData* tdata = (FileTreeData*)data;
+	FileTreeData* tdata = static_cast<FileTreeData*>(data);
 
 	// make sure the data (file name) is valid
 	if (!data)
@@ -346,7 +346,7 @@ void FileControl::OnTreeMenu(wxTreeEvent& event)
 	if (temp.EndsWith(wxT("blp")))
 		infoMenu.Append(ID_FILELIST_VIEW, wxT("&View"), wxT("View this object"));
 
-	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, (wxObjectEventFunction)&FileControl::OnPopupClick, nullptr, this);
+	infoMenu.Connect(wxEVT_COMMAND_MENU_SELECTED, reinterpret_cast<wxObjectEventFunction>(&FileControl::OnPopupClick), nullptr, this);
 	PopupMenu(&infoMenu);
 }
 
@@ -514,7 +514,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		return;
 	}
 
-	FileTreeData* data = (FileTreeData*)fileTree->GetItemData(item);
+	FileTreeData* data = static_cast<FileTreeData*>(fileTree->GetItemData(item));
 
 	// make sure the data (file name) is valid
 	if (!data || !data->file)

@@ -166,7 +166,7 @@ AnimControl::~AnimControl()
 	// Free the memory that was allocated (fixed: memory leak)
 	for (size_t i = 0; i < skinList->GetCount(); i++)
 	{
-		TextureGroup* grp = (TextureGroup*)skinList->GetClientData((unsigned int)i);
+		TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
 		wxDELETE(grp);
 	}
 
@@ -203,7 +203,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 	{
 		for (size_t i = 0; i < skinList->GetCount(); i++)
 		{
-			TextureGroup* grp = (TextureGroup*)skinList->GetClientData((unsigned int)i);
+			TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
 			wxDELETE(grp);
 		}
 	}
@@ -415,7 +415,7 @@ void AnimControl::UpdateWMO(WMO* w, int group)
 	wmoList->Show(TRUE);
 
 	// get wmo name or current wmogroup name/descr
-	if (group >= -1 && group < (int)g_selWMO->nGroups)
+	if (group >= -1 && group < static_cast<int>(g_selWMO->nGroups))
 	{
 		wxString label = w->itemName().toStdWString();
 		label = label.AfterLast('/');

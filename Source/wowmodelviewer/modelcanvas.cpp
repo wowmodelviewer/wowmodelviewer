@@ -426,8 +426,8 @@ void ModelCanvas::OnMouse(wxMouseEvent& event)
 	}
 	else if (event.Dragging())
 	{
-		const auto deltax = ((float)event.GetX() - lastMousePos.x) * MOUSE_SENSITIVITY * mul;
-		const auto deltay = ((float)event.GetY() - lastMousePos.y) * MOUSE_SENSITIVITY * mul;
+		const auto deltax = (static_cast<float>(event.GetX()) - lastMousePos.x) * MOUSE_SENSITIVITY * mul;
+		const auto deltay = (static_cast<float>(event.GetY()) - lastMousePos.y) * MOUSE_SENSITIVITY * mul;
 
 		if (event.LeftIsDown())
 		{
