@@ -1,6 +1,4 @@
-//--
-#ifndef _SETTINGSCONTROL_H_
-#define _SETTINGSCONTROL_H_
+#pragma once
 
 // WX Headers
 #include <wx/wxprec.h>
@@ -9,41 +7,34 @@
 #endif
 
 class wxNotebook;
-
-// Custom headers
-
 class DisplaySettings;
 class ExportSettings;
 class GeneralSettings;
 
 enum
 {
-  // Settings
-  ID_SETTINGS_FRAME,
-  ID_GENERAL_SETTINGS,
-  ID_DISPLAY_SETTINGS,
-  ID_EXPORT_SETTINGS,
-  ID_SETTINGS_TABS
+	// Settings
+	ID_SETTINGS_FRAME,
+	ID_GENERAL_SETTINGS,
+	ID_DISPLAY_SETTINGS,
+	ID_EXPORT_SETTINGS,
+	ID_SETTINGS_TABS
 };
 
-
-class SettingsControl: public wxWindow
+class SettingsControl : public wxWindow
 {
-  DECLARE_CLASS(SettingsControl)
-    DECLARE_EVENT_TABLE()
+	DECLARE_CLASS(SettingsControl)
+	DECLARE_EVENT_TABLE()
 
-  wxNotebook *notebook;
-  GeneralSettings *page1;
-  DisplaySettings *page2;
-  ExportSettings *page3;
+	wxNotebook* notebook;
+	GeneralSettings* page1;
+	DisplaySettings* page2;
+	ExportSettings* page3;
 
 public:
+	SettingsControl(wxWindow* parent, wxWindowID id);
+	~SettingsControl();
 
-  SettingsControl(wxWindow* parent, wxWindowID id);
-  ~SettingsControl();
-  
-  void Open();
-  void Close();
+	void Open();
+	void Close();
 };
-
-#endif
