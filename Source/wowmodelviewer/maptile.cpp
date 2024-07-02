@@ -768,9 +768,9 @@ MapTile::~MapTile()
 
 	for (auto& chunk : chunks)
 	{
-		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
+		for (auto& i : chunk)
 		{
-			chunk[i].destroy();
+			i.destroy();
 		}
 	}
 
@@ -854,10 +854,10 @@ void MapTile::draw()
 
 	for (auto& chunk : chunks)
 	{
-		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
+		for (auto& i : chunk)
 		{
-			chunk[i].visible = false;
-			chunk[i].draw();
+			i.visible = false;
+			i.draw();
 		}
 	}
 
@@ -870,10 +870,10 @@ void MapTile::drawWater()
 
 	for (auto& chunk : chunks)
 	{
-		for (size_t i = 0; i < CHUNKS_IN_TILE; i++)
+		for (auto& i : chunk)
 		{
-			if (chunk[i].visible)
-				chunk[i].drawWater();
+			if (i.visible)
+				i.drawWater();
 		}
 	}
 }
