@@ -951,8 +951,11 @@ enum // 03-29-2005 By ObscuR
 	FLAG_MCCV,
 };
 
-#define  MCLY_USE_ALPHAMAP    0x100
-#define  MCLY_ALPHAMAP_COMPRESS  0x200
+enum
+{
+	MCLY_USE_ALPHAMAP = 0x100,
+	MCLY_ALPHAMAP_COMPRESS = 0x200
+};
 
 struct MCLY
 {

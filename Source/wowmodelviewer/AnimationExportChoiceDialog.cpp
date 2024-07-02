@@ -4,7 +4,11 @@
 
 const int ID_SELECT_ALL = wxNewId();
 const int ID_UNSELECT_ALL = wxNewId();
-#define wxID_LISTBOX 3000 // from choicedgg.cpp
+
+enum
+{
+	wxID_LISTBOX = 3000 // from choicedgg.cpp
+};
 
 BEGIN_EVENT_TABLE(AnimationExportChoiceDialog, wxMultiChoiceDialog)
 	EVT_CHECKLISTBOX(wxID_LISTBOX, AnimationExportChoiceDialog::updateButtons)

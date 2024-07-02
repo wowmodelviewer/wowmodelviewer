@@ -37,7 +37,10 @@
 #include "database.h" // ItemRecord
 #include "wow_enums.h"
 
-#define DEBUG_RESULTS 0
+enum
+{
+	DEBUG_RESULTS = 0
+};
 
 bool ArmoryImporter::acceptURL(QString url) const
 {

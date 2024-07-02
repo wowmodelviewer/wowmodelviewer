@@ -18,8 +18,11 @@ class WMO;
 class WMOGroup;
 class GameFile;
 
-#define  WMO_MATERIAL_CULL  0x04  // Remove the back-facing polygons
-#define WMO_MATERIAL_LUM  0x10  // Bright at Night
+enum
+{
+	WMO_MATERIAL_CULL = 0x04, // Remove the back-facing polygons
+	WMO_MATERIAL_LUM = 0x10  // Bright at Night
+};
 
 struct WMOMaterial
 {

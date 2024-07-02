@@ -68,7 +68,10 @@ enum CharGeosets
 	NUM_GEOSETS
 };
 
-#define  UPPER_BODY_BONES  5
+enum
+{
+	UPPER_BODY_BONES = 5
+};
 
 enum POSITION_SLOTS
 {

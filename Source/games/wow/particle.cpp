@@ -6,7 +6,10 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-#define MAX_PARTICLES 10000
+enum
+{
+	MAX_PARTICLES = 10000
+};
 
 bool ParticleSystem::useDoNotTrail = false;
 

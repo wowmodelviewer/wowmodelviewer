@@ -137,7 +137,10 @@ public:
   (there might be a nicer way to do this? meh meh)
 */
 
-#define  MAX_ANIMATED  500
+enum
+{
+	MAX_ANIMATED = 500
+};
 
 template <class T, class D=T, class Conv=Identity<T>>
 class Animated

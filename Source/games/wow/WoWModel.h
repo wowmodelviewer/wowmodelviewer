@@ -50,7 +50,10 @@ class QXmlStreamReader;
 #    define _WOWMODEL_API_
 #endif
 
-#define TEXTURE_MAX 32
+enum
+{
+	TEXTURE_MAX = 32
+};
 
 class _WOWMODEL_API_ WoWModel : public ManagedItem, public Displayable, public Model, public Container<WoWItem>
 {

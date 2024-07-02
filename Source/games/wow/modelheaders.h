@@ -125,9 +125,12 @@ struct ModelHeader
 	uint32 ofsTextureCombinerCombos; // An array of shorts, related to renderflags.
 };
 
-#define  ANIMATION_HANDSCLOSED  15
-#define  ANIMATION_MOUNT      91
-#define  ANIMATION_LOOPED    0x20 // flags
+enum
+{
+	ANIMATION_HANDSCLOSED = 15,
+	ANIMATION_MOUNT = 91,
+	ANIMATION_LOOPED = 0x20 // flags
+};
 
 // block B - animations, size 68 bytes, WotLK 64 bytes
 struct ModelAnimation
@@ -177,8 +180,11 @@ struct AnimationBlockHeader
 	uint32 ofsEntrys;
 };
 
-#define  MODELBONE_BILLBOARD  8
-#define  MODELBONE_TRANSFORM  512
+enum
+{
+	MODELBONE_BILLBOARD = 8,
+	MODELBONE_TRANSFORM = 512
+};
 
 // block E - bones
 struct ModelBoneDef
@@ -291,8 +297,11 @@ public:
 	bool display;
 };
 
-#define  TEXTUREUNIT_STATIC  0x10
-#define  TEXTUREUNIT_IGNORE_TEXTURE_WEIGHTS  0x40
+enum
+{
+	TEXTUREUNIT_STATIC = 0x10,
+	TEXTUREUNIT_IGNORE_TEXTURE_WEIGHTS = 0x40
+};
 
 /// Lod part, A texture unit (sub of material)
 struct ModelTexUnit
@@ -355,11 +364,14 @@ Mode   Shading     String
 
 // block X - render flags
 /* flags */
-#define  RENDERFLAGS_UNLIT  1
-#define  RENDERFLAGS_UNFOGGED  2
-#define  RENDERFLAGS_TWOSIDED  4
-#define  RENDERFLAGS_BILLBOARD  8
-#define  RENDERFLAGS_ZBUFFERED  16
+enum
+{
+	RENDERFLAGS_UNLIT = 1,
+	RENDERFLAGS_UNFOGGED = 2,
+	RENDERFLAGS_TWOSIDED = 4,
+	RENDERFLAGS_BILLBOARD = 8,
+	RENDERFLAGS_ZBUFFERED = 16
+};
 
 struct ModelRenderFlags
 {
@@ -460,25 +472,28 @@ struct ModelParticleParams
 };
 
 // Most of these model particle flags are currently ignored by WMV:
-#define MODELPARTICLE_FLAGS_WORLDSPACE     0x8        // Particles travel "up" in world space, rather than model
-#define MODELPARTICLE_FLAGS_DONOTTRAIL     0x10       // Do not trail 
-#define MODELPARTICLE_FLAGS_MODELSPACE     0x80       // Particles in model space
-#define MODELPARTICLE_FLAGS_PINNED         0x400      // Pinned Particles, their quad enlarges from their creation
+enum
+{
+	MODELPARTICLE_FLAGS_WORLDSPACE = 0x8, // Particles travel "up" in world space, rather than model
+	MODELPARTICLE_FLAGS_DONOTTRAIL = 0x10, // Do not trail 
+	MODELPARTICLE_FLAGS_MODELSPACE = 0x80, // Particles in model space
+	MODELPARTICLE_FLAGS_PINNED = 0x400, // Pinned Particles, their quad enlarges from their creation
 // position to where they expand
-#define MODELPARTICLE_FLAGS_DONOTBILLBOARD 0x1000     // Wiki says: XYQuad Particles. They align to XY axis
+	MODELPARTICLE_FLAGS_DONOTBILLBOARD = 0x1000, // Wiki says: XYQuad Particles. They align to XY axis
 // facing Z axis direction
-#define MODELPARTICLE_FLAGS_RANDOMTEXTURE  0x10000    // Choose Random Texture
-#define MODELPARTICLE_FLAGS_OUTWARD        0x20000    // "Outward" particles, most emitters have this and
+	MODELPARTICLE_FLAGS_RANDOMTEXTURE = 0x10000, // Choose Random Texture
+	MODELPARTICLE_FLAGS_OUTWARD = 0x20000, // "Outward" particles, most emitters have this and
 // their particles move away from the origin, when they
 // don't the particles start at origin+(speed*life) and
 // move towards the origin
-#define MODELPARTICLE_FLAGS_RANDOMSTART    0x200000   // Random Flip Book Start
-#define MODELPARTICLE_FLAGS_BONEGENERATOR  0x1000000  // Bone generator = bone, not joint
-#define MODELPARTICLE_FLAGS_DONOTTHROTTLE  0x4000000  // Do not throttle emission rate based on distance
-#define MODELPARTICLE_FLAGS_MULTITEXTURE   0x10000000 // Particle uses multi-texturing. This affects emitter values
-#define MODELPARTICLE_EMITTER_PLANE  1
-#define MODELPARTICLE_EMITTER_SPHERE 2
-#define MODELPARTICLE_EMITTER_SPLINE 3
+	MODELPARTICLE_FLAGS_RANDOMSTART = 0x200000, // Random Flip Book Start
+	MODELPARTICLE_FLAGS_BONEGENERATOR = 0x1000000, // Bone generator = bone, not joint
+	MODELPARTICLE_FLAGS_DONOTTHROTTLE = 0x4000000, // Do not throttle emission rate based on distance
+	MODELPARTICLE_FLAGS_MULTITEXTURE = 0x10000000, // Particle uses multi-texturing. This affects emitter values
+	MODELPARTICLE_EMITTER_PLANE = 1,
+	MODELPARTICLE_EMITTER_SPHERE = 2,
+	MODELPARTICLE_EMITTER_SPLINE = 3
+};
 
 template <typename Base, size_t integer_bits, size_t decimal_bits>
 struct fixed_point

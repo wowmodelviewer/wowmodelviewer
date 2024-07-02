@@ -4,7 +4,11 @@
 #define CHUNKSIZE ((TILESIZE) / 16.0f)
 #define UNITSIZE (CHUNKSIZE / 8.0f)
 #define ZEROPOINT (32.0f * (TILESIZE))
-#define  CHUNKS_IN_TILE  16
+
+enum
+{
+	CHUNKS_IN_TILE = 16
+};
 
 #include "GL/glew.h"
 #include "wmo.h"

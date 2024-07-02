@@ -3,7 +3,10 @@
 #include "Game.h"
 #include "logger/Logger.h"
 
-#define SET_WARN_COUNT 10
+enum
+{
+	SET_WARN_COUNT = 10
+};
 
 UserSkins::UserSkins(const wxString& filename) : loaded(false)
 {
