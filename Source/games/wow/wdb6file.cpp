@@ -143,7 +143,7 @@ std::vector<std::string> WDB6File::get(unsigned int recordIndex, const core::Tab
 				}
 				else // if no value defined, insert 0
 				{
-					result.push_back("0");
+					result.emplace_back("0");
 				}
 			}
 		}

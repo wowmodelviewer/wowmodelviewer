@@ -76,7 +76,7 @@ int core::GameDatabase::treatQuery(void* resultPtr, int nbcols, char** vals, cha
 	// update columns
 	for (int i = 0; i < nbcols; i++)
 	{
-		values.push_back(QString(vals[i]));
+		values.emplace_back(vals[i]);
 	}
 
 	r->values.push_back(values);

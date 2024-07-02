@@ -472,7 +472,7 @@ std::vector<std::string> WDC1File::get(unsigned int recordIndex, const core::Tab
 			if (It != m_relationShipData.end())
 				result.push_back(It->second);
 			else
-				result.push_back("");
+				result.emplace_back("");
 			continue;
 		}
 
