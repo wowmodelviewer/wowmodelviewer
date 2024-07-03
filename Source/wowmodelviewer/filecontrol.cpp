@@ -1,12 +1,8 @@
 #include "logger/Logger.h"
 #include <wx/filename.h>
 #include <wx/msgdlg.h>
-#include <QDirIterator>
 #include <QImage>
-#include "CASCFile.h"
 #include "Game.h"
-#include "globalvars.h"
-#include "logger/Logger.h"
 #include "modelviewer.h"
 #include "Texture.h"
 

@@ -10,7 +10,6 @@
 
 #include <wx/aui/aui.h>
 #include "modelcanvas.h"
-#include "animcontrol.h"
 #include "charcontrol.h"
 #include "lightcontrol.h"
 #include "modelcontrol.h"

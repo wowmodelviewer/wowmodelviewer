@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QString>
 #include "dbfile.h"
 
 #ifdef _WIN32

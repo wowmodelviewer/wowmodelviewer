@@ -1,5 +1,4 @@
 #include "itemselection.h"
-#include <QString>
 #include <wx/listctrl.h>
 #include "globalvars.h"
 #include "Game.h"

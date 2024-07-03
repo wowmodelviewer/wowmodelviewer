@@ -11,7 +11,6 @@
 #include "globalvars.h"
 #include "LogStackWalker.h"
 #include "PluginManager.h"
-#include "UserSkins.h"
 #include "util.h"
 #include "WoWDatabase.h"
 #include "WoWFolder.h"

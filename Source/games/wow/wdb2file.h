@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QString>
-
 #include "dbfile.h"
-
 #include "CASCFile.h"
 
 #ifdef _WIN32

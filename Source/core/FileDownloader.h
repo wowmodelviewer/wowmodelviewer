@@ -2,7 +2,6 @@
 
 #include <QObject>
 #include <QByteArray>
-#include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QString>
 #include <QWaitCondition>

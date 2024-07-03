@@ -4,8 +4,6 @@
 #include <windows.h>
 #endif
 
-//#include <cstdlib>
-#include <iostream>
 #include <string>
 #include <sstream>
 #include <vector>
@@ -22,12 +20,9 @@ extern wxString armoryPath;
 extern wxString customDirectoryPath;
 extern int customFilesConflictPolicy;
 extern int displayItemAndNPCId;
-
 extern bool useRandomLooks;
-
 class UserSkins;
 extern UserSkins& gUserSkins;
-
 extern long langID;
 extern wxString langName;
 extern long langOffset;
@@ -35,7 +30,6 @@ extern long interfaceID;
 extern int ssCounter;
 extern int imgFormat;
 extern long versionID;
-
 extern wxString locales[];
 
 // Slashes for Pathing

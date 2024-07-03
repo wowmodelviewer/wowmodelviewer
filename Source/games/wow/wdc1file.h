@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QString>
-
 #include "types.h"
 #include "wdb5file.h"
 

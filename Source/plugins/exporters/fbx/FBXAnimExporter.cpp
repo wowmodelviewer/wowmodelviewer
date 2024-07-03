@@ -24,14 +24,10 @@
  */
 
 #include "FBXAnimExporter.h"
-
 #include <sstream>
-
 #include <qdir.h>
-
 #include <fbxsdk.h>
 #include <fbxsdk/fileio/fbxiosettings.h>
-
 #include "GlobalSettings.h"
 #include "FBXHeaders.h"
 #include "WoWModel.h"

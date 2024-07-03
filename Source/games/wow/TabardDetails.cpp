@@ -1,7 +1,5 @@
 #include "TabardDetails.h"
 #include "Game.h"
-#include "wow_enums.h"
-
 #include <QXmlStreamWriter>
 
 TabardDetails::TabardDetails()

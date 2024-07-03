@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QString>
 #include "LogOutput.h"
 
 #ifdef _WIN32

@@ -3,8 +3,6 @@
 #include "Game.h"
 #include "GameFile.h"
 
-#include <QImage>
-
 #define WIP_DH_SUPPORT 1
 
 #ifdef _LINUX // Linux

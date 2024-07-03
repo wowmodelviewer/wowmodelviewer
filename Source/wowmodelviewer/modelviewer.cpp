@@ -10,7 +10,6 @@
 #include "app.h"
 #include "Bone.h"
 #include "CASCFile.h"
-#include "CASCFolder.h"
 #include "CharInfos.h"
 #include "ExporterPlugin.h"
 #include "Game.h"

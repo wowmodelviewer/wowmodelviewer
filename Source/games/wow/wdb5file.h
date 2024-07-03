@@ -1,8 +1,8 @@
 #pragma once
 
+#include <map>
 #include "dbfile.h"
 #include "types.h"
-
 #include "CASCFile.h"
 
 #ifdef _WIN32

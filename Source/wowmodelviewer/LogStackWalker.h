@@ -1,6 +1,7 @@
 #pragma once
 
 #ifndef WX_PRECOMP
+// ReSharper disable once CppUnusedIncludeDirective
 #include <wx/wx.h>
 #endif
 

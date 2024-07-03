@@ -10,8 +10,6 @@
 #include <string>
 #include <vector>
 
-#include "glm/glm.hpp"
-
 class Displayable;
 class WoWModel;
 

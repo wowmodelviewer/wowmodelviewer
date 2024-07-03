@@ -36,10 +36,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------------- */
 #pragma once
 
-/* dependencies */
-#include <stdio.h>
-#include <memory.h>
-
 /* c++ marker */
 #ifdef __cplusplus
 extern "C" {

@@ -1,11 +1,9 @@
 #pragma once
 
 #include <map>
-
 #include <QString>
-
+// ReSharper disable once CppUnusedIncludeDirective
 #include "GameFile.h"
-
 #include "logger/Logger.h"
 
 #ifdef _WIN32

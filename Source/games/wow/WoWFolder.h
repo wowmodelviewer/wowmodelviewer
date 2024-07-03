@@ -1,9 +1,6 @@
 #pragma once
 
 #include <map>
-
-#include <QString>
-
 #include "CASCFolder.h"
 #include "GameFile.h"
 #include "GameFolder.h"

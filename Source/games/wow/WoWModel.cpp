@@ -1,14 +1,10 @@
 #include "WoWModel.h"
-
 #include <algorithm>
 #include <cassert>
-#include <fstream>
 #include <sstream>
-#include <iostream>
 #include <vector>
 #include <map>
 #include <string>
-
 #include "Attachment.h"
 #include "CASCFile.h"
 #include "Game.h"
@@ -19,11 +15,8 @@
 #include "ModelRenderPass.h"
 #include "ModelTransparency.h"
 #include "video.h"
-
 #include "logger/Logger.h"
-
 #include <QXmlStreamWriter>
-
 #include "glm/gtc/epsilon.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"

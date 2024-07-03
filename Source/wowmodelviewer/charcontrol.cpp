@@ -9,7 +9,6 @@
 #include "itemselection.h"
 #include "modelviewer.h"
 #include "util.h"
-#include "WoWDatabase.h"
 #include "WoWModel.h"
 #include "wow_enums.h"
 #include "logger/Logger.h"

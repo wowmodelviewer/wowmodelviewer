@@ -21,7 +21,6 @@
 #include <map>
 #include <string>
 #include <vector>
-
 #include "WoWDatabase.h"
 #include "GameFile.h"
 #include "wow_enums.h"
@@ -29,7 +28,6 @@
 
 class Attachment;
 class WoWModel;
-
 class QXmlStreamWriter;
 class QXmlStreamReader;
 
