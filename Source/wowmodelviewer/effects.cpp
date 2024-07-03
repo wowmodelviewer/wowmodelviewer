@@ -67,7 +67,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 					LHandEnchant = it.first;
 
 				// children:
-				for (auto& i : charControl->charAtt->children)
+				for (const auto& i : charControl->charAtt->children)
 				{
 					if (i->slot == s)
 					{
@@ -75,7 +75,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 						if (att->children.size() > 0)
 							att->delChildren();
 
-						WoWModel* m = static_cast<WoWModel*>(att->model());
+						const WoWModel* m = static_cast<WoWModel*>(att->model());
 						if (!m)
 							return;
 
@@ -103,7 +103,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 
 void EnchantsDialog::InitObjects()
 {
-	wxString handSlots[2] = {wxT("Right Hand"), wxT("Left Hand")};
+	const wxString handSlots[2] = {wxT("Right Hand"), wxT("Left Hand")};
 
 	slot = new wxRadioBox(this, -1, wxT("Apply effects to:"), wxPoint(10, 10), wxSize(180, 80), 2, handSlots, 4,
 	                      wxRA_SPECIFY_ROWS, wxDefaultValidator, wxT("radioBox"));
@@ -119,7 +119,7 @@ void EnchantsDialog::InitObjects()
 
 void EnchantsDialog::InitEnchants()
 {
-	QString query =
+	const QString query =
 		"SELECT SpellItemEnchantment.ID, Name, IVE1.path AS enchant1, IVE2.path AS enchant2, IVE3.path AS enchant3, IVE4.path AS enchant4, IVE5.path AS enchant5 \
                    FROM SpellItemEnchantment \
                    LEFT JOIN ItemVisuals ON VisualID = ItemVisuals .ID \
@@ -130,7 +130,7 @@ void EnchantsDialog::InitEnchants()
                    LEFT JOIN ItemVisualEffects IVE5 ON ItemVisuals .itemVisualEffects5 = IVE5.ID \
                    WHERE VisualID != 0";
 
-	sqlResult enchantsInfos = GAMEDATABASE.sqlQuery(query);
+	const sqlResult enchantsInfos = GAMEDATABASE.sqlQuery(query);
 
 	if (!enchantsInfos.valid || enchantsInfos.values.empty())
 		return;

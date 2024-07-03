@@ -52,9 +52,9 @@ inline T interpolateHermite(const float r, const T& v1, const T& v2, const T& in
 template <class T>
 inline T interpolateBezier(const float r, const T& v1, const T& v2, const T& in, const T& out)
 {
-	float InverseFactor = (1.0f - r);
-	float FactorTimesTwo = r * r;
-	float InverseFactorTimesTwo = InverseFactor * InverseFactor;
+	const float InverseFactor = (1.0f - r);
+	const float FactorTimesTwo = r * r;
+	const float InverseFactorTimesTwo = InverseFactor * InverseFactor;
 	// basis functions
 	float h1 = InverseFactorTimesTwo * InverseFactor;
 	float h2 = 3.0f * r * InverseFactorTimesTwo;

@@ -64,10 +64,10 @@ void WMOLight::init(GameFile& f)
 	pos = glm::vec3(pos.x, pos.z, -pos.y);
 
 	// rgb? bgr? hm
-	float fa = ((color & 0xff000000) >> 24) / 255.0f;
-	float fr = ((color & 0x00ff0000) >> 16) / 255.0f;
-	float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
-	float fb = ((color & 0x000000ff)) / 255.0f;
+	const float fa = ((color & 0xff000000) >> 24) / 255.0f;
+	const float fr = ((color & 0x00ff0000) >> 16) / 255.0f;
+	const float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
+	const float fb = ((color & 0x000000ff)) / 255.0f;
 
 	fcolor = glm::vec4(fr, fg, fb, fa);
 	fcolor *= intensity;

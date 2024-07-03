@@ -66,7 +66,7 @@ bool FBXHeaders::createFBXHeaders(FbxString fileVersion, QString l_FileName, Fbx
 	}
 
 	// convert scene from Yup to Zup
-	FbxAxisSystem conv(FbxAxisSystem::eMayaZUp); // we desire to convert the scene from Y-Up to Z-Up
+	const FbxAxisSystem conv(FbxAxisSystem::eMayaZUp); // we desire to convert the scene from Y-Up to Z-Up
 	conv.ConvertScene(l_Scene);
 
 	//LOG_INFO << "FBX SDK scene successfully created";

@@ -49,9 +49,9 @@ void VersionManager::checkForNewVersionAndExit()
 {
 	// only check core version for now
 	QString appName = QString::fromStdWString(GLOBALSETTINGS.appName());
-	QString currentVersion = m_currentVersionsMap[appName];
-	QString lastVersion = getLastVersionFor(appName);
-	int result = compareVersion(currentVersion, lastVersion);
+	const QString currentVersion = m_currentVersionsMap[appName];
+	const QString lastVersion = getLastVersionFor(appName);
+	const int result = compareVersion(currentVersion, lastVersion);
 	qApp->exit(result);
 }
 
@@ -68,8 +68,8 @@ int VersionManager::compareVersion(const QString& v1, const QString& v2)
 	{
 		if (i < v2list.size())
 		{
-			int ver1 = v1list[i].toInt();
-			int ver2 = v2list[i].toInt();
+			const int ver1 = v1list[i].toInt();
+			const int ver2 = v2list[i].toInt();
 			if (ver1 < ver2)
 				return -1;
 			if (ver1 > ver2)
@@ -97,7 +97,7 @@ void VersionManager::fileDownloaded(QString& filename)
 	if (filename.contains("latest.json"))
 	{
 		QJsonParseError error;
-		QJsonDocument datas = QJsonDocument::fromJson(m_fileDownloader->m_datas, &error);
+		const QJsonDocument datas = QJsonDocument::fromJson(m_fileDownloader->m_datas, &error);
 		QJsonArray values = datas.array();
 
 		for (auto&& value : values)

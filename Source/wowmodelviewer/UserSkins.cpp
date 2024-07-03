@@ -60,7 +60,7 @@ void UserSkins::LoadFile(const wxString& filename)
 			return;
 		}
 
-		size_t numGroups = atoi(line.c_str());
+		const size_t numGroups = atoi(line.c_str());
 		if (numGroups < 0)
 		{
 			LOG_ERROR << "UserSkins: negative number of groups specified in line" << lineNr;
@@ -101,11 +101,11 @@ bool UserSkins::AddUserSkins(const wxString& model, TextureSet& set)
 	if (!loaded)
 		return false;
 
-	TexSetMap::iterator it = skins.find(model);
+	const TexSetMap::iterator it = skins.find(model);
 	if (it == skins.end())
 		return false;
 
-	TextureSet& myset = it->second;
+	const TextureSet& myset = it->second;
 	for (const auto& i : myset)
 		set.insert(i);
 	return true;

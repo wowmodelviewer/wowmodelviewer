@@ -86,7 +86,7 @@ bool VideoSettings::Init()
 		return true;
 
 	glewExperimental = GL_TRUE;
-	int glewErr = glewInit();
+	const int glewErr = glewInit();
 
 	if (glewErr != GLEW_OK)
 	{
@@ -111,7 +111,7 @@ bool VideoSettings::Init()
 	version = ((char*)glGetString(GL_VERSION));
 	renderer = ((char*)glGetString(GL_RENDERER));
 
-	double num = atof((char*)glGetString(GL_VERSION));
+	const double num = atof((char*)glGetString(GL_VERSION));
 	supportOGL20 = (num >= 2.0);
 	if (supportOGL20)
 		supportNPOT = true;

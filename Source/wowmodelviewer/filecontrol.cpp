@@ -65,7 +65,7 @@ void beautifyFileName(QString& file)
 	QString firstLetter = file[0];
 	firstLetter = firstLetter.toUpper();
 	file[0] = firstLetter[0];
-	int ret = file.indexOf('\\');
+	const int ret = file.indexOf('\\');
 	if (ret > -1)
 	{
 		firstLetter = file[ret + 1];

@@ -66,7 +66,7 @@ void DisplaySettings::Update()
 {
 	oglMode->Clear();
 
-	for (auto& i : video.capsList)
+	for (const auto& i : video.capsList)
 	{
 		wxString mode = wxString::Format(
 			wxT("Colour:%i Depth:%i Alpha:%i "), i.colour, i.zBuffer,

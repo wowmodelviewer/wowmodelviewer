@@ -95,20 +95,20 @@ bool WowModelViewApp::OnInit()
 		wxImage::AddHandler(new wxXPMHandler);
 
 		// Enable Randomly choosing between SPLASH and SPLASH2
-		bool randomSplash2 = true;
+		const bool randomSplash2 = true;
 
 		wxString splashname = L"SPLASH";
 		if (randomSplash2 == true)
 		{
 			srand(time(nullptr));
-			int randomchoice = rand() % 10; // Random number between 0-9
+			const int randomchoice = rand() % 10; // Random number between 0-9
 			if (randomchoice >= 5)
 			{
 				splashname = L"SPLASH2";
 			}
 		}
 
-		wxBitmap* bitmap = createBitmapFromResource(splashname);
+		const wxBitmap* bitmap = createBitmapFromResource(splashname);
 		if (!bitmap)
 			wxMessageBox(_("Failed to load Splash Screen.\nPress OK to continue loading WMV."), _("Failure"));
 		else
@@ -123,9 +123,9 @@ bool WowModelViewApp::OnInit()
 	// Error & Logging settings
 	wxHandleFatalExceptions(true);
 
-	wxString execPath = wxStandardPaths::Get().GetExecutablePath();
-	wxFileName fname(execPath);
-	wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings");
+	const wxString execPath = wxStandardPaths::Get().GetExecutablePath();
+	const wxFileName fname(execPath);
+	const wxString userPath = fname.GetPath(wxPATH_GET_VOLUME) + SLASH + wxT("userSettings");
 	wxFileName::Mkdir(userPath, 0777, wxPATH_MKDIR_FULL);
 
 	// Application Info

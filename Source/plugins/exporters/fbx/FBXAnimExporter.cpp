@@ -36,7 +36,7 @@
 void FBXAnimExporter::run()
 {
 	QMutexLocker locker(&m_mutex);
-	ModelAnimation curAnimation = l_model->anims[animID];
+	const ModelAnimation curAnimation = l_model->anims[animID];
 	if (srcfileName.isNull() || srcfileName.isEmpty())
 	{
 		LOG_ERROR << "Unable to get FBX Animation Source Filename.";
@@ -46,8 +46,8 @@ void FBXAnimExporter::run()
 	// LOG_INFO << "FBX Animation Thead Source Filename: " << qPrintable(srcfileName);
 	srcfileName = srcfileName.mid(0, srcfileName.lastIndexOf(".fbx"));
 	QString srcPath = srcfileName.mid(0, srcfileName.lastIndexOf(SLASH));
-	QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
-	QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
+	const QString justfileName = srcfileName.mid(srcfileName.lastIndexOf(SLASH) + 1);
+	const QString anim_name = QString("%1 [%2]").arg(animationName).arg(curAnimation.Index);
 	QString file_name = QString("%1_%5/%2_%3_%4.fbx").arg(srcfileName).arg(justfileName).arg(animationName).
 	                                                  arg(curAnimation.Index).arg(wxT("Animations"));
 	if (useAltNaming)
@@ -56,7 +56,7 @@ void FBXAnimExporter::run()
 		                                          arg(curAnimation.Index).arg(wxT("Animations"));
 	}
 	LOG_INFO << "FBX Animation Filename: " << qPrintable(file_name);
-	QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));
+	const QDir dir(file_name.mid(0, file_name.lastIndexOf('/')));
 	if (dir.exists() == false)
 	{
 		dir.mkpath(file_name.mid(0, file_name.lastIndexOf('/')));

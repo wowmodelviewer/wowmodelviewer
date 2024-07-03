@@ -112,14 +112,14 @@ GameFile* wow::WoWFolder::getFile(int id)
 	if (id <= 0) // bad id given
 		return result;
 
-	auto it = m_idMap.find(id);
+	const auto it = m_idMap.find(id);
 	if (it != m_idMap.end())
 		result = it->second;
 
 	if (!result) // if not found, try to force open by id
 	{
 		// Build File########.unk filename needed for CASC lib to open file based on id
-		QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
+		const QString filename = QString("File%1.unk").arg(id, 8, 16, QLatin1Char('0'));
 		LOG_INFO << "File with id" << id << "not found in listfile. Trying to open" << filename;
 
 		HANDLE newfile;
@@ -144,7 +144,7 @@ bool wow::WoWFolder::openFile(int id, HANDLE* result)
 
 bool wow::WoWFolder::openFile(std::string file, HANDLE* result)
 {
-	auto it = m_nameIdMap.find(QString::fromStdString(file));
+	const auto it = m_nameIdMap.find(QString::fromStdString(file));
 	if (it == m_nameIdMap.end())
 		return false;
 	return m_CASCFolder.openFile(it->second, result);

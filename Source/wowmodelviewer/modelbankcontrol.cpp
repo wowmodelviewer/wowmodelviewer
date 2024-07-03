@@ -58,7 +58,7 @@ ModelBankControl::~ModelBankControl()
 
 void ModelBankControl::OnButton(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_MODELBANK_ADD)
 	{
@@ -79,11 +79,11 @@ void ModelBankControl::LoadModel()
 	if (!g_canvas)
 		return;
 
-	int val = lstBank->GetSelection();
+	const int val = lstBank->GetSelection();
 	if (val == wxNOT_FOUND)
 		return;
 
-	ModelBank cd = bankList[val];
+	const ModelBank cd = bankList[val];
 
 	g_modelViewer->LoadModel(GAMEDIRECTORY.getFile(QString::fromWCharArray(cd.fileName.c_str())));
 

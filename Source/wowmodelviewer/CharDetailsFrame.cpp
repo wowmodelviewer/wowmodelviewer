@@ -50,7 +50,7 @@ void CharDetailsFrame::setModel(WoWModel* model)
 	const auto infos = model_->infos;
 
 
-	auto options = GAMEDATABASE.sqlQuery(
+	const auto options = GAMEDATABASE.sqlQuery(
 		QString(
 			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex")
 		.arg(infos.ChrModelID[0]));

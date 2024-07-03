@@ -111,7 +111,7 @@ void CharTexture::burnComponent(QImage& destImage, CharTextureComponent& ct) con
 
 	const auto& coords = layoutInfos.second[ct.region];
 
-	auto* tmp = gameFileToQImage(ct.file);
+	const auto* tmp = gameFileToQImage(ct.file);
 
 	if (!tmp)
 		return;

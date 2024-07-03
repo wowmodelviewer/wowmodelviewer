@@ -95,7 +95,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString& file)
 
 	bool result = true; // ok until we found an issue
 
-	for (auto& it : m_dbStruct)
+	for (const auto& it : m_dbStruct)
 	{
 		if (it->create())
 		{
@@ -115,7 +115,7 @@ bool core::GameDatabase::createDatabaseFromXML(const QString& file)
 		}
 	}
 
-	for (auto it : m_dbStruct)
+	for (const auto it : m_dbStruct)
 		delete it;
 
 	return result;
@@ -140,7 +140,7 @@ bool core::GameDatabase::readStructureFromXML(const QString& file)
 	doc.setContent(&f);
 	f.close();
 
-	QDomElement docElem = doc.documentElement();
+	const QDomElement docElem = doc.documentElement();
 
 	QDomElement e = docElem.firstChildElement();
 

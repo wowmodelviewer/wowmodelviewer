@@ -47,10 +47,10 @@ void CharDetailsCustomizationChoice::onChoice(wxCommandEvent& event)
 
 void CharDetailsCustomizationChoice::onEvent(Event* e)
 {
-	auto* event = dynamic_cast<CharDetailsEvent*>(e);
+	const auto* event = dynamic_cast<CharDetailsEvent*>(e);
 	if (event && (event->type() == CharDetailsEvent::CHOICE_LIST_CHANGED) && (event->getCustomizationOptionId() == ID_))
 	{
-		auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
+		const auto it = std::find(values_.begin(), values_.end(), details_.get(ID_));
 		if (it != values_.end())
 			choice_->SetSelection(it - values_.begin());
 	}
@@ -64,7 +64,7 @@ void CharDetailsCustomizationChoice::buildList()
 		choice_->Clear();
 		values_.clear();
 
-		auto ids = details_.getCustomizationChoices(ID_);
+		const auto ids = details_.getCustomizationChoices(ID_);
 
 		LOG_INFO << __FUNCTION__ << ID_;
 
@@ -72,7 +72,7 @@ void CharDetailsCustomizationChoice::buildList()
 			return;
 
 		auto query = QString("SELECT OrderIndex,Name_Lang,ID FROM ChrCustomizationChoice WHERE ID IN (");
-		for (auto id : ids)
+		for (const auto id : ids)
 		{
 			query += QString::number(id);
 			query += ",";
@@ -83,7 +83,7 @@ void CharDetailsCustomizationChoice::buildList()
 
 		LOG_INFO << query;
 
-		auto choices = GAMEDATABASE.sqlQuery(query);
+		const auto choices = GAMEDATABASE.sqlQuery(query);
 
 		if (choices.valid && !choices.values.empty())
 		{

@@ -48,7 +48,7 @@ void ParticleSystem::init(GameFile* f, M2ParticleDef& mta, std::vector<uint32>& 
 
 	for (size_t i = 0; i < 3; i++)
 	{
-		float opacity = *reinterpret_cast<short*>(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
+		const float opacity = *reinterpret_cast<short*>(f->getBuffer() + mta.p.opacity.ofsKeys + i * 2);
 		colors[i] = glm::vec4(colors2[i].x / 255.0f, colors2[i].y / 255.0f,
 		                      colors2[i].z / 255.0f, opacity / 32767.0f);
 		sizes[i] = (*reinterpret_cast<float*>(f->getBuffer() + mta.p.sizes.ofsKeys + i * sizeof(glm::vec2))) * mta.p.scales[i];
@@ -122,8 +122,8 @@ void ParticleSystem::initTile(glm::vec2* tc, int num)
 {
 	glm::vec2 otc[4];
 	glm::vec2 a, b;
-	int x = num % cols;
-	int y = num / cols;
+	const int x = num % cols;
+	const int y = num / cols;
 	a.x = x * (1.0f / cols);
 	b.x = (x + 1) * (1.0f / cols);
 	a.y = y * (1.0f / rows);

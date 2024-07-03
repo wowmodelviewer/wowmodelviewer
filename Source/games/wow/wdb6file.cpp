@@ -83,7 +83,7 @@ bool WDB6File::open()
 				values[id] = val;
 			}
 
-			std::tuple<std::map<uint32, uint32>, uint8> column = std::make_tuple(values, type);
+			const std::tuple<std::map<uint32, uint32>, uint8> column = std::make_tuple(values, type);
 			m_commonData[c] = column;
 		}
 	}

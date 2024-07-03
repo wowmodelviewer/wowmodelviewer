@@ -76,7 +76,7 @@ void AnimationExportChoiceDialog::updateButtons(wxCommandEvent&)
 {
 	unsigned int nbselected = 0;
 
-	wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
+	const wxCheckListBox* checkListBox = wxDynamicCast(m_listbox, wxCheckListBox);
 
 	for (unsigned int n = 0; n < checkListBox->GetCount(); n++)
 	{

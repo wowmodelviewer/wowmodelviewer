@@ -45,9 +45,9 @@ struct WMOGroupHeader
 void setGLColor(unsigned int col)
 {
 	//glColor4ubv((GLubyte*)(&col));
-	GLubyte r = (col & 0x00FF0000) >> 16;
-	GLubyte g = (col & 0x0000FF00) >> 8;
-	GLubyte b = (col & 0x000000FF);
+	const GLubyte r = (col & 0x00FF0000) >> 16;
+	const GLubyte g = (col & 0x0000FF00) >> 8;
+	const GLubyte b = (col & 0x000000FF);
 	glColor4ub(r, g, b, 1);
 }
 

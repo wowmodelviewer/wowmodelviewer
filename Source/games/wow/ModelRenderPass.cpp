@@ -66,7 +66,7 @@ void ModelRenderPass::deinit()
 
 	if (opacity != -1 || color != -1)
 	{
-		GLfloat czero[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+		const GLfloat czero[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 		glMaterialfv(GL_FRONT, GL_EMISSION, czero);
 
 		//glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -91,7 +91,7 @@ bool ModelRenderPass::init()
 	if (color != -1 && color < static_cast<int16>(model->colors.size()) && model->colors[color].color.uses(0))
 	{
 		/* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
-		glm::vec3 c = model->colors[color].color.getValue(0, model->animtime);
+		const glm::vec3 c = model->colors[color].color.getValue(0, model->animtime);
 		if (model->colors[color].opacity.uses(model->anim))
 			ocol.w = model->colors[color].opacity.getValue(model->anim, model->animtime);
 
@@ -123,7 +123,7 @@ bool ModelRenderPass::init()
 
 	// TEXTURE
 	// bind to our texture
-	GLuint texId = model->getGLTexture(tex);
+	const GLuint texId = model->getGLTexture(tex);
 	if (texId != INVALID_TEX)
 		glBindTexture(GL_TEXTURE_2D, texId);
 

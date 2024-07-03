@@ -71,7 +71,7 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 		return false;
 
 	// prepare obj file
-	QString targetFile = QString::fromStdWString(target);
+	const QString targetFile = QString::fromStdWString(target);
 
 	QFile file(targetFile);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))

@@ -154,7 +154,7 @@ void fprintbu8(FILE* file, uint8 value)
 		x <<= 1;
 	}
 
-	for (bool i : b)
+	for (const bool i : b)
 	{
 		if (i)
 			fprintf(file, "1");
@@ -165,8 +165,8 @@ void fprintbu8(FILE* file, uint8 value)
 
 bool getBitH2L(unsigned char* data, unsigned bit)
 {
-	unsigned char byte = data[bit / 8];
-	unsigned char pos = bit % 8;
+	const unsigned char byte = data[bit / 8];
+	const unsigned char pos = bit % 8;
 
 	unsigned char mask = 0x80;
 	mask >>= pos;

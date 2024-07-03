@@ -62,7 +62,7 @@ private:
 
 		TreeStackItem* getChildByName(QString name)
 		{
-			std::map<QString, TreeStackItem*>::iterator it = m_childrenMap.find(name);
+			const std::map<QString, TreeStackItem*>::iterator it = m_childrenMap.find(name);
 
 			if (it != m_childrenMap.end())
 				return it->second;
@@ -77,7 +77,7 @@ private:
 
 		void createTreeItems(wxTreeCtrl* tree)
 		{
-			for (auto& it : m_childrenMap)
+			for (const auto& it : m_childrenMap)
 			{
 				TreeStackItem* child = it.second;
 				child->id = tree->AppendItem(id, it.second->name().toStdWString(), -1, -1,

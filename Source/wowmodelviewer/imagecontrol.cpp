@@ -53,7 +53,7 @@ void ImageControl::OnShow(wxAuiManager* m)
 	//locked = false;
 	lockAspect->SetValue(locked);
 
-	int screenSize[4]{};
+	const int screenSize[4]{};
 	glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize);
 
 	x = screenSize[2];

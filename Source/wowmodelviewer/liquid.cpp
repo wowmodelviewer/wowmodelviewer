@@ -119,8 +119,8 @@ void Liquid::initGeometry(GameFile& f)
 {
 	// assume: f is at the appropriate starting position
 
-	LiquidVertex* map = reinterpret_cast<LiquidVertex*>(f.getPointer());
-	unsigned char* flags = (unsigned char*)(f.getPointer() + (xtiles + 1) * (ytiles + 1) * sizeof(LiquidVertex));
+	const LiquidVertex* map = reinterpret_cast<LiquidVertex*>(f.getPointer());
+	const unsigned char* flags = (unsigned char*)(f.getPointer() + (xtiles + 1) * (ytiles + 1) * sizeof(LiquidVertex));
 
 	// generate vertices
 	glm::vec3* verts = new glm::vec3[(xtiles + 1) * (ytiles + 1)];
@@ -130,7 +130,7 @@ void Liquid::initGeometry(GameFile& f)
 	{
 		for (int i = 0; i < xtiles + 1; i++)
 		{
-			int p = j * (xtiles + 1) + i;
+			const int p = j * (xtiles + 1) + i;
 			float h = map[p].h;
 			if (h > 100000) h = pos.y;
 			verts[p] = glm::vec3(pos.x + tilesize * i, h, pos.z + ydir * tilesize * j);
@@ -149,12 +149,12 @@ void Liquid::initGeometry(GameFile& f)
 	{
 		for (int i = 0; i < xtiles; i++)
 		{
-			unsigned char F = flags[j * xtiles + i];
+			const unsigned char F = flags[j * xtiles + i];
 			if ((F & 8) == 0)
 			{
 				tmpflag = F;
 				// 15 seems to be "don't draw"
-				int p = j * (xtiles + 1) + i;
+				const int p = j * (xtiles + 1) + i;
 
 				// HACK: pack the vertex color selection into the 2nd texture coordinate
 				//float fc;

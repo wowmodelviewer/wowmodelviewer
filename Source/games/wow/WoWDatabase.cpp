@@ -49,8 +49,8 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement& e, core::FieldSt
 	const QDomNamedNodeMap attributes = e.attributes();
 
 	const QDomNode pos = attributes.namedItem("pos");
-	QDomNode commonData = attributes.namedItem("commonData");
-	QDomNode relationshipData = attributes.namedItem("relationshipData");
+	const QDomNode commonData = attributes.namedItem("commonData");
+	const QDomNode relationshipData = attributes.namedItem("relationshipData");
 
 	if (!pos.isNull())
 		field->pos = pos.nodeValue().toInt();

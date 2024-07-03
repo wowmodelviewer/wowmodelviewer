@@ -68,7 +68,7 @@ void Texture::load()
 		*/
 		LOG_ERROR << __FILE__ << __FUNCTION__ << __LINE__ << "type=" << type;
 
-		BYTE* buffer = nullptr;
+		const BYTE* buffer = nullptr;
 		unsigned char* buf = new unsigned char[sizes[0]];
 
 		file->seek(offsets[0]);

@@ -46,7 +46,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 	sizer->Add(chkbox[CHECK_RANDOMSKIN], 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
 	sizer->Add(chkbox[CHECK_DISPLAYIDINLIST], 0, wxLEFT | wxRIGHT | wxBOTTOM, 5);
 
-	wxString policies[2] = {_("Use game files"), _("Use custom files")};
+	const wxString policies[2] = {_("Use game files"), _("Use custom files")};
 
 	keepPolicyRadioBox = new wxRadioBox(this, -1, _("Conflict policy"), wxDefaultPosition, wxDefaultSize, 2, policies,
 	                                    2);

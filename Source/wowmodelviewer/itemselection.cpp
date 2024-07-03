@@ -61,7 +61,7 @@ ChoiceDialog::ChoiceDialog(CharControl* dest, int type,
 	// New Item Selection stuff
 	// Objective is to change over from a wxListBox to a wxListCtrl
 	// which supports different text colours
-	wxCArrayString chs(choices);
+	const wxCArrayString chs(choices);
 	m_listctrl = new wxListView(this, wxID_LISTCTRL, wxDefaultPosition, wxSize(200, 200),
 	                            wxLC_REPORT | wxLC_SINGLE_SEL | wxLC_NO_HEADER);
 

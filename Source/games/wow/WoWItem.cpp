@@ -71,7 +71,7 @@ void WoWItem::setId(int id)
 
 				//check if display id already in the map (do not duplicate when look is the same)
 				auto found = false;
-				for (auto& it : levelDisplayMap_)
+				for (const auto& it : levelDisplayMap_)
 				{
 					if (it.second == curid)
 					{
@@ -88,7 +88,7 @@ void WoWItem::setId(int id)
 			}
 		}
 
-		auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
 			.arg(levelDisplayMap_[level_]));
 
 		if (iteminfos.valid && !iteminfos.values.empty())
@@ -119,7 +119,7 @@ void WoWItem::setLevel(int level)
 	{
 		level_ = level;
 
-		auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
 			.arg(levelDisplayMap_[level_]));
 
 		if (iteminfos.valid && !iteminfos.values.empty())
@@ -138,7 +138,7 @@ void WoWItem::setModifierId(int id)
 	const auto it = modifierIdDisplayMap_.find(id);
 	if (it != modifierIdDisplayMap_.end())
 	{
-		auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
+		const auto iteminfos = GAMEDATABASE.sqlQuery(QString("SELECT ItemDisplayInfoID FROM ItemAppearance WHERE ID = %1")
 			.arg(it->second));
 
 		if (iteminfos.valid && !iteminfos.values.empty())
@@ -160,7 +160,7 @@ void WoWItem::onParentSet(Component* parent)
 void WoWItem::unload()
 {
 	// delete models and clear map
-	for (auto& itemModel : itemModels_)
+	for (const auto& itemModel : itemModels_)
 		delete itemModel.second;
 
 	itemModels_.clear();

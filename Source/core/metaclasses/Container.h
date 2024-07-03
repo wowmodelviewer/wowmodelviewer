@@ -114,7 +114,7 @@ int Container<DataType>::removeAllChildrenOfType()
 		}
 	}
 
-	int l_result = l_childrenToRemove.size();
+	const int l_result = l_childrenToRemove.size();
 
 	for (l_it = l_childrenToRemove.begin(); l_it != l_childrenToRemove.end(); l_it++)
 	{

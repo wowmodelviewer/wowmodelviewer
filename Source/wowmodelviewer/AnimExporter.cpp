@@ -82,7 +82,7 @@ void CAnimationExporter::Init(const wxString fn)
 
 	lblFile->SetLabel(fn);
 
-	size_t i = (m_iTotalAnimFrames / 50);
+	const size_t i = (m_iTotalAnimFrames / 50);
 	txtFrames->SetLabel(wxEmptyString);
 	*txtFrames << static_cast<int>(i);
 

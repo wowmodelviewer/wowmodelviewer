@@ -51,13 +51,13 @@ NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 	QString infos = extractSubString(htmldata, "(g_npcs[", ";");
 
 	// finding name
-	QString NPCName = extractSubString(infos, "name\":\"", "\",");
+	const QString NPCName = extractSubString(infos, "name\":\"", "\",");
 
 	// finding type
-	int NPCType = extractSubString(infos, "type\":", "}").toInt();
+	const int NPCType = extractSubString(infos, "type\":", "}").toInt();
 
 	// finding id
-	int NPCId = extractSubString(infos, "id\":", ",").toInt();
+	const int NPCId = extractSubString(infos, "id\":", ",").toInt();
 
 	// display id
 	QString NPCDispIdstr = extractSubString(htmldata, "ModelViewer.show({");
@@ -66,7 +66,7 @@ NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 	if (NPCDispIdstr.indexOf(",") != -1) // comma at end of id
 		NPCDispIdstr = NPCDispIdstr.mid(0, NPCDispIdstr.indexOf(","));
 
-	int NPCDispId = NPCDispIdstr.toInt();
+	const int NPCDispId = NPCDispIdstr.toInt();
 
 	NPCInfos* result = new NPCInfos();
 
@@ -94,7 +94,7 @@ ItemRecord* WowheadImporter::importItem(QString urlToGrab) const
 	data.chop(1);
 
 	QJsonParseError error;
-	QJsonObject infos = QJsonDocument::fromJson(data.toUtf8(), &error).object();
+	const QJsonObject infos = QJsonDocument::fromJson(data.toUtf8(), &error).object();
 
 	LOG_INFO << error.errorString();
 

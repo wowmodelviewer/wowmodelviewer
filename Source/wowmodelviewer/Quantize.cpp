@@ -50,7 +50,7 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 				b = pal[ldx];
 				g = pal[ldx + 1];
 				r = pal[ldx + 2];
-				BYTE a = pal[ldx + 3];
+				const BYTE a = pal[ldx + 3];
 				AddColor(&m_pTree, r, g, b, a, m_nColorBits, 0, &m_nLeafCount,
 				         m_pReducibleNodes);
 				while (m_nLeafCount > m_nMaxColors)
@@ -104,8 +104,8 @@ void CQuantizer::AddColor(NODE** ppNode, BYTE r, BYTE g, BYTE b, BYTE a,
 	else
 	{
 		// Recurse a level deeper if the node is not a leaf.
-		int shift = 7 - nLevel;
-		int nIndex = (((r & mask[nLevel]) >> shift) << 2) |
+		const int shift = 7 - nLevel;
+		const int nIndex = (((r & mask[nLevel]) >> shift) << 2) |
 			(((g & mask[nLevel]) >> shift) << 1) |
 			((b & mask[nLevel]) >> shift);
 		AddColor(&((*ppNode)->pChild[nIndex]), r, g, b, a, nColorBits,

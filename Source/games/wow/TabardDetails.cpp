@@ -43,11 +43,11 @@ GameFile* TabardDetails::GetBackgroundTex(int slot)
 GameFile* TabardDetails::GetBorderTex(int slot)
 {
 	GameFile* result = nullptr;
-	QString query = QString(
-		                "SELECT FileDataID FROM GuildTabardBorder WHERE BorderID=%1 AND Color=%2 AND Tier=%3 AND Component=%4")
-	                .arg(borderId).arg(borderColor).arg(tier).arg(slot);
+	const QString query = QString(
+		                      "SELECT FileDataID FROM GuildTabardBorder WHERE BorderID=%1 AND Color=%2 AND Tier=%3 AND Component=%4")
+	                      .arg(borderId).arg(borderColor).arg(tier).arg(slot);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.values.empty())
 		result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());
@@ -58,10 +58,10 @@ GameFile* TabardDetails::GetBorderTex(int slot)
 GameFile* TabardDetails::GetIconTex(int slot)
 {
 	GameFile* result = nullptr;
-	QString query = QString("SELECT FileDataID FROM GuildTabardEmblem WHERE EmblemID=%1 AND Color=%2 AND Component=%3")
-	                .arg(iconId).arg(iconColor).arg(slot);
+	const QString query = QString("SELECT FileDataID FROM GuildTabardEmblem WHERE EmblemID=%1 AND Color=%2 AND Component=%3")
+	                      .arg(iconId).arg(iconColor).arg(slot);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.values.empty())
 		result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());
@@ -81,10 +81,10 @@ int TabardDetails::GetMaxIcon()
 
 int TabardDetails::GetMaxIconColor(int icon)
 {
-	QString query = QString("SELECT COUNT(*) FROM(SELECT DISTINCT Color FROM GuildTabardEmblem WHERE EmblemID = %1)").
+	const QString query = QString("SELECT COUNT(*) FROM(SELECT DISTINCT Color FROM GuildTabardEmblem WHERE EmblemID = %1)").
 		arg(icon);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.values.empty())
 		return r.values[0][0].toInt();
@@ -99,10 +99,10 @@ int TabardDetails::GetMaxBorder()
 
 int TabardDetails::GetMaxBorderColor(int border)
 {
-	QString query = QString("SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = %1)").
+	const QString query = QString("SELECT COUNT(*) FROM (SELECT DISTINCT Color FROM GuildTabardBorder WHERE BorderID = %1)").
 		arg(border);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.values.empty())
 		return r.values[0][0].toInt();

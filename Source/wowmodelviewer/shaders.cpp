@@ -82,7 +82,7 @@ Shader::Shader(GLenum target, const char* program, bool fromFile): target(target
 			return;
 		}
 		fseek(f, 0, SEEK_END);
-		size_t len = ftell(f);
+		const size_t len = ftell(f);
 		fseek(f, 0, SEEK_SET);
 
 		buf = new char[len + 1];

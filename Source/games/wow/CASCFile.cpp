@@ -169,7 +169,7 @@ void CASCFile::doPostOpenOperation()
 	{
 		chunkHeader chunkHead;
 		memcpy(&chunkHead, buffer, sizeof(chunkHeader));
-		std::string magic = std::string(chunkHead.magic, 4);
+		const std::string magic = std::string(chunkHead.magic, 4);
 		if (std::find(KNOWN_CHUNKS.begin(), KNOWN_CHUNKS.end(), magic) != KNOWN_CHUNKS.end()
 			&& chunkHead.size <= size)
 		{

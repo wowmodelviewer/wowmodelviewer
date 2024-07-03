@@ -41,7 +41,7 @@ bool WDB5File::open()
 		return false;
 	}
 
-	WDB5File::header header = readHeader();
+	const WDB5File::header header = readHeader();
 
 	recordSize = header.record_size;
 	recordCount = header.record_count;

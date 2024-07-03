@@ -55,12 +55,12 @@ bool CASCFolder::setConfig(core::GameConfig config)
 	// set locale
 	if (!m_currentConfig.locale.isEmpty())
 	{
-		auto it = locales.find(m_currentConfig.locale);
+		const auto it = locales.find(m_currentConfig.locale);
 
 		if (it != locales.end())
 		{
 			HANDLE dummy;
-			QString cascParams = m_folder + "*" + m_currentConfig.product;
+			const QString cascParams = m_folder + "*" + m_currentConfig.product;
 			LOG_INFO << "Loading Game Folder:" << cascParams;
 			// locale found => try to open it
 			if (!CascOpenStorage(cascParams.toStdWString().c_str(), it->second, &hStorage))
@@ -91,7 +91,7 @@ bool CASCFolder::setConfig(core::GameConfig config)
 
 void CASCFolder::initBuildInfo()
 {
-	QString buildinfofile = m_folder + "\\..\\.build.info";
+	const QString buildinfofile = m_folder + "\\..\\.build.info";
 	LOG_INFO << "buildinfofile : " << buildinfofile;
 
 	QFile file(buildinfofile);
