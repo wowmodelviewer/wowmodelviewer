@@ -109,10 +109,10 @@ public:
 	static const glm::fquat conv(const PACK_QUATERNION t)
 	{
 		return glm::fquat(
-			float(t.w < 0 ? t.w + 32768 : t.w - 32767) / 32767.0f,
-			float(t.x < 0 ? t.x + 32768 : t.x - 32767) / 32767.0f,
-			float(t.y < 0 ? t.y + 32768 : t.y - 32767) / 32767.0f,
-			float(t.z < 0 ? t.z + 32768 : t.z - 32767) / 32767.0f);
+			static_cast<float>(t.w < 0 ? t.w + 32768 : t.w - 32767) / 32767.0f,
+			static_cast<float>(t.x < 0 ? t.x + 32768 : t.x - 32767) / 32767.0f,
+			static_cast<float>(t.y < 0 ? t.y + 32768 : t.y - 32767) / 32767.0f,
+			static_cast<float>(t.z < 0 ? t.z + 32768 : t.z - 32767) / 32767.0f);
 	}
 };
 
