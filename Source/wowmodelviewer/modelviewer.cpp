@@ -2348,7 +2348,7 @@ void ModelViewer::OnLanguage(wxCommandEvent& event)
 		// the arrays should be in sync
 		wxCOMPILE_TIME_ASSERT(WXSIZEOF(langNames) == WXSIZEOF(langIds), LangArraysMismatch);
 
-		const long lng = wxGetSingleChoiceIndex(_("Please select a language:"), _("Language"), WXSIZEOF(langNames),
+		const long lng = wxGetSingleChoiceIndex(_("Please select a language:"), _("Language"), std::size(langNames),
 		                                        langNames);
 
 		if (lng != -1 && lng != interfaceID)

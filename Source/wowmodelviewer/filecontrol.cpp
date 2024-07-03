@@ -93,7 +93,7 @@ FileControl::FileControl(wxWindow* parent, wxWindowID id)
 		fileTree = new wxTreeCtrl(this, ID_FILELIST, wxPoint(0, 35), wxSize(400, 580),
 		                          wxTR_HIDE_ROOT | wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT | wxTR_FULL_ROW_HIGHLIGHT |
 		                          wxTR_NO_LINES);
-		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), WXSIZEOF(chos), chos);
+		choFilter = new wxChoice(this, ID_FILELIST_FILTER, wxPoint(10, 620), wxSize(130, 10), std::size(chos), chos);
 		choFilter->SetSelection(filterMode);
 	}
 	catch (...)
