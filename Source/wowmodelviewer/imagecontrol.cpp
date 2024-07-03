@@ -134,7 +134,7 @@ void ImageControl::OnText(wxCommandEvent& event)
 		tmp.ToLong(&value);
 
 		x = value;
-		value = int(value / aspect);
+		value = static_cast<int>(value / aspect);
 		y = value;
 		canvasHeight->SetValue(wxString::Format(wxT("%li"), value));
 	}
@@ -144,7 +144,7 @@ void ImageControl::OnText(wxCommandEvent& event)
 		tmp.ToLong(&value);
 
 		y = value;
-		value = int(value * aspect);
+		value = static_cast<int>(value * aspect);
 		x = value;
 		canvasWidth->SetValue(wxString::Format(wxT("%li"), value));
 	}

@@ -38,7 +38,7 @@ float round(float input, int limit = 2)
 	{
 		input *= (10 ^ limit);
 	}
-	input = int(input + 0.5);
+	input = static_cast<int>(input + 0.5);
 	if (limit > 0)
 	{
 		input /= (10 ^ limit);

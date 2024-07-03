@@ -160,7 +160,7 @@ void CAnimationExporter::CreateGif()
 	if (m_iDelay > 100)
 		m_iDelay = 100;
 
-	m_iTimeStep = int(m_iTotalAnimFrames / m_iTotalFrames);
+	m_iTimeStep = static_cast<int>(m_iTotalAnimFrames / m_iTotalFrames);
 	// Total number of frames in the animation / total frames going into our exported animation image
 
 	if (m_bShrink)

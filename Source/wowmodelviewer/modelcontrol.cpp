@@ -422,7 +422,7 @@ void ModelControl::Update()
 	particles->SetValue(model->showParticles);
 	texture->SetValue(model->showTexture);
 
-	alpha->SetValue(int(model->alpha_ * 100));
+	alpha->SetValue(static_cast<int>(model->alpha_ * 100));
 	scale->SetValue(model->scale_ * 100);
 
 	txtX->SetValue(wxString::Format(wxT("%f"), model->pos_.x));

@@ -149,7 +149,7 @@ int AnimManager::Tick(int time)
 	if ((Count < PlayIndex))
 		return -1;
 
-	Frame += int(time * Speed);
+	Frame += static_cast<int>(time * Speed);
 
 	// animate our mouth animation
 	if (AnimIDMouth > -1)

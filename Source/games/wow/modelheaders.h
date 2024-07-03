@@ -501,7 +501,7 @@ struct fixed_point
 	Base decimal : decimal_bits;
 	Base integer : integer_bits;
 	Base sign : 1;
-	float to_float() const { return (sign ? -1.0f : 1.0f) * (integer + decimal / float(1 << decimal_bits)); }
+	float to_float() const { return (sign ? -1.0f : 1.0f) * (integer + decimal / static_cast<float>(1 << decimal_bits)); }
 };
 
 using fp_6_9 = fixed_point<uint16, 6, 9>;
