@@ -943,7 +943,7 @@ void ModelViewer::LoadModel(GameFile* file)
 	// check if this is a character model
 	isChar = (file->fullname().startsWith("char", Qt::CaseInsensitive) || file->fullname().startsWith(
 		"alternate\\char", Qt::CaseInsensitive));
-	Attachment* modelAtt = nullptr;
+	Attachment* modelAtt;
 
 	if (isChar)
 	{

@@ -107,7 +107,7 @@ short DDSBigShort(short src)
 
 float DDSBigFloat(float src)
 {
-	floatSwapUnion in{}, out{};
+	floatSwapUnion in, out{};
 	in.f = src;
 	out.c[0] = in.c[3];
 	out.c[1] = in.c[2];

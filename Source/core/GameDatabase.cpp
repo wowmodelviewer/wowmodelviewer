@@ -18,7 +18,7 @@ core::GameDatabase::GameDatabase() : m_db(nullptr), m_fastMode(false)
 
 bool core::GameDatabase::initFromXML(const QString& file)
 {
-	int rc = 1;
+	int rc;
 
 	if (m_fastMode)
 		rc = sqlite3_open("./wowdb.sqlite", &m_db);

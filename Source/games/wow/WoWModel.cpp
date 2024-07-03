@@ -1593,7 +1593,7 @@ void WoWModel::calcBones(ssize_t Anim, size_t time)
 
 void WoWModel::animate(ssize_t Anim)
 {
-	size_t t = 0;
+	size_t t;
 
 	const ModelAnimation& a = anims[Anim];
 	int tmax = a.length;
