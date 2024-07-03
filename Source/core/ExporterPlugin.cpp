@@ -8,13 +8,12 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 	LOG_INFO << "Exporting GL texture with id " << id << "in" << filename.c_str();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, id);
-	unsigned char* pixels = nullptr;
 
 	GLint width, height;
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
 	glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
 
-	pixels = new unsigned char[width * height * 4];
+	unsigned char* pixels = new unsigned char[width * height * 4];
 
 	glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, pixels);
 

@@ -218,10 +218,9 @@ bool WowModelViewApp::OnInit()
 
 	// TODO: Improve this feature and expand on it.
 	// Command arguments
-	QString cmd;
 	for (int i = 0; i < argc; i++)
 	{
-		cmd = QString::fromWCharArray(argv[i]);
+		QString cmd = QString::fromWCharArray(argv[i]);
 
 		if (cmd == "-m")
 		{

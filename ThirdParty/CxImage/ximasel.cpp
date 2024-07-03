@@ -612,9 +612,8 @@ bool CxImage::SelectionFlip()
   BYTE *buff = (BYTE*)malloc(head.biWidth);
   if (!buff) return false;
 
-  BYTE *iSrc,*iDst;
-  iSrc = pSelection + (head.biHeight-1)*head.biWidth;
-  iDst = pSelection;
+  BYTE* iSrc = pSelection + (head.biHeight - 1) * head.biWidth;
+  BYTE* iDst = pSelection;
   for (long i=0; i<(head.biHeight/2); ++i)
   {
     memcpy(buff, iSrc, head.biWidth);
@@ -637,11 +636,10 @@ bool CxImage::SelectionMirror()
   if (!pSelection) return false;
   BYTE* pSelection2 = (BYTE*)malloc(head.biWidth * head.biHeight);
   if (!pSelection2) return false;
-  
-  BYTE *iSrc,*iDst;
+
   long wdt=head.biWidth-1;
-  iSrc=pSelection + wdt;
-  iDst=pSelection2;
+  BYTE* iSrc = pSelection + wdt;
+  BYTE* iDst = pSelection2;
   for(long y=0; y < head.biHeight; y++){
     for(long x=0; x <= wdt; x++)
       *(iDst+x)=*(iSrc-x);

@@ -42,8 +42,6 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	AVICOMPRESSOPTIONS opts;
 	AVICOMPRESSOPTIONS FAR * aopts[1] = {&opts};
 
-	HRESULT hr;
-
 	LOG_INFO << "Initating AVI class object for writing.";
 
 	// Step 0 : Let's make sure we are running on 1.1 
@@ -59,10 +57,10 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	AVIFileInit();
 
 	// Step 2 : Open the movie file for writing....
-	hr = AVIFileOpen(&m_pAVIFile, // Address to contain the new file interface pointer
-	                 m_sFile, // Null-terminated string containing the name of the file to open
-	                 OF_WRITE | OF_CREATE, // Access mode to use when opening the file. 
-	nullptr); // use handler determined from file extension.
+	HRESULT hr = AVIFileOpen(&m_pAVIFile, // Address to contain the new file interface pointer
+	                         m_sFile, // Null-terminated string containing the name of the file to open
+	                         OF_WRITE | OF_CREATE, // Access mode to use when opening the file. 
+	                         nullptr); // use handler determined from file extension.
 	// Name your file .avi -> very important
 
 	if (hr != AVIERR_OK)
@@ -267,17 +265,15 @@ void CAVIGenerator::ReleaseEngine()
 
 HRESULT CAVIGenerator::AddFrame(BYTE* bmBits)
 {
-	HRESULT hr;
-
 	// compress bitmap
-	hr = AVIStreamWrite(m_pStreamCompressed, // stream pointer
-	                    m_iLastFrame, // time of this frame
-	                    1, // number to write
-	                    bmBits, // image buffer
-	                    m_bih.biSizeImage, // size of this frame
-	                    AVIIF_KEYFRAME, // flags....
-	                    nullptr,
-	nullptr);
+	HRESULT hr = AVIStreamWrite(m_pStreamCompressed, // stream pointer
+	                            m_iLastFrame, // time of this frame
+	                            1, // number to write
+	                            bmBits, // image buffer
+	                            m_bih.biSizeImage, // size of this frame
+	                            AVIIF_KEYFRAME, // flags....
+	                            nullptr,
+	                            nullptr);
 
 	// updating frame counter
 	m_iLastFrame++;

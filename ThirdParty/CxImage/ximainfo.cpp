@@ -381,9 +381,7 @@ DWORD CxImage::GetTypeIdFromName(const TCHAR* ext)
 ////////////////////////////////////////////////////////////////////////////////
 DWORD CxImage::GetTypeIdFromIndex(const DWORD index)
 {
-  DWORD n;
-
-  n=0; if (index == n) return CXIMAGE_FORMAT_UNKNOWN;
+	DWORD n = 0; if (index == n) return CXIMAGE_FORMAT_UNKNOWN;
 #if CXIMAGE_SUPPORT_BMP
   n++; if (index == n) return CXIMAGE_FORMAT_BMP;
 #endif
@@ -447,9 +445,7 @@ DWORD CxImage::GetTypeIdFromIndex(const DWORD index)
 ////////////////////////////////////////////////////////////////////////////////
 DWORD CxImage::GetTypeIndexFromId(const DWORD id)
 {
-  DWORD n;
-
-  n=0; if (id == CXIMAGE_FORMAT_UNKNOWN) return n;
+	DWORD n = 0; if (id == CXIMAGE_FORMAT_UNKNOWN) return n;
 #if CXIMAGE_SUPPORT_BMP
   n++; if (id == CXIMAGE_FORMAT_BMP) return n;
 #endif
@@ -761,8 +757,7 @@ const char* CxImage::GetLastError()
 ////////////////////////////////////////////////////////////////////////////////
 DWORD CxImage::DumpSize()
 {
-  DWORD n;
-  n = sizeof(BITMAPINFOHEADER) + sizeof(CXIMAGEINFO) + GetSize();
+	DWORD n = sizeof(BITMAPINFOHEADER) + sizeof(CXIMAGEINFO) + GetSize();
 
   if (pAlpha){
     n += 1 + head.biWidth * head.biHeight;

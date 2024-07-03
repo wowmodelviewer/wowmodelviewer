@@ -45,10 +45,9 @@ struct WMOGroupHeader
 void setGLColor(unsigned int col)
 {
 	//glColor4ubv((GLubyte*)(&col));
-	GLubyte r, g, b;
-	r = (col & 0x00FF0000) >> 16;
-	g = (col & 0x0000FF00) >> 8;
-	b = (col & 0x000000FF);
+	GLubyte r = (col & 0x00FF0000) >> 16;
+	GLubyte g = (col & 0x0000FF00) >> 8;
+	GLubyte b = (col & 0x000000FF);
 	glColor4ub(r, g, b, 1);
 }
 
@@ -452,13 +451,11 @@ void WMOGroup::initLighting(int nLR, short* useLights)
 	if ((flags & 0x2000) && hascv)
 	{
 		glm::vec3 dirmin(1, 1, 1);
-		float lenmin;
-		int lmin;
 
 		for (size_t i = 0; i < nDoodads; i++)
 		{
-			lenmin = 999999.0f * 999999.0f;
-			lmin = 0;
+			float lenmin = 999999.0f * 999999.0f;
+			int lmin = 0;
 			WMOModelInstance& mi = wmo->modelis[ddr[i]];
 			for (size_t j = 0; j < wmo->nLights; j++)
 			{

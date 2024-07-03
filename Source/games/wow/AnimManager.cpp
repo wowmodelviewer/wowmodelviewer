@@ -185,26 +185,23 @@ size_t AnimManager::GetFrameCount()
 
 void AnimManager::NextFrame() // Only called by the animation controls
 {
-	ssize_t TimeDiff;
 	ssize_t id = animList[PlayIndex].AnimID;
-	TimeDiff = (model.anims[id].length / 60);
+	ssize_t TimeDiff = (model.anims[id].length / 60);
 	Frame += TimeDiff;
 	ForceModelUpdate(TimeDiff);
 }
 
 void AnimManager::PrevFrame() // Only called by the animation controls
 {
-	ssize_t TimeDiff;
 	ssize_t id = animList[PlayIndex].AnimID;
-	TimeDiff = (model.anims[id].length / 60) * -1;
+	ssize_t TimeDiff = (model.anims[id].length / 60) * -1;
 	Frame += TimeDiff;
 	ForceModelUpdate(TimeDiff);
 }
 
 void AnimManager::SetFrame(size_t f) // Only called by the animation slider, or if Stop is called
 {
-	ssize_t TimeDiff;
-	TimeDiff = f - Frame;
+	ssize_t TimeDiff = f - Frame;
 	ssize_t id = animList[PlayIndex].AnimID;
 
 	// ideal frame interval:

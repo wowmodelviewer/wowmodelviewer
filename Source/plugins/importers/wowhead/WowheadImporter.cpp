@@ -41,8 +41,6 @@ bool WowheadImporter::acceptURL(QString url) const
 
 NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 {
-	NPCInfos* result = nullptr;
-
 	// Get the HTML...
 	QString htmldata = QString(getURLData(urlToGrab)).toUtf8();
 	if (htmldata.isNull() || htmldata.isEmpty())
@@ -70,7 +68,7 @@ NPCInfos* WowheadImporter::importNPC(QString urlToGrab) const
 
 	int NPCDispId = NPCDispIdstr.toInt();
 
-	result = new NPCInfos();
+	NPCInfos* result = new NPCInfos();
 
 	result->name = NPCName.toStdWString();
 	result->type = NPCType;

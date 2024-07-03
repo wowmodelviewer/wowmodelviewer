@@ -186,10 +186,8 @@ extracts colors from a dds color block
 
 static void DDSGetColorBlockColors(ddsColorBlock_t* block, ddsColor_t colors[4])
 {
-	unsigned short word;
-
 	/* color 0 */
-	word = DDSLittleShort(block->colors[0]);
+	unsigned short word = DDSLittleShort(block->colors[0]);
 	colors[0].a = 0xff;
 
 	/* extract rgb bits */
@@ -279,19 +277,17 @@ fixme: make endian-safe
 */
 static void DDSDecodeColorBlock(unsigned int* pixel, ddsColorBlock_t* block, int width, unsigned int colors[4])
 {
-	int r, n;
-	unsigned int bits;
 	unsigned int masks[] = {3, 12, 3 << 4, 3 << 6}; /* bit masks = 00000011, 00001100, 00110000, 11000000 */
 	int shift[] = {0, 2, 4, 6};
 
 	/* r steps through lines in y */
-	for (r = 0; r < 4; r++, pixel += (width - 4)) /* no width * 4 as unsigned int ptr inc will * 4 */
+	for (int r = 0; r < 4; r++, pixel += (width - 4)) /* no width * 4 as unsigned int ptr inc will * 4 */
 	{
 		/* width * 4 bytes per pixel per line, each j dxtc row is 4 lines of pixels */
 		/* n steps through pixels */
-		for (n = 0; n < 4; n++)
+		for (int n = 0; n < 4; n++)
 		{
-			bits = block->row[r] & masks[n];
+			unsigned int bits = block->row[r] & masks[n];
 			bits >>= shift[n];
 
 			switch (bits)
@@ -332,8 +328,6 @@ decodes a dds explicit alpha block
 static void DDSDecodeAlphaExplicit(unsigned int* pixel, ddsAlphaBlockExplicit_t* alphaBlock, int width,
                                    unsigned int alphaZero)
 {
-	int row, pix;
-	unsigned short word;
 	ddsColor_t color{};
 
 	/* clear color */
@@ -342,12 +336,12 @@ static void DDSDecodeAlphaExplicit(unsigned int* pixel, ddsAlphaBlockExplicit_t*
 	color.b = 0;
 
 	/* walk rows */
-	for (row = 0; row < 4; row++, pixel += (width - 4))
+	for (int row = 0; row < 4; row++, pixel += (width - 4))
 	{
-		word = DDSLittleShort(alphaBlock->row[row]);
+		unsigned short word = DDSLittleShort(alphaBlock->row[row]);
 
 		/* walk pixels */
-		for (pix = 0; pix < 4; pix++)
+		for (int pix = 0; pix < 4; pix++)
 		{
 			/* zero the alpha bits of image pixel */
 			*pixel &= alphaZero;
@@ -368,7 +362,6 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
                                      unsigned int alphaZero)
 {
 	int row, pix;
-	unsigned int stuff;
 	unsigned char bits[4][4]{};
 	unsigned short alphas[8]{};
 	ddsColor_t aColors[4][4]{};
@@ -404,7 +397,7 @@ static void DDSDecodeAlpha3BitLinear(unsigned int* pixel, ddsAlphaBlock3BitLinea
 	/* decode 3-bit fields into array of 16 bytes with same value */
 
 	/* first two rows of 4 pixels each */
-	stuff = *((unsigned char*)&(alphaBlock->stuff[0]));
+	unsigned int stuff = *((unsigned char*)&(alphaBlock->stuff[0]));
 
 	bits[0][0] = static_cast<unsigned char>(stuff & 0x00000007);
 	stuff >>= 3;
@@ -475,26 +468,23 @@ decompresses a dxt1 format texture
 
 int DDSDecompressDXT1(unsigned char* src, int width, int height, unsigned char* dest)
 {
-	int x, y, xBlocks, yBlocks;
-	unsigned int* pixel;
-	ddsColorBlock_t* block;
 	ddsColor_t colors[4];
 
 	/* setup */
-	xBlocks = width / 4;
-	yBlocks = height / 4;
+	int xBlocks = width / 4;
+	int yBlocks = height / 4;
 
 	/* walk y */
-	for (y = 0; y < yBlocks; y++)
+	for (int y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block */
-		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 8);
+		ddsColorBlock_t* block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 8);
 
 		/* walk x */
-		for (x = 0; x < xBlocks; x++, block++)
+		for (int x = 0; x < xBlocks; x++, block++)
 		{
 			DDSGetColorBlockColors(block, colors);
-			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			unsigned int* pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
 			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 		}
 	}
@@ -509,41 +499,37 @@ decompresses a dxt3 format texture
 */
 int DDSDecompressDXT3(unsigned char* src, int width, int height, unsigned char* dest)
 {
-	int x, y, xBlocks, yBlocks;
-	unsigned int *pixel, alphaZero;
-	ddsColorBlock_t* block;
-	ddsAlphaBlockExplicit_t* alphaBlock;
 	ddsColor_t colors[4]{};
 
 	/* setup */
-	xBlocks = width / 4;
-	yBlocks = height / 4;
+	int xBlocks = width / 4;
+	int yBlocks = height / 4;
 
 	/* create zero alpha */
 	colors[0].a = 0;
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
+	unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
-	for (y = 0; y < yBlocks; y++)
+	for (int y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
-		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
+		ddsColorBlock_t* block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
 
 		/* walk x */
-		for (x = 0; x < xBlocks; x++, block++)
+		for (int x = 0; x < xBlocks; x++, block++)
 		{
 			/* get alpha block */
-			alphaBlock = reinterpret_cast<ddsAlphaBlockExplicit_t*>(block);
+			ddsAlphaBlockExplicit_t* alphaBlock = reinterpret_cast<ddsAlphaBlockExplicit_t*>(block);
 
 			/* get color block */
 			block++;
 			DDSGetColorBlockColors(block, colors);
 
 			/* decode color block */
-			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			unsigned int* pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
 			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 
 			/* overwrite alpha bits with alpha block */
@@ -560,41 +546,37 @@ decompresses a dxt5 format texture
 */
 int DDSDecompressDXT5(unsigned char* src, int width, int height, unsigned char* dest)
 {
-	int x, y, xBlocks, yBlocks;
-	unsigned int *pixel, alphaZero;
-	ddsColorBlock_t* block;
-	ddsAlphaBlock3BitLinear_t* alphaBlock;
 	ddsColor_t colors[4]{};
 
 	/* setup */
-	xBlocks = width / 4;
-	yBlocks = height / 4;
+	int xBlocks = width / 4;
+	int yBlocks = height / 4;
 
 	/* create zero alpha */
 	colors[0].a = 0;
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
+	unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
-	for (y = 0; y < yBlocks; y++)
+	for (int y = 0; y < yBlocks; y++)
 	{
 		/* 8 bytes per block, 1 block for alpha, 1 block for color */
-		block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
+		ddsColorBlock_t* block = reinterpret_cast<ddsColorBlock_t*>(src + y * xBlocks * 16);
 
 		/* walk x */
-		for (x = 0; x < xBlocks; x++, block++)
+		for (int x = 0; x < xBlocks; x++, block++)
 		{
 			/* get alpha block */
-			alphaBlock = reinterpret_cast<ddsAlphaBlock3BitLinear_t*>(block);
+			ddsAlphaBlock3BitLinear_t* alphaBlock = reinterpret_cast<ddsAlphaBlock3BitLinear_t*>(block);
 
 			/* get color block */
 			block++;
 			DDSGetColorBlockColors(block, colors);
 
 			/* decode color block */
-			pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
+			unsigned int* pixel = reinterpret_cast<unsigned int*>(dest + x * 16 + (y * 4) * width * 4);
 			DDSDecodeColorBlock(pixel, block, width, reinterpret_cast<unsigned int*>(colors));
 
 			/* overwrite alpha bits with alpha block */

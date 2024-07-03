@@ -1152,7 +1152,6 @@ inline void ModelCanvas::RenderWMO()
 	InitView();
 
 	// Lighting
-	glm::vec4 la;
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -1162,7 +1161,7 @@ inline void ModelCanvas::RenderWMO()
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
 		glDisable(light);
 	}
-	la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -1204,7 +1203,6 @@ inline void ModelCanvas::RenderADT()
 	InitView();
 
 	// Lighting
-	glm::vec4 la;
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -1214,7 +1212,7 @@ inline void ModelCanvas::RenderADT()
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
 		glDisable(light);
 	}
-	la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -1271,7 +1269,6 @@ inline void ModelCanvas::RenderWMOToBuffer()
 	}
 
 	// Lighting
-	glm::vec4 la;
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
@@ -1281,7 +1278,7 @@ inline void ModelCanvas::RenderWMOToBuffer()
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
 		glDisable(light);
 	}
-	la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
+	glm::vec4 la = glm::vec4(0.35f, 0.35f, 0.35f, 1.0f);
 
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, glm::value_ptr(la));
 	glColor3f(1.0f, 1.0f, 1.0f);
@@ -1496,11 +1493,9 @@ void ModelCanvas::OnTimer(wxTimerEvent& event)
 
 void ModelCanvas::tick()
 {
-	size_t ddt = 0;
-
 	// Time stuff
 	//time = float();
-	ddt = (timeGetTime() - lastTime); // * animSpeed;
+	size_t ddt = (timeGetTime() - lastTime); // * animSpeed;
 	lastTime = timeGetTime();
 	// --
 

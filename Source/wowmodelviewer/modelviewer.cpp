@@ -766,9 +766,8 @@ void ModelViewer::LoadSession()
 	GLOBALSETTINGS.bInitPoseOnlyExport = config.value("Session/InitPoseOnlyExport", false).toBool();
 
 	// Background and Custom Colours
-	wxString colStr;
 	wxColour bgCol;
-	colStr = config.value("Session/bgCol", "#475F79").toString().toStdWString(); // #475F79 = (71, 95, 121)
+	wxString colStr = config.value("Session/bgCol", "#475F79").toString().toStdWString(); // #475F79 = (71, 95, 121)
 	if (!bgCol.Set(colStr))
 		bgCol = wxColour(71, 95, 121);
 	bgDialogData.SetColour(bgCol);
@@ -818,8 +817,7 @@ void ModelViewer::SaveSession()
 	config.setValue("Session/InitPoseOnlyExport", GLOBALSETTINGS.bInitPoseOnlyExport);
 
 	// Background and Custom Colours
-	wxColour bgCol;
-	bgCol = bgDialogData.GetColour();
+	wxColour bgCol = bgDialogData.GetColour();
 	config.setValue("Session/bgCol", QString::fromWCharArray(bgCol.GetAsString(wxC2S_HTML_SYNTAX).c_str()));
 	for (int i = 0; i < 16; i++)
 	{

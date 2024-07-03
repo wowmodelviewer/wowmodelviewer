@@ -20,7 +20,6 @@ void Texture::load()
 	// Vars
 	int offsets[16], sizes[16], type = 0;
 	uint width = 0, height = 0;
-	GLint format = 0;
 	char attr[4];
 
 	// bind the texture
@@ -114,7 +113,7 @@ void Texture::load()
 			if (!video.supportCompression)
 				ucbuf = new unsigned char[width * height * 4];
 
-			format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
+			GLint format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
 			int blocksize = 8;
 
 			// guesswork here :(
@@ -200,8 +199,6 @@ void Texture::load()
 
 			unsigned char* buf = new unsigned char[sizes[0]];
 			unsigned int* buf2 = new unsigned int[width * height];
-			unsigned int* p = nullptr;
-			unsigned char *c = nullptr, *a = nullptr;
 
 			int alphabits = attr[1];
 			bool hasalpha = (alphabits != 0);
@@ -220,9 +217,9 @@ void Texture::load()
 					int cnt = 0;
 					int alpha = 0;
 
-					p = buf2;
-					c = buf;
-					a = buf + width * height;
+					unsigned int* p = buf2;
+					unsigned char* c = buf;
+					unsigned char* a = buf + width * height;
 					for (uint y = 0; y < height; y++)
 					{
 						for (uint x = 0; x < width; x++)

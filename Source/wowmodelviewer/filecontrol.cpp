@@ -618,9 +618,8 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 // bg recolor
 void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent&)
 {
-	wxTreeItemId h;
 	size_t i = 0;
-	for (h = fileTree->GetFirstVisibleItem(); h.IsOk(); h = fileTree->GetNextVisible(h))
+	for (wxTreeItemId h = fileTree->GetFirstVisibleItem(); h.IsOk(); h = fileTree->GetNextVisible(h))
 	{
 		if (!fileTree->IsVisible(h))
 			break;

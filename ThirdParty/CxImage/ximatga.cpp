@@ -176,10 +176,9 @@ bool CxImageTGA::Encode(CxFile * hFile)
     }
   } else {
     pDest = (BYTE*)malloc(4*tgaHead.ImageWidth);
-    RGBQUAD c;
     for (int y=0; y < tgaHead.ImageHeight; y++){
       for(int x=0, x4=0;x<tgaHead.ImageWidth;x++, x4+=4){
-        c = BlindGetPixelColor(x,y);
+        RGBQUAD c = BlindGetPixelColor(x, y);
         pDest[x4+0]=c.rgbBlue;
         pDest[x4+1]=c.rgbGreen;
         pDest[x4+2]=c.rgbRed;

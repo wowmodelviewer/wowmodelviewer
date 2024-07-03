@@ -380,18 +380,18 @@ bool CxImage::SplitHSL(CxImage* h,CxImage* s,CxImage* l)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::RGBtoHSL(RGBQUAD lRGBColor)
 {
-  BYTE R,G,B;          /* input RGB values */
-  BYTE H,L,S;          /* output HSL values */
-  BYTE cMax,cMin;        /* max and min RGB values */
-  WORD Rdelta,Gdelta,Bdelta;  /* intermediate value: % of spread from max*/
+	/* input RGB values */
+  BYTE H, S;          /* output HSL values */
+	/* max and min RGB values */
+	/* intermediate value: % of spread from max*/
 
-  R = lRGBColor.rgbRed;  /* get R, G, and B out of DWORD */
-  G = lRGBColor.rgbGreen;
-  B = lRGBColor.rgbBlue;
+  BYTE R = lRGBColor.rgbRed;  /* get R, G, and B out of DWORD */
+  BYTE G = lRGBColor.rgbGreen;
+  BYTE B = lRGBColor.rgbBlue;
 
-  cMax = max( max(R,G), B);  /* calculate lightness */
-  cMin = min( min(R,G), B);
-  L = (BYTE)((((cMax+cMin)*HSLMAX)+RGBMAX)/(2*RGBMAX));
+  BYTE cMax = max(max(R,G), B);  /* calculate lightness */
+  BYTE cMin = min(min(R,G), B);
+  BYTE L = (BYTE)((((cMax + cMin) * HSLMAX) + RGBMAX) / (2 * RGBMAX));
 
   if (cMax==cMin){      /* r=g=b --> achromatic case */
     S = 0;          /* saturation */
@@ -402,9 +402,9 @@ RGBQUAD CxImage::RGBtoHSL(RGBQUAD lRGBColor)
     else
       S = (BYTE)((((cMax-cMin)*HSLMAX)+((2*RGBMAX-cMax-cMin)/2))/(2*RGBMAX-cMax-cMin));
     /* hue */
-    Rdelta = (WORD)((((cMax-R)*(HSLMAX/6)) + ((cMax-cMin)/2) ) / (cMax-cMin));
-    Gdelta = (WORD)((((cMax-G)*(HSLMAX/6)) + ((cMax-cMin)/2) ) / (cMax-cMin));
-    Bdelta = (WORD)((((cMax-B)*(HSLMAX/6)) + ((cMax-cMin)/2) ) / (cMax-cMin));
+    WORD Rdelta = (WORD)((((cMax - R) * (HSLMAX / 6)) + ((cMax - cMin) / 2)) / (cMax - cMin));
+    WORD Gdelta = (WORD)((((cMax - G) * (HSLMAX / 6)) + ((cMax - cMin) / 2)) / (cMax - cMin));
+    WORD Bdelta = (WORD)((((cMax - B) * (HSLMAX / 6)) + ((cMax - cMin) / 2)) / (cMax - cMin));
 
     if (R == cMax)
       H = (BYTE)(Bdelta - Gdelta);
@@ -450,18 +450,17 @@ RGBQUAD CxImage::HSLtoRGB(COLORREF cHSLColor)
 RGBQUAD CxImage::HSLtoRGB(RGBQUAD lHSLColor)
 { 
   //<F. Livraghi> fixed implementation for HSL2RGB routine
-  float h,s,l;
-  float m1,m2;
+  float m2;
   BYTE r,g,b;
 
-  h = (float)lHSLColor.rgbRed * 360.0f/255.0f;
-  s = (float)lHSLColor.rgbGreen/255.0f;
-  l = (float)lHSLColor.rgbBlue/255.0f;
+  float h = (float)lHSLColor.rgbRed * 360.0f / 255.0f;
+  float s = (float)lHSLColor.rgbGreen / 255.0f;
+  float l = (float)lHSLColor.rgbBlue / 255.0f;
 
   if (l <= 0.5)  m2 = l * (1+s);
   else      m2 = l + s - l*s;
 
-  m1 = 2 * l - m2;
+  float m1 = 2 * l - m2;
 
   if (s == 0) {
     r=g=b=(BYTE)(l*255.0f);
@@ -477,17 +476,16 @@ RGBQUAD CxImage::HSLtoRGB(RGBQUAD lHSLColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::YUVtoRGB(RGBQUAD lYUVColor)
 {
-  int U,V,R,G,B;
-  float Y = lYUVColor.rgbRed;
-  U = lYUVColor.rgbGreen - 128;
-  V = lYUVColor.rgbBlue - 128;
+	float Y = lYUVColor.rgbRed;
+  int U = lYUVColor.rgbGreen - 128;
+  int V = lYUVColor.rgbBlue - 128;
 
 //  R = (int)(1.164 * Y + 2.018 * U);
 //  G = (int)(1.164 * Y - 0.813 * V - 0.391 * U);
 //  B = (int)(1.164 * Y + 1.596 * V);
-  R = (int)( Y + 1.403f * V);
-  G = (int)( Y - 0.344f * U - 0.714f * V);
-  B = (int)( Y + 1.770f * U);
+  int R = (int)(Y + 1.403f * V);
+  int G = (int)(Y - 0.344f * U - 0.714f * V);
+  int B = (int)(Y + 1.770f * U);
 
   R= min(255,max(0,R));
   G= min(255,max(0,G));
@@ -498,17 +496,16 @@ RGBQUAD CxImage::YUVtoRGB(RGBQUAD lYUVColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::RGBtoYUV(RGBQUAD lRGBColor)
 {
-  int Y,U,V,R,G,B;
-  R = lRGBColor.rgbRed;
-  G = lRGBColor.rgbGreen;
-  B = lRGBColor.rgbBlue;
+	int R = lRGBColor.rgbRed;
+  int G = lRGBColor.rgbGreen;
+  int B = lRGBColor.rgbBlue;
 
 //  Y = (int)( 0.257 * R + 0.504 * G + 0.098 * B);
 //  U = (int)( 0.439 * R - 0.368 * G - 0.071 * B + 128);
 //  V = (int)(-0.148 * R - 0.291 * G + 0.439 * B + 128);
-  Y = (int)(0.299f * R + 0.587f * G + 0.114f * B);
-  U = (int)((B-Y) * 0.565f + 128);
-  V = (int)((R-Y) * 0.713f + 128);
+  int Y = (int)(0.299f * R + 0.587f * G + 0.114f * B);
+  int U = (int)((B - Y) * 0.565f + 128);
+  int V = (int)((R - Y) * 0.713f + 128);
 
   Y= min(255,max(0,Y));
   U= min(255,max(0,U));
@@ -519,14 +516,13 @@ RGBQUAD CxImage::RGBtoYUV(RGBQUAD lRGBColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::YIQtoRGB(RGBQUAD lYIQColor)
 {
-  int I,Q,R,G,B;
-  float Y = lYIQColor.rgbRed;
-  I = lYIQColor.rgbGreen - 128;
-  Q = lYIQColor.rgbBlue - 128;
+	float Y = lYIQColor.rgbRed;
+  int I = lYIQColor.rgbGreen - 128;
+  int Q = lYIQColor.rgbBlue - 128;
 
-  R = (int)( Y + 0.956f * I + 0.621f * Q);
-  G = (int)( Y - 0.273f * I - 0.647f * Q);
-  B = (int)( Y - 1.104f * I + 1.701f * Q);
+  int R = (int)(Y + 0.956f * I + 0.621f * Q);
+  int G = (int)(Y - 0.273f * I - 0.647f * Q);
+  int B = (int)(Y - 1.104f * I + 1.701f * Q);
 
   R= min(255,max(0,R));
   G= min(255,max(0,G));
@@ -537,14 +533,13 @@ RGBQUAD CxImage::YIQtoRGB(RGBQUAD lYIQColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::RGBtoYIQ(RGBQUAD lRGBColor)
 {
-  int Y,I,Q,R,G,B;
-  R = lRGBColor.rgbRed;
-  G = lRGBColor.rgbGreen;
-  B = lRGBColor.rgbBlue;
+	int R = lRGBColor.rgbRed;
+  int G = lRGBColor.rgbGreen;
+  int B = lRGBColor.rgbBlue;
 
-  Y = (int)( 0.2992f * R + 0.5868f * G + 0.1140f * B);
-  I = (int)( 0.5960f * R - 0.2742f * G - 0.3219f * B + 128);
-  Q = (int)( 0.2109f * R - 0.5229f * G + 0.3120f * B + 128);
+  int Y = (int)(0.2992f * R + 0.5868f * G + 0.1140f * B);
+  int I = (int)(0.5960f * R - 0.2742f * G - 0.3219f * B + 128);
+  int Q = (int)(0.2109f * R - 0.5229f * G + 0.3120f * B + 128);
 
   Y= min(255,max(0,Y));
   I= min(255,max(0,I));
@@ -555,15 +550,14 @@ RGBQUAD CxImage::RGBtoYIQ(RGBQUAD lRGBColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::XYZtoRGB(RGBQUAD lXYZColor)
 {
-  int X,Y,Z,R,G,B;
-  X = lXYZColor.rgbRed;
-  Y = lXYZColor.rgbGreen;
-  Z = lXYZColor.rgbBlue;
+	int X = lXYZColor.rgbRed;
+  int Y = lXYZColor.rgbGreen;
+  int Z = lXYZColor.rgbBlue;
   double k=1.088751;
 
-  R = (int)(  3.240479f * X - 1.537150f * Y - 0.498535f * Z * k);
-  G = (int)( -0.969256f * X + 1.875992f * Y + 0.041556f * Z * k);
-  B = (int)(  0.055648f * X - 0.204043f * Y + 1.057311f * Z * k);
+  int R = (int)(3.240479f * X - 1.537150f * Y - 0.498535f * Z * k);
+  int G = (int)(-0.969256f * X + 1.875992f * Y + 0.041556f * Z * k);
+  int B = (int)(0.055648f * X - 0.204043f * Y + 1.057311f * Z * k);
 
   R= min(255,max(0,R));
   G= min(255,max(0,G));
@@ -574,14 +568,13 @@ RGBQUAD CxImage::XYZtoRGB(RGBQUAD lXYZColor)
 ////////////////////////////////////////////////////////////////////////////////
 RGBQUAD CxImage::RGBtoXYZ(RGBQUAD lRGBColor)
 {
-  int X,Y,Z,R,G,B;
-  R = lRGBColor.rgbRed;
-  G = lRGBColor.rgbGreen;
-  B = lRGBColor.rgbBlue;
+	int R = lRGBColor.rgbRed;
+  int G = lRGBColor.rgbGreen;
+  int B = lRGBColor.rgbBlue;
 
-  X = (int)( 0.412453f * R + 0.357580f * G + 0.180423f * B);
-  Y = (int)( 0.212671f * R + 0.715160f * G + 0.072169f * B);
-  Z = (int)((0.019334f * R + 0.119193f * G + 0.950227f * B)*0.918483657f);
+  int X = (int)(0.412453f * R + 0.357580f * G + 0.180423f * B);
+  int Y = (int)(0.212671f * R + 0.715160f * G + 0.072169f * B);
+  int Z = (int)((0.019334f * R + 0.119193f * G + 0.950227f * B) * 0.918483657f);
 
   //X= min(255,max(0,X));
   //Y= min(255,max(0,Y));
@@ -1328,11 +1321,10 @@ bool CxImage::GammaRGB(float gammaR, float gammaG, float gammaB)
   if (gammaG <= 0.0f) return false;
   if (gammaB <= 0.0f) return false;
 
-  double dinvgamma, dMax;
   int i;
 
-  dinvgamma = 1/gammaR;
-  dMax = pow(255.0, dinvgamma) / 255.0;
+  double dinvgamma = 1 / gammaR;
+  double dMax = pow(255.0, dinvgamma) / 255.0;
   BYTE cTableR[256];
   for (i=0;i<256;i++)  {
     cTableR[i] = (BYTE)max(0,min(255,(int)( pow((double)i, dinvgamma) / dMax)));
@@ -1368,7 +1360,7 @@ bool CxImage::Median(long Ksize)
 
   long k2 = Ksize/2;
   long kmax= Ksize-k2;
-  long i,j,k;
+  long i,j;
 
   RGBQUAD* kernel = (RGBQUAD*)malloc(Ksize*Ksize*sizeof(RGBQUAD));
 
@@ -1396,7 +1388,7 @@ bool CxImage::Median(long Ksize)
 #endif //CXIMAGE_SUPPORT_SELECTION
         {
         for(j=-k2, i=0;j<kmax;j++)
-          for(k=-k2;k<kmax;k++)
+          for(long k = -k2;k<kmax;k++)
             if (IsInside(x+j,y+k))
               kernel[i++]=BlindGetPixelColor(x+j,y+k);
 
@@ -1486,9 +1478,7 @@ bool CxImage::FFT2(CxImage* srcReal, CxImage* srcImag, CxImage* dstReal, CxImage
   bool bYpow2 = IsPowerof2(h);
   //if bForceFFT, width AND height must be powers of 2
   if (bForceFFT && !(bXpow2 && bYpow2)) {
-    long i;
-    
-    i=0;
+	  long i = 0;
     while((1<<i)<w) i++;
     w=1<<i;
     bXpow2=true;
@@ -1500,11 +1490,10 @@ bool CxImage::FFT2(CxImage* srcReal, CxImage* srcImag, CxImage* dstReal, CxImage
   }
 
   // I/O images for FFT
-  CxImage *tmpReal,*tmpImag;
 
   // select output
-  tmpReal = (dstReal) ? dstReal : srcReal;
-  tmpImag = (dstImag) ? dstImag : srcImag;
+  CxImage* tmpReal = (dstReal) ? dstReal : srcReal;
+  CxImage* tmpImag = (dstImag) ? dstImag : srcImag;
 
   // src!=dst -> copy the image
   if (srcReal && dstReal) tmpReal->Copy(*srcReal,true,false,false);
@@ -1538,14 +1527,11 @@ bool CxImage::FFT2(CxImage* srcReal, CxImage* srcImag, CxImage* dstReal, CxImage
 
   //ok, here we have 2 (w x h), grayscale images ready for a FFT
 
-  double* real;
-  double* imag;
-  long j,k,m;
+  long j,k;
 
-  _complex **grid;
   //double mean = tmpReal->Mean();
   /* Allocate memory for the grid */
-  grid = (_complex **)malloc(w * sizeof(_complex));
+  _complex** grid = (_complex**)malloc(w * sizeof(_complex));
   for (k=0;k<w;k++) {
     grid[k] = (_complex *)malloc(h * sizeof(_complex));
   }
@@ -1557,15 +1543,14 @@ bool CxImage::FFT2(CxImage* srcReal, CxImage* srcImag, CxImage* dstReal, CxImage
   }
 
   //DFT buffers
-  double *real2,*imag2;
-  real2 = (double*)malloc(max(w,h) * sizeof(double));
-  imag2 = (double*)malloc(max(w,h) * sizeof(double));
+  double* real2 = (double*)malloc(max(w, h) * sizeof(double));
+  double* imag2 = (double*)malloc(max(w, h) * sizeof(double));
 
   /* Transform the rows */
-  real = (double *)malloc(w * sizeof(double));
-  imag = (double *)malloc(w * sizeof(double));
+  double* real = (double*)malloc(w * sizeof(double));
+  double* imag = (double*)malloc(w * sizeof(double));
 
-  m=0;
+  long m = 0;
   while((1<<m)<w) m++;
 
   for (j=0;j<h;j++) {
@@ -1664,25 +1649,24 @@ bool CxImage::IsPowerof2(long x)
 */
 bool CxImage::FFT(int dir,int m,double *x,double *y)
 {
-  long nn,i,i1,j,k,i2,l,l1,l2;
-  double c1,c2,tx,ty,t1,t2,u1,u2,z;
+  long i;
 
   /* Calculate the number of points */
-  nn = 1<<m;
+  long nn = 1 << m;
 
   /* Do the bit reversal */
-  i2 = nn >> 1;
-  j = 0;
+  long i2 = nn >> 1;
+  long j = 0;
   for (i=0;i<nn-1;i++) {
     if (i < j) {
-      tx = x[i];
-      ty = y[i];
+      double tx = x[i];
+      double ty = y[i];
       x[i] = x[j];
       y[i] = y[j];
       x[j] = tx;
       y[j] = ty;
     }
-    k = i2;
+    long k = i2;
     while (k <= j) {
       j -= k;
       k >>= 1;
@@ -1691,25 +1675,25 @@ bool CxImage::FFT(int dir,int m,double *x,double *y)
   }
 
   /* Compute the FFT */
-  c1 = -1.0;
-  c2 = 0.0;
-  l2 = 1;
-  for (l=0;l<m;l++) {
-    l1 = l2;
+  double c1 = -1.0;
+  double c2 = 0.0;
+  long l2 = 1;
+  for (long l = 0;l<m;l++) {
+    long l1 = l2;
     l2 <<= 1;
-    u1 = 1.0;
-    u2 = 0.0;
+    double u1 = 1.0;
+    double u2 = 0.0;
     for (j=0;j<l1;j++) {
       for (i=j;i<nn;i+=l2) {
-        i1 = i + l1;
-        t1 = u1 * x[i1] - u2 * y[i1];
-        t2 = u1 * y[i1] + u2 * x[i1];
+        long i1 = i + l1;
+        double t1 = u1 * x[i1] - u2 * y[i1];
+        double t2 = u1 * y[i1] + u2 * x[i1];
         x[i1] = x[i] - t1;
         y[i1] = y[i] - t2;
         x[i] += t1;
         y[i] += t2;
       }
-      z =  u1 * c1 - u2 * c2;
+      double z = u1 * c1 - u2 * c2;
       u2 = u1 * c2 + u2 * c1;
       u1 = z;
     }
@@ -1736,17 +1720,15 @@ bool CxImage::FFT(int dir,int m,double *x,double *y)
 */
 bool CxImage::DFT(int dir,long m,double *x1,double *y1,double *x2,double *y2)
 {
-   long i,k;
-   double arg;
-   double cosarg,sinarg;
-   
+   long i;
+
    for (i=0;i<m;i++) {
       x2[i] = 0;
       y2[i] = 0;
-      arg = - dir * 2.0 * PI * i / (double)m;
-      for (k=0;k<m;k++) {
-         cosarg = cos(k * arg);
-         sinarg = sin(k * arg);
+      double arg = -dir * 2.0 * PI * i / (double)m;
+      for (long k = 0;k<m;k++) {
+         double cosarg = cos(k * arg);
+         double sinarg = sin(k * arg);
          x2[i] += (x1[k] * cosarg - y1[k] * sinarg);
          y2[i] += (x1[k] * sinarg + y1[k] * cosarg);
       }
@@ -2091,12 +2073,8 @@ bool CxImage::Jitter(long radius)
  */
 int CxImage::gen_convolve_matrix (float radius, float **cmatrix_p)
 {
-  int matrix_length;
-  int matrix_midpoint;
-  float* cmatrix;
-  int i,j;
-  float std_dev;
-  float sum;
+	int i,j;
+	float sum;
   
   /* we want to generate a matrix that goes out a certain radius
   * from the center, so we have to go out ceil(rad-0.5) pixels,
@@ -2111,15 +2089,15 @@ int CxImage::gen_convolve_matrix (float radius, float **cmatrix_p)
   */
   radius = (float)fabs(0.5*radius) + 0.25f;
   
-  std_dev = radius;
+  float std_dev = radius;
   radius = std_dev * 2;
   
   /* go out 'radius' in each direction */
-  matrix_length = int (2 * ceil(radius-0.5) + 1);
+  int matrix_length = int(2 * ceil(radius - 0.5) + 1);
   if (matrix_length <= 0) matrix_length = 1;
-  matrix_midpoint = matrix_length/2 + 1;
+  int matrix_midpoint = matrix_length / 2 + 1;
   *cmatrix_p = new float[matrix_length];
-  cmatrix = *cmatrix_p;
+  float* cmatrix = *cmatrix_p;
   
   /*  Now we fill the matrix by doing a numeric integration approximation
   * from -2*std_dev to 2*std_dev, sampling 50 points per pixel.
@@ -2203,13 +2181,7 @@ void CxImage::blur_line (float *ctable, float *cmatrix, int cmatrix_length, BYTE
   int i=0, j=0;
   int row;
   int cmatrix_middle = cmatrix_length/2;
-  
-  float *cmatrix_p;
-  BYTE  *cur_col_p;
-  BYTE  *cur_col_p1;
-  BYTE  *dest_col_p;
-  float *ctable_p;
-  
+
   /* this first block is the same as the non-optimized version --
   * it is only used for very small pictures, so speed isn't a
   * big concern.
@@ -2260,16 +2232,16 @@ void CxImage::blur_line (float *ctable, float *cmatrix, int cmatrix_length, BYTE
       }
     }
     /* go through each pixel in each col */
-    dest_col_p = dest_col + row*bytes;
+    BYTE* dest_col_p = dest_col + row * bytes;
     for (; row < y-cmatrix_middle; row++)
     {
-      cur_col_p = (row - cmatrix_middle) * bytes + cur_col;
+      BYTE* cur_col_p = (row - cmatrix_middle) * bytes + cur_col;
       for (i = 0; i<bytes; i++)
       {
         sum = 0;
-        cmatrix_p = cmatrix;
-        cur_col_p1 = cur_col_p;
-        ctable_p = ctable;
+        float* cmatrix_p = cmatrix;
+        BYTE* cur_col_p1 = cur_col_p;
+        float* ctable_p = ctable;
         for (j = cmatrix_length; j>0; j--)
         {
           sum += *(ctable_p + *cur_col_p1);
@@ -2306,38 +2278,37 @@ void CxImage::blur_line (float *ctable, float *cmatrix, int cmatrix_length, BYTE
  */
 void CxImage::blur_text (BYTE threshold, BYTE decay, BYTE max_depth, CxImage* iSrc, CxImage* iDst, BYTE bytes)
 {
-  long x,y,z,m;
-  BYTE *pSrc, *pSrc2, *pSrc3, *pDst;
-  BYTE step,n;
+  long x, z,m;
+  BYTE step;
   int pivot;
 
   if (max_depth<1) max_depth = 1;
 
-  long nmin,nmax,xmin,xmax,ymin,ymax;
-  xmin = ymin = 0;
-  xmax = iSrc->head.biWidth;
-  ymax = iSrc->head.biHeight;
+  long ymin;
+  long xmin = ymin = 0;
+  long xmax = iSrc->head.biWidth;
+  long ymax = iSrc->head.biHeight;
 
   if (xmin==xmax || ymin==ymax) return;
 
-  nmin = xmin * bytes;
-  nmax = xmax * bytes;
+  long nmin = xmin * bytes;
+  long nmax = xmax * bytes;
 
   CImageIterator itSrc(iSrc);
   CImageIterator itTmp(iDst);
 
   double dbScaler = 100.0f/(ymax-ymin)/bytes;
 
-  for (n=0; n<bytes; n++){
-    for (y=ymin+1;y<(ymax-1);y++)
+  for (BYTE n = 0; n<bytes; n++){
+    for (long y = ymin + 1;y<(ymax-1);y++)
     {
       if (info.nEscape) break;
       info.nProgress = (long)((y-ymin)*dbScaler*(1+n));
 
-      pSrc  = itSrc.GetRow(y);
-      pSrc2 = itSrc.GetRow(y+1);
-      pSrc3 = itSrc.GetRow(y-1);
-      pDst  = itTmp.GetRow(y);
+      BYTE* pSrc = itSrc.GetRow(y);
+      BYTE* pSrc2 = itSrc.GetRow(y + 1);
+      BYTE* pSrc3 = itSrc.GetRow(y - 1);
+      BYTE* pDst = itTmp.GetRow(y);
 
       //scan left to right
       for (x=n+nmin /*,i=xmin*/; x<(nmax-1); x+=bytes /*,i++*/)
@@ -2799,9 +2770,8 @@ bool CxImage::Lut(BYTE* pLut)
     }
 #if CXIMAGE_SUPPORT_SELECTION
   } else if (pSelection && (head.biBitCount==8) && IsGrayScale()){
-    long xmin,xmax,ymin,ymax;
-    xmin = info.rSelectionBox.left; xmax = info.rSelectionBox.right;
-    ymin = info.rSelectionBox.bottom; ymax = info.rSelectionBox.top;
+	  long xmin = info.rSelectionBox.left; long xmax = info.rSelectionBox.right;
+    long ymin = info.rSelectionBox.bottom; long ymax = info.rSelectionBox.top;
 
     if (xmin==xmax || ymin==ymax)
       return false;
@@ -2842,7 +2812,6 @@ bool CxImage::Lut(BYTE* pLutR, BYTE* pLutG, BYTE* pLutB, BYTE* pLutA)
   if (!pDib || !pLutR || !pLutG || !pLutB) return false;
   RGBQUAD color;
 
-  double dbScaler;
   if (head.biClrUsed==0){
 
     long xmin,xmax,ymin,ymax;
@@ -2857,7 +2826,7 @@ bool CxImage::Lut(BYTE* pLutR, BYTE* pLutG, BYTE* pLutB, BYTE* pLutA)
     if (xmin==xmax || ymin==ymax)
       return false;
 
-    dbScaler = 100.0/(ymax-ymin);
+    double dbScaler = 100.0 / (ymax - ymin);
 
     for(long y=ymin; y<ymax; y++){
       info.nProgress = (long)((y-ymin)*dbScaler);

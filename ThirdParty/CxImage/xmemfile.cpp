@@ -161,9 +161,9 @@ long CxMemFile::GetC()
 char * CxMemFile::GetS(char *string, int n)
 {
   n--;
-  long c,i=0;
+  long i=0;
   while (i<n){
-    c = GetC();
+    long c = GetC();
     if (c == EOF) return 0;
     string[i++] = (char)c;
     if (c == '\n') break;

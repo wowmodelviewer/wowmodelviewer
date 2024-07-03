@@ -233,11 +233,11 @@ void initGlobalVBOs()
 	{
 		GLuint detailtexcoords, alphatexcoords;
 
-		glm::vec2 temp[mapbufsize], *vt;
+		glm::vec2 temp[mapbufsize];
 		float tx, ty;
 
 		// init texture coordinates for detail map:
-		vt = temp;
+		glm::vec2* vt = temp;
 		int detail_size = 1;
 		const float detail_half = 0.5f * detail_size / 8.0f;
 		for (int j = 0; j < 17; j++)
@@ -2038,8 +2038,8 @@ void MapChunk::drawWater()
 					unsigned p4 = tx + 1 + ty * (layer.w + 1);
 
 					// alpha values helper
-					float a1, a2, a3, a4;
-					a1 = a2 = a3 = a4 = 1.0f;
+					float a2, a3, a4;
+					float a1 = a2 = a3 = a4 = 1.0f;
 					if (layer.alphas.size() != 0)
 					{
 						a1 = static_cast<float>(layer.alphas[p1]) / 255.f * 1.5f + 0.3f; // whats the magic formular here ???
@@ -2049,8 +2049,8 @@ void MapChunk::drawWater()
 					}
 
 					// height values helper
-					float h1, h2, h3, h4;
-					h1 = h2 = h3 = h4 = 0.0f;
+					float h2, h3, h4;
+					float h1 = h2 = h3 = h4 = 0.0f;
 					if (layer.heights.size() != 0)
 					{
 						h1 = layer.heights[p1];

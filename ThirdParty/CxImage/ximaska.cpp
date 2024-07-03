@@ -57,9 +57,8 @@ bool CxImageSKA::Decode(CxFile *hFile)
 
   //reorder rows
   if (GetEffWidth() != ska_header.Width){
-    BYTE *src,*dst;
-    src = GetBits() + ska_header.Width*(ska_header.Height-1);
-    dst = GetBits(ska_header.Height-1);
+	  BYTE* src = GetBits() + ska_header.Width * (ska_header.Height - 1);
+    BYTE* dst = GetBits(ska_header.Height - 1);
     for(int y=0;y<ska_header.Height;y++){
       memcpy(dst,src,ska_header.Width);
       src -= ska_header.Width;

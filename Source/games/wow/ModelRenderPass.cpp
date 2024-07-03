@@ -90,9 +90,8 @@ bool ModelRenderPass::init()
 	// emissive colors
 	if (color != -1 && color < static_cast<int16>(model->colors.size()) && model->colors[color].color.uses(0))
 	{
-		glm::vec3 c;
 		/* Alfred 2008.10.02 buggy opacity make model invisible, TODO */
-		c = model->colors[color].color.getValue(0, model->animtime);
+		glm::vec3 c = model->colors[color].color.getValue(0, model->animtime);
 		if (model->colors[color].opacity.uses(model->anim))
 			ocol.w = model->colors[color].opacity.getValue(model->anim, model->animtime);
 

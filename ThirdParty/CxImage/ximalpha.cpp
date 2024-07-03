@@ -178,9 +178,8 @@ BYTE CxImage::BlindAlphaGet(const long x,const long y)
  */
 void CxImage::AlphaPaletteClear()
 {
-  RGBQUAD c;
-  for(WORD ip=0; ip<head.biClrUsed;ip++){
-    c=GetPaletteColor((BYTE)ip);
+	for(WORD ip=0; ip<head.biClrUsed;ip++){
+    RGBQUAD c = GetPaletteColor((BYTE)ip);
     c.rgbReserved=0;
     SetPaletteColor((BYTE)ip,c);
   }
@@ -191,9 +190,8 @@ void CxImage::AlphaPaletteClear()
  */
 bool CxImage::AlphaPaletteIsValid()
 {
-  RGBQUAD c;
-  for(WORD ip=0; ip<head.biClrUsed;ip++){
-    c=GetPaletteColor((BYTE)ip);
+	for(WORD ip=0; ip<head.biClrUsed;ip++){
+    RGBQUAD c = GetPaletteColor((BYTE)ip);
     if (c.rgbReserved != 0) return true;
   }
   return false;
@@ -254,9 +252,8 @@ bool CxImage::AlphaFlip()
   BYTE *buff = (BYTE*)malloc(head.biWidth);
   if (!buff) return false;
 
-  BYTE *iSrc,*iDst;
-  iSrc = pAlpha + (head.biHeight-1)*head.biWidth;
-  iDst = pAlpha;
+  BYTE* iSrc = pAlpha + (head.biHeight - 1) * head.biWidth;
+  BYTE* iDst = pAlpha;
   for (long i=0; i<(head.biHeight/2); ++i)
   {
     memcpy(buff, iSrc, head.biWidth);
@@ -276,10 +273,9 @@ bool CxImage::AlphaMirror()
   if (!pAlpha) return false;
   BYTE* pAlpha2 = (BYTE*)malloc(head.biWidth * head.biHeight);
   if (!pAlpha2) return false;
-  BYTE *iSrc,*iDst;
   long wdt=head.biWidth-1;
-  iSrc=pAlpha + wdt;
-  iDst=pAlpha2;
+  BYTE* iSrc = pAlpha + wdt;
+  BYTE* iDst = pAlpha2;
   for(long y=0; y < head.biHeight; y++){
     for(long x=0; x <= wdt; x++)
       *(iDst+x)=*(iSrc-x);

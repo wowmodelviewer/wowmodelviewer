@@ -120,7 +120,7 @@ void CAnimationExporter::CreateGif()
 		return;
 	}
 
-	CxImage** gifImages = nullptr; // Our pointer array of images
+	// Our pointer array of images
 
 	// Reset the state of our GUI objects
 	btnStart->Enable(false);
@@ -215,7 +215,7 @@ void CAnimationExporter::CreateGif()
 
 	// Create one frame to make our optimal colour palette from.
 	unsigned char* buffer = new unsigned char[m_iSize];
-	gifImages = new CxImage*[m_iTotalFrames];
+	CxImage** gifImages = new CxImage*[m_iTotalFrames];
 
 	for (unsigned int i = 0; i < m_iTotalFrames && !m_bPng; i++)
 	{

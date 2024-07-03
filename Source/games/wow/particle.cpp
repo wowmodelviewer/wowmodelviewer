@@ -499,7 +499,7 @@ static glm::mat4 SpreadMat;
 
 void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 {
-	int i, j;
+	int i;
 	float a[2]{}, c[2]{}, s[2]{};
 	glm::mat4 Temp(1.0f);
 
@@ -536,7 +536,7 @@ void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 
 	float Size = abs(c[0]) * l + abs(s[0]) * w;
 	for (i = 0; i < 3; i++)
-		for (j = 0; j < 3; j++)
+		for (int j = 0; j < 3; j++)
 			SpreadMat[i][j] *= Size;
 }
 

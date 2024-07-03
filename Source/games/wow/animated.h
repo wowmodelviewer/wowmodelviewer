@@ -177,7 +177,6 @@ public:
 		}
 		if (data[anim].size() > 1 && times[anim].size() > 1)
 		{
-			size_t t1, t2;
 			size_t pos = 0;
 			float r;
 			size_t max_time = times[anim][times[anim].size() - 1];
@@ -215,8 +214,8 @@ public:
 						break;
 					}
 				}
-				t1 = times[anim][pos];
-				t2 = times[anim][pos + 1];
+				size_t t1 = times[anim][pos];
+				size_t t2 = times[anim][pos + 1];
 				r = (time - t1) / static_cast<float>(t2 - t1);
 
 				if (type == INTERPOLATION_NONE)

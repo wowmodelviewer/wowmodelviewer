@@ -659,8 +659,7 @@ void CharControl::selectMount()
 		GAMEDIRECTORY.getFilesForFolder(files, QString("creature/"), QString("m2"));
 		if (files.size())
 		{
-			std::vector<GameFile*>::iterator it;
-			for (it = files.begin(); it != files.end(); ++it)
+			for (std::vector<GameFile*>::iterator it = files.begin(); it != files.end(); ++it)
 			{
 				QString fn = (*it)->fullname();
 				creaturemodels.push_back(wxString(fn.toStdWString()));
@@ -850,7 +849,6 @@ void CharControl::OnUpdateItem(int type, int id)
 		{
 			TextureGroup grp;
 			GameFile* modelFile;
-			WoWModel* m;
 			int morphID = 0;
 
 			if (!model)
@@ -901,7 +899,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			}
 			else
 				break; // shouldn't happen
-			m = new WoWModel(modelFile, false);
+			WoWModel* m = new WoWModel(modelFile, false);
 			m->isMount = true;
 			g_canvas->root->setModel(m);
 			g_canvas->setModel(m, true);

@@ -321,10 +321,9 @@ bool CxImage::HistogramEqualize()
     int histogram[256];
   int map[256];
   int equalize_map[256];
-    int x, y, i, j;
+    int x, y, i;
   RGBQUAD color;
   RGBQUAD  yuvClr;
-  unsigned int YVal, high, low;
 
   memset( &histogram, 0, sizeof(int) * 256 );
   memset( &map, 0, sizeof(int) * 256 );
@@ -336,21 +335,21 @@ bool CxImage::HistogramEqualize()
     if (info.nEscape) break;
     for(x=0; x < head.biWidth; x++){
       color = BlindGetPixelColor( x, y );
-      YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
+      unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
       histogram[YVal]++;
     }
   }
 
   // integrate the histogram to get the equalization map.
-  j = 0;
+  int j = 0;
   for(i=0; i <= 255; i++){
     j += histogram[i];
     map[i] = j; 
   }
 
   // equalize
-  low = map[0];
-  high = map[255];
+  unsigned int low = map[0];
+  unsigned int high = map[255];
   if (low == high) return false;
   for( i = 0; i <= 255; i++ ){
     equalize_map[i] = (unsigned int)((((double)( map[i] - low ) ) * 255) / ( high - low ) );
@@ -393,10 +392,9 @@ bool CxImage::HistogramNormalize()
   if (!pDib) return false;
 
   int histogram[256];
-  int threshold_intensity, intense;
   int x, y, i;
   unsigned int normalize_map[256];
-  unsigned int high, low, YVal;
+  unsigned int high, low;
 
   RGBQUAD color;
   RGBQUAD  yuvClr;
@@ -410,15 +408,15 @@ bool CxImage::HistogramNormalize()
     if (info.nEscape) break;
     for(x=0; x < head.biWidth; x++){
       color = BlindGetPixelColor( x, y );
-      YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
+      unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
       histogram[YVal]++;
     }
   }
 
   // find histogram boundaries by locating the 1 percent levels
-  threshold_intensity = ( head.biWidth * head.biHeight) / 100;
+  int threshold_intensity = (head.biWidth * head.biHeight) / 100;
 
-  intense = 0;
+  int intense = 0;
   for( low = 0; low < 255; low++ ){
     intense += histogram[low];
     if( intense > threshold_intensity )  break;

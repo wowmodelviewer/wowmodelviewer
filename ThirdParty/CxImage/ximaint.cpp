@@ -851,11 +851,7 @@ float CxImage::KernelBlackman(const float x)
 ////////////////////////////////////////////////////////////////////////////////
 float CxImage::KernelBessel_J1(const float x)
 {
-  double p, q;
-  
-  register long i;
-  
-  static const double
+	static const double
   Pone[] =
   {
     0.581199354001606143928050809e+21,
@@ -881,9 +877,9 @@ float CxImage::KernelBessel_J1(const float x)
     0.1e+1
   };
     
-  p = Pone[8];
-  q = Qone[8];
-  for (i=7; i >= 0; i--)
+  double p = Pone[8];
+  double q = Qone[8];
+  for (register long i = 7; i >= 0; i--)
   {
     p = p*x*x+Pone[i];
     q = q*x*x+Qone[i];
@@ -893,11 +889,7 @@ float CxImage::KernelBessel_J1(const float x)
 ////////////////////////////////////////////////////////////////////////////////
 float CxImage::KernelBessel_P1(const float x)
 {
-  double p, q;
-  
-  register long i;
-  
-  static const double
+	static const double
   Pone[] =
   {
     0.352246649133679798341724373e+5,
@@ -917,9 +909,9 @@ float CxImage::KernelBessel_P1(const float x)
     0.1e+1
   };
     
-  p = Pone[5];
-  q = Qone[5];
-  for (i=4; i >= 0; i--)
+  double p = Pone[5];
+  double q = Qone[5];
+  for (register long i = 4; i >= 0; i--)
   {
     p = p*(8.0/x)*(8.0/x)+Pone[i];
     q = q*(8.0/x)*(8.0/x)+Qone[i];
@@ -929,11 +921,7 @@ float CxImage::KernelBessel_P1(const float x)
 ////////////////////////////////////////////////////////////////////////////////
 float CxImage::KernelBessel_Q1(const float x)
 {
-  double p, q;
-  
-  register long i;
-  
-  static const double
+	static const double
   Pone[] =
   {
     0.3511751914303552822533318e+3,
@@ -953,9 +941,9 @@ float CxImage::KernelBessel_Q1(const float x)
     0.1e+1
   };
     
-  p = Pone[5];
-  q = Qone[5];
-  for (i=4; i >= 0; i--)
+  double p = Pone[5];
+  double q = Qone[5];
+  for (register long i = 4; i >= 0; i--)
   {
     p = p*(8.0/x)*(8.0/x)+Pone[i];
     q = q*(8.0/x)*(8.0/x)+Qone[i];
@@ -965,17 +953,16 @@ float CxImage::KernelBessel_Q1(const float x)
 ////////////////////////////////////////////////////////////////////////////////
 float CxImage::KernelBessel_Order1(float x)
 {
-  float p, q;
-  
-  if (x == 0.0)
+	if (x == 0.0)
     return (0.0f);
-  p = x;
+  float p = x;
   if (x < 0.0)
     x=(-x);
   if (x < 8.0)
     return(p*KernelBessel_J1(x));
-  q = (float)sqrt(2.0f/(PI*x))*(float)(KernelBessel_P1(x)*(1.0f/sqrt(2.0f)*(sin(x)-cos(x)))-8.0f/x*KernelBessel_Q1(x)*
-    (-1.0f/sqrt(2.0f)*(sin(x)+cos(x))));
+  float q = (float)sqrt(2.0f / (PI * x)) * (float)(KernelBessel_P1(x) * (1.0f / sqrt(2.0f) * (sin(x) - cos(x))) - 8.0f
+	  / x * KernelBessel_Q1(x) *
+	  (-1.0f / sqrt(2.0f) * (sin(x) + cos(x))));
   if (p < 0.0f)
     q = (-q);
   return (q);

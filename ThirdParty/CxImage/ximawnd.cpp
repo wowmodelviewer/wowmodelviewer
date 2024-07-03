@@ -1070,13 +1070,12 @@ long CxImage::Tile(HDC hdc, RECT *rc)
   if((pDib)&&(hdc)&&(rc)) {
     int w = rc->right - rc->left;
     int h = rc->bottom - rc->top;
-    int x,y,z;
     int bx=head.biWidth;
     int by=head.biHeight;
-    for (y = 0 ; y < h ; y += by){
+    for (int y = 0 ; y < h ; y += by){
       if ((y+by)>h) by=h-y;
-      z=bx;
-      for (x = 0 ; x < w ; x += z){
+      int z = bx;
+      for (int x = 0 ; x < w ; x += z){
         if ((x+z)>w) z=w-x;
         RECT r = {rc->left + x,rc->top + y,rc->left + x + z,rc->top + y + by};
         Draw(hdc,rc->left + x, rc->top + y,-1,-1,&r);

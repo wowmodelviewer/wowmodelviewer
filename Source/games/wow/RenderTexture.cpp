@@ -4,8 +4,7 @@
 
 bool CHECK_FRAMEBUFFER_STATUS()
 {
-	GLenum status = 0;
-	status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 
 	switch (status)
 	{
@@ -65,7 +64,6 @@ void RenderTexture::InitGL()
 
 void RenderTexture::Init(int width, int height, bool fboMode)
 {
-	GLenum err;
 	canvas_hDC = wglGetCurrentDC();
 	canvas_hRC = wglGetCurrentContext();
 
@@ -215,7 +213,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		m_hPBuffer = wglCreatePbufferARB(canvas_hDC, iPixelFormat, nWidth, nHeight, pb_attr);
 
 		// Error check
-		err = glGetError();
+		GLenum err = glGetError();
 		if (!m_hPBuffer)
 		{
 			LOG_ERROR << "Could not create the PixelBuffer." << err;

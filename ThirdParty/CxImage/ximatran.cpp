@@ -92,9 +92,8 @@ bool CxImage::Flip(bool bFlipSelection, bool bFlipAlpha)
   BYTE *buff = (BYTE*)malloc(info.dwEffWidth);
   if (!buff) return false;
 
-  BYTE *iSrc,*iDst;
-  iSrc = GetBits(head.biHeight-1);
-  iDst = GetBits(0);
+  BYTE* iSrc = GetBits(head.biHeight - 1);
+  BYTE* iDst = GetBits(0);
   for (long i=0; i<(head.biHeight/2); ++i)
   {
     memcpy(buff, iSrc, info.dwEffWidth);
@@ -135,10 +134,9 @@ bool CxImage::Mirror(bool bMirrorSelection, bool bMirrorAlpha)
     return false;
   }
 
-  BYTE *iSrc,*iDst;
   long wdt=(head.biWidth-1) * (head.biBitCount==24 ? 3:1);
-  iSrc=info.pImage + wdt;
-  iDst=imatmp->info.pImage;
+  BYTE* iSrc = info.pImage + wdt;
+  BYTE* iDst = imatmp->info.pImage;
   long x,y;
   switch (head.biBitCount){
   case 24:
@@ -847,11 +845,10 @@ bool CxImage::Rotate180(CxImage* iDst)
   if (AlphaIsValid())  imgDest.AlphaCreate();
 #endif //CXIMAGE_SUPPORT_ALPHA
 
-  long x,y,y2;
-  for (y = 0; y < ht; y++){
+  for (long y = 0; y < ht; y++){
     info.nProgress = (long)(100*y/ht); //<Anatoly Ivasyuk>
-    y2=ht-y-1;
-    for (x = 0; x < wid; x++){
+    long y2 = ht - y - 1;
+    for (long x = 0; x < wid; x++){
       if(head.biClrUsed==0)//RGB
         imgDest.SetPixelColor(wid-x-1, y2, BlindGetPixelColor(x, y));
       else  //PALETTE
@@ -2002,8 +1999,7 @@ bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long heigh
 {
   if (!pDib) return false;
 
-  
-  long startx,starty,endx,endy;
+
   double cos_angle = cos(angle/*/57.295779513082320877*/);
     double sin_angle = sin(angle/*/57.295779513082320877*/);
 
@@ -2011,9 +2007,9 @@ bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long heigh
   if ( fabs(angle)<0.0002 )
     return Crop( topx, topy, topx+width, topy+height, iDst);
 
-  startx = min(topx, topx - (long)(sin_angle*(double)height));
-  endx   = topx + (long)(cos_angle*(double)width);
-  endy   = topy + (long)(cos_angle*(double)height + sin_angle*(double)width);
+  long startx = min(topx, topx - (long)(sin_angle*(double)height));
+  long endx = topx + (long)(cos_angle * (double)width);
+  long endy = topy + (long)(cos_angle * (double)height + sin_angle * (double)width);
   // check: corners of the rectangle must be inside
   if ( IsInside( startx, topy )==false ||
      IsInside( endx, endy ) == false )
@@ -2039,7 +2035,7 @@ bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long heigh
   // crop rotated image to the original selection rectangle
     endx   = (tmp.head.biWidth+width)/2;
   startx = (tmp.head.biWidth-width)/2;
-  starty = (tmp.head.biHeight+height)/2;
+  long starty = (tmp.head.biHeight + height) / 2;
     endy   = (tmp.head.biHeight-height)/2;
     if ( false == tmp.Crop( startx, starty, endx, endy ) )
     return false;

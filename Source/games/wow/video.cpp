@@ -211,8 +211,7 @@ void VideoSettings::InitGL()
 	if (!Init())
 		return;
 
-	GLenum err = 0;
-	err = glGetError();
+	GLenum err = glGetError();
 	if (err)
 		LOG_ERROR << __FUNCTION__ << __FILE__ << err << "An error occured on line" << __LINE__;
 
@@ -305,7 +304,6 @@ void VideoSettings::EnumDisplayModes()
 
 	// This is where we do the grunt work of checking the caps
 	// find out how many pixel formats we have
-	size_t num_pfd = 0;
 	std::vector<int> iAttributes;
 	std::vector<int> results;
 
@@ -313,7 +311,7 @@ void VideoSettings::EnumDisplayModes()
 	results.resize(2); // 2 elements
 	wglGetPixelFormatAttribivARB(hDC, 0, 0, 1, &iAttributes[0], &results[0]);
 	// get the number of contexts we can create
-	num_pfd = results[0];
+	size_t num_pfd = results[0];
 	iAttributes.clear();
 	results.clear();
 
@@ -635,7 +633,6 @@ void VideoSettings::SetMode()
 		return;
 	}
 
-	GLboolean status;
 	unsigned int numFormats;
 	float fAttributes[] = {0, 0};
 	std::vector<int> AttributeList;
@@ -675,7 +672,7 @@ void VideoSettings::SetMode()
 	AttributeList.push_back(0);
 
 
-	status = wglChoosePixelFormatARB(hDC, &AttributeList[0], fAttributes, 1, &pixelFormat, &numFormats);
+	GLboolean status = wglChoosePixelFormatARB(hDC, &AttributeList[0], fAttributes, 1, &pixelFormat, &numFormats);
 	if (status == GL_TRUE && numFormats)
 	{
 		if (SetPixelFormat(hDC, pixelFormat, &pfd) == FALSE)

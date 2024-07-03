@@ -295,7 +295,6 @@ void AnimControl::UpdateModel(WoWModel* m)
 	// Animation stuff
 	if (m->animated && m->anims.size() > 0)
 	{
-		wxString strName;
 		wxString strStand;
 		int selectAnim = 0;
 
@@ -325,7 +324,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 		{
 			for (unsigned int i = 0; i < animCList->GetCount(); i++)
 			{
-				strName = animCList->GetString(i);
+				wxString strName = animCList->GetString(i);
 				if (strName == strStand)
 				{
 					selectAnim = i;

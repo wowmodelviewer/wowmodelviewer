@@ -24,7 +24,7 @@ CQuantizer::~CQuantizer()
 
 BOOL CQuantizer::ProcessImage(HANDLE hImage)
 {
-	BYTE r, g, b, a;
+	BYTE r, g, b;
 	int i, j;
 
 	BITMAPINFOHEADER ds;
@@ -50,7 +50,7 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 				b = pal[ldx];
 				g = pal[ldx + 1];
 				r = pal[ldx + 2];
-				a = pal[ldx + 3];
+				BYTE a = pal[ldx + 3];
 				AddColor(&m_pTree, r, g, b, a, m_nColorBits, 0, &m_nLeafCount,
 				         m_pReducibleNodes);
 				while (m_nLeafCount > m_nMaxColors)
@@ -218,13 +218,13 @@ void CQuantizer::SetColorTable(RGBQUAD* prgb)
 		GetPaletteColors(m_pTree, tmppal, &nIndex, nSum);
 		if (m_nLeafCount > m_nOutputMaxColors)
 		{
-			UINT j, k, nr, ng, nb, na, ns, a, b;
-			for (j = 0; j < m_nOutputMaxColors; j++)
+			UINT ng, nb, na, ns;
+			for (UINT j = 0; j < m_nOutputMaxColors; j++)
 			{
-				a = (j * m_nLeafCount) / m_nOutputMaxColors;
-				b = ((j + 1) * m_nLeafCount) / m_nOutputMaxColors;
-				nr = ng = nb = na = ns = 0;
-				for (k = a; k < b; k++)
+				UINT a = (j * m_nLeafCount) / m_nOutputMaxColors;
+				UINT b = ((j + 1) * m_nLeafCount) / m_nOutputMaxColors;
+				UINT nr = ng = nb = na = ns = 0;
+				for (UINT k = a; k < b; k++)
 				{
 					nr += tmppal[k].rgbRed * nSum[k];
 					ng += tmppal[k].rgbGreen * nSum[k];

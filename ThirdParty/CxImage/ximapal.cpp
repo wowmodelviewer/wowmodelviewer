@@ -369,12 +369,12 @@ BYTE CxImage::GetNearestIndex(RGBQUAD c)
   BYTE* iDst = (BYTE*)(pDib) + sizeof(BITMAPINFOHEADER);
   long distance=200000;
   int i,j = 0;
-  long k,l;
+  long l;
   int m = (int)(head.biClrImportant==0 ? head.biClrUsed : head.biClrImportant);
   for(i=0,l=0;i<m;i++,l+=sizeof(RGBQUAD)){
-    k = (iDst[l]-c.rgbBlue)*(iDst[l]-c.rgbBlue)+
-      (iDst[l+1]-c.rgbGreen)*(iDst[l+1]-c.rgbGreen)+
-      (iDst[l+2]-c.rgbRed)*(iDst[l+2]-c.rgbRed);
+    long k = (iDst[l] - c.rgbBlue) * (iDst[l] - c.rgbBlue) +
+	    (iDst[l + 1] - c.rgbGreen) * (iDst[l + 1] - c.rgbGreen) +
+	    (iDst[l + 2] - c.rgbRed) * (iDst[l + 2] - c.rgbRed);
 //    k = abs(iDst[l]-c.rgbBlue)+abs(iDst[l+1]-c.rgbGreen)+abs(iDst[l+2]-c.rgbRed);
     if (k==0){
       j=i;
@@ -397,11 +397,10 @@ BYTE CxImage::GetNearestIndex(RGBQUAD c)
 void CxImage::RGBtoBGR(BYTE *buffer, int length)
 {
   if (buffer && (head.biClrUsed==0)){
-    BYTE temp;
-    length = min(length,(int)info.dwEffWidth);
+	  length = min(length,(int)info.dwEffWidth);
     length = min(length,(int)(3*head.biWidth));
     for (int i=0;i<length;i+=3){
-      temp = buffer[i]; buffer[i] = buffer[i+2]; buffer[i+2] = temp;
+      BYTE temp = buffer[i]; buffer[i] = buffer[i+2]; buffer[i+2] = temp;
     }
   }
 }
@@ -494,13 +493,12 @@ void CxImage::BlendPalette(COLORREF cr,long perc)
 {
   if ((pDib==NULL)||(head.biClrUsed==0)) return;
   BYTE* iDst = (BYTE*)(pDib) + sizeof(BITMAPINFOHEADER);
-  DWORD i,r,g,b;
   RGBQUAD* pPal=(RGBQUAD*)iDst;
-  r = GetRValue(cr);
-  g = GetGValue(cr);
-  b = GetBValue(cr);
+  DWORD r = GetRValue(cr);
+  DWORD g = GetGValue(cr);
+  DWORD b = GetBValue(cr);
   if (perc>100) perc=100;
-  for(i=0;i<head.biClrUsed;i++){
+  for(DWORD i = 0;i<head.biClrUsed;i++){
     pPal[i].rgbBlue=(BYTE)((pPal[i].rgbBlue*(100-perc)+b*perc)/100);
     pPal[i].rgbGreen =(BYTE)((pPal[i].rgbGreen*(100-perc)+g*perc)/100);
     pPal[i].rgbRed =(BYTE)((pPal[i].rgbRed*(100-perc)+r*perc)/100);
@@ -532,10 +530,9 @@ void CxImage::SwapIndex(BYTE idx1, BYTE idx2)
   SetPaletteColor(idx1,GetPaletteColor(idx2));
   SetPaletteColor(idx2,tempRGB);
   //swap the pixels
-  BYTE idx;
   for(long y=0; y < head.biHeight; y++){
     for(long x=0; x < head.biWidth; x++){
-      idx=BlindGetPixelIndex(x,y);
+      BYTE idx = BlindGetPixelIndex(x, y);
       if (idx==idx1) BlindSetPixelIndex(x,y,idx2);
       if (idx==idx2) BlindSetPixelIndex(x,y,idx1);
     }
@@ -551,10 +548,9 @@ void CxImage::SwapRGB2BGR()
 
   if (head.biClrUsed){
     RGBQUAD* ppal=GetPalette();
-    BYTE b;
     if(!ppal) return;
     for(WORD a=0;a<head.biClrUsed;a++){
-      b=ppal[a].rgbBlue; ppal[a].rgbBlue=ppal[a].rgbRed; ppal[a].rgbRed=b;
+      BYTE b = ppal[a].rgbBlue; ppal[a].rgbBlue=ppal[a].rgbRed; ppal[a].rgbRed=b;
     }
   } else {
     for(long y=0;y<head.biHeight;y++){
@@ -619,10 +615,9 @@ bool CxImage::IsSamePalette(CxImage &img, bool bCheckAlpha)
   if (head.biClrUsed == 0)
     return false;
 
-  RGBQUAD c1,c2;
   for (DWORD n=0; n<head.biClrUsed; n++){
-    c1 = GetPaletteColor((BYTE)n);
-    c2 = img.GetPaletteColor((BYTE)n);
+    RGBQUAD c1 = GetPaletteColor((BYTE)n);
+    RGBQUAD c2 = img.GetPaletteColor((BYTE)n);
     if (c1.rgbRed != c2.rgbRed) return false;
     if (c1.rgbBlue != c2.rgbBlue) return false;
     if (c1.rgbGreen != c2.rgbGreen) return false;

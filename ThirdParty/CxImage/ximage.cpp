@@ -240,8 +240,7 @@ void* CxImage::Create(DWORD dwWidth, DWORD dwHeight, DWORD wBpp, DWORD imagetype
 
     // use our bitmap info structure to fill in first part of
     // our DIB with the BITMAPINFOHEADER
-    BITMAPINFOHEADER*  lpbi;
-  lpbi = (BITMAPINFOHEADER*)(pDib);
+  BITMAPINFOHEADER* lpbi = (BITMAPINFOHEADER*)(pDib);
     *lpbi = head;
 
   info.pImage=GetBits();
@@ -371,17 +370,15 @@ void CxImage::Bitfield2RGB(BYTE *src, DWORD redmask, DWORD greenmask, DWORD blue
     ns[1]+=ns[0]; ns[2]+=ns[1];  ns[0]=8-ns[0]; ns[1]-=8; ns[2]-=8;
     // dword aligned width for 16 bit image
     long effwidth2=(((head.biWidth + 1) / 2) * 4);
-    WORD w;
-    long y2,y3,x2,x3;
     BYTE *p=info.pImage;
     // scan the buffer in reverse direction to avoid reallocations
     for (long y=head.biHeight-1; y>=0; y--){
-      y2=effwidth2*y;
-      y3=info.dwEffWidth*y;
+      long y2 = effwidth2 * y;
+      long y3 = info.dwEffWidth * y;
       for (long x=head.biWidth-1; x>=0; x--){
-        x2 = 2*x+y2;
-        x3 = 3*x+y3;
-        w = (WORD)(src[x2]+256*src[1+x2]);
+        long x2 = 2 * x + y2;
+        long x3 = 3 * x + y3;
+        WORD w = (WORD)(src[x2] + 256 * src[1 + x2]);
         p[  x3]=(BYTE)((w & bluemask)<<ns[0]);
         p[1+x3]=(BYTE)((w & greenmask)>>ns[1]);
         p[2+x3]=(BYTE)((w & redmask)>>ns[2]);
@@ -400,15 +397,14 @@ void CxImage::Bitfield2RGB(BYTE *src, DWORD redmask, DWORD greenmask, DWORD blue
     }
     // dword aligned width for 32 bit image
     long effwidth4 = head.biWidth * 4;
-    long y4,y3,x4,x3;
     BYTE *p=info.pImage;
     // scan the buffer in reverse direction to avoid reallocations
     for (long y=head.biHeight-1; y>=0; y--){
-      y4=effwidth4*y;
-      y3=info.dwEffWidth*y;
+      long y4 = effwidth4 * y;
+      long y3 = info.dwEffWidth * y;
       for (long x=head.biWidth-1; x>=0; x--){
-        x4 = 4*x+y4;
-        x3 = 3*x+y3;
+        long x4 = 4 * x + y4;
+        long x3 = 3 * x + y3;
         p[  x3]=src[ns[2]+x4];
         p[1+x3]=src[ns[1]+x4];
         p[2+x3]=src[ns[0]+x4];
@@ -444,11 +440,9 @@ bool CxImage::CreateFromArray(BYTE* pArray,DWORD dwWidth,DWORD dwHeight,DWORD dw
   if (dwBitsperpixel==32) AlphaCreate();
 #endif //CXIMAGE_SUPPORT_ALPHA
 
-  BYTE *dst,*src;
-
   for (DWORD y = 0; y<dwHeight; y++) {
-    dst = info.pImage + (bFlipImage?(dwHeight-1-y):y) * info.dwEffWidth;
-    src = pArray + y * dwBytesperline;
+    BYTE* dst = info.pImage + (bFlipImage ? (dwHeight - 1 - y) : y) * info.dwEffWidth;
+    BYTE* src = pArray + y * dwBytesperline;
     if (dwBitsperpixel==32){
       for(DWORD x=0;x<dwWidth;x++){
         *dst++=src[0];
@@ -483,11 +477,9 @@ bool CxImage::CreateFromMatrix(BYTE** ppMatrix,DWORD dwWidth,DWORD dwHeight,DWOR
   if (dwBitsperpixel==32) AlphaCreate();
 #endif //CXIMAGE_SUPPORT_ALPHA
 
-  BYTE *dst,*src;
-
   for (DWORD y = 0; y<dwHeight; y++) {
-    dst = info.pImage + (bFlipImage?(dwHeight-1-y):y) * info.dwEffWidth;
-    src = ppMatrix[y];
+    BYTE* dst = info.pImage + (bFlipImage ? (dwHeight - 1 - y) : y) * info.dwEffWidth;
+    BYTE* src = ppMatrix[y];
     if (src){
       if (dwBitsperpixel==32){
         for(DWORD x=0;x<dwWidth;x++){

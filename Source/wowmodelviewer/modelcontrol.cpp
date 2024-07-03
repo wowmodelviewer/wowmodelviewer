@@ -306,14 +306,13 @@ void ModelControl::RefreshModel(Attachment* root)
 		}
 
 		// update combo box with the list of models?
-		wxString tmp;
 		modelname->Clear();
 		for (std::vector<Attachment*>::iterator it = attachments.begin(); it != attachments.end(); ++it)
 		{
 			m = dynamic_cast<WoWModel*>((*it)->model());
 			if (m)
 			{
-				tmp = m->name().toStdWString();
+				wxString tmp = m->name().toStdWString();
 				modelname->Append(tmp.AfterLast('\\'));
 			}
 		}
@@ -440,10 +439,15 @@ void ModelControl::Update()
 	else
 	{
 		pcr.clear();
-		particleColorSet cols11, cols12, cols13;
-		cols11 = {glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)};
-		cols12 = {glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)};
-		cols13 = {glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)};
+		particleColorSet cols11 = {
+			glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)
+		};
+		particleColorSet cols12 = {
+			glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)
+		};
+		particleColorSet cols13 = {
+			glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0), glm::vec4(0.0, 0.0, 0.0, 1.0)
+		};
 		pcr = {cols11, cols12, cols13};
 	}
 	particlecolreplace->SetValue(false);
@@ -691,11 +695,9 @@ void ModelControl::UpdatePCRTexts()
 
 void ModelControl::UpdatePCRText(wxColourPickerCtrl* cpc)
 {
-	wxTextCtrl* txtCtrl;
-
 	if (!cpc)
 		return;
-	txtCtrl = cpc->GetTextCtrl();
+	wxTextCtrl* txtCtrl = cpc->GetTextCtrl();
 	if (txtCtrl)
 		txtCtrl->SetValue(cpc->GetColour().GetAsString(wxC2S_HTML_SYNTAX));
 }

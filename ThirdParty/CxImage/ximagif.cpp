@@ -293,11 +293,10 @@ bool CxImageGIF::Decode(CxFile *fp)
 ////////////////////////////////////////////////////////////////////////////////
 bool CxImageGIF::DecodeExtension(CxFile *fp)
 {
-  bool bContinue;
-  unsigned char count;
+	unsigned char count;
   unsigned char fc;
 
-  bContinue = (1 == fp->Read(&fc, sizeof(fc), 1));
+  bool bContinue = (1 == fp->Read(&fc, sizeof(fc), 1));
   if (bContinue) {
     /* AD - for transparency */
     if (fc == 0xF9)  {
@@ -655,8 +654,8 @@ bool CxImageGIF::EncodeRGB(CxFile *fp)
 
   EncodeComment(fp);
 
-  unsigned long w,h;
-  w=h=0;
+  unsigned long h;
+  unsigned long w = h = 0;
   const long cellw = 17;
   const long cellh = 15;
   CxImageGIF tmp;
@@ -672,10 +671,9 @@ bool CxImageGIF::EncodeRGB(CxFile *fp)
         tmp.SetPaletteColor(0,GetTransColor());
       }
 
-      BYTE i;
       for (unsigned long j=0;j<h;j++){
         for (unsigned long k=0;k<w;k++){
-          i=(BYTE)(1+k+cellw*j);
+          BYTE i = (BYTE)(1 + k + cellw * j);
           tmp.SetPaletteColor(i,GetPixelColor(x+k,head.biHeight-y-h+j));
           tmp.SetPixelIndex(k,j,tmp.GetNearestIndex(tmp.GetPaletteColor(i)));
         }
@@ -718,10 +716,7 @@ void CxImageGIF::Putword(int w, CxFile *fp )
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::compressNONE( int init_bits, CxFile* outfile)
 {
-  register long c;
-  register long ent;
-
-  // g_init_bits - initial number of bits
+	// g_init_bits - initial number of bits
   // g_outfile   - pointer to output file
   g_init_bits = init_bits;
   g_outfile = outfile;
@@ -736,12 +731,12 @@ void CxImageGIF::compressNONE( int init_bits, CxFile* outfile)
   free_ent = (short)(ClearCode + 2);
 
   a_count=0;
-  ent = GifNextPixel( );
+  register long ent = GifNextPixel();
 
   output( (code_int)ClearCode );
 
   while ( ent != EOF ) {    
-    c = GifNextPixel();
+    register long c = GifNextPixel();
 
     output ( (code_int) ent );
     ent = c;
@@ -768,10 +763,6 @@ void CxImageGIF::compressLZW( int init_bits, CxFile* outfile)
 {
   register long fcode;
   register long c;
-  register long ent;
-  register long hshift;
-  register long disp;
-  register long i;
 
   // g_init_bits - initial number of bits
   // g_outfile   - pointer to output file
@@ -788,9 +779,9 @@ void CxImageGIF::compressLZW( int init_bits, CxFile* outfile)
   free_ent = (short)(ClearCode + 2);
 
   a_count=0;
-  ent = GifNextPixel( );
+  register long ent = GifNextPixel();
 
-  hshift = 0;
+  register long hshift = 0;
   for ( fcode = (long) HSIZE;  fcode < 65536L; fcode *= 2L )  ++hshift;
   hshift = 8 - hshift;                /* set hash code range bound */
   cl_hash((long)HSIZE);        /* clear hash table */
@@ -799,14 +790,14 @@ void CxImageGIF::compressLZW( int init_bits, CxFile* outfile)
   while ( (c = GifNextPixel( )) != EOF ) {    
 
     fcode = (long) (((long) c << MAXBITSCODES) + ent);
-    i = (((code_int)c << hshift) ^ ent);    /* xor hashing */
+    register long i = (((code_int)c << hshift) ^ ent);    /* xor hashing */
 
     if ( HashTabOf (i) == fcode ) {
       ent = CodeTabOf (i);
       continue;
     } else if ( (long)HashTabOf (i) < 0 )      /* empty slot */
       goto nomatch;
-    disp = HSIZE - i;           /* secondary hash (after G. Knott) */
+    register long disp = HSIZE - i;           /* secondary hash (after G. Knott) */
     if ( i == 0 )  disp = 1;
 probe:
     if ( (i -= disp) < 0 )  i += HSIZE;
@@ -893,10 +884,9 @@ void CxImageGIF::cl_hash(long hsize)
 {
   register long *htab_p = htab+hsize;
 
-  register long i;
   register long m1 = -1L;
 
-  i = hsize - 16;
+  register long i = hsize - 16;
 
   do {
     *(htab_p-16)=m1;
@@ -990,7 +980,6 @@ short CxImageGIF::init_exp(short size)
 short CxImageGIF::get_next_code(CxFile* file)
 {
   short i, x;
-  DWORD ret;
 
   if (nbits_left == 0) {
     if (navail_bytes <= 0) {
@@ -1012,7 +1001,7 @@ short CxImageGIF::get_next_code(CxFile* file)
 
   if (navail_bytes<0) return ending; // prevent deadlocks (thanks to Mike Melnikov)
 
-  ret = b1 >> (8 - nbits_left);
+  DWORD ret = b1 >> (8 - nbits_left);
   while (curr_size > nbits_left){
     if (navail_bytes <= 0){
       /* Out of bytes in current block, so read next block*/
@@ -1061,9 +1050,8 @@ short CxImageGIF::get_next_code(CxFile* file)
  */
 short CxImageGIF::decoder(CxFile* file, CImageIterator* iter, short linewidth, int &bad_code_count)
 {
-  register BYTE *sp, *bufptr;
-  BYTE *buf;
-  register short code, fc, oc, bufcnt;
+	BYTE *buf;
+  register short fc;
   short c, size, ret;
 
   /* Initialize for decoding a new image... */
@@ -1077,15 +1065,15 @@ short CxImageGIF::decoder(CxFile* file, CImageIterator* iter, short linewidth, i
   /* Initialize in case they forgot to put in a clear code.
    * (This shouldn't happen, but we'll try and decode it anyway...)
    */
-  oc = fc = 0;
+  register short oc = fc = 0;
 
    /* Allocate space for the decode buffer */
   if ((buf = new BYTE[linewidth + 1]) == NULL) return(OUT_OF_MEMORY);
 
    /* Set up the stack pointer and decode buffer pointer */
-  sp = stack;
-  bufptr = buf;
-  bufcnt = linewidth;
+  register BYTE* sp = stack;
+  register BYTE* bufptr = buf;
+  register short bufcnt = linewidth;
 
    /* This is the main loop.  For each code we get we pass through the
   * linked list of prefix codes, pushing the corresponding "character" for
@@ -1146,7 +1134,7 @@ short CxImageGIF::decoder(CxFile* file, CImageIterator* iter, short linewidth, i
       * it must be a code code...  So we can now decode the code into
       * a stack of character codes. (Clear as mud, right?)
       */
-      code = c;
+      register short code = c;
 
       /* Here we go again with one of those off chances...  If, on the
       * off chance, the code we got is beyond the range of those already
@@ -1313,8 +1301,8 @@ int CxImageGIF::get_num_frames(CxFile *fp,struct_TabCol* TabColSrc,struct_dscgif
 long CxImageGIF::seek_next_image(CxFile* fp, long position)
 {
   fp->Seek(position, SEEK_SET);
-  char ch1,ch2;
-  ch1=ch2=0;
+  char ch2;
+  char ch1 = ch2 = 0;
   while(fp->Read(&ch2,sizeof(char),1)>0){
     if (ch1 == 0 && ch2 == ','){
       fp->Seek(-1,SEEK_CUR);
@@ -1346,11 +1334,10 @@ void CxImageGIF::GifMix(CxImage & imgsrc2, struct_image & imgdesc)
   long xmax = min(GetWidth(), (DWORD)(imgdesc.l + imgdesc.w));
 
   long ibg2= imgsrc2.GetTransIndex();
-    BYTE i2;
 
   for(long y = ymin; y < ymax; y++){
     for(long x = xmin; x < xmax; x++){
-      i2 = imgsrc2.GetPixelIndex(x-xmin,y-ymin);
+      BYTE i2 = imgsrc2.GetPixelIndex(x - xmin, y - ymin);
       if(i2!=ibg2) SetPixelIndex(x,y,i2);
     }
   }
@@ -1444,11 +1431,9 @@ void CxImageGIF::rle_output_plain(int c,struct_RLE* rle)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::rle_flush_fromclear(int count,struct_RLE* rle)
 {
-  int n;
-
-  rle->out_clear = rle->max_ocodes;
+	rle->out_clear = rle->max_ocodes;
   rle->rl_table_pixel = rle->rl_pixel;
-  n = 1;
+  int n = 1;
   while (count > 0){
     if (n == 1){
       rle->rl_table_max = 1;
@@ -1483,13 +1468,9 @@ void CxImageGIF::rle_reset_out_clear(struct_RLE* rle)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::rle_flush_withtable(int count, struct_RLE* rle)
 {
-  int repmax;
-  int repleft;
-  int leftover;
-
-  repmax = count / rle->rl_table_max;
-  leftover = count % rle->rl_table_max;
-  repleft = (leftover ? 1 : 0);
+	int repmax = count / rle->rl_table_max;
+  int leftover = count % rle->rl_table_max;
+  int repleft = (leftover ? 1 : 0);
   if (rle->out_count+repmax+repleft > rle->max_ocodes){
     repmax = rle->max_ocodes - rle->out_count;
     leftover = count - (repmax * rle->rl_table_max);
@@ -1517,18 +1498,14 @@ void CxImageGIF::rle_flush_withtable(int count, struct_RLE* rle)
 ////////////////////////////////////////////////////////////////////////////////
 unsigned int CxImageGIF::rle_compute_triangle_count(unsigned int count, unsigned int nrepcodes)
 {
-  unsigned int perrep;
-  unsigned int cost;
-
-  cost = 0;
-  perrep = (nrepcodes * (nrepcodes+1)) / 2;
+	unsigned int cost = 0;
+  unsigned int perrep = (nrepcodes * (nrepcodes + 1)) / 2;
   while (count >= perrep){
     cost += nrepcodes;
     count -= perrep;
   }
   if (count > 0){
-    unsigned int n;
-    n = rle_isqrt(count);
+	  unsigned int n = rle_isqrt(count);
     while ((n*(n+1)) >= 2*count) n --;
     while ((n*(n+1)) < 2*count) n ++;
     cost += n;
@@ -1553,8 +1530,7 @@ unsigned int CxImageGIF::rle_isqrt(unsigned int x)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::rle_flush_clearorrep(int count, struct_RLE* rle)
 {
-  int withclr;
-  withclr = 1 + rle_compute_triangle_count(count,rle->max_ocodes);
+	int withclr = 1 + rle_compute_triangle_count(count, rle->max_ocodes);
   if (withclr < count) {
     rle_output(rle->code_clear,rle);
     rle_clear(rle);
@@ -1620,10 +1596,9 @@ void CxImageGIF::compressRLE( int init_bits, CxFile* outfile)
 
   rle_output(rle.code_clear,&rle);
 
-  int c;
   for( ;; )
   {
-    c = GifNextPixel();
+    int c = GifNextPixel();
     if ((rle.rl_count > 0) && (c != rle.rl_pixel)) rle_flush(&rle);
     if (c == EOF) break;
     if (rle.rl_pixel == c){

@@ -127,7 +127,7 @@ void CASCFolder::initBuildInfo()
 	// now loop across file lines with actual values
 	while (in.readLineInto(&line))
 	{
-		QString version, product;
+		QString version;
 		QStringList values = line.split('|');
 
 		// if inactive config, skip it
@@ -142,7 +142,7 @@ void CASCFolder::initBuildInfo()
 				captured(4);
 
 		// grab product name for this line
-		product = values[productIndex];
+		QString product = values[productIndex];
 
 		// grab locale(s) for this line
 		values = values[tagIndex].split(':');
@@ -214,8 +214,8 @@ void CASCFolder::addExtraEncryptionKeys()
 			if (keyName.isEmpty() || keyValue.isEmpty())
 				continue;
 
-			bool ok, ok2;
-			ok2 = CascAddStringEncryptionKey(hStorage, keyName.toULongLong(&ok, 16), keyValue.toStdString().c_str());
+			bool ok;
+			bool ok2 = CascAddStringEncryptionKey(hStorage, keyName.toULongLong(&ok, 16), keyValue.toStdString().c_str());
 			if (!ok2)
 				LOG_ERROR << "Failed to add TACT key from file, Name:" << keyName << ", Value:" << keyValue;
 		}
