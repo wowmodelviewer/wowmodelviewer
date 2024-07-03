@@ -27,7 +27,7 @@ private:
 	static const int ID_BTN_IMPORT;
 
 	void OnImportButtonClicked(wxCommandEvent& event);
-	void OnDisplayButtonClicked(wxCommandEvent& event);
+	//void OnDisplayButtonClicked(wxCommandEvent& event);
 
 	DECLARE_EVENT_TABLE();
 };

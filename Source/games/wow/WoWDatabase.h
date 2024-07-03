@@ -49,7 +49,7 @@ namespace wow
 	{
 	public:
 		WoWDatabase();
-		WoWDatabase(WoWDatabase&);
+		//WoWDatabase(WoWDatabase&);
 
 		~WoWDatabase()
 		{

@@ -48,8 +48,8 @@ public:
 private:
 	CASCFolder(const CASCFolder&);
 
-	void initLocales();
-	void initVersion();
+	//void initLocales();
+	//void initVersion();
 	void initBuildInfo();
 	void addExtraEncryptionKeys();
 

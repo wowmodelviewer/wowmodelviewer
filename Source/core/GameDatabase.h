@@ -89,7 +89,7 @@ namespace core
 	{
 	public:
 		GameDatabase();
-		GameDatabase(GameDatabase&);
+		//GameDatabase(GameDatabase&);
 
 		bool initFromXML(const QString& file);
 

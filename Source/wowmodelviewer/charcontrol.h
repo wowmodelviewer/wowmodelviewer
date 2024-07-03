@@ -47,7 +47,7 @@ public:
 
 	void RefreshModel();
 	void RefreshEquipment();
-	inline void RandomiseChar();
+	//inline void RandomiseChar();
 
 	void OnTabardSpin(wxSpinEvent& event);
 	void OnCheck(wxCommandEvent& event);

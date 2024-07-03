@@ -120,7 +120,7 @@ public:
 	void OnAbout(wxCommandEvent& event);
 	void OnCheckForUpdate(wxCommandEvent& event);
 	void OnCanvasSize(wxCommandEvent& event);
-	void OnTest(wxCommandEvent& event);
+	//void OnTest(wxCommandEvent& event);
 	void OnExport(wxCommandEvent& event);
 	void OnExportOther(wxCommandEvent& event);
 

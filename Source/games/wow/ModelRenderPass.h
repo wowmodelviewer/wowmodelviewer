@@ -37,7 +37,7 @@ public:
 	int geoIndex;
 
 	bool init();
-	int BlendValueForMode(int mode);
+	//int BlendValueForMode(int mode);
 
 	void render(bool animated);
 
