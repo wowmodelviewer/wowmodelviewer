@@ -335,7 +335,7 @@ bool CxImage::HistogramEqualize()
     if (info.nEscape) break;
     for(x=0; x < head.biWidth; x++){
       color = BlindGetPixelColor( x, y );
-      unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
+      const unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
       histogram[YVal]++;
     }
   }
@@ -348,8 +348,8 @@ bool CxImage::HistogramEqualize()
   }
 
   // equalize
-  unsigned int low = map[0];
-  unsigned int high = map[255];
+  const unsigned int low = map[0];
+  const unsigned int high = map[255];
   if (low == high) return false;
   for( i = 0; i <= 255; i++ ){
     equalize_map[i] = (unsigned int)((((double)( map[i] - low ) ) * 255) / ( high - low ) );
@@ -408,7 +408,7 @@ bool CxImage::HistogramNormalize()
     if (info.nEscape) break;
     for(x=0; x < head.biWidth; x++){
       color = BlindGetPixelColor( x, y );
-      unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
+      const unsigned int YVal = (unsigned int)RGB2GRAY(color.rgbRed, color.rgbGreen, color.rgbBlue);
       histogram[YVal]++;
     }
   }
@@ -519,7 +519,7 @@ bool CxImage::HistogramLog()
   }
 
   // Logarithm Operator
-  double k = 255.0 / ::log( 1.0 + (double)high );
+  const double k = 255.0 / ::log( 1.0 + (double)high );
   if( head.biClrUsed == 0 ){
     for( y = 0; y < head.biHeight; y++ ){
       info.nProgress = (long)(50+50*y/head.biHeight);
@@ -584,7 +584,7 @@ bool CxImage::HistogramRoot()
   }
 
   // Root Operator
-  double k = 128.0 / ::log( 1.0 + (double)high );
+  const double k = 128.0 / ::log( 1.0 + (double)high );
   if( head.biClrUsed == 0 ){
     for( y = 0; y < head.biHeight; y++ ){
       info.nProgress = (long)(50+50*y/head.biHeight);

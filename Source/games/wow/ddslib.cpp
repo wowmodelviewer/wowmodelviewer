@@ -277,8 +277,8 @@ fixme: make endian-safe
 */
 static void DDSDecodeColorBlock(unsigned int* pixel, ddsColorBlock_t* block, int width, unsigned int colors[4])
 {
-	unsigned int masks[] = {3, 12, 3 << 4, 3 << 6}; /* bit masks = 00000011, 00001100, 00110000, 11000000 */
-	int shift[] = {0, 2, 4, 6};
+	const unsigned int masks[] = {3, 12, 3 << 4, 3 << 6}; /* bit masks = 00000011, 00001100, 00110000, 11000000 */
+	const int shift[] = {0, 2, 4, 6};
 
 	/* r steps through lines in y */
 	for (int r = 0; r < 4; r++, pixel += (width - 4)) /* no width * 4 as unsigned int ptr inc will * 4 */
@@ -471,8 +471,8 @@ int DDSDecompressDXT1(unsigned char* src, int width, int height, unsigned char* 
 	ddsColor_t colors[4];
 
 	/* setup */
-	int xBlocks = width / 4;
-	int yBlocks = height / 4;
+	const int xBlocks = width / 4;
+	const int yBlocks = height / 4;
 
 	/* walk y */
 	for (int y = 0; y < yBlocks; y++)
@@ -502,15 +502,15 @@ int DDSDecompressDXT3(unsigned char* src, int width, int height, unsigned char* 
 	ddsColor_t colors[4]{};
 
 	/* setup */
-	int xBlocks = width / 4;
-	int yBlocks = height / 4;
+	const int xBlocks = width / 4;
+	const int yBlocks = height / 4;
 
 	/* create zero alpha */
 	colors[0].a = 0;
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
+	const unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
 	for (int y = 0; y < yBlocks; y++)
@@ -549,15 +549,15 @@ int DDSDecompressDXT5(unsigned char* src, int width, int height, unsigned char* 
 	ddsColor_t colors[4]{};
 
 	/* setup */
-	int xBlocks = width / 4;
-	int yBlocks = height / 4;
+	const int xBlocks = width / 4;
+	const int yBlocks = height / 4;
 
 	/* create zero alpha */
 	colors[0].a = 0;
 	colors[0].r = 0xFF;
 	colors[0].g = 0xFF;
 	colors[0].b = 0xFF;
-	unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
+	const unsigned int alphaZero = *reinterpret_cast<unsigned int*>(&colors[0]);
 
 	/* walk y */
 	for (int y = 0; y < yBlocks; y++)

@@ -168,7 +168,7 @@ bool WowModelViewApp::OnInit()
 	icon = new wxICON("MAINICON");
 	if (!icon->Ok())
 	{
-		wxBitmap* bitmap = createBitmapFromResource(L"ICON3");
+		const wxBitmap* bitmap = createBitmapFromResource(L"ICON3");
 		if (!bitmap)
 		{
 			wxMessageBox(wxT("Failed to load bitmap"), wxT("Failure"));
@@ -285,7 +285,7 @@ bool WowModelViewApp::OnInit()
 			SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),
 			                        FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_RED);
 
-			HWND console = GetConsoleWindow();
+			const HWND console = GetConsoleWindow();
 			RECT r;
 			GetWindowRect(console, &r);
 			MoveWindow(console, r.left, r.top, 800, 600, TRUE);
@@ -364,7 +364,7 @@ void WowModelViewApp::OnUnhandledException()
 
 void WowModelViewApp::LoadSettings()
 {
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
 	// graphic settings
 	video.curCap.aaSamples = config.value("Graphics/FSAA", 0).toInt();

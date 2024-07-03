@@ -673,13 +673,13 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
                               unsigned int& result) const
 {
 	unsigned char* recordOffset = m_recordOffsets[recordIndex];
-	field_storage_info info = m_fieldStorageInfo[fieldIndex];
+	const field_storage_info info = m_fieldStorageInfo[fieldIndex];
 	switch (info.storage_type)
 	{
 	case FIELD_COMPRESSION::NONE:
 		{
 			uint fieldSize = info.field_size_bits / 8;
-			unsigned char* fieldOffset = recordOffset + info.field_offset_bits / 8;
+			const unsigned char* fieldOffset = recordOffset + info.field_offset_bits / 8;
 
 			if (arraySize != 1)
 			{
@@ -720,10 +720,10 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 	case FIELD_COMPRESSION::COMMON_DATA:
 		{
 			result = info.val1;
-			auto mapIt = m_commonData.find(fieldIndex);
+			const auto mapIt = m_commonData.find(fieldIndex);
 			if (mapIt != m_commonData.end())
 			{
-				auto valIt = mapIt->second.find(m_IDs[recordIndex]);
+				const auto valIt = mapIt->second.find(m_IDs[recordIndex]);
 				if (valIt != mapIt->second.end())
 					result = valIt->second;
 			}
@@ -731,17 +731,17 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 		}
 	case FIELD_COMPRESSION::BITPACKED_INDEXED:
 		{
-			uint32 index = readBitpackedValue(info, recordOffset);
-			auto it = m_palletBlockOffsets.find(fieldIndex);
-			uint32 offset = it->second + index * 4;
+			const uint32 index = readBitpackedValue(info, recordOffset);
+			const auto it = m_palletBlockOffsets.find(fieldIndex);
+			const uint32 offset = it->second + index * 4;
 			memcpy(&result, getBuffer() + offset, 4);
 			break;
 		}
 	case FIELD_COMPRESSION::BITPACKED_INDEXED_ARRAY:
 		{
-			uint32 index = readBitpackedValue(info, recordOffset);
-			auto it = m_palletBlockOffsets.find(fieldIndex);
-			uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
+			const uint32 index = readBitpackedValue(info, recordOffset);
+			const auto it = m_palletBlockOffsets.find(fieldIndex);
+			const uint32 offset = it->second + index * arraySize * 4 + arrayIndex * 4;
 			memcpy(&result, getBuffer() + offset, 4);
 			break;
 		}
@@ -755,8 +755,8 @@ bool WDC2File::readFieldValue(unsigned int recordIndex, unsigned int fieldIndex,
 
 uint32 WDC2File::readBitpackedValue(field_storage_info info, unsigned char* recordOffset) const
 {
-	unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
-	unsigned int offset = info.field_offset_bits / 8;
+	const unsigned int Size = (info.field_size_bits + (info.field_offset_bits & 7) + 7) / 8;
+	const unsigned int offset = info.field_offset_bits / 8;
 	unsigned char* v = new unsigned char[Size];
 
 	memcpy(v, recordOffset + offset, Size);

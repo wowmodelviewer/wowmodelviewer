@@ -100,11 +100,11 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		QString url = m_URLname->GetValue().utf8_str();
+		const QString url = m_URLname->GetValue().utf8_str();
 
-		for (auto it : PLUGINMANAGER)
+		for (const auto it : PLUGINMANAGER)
 		{
-			ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
+			const ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
 			if (plugin && plugin->acceptURL(url))
 			{
 				m_importedItem = plugin->importItem(url);

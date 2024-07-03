@@ -228,7 +228,7 @@ bool ModelRenderPass::init()
 
 void ModelRenderPass::render(bool animated)
 {
-	ModelGeosetHD* geoset = model->geosets[geoIndex];
+	const ModelGeosetHD* geoset = model->geosets[geoIndex];
 	// we don't want to render completely transparent parts
 	// render
 	if (animated)
@@ -246,7 +246,7 @@ void ModelRenderPass::render(bool animated)
 			glBegin(GL_TRIANGLES);
 			for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
 			{
-				uint32 a = model->indices[b];
+				const uint32 a = model->indices[b];
 				glNormal3fv(glm::value_ptr(model->normals[a]));
 				glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
 				glVertex3fv(glm::value_ptr(model->vertices[a]));
@@ -268,7 +268,7 @@ void ModelRenderPass::render(bool animated)
 		glBegin(GL_TRIANGLES);
 		for (size_t k = 0, b = geoset->istart; k < geoset->icount; k++, b++)
 		{
-			uint16 a = model->indices[b];
+			const uint16 a = model->indices[b];
 			glNormal3fv(glm::value_ptr(model->normals[a]));
 			glTexCoord2fv(glm::value_ptr(model->origVertices[a].texcoords));
 			glVertex3fv(glm::value_ptr(model->vertices[a]));

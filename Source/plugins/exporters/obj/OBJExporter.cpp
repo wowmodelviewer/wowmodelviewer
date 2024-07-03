@@ -139,13 +139,13 @@ bool OBJExporter::exportModel(Model* m, std::wstring target)
 				obj << "# " << "\n";
 				obj << "# " << (*it)->name() << "\n";
 				obj << "# " << "\n";
-				for (auto& It : itemModels)
+				for (const auto& It : itemModels)
 				{
 					WoWModel* itemModel = It.second;
 					LOG_INFO << "Exporting attached item" << itemModel->modelname.c_str();
 
 					// find matrix
-					int l = model->attLookup[It.first];
+					const int l = model->attLookup[It.first];
 					glm::mat4 M;
 					glm::vec3 pos;
 					if (l > -1)
@@ -381,7 +381,7 @@ bool OBJExporter::exportModelMaterials(WoWModel* model, QTextStream& file, QStri
 
 	LOG_INFO << "nb textures to export :" << texToExport.size();
 
-	for (auto& it : texToExport)
+	for (const auto& it : texToExport)
 		exportGLTexture(it.second, it.first);
 
 	return true;

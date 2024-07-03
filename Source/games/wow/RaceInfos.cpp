@@ -103,7 +103,7 @@ int RaceInfos::getHDModelForFileID(int fileid)
 		const auto raceID = it->second.raceID;
 		const auto sexID = it->second.sexID;
 
-		for (auto& r : RACES)
+		for (const auto& r : RACES)
 		{
 			if (r.second.raceID == raceID && r.second.sexID == sexID && r.second.isHD)
 			{
@@ -130,7 +130,7 @@ bool RaceInfos::getRaceInfosForFileID(int fileid, RaceInfos& infos)
 
 int RaceInfos::getFileIDForRaceSex(const int& race, const int& sex)
 {
-	for (auto& r : RACES)
+	for (const auto& r : RACES)
 	{
 		if (r.second.raceID == race && r.second.sexID == sex)
 			return r.first;

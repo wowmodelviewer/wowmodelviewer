@@ -148,11 +148,11 @@ bool loadDataFromResource(char*& t_data, DWORD& t_dataSize, const wxString& t_na
 {
 	bool r_result = false;
 
-	HRSRC a_resource = FindResource(nullptr, t_name.c_str(), RT_RCDATA);
+	const HRSRC a_resource = FindResource(nullptr, t_name.c_str(), RT_RCDATA);
 
 	if (nullptr != a_resource)
 	{
-		HGLOBAL a_resHandle = LoadResource(nullptr, a_resource);
+		const HGLOBAL a_resHandle = LoadResource(nullptr, a_resource);
 		if (nullptr != a_resHandle)
 		{
 			t_data = static_cast<char*>(LockResource(a_resHandle));

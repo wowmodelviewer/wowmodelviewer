@@ -205,7 +205,7 @@ void AnimManager::SetFrame(size_t f) // Only called by the animation slider, or 
 	const ssize_t id = animList[PlayIndex].AnimID;
 
 	// ideal frame interval:
-	int frameInterval = model.anims[id].length / 60;
+	const int frameInterval = model.anims[id].length / 60;
 
 	uint i = 1;
 

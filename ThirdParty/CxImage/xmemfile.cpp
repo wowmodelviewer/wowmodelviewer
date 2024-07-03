@@ -51,7 +51,7 @@ size_t CxMemFile::Read(void *buffer, size_t size, size_t count)
   if (m_pBuffer==NULL) return 0;
   if (m_Position >= (long)m_Size) return 0;
 
-  long nCount = (long)(count*size);
+  const long nCount = (long)(count*size);
   if (nCount == 0) return 0;
 
   long nRead;
@@ -71,7 +71,7 @@ size_t CxMemFile::Write(const void *buffer, size_t size, size_t count)
   if (m_pBuffer==NULL) return 0;
   if (buffer==NULL) return 0;
 
-  long nCount = (long)(count*size);
+  const long nCount = (long)(count*size);
   if (nCount == 0) return 0;
 
   if (m_Position + nCount > m_Edge){
@@ -163,7 +163,7 @@ char * CxMemFile::GetS(char *string, int n)
   n--;
   long i=0;
   while (i<n){
-    long c = GetC();
+	  const long c = GetC();
     if (c == EOF) return 0;
     string[i++] = (char)c;
     if (c == '\n') break;
@@ -182,7 +182,7 @@ bool CxMemFile::Alloc(DWORD dwNewLen)
   if (dwNewLen > (DWORD)m_Edge)
   {
     // find new buffer size
-    DWORD dwNewBufferSize = (DWORD)(((dwNewLen>>16)+1)<<16);
+    const DWORD dwNewBufferSize = (DWORD)(((dwNewLen>>16)+1)<<16);
 
     // allocate new buffer
     if (m_pBuffer == NULL) m_pBuffer = (BYTE*)malloc(dwNewBufferSize);

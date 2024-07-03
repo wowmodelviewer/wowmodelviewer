@@ -195,7 +195,7 @@ void wow::WoWFolder::onChildRemoved(GameFile* child)
 
 QString wow::WoWFolder::fileName(int id)
 {
-	auto it = m_idNameMap.find(id);
+	const auto it = m_idNameMap.find(id);
 	if (it == m_idNameMap.end())
 		return QString();
 	return it->second;
@@ -203,7 +203,7 @@ QString wow::WoWFolder::fileName(int id)
 
 int wow::WoWFolder::fileID(QString fileName)
 {
-	auto it = m_nameIdMap.find(fileName);
+	const auto it = m_nameIdMap.find(fileName);
 	if (it == m_nameIdMap.end())
 		return -1;
 	return it->second;

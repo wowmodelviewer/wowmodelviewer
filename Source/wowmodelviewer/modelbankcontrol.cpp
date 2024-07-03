@@ -124,7 +124,7 @@ void ModelBankControl::LoadModel()
 		for (size_t i = 0; i < grp.count; i++)
 			grp.tex[i] = cd.textures[i];
 
-		int Val = g_animControl->AddSkin(grp);
+		const int Val = g_animControl->AddSkin(grp);
 		g_animControl->SetSkin(Val);
 	}
 }
@@ -190,7 +190,7 @@ void ModelBankControl::AddModel()
 
 void ModelBankControl::RemoveModel()
 {
-	int val = lstBank->GetSelection();
+	const int val = lstBank->GetSelection();
 	if (val == wxNOT_FOUND)
 		return;
 

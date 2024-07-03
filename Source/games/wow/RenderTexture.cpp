@@ -173,7 +173,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 		// Define the minimum pixel format requirements we will need for our 
 		// p-buffer. A p-buffer is just like a frame buffer, it can have a depth 
 		// buffer associated with it and it can be double buffered.
-		int pf_attr[] =
+		const int pf_attr[] =
 		{
 			WGL_SUPPORT_OPENGL_ARB, TRUE, // P-buffer will be used with OpenGL
 			WGL_DRAW_TO_PBUFFER_ARB, TRUE, // Enable render to p-buffer
@@ -202,7 +202,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 		// Set some p-buffer attributes so that we can use this p-buffer as a
 		// 2D RGBA texture target.
-		int pb_attr[] =
+		const int pb_attr[] =
 		{
 			WGL_TEXTURE_FORMAT_ARB, WGL_TEXTURE_RGBA_ARB, // Our p-buffer will have a texture format of RGBA
 			WGL_TEXTURE_TARGET_ARB, WGL_TEXTURE_2D_ARB, // Of texture target will be GL_TEXTURE_2D

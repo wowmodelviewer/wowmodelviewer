@@ -311,7 +311,7 @@ void VideoSettings::EnumDisplayModes()
 	results.resize(2); // 2 elements
 	wglGetPixelFormatAttribivARB(hDC, 0, 0, 1, &iAttributes[0], &results[0]);
 	// get the number of contexts we can create
-	size_t num_pfd = results[0];
+	const size_t num_pfd = results[0];
 	iAttributes.clear();
 	results.clear();
 
@@ -472,7 +472,7 @@ bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
 	std::vector<int> iAttributes;
 	std::vector<int> results;
 	unsigned int numformats;
-	float fAtrributes[] = {0, 0};
+	const float fAtrributes[] = {0, 0};
 
 	iAttributes.push_back(WGL_DRAW_TO_WINDOW_ARB);
 	iAttributes.push_back(GL_TRUE);
@@ -503,7 +503,7 @@ bool VideoSettings::GetCompatibleWinMode(VideoCaps caps)
 	iAttributes.push_back(0);
 	iAttributes.push_back(0);
 
-	int status = wglChoosePixelFormatARB(hDC, &iAttributes[0], fAtrributes, 1, &pixelFormat, &numformats);
+	const int status = wglChoosePixelFormatARB(hDC, &iAttributes[0], fAtrributes, 1, &pixelFormat, &numformats);
 	// find a matching format
 	if (status == GL_TRUE && numformats)
 	{
@@ -634,7 +634,7 @@ void VideoSettings::SetMode()
 	}
 
 	unsigned int numFormats;
-	float fAttributes[] = {0, 0};
+	const float fAttributes[] = {0, 0};
 	std::vector<int> AttributeList;
 
 	AttributeList.push_back(WGL_DRAW_TO_WINDOW_ARB);
@@ -672,7 +672,7 @@ void VideoSettings::SetMode()
 	AttributeList.push_back(0);
 
 
-	GLboolean status = wglChoosePixelFormatARB(hDC, &AttributeList[0], fAttributes, 1, &pixelFormat, &numFormats);
+	const GLboolean status = wglChoosePixelFormatARB(hDC, &AttributeList[0], fAttributes, 1, &pixelFormat, &numFormats);
 	if (status == GL_TRUE && numFormats)
 	{
 		if (SetPixelFormat(hDC, pixelFormat, &pfd) == FALSE)

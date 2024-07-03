@@ -255,7 +255,7 @@ void ModelControl::RefreshModel(Attachment* root)
 	{
 		attachments.clear();
 
-		WoWModel* m = static_cast<WoWModel*>(root->model());
+		const WoWModel* m = static_cast<WoWModel*>(root->model());
 		if (m)
 		{
 			//  wxASSERT(m);
@@ -387,7 +387,7 @@ void ModelControl::Update()
 	GeosetTreeItemIds.clear();
 	clbGeosets->DeleteAllItems();
 	clbGeosets->SetWindowStyle(wxTR_HIDE_ROOT);
-	wxTreeItemId root = clbGeosets->AddRoot(_("Model Geosets"));
+	const wxTreeItemId root = clbGeosets->AddRoot(_("Model Geosets"));
 	for (size_t i = 0; i < model->geosets.size(); i++)
 	{
 		size_t mesh = model->geosets[i]->id / 100;
@@ -471,8 +471,8 @@ void ModelControl::UpdateGeosetSelection()
 		return;
 	for (auto it = begin(GeosetTreeItemIds); it != end(GeosetTreeItemIds); ++it)
 	{
-		GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(*it));
-		size_t id = data->geosetId;
+		const GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(*it));
+		const size_t id = data->geosetId;
 		clbGeosets->SetItemBackgroundColour(*it,
 		                                    (model->isGeosetDisplayed(id)) ? *wxGREEN : *wxWHITE);
 	}
@@ -523,8 +523,8 @@ void ModelControl::OnCheck(wxCommandEvent& event)
 	if (!init || !model)
 		return;
 
-	int id = event.GetId();
-	bool check = event.IsChecked();
+	const int id = event.GetId();
+	const bool check = event.IsChecked();
 	switch (id)
 	{
 	case ID_MODEL_BONES:
@@ -562,7 +562,7 @@ void ModelControl::OnCombo(wxCommandEvent& event)
 	if (!init)
 		return;
 
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_MODEL_LOD)
 	{
@@ -593,7 +593,7 @@ void ModelControl::OnCombo(wxCommandEvent& event)
 	else if (id == ID_MODEL_NAME)
 	{
 		/* Alfred 2009/07/16 fix crash, remember CurrentSelection before UpdateModel() */
-		int CurrentSelection = modelname->GetCurrentSelection();
+		const int CurrentSelection = modelname->GetCurrentSelection();
 		if (CurrentSelection < static_cast<int>(attachments.size()))
 		{
 			UpdateModel(attachments[CurrentSelection]);
@@ -611,15 +611,15 @@ void ModelControl::OnList(wxTreeEvent& event)
 	if (!init || !model)
 		return;
 
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_MODEL_GEOSETS)
 	{
-		wxTreeItemId curItem = clbGeosets->GetSelection();
-		GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(curItem));
+		const wxTreeItemId curItem = clbGeosets->GetSelection();
+		const GeosetTreeItemData* data = static_cast<GeosetTreeItemData*>(clbGeosets->GetItemData(curItem));
 		if (data)
 		{
-			size_t geosetIndex = data->geosetId;
+			const size_t geosetIndex = data->geosetId;
 			model->showGeoset(geosetIndex, !model->isGeosetDisplayed(geosetIndex));
 			clbGeosets->SetItemBackgroundColour(curItem,
 			                                    (model->isGeosetDisplayed(geosetIndex)) ? *wxGREEN : *wxWHITE);
@@ -638,7 +638,7 @@ void ModelControl::OnSlider(wxScrollEvent& event)
 	if (!init || !model)
 		return;
 
-	int id = event.GetId();
+	const int id = event.GetId();
 	if (id == ID_MODEL_ALPHA)
 	{
 		model->alpha_ = event.GetInt() / 100.0f;
@@ -660,7 +660,7 @@ void ModelControl::OnEnter(wxCommandEvent& event)
 	if (!init || !model)
 		return;
 
-	int eventID = event.GetId();
+	const int eventID = event.GetId();
 
 	if (eventID == ID_MODEL_X || eventID == ID_MODEL_Y || eventID == ID_MODEL_Z ||
 		eventID == ID_MODEL_ROT_X || eventID == ID_MODEL_ROT_Y || eventID == ID_MODEL_ROT_Z)
@@ -707,7 +707,7 @@ void ModelControl::OnColourChange(wxColourPickerEvent& event)
 	if (!init)
 		return;
 
-	glm::vec4 col = fromColWidget(event.GetColour());
+	const glm::vec4 col = fromColWidget(event.GetColour());
 	wxColourPickerCtrl* cpc{};
 
 	switch (event.GetId())
@@ -771,11 +771,11 @@ ScrWindow::ScrWindow(const wxString& title)
 	wxImage::AddHandler(new wxPNGHandler);
 	sw = new wxScrolledWindow(this);
 
-	wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
+	const wxBitmap bmp(title, wxBITMAP_TYPE_PNG);
 	sb = new wxStaticBitmap(sw, -1, bmp);
 
-	int width = bmp.GetWidth();
-	int height = bmp.GetHeight();
+	const int width = bmp.GetWidth();
+	const int height = bmp.GetHeight();
 
 	wxFrameBase::CreateStatusBar();
 	wxString sbarText;

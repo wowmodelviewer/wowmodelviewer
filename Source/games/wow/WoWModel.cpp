@@ -226,10 +226,10 @@ WoWModel::~WoWModel()
 				ribbons.clear();
 				events.clear();
 
-				for (auto it : passes)
+				for (const auto it : passes)
 					delete it;
 
-				for (auto it : geosets)
+				for (const auto it : geosets)
 					delete it;
 			}
 			else
@@ -329,7 +329,7 @@ bool WoWModel::isAnimated()
 		{
 			if (ov_it->weights[b] > 0)
 			{
-				ModelBoneDef& bb = bo[ov_it->bones[b]];
+				const ModelBoneDef& bb = bo[ov_it->bones[b]];
 				if (bb.translation.type || bb.rotation.type || bb.scaling.type || (bb.flags & MODELBONE_BILLBOARD))
 				{
 					if (bb.flags & MODELBONE_BILLBOARD)
@@ -352,7 +352,7 @@ bool WoWModel::isAnimated()
 	{
 		for (uint i = 0; i < bones.size(); i++)
 		{
-			ModelBoneDef& bb = bo[i];
+			const ModelBoneDef& bb = bo[i];
 			if (bb.translation.type || bb.rotation.type || bb.scaling.type)
 			{
 				animBones = true;
@@ -373,7 +373,7 @@ bool WoWModel::isAnimated()
 	// animated colors
 	if (header.nColors)
 	{
-		ModelColorDef* cols = reinterpret_cast<ModelColorDef*>(gamefile->getBuffer() + header.ofsColors);
+		const ModelColorDef* cols = reinterpret_cast<ModelColorDef*>(gamefile->getBuffer() + header.ofsColors);
 		for (size_t i = 0; i < header.nColors; i++)
 		{
 			if (cols[i].color.type != 0 || cols[i].opacity.type != 0)
@@ -387,7 +387,7 @@ bool WoWModel::isAnimated()
 	// animated opacity
 	if (header.nTransparency && !animMisc)
 	{
-		ModelTransDef* trs = reinterpret_cast<ModelTransDef*>(gamefile->getBuffer() + header.ofsTransparency);
+		const ModelTransDef* trs = reinterpret_cast<ModelTransDef*>(gamefile->getBuffer() + header.ofsTransparency);
 		for (size_t i = 0; i < header.nTransparency; i++)
 		{
 			if (trs[i].trans.type != 0)
@@ -908,7 +908,7 @@ void WoWModel::readAnimsFromFile(GameFile* f, std::vector<AFID>& afids, modelAni
 		// if we have animation file ids from AFID chunk, use them
 		if (afids.size() > 0)
 		{
-			for (auto it : afids)
+			for (const auto it : afids)
 			{
 				if ((it.animId == anims[i].animID) && (it.subAnimId == anims[i].subAnimID))
 				{
@@ -1226,7 +1226,7 @@ void WoWModel::setLOD(int index)
 
 	if (gamefile->isChunked())
 	{
-		int numSkinFiles = sizeof(skinFileIDs);
+		const int numSkinFiles = sizeof(skinFileIDs);
 		if (!numSkinFiles)
 		{
 			LOG_ERROR << "Attempt to set view level when no .skin files exist.";
@@ -1245,7 +1245,7 @@ void WoWModel::setLOD(int index)
 				").";
 		}
 
-		uint32 skinfile = skinFileIDs[index];
+		const uint32 skinfile = skinFileIDs[index];
 		g = GAMEDIRECTORY.getFile(skinfile);
 		if (!g || !g->open())
 		{
@@ -1255,7 +1255,7 @@ void WoWModel::setLOD(int index)
 	}
 	else
 	{
-		QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
+		const QString tmpname = QString::fromStdString(modelname).replace(".m2", "", Qt::CaseInsensitive);
 		lodname = QString("%1%2.skin").arg(tmpname).arg(index, 2, 10, QChar('0')).toStdString(); // Lods: 00, 01, 02, 03
 
 		g = GAMEDIRECTORY.getFile(lodname.c_str());
@@ -1267,10 +1267,10 @@ void WoWModel::setLOD(int index)
 	}
 
 	// Texture definitions
-	ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(gamefile->getBuffer() + header.ofsTextures);
+	const ModelTextureDef* texdef = reinterpret_cast<ModelTextureDef*>(gamefile->getBuffer() + header.ofsTextures);
 
 	// Transparency
-	int16* transLookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTransparencyLookup);
+	const int16* transLookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTransparencyLookup);
 
 	if (g->isEof())
 	{
@@ -1279,7 +1279,7 @@ void WoWModel::setLOD(int index)
 		return;
 	}
 
-	ModelView* view = reinterpret_cast<ModelView*>(g->getBuffer());
+	const ModelView* view = reinterpret_cast<ModelView*>(g->getBuffer());
 
 	if (view->id[0] != 'S' || view->id[1] != 'K' || view->id[2] != 'I' || view->id[3] != 'N')
 	{
@@ -1289,8 +1289,8 @@ void WoWModel::setLOD(int index)
 	}
 
 	// Indices,  Triangles
-	uint16* indexLookup = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsIndex);
-	uint16* triangles = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsTris);
+	const uint16* indexLookup = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsIndex);
+	const uint16* triangles = reinterpret_cast<uint16*>(g->getBuffer() + view->ofsTris);
 	rawIndices.clear();
 	rawIndices.resize(view->nTris);
 
@@ -1303,11 +1303,11 @@ void WoWModel::setLOD(int index)
 
 	// render ops
 	ModelGeoset* ops = reinterpret_cast<ModelGeoset*>(g->getBuffer() + view->ofsSub);
-	ModelTexUnit* Tex = reinterpret_cast<ModelTexUnit*>(g->getBuffer() + view->ofsTex);
+	const ModelTexUnit* Tex = reinterpret_cast<ModelTexUnit*>(g->getBuffer() + view->ofsTex);
 	ModelRenderFlags* renderFlags = reinterpret_cast<ModelRenderFlags*>(gamefile->getBuffer() + header.ofsTexFlags);
-	uint16* texlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexLookup);
-	uint16* texanimlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexAnimLookup);
-	int16* texunitlookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTexUnitLookup);
+	const uint16* texlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexLookup);
+	const uint16* texanimlookup = reinterpret_cast<uint16*>(gamefile->getBuffer() + header.ofsTexAnimLookup);
+	const int16* texunitlookup = reinterpret_cast<int16*>(gamefile->getBuffer() + header.ofsTexUnitLookup);
 
 	uint32 istart = 0;
 	for (size_t i = 0; i < view->nSub; i++)
@@ -1328,7 +1328,7 @@ void WoWModel::setLOD(int index)
 		ModelRenderPass* pass = new ModelRenderPass(this, Tex[j].op);
 
 		uint texOffset = 0;
-		uint texCount = Tex[j].op_count;
+		const uint texCount = Tex[j].op_count;
 		// THIS IS A QUICK AND DIRTY WORKAROUND. If op_count > 1 then the texture unit contains multiple textures.
 		// Properly we should display them all, blended, but WMV doesn't support that yet, and it ends up
 		// displaying one randomly. So for now we try to guess which one is the most important by checking
@@ -1336,7 +1336,7 @@ void WoWModel::setLOD(int index)
 		pass->specialTex = specialTextures[texlookup[Tex[j].textureid]];
 		for (size_t k = 0; k < texCount; k++)
 		{
-			int special = specialTextures[texlookup[Tex[j].textureid + k]];
+			const int special = specialTextures[texlookup[Tex[j].textureid + k]];
 			if (special == 11 || special == 12 || special == 13)
 			{
 				texOffset = k;
@@ -1350,7 +1350,7 @@ void WoWModel::setLOD(int index)
 		pass->tex = texlookup[Tex[j].textureid + texOffset];
 
 		// TODO: figure out these flags properly -_-
-		ModelRenderFlags& rf = renderFlags[Tex[j].flagsIndex];
+		const ModelRenderFlags& rf = renderFlags[Tex[j].flagsIndex];
 
 		pass->blendmode = rf.blend;
 		//if (rf.blend == 0) // Test to disable/hide different blend types
@@ -1595,7 +1595,7 @@ void WoWModel::animate(ssize_t Anim)
 {
 	size_t t = 0;
 
-	ModelAnimation& a = anims[Anim];
+	const ModelAnimation& a = anims[Anim];
 	int tmax = a.length;
 	if (tmax == 0)
 		tmax = 1;
@@ -1717,7 +1717,7 @@ inline void WoWModel::drawModel()
 	{
 		glDisable(GL_COLOR_MATERIAL);
 
-		float a[] = {1.0f, 1.0f, 1.0f, alpha_};
+		const float a[] = {1.0f, 1.0f, 1.0f, alpha_};
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, a);
 
 		glEnable(GL_BLEND);
@@ -1765,7 +1765,7 @@ inline void WoWModel::drawModel()
 
 	// Render the various parts of the model.
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for (auto it : passes)
+	for (const auto it : passes)
 	{
 		if (it->init())
 		{
@@ -1783,7 +1783,7 @@ inline void WoWModel::drawModel()
 
 	if (showModel && (alpha_ != 1.0f))
 	{
-		float a[] = {1.0f, 1.0f, 1.0f, 1.0f};
+		const float a[] = {1.0f, 1.0f, 1.0f, 1.0f};
 		glMaterialfv(GL_FRONT, GL_DIFFUSE, a);
 
 		glDisable(GL_BLEND);
@@ -1891,7 +1891,7 @@ void WoWModel::drawBones()
 // Sets up the models attachments
 void WoWModel::setupAtt(int id)
 {
-	int l = attLookup[id];
+	const int l = attLookup[id];
 	if (l > -1)
 		atts[l].setup();
 }
@@ -1899,7 +1899,7 @@ void WoWModel::setupAtt(int id)
 // Sets up the models attachments
 void WoWModel::setupAtt2(int id)
 {
-	int l = attLookup[id];
+	const int l = attLookup[id];
 	if (l >= 0)
 		atts[l].setupParticle();
 }
@@ -1909,7 +1909,7 @@ void WoWModel::drawBoundingVolume()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glBegin(GL_TRIANGLES);
-	for (unsigned int v : boundTris)
+	for (const unsigned int v : boundTris)
 	{
 		if (v < bounds.size())
 			glVertex3fv(glm::value_ptr(bounds[v]));
@@ -1965,7 +1965,7 @@ void WoWModel::drawParticles()
 
 WoWItem* WoWModel::getItem(CharSlots slot)
 {
-	for (auto it : *this)
+	for (const auto it : *this)
 	{
 		if (it->slot() == slot)
 			return it;
@@ -1976,7 +1976,7 @@ WoWItem* WoWModel::getItem(CharSlots slot)
 
 int WoWModel::getItemId(CharSlots slot)
 {
-	auto* item = getItem(slot);
+	const auto* item = getItem(slot);
 
 	if (item == nullptr)
 		return 0;
@@ -1986,7 +1986,7 @@ int WoWModel::getItemId(CharSlots slot)
 
 bool WoWModel::isWearingARobe()
 {
-	auto* chest = getItem(CS_CHEST);
+	const auto* chest = getItem(CS_CHEST);
 	if (chest == nullptr)
 		return false;
 
@@ -2004,7 +2004,7 @@ void WoWModel::update(int dt) // (float dt)
 
 void WoWModel::updateTextureList(GameFile* Tex, int special)
 {
-	for (int specialTexture : specialTextures)
+	for (const int specialTexture : specialTextures)
 	{
 		if (specialTexture == special)
 		{
@@ -3887,7 +3887,7 @@ QString WoWModel::getCGGroupName(CharGeosets cg)
 		{CG_HORN_DECORATION, "Horn Decoration"}
 	};
 
-	auto it = groups.find(cg);
+	const auto it = groups.find(cg);
 	if (it != groups.end())
 		result = it->second;
 
@@ -3912,16 +3912,16 @@ bool WoWModel::isGeosetDisplayed(uint geosetindex)
 
 void WoWModel::setGeosetGroupDisplay(CharGeosets group, int val)
 {
-	int a = static_cast<int>(group) * 100;
-	int b = (static_cast<int>(group) + 1) * 100;
-	int geosetID = a + val;
+	const int a = static_cast<int>(group) * 100;
+	const int b = (static_cast<int>(group) + 1) * 100;
+	const int geosetID = a + val;
 
 	// This loop must be done only on first geosets (original ones) in case of merged models
 	// This is why rawGeosets.size() is used as a stop criteria even if we are looping over
 	// geosets member
 	for (uint i = 0; i < rawGeosets.size(); i++)
 	{
-		int id = geosets[i]->id;
+		const int id = geosets[i]->id;
 		if (id > a && id < b)
 			showGeoset(i, (id == geosetID));
 	}
@@ -3974,8 +3974,8 @@ WoWModel* WoWModel::mergeModel(QString& name, int type, bool noRefresh)
 	name = name.replace("\\", "/");
 
 	LOG_INFO << __FUNCTION__ << name;
-	auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
-	                       [&](const WoWModel* m) { return m->gamefile->fullname() == name; });
+	const auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
+	                             [&](const WoWModel* m) { return m->gamefile->fullname() == name; });
 
 	if (it != mergedModels.end())
 		return *it;
@@ -3992,8 +3992,8 @@ WoWModel* WoWModel::mergeModel(QString& name, int type, bool noRefresh)
 WoWModel* WoWModel::mergeModel(uint fileID, int type, bool noRefresh)
 {
 	LOG_INFO << __FUNCTION__ << fileID;
-	auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
-	                       [&](const WoWModel* m) { return m->gamefile->fileDataId() == fileID; });
+	const auto it = std::find_if(std::begin(mergedModels), std::end(mergedModels),
+	                             [&](const WoWModel* m) { return m->gamefile->fileDataId() == fileID; });
 	if (it != mergedModels.end())
 		return *it;
 
@@ -4010,7 +4010,7 @@ WoWModel* WoWModel::mergeModel(WoWModel* m, int type, bool noRefresh)
 {
 	LOG_INFO << __FUNCTION__ << m;
 	m->mergedModelType = type;
-	auto it = mergedModels.insert(m);
+	const auto it = mergedModels.insert(m);
 	if (it.second == true && !noRefresh) // new element inserted
 		refreshMerging();
 	return m;
@@ -4018,7 +4018,7 @@ WoWModel* WoWModel::mergeModel(WoWModel* m, int type, bool noRefresh)
 
 WoWModel* WoWModel::getMergedModel(uint fileID)
 {
-	for (auto it : mergedModels)
+	for (const auto it : mergedModels)
 	{
 		if (it->gamefile->fileDataId() == fileID)
 			return it;
@@ -4044,11 +4044,11 @@ void WoWModel::refreshMerging()
 	specialTextures.resize(TEXTURE_MAX);
 
 	uint mergeIndex = 0;
-	for (auto modelsIt : mergedModels)
+	for (const auto modelsIt : mergedModels)
 	{
-		uint nbVertices = origVertices.size();
-		uint nbIndices = indices.size();
-		uint nbGeosets = geosets.size();
+		const uint nbVertices = origVertices.size();
+		const uint nbIndices = indices.size();
+		const uint nbGeosets = geosets.size();
 
 		// reinit merged model as well, just in case
 		modelsIt->origVertices = modelsIt->rawVertices;
@@ -4108,18 +4108,18 @@ void WoWModel::refreshMerging()
 
 		indices.reserve(indices.size() + modelsIt->indices.size());
 
-		for (auto& it : modelsIt->indices)
+		for (const auto& it : modelsIt->indices)
 			indices.push_back(it + nbVertices);
 
 		// retrieve tex id associated to model hands (needed for DH)
 		uint16 handTex = ModelRenderPass::INVALID_TEX;
-		for (auto it : passes)
+		for (const auto it : passes)
 		{
 			if (geosets[it->geoIndex]->id / 100 == 23)
 				handTex = it->tex;
 		}
 
-		for (auto it : modelsIt->passes)
+		for (const auto it : modelsIt->passes)
 		{
 			ModelRenderPass* p = new ModelRenderPass(*it);
 			p->model = this;
@@ -4141,7 +4141,7 @@ void WoWModel::refreshMerging()
 #endif
 
 		// add model textures
-		for (auto it : modelsIt->textures)
+		for (const auto it : modelsIt->textures)
 		{
 			if (it != ModelRenderPass::INVALID_TEX)
 				textures.push_back(TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(TEXTUREMANAGER.get(it))));
@@ -4206,9 +4206,9 @@ void WoWModel::refreshMerging()
 void WoWModel::unmergeModel(QString& name)
 {
 	LOG_INFO << __FUNCTION__ << name;
-	auto it = std::find_if(std::begin(mergedModels),
-	                       std::end(mergedModels),
-	                       [&](const WoWModel* m) { return m->gamefile->fullname() == name.replace("\\", "/"); });
+	const auto it = std::find_if(std::begin(mergedModels),
+	                             std::end(mergedModels),
+	                             [&](const WoWModel* m) { return m->gamefile->fullname() == name.replace("\\", "/"); });
 
 	if (it != mergedModels.end())
 	{
@@ -4221,9 +4221,9 @@ void WoWModel::unmergeModel(QString& name)
 void WoWModel::unmergeModel(uint fileID)
 {
 	LOG_INFO << __FUNCTION__ << fileID;
-	auto it = std::find_if(std::begin(mergedModels),
-	                       std::end(mergedModels),
-	                       [&](const WoWModel* m) { return m->gamefile->fileDataId() == fileID; });
+	const auto it = std::find_if(std::begin(mergedModels),
+	                             std::end(mergedModels),
+	                             [&](const WoWModel* m) { return m->gamefile->fileDataId() == fileID; });
 
 	if (it != mergedModels.end())
 	{
@@ -4260,7 +4260,7 @@ void WoWModel::refresh()
 		                   .arg((infos.sexID == 0) ? "HelmetGeosetVis1" : "HelmetGeosetVis2")
 		                   .arg(headItemId);
 
-		auto helmetInfos = GAMEDATABASE.sqlQuery(query);
+		const auto helmetInfos = GAMEDATABASE.sqlQuery(query);
 
 		if (helmetInfos.valid && !helmetInfos.values.empty())
 		{
@@ -4273,7 +4273,7 @@ void WoWModel::refresh()
 
 	// reset char texture
 	tex.reset(infos.textureLayoutID);
-	for (auto t : cd.textures)
+	for (const auto t : cd.textures)
 	{
 		if (t.type != 1)
 		{
@@ -4313,7 +4313,7 @@ void WoWModel::refresh()
 	cd.showFeet = infos.barefeet;
 
 	// Reset geosets
-	for (auto geo : cd.geosets)
+	for (const auto geo : cd.geosets)
 		setGeosetGroupDisplay(static_cast<CharGeosets>(geo.first), geo.second);
 
 	// finalize character texture
@@ -4360,7 +4360,7 @@ void WoWModel::restoreRawGeosets()
 {
 	std::vector<bool> geosetDisplayStatus;
 
-	for (auto it : geosets)
+	for (const auto it : geosets)
 	{
 		geosetDisplayStatus.push_back(it->display);
 		delete it;
@@ -4368,14 +4368,14 @@ void WoWModel::restoreRawGeosets()
 
 	geosets.clear();
 
-	for (auto it : rawGeosets)
+	for (const auto it : rawGeosets)
 	{
 		ModelGeosetHD* geo = new ModelGeosetHD(*it);
 		geosets.push_back(geo);
 	}
 
 	uint i = 0;
-	for (auto it : geosetDisplayStatus)
+	for (const auto it : geosetDisplayStatus)
 	{
 		geosets[i]->display = it;
 		i++;
@@ -4477,7 +4477,7 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 	out << "  <SkeletonAndAnimation>" << endl;
 
 	out << "  <GlobalSequences size=\"" << m.globalSequences.size() << "\">" << endl;
-	for (unsigned int globalSequence : m.globalSequences)
+	for (const unsigned int globalSequence : m.globalSequences)
 		out << "<Sequence>" << globalSequence << "</Sequence>" << endl;
 	out << "  </GlobalSequences>" << endl;
 
@@ -4585,8 +4585,8 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 	for (size_t i = 0; i < m.passes.size(); i++)
 	{
 		out << "    <RenderPass id=\"" << i << "\">" << endl;
-		ModelRenderPass* p = m.passes[i];
-		ModelGeosetHD* geoset = m.geosets[p->geoIndex];
+		const ModelRenderPass* p = m.passes[i];
+		const ModelGeosetHD* geoset = m.geosets[p->geoIndex];
 		out << "      <indexStart>" << geoset->istart << "</indexStart>" << endl;
 		out << "      <indexCount>" << geoset->icount << "</indexCount>" << endl;
 		out << "      <vertexStart>" << geoset->vstart << "</vertexStart>" << endl;
@@ -4789,9 +4789,9 @@ std::ostream& operator<<(std::ostream& out, const WoWModel& m)
 
 	//  out << "    <>" << m.header. << "</>" << endl;
 	out << "  <TextureLists>" << endl;
-	for (auto it : m.passes)
+	for (const auto it : m.passes)
 	{
-		GLuint tex = m.getGLTexture(it->tex);
+		const GLuint tex = m.getGLTexture(it->tex);
 		if (tex != ModelRenderPass::INVALID_TEX)
 			out << "    <TextureList id=\"" << tex << "\">" << TEXTUREMANAGER.get(tex).toStdString() << "</TextureList>"
 				<< endl;

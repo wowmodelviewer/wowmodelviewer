@@ -95,12 +95,12 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		QString url = m_URLname->GetValue().utf8_str();
+		const QString url = m_URLname->GetValue().utf8_str();
 
-		NPCInfos* result = nullptr;
-		for (auto it : PLUGINMANAGER)
+		const NPCInfos* result = nullptr;
+		for (const auto it : PLUGINMANAGER)
 		{
-			ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
+			const ImporterPlugin* plugin = dynamic_cast<ImporterPlugin*>(it);
 			if (plugin && plugin->acceptURL(url))
 			{
 				result = plugin->importNPC(url);

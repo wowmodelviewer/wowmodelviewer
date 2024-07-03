@@ -151,7 +151,7 @@ void Texture::load()
 					file->seek(offsets[i]);
 					file->read(buf, sizes[i]);
 
-					int size = ((width + 3) / 4) * ((height + 3) / 4) * blocksize;
+					const int size = ((width + 3) / 4) * ((height + 3) / 4) * blocksize;
 
 					if (video.supportCompression)
 					{
@@ -200,8 +200,8 @@ void Texture::load()
 			unsigned char* buf = new unsigned char[sizes[0]];
 			unsigned int* buf2 = new unsigned int[width * height];
 
-			int alphabits = attr[1];
-			bool hasalpha = (alphabits != 0);
+			const int alphabits = attr[1];
+			const bool hasalpha = (alphabits != 0);
 
 			compressed = false;
 
@@ -218,8 +218,8 @@ void Texture::load()
 					int alpha = 0;
 
 					unsigned int* p = buf2;
-					unsigned char* c = buf;
-					unsigned char* a = buf + width * height;
+					const unsigned char* c = buf;
+					const unsigned char* a = buf + width * height;
 					for (uint y = 0; y < height; y++)
 					{
 						for (uint x = 0; x < width; x++)

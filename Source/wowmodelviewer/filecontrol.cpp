@@ -186,10 +186,10 @@ void FileControl::Init(ModelViewer* mv)
 
 void FileControl::OnChoice(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 	if (id == ID_FILELIST_FILTER)
 	{
-		int curSelection = choFilter->GetCurrentSelection();
+		const int curSelection = choFilter->GetCurrentSelection();
 		if (curSelection >= 0 && curSelection != filterMode)
 		{
 			filterMode = curSelection;
@@ -222,7 +222,7 @@ void FileControl::Export(wxString val, int select)
 
 	LOG_INFO << "Saving" << QString::fromWCharArray(val.c_str());
 
-	wxFileName fn(val);
+	const wxFileName fn(val);
 
 	FILE* hFile = nullptr;
 	wxString filename;
@@ -262,11 +262,11 @@ wxString FileControl::ExportPNG(wxString val)
 	if (val.IsEmpty())
 		return _T("");
 
-	wxFileName fn(val);
+	const wxFileName fn(val);
 	if (fn.GetExt().Lower() != wxT("blp"))
 		return _T("");
 
-	TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
+	const TextureID temptex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(val.c_str())));
 	Texture& tex = *static_cast<Texture*>(TEXTUREMANAGER.items[temptex]);
 	if (tex.w == 0 || tex.h == 0)
 		return _T("");
@@ -282,7 +282,7 @@ wxString FileControl::ExportPNG(wxString val)
 	unsigned char* tempbuf = static_cast<unsigned char*>(malloc(tex.w * tex.h * 4));
 	tex.getPixels(tempbuf, GL_BGRA_EXT);
 
-	QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
+	const QImage PNGFile(tempbuf, tex.w, tex.h, QImage::Format_RGBA8888);
 	PNGFile.save(QString::fromWCharArray(filename.c_str()));
 
 	free(tempbuf);
@@ -291,17 +291,17 @@ wxString FileControl::ExportPNG(wxString val)
 
 void FileControl::OnPopupClick(wxCommandEvent& evt)
 {
-	FileTreeData* data = static_cast<FileTreeData*>(static_cast<wxMenu*>(evt.GetEventObject())->GetClientData());
-	wxString val(data->file->fullname().toStdWString());
+	const FileTreeData* data = static_cast<FileTreeData*>(static_cast<wxMenu*>(evt.GetEventObject())->GetClientData());
+	const wxString val(data->file->fullname().toStdWString());
 
-	int id = evt.GetId();
+	const int id = evt.GetId();
 	if (id == ID_FILELIST_SAVE)
 	{
 		Export(val, 1);
 	}
 	else if (id == ID_FILELIST_VIEW)
 	{
-		wxString temp = ExportPNG(val);
+		const wxString temp = ExportPNG(val);
 
 		if (!temp.IsEmpty())
 		{
@@ -318,13 +318,13 @@ void FileControl::OnPopupClick(wxCommandEvent& evt)
 
 void FileControl::OnTreeMenu(wxTreeEvent& event)
 {
-	wxTreeItemId item = event.GetItem();
+	const wxTreeItemId item = event.GetItem();
 
 	if (!item.IsOk() || !modelviewer->canvas) // make sure that a valid Tree Item was actually selected.
 		return;
 
 	void* data = reinterpret_cast<void*>(fileTree->GetItemData(item));
-	FileTreeData* tdata = static_cast<FileTreeData*>(data);
+	const FileTreeData* tdata = static_cast<FileTreeData*>(data);
 
 	// make sure the data (file name) is valid
 	if (!data)
@@ -502,7 +502,7 @@ void FileControl::UpdateInterface()
 
 void FileControl::OnTreeSelect(wxTreeEvent& event)
 {
-	wxTreeItemId item = event.GetItem();
+	const wxTreeItemId item = event.GetItem();
 
 	// make sure that a valid Tree Item was actually selected.
 	if (!item.IsOk() || !modelviewer->canvas)
@@ -510,7 +510,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		return;
 	}
 
-	FileTreeData* data = static_cast<FileTreeData*>(fileTree->GetItemData(item));
+	const FileTreeData* data = static_cast<FileTreeData*>(fileTree->GetItemData(item));
 
 	// make sure the data (file name) is valid
 	if (!data || !data->file)
@@ -552,9 +552,9 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		//modelviewer->canvas->model->modelType = MT_WMO;
 
 		// if we have selected a non-root wmo, find the root filename
-		char dash = rootfn[rootfn.length() - 8];
-		char num = rootfn[rootfn.length() - 7];
-		bool isroot = !((dash == '_') && (num >= '0') && (num <= '9'));
+		const char dash = rootfn[rootfn.length() - 8];
+		const char num = rootfn[rootfn.length() - 7];
+		const bool isroot = !((dash == '_') && (num >= '0') && (num <= '9'));
 		if (!isroot)
 		{
 			rootfn.erase(rootfn.length() - 8);
@@ -588,10 +588,10 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		ClearCanvas();
 
 		// For Graphics
-		wxString val(data->file->fullname().toStdWString());
+		const wxString val(data->file->fullname().toStdWString());
 		ExportPNG(val);
-		wxFileName fn(val);
-		wxString temp(wxGetCwd() + SLASH + wxT("Export") + SLASH + fn.GetName() + wxT(".png"));
+		const wxFileName fn(val);
+		const wxString temp(wxGetCwd() + SLASH + wxT("Export") + SLASH + fn.GetName() + wxT(".png"));
 		modelviewer->canvas->LoadBackground(temp);
 		wxRemoveFile(temp);
 
@@ -602,7 +602,7 @@ void FileControl::OnTreeSelect(wxTreeEvent& event)
 		ClearCanvas();
 
 		modelviewer->isADT = true;
-		wxString rootfn(data->file->fullname().toStdWString());
+		const wxString rootfn(data->file->fullname().toStdWString());
 		modelviewer->canvas->LoadADT(rootfn);
 
 		UpdateInterface();
@@ -632,7 +632,7 @@ void FileControl::OnTreeCollapsedOrExpanded(wxTreeEvent&)
 
 void FileControl::OnButton(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 	if (id == ID_FILELIST_CONTENT)
 		Init();
 	else if (id == ID_FILELIST_SEARCH)

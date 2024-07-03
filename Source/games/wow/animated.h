@@ -179,7 +179,7 @@ public:
 		{
 			size_t pos = 0;
 			float r;
-			size_t max_time = times[anim][times[anim].size() - 1];
+			const size_t max_time = times[anim][times[anim].size() - 1];
 			//if (max_time > 0)
 			//  time %= max_time; // I think this might not be necessary?
 			if (time > max_time)
@@ -214,8 +214,8 @@ public:
 						break;
 					}
 				}
-				size_t t1 = times[anim][pos];
-				size_t t2 = times[anim][pos + 1];
+				const size_t t1 = times[anim][pos];
+				const size_t t2 = times[anim][pos + 1];
 				r = (time - t1) / static_cast<float>(t2 - t1);
 
 				if (type == INTERPOLATION_NONE)
@@ -263,10 +263,10 @@ public:
 
 		for (size_t j = 0; j < b.nTimes; j++)
 		{
-			AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsTimes + j * sizeof(
+			const AnimationBlockHeader* pHeadTimes = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsTimes + j * sizeof(
 				AnimationBlockHeader));
 
-			unsigned int* ptimes = reinterpret_cast<unsigned int*>(f->getBuffer() + pHeadTimes->ofsEntrys);
+			const unsigned int* ptimes = reinterpret_cast<unsigned int*>(f->getBuffer() + pHeadTimes->ofsEntrys);
 			for (size_t i = 0; i < pHeadTimes->nEntrys; i++)
 				times[j].push_back(ptimes[i]);
 		}
@@ -274,7 +274,7 @@ public:
 		// keyframes
 		for (size_t j = 0; j < b.nKeys; j++)
 		{
-			AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsKeys + j * sizeof(
+			const AnimationBlockHeader* pHeadKeys = reinterpret_cast<AnimationBlockHeader*>(f->getBuffer() + b.ofsKeys + j * sizeof(
 				AnimationBlockHeader));
 
 			D* keys = reinterpret_cast<D*>(f->getBuffer() + pHeadKeys->ofsEntrys);

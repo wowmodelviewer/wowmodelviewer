@@ -166,7 +166,7 @@ void WoWItem::unload()
 	itemModels_.clear();
 
 	// release textures and clear map
-	for (auto& itemTexture : itemTextures_)
+	for (const auto& itemTexture : itemTextures_)
 		TEXTUREMANAGER.delbyname(itemTexture.second->fullname());
 
 	itemTextures_.clear();
@@ -213,13 +213,13 @@ void WoWItem::load()
 		iteminfos))
 		return;
 
-	int geosetGroup[6] = {
+	const int geosetGroup[6] = {
 		iteminfos.values[0][0].toInt(), iteminfos.values[0][1].toInt(),
 		iteminfos.values[0][2].toInt(), iteminfos.values[0][3].toInt(),
 		iteminfos.values[0][4].toInt(), iteminfos.values[0][5].toInt()
 	};
 
-	int attachmentGeosetGroup[6] =
+	const int attachmentGeosetGroup[6] =
 	{
 		iteminfos.values[0][6].toInt(), iteminfos.values[0][7].toInt(),
 		iteminfos.values[0][8].toInt(), iteminfos.values[0][9].toInt(),
@@ -229,10 +229,10 @@ void WoWItem::load()
 	displayFlags_ = iteminfos.values[0][12].toInt();
 
 	// query models
-	int models[2] = {getCustomModelId(0), getCustomModelId(1)};
+	const int models[2] = {getCustomModelId(0), getCustomModelId(1)};
 
 	// query textures
-	int textures[2] = {getCustomTextureId(0), getCustomTextureId(1)};
+	const int textures[2] = {getCustomTextureId(0), getCustomTextureId(1)};
 
 	// query textures from ItemDisplayInfoMaterialRes (if relevant)
 	auto texinfos = GAMEDATABASE.sqlQuery(
@@ -303,7 +303,7 @@ void WoWItem::load()
 			const auto query = QString("SELECT ID, PositionIndex FROM ComponentModelFileData "
 				"WHERE ID IN (%1,%2)").arg(models[0]).arg(models[1]);
 
-			auto result = GAMEDATABASE.sqlQuery(query);
+			const auto result = GAMEDATABASE.sqlQuery(query);
 
 			auto leftIndex = 0;
 			auto rightIndex = 1;

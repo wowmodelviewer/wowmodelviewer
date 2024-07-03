@@ -239,7 +239,7 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 	NPCimporterDialog* dlg = new NPCimporterDialog();
 	if (dlg->ShowModal() == wxID_OK)
 	{
-		int modelid = dlg->getImportedId();
+		const int modelid = dlg->getImportedId();
 		if (modelid != -1)
 		{
 			int id = 0;
@@ -256,15 +256,15 @@ void FilteredChoiceDialog::OnImportNPC(wxCommandEvent& event)
 			if (!found)
 			{
 				// npc is not present in current database
-				NPCRecord rec(dlg->getNPCLine());
+				const NPCRecord rec(dlg->getNPCLine());
 				if (rec.model > 0)
 				{
 					npcs.push_back(rec);
 					id = npcs.size() - 1;
-					QString query = QString(
-						                "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
-					                .
-					                arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
+					const QString query = QString(
+						                      "INSERT INTO Creature(ID,CreatureType,DisplayID1,Name_Lang) VALUES (%1,%2,%3,\"%4\")")
+					                      .
+					                      arg(modelid).arg(rec.type).arg(rec.model).arg(rec.name);
 					GAMEDATABASE.sqlQuery(query);
 				}
 			}
@@ -281,7 +281,7 @@ void FilteredChoiceDialog::OnImportItem(wxCommandEvent& event)
 	ItemImporterDialog* dlg = new ItemImporterDialog();
 	if (dlg->ShowModal() == wxID_OK)
 	{
-		ItemRecord rec = dlg->getImportedItem();
+		const ItemRecord rec = dlg->getImportedItem();
 		if (rec.id != 0)
 		{
 			bool found = false;

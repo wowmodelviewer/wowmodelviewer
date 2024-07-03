@@ -335,14 +335,14 @@ void Liquid::initTextures(wxString basename, int first, int last)
 	for (ssize_t i = first; i <= last; i++)
 	{
 		buf = wxString::Format(wxT("%s.%d.blp"), basename.c_str(), i);
-		int tex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(buf.c_str())));
+		const int tex = TEXTUREMANAGER.add(GAMEDIRECTORY.getFile(QString::fromWCharArray(buf.c_str())));
 		textures.push_back(tex);
 	}
 }
 
 Liquid::~Liquid()
 {
-	for (unsigned int texture : textures)
+	for (const unsigned int texture : textures)
 	{
 		TEXTUREMANAGER.del(texture);
 	}

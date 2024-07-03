@@ -118,10 +118,10 @@ bool CxImage::SelectionAddRect(RECT r, BYTE level)
   if (info.rSelectionBox.right <= r2.right) info.rSelectionBox.right = max(0L,min(head.biWidth,r2.right+1));
   if (info.rSelectionBox.bottom > r2.bottom) info.rSelectionBox.bottom = max(0L,min(head.biHeight,r2.bottom));
 
-  long ymin = max(0L,min(head.biHeight,r2.bottom));
-  long ymax = max(0L,min(head.biHeight,r2.top+1));
-  long xmin = max(0L,min(head.biWidth,r2.left));
-  long xmax = max(0L,min(head.biWidth,r2.right+1));
+  const long ymin = max(0L,min(head.biHeight,r2.bottom));
+  const long ymax = max(0L,min(head.biHeight,r2.top+1));
+  const long xmin = max(0L,min(head.biWidth,r2.left));
+  const long xmax = max(0L,min(head.biWidth,r2.right+1));
 
   for (long y=ymin; y<ymax; y++)
     memset(pSelection + xmin + y * head.biWidth, level, xmax-xmin);
@@ -137,22 +137,22 @@ bool CxImage::SelectionAddEllipse(RECT r, BYTE level)
   if (pSelection==NULL) SelectionCreate();
   if (pSelection==NULL) return false;
 
-  long xradius = abs(r.right - r.left)/2;
-  long yradius = abs(r.top - r.bottom)/2;
+  const long xradius = abs(r.right - r.left)/2;
+  const long yradius = abs(r.top - r.bottom)/2;
   if (xradius==0 || yradius==0) return false;
 
-  long xcenter = (r.right + r.left)/2;
-  long ycenter = (r.top + r.bottom)/2;
+  const long xcenter = (r.right + r.left)/2;
+  const long ycenter = (r.top + r.bottom)/2;
 
   if (info.rSelectionBox.left > (xcenter - xradius)) info.rSelectionBox.left = max(0L,min(head.biWidth,(xcenter - xradius)));
   if (info.rSelectionBox.right <= (xcenter + xradius)) info.rSelectionBox.right = max(0L,min(head.biWidth,(xcenter + xradius + 1)));
   if (info.rSelectionBox.bottom > (ycenter - yradius)) info.rSelectionBox.bottom = max(0L,min(head.biHeight,(ycenter - yradius)));
   if (info.rSelectionBox.top <= (ycenter + yradius)) info.rSelectionBox.top = max(0L,min(head.biHeight,(ycenter + yradius + 1)));
 
-  long xmin = max(0L,min(head.biWidth,xcenter - xradius));
-  long xmax = max(0L,min(head.biWidth,xcenter + xradius + 1));
-  long ymin = max(0L,min(head.biHeight,ycenter - yradius));
-  long ymax = max(0L,min(head.biHeight,ycenter + yradius + 1));
+  const long xmin = max(0L,min(head.biWidth,xcenter - xradius));
+  const long xmax = max(0L,min(head.biWidth,xcenter + xradius + 1));
+  const long ymin = max(0L,min(head.biHeight,ycenter - yradius));
+  const long ymax = max(0L,min(head.biHeight,ycenter + yradius + 1));
 
   long y,yo;
   for (y=ymin; y<min(ycenter,ymax); y++){
@@ -178,7 +178,7 @@ bool CxImage::SelectionInvert()
 {
   if (pSelection) {
     BYTE *iSrc=pSelection;
-    long n=head.biHeight*head.biWidth;
+    const long n=head.biHeight*head.biWidth;
     for(long i=0; i < n; i++){
       *iSrc=(BYTE)~(*(iSrc));
       iSrc++;
@@ -408,7 +408,7 @@ bool CxImage::SelectionAddColor(RGBQUAD c, BYTE level)
 
     for (long y = 0; y < head.biHeight; y++){
         for (long x = 0; x < head.biWidth; x++){
-            RGBQUAD color = BlindGetPixelColor(x, y);
+	        const RGBQUAD color = BlindGetPixelColor(x, y);
             if (color.rgbRed   == c.rgbRed &&
         color.rgbGreen == c.rgbGreen &&
                 color.rgbBlue  == c.rgbBlue)
@@ -491,7 +491,7 @@ bool CxImage::SelectionSet(CxImage &from)
 
   if (pSelection==NULL) pSelection = (BYTE*)malloc(head.biWidth * head.biHeight);
 
-  BYTE* src = from.info.pImage;
+  const BYTE* src = from.info.pImage;
   BYTE* dst = pSelection;
   if (src==NULL || dst==NULL){
     strcpy(info.szLastError,"CxImage::SelectionSet: null pointer");
@@ -625,7 +625,7 @@ bool CxImage::SelectionFlip()
 
   free(buff);
 
-  long top = info.rSelectionBox.top;
+  const long top = info.rSelectionBox.top;
   info.rSelectionBox.top = head.biHeight - info.rSelectionBox.bottom;
   info.rSelectionBox.bottom = head.biHeight - top;
   return true;
@@ -637,8 +637,8 @@ bool CxImage::SelectionMirror()
   BYTE* pSelection2 = (BYTE*)malloc(head.biWidth * head.biHeight);
   if (!pSelection2) return false;
 
-  long wdt=head.biWidth-1;
-  BYTE* iSrc = pSelection + wdt;
+  const long wdt=head.biWidth-1;
+  const BYTE* iSrc = pSelection + wdt;
   BYTE* iDst = pSelection2;
   for(long y=0; y < head.biHeight; y++){
     for(long x=0; x <= wdt; x++)
@@ -648,8 +648,8 @@ bool CxImage::SelectionMirror()
   }
   free(pSelection);
   pSelection=pSelection2;
-  
-  long left = info.rSelectionBox.left;
+
+  const long left = info.rSelectionBox.left;
   info.rSelectionBox.left = head.biWidth - info.rSelectionBox.right;
   info.rSelectionBox.right = head.biWidth - left;
   return true;

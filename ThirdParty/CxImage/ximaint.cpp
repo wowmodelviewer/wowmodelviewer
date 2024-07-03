@@ -678,9 +678,9 @@ float CxImage::KernelBSpline(const float x)
   if (x>2.0f) return 0.0f;
   // thanks to Kristian Kratzenstein
   float a, b, c, d;
-  float xm1 = x - 1.0f; // Was calculatet anyway cause the "if((x-1.0f) < 0)"
-  float xp1 = x + 1.0f;
-  float xp2 = x + 2.0f;
+  const float xm1 = x - 1.0f; // Was calculatet anyway cause the "if((x-1.0f) < 0)"
+  const float xp1 = x + 1.0f;
+  const float xp2 = x + 2.0f;
 
   if ((xp2) <= 0.0f) a = 0.0f; else a = xp2*xp2*xp2; // Only float, not float -> double -> float
   if ((xp1) <= 0.0f) b = 0.0f; else b = xp1*xp1*xp1;
@@ -746,8 +746,8 @@ float CxImage::KernelLinear(const float t)
  */
 float CxImage::KernelCubic(const float t)
 {
-  float abs_t = (float)fabs(t);
-  float abs_t_sq = abs_t * abs_t;
+	const float abs_t = (float)fabs(t);
+	const float abs_t_sq = abs_t * abs_t;
   if (abs_t<1) return 1-2*abs_t_sq+abs_t_sq*abs_t;
   if (abs_t<2) return 4 - 8*abs_t +5*abs_t_sq - abs_t_sq*abs_t;
   return 0;
@@ -767,8 +767,8 @@ float CxImage::KernelCubic(const float t)
  */
 float CxImage::KernelGeneralizedCubic(const float t, const float a)
 {
-  float abs_t = (float)fabs(t);
-  float abs_t_sq = abs_t * abs_t;
+	const float abs_t = (float)fabs(t);
+	const float abs_t_sq = abs_t * abs_t;
   if (abs_t<1) return (a+2)*abs_t_sq*abs_t - (a+3)*abs_t_sq + 1;
   if (abs_t<2) return a*abs_t_sq*abs_t - 5*a*abs_t_sq + 8*a*abs_t - 4*a;
   return 0;
@@ -789,8 +789,8 @@ float CxImage::KernelLanczosSinc(const float t, const float r)
 {
   if (fabs(t) > r) return 0;
   if (t==0) return 1;
-  float pit=PI*t;
-  float pitd=pit/r;
+  const float pit=PI*t;
+  const float pitd=pit/r;
   return (float)((sin(pit)/pit) * (sin(pitd)/pitd));
 }
 
@@ -955,7 +955,7 @@ float CxImage::KernelBessel_Order1(float x)
 {
 	if (x == 0.0)
     return (0.0f);
-  float p = x;
+	const float p = x;
   if (x < 0.0)
     x=(-x);
   if (x < 8.0)

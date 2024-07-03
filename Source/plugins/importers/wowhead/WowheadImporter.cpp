@@ -130,7 +130,7 @@ QString WowheadImporter::extractSubString(QString& datas, QString beginPattern, 
 
 QByteArray WowheadImporter::getURLData(QString inputUrl) const
 {
-	QUrl url = QString(inputUrl);
+	const QUrl url = QString(inputUrl);
 
 	if (!url.errorString().isEmpty())
 	{

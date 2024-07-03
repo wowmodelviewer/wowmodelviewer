@@ -182,7 +182,7 @@ void CAVIGenerator::InitEngineForRead()
 	LOG_INFO << "Initiating AVI class object for reading.";
 
 	// make sure we are running on 1.1 or newer
-	DWORD wVer = HIWORD(VideoForWindowsVersion());
+	const DWORD wVer = HIWORD(VideoForWindowsVersion());
 	if (wVer < 0x010a)
 	{
 		LOG_ERROR << "Version of Video for Windows is too old. Come on, join the 21th century!";
@@ -266,14 +266,14 @@ void CAVIGenerator::ReleaseEngine()
 HRESULT CAVIGenerator::AddFrame(BYTE* bmBits)
 {
 	// compress bitmap
-	HRESULT hr = AVIStreamWrite(m_pStreamCompressed, // stream pointer
-	                            m_iLastFrame, // time of this frame
-	                            1, // number to write
-	                            bmBits, // image buffer
-	                            m_bih.biSizeImage, // size of this frame
-	                            AVIIF_KEYFRAME, // flags....
-	                            nullptr,
-	                            nullptr);
+	const HRESULT hr = AVIStreamWrite(m_pStreamCompressed, // stream pointer
+	                                  m_iLastFrame, // time of this frame
+	                                  1, // number to write
+	                                  bmBits, // image buffer
+	                                  m_bih.biSizeImage, // size of this frame
+	                                  AVIIF_KEYFRAME, // flags....
+	                                  nullptr,
+	                                  nullptr);
 
 	// updating frame counter
 	m_iLastFrame++;
@@ -284,7 +284,7 @@ HRESULT CAVIGenerator::AddFrame(BYTE* bmBits)
 // Grabs the next frame from the stream
 void CAVIGenerator::GetFrame()
 {
-	BYTE* pDIB = static_cast<BYTE*>(AVIStreamGetFrame(m_pGetFrame, m_iCurFrame));
+	const BYTE* pDIB = static_cast<BYTE*>(AVIStreamGetFrame(m_pGetFrame, m_iCurFrame));
 	//ASSERT(pDIB!=NULL);
 	if (!pDIB)
 		return;

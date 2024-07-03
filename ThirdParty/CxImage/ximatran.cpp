@@ -134,8 +134,8 @@ bool CxImage::Mirror(bool bMirrorSelection, bool bMirrorAlpha)
     return false;
   }
 
-  long wdt=(head.biWidth-1) * (head.biBitCount==24 ? 3:1);
-  BYTE* iSrc = info.pImage + wdt;
+  const long wdt=(head.biWidth-1) * (head.biBitCount==24 ? 3:1);
+  const BYTE* iSrc = info.pImage + wdt;
   BYTE* iDst = imatmp->info.pImage;
   long x,y;
   switch (head.biBitCount){
@@ -833,8 +833,8 @@ bool CxImage::Rotate180(CxImage* iDst)
 {
   if (!pDib) return false;
 
-  long wid = GetWidth();
-  long ht = GetHeight();
+  const long wid = GetWidth();
+  const long ht = GetHeight();
 
   CxImage imgDest;
   imgDest.CopyInfo(*this);
@@ -847,7 +847,7 @@ bool CxImage::Rotate180(CxImage* iDst)
 
   for (long y = 0; y < ht; y++){
     info.nProgress = (long)(100*y/ht); //<Anatoly Ivasyuk>
-    long y2 = ht - y - 1;
+    const long y2 = ht - y - 1;
     for (long x = 0; x < wid; x++){
       if(head.biClrUsed==0)//RGB
         imgDest.SetPixelColor(wid-x-1, y2, BlindGetPixelColor(x, y));
@@ -2000,8 +2000,8 @@ bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long heigh
   if (!pDib) return false;
 
 
-  double cos_angle = cos(angle/*/57.295779513082320877*/);
-    double sin_angle = sin(angle/*/57.295779513082320877*/);
+  const double cos_angle = cos(angle/*/57.295779513082320877*/);
+  const double sin_angle = sin(angle/*/57.295779513082320877*/);
 
   // if there is nothing special, call the original Crop():
   if ( fabs(angle)<0.0002 )
@@ -2035,7 +2035,7 @@ bool CxImage::CropRotatedRectangle( long topx, long topy, long width, long heigh
   // crop rotated image to the original selection rectangle
     endx   = (tmp.head.biWidth+width)/2;
   startx = (tmp.head.biWidth-width)/2;
-  long starty = (tmp.head.biHeight + height) / 2;
+  const long starty = (tmp.head.biHeight + height) / 2;
     endy   = (tmp.head.biHeight-height)/2;
     if ( false == tmp.Crop( startx, starty, endx, endy ) )
     return false;
@@ -2302,8 +2302,8 @@ bool CxImage::Expand(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst)
 
     if ((newx < head.biWidth) || (newy < head.biHeight)) return false;
 
-    int nAddLeft = (newx - head.biWidth) / 2;
-    int nAddTop = (newy - head.biHeight) / 2;
+  const int nAddLeft = (newx - head.biWidth) / 2;
+  const int nAddTop = (newy - head.biHeight) / 2;
 
     return Expand(nAddLeft, nAddTop, newx - (head.biWidth + nAddLeft), newy - (head.biHeight + nAddTop), canvascolor, iDst);
 }
@@ -2331,7 +2331,7 @@ bool CxImage::Thumbnail(long newx, long newy, RGBQUAD canvascolor, CxImage* iDst
     // determine whether we need to shrink the image
     if ((head.biWidth > newx) || (head.biHeight > newy)) {
         float fScale;
-        float fAspect = (float) newx / (float) newy;
+        const float fAspect = (float) newx / (float) newy;
         if (fAspect * head.biHeight > head.biWidth) {
             fScale = (float) newy / head.biHeight;
         } else {

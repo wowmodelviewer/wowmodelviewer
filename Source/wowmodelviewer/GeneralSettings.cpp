@@ -97,7 +97,7 @@ GeneralSettings::GeneralSettings(wxWindow* parent, wxWindowID id)
 
 void GeneralSettings::OnCheck(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_SETTINGS_RANDOMSKIN)
 	{
@@ -135,7 +135,7 @@ void GeneralSettings::Update()
 
 void GeneralSettings::OnButton(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_GENERAL_SETTINGS_APPLY)
 	{
@@ -173,7 +173,7 @@ void GeneralSettings::OnButton(wxCommandEvent& event)
 
 	else if (id == ID_FIND_GAME_FOLDER)
 	{
-		wxString newPath = getGamePath(true);
+		const wxString newPath = getGamePath(true);
 		if (newPath.IsEmpty()) // user probably hit cancel
 			return;
 		gamePathDisplay->SetValue(newPath);
@@ -184,7 +184,7 @@ void GeneralSettings::OnButton(wxCommandEvent& event)
 	{
 		wxDirDialog* customDirPicker = new wxDirDialog(this, _("Select the folder containing your custom files."),
 		                                               customDirectoryPath, 0);
-		int i = customDirPicker->ShowModal();
+		const int i = customDirPicker->ShowModal();
 		if (i != wxID_OK)
 			return;
 		newCustomFolder = customDirPicker->GetPath();

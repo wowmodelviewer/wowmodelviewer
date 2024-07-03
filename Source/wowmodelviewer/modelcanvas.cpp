@@ -184,8 +184,8 @@ ModelCanvas::ModelCanvas(wxWindow* parent, VideoCaps* caps)
 		// Initiate our default OpenGL settings
 		LOG_INFO << "Initiating OpenGL...";
 #ifdef _WINDOWS
-		wxDisplay* disp = new wxDisplay(0);
-		int bpp = disp->GetCurrentMode().bpp;
+		const wxDisplay* disp = new wxDisplay(0);
+		const int bpp = disp->GetCurrentMode().bpp;
 		video.SetHandle(static_cast<HWND>(this->wxWindow::GetHandle()), bpp);
 #else
     video.render = true;
@@ -585,7 +585,7 @@ inline void ModelCanvas::RenderSkybox()
 	glPushMatrix(); // Save the current modelview matrix
 	glLoadIdentity(); // Reset it
 
-	float fScale = 64.0f / skyModel->rad;
+	const float fScale = 64.0f / skyModel->rad;
 
 	glTranslatef(0.0f, 0.0f, -5.0f); // Position the sky box
 	glScalef(fScale, fScale, fScale); // Scale it so it looks appropriate
@@ -684,9 +684,9 @@ inline void ModelCanvas::RenderBackground()
 	gluOrtho2D(0, 1, 0, 1);
 
 	// save previous state
-	GLboolean texture2DState = glIsEnabled(GL_TEXTURE_2D);
-	GLboolean depthTestState = glIsEnabled(GL_DEPTH_TEST);
-	GLboolean lightningState = glIsEnabled(GL_LIGHTING);
+	const GLboolean texture2DState = glIsEnabled(GL_TEXTURE_2D);
+	const GLboolean depthTestState = glIsEnabled(GL_DEPTH_TEST);
+	const GLboolean lightningState = glIsEnabled(GL_LIGHTING);
 
 	glEnable(GL_TEXTURE_2D); // Enable 2D Texture Mapping
 	glDisable(GL_DEPTH_TEST);
@@ -1155,7 +1155,7 @@ inline void ModelCanvas::RenderWMO()
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
-		GLuint light = GL_LIGHT0 + (GLuint)i;
+		const GLuint light = GL_LIGHT0 + (GLuint)i;
 		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
 		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
@@ -1206,7 +1206,7 @@ inline void ModelCanvas::RenderADT()
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
-		GLuint light = GL_LIGHT0 + (GLuint)i;
+		const GLuint light = GL_LIGHT0 + (GLuint)i;
 		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
 		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
@@ -1272,7 +1272,7 @@ inline void ModelCanvas::RenderWMOToBuffer()
 	// From what I can tell, WoW OpenGL only uses 4 g_modelViewer->lightControl->lights
 	for (size_t i = 0; i < 4; i++)
 	{
-		GLuint light = GL_LIGHT0 + (GLuint)i;
+		const GLuint light = GL_LIGHT0 + (GLuint)i;
 		glLightf(light, GL_CONSTANT_ATTENUATION, 0.0f);
 		glLightf(light, GL_LINEAR_ATTENUATION, 0.7f);
 		glLightf(light, GL_QUADRATIC_ATTENUATION, 0.03f);
@@ -1533,7 +1533,7 @@ void ModelCanvas::LoadBackground(wxString filename)
 	wxString tmp = filename.AfterLast(wxT('.'));
 	tmp.MakeLower();
 
-	GLuint texFormat = GL_TEXTURE_2D;
+	const GLuint texFormat = GL_TEXTURE_2D;
 
 	if (tmp == wxT("avi"))
 	{
@@ -1632,13 +1632,13 @@ void ModelCanvas::OnCamMenu(wxCommandEvent& event)
 void ModelCanvas::CheckMovement()
 {
 	// Make sure its the canvas that has focus before continuing
-	wxWindow* win = wxWindow::FindFocus();
+	const wxWindow* win = wxWindow::FindFocus();
 	if (!win)
 		return;
 
 	// Its no longer an opengl canvas window, its now just a standard window.
 	// wxWindow *gl = wxDynamicCast(win, wxGLCanvas);
-	wxWindow* wintest = wxDynamicCast(win, wxWindow);
+	const wxWindow* wintest = wxDynamicCast(win, wxWindow);
 	if (!wintest)
 		return;
 
@@ -1680,7 +1680,7 @@ void ModelCanvas::Screenshot(const wxString fn, int x, int y)
 	delete rt;
 	rt = nullptr;
 
-	wxFileName temp(fn, wxPATH_NATIVE);
+	const wxFileName temp(fn, wxPATH_NATIVE);
 
 	int screenSize[4];
 	glGetIntegerv(GL_VIEWPORT, screenSize);
@@ -1785,7 +1785,7 @@ void ModelCanvas::LoadSceneState(int id)
 		m->pos_ = sceneState[id].pos;
 		m->rot_ = sceneState[id].rot;
 
-		int screenSize[4]{};
+		const int screenSize[4]{};
 		glGetIntegerv(GL_VIEWPORT, (GLint*)screenSize); // get the width/height of the canvas
 		video.ResizeGLScene(screenSize[2], screenSize[3]);
 	}

@@ -194,7 +194,7 @@ void CQuantizer::GetPaletteColors(NODE* pTree, RGBQUAD* prgb, UINT* pIndex, UINT
 		}
 		else
 		{
-			for (auto& i : pTree->pChild)
+			for (const auto& i : pTree->pChild)
 			{
 				if (i != nullptr)
 					GetPaletteColors(i, prgb, pIndex, pSum);
@@ -221,8 +221,8 @@ void CQuantizer::SetColorTable(RGBQUAD* prgb)
 			UINT ng, nb, na, ns;
 			for (UINT j = 0; j < m_nOutputMaxColors; j++)
 			{
-				UINT a = (j * m_nLeafCount) / m_nOutputMaxColors;
-				UINT b = ((j + 1) * m_nLeafCount) / m_nOutputMaxColors;
+				const UINT a = (j * m_nLeafCount) / m_nOutputMaxColors;
+				const UINT b = ((j + 1) * m_nLeafCount) / m_nOutputMaxColors;
 				UINT nr = ng = nb = na = ns = 0;
 				for (UINT k = a; k < b; k++)
 				{

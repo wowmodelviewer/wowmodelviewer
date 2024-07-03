@@ -871,7 +871,7 @@ DWORD CxImage::UnDump(const BYTE * src)
   }
 
   if (src[n++]){
-    RECT box = info.rSelectionBox;
+	  const RECT box = info.rSelectionBox;
     if (SelectionCreate()){
       info.rSelectionBox = box;
       memcpy(pSelection, &src[n], head.biWidth * head.biHeight);

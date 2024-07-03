@@ -216,9 +216,9 @@ void LightControl::SetAmbience()
 
 	glLightfv(GL_LIGHT0 + activeLight, GL_AMBIENT, glm::value_ptr(lights[activeLight].ambience));
 
-	wxColour col(static_cast<unsigned char>(lights[activeLight].ambience.x * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].ambience.y * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].ambience.z * 255.0f));
+	const wxColour col(static_cast<unsigned char>(lights[activeLight].ambience.x * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].ambience.y * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].ambience.z * 255.0f));
 	ambience->SetBackgroundColour(col);
 }
 
@@ -229,9 +229,9 @@ void LightControl::SetDiffuse()
 	// Update the opengl scene lighting
 	glLightfv(GL_LIGHT0 + activeLight, GL_DIFFUSE, glm::value_ptr(lights[activeLight].diffuse));
 
-	wxColour col(static_cast<unsigned char>(lights[activeLight].diffuse.x * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].diffuse.y * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].diffuse.z * 255.0f));
+	const wxColour col(static_cast<unsigned char>(lights[activeLight].diffuse.x * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].diffuse.y * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].diffuse.z * 255.0f));
 	diffuse->SetBackgroundColour(col);
 }
 
@@ -251,15 +251,15 @@ void LightControl::SetSpecular()
 
 	glLightfv(GL_LIGHT0 + activeLight, GL_SPECULAR, glm::value_ptr(lights[activeLight].specular));
 
-	wxColour col(static_cast<unsigned char>(lights[activeLight].specular.x * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].specular.y * 255.0f),
-	             static_cast<unsigned char>(lights[activeLight].specular.z * 255.0f));
+	const wxColour col(static_cast<unsigned char>(lights[activeLight].specular.x * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].specular.y * 255.0f),
+	                   static_cast<unsigned char>(lights[activeLight].specular.z * 255.0f));
 	specular->SetBackgroundColour(col);
 }
 
 void LightControl::OnButton(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_LIGHTCOLOUR)
 		SetColour();
@@ -304,7 +304,7 @@ void LightControl::OnCombo(wxCommandEvent& event)
 
 void LightControl::OnText(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 	glm::vec4 p = lights[activeLight].pos;
 	glm::vec4 t = lights[activeLight].target;
 
@@ -331,7 +331,7 @@ void LightControl::OnCheck(wxCommandEvent& event)
 	{
 		lights[activeLight].enabled = event.IsChecked();
 
-		GLuint light = GL_LIGHT0 + activeLight;
+		const GLuint light = GL_LIGHT0 + activeLight;
 		if (lights[activeLight].enabled)
 			glEnable(light);
 		else
@@ -350,7 +350,7 @@ void LightControl::OnRadio(wxCommandEvent& event)
 	qintensity->Enable(false);
 	alpha->Enable(false);
 
-	GLuint lightID = GL_LIGHT0 + activeLight;
+	const GLuint lightID = GL_LIGHT0 + activeLight;
 
 	if (event.GetId() == ID_LIGHTPOSITIONAL)
 	{
@@ -408,7 +408,7 @@ void LightControl::OnScroll(wxScrollEvent& event)
 	//
 	// Update our light settings here
 	// instead of calling it every frame
-	GLuint lightID = GL_LIGHT0 + activeLight;
+	const GLuint lightID = GL_LIGHT0 + activeLight;
 
 	if (lights[activeLight].type == LIGHT_POSITIONAL)
 	{
@@ -452,8 +452,8 @@ glm::vec4 LightControl::GetCurrentAmbience()
 glm::vec3 LightControl::DoSetColour(const glm::vec3& defColor)
 {
 	wxColourData data;
-	wxColour dcol(static_cast<unsigned char>(defColor.x * 255.0f), static_cast<unsigned char>(defColor.y * 255.0f),
-	              static_cast<unsigned char>(defColor.z * 255.0f));
+	const wxColour dcol(static_cast<unsigned char>(defColor.x * 255.0f), static_cast<unsigned char>(defColor.y * 255.0f),
+	                    static_cast<unsigned char>(defColor.z * 255.0f));
 	data.SetChooseFull(true);
 	data.SetColour(dcol);
 
@@ -461,7 +461,7 @@ glm::vec3 LightControl::DoSetColour(const glm::vec3& defColor)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxColourData retData = dialog.GetColourData();
-		wxColour col = retData.GetColour();
+		const wxColour col = retData.GetColour();
 		return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
 	}
 	return defColor;
@@ -470,8 +470,8 @@ glm::vec3 LightControl::DoSetColour(const glm::vec3& defColor)
 glm::vec4 LightControl::DoSetColour(const glm::vec4& defColor)
 {
 	wxColourData data;
-	wxColour dcol(static_cast<unsigned char>(defColor.x * 255.0f), static_cast<unsigned char>(defColor.y * 255.0f),
-	              static_cast<unsigned char>(defColor.z * 255.0f));
+	const wxColour dcol(static_cast<unsigned char>(defColor.x * 255.0f), static_cast<unsigned char>(defColor.y * 255.0f),
+	                    static_cast<unsigned char>(defColor.z * 255.0f));
 	data.SetChooseFull(true);
 	data.SetColour(dcol);
 
@@ -479,7 +479,7 @@ glm::vec4 LightControl::DoSetColour(const glm::vec4& defColor)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		wxColourData retData = dialog.GetColourData();
-		wxColour col = retData.GetColour();
+		const wxColour col = retData.GetColour();
 		return glm::vec4(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f, 1.0f);
 	}
 	return defColor;
@@ -559,7 +559,7 @@ void LightControl::Update()
 	alpha->Enable(false);
 
 	// Update the lighting
-	GLuint lightID = GL_LIGHT0 + activeLight;
+	const GLuint lightID = GL_LIGHT0 + activeLight;
 
 	if (lights[activeLight].type == LIGHT_POSITIONAL)
 	{
@@ -600,11 +600,11 @@ void LightControl::Update()
 
 void LightControl::UpdateGL()
 {
-	float tar[3] = {0.0f, -1.0f, 0.0f};
+	const float tar[3] = {0.0f, -1.0f, 0.0f};
 	// Update the lighting
 	for (size_t i = 0; i < MAX_LIGHTS; i++)
 	{
-		GLuint lightID = GL_LIGHT0 + (GLuint)i;
+		const GLuint lightID = GL_LIGHT0 + (GLuint)i;
 
 		if (lights[i].enabled)
 			glEnable(lightID);

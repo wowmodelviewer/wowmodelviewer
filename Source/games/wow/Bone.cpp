@@ -12,7 +12,7 @@ void Bone::calcMatrix(std::vector<Bone>& allbones, ssize_t anim, size_t time, bo
 		return;
 
 	glm::mat4 m(1.0f);
-	glm::fquat q;
+	const glm::fquat q;
 
 	const bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
 	if (tr)

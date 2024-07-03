@@ -88,8 +88,8 @@ bool CxImageTGA::Decode(CxFile *hFile)
     SetGrayPalette();
 
   // Bits 4 & 5 of the Image Descriptor byte control the ordering of the pixels.
-  bool bXReversed = ((tgaHead.ImagDesc & 16) == 16);
-  bool bYReversed = ((tgaHead.ImagDesc & 32) == 32);
+  const bool bXReversed = ((tgaHead.ImagDesc & 16) == 16);
+  const bool bYReversed = ((tgaHead.ImagDesc & 32) == 32);
 
     CImageIterator iter(this);
   BYTE rleLeftover = 255; //for images with illegal packet boundary 
@@ -158,7 +158,7 @@ bool CxImageTGA::Encode(CxFile * hFile)
 
   if (head.biBitCount==8){
     rgb_color pal[256];
-    RGBQUAD* ppal = GetPalette();
+    const RGBQUAD* ppal = GetPalette();
     for (int i=0;i<256; i++){
       pal[i].r = ppal[i].rgbBlue;
       pal[i].g = ppal[i].rgbGreen;
@@ -178,7 +178,7 @@ bool CxImageTGA::Encode(CxFile * hFile)
     pDest = (BYTE*)malloc(4*tgaHead.ImageWidth);
     for (int y=0; y < tgaHead.ImageHeight; y++){
       for(int x=0, x4=0;x<tgaHead.ImageWidth;x++, x4+=4){
-        RGBQUAD c = BlindGetPixelColor(x, y);
+	      const RGBQUAD c = BlindGetPixelColor(x, y);
         pDest[x4+0]=c.rgbBlue;
         pDest[x4+1]=c.rgbGreen;
         pDest[x4+2]=c.rgbRed;

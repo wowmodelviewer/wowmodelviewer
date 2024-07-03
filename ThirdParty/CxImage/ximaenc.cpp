@@ -110,7 +110,7 @@ bool CxImage::Save(const TCHAR * filename, DWORD imagetype)
   if ((hFile=fopen(filename,"wb"))==NULL)  return false;
 #endif
 
-  bool bOK = Encode(hFile,imagetype);
+  const bool bOK = Encode(hFile,imagetype);
   fclose(hFile);
   return bOK;
 }
@@ -467,9 +467,9 @@ bool CxImage::Encode2RGBA(CxFile *hFile, bool bFlipY)
   if (EncodeSafeCheck(hFile)) return false;
 
   for (long y1 = 0; y1 < head.biHeight; y1++) {
-    long y = bFlipY ? head.biHeight - 1 - y1 : y1;
+	  const long y = bFlipY ? head.biHeight - 1 - y1 : y1;
     for(long x = 0; x < head.biWidth; x++) {
-      RGBQUAD color = BlindGetPixelColor(x,y);
+	    const RGBQUAD color = BlindGetPixelColor(x,y);
       hFile->PutC(color.rgbRed);
       hFile->PutC(color.rgbGreen);
       hFile->PutC(color.rgbBlue);
@@ -581,8 +581,8 @@ bool CxImage::Load(const TCHAR * filename, DWORD imagetype)
  */
 bool CxImage::LoadResource(HRSRC hRes, DWORD imagetype, HMODULE hModule)
 {
-  DWORD rsize=SizeofResource(hModule,hRes);
-  HGLOBAL hMem=::LoadResource(hModule,hRes);
+	const DWORD rsize=SizeofResource(hModule,hRes);
+	const HGLOBAL hMem=::LoadResource(hModule,hRes);
   if (hMem){
     char* lpVoid=(char*)LockResource(hMem);
     if (lpVoid){

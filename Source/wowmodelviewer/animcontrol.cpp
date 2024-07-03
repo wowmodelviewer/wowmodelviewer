@@ -165,7 +165,7 @@ AnimControl::~AnimControl()
 	// Free the memory that was allocated (fixed: memory leak)
 	for (size_t i = 0; i < skinList->GetCount(); i++)
 	{
-		TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
+		const TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
 		wxDELETE(grp);
 	}
 
@@ -202,7 +202,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 	{
 		for (size_t i = 0; i < skinList->GetCount(); i++)
 		{
-			TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
+			const TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData((unsigned int)i));
 			wxDELETE(grp);
 		}
 	}
@@ -222,7 +222,7 @@ void AnimControl::UpdateModel(WoWModel* m)
 
 	skinList->Clear();
 
-	QString modelpath = GetModelFolder(m);
+	const QString modelpath = GetModelFolder(m);
 	if (modelFolder != modelpath) // new model is in different folder to old
 	{
 		modelFolderChanged = true;
@@ -367,7 +367,7 @@ void AnimControl::UpdateWMO(WMO* w, int group)
 	if (!w || w->itemName().size() == 0)
 		return;
 
-	bool newwmo = (oldname != w->itemName().toStdString());
+	const bool newwmo = (oldname != w->itemName().toStdString());
 	oldname = w->itemName().toStdString();
 
 	//Model *m = static_cast<Model*>(canvas->root->children[0]);
@@ -405,7 +405,7 @@ void AnimControl::UpdateWMO(WMO* w, int group)
 			wmoList->Append(wxString(g_selWMO->doodadsets[i].name, *wxConvCurrent));
 		}
 
-		int sel = defaultDoodads ? 1 : 0;
+		const int sel = defaultDoodads ? 1 : 0;
 		g_selWMO->includeDefaultDoodads = defaultDoodads;
 		wmoList->Select(sel);
 		g_selWMO->showDoodadSet(sel - 1);
@@ -445,9 +445,9 @@ void AnimControl::SetSkinByDisplayID(int cdi)
 		return;
 	}
 
-	TextureGroup gp = CDIToTexGp[cdi];
+	const TextureGroup gp = CDIToTexGp[cdi];
 	// Find position of texture group in menu and set the model to this appearance:
-	int count = skinList->GetCount();
+	const int count = skinList->GetCount();
 	for (int i = 0; i < count; i++)
 	{
 		// note that these aren't the same group, just equivalent:
@@ -917,15 +917,15 @@ void AnimControl::SyncBLPSkinList()
 	// Configure BLPSkinLists (single skin selectors) to show same skins as the main texture selector, if possible
 	std::vector<wxString> currTextures(3);
 
-	int sel = skinList->GetSelection();
+	const int sel = skinList->GetSelection();
 	if (sel < 0) // model not currently using a proper texture set, possibly custom
 		return;
-	TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(sel));
+	const TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(sel));
 
 	for (size_t i = 0; i < 3; i++)
 	{
 		wxString texname;
-		GameFile* tex = grp->tex[i];
+		const GameFile* tex = grp->tex[i];
 		if (tex)
 		{
 			texname = tex->fullname().toStdWString();
@@ -941,7 +941,7 @@ void AnimControl::SyncBLPSkinList()
 		// fill our skin selector
 		for (TextureSet::iterator it = BLPskins.begin(); it != BLPskins.end(); ++it)
 		{
-			GameFile* tex = it->tex[0];
+			const GameFile* tex = it->tex[0];
 			wxString texname = tex->fullname().toStdWString();
 			texname = texname.AfterLast('/').BeforeLast('.');
 			if (texname == currTextures[0])
@@ -964,7 +964,7 @@ bool AnimControl::FillSkinSelector(TextureSet& skins)
 	// fill our skin selector
 	for (std::set<TextureGroup>::iterator it = skins.begin(); it != skins.end(); ++it)
 	{
-		GameFile* tex = it->tex[0];
+		const GameFile* tex = it->tex[0];
 		wxString texname = tex->fullname().toStdWString();
 		wxString selectorName = texname.AfterLast('/').BeforeLast('.');
 		if (it->definedTexture)
@@ -974,7 +974,7 @@ bool AnimControl::FillSkinSelector(TextureSet& skins)
 		skinList->SetClientData(num++, grp);
 	}
 
-	bool ret = (skins.size() > 0);
+	const bool ret = (skins.size() > 0);
 	//skins.clear();
 	return ret;
 }
@@ -992,7 +992,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet& skins, bool item)
 		// fill our skin selector
 		for (TextureSet::iterator it = skins.begin(); it != skins.end(); ++it)
 		{
-			GameFile* tex = it->tex[0];
+			const GameFile* tex = it->tex[0];
 			wxString texname = tex->fullname().toStdWString();
 			texname = texname.AfterLast('/').BeforeLast('.');
 			TextureGroup* grp = new TextureGroup(*it);
@@ -1013,7 +1013,7 @@ bool AnimControl::FillBLPSkinSelector(TextureSet& skins, bool item)
 		BLPSkinList2->Thaw();
 		BLPSkinList3->Thaw();
 
-		bool ret = (skins.size() > 0);
+		const bool ret = (skins.size() > 0);
 		//skins.clear();
 		return ret;
 	}
@@ -1131,9 +1131,9 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 	{
 		if (g_selModel)
 		{
-			wxString val = animCList->GetValue();
-			int first = val.Find('[') + 1;
-			int last = val.Find(']');
+			const wxString val = animCList->GetValue();
+			const int first = val.Find('[') + 1;
+			const int last = val.Find(']');
 			selectedAnim = wxAtoi(val.Mid(first, last - first));
 
 			if (bLockAnims)
@@ -1169,18 +1169,18 @@ void AnimControl::OnAnim(wxCommandEvent& event)
 	}
 	else if (event.GetId() == ID_ANIM_SECONDARY)
 	{
-		wxString val = animCList2->GetValue();
-		int first = val.Find('[') + 1;
-		int last = val.Find(']');
+		const wxString val = animCList2->GetValue();
+		const int first = val.Find('[') + 1;
+		const int last = val.Find(']');
 		selectedAnim2 = wxAtoi(val.Mid(first, last - first));
 
 		g_selModel->animManager->SetSecondary(selectedAnim2);
 	}
 	else if (event.GetId() == ID_ANIM_MOUTH)
 	{
-		wxString val = animCList3->GetValue();
-		int first = val.Find('[') + 1;
-		int last = val.Find(']');
+		const wxString val = animCList3->GetValue();
+		const int first = val.Find('[') + 1;
+		const int last = val.Find(']');
 		selectedAnim3 = wxAtoi(val.Mid(first, last - first));
 
 		//canvas->g_selModel->animManager->SetSecondary(selectedAnim2);
@@ -1192,7 +1192,7 @@ void AnimControl::OnSkin(wxCommandEvent& event)
 {
 	if (g_selModel)
 	{
-		int sel = event.GetSelection();
+		const int sel = event.GetSelection();
 		SetSkin(sel);
 	}
 }
@@ -1201,7 +1201,7 @@ void AnimControl::OnBLPSkin(wxCommandEvent& event)
 {
 	if (g_selModel)
 	{
-		int sel = event.GetSelection();
+		const int sel = event.GetSelection();
 		int texnum;
 		switch (event.GetId())
 		{
@@ -1226,7 +1226,7 @@ void AnimControl::OnItemSet(wxCommandEvent& event)
 {
 	if (g_selWMO)
 	{
-		int sel = event.GetSelection();
+		const int sel = event.GetSelection();
 		// -1 for no doodads
 		g_selWMO->showDoodadSet(sel - 1);
 	}
@@ -1243,7 +1243,7 @@ void AnimControl::OnSliderUpdate(wxCommandEvent& event)
 		if (!g_selModel || !g_selModel->animManager)
 			return;
 
-		float speed = speedMouthSlider->GetValue() / 10.0f;
+		const float speed = speedMouthSlider->GetValue() / 10.0f;
 		g_selModel->animManager->SetMouthSpeed(speed);
 		speedMouthLabel->SetLabel(wxString::Format(_("Speed: %.1fx"), speed));
 	}
@@ -1286,7 +1286,7 @@ void AnimControl::SetSkin(int num)
 		g_selModel->replaceParticleColors = false;
 		return;
 	}
-	TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(num));
+	const TextureGroup* grp = static_cast<TextureGroup*>(skinList->GetClientData(num));
 
 	if (!grp) // invalid texture group
 	{
@@ -1296,7 +1296,7 @@ void AnimControl::SetSkin(int num)
 
 	// creatureGeosetData defines geosets that are enabled only when
 	// specific displayIDs are selected from the menu.
-	std::set<GeosetNum> cgd = grp->creatureGeosetData;
+	const std::set<GeosetNum> cgd = grp->creatureGeosetData;
 	g_selModel->setCreatureGeosetData(cgd);
 	g_modelViewer->modelControl->UpdateGeosetSelection();
 
@@ -1311,7 +1311,7 @@ void AnimControl::SetSkin(int num)
 		}
 		currTextures[i] = texname;
 
-		int base = grp->base + i;
+		const int base = grp->base + i;
 		g_selModel->updateTextureList(tex, base);
 	}
 
@@ -1347,7 +1347,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 		return;
 	}
 
-	int base = grp->base + texnum - 1;
+	const int base = grp->base + texnum - 1;
 	GameFile* tex = grp->tex[0];
 	LOG_INFO << "SETSINGLESKIN skin = " << tex->fullname();
 	g_selModel->updateTextureList(tex, base);
@@ -1356,7 +1356,7 @@ void AnimControl::SetSingleSkin(int num, int texnum)
 int AnimControl::AddSkin(TextureGroup grp)
 {
 	skinList->Append(wxT("Custom"));
-	int count = skinList->GetCount() - 1;
+	const int count = skinList->GetCount() - 1;
 	TextureGroup* group = new TextureGroup(grp);
 	skinList->SetClientData(count, group);
 	SetSkin(count);

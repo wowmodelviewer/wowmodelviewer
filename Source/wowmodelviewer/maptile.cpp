@@ -176,8 +176,8 @@ bool getBitH2L(unsigned char* data, unsigned bit)
 
 bool getBitL2H(unsigned char* data, unsigned bit)
 {
-	unsigned char byte = data[bit / 8];
-	unsigned char pos = bit % 8;
+	const unsigned char byte = data[bit / 8];
+	const unsigned char pos = bit % 8;
 
 	unsigned char mask = 0x1;
 	mask <<= pos;
@@ -238,7 +238,7 @@ void initGlobalVBOs()
 
 		// init texture coordinates for detail map:
 		glm::vec2* vt = temp;
-		int detail_size = 1;
+		const int detail_size = 1;
 		const float detail_half = 0.5f * detail_size / 8.0f;
 		for (int j = 0; j < 17; j++)
 		{
@@ -1707,8 +1707,8 @@ void MapChunk::initStrip(int holes)
 			{
 				// draw tile here
 				// this is ugly but sort of works
-				int i = x * 2;
-				int j = y * 4;
+				const int i = x * 2;
+				const int j = y * 4;
 				for (ssize_t k = 0; k < 2; k++)
 				{
 					if (!first)
@@ -1755,7 +1755,7 @@ void MapChunk::drawPass(int anim)
 
 		// note: this is ad hoc and probably completely wrong
 		//int spd = (anim & 0x08) | ((anim & 0x10) >> 2) | ((anim & 0x20) >> 4) | ((anim & 0x40) >> 6);
-		int dir = anim & 0x07;
+		const int dir = anim & 0x07;
 		const float texanimxtab[8] = {0, 1, 1, 1, 0, -1, -1, -1};
 		const float texanimytab[8] = {1, 1, 0, -1, -1, -1, 0, 1};
 		float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
@@ -1763,7 +1763,7 @@ void MapChunk::drawPass(int anim)
 		//int detail_size = 1;
 		//int animspd = (int)(200.0f * detail_size);
 		//float f = ( ((int)(gWorld->animtime*(spd/15.0f))) % animspd) / (float)animspd;
-		int f = 0; // TODO
+		const int f = 0; // TODO
 		glTranslatef(f * fdx, f * fdy, 0);
 	}
 
@@ -1845,7 +1845,7 @@ void MapChunk::draw()
 		// blended layers
 		for (size_t i = 1; i < nTextures; i++)
 		{
-			int tex = GL_TEXTURE2_ARB + i - 1;
+			const int tex = GL_TEXTURE2_ARB + i - 1;
 			glActiveTextureARB(tex);
 			glBindTexture(GL_TEXTURE_2D, textures[i]);
 		}
@@ -2000,7 +2000,7 @@ void MapChunk::drawWater()
 	glDisable(GL_TEXTURE_2D);
 
 	//size_t texidx = (size_t)(gWorld->animtime / 60.0f) % wTextures.size();
-	size_t texidx = 0;
+	const size_t texidx = 0;
 	glBindTexture(GL_TEXTURE_2D, wTextures[texidx]);
 	//glBindTexture(GL_TEXTURE_2D, gWorld->water);
 
@@ -2019,23 +2019,23 @@ void MapChunk::drawWater()
 
 		for (auto& layer : waterLayer)
 		{
-			unsigned ox = layer.x;
-			unsigned oy = layer.y;
+			const unsigned ox = layer.x;
+			const unsigned oy = layer.y;
 
 			for (unsigned y = oy; y < layer.h + oy; y++)
 			{
 				for (unsigned x = ox; x < layer.w + ox; x++)
 				{
-					unsigned tx = x - ox;
-					unsigned ty = y - oy;
+					const unsigned tx = x - ox;
+					const unsigned ty = y - oy;
 
 					// p1--p4
 					// |    |  // this is GL_QUADS 
 					// p2--p3
-					unsigned p1 = tx + ty * (layer.w + 1);
-					unsigned p2 = tx + (ty + 1) * (layer.w + 1);
-					unsigned p3 = tx + 1 + (ty + 1) * (layer.w + 1);
-					unsigned p4 = tx + 1 + ty * (layer.w + 1);
+					const unsigned p1 = tx + ty * (layer.w + 1);
+					const unsigned p2 = tx + (ty + 1) * (layer.w + 1);
+					const unsigned p3 = tx + 1 + (ty + 1) * (layer.w + 1);
+					const unsigned p4 = tx + 1 + ty * (layer.w + 1);
 
 					// alpha values helper
 					float a2, a3, a4;
@@ -2104,7 +2104,7 @@ void MapNode::draw()
 {
 	//if (!gWorld->frustum.intersects(vmin,vmax)) 
 	//  return;
-	for (auto& i : children)
+	for (const auto& i : children)
 		i->draw();
 }
 
@@ -2123,17 +2123,17 @@ void MapNode::setup(MapTile* t)
 	}
 	else
 	{
-		int half = size / 2;
+		const int half = size / 2;
 		children[0] = new MapNode(px, py, half);
 		children[1] = new MapNode(px + half, py, half);
 		children[2] = new MapNode(px, py + half, half);
 		children[3] = new MapNode(px + half, py + half, half);
-		for (auto& i : children)
+		for (const auto& i : children)
 		{
 			i->setup(mt);
 		}
 	}
-	for (auto& i : children)
+	for (const auto& i : children)
 	{
 		if (i->vmin.x < vmin.x) vmin.x = i->vmin.x;
 		if (i->vmin.y < vmin.y) vmin.y = i->vmin.y;
@@ -2148,7 +2148,7 @@ void MapNode::cleanup()
 {
 	if (size > 2)
 	{
-		for (auto& i : children)
+		for (const auto& i : children)
 		{
 			i->cleanup();
 			delete i;

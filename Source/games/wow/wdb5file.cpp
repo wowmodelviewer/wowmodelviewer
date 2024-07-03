@@ -149,7 +149,7 @@ bool WDB5File::open()
 			// read ids from data
 			for (uint i = 0; i < recordCount; i++)
 			{
-				unsigned char* recordOffset = data + (i * recordSize);
+				const unsigned char* recordOffset = data + (i * recordSize);
 				unsigned char* val = new unsigned char[indexSize];
 				memcpy(val, recordOffset + indexPos, indexSize);
 				m_IDs.push_back((*reinterpret_cast<unsigned int*>(val) & indexMask));
@@ -164,7 +164,7 @@ bool WDB5File::open()
 	// copy table
 	if (header.copy_table_size > 0)
 	{
-		uint nbEntries = header.copy_table_size / sizeof(copy_table_entry);
+		const uint nbEntries = header.copy_table_size / sizeof(copy_table_entry);
 
 		m_IDs.reserve(recordCount + nbEntries);
 		m_recordOffsets.reserve(recordCount + nbEntries);

@@ -177,7 +177,7 @@ void CharDetails::fillCustomizationMap()
 	if (infos.raceID == -1)
 		return;
 
-	auto options = GAMEDATABASE.sqlQuery(
+	const auto options = GAMEDATABASE.sqlQuery(
 		QString(
 			"SELECT ID FROM ChrCustomizationOption WHERE ChrModelID = %1 AND ChrCustomizationID != 0 ORDER BY OrderIndex")
 		.arg(infos.ChrModelID[0]));
@@ -189,7 +189,7 @@ void CharDetails::fillCustomizationMap()
 	LINKED_OPTIONS_MAP_.clear();
 	initLinkedOptionsMap();
 
-	for (auto& option : choicesPerOptionMap_)
+	for (const auto& option : choicesPerOptionMap_)
 		fillCustomizationMapForOption(option.first);
 }
 
@@ -202,7 +202,7 @@ void CharDetails::fillCustomizationMapForOption(uint chrCustomizationOption)
 	vals.clear();
 
 	// 1. fill direct values
-	auto choices = GAMEDATABASE.sqlQuery(
+	const auto choices = GAMEDATABASE.sqlQuery(
 		QString("SELECT ID FROM ChrCustomizationChoice WHERE ChrCustomizationOptionID = %1 ORDER BY OrderIndex").arg(
 			chrCustomizationOption));
 	if (choices.valid)

@@ -200,7 +200,7 @@ void CharControl::UpdateModel(Attachment* a)
 		model->td.setIcon(randint(0, model->td.GetMaxIcon()));
 		model->td.setIconColor(randint(0, model->td.GetMaxIconColor(model->td.getIcon())));
 		model->td.setBorder(randint(0, model->td.GetMaxBorder()));
-		int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
+		const int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
 		model->td.setBorderColor(randint(0, maxColor));
 		model->td.setBackground(randint(0, model->td.GetMaxBackground()));
 
@@ -243,7 +243,7 @@ void CharControl::UpdateModel(Attachment* a)
 
 	for (size_t i = 0; i < NUM_CHAR_SLOTS; i++)
 	{
-		WoWItem* item = model->getItem(static_cast<CharSlots>(i));
+		const WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 		if (item)
 		{
 			if (buttons[i])
@@ -270,7 +270,7 @@ void CharControl::UpdateModel(Attachment* a)
 
 void CharControl::OnCheck(wxCommandEvent& event)
 {
-	int ID = event.GetId();
+	const int ID = event.GetId();
 	if (ID == ID_SHOW_UNDERWEAR)
 		model->cd.showUnderwear = event.IsChecked();
 	else if (ID == ID_SHOW_HAIR)
@@ -309,7 +309,7 @@ void CharControl::RefreshEquipment()
 	{
 		if (labels[i])
 		{
-			WoWItem* item = model->getItem(static_cast<CharSlots>(i));
+			const WoWItem* item = model->getItem(static_cast<CharSlots>(i));
 			if (item)
 			{
 				labels[i]->SetLabel(item->name().toStdWString());
@@ -425,7 +425,7 @@ void CharControl::RefreshModel()
 	model->refresh();
 
 	// Eye Glow Geosets are ID 1701, 1702, etc.
-	size_t egt = model->cd.eyeGlowType;
+	const size_t egt = model->cd.eyeGlowType;
 	int egtId = CG_EYEGLOW * 100 + egt + 1; // CG_EYEGLOW = 17
 
 	// Update Eye Glow Menu
@@ -524,7 +524,7 @@ void CharControl::selectItem(ssize_t type, ssize_t slot, const wxChar* caption)
 		itemDialog = new FilteredChoiceDialog(this, type, g_modelViewer, wxT("Choose an item"), caption, choices,
 		                                      &quality);
 
-	wxSize s = itemDialog->GetSize();
+	const wxSize s = itemDialog->GetSize();
 	const int w = 250;
 	if (s.GetWidth() > w)
 	{
@@ -589,7 +589,7 @@ void CharControl::selectStart()
 
 	LOG_INFO << "race =" << infos.raceID << "sex = " << infos.sexID;
 
-	QString query = QString("SELECT ChrClasses.Filename, CSO.ID "
+	const QString query = QString("SELECT ChrClasses.Filename, CSO.ID "
 		"FROM CharStartOutfit AS CSO LEFT JOIN ChrClasses on CSO.classID = ChrClasses.ID "
 		"WHERE CSO.raceID=%1 AND CSO.sexID=%2").arg(infos.raceID).arg(infos.sexID);
 
@@ -611,7 +611,7 @@ void CharControl::selectStart()
 
 bool filterCreatures(wxString fn)
 {
-	wxString tmp = fn.Lower();
+	const wxString tmp = fn.Lower();
 	return (tmp.StartsWith(wxT("crea")) && tmp.EndsWith(wxT("m2")));
 }
 
@@ -747,7 +747,7 @@ void CharControl::selectNPC(ssize_t type)
 
 	itemDialog->SetSelection(0);
 
-	wxSize s = itemDialog->GetSize();
+	const wxSize s = itemDialog->GetSize();
 	const int w = 250;
 	if (s.GetWidth() > w)
 	{
@@ -794,7 +794,7 @@ void CharControl::OnUpdateItem(int type, int id)
 
 			if (id && model)
 			{
-				QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
+				const QString query = QString("SELECT itemID1, itemID2, itemID3, itemID4, itemID5, "
 					"itemID6, itemID7,  itemID8 FROM ItemSet WHERE ID = %1").arg(id);
 
 				sqlResult itemSet = GAMEDATABASE.sqlQuery(query);
@@ -803,7 +803,7 @@ void CharControl::OnUpdateItem(int type, int id)
 				{
 					// reset previously equipped items
 
-					for (auto it : *model)
+					for (const auto it : *model)
 						it->setId(0);
 
 					for (unsigned i = 0; i < 8; i++)
@@ -820,7 +820,7 @@ void CharControl::OnUpdateItem(int type, int id)
 
 		if (id && model)
 		{
-			QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
+			const QString query = QString("SELECT CSO.iitem1, CSO.iitem2, CSO.iitem3, CSO.iitem4, CSO.iitem5,"
 				"CSO.iitem6, CSO.iitem6, CSO.iitem7, CSO.iitem8, CSO.iitem9, CSO.iitem10, CSO.iitem11,"
 				"CSO.iitem12, CSO.iitem13, CSO.iitem14, CSO.iitem15, CSO.iitem16, CSO.iitem17, CSO.iitem18,"
 				"CSO.iitem19, CSO.iitem20, CSO.iitem21, CSO.iitem22, CSO.iitem23, CSO.iitem24 "
@@ -831,7 +831,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			if (startOutfit.valid && !startOutfit.empty())
 			{
 				// reset previously equipped items
-				for (auto it : *model)
+				for (const auto it : *model)
 					it->setId(0);
 
 				for (unsigned i = 0; i < 24; i++)
@@ -881,7 +881,7 @@ void CharControl::OnUpdateItem(int type, int id)
 			{
 				morphID = numbers[id];
 				// Only dealing with Creature/ models (for now), so don't need to worry about CreatureDisplayInfoExtra
-				QString query = QString(
+				const QString query = QString(
 					"SELECT CreatureModelData.FileDataID, CreatureDisplayInfo.TextureVariationFileDataID1, "
 					"CreatureDisplayInfo.TextureVariationFileDataID2, CreatureDisplayInfo.TextureVariationFileDataID3 FROM CreatureDisplayInfo "
 					"LEFT JOIN CreatureModelData ON CreatureDisplayInfo.modelID = CreatureModelData.ID "
@@ -981,7 +981,7 @@ void CharControl::OnTabardSpin(wxSpinEvent& event)
 		{
 			LOG_INFO << "Tabard Notice: Border Change.";
 			model->td.setBorder(event.GetPosition());
-			int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
+			const int maxColor = model->td.GetMaxBorderColor(model->td.getBorder());
 			if (maxColor < model->td.getBorderColor())
 			{
 				model->td.setBorderColor(0);

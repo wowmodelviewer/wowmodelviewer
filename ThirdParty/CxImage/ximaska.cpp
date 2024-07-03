@@ -38,14 +38,14 @@ bool CxImageSKA::Decode(CxFile *hFile)
     return true;
   }
 
-  int bpp = 1<<ska_header.BppExp;
+  const int bpp = 1<<ska_header.BppExp;
 
   Create(ska_header.Width,ska_header.Height,bpp,CXIMAGE_FORMAT_SKA);
   if (!IsValid())
     return false;
 
   // read the palette
-  int nColors = 1<<bpp;
+  const int nColors = 1<<bpp;
   rgb_color* ppal = (rgb_color*)malloc(nColors*sizeof(rgb_color));
   if (!ppal) return false;
   hFile->Read(ppal,nColors*sizeof(rgb_color),1);
@@ -57,7 +57,7 @@ bool CxImageSKA::Decode(CxFile *hFile)
 
   //reorder rows
   if (GetEffWidth() != ska_header.Width){
-	  BYTE* src = GetBits() + ska_header.Width * (ska_header.Height - 1);
+	  const BYTE* src = GetBits() + ska_header.Width * (ska_header.Height - 1);
     BYTE* dst = GetBits(ska_header.Height - 1);
     for(int y=0;y<ska_header.Height;y++){
       memcpy(dst,src,ska_header.Width);
@@ -110,7 +110,7 @@ bool CxImageSKA::Encode(CxFile * hFile)
 
   hFile->Write(pal,256*sizeof(rgb_color),1);
 
-  BYTE* src = GetBits(ska_header.Height-1);
+  const BYTE* src = GetBits(ska_header.Height-1);
   for(int y=0;y<ska_header.Height;y++){
     hFile->Write(src,ska_header.Width,1);
     src -= GetEffWidth();

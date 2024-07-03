@@ -117,12 +117,12 @@ bool FBXExporter::exportModel(Model* model, std::wstring target)
 		FBXHeaders::storeBindPose(m_p_scene, m_boneClusters, m_p_meshNode);
 		FBXHeaders::storeRestPose(m_p_scene, m_p_skeletonNode);
 
-		for (auto it : *m_p_model)
+		for (const auto it : *m_p_model)
 		{
 			std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 			if (!itemModels.empty())
 			{
-				for (auto& itemModel : itemModels)
+				for (const auto& itemModel : itemModels)
 				{
 					if (m_attachBoneClusters.find(itemModel.first) != m_attachBoneClusters.end() && m_attachMeshNodes.
 						find(itemModel.first) != m_attachMeshNodes.end())
@@ -177,17 +177,17 @@ void FBXExporter::createMeshes()
 	FbxNode* root_node = m_p_scene->GetRootNode();
 	root_node->AddChild(m_p_meshNode);
 
-	for (auto it : *m_p_model)
+	for (const auto it : *m_p_model)
 	{
 		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (auto& It : itemModels)
+			for (const auto& It : itemModels)
 			{
 				WoWModel* itemModel = It.second;
 				LOG_INFO << "Found attached item:" << itemModel->modelname.c_str();
 
-				int l = m_p_model->attLookup[It.first];
+				const int l = m_p_model->attLookup[It.first];
 				glm::mat4 m;
 				glm::vec3 pos;
 				if (l > -1)
@@ -211,12 +211,12 @@ void FBXExporter::createSkeletons()
 	FbxNode* root_node = m_p_scene->GetRootNode();
 	root_node->AddChild(m_p_skeletonNode);
 
-	for (auto it : *m_p_model)
+	for (const auto it : *m_p_model)
 	{
 		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (auto& It : itemModels)
+			for (const auto& It : itemModels)
 			{
 				WoWModel* itemModel = It.second;
 				if (itemModel->animated == false || itemModel->bones.size() < 2)
@@ -238,7 +238,7 @@ void FBXExporter::createSkeletons()
 void FBXExporter::linkMeshAndSkeleton()
 {
 	// create clusters
-	for (auto it : m_boneNodes)
+	for (const auto it : m_boneNodes)
 	{
 		FbxCluster* cluster = FbxCluster::Create(m_p_scene, "");
 		m_boneClusters.push_back(cluster);
@@ -248,7 +248,7 @@ void FBXExporter::linkMeshAndSkeleton()
 
 	// define control points
 	int i = 0;
-	for (auto it : m_p_model->origVertices)
+	for (const auto it : m_p_model->origVertices)
 	{
 		for (size_t j = 0; j < 4; j++)
 		{
@@ -260,14 +260,14 @@ void FBXExporter::linkMeshAndSkeleton()
 
 	// set initial matrices
 	FbxAMatrix matrix = m_p_meshNode->EvaluateGlobalTransform();
-	for (auto it : m_boneClusters)
+	for (const auto it : m_boneClusters)
 	{
 		it->SetTransformMatrix(matrix);
 	}
 
 	// set link matrices
 	std::vector<FbxCluster*>::iterator clusterIt = m_boneClusters.begin();
-	for (auto it : m_boneNodes)
+	for (const auto it : m_boneNodes)
 	{
 		matrix = it.second->EvaluateGlobalTransform();
 		(*clusterIt)->SetTransformLinkMatrix(matrix);
@@ -278,7 +278,7 @@ void FBXExporter::linkMeshAndSkeleton()
 	FbxGeometry* lMeshAttribute = static_cast<FbxGeometry*>(m_p_meshNode->GetNodeAttribute());
 	FbxSkin* skin = FbxSkin::Create(m_p_scene, "");
 
-	for (auto it : m_boneClusters)
+	for (const auto it : m_boneClusters)
 		skin->AddCluster(it);
 
 	lMeshAttribute->AddDeformer(skin);
@@ -325,10 +325,10 @@ bool FBXExporter::createAnimationFiles()
 	//LOG_INFO << "Exporting animations with" << maxThreads << "threads...";
 	//QThreadPool::globalInstance()->setMaxThreadCount(maxThreads);   // Use to limit the number of threads we can run at once.
 
-	for (auto it : m_animsToExport)
+	for (const auto it : m_animsToExport)
 	{
 		QMutexLocker locker(&m_mutex);
-		ModelAnimation curAnimation = m_p_model->anims[it];
+		const ModelAnimation curAnimation = m_p_model->anims[it];
 		FBXAnimExporter* exporter = new FBXAnimExporter();
 		exporter->setValues(m_fileVersion, QString::fromWCharArray(m_filename.c_str()),
 		                    QString::fromWCharArray(animsMap[curAnimation.animID].c_str()), m_p_model, m_boneClusters,
@@ -389,12 +389,12 @@ void FBXExporter::createMaterials()
 		}
 	}
 
-	for (auto it : *m_p_model)
+	for (const auto it : *m_p_model)
 	{
 		std::map<POSITION_SLOTS, WoWModel*> itemModels = it->models();
 		if (!itemModels.empty())
 		{
-			for (auto& itemModel : itemModels)
+			for (const auto& itemModel : itemModels)
 			{
 				WoWModel* model = itemModel.second;
 				for (unsigned int i = 0; i < model->passes.size(); i++)
@@ -446,7 +446,7 @@ void FBXExporter::createMaterials()
 		}
 	}
 
-	for (auto it : m_texturesToExport)
+	for (const auto it : m_texturesToExport)
 		exportGLTexture(it.second, it.first);
 }
 

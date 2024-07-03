@@ -115,15 +115,15 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 	for (size_t i = 0; i < num_of_vertices; i++)
 	{
 		ModelVertex& v = model->origVertices[i];
-		glm::vec3 Position = glm::vec3(m * glm::vec4((v.pos + offset), 1.0f));
+		const glm::vec3 Position = glm::vec3(m * glm::vec4((v.pos + offset), 1.0f));
 		vertices[i].Set(Position.x * SCALE_FACTOR, Position.y * SCALE_FACTOR, Position.z * SCALE_FACTOR);
-		glm::vec3 vn = glm::normalize(v.normal);
+		const glm::vec3 vn = glm::normalize(v.normal);
 		layer_normal->GetDirectArray().Add(FbxVector4(vn.x, vn.y, vn.z));
 		layer_texcoord->GetDirectArray().Add(FbxVector2(v.texcoords.x, 1.0 - v.texcoords.y));
 	}
 
 	// Create polygons.
-	size_t num_of_passes = model->passes.size();
+	const size_t num_of_passes = model->passes.size();
 	FbxLayerElementMaterial* layer_material = FbxLayerElementMaterial::Create(mesh, "");
 	layer_material->SetMappingMode(FbxLayerElement::eByPolygon);
 	layer_material->SetReferenceMode(FbxLayerElement::eIndexToDirect);
@@ -145,8 +145,8 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 			FbxSurfaceMaterial* material = l_scene->GetMaterial(mtrl_name.Buffer());
 			meshNode->AddMaterial(material);
 
-			ModelGeosetHD* g = model->geosets[p->geoIndex];
-			size_t num_of_faces = g->icount / 3;
+			const ModelGeosetHD* g = model->geosets[p->geoIndex];
+			const size_t num_of_faces = g->icount / 3;
 			for (size_t j = 0; j < num_of_faces; j++)
 			{
 				mesh->BeginPolygon(mtrl_index);
@@ -162,7 +162,7 @@ FbxNode* FBXHeaders::createMesh(FbxManager* & l_manager, FbxScene* & l_scene, Wo
 
 	layer->SetNormals(layer_normal);
 
-	FbxGeometryConverter lGeometryConverter(l_manager);
+	const FbxGeometryConverter lGeometryConverter(l_manager);
 	lGeometryConverter.ComputeEdgeSmoothingFromNormals(mesh);
 	//convert soft/hard edge info to smoothing group info
 	lGeometryConverter.ComputePolygonSmoothingFromEdgeSmoothing(mesh);
@@ -187,14 +187,14 @@ void FBXHeaders::createSkeleton(WoWModel* l_model, FbxScene*& l_scene, FbxNode*&
 	l_skeletonNode->SetNodeAttribute(bone_group_skeleton_attribute);
 
 	std::vector<FbxSkeleton::EType> bone_types;
-	size_t num_of_bones = l_model->bones.size();
+	const size_t num_of_bones = l_model->bones.size();
 
 	// Set bone type.
 	std::vector<bool> has_children;
 	has_children.resize(num_of_bones);
 	for (size_t i = 0; i < num_of_bones; ++i)
 	{
-		Bone bone = l_model->bones[i];
+		const Bone bone = l_model->bones[i];
 		if (bone.parent != -1)
 			has_children[bone.parent] = true;
 	}
@@ -202,7 +202,7 @@ void FBXHeaders::createSkeleton(WoWModel* l_model, FbxScene*& l_scene, FbxNode*&
 	bone_types.resize(num_of_bones);
 	for (size_t i = 0; i < num_of_bones; ++i)
 	{
-		Bone bone = l_model->bones[i];
+		const Bone bone = l_model->bones[i];
 
 		if (bone.parent == -1)
 		{
@@ -221,7 +221,7 @@ void FBXHeaders::createSkeleton(WoWModel* l_model, FbxScene*& l_scene, FbxNode*&
 	// Create bone.
 	for (size_t i = 0; i < num_of_bones; ++i)
 	{
-		Bone& bone = l_model->bones[i];
+		const Bone& bone = l_model->bones[i];
 		glm::vec3 trans = bone.pivot;
 
 		int pid = bone.parent;
@@ -265,7 +265,7 @@ void FBXHeaders::storeBindPose(FbxScene* & l_scene, std::vector<FbxCluster*> l_b
 	FbxPose* pose = FbxPose::Create(l_scene, "Bind Pose");
 	pose->SetIsBindPose(true);
 
-	for (auto it : l_boneClusters)
+	for (const auto it : l_boneClusters)
 	{
 		FbxNode* node = it->GetLink();
 		FbxMatrix matrix = node->EvaluateGlobalTransform();

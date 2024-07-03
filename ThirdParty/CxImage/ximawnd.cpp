@@ -164,10 +164,10 @@ long CxImage::Blt(HDC pDC, long x, long y)
 {
   if((pDib==0)||(pDC==0)||(!info.bEnabled)) return 0;
 
-    HBRUSH brImage = CreateDIBPatternBrushPt(pDib, DIB_RGB_COLORS);
+  const HBRUSH brImage = CreateDIBPatternBrushPt(pDib, DIB_RGB_COLORS);
     POINT pt;
     SetBrushOrgEx(pDC,x,y,&pt); //<RT>
-    HBRUSH brOld = (HBRUSH) SelectObject(pDC, brImage);
+  const HBRUSH brOld = (HBRUSH) SelectObject(pDC, brImage);
     PatBlt(pDC, x, y, head.biWidth, head.biHeight, PATCOPY);
     SelectObject(pDC, brOld);
     SetBrushOrgEx(pDC,pt.x,pt.y,NULL);
@@ -506,9 +506,9 @@ HBITMAP CxImage::MakeBitmap(HDC hdc)
     // // Create a device-independent bitmap <CSC>
     //  return CreateBitmap(head.biWidth,head.biHeight,  1, head.biBitCount, GetBits());
     // use instead this code
-    HDC hMemDC = CreateCompatibleDC(NULL);
+    const HDC hMemDC = CreateCompatibleDC(NULL);
     LPVOID pBit32;
-    HBITMAP bmp = CreateDIBSection(hMemDC,(LPBITMAPINFO)pDib,DIB_RGB_COLORS, &pBit32, NULL, 0);
+    const HBITMAP bmp = CreateDIBSection(hMemDC,(LPBITMAPINFO)pDib,DIB_RGB_COLORS, &pBit32, NULL, 0);
     if (pBit32) memcpy(pBit32, GetBits(), head.biSizeImage);
     DeleteDC(hMemDC);
     return bmp;
@@ -519,7 +519,7 @@ HBITMAP CxImage::MakeBitmap(HDC hdc)
   //  GetBits(), (LPBITMAPINFO)pDib, DIB_RGB_COLORS);
   // this alternative works also with _WIN32_WCE
   LPVOID pBit32;
-  HBITMAP bmp = CreateDIBSection(hdc, (LPBITMAPINFO)pDib, DIB_RGB_COLORS, &pBit32, NULL, 0);
+  const HBITMAP bmp = CreateDIBSection(hdc, (LPBITMAPINFO)pDib, DIB_RGB_COLORS, &pBit32, NULL, 0);
   if (pBit32) memcpy(pBit32, GetBits(), head.biSizeImage);
 
   return bmp;
@@ -544,7 +544,7 @@ bool CxImage::CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal)
         if (!Create(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0))
       return false;
     // create a device context for the bitmap
-        HDC dc = ::GetDC(NULL);
+        const HDC dc = ::GetDC(NULL);
     if (!dc)
       return false;
 
@@ -598,7 +598,7 @@ bool CxImage::CreateFromHICON(HICON hico)
 
     RGBQUAD *l_pRawBytes = new RGBQUAD[l_Bitmap.bmWidth * l_Bitmap.bmHeight];
 
-    HDC dc = ::GetDC(NULL);
+    const HDC dc = ::GetDC(NULL);
 
     if(dc)
     {
@@ -966,10 +966,10 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
   if((pDib==0)||(hdc==0)||(cx==0)||(cy==0)||(!info.bEnabled)) return 0;
   if (cx < 0) cx = head.biWidth;
   if (cy < 0) cy = head.biHeight;
-  bool bTransparent = (info.nBkgndIndex >= 0);
+  const bool bTransparent = (info.nBkgndIndex >= 0);
 
   //required for MM_ANISOTROPIC, MM_HIENGLISH, and similar modes [Greg Peatfield]
-  int hdc_Restore = ::SaveDC(hdc);
+  const int hdc_Restore = ::SaveDC(hdc);
   if (!hdc_Restore) 
     return 0;
 
@@ -982,18 +982,18 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
   } else {
     // draw image with transparent background
     const int safe = 0; // or else GDI fails in the following - sometimes 
-    RECT rcDst = {x+safe, y+safe, x+cx, y+cy};
+    const RECT rcDst = {x+safe, y+safe, x+cx, y+cy};
     if (RectVisible(hdc, &rcDst)){
     /////////////////////////////////////////////////////////////////
       // True Mask Method - Thanks to Paul Reynolds and Ron Gery
-      int nWidth = head.biWidth;
-      int nHeight = head.biHeight;
+    const int nWidth = head.biWidth;
+    const int nHeight = head.biHeight;
       // Create two memory dcs for the image and the mask
-      HDC dcImage=CreateCompatibleDC(hdc);
-      HDC dcTrans=CreateCompatibleDC(hdc);
+    const HDC dcImage=CreateCompatibleDC(hdc);
+    const HDC dcTrans=CreateCompatibleDC(hdc);
       // Select the image into the appropriate dc
-      HBITMAP bm = CreateCompatibleBitmap(hdc, nWidth, nHeight);
-      HBITMAP pOldBitmapImage = (HBITMAP)SelectObject(dcImage,bm);
+    const HBITMAP bm = CreateCompatibleBitmap(hdc, nWidth, nHeight);
+    const HBITMAP pOldBitmapImage = (HBITMAP)SelectObject(dcImage,bm);
 #if !defined (_WIN32_WCE)
       SetStretchBltMode(dcImage,COLORONCOLOR);
 #endif
@@ -1001,15 +1001,15 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
               info.pImage,(BITMAPINFO*)pDib,DIB_RGB_COLORS,SRCCOPY);
 
       // Create the mask bitmap
-      HBITMAP bitmapTrans = CreateBitmap(nWidth, nHeight, 1, 1, NULL);
+    const HBITMAP bitmapTrans = CreateBitmap(nWidth, nHeight, 1, 1, NULL);
       // Select the mask bitmap into the appropriate dc
-      HBITMAP pOldBitmapTrans = (HBITMAP)SelectObject(dcTrans, bitmapTrans);
+    const HBITMAP pOldBitmapTrans = (HBITMAP)SelectObject(dcTrans, bitmapTrans);
       // Build mask based on transparent colour
       RGBQUAD rgbBG;
       if (head.biBitCount<24) rgbBG = GetPaletteColor((BYTE)info.nBkgndIndex);
       else rgbBG = info.nBkgndColor;
-      COLORREF crColour = RGB(rgbBG.rgbRed, rgbBG.rgbGreen, rgbBG.rgbBlue);
-      COLORREF crOldBack = SetBkColor(dcImage,crColour);
+    const COLORREF crColour = RGB(rgbBG.rgbRed, rgbBG.rgbGreen, rgbBG.rgbBlue);
+    const COLORREF crOldBack = SetBkColor(dcImage,crColour);
       BitBlt(dcTrans,0, 0, nWidth, nHeight, dcImage, 0, 0, SRCCOPY);
 
       // Do the work - True Mask method - cool if not actual display
@@ -1068,9 +1068,9 @@ long CxImage::Stretch(HDC hdc, long xoffset, long yoffset, long xsize, long ysiz
 long CxImage::Tile(HDC hdc, RECT *rc)
 {
   if((pDib)&&(hdc)&&(rc)) {
-    int w = rc->right - rc->left;
-    int h = rc->bottom - rc->top;
-    int bx=head.biWidth;
+	  const int w = rc->right - rc->left;
+	  const int h = rc->bottom - rc->top;
+	  const int bx=head.biWidth;
     int by=head.biHeight;
     for (int y = 0 ; y < h ; y += by){
       if ((y+by)>h) by=h-y;

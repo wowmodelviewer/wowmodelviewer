@@ -109,7 +109,7 @@ bool CxImageGIF::Decode(CxFile *fp)
           bTrueColor++;
 
         rgb_color  locpal[256];        //Local Palette 
-        rgb_color* pcurpal = TabCol.paleta;  //Current Palette 
+        const rgb_color* pcurpal = TabCol.paleta;  //Current Palette 
         short palcount = TabCol.sogct;    //Current Palette color count  
 
         // Local colour map?
@@ -211,7 +211,7 @@ bool CxImageGIF::Decode(CxFile *fp)
         iypos = 0;
         ipass = 0;
 
-        long pos_start = fp->Tell();
+        const long pos_start = fp->Tell();
         //if (interlaced) log << "Interlaced" << endl;
         decoder(fp, iter, image.w, badcode);
         delete iter;
@@ -484,7 +484,7 @@ bool CxImageGIF::Encode(CxFile * fp, CxImage ** pImages, int pagecount, bool bLo
   if (bLocalDispMeth) {
     ghost.EncodeExtension(fp);
   } else {
-    BYTE dm = ghost.GetDisposalMethod();
+	  const BYTE dm = ghost.GetDisposalMethod();
     ghost.SetDisposalMethod(GetDisposalMethod());
     ghost.EncodeExtension(fp);
     ghost.SetDisposalMethod(dm);
@@ -500,7 +500,7 @@ bool CxImageGIF::Encode(CxFile * fp, CxImage ** pImages, int pagecount, bool bLo
     if (bLocalDispMeth) {
       ghost.EncodeExtension(fp);
     } else {
-      BYTE dm = ghost.GetDisposalMethod();
+	    const BYTE dm = ghost.GetDisposalMethod();
       ghost.SetDisposalMethod(GetDisposalMethod());
       ghost.EncodeExtension(fp);
       ghost.SetDisposalMethod(dm);
@@ -539,7 +539,7 @@ void CxImageGIF::EncodeHeader(CxFile *fp)
   fp->PutC(0);   //GIF "pixel aspect ratio"
 
   if (head.biClrUsed!=0){
-    RGBQUAD* pPal = GetPalette();
+	  const RGBQUAD* pPal = GetPalette();
     for(DWORD i=0; i<head.biClrUsed; ++i) 
     {
       fp->PutC(pPal[i].rgbRed);
@@ -603,7 +603,7 @@ void CxImageGIF::EncodeBody(CxFile *fp, bool bLocalColorMap)
 
   if (bLocalColorMap){
     Flags|=0x87;
-    RGBQUAD* pPal = GetPalette();
+    const RGBQUAD* pPal = GetPalette();
     for(DWORD i=0; i<head.biClrUsed; ++i) 
     {
       fp->PutC(pPal[i].rgbRed);
@@ -612,7 +612,7 @@ void CxImageGIF::EncodeBody(CxFile *fp, bool bLocalColorMap)
     }
   }
 
-  int InitCodeSize = head.biBitCount <=1 ? 2 : head.biBitCount;
+  const int InitCodeSize = head.biBitCount <=1 ? 2 : head.biBitCount;
    // Write out the initial code size
   fp->PutC((BYTE)InitCodeSize);
 
@@ -673,7 +673,7 @@ bool CxImageGIF::EncodeRGB(CxFile *fp)
 
       for (unsigned long j=0;j<h;j++){
         for (unsigned long k=0;k<w;k++){
-          BYTE i = (BYTE)(1 + k + cellw * j);
+	        const BYTE i = (BYTE)(1 + k + cellw * j);
           tmp.SetPaletteColor(i,GetPixelColor(x+k,head.biHeight-y-h+j));
           tmp.SetPixelIndex(k,j,tmp.GetNearestIndex(tmp.GetPaletteColor(i)));
         }
@@ -698,7 +698,7 @@ int CxImageGIF::GifNextPixel( )
 {
   if( CountDown == 0 ) return EOF;
   --CountDown;
-  int r = GetPixelIndex(curx,cury);
+  const int r = GetPixelIndex(curx,cury);
   // Bump the current X position
   ++curx;
   if( curx == head.biWidth ){
@@ -724,7 +724,7 @@ void CxImageGIF::compressNONE( int init_bits, CxFile* outfile)
    // Set up the necessary values
   cur_accum = cur_bits = clear_flg = 0;
   maxcode = (short)MAXCODE(n_bits = g_init_bits);
-  code_int maxmaxcode = (code_int)1 << MAXBITSCODES;
+	const code_int maxmaxcode = (code_int)1 << MAXBITSCODES;
 
   ClearCode = (1 << (init_bits - 1));
   EOFCode = ClearCode + 1;
@@ -735,8 +735,8 @@ void CxImageGIF::compressNONE( int init_bits, CxFile* outfile)
 
   output( (code_int)ClearCode );
 
-  while ( ent != EOF ) {    
-    register long c = GifNextPixel();
+  while ( ent != EOF ) {
+	  const register long c = GifNextPixel();
 
     output ( (code_int) ent );
     ent = c;
@@ -772,7 +772,7 @@ void CxImageGIF::compressLZW( int init_bits, CxFile* outfile)
    // Set up the necessary values
   cur_accum = cur_bits = clear_flg = 0;
   maxcode = (short)MAXCODE(n_bits = g_init_bits);
-  code_int maxmaxcode = (code_int)1 << MAXBITSCODES;
+  const code_int maxmaxcode = (code_int)1 << MAXBITSCODES;
 
   ClearCode = (1 << (init_bits - 1));
   EOFCode = ClearCode + 1;
@@ -884,7 +884,7 @@ void CxImageGIF::cl_hash(long hsize)
 {
   register long *htab_p = htab+hsize;
 
-  register long m1 = -1L;
+  const register long m1 = -1L;
 
   register long i = hsize - 16;
 
@@ -1208,7 +1208,7 @@ int CxImageGIF::get_num_frames(CxFile *fp,struct_TabCol* TabColSrc,struct_dscgif
 {
   struct_image image;
 
-  long pos=fp->Tell();
+  const long pos=fp->Tell();
   int nframes=0;
 
   struct_TabCol TempTabCol;
@@ -1271,7 +1271,7 @@ int CxImageGIF::get_num_frames(CxFile *fp,struct_TabCol* TabColSrc,struct_dscgif
         iypos = 0;
         ipass = 0;
 
-        long pos_start = fp->Tell();
+        const long pos_start = fp->Tell();
 
         //if (interlaced) log << "Interlaced" << endl;
         decoder(fp, 0, image.w, badcode);
@@ -1328,16 +1328,16 @@ void CxImageGIF::GetComment(char* sz_comment_out)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::GifMix(CxImage & imgsrc2, struct_image & imgdesc)
 {
-  long ymin = max(0,(long)(GetHeight()-imgdesc.t - imgdesc.h));
-  long ymax = GetHeight()-imgdesc.t;
-  long xmin = imgdesc.l;
-  long xmax = min(GetWidth(), (DWORD)(imgdesc.l + imgdesc.w));
+	const long ymin = max(0,(long)(GetHeight()-imgdesc.t - imgdesc.h));
+	const long ymax = GetHeight()-imgdesc.t;
+	const long xmin = imgdesc.l;
+	const long xmax = min(GetWidth(), (DWORD)(imgdesc.l + imgdesc.w));
 
-  long ibg2= imgsrc2.GetTransIndex();
+	const long ibg2= imgsrc2.GetTransIndex();
 
   for(long y = ymin; y < ymax; y++){
     for(long x = xmin; x < xmax; x++){
-      BYTE i2 = imgsrc2.GetPixelIndex(x - xmin, y - ymin);
+	    const BYTE i2 = imgsrc2.GetPixelIndex(x - xmin, y - ymin);
       if(i2!=ibg2) SetPixelIndex(x,y,i2);
     }
   }
@@ -1499,7 +1499,7 @@ void CxImageGIF::rle_flush_withtable(int count, struct_RLE* rle)
 unsigned int CxImageGIF::rle_compute_triangle_count(unsigned int count, unsigned int nrepcodes)
 {
 	unsigned int cost = 0;
-  unsigned int perrep = (nrepcodes * (nrepcodes + 1)) / 2;
+	const unsigned int perrep = (nrepcodes * (nrepcodes + 1)) / 2;
   while (count >= perrep){
     cost += nrepcodes;
     count -= perrep;
@@ -1530,7 +1530,7 @@ unsigned int CxImageGIF::rle_isqrt(unsigned int x)
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageGIF::rle_flush_clearorrep(int count, struct_RLE* rle)
 {
-	int withclr = 1 + rle_compute_triangle_count(count, rle->max_ocodes);
+	const int withclr = 1 + rle_compute_triangle_count(count, rle->max_ocodes);
   if (withclr < count) {
     rle_output(rle->code_clear,rle);
     rle_clear(rle);
@@ -1598,7 +1598,7 @@ void CxImageGIF::compressRLE( int init_bits, CxFile* outfile)
 
   for( ;; )
   {
-    int c = GifNextPixel();
+	  const int c = GifNextPixel();
     if ((rle.rl_count > 0) && (c != rle.rl_pixel)) rle_flush(&rle);
     if (c == EOF) break;
     if (rle.rl_pixel == c){

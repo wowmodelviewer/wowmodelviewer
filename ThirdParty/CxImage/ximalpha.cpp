@@ -88,7 +88,7 @@ void CxImage::AlphaInvert()
 {
   if (pAlpha) {
     BYTE *iSrc=pAlpha;
-    long n=head.biHeight*head.biWidth;
+    const long n=head.biHeight*head.biWidth;
     for(long i=0; i < n; i++){
       *iSrc=(BYTE)~(*(iSrc));
       iSrc++;
@@ -116,7 +116,7 @@ bool CxImage::AlphaSet(CxImage &from)
 {
   if (!from.IsGrayScale() || head.biWidth != from.head.biWidth || head.biHeight != from.head.biHeight) return false;
   if (pAlpha==NULL) pAlpha = (BYTE*)malloc(head.biWidth * head.biHeight);
-  BYTE* src = from.info.pImage;
+  const BYTE* src = from.info.pImage;
   BYTE* dst = pAlpha;
   if (src==NULL || dst==NULL) return false;
   for (long y=0; y<head.biHeight; y++){
@@ -191,7 +191,7 @@ void CxImage::AlphaPaletteClear()
 bool CxImage::AlphaPaletteIsValid()
 {
 	for(WORD ip=0; ip<head.biClrUsed;ip++){
-    RGBQUAD c = GetPaletteColor((BYTE)ip);
+		const RGBQUAD c = GetPaletteColor((BYTE)ip);
     if (c.rgbReserved != 0) return true;
   }
   return false;
@@ -203,8 +203,8 @@ bool CxImage::AlphaPaletteIsValid()
  */
 void CxImage::AlphaStrip()
 {
-  bool bAlphaPaletteIsValid = AlphaPaletteIsValid();
-  bool bAlphaIsValid = AlphaIsValid();
+	const bool bAlphaPaletteIsValid = AlphaPaletteIsValid();
+	const bool bAlphaIsValid = AlphaIsValid();
   if (!(bAlphaIsValid || bAlphaPaletteIsValid)) return;
   RGBQUAD c;
   long a, a1;
@@ -273,8 +273,8 @@ bool CxImage::AlphaMirror()
   if (!pAlpha) return false;
   BYTE* pAlpha2 = (BYTE*)malloc(head.biWidth * head.biHeight);
   if (!pAlpha2) return false;
-  long wdt=head.biWidth-1;
-  BYTE* iSrc = pAlpha + wdt;
+  const long wdt=head.biWidth-1;
+  const BYTE* iSrc = pAlpha + wdt;
   BYTE* iDst = pAlpha2;
   for(long y=0; y < head.biHeight; y++){
     for(long x=0; x <= wdt; x++)

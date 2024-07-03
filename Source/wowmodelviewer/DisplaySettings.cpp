@@ -130,7 +130,7 @@ void DisplaySettings::Update()
 
 void DisplaySettings::OnButton(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_DISPLAY_SETTINGS_APPLY)
 	{

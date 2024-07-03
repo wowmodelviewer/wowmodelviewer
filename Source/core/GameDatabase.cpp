@@ -228,7 +228,7 @@ bool core::TableStructure::create()
 
 	std::list<QString> indexesToCreate;
 
-	for (auto& field : fields)
+	for (const auto& field : fields)
 	{
 		if (field->arraySize == 1) // simple field
 		{
@@ -264,7 +264,7 @@ bool core::TableStructure::create()
 
 	//LOG_INFO << create;
 
-	sqlResult r = core::Game::instance().database().sqlQuery(create);
+	const sqlResult r = core::Game::instance().database().sqlQuery(create);
 
 	if (r.valid)
 	{
@@ -292,7 +292,7 @@ bool core::TableStructure::fill()
 	QString query = "INSERT INTO ";
 	query += name;
 	query += "(";
-	int nbFields = fields.size();
+	const int nbFields = fields.size();
 	int curfield = 0;
 	for (auto it = fields.begin(), itEnd = fields.end();
 	     it != itEnd;
@@ -318,9 +318,9 @@ bool core::TableStructure::fill()
 
 	query += ") VALUES";
 
-	QString queryBase = query;
+	const QString queryBase = query;
 	int record = 0;
-	int nbRecord = dbc->getRecordCount();
+	const int nbRecord = dbc->getRecordCount();
 
 	for (DBFile::Iterator it = dbc->begin(), itEnd = dbc->end(); it != itEnd; ++it, record++)
 	{
@@ -344,7 +344,7 @@ bool core::TableStructure::fill()
 		if (record % 200 == 0 && record != nbRecord - 1)
 		{
 			query += ";";
-			sqlResult r = GAMEDATABASE.sqlQuery(query);
+			const sqlResult r = GAMEDATABASE.sqlQuery(query);
 			if (!r.valid)
 				return false;
 			query = queryBase;
@@ -357,7 +357,7 @@ bool core::TableStructure::fill()
 	}
 
 	query += ";";
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid)
 		LOG_INFO << "table" << name << "successfuly filled";
@@ -378,6 +378,6 @@ DBFile* core::TableStructure::createDBFile()
 
 core::TableStructure::~TableStructure()
 {
-	for (auto it : fields)
+	for (const auto it : fields)
 		delete it;
 }

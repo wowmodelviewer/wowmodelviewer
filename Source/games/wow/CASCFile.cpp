@@ -236,7 +236,7 @@ void CASCFile::dumpStructure()
 			{
 				AFID afid;
 				read(&afid, sizeof(AFID));
-				GameFile* f = GAMEDIRECTORY.getFile(afid.fileId);
+				const GameFile* f = GAMEDIRECTORY.getFile(afid.fileId);
 				if (f)
 					LOG_INFO << f->fullname();
 			}
@@ -280,7 +280,7 @@ void CASCFile::dumpStructure()
 			{
 				uint32 id;
 				read(&id, sizeof(uint32));
-				GameFile* f = GAMEDIRECTORY.getFile(id);
+				const GameFile* f = GAMEDIRECTORY.getFile(id);
 				if (f)
 					LOG_INFO << f->fullname();
 			}

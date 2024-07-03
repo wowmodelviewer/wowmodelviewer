@@ -124,7 +124,7 @@ void CxImage::Copy(const CxImage &src, bool copypixels, bool copyselection, bool
   //copy the pixels and the palette, or at least copy the palette only.
   if (copypixels && pDib && src.pDib) memcpy(pDib,src.pDib,GetSize());
   else SetPalette(src.GetPalette());
-  long nSize = head.biWidth * head.biHeight;
+  const long nSize = head.biWidth * head.biHeight;
   //copy the selection
   if (copyselection && src.pSelection){
     if (pSelection) free(pSelection);
@@ -369,16 +369,16 @@ void CxImage::Bitfield2RGB(BYTE *src, DWORD redmask, DWORD greenmask, DWORD blue
     }
     ns[1]+=ns[0]; ns[2]+=ns[1];  ns[0]=8-ns[0]; ns[1]-=8; ns[2]-=8;
     // dword aligned width for 16 bit image
-    long effwidth2=(((head.biWidth + 1) / 2) * 4);
+    const long effwidth2=(((head.biWidth + 1) / 2) * 4);
     BYTE *p=info.pImage;
     // scan the buffer in reverse direction to avoid reallocations
     for (long y=head.biHeight-1; y>=0; y--){
-      long y2 = effwidth2 * y;
-      long y3 = info.dwEffWidth * y;
+	    const long y2 = effwidth2 * y;
+	    const long y3 = info.dwEffWidth * y;
       for (long x=head.biWidth-1; x>=0; x--){
-        long x2 = 2 * x + y2;
-        long x3 = 3 * x + y3;
-        WORD w = (WORD)(src[x2] + 256 * src[1 + x2]);
+	      const long x2 = 2 * x + y2;
+	      const long x3 = 3 * x + y3;
+	      const WORD w = (WORD)(src[x2] + 256 * src[1 + x2]);
         p[  x3]=(BYTE)((w & bluemask)<<ns[0]);
         p[1+x3]=(BYTE)((w & greenmask)>>ns[1]);
         p[2+x3]=(BYTE)((w & redmask)>>ns[2]);
@@ -396,15 +396,15 @@ void CxImage::Bitfield2RGB(BYTE *src, DWORD redmask, DWORD greenmask, DWORD blue
       if (bluemask>>i) ns[2]++;
     }
     // dword aligned width for 32 bit image
-    long effwidth4 = head.biWidth * 4;
+    const long effwidth4 = head.biWidth * 4;
     BYTE *p=info.pImage;
     // scan the buffer in reverse direction to avoid reallocations
     for (long y=head.biHeight-1; y>=0; y--){
-      long y4 = effwidth4 * y;
-      long y3 = info.dwEffWidth * y;
+	    const long y4 = effwidth4 * y;
+	    const long y3 = info.dwEffWidth * y;
       for (long x=head.biWidth-1; x>=0; x--){
-        long x4 = 4 * x + y4;
-        long x3 = 3 * x + y3;
+	      const long x4 = 4 * x + y4;
+	      const long x3 = 3 * x + y3;
         p[  x3]=src[ns[2]+x4];
         p[1+x3]=src[ns[1]+x4];
         p[2+x3]=src[ns[0]+x4];
@@ -442,7 +442,7 @@ bool CxImage::CreateFromArray(BYTE* pArray,DWORD dwWidth,DWORD dwHeight,DWORD dw
 
   for (DWORD y = 0; y<dwHeight; y++) {
     BYTE* dst = info.pImage + (bFlipImage ? (dwHeight - 1 - y) : y) * info.dwEffWidth;
-    BYTE* src = pArray + y * dwBytesperline;
+    const BYTE* src = pArray + y * dwBytesperline;
     if (dwBitsperpixel==32){
       for(DWORD x=0;x<dwWidth;x++){
         *dst++=src[0];
@@ -479,7 +479,7 @@ bool CxImage::CreateFromMatrix(BYTE** ppMatrix,DWORD dwWidth,DWORD dwHeight,DWOR
 
   for (DWORD y = 0; y<dwHeight; y++) {
     BYTE* dst = info.pImage + (bFlipImage ? (dwHeight - 1 - y) : y) * info.dwEffWidth;
-    BYTE* src = ppMatrix[y];
+    const BYTE* src = ppMatrix[y];
     if (src){
       if (dwBitsperpixel==32){
         for(DWORD x=0;x<dwWidth;x++){
@@ -504,11 +504,11 @@ bool CxImage::CreateFromMatrix(BYTE** ppMatrix,DWORD dwWidth,DWORD dwHeight,DWOR
  */
 int CxImage::CompareColors(const void *elem1, const void *elem2)
 {
-  RGBQUAD* c1 = (RGBQUAD*)elem1;
-  RGBQUAD* c2 = (RGBQUAD*)elem2;
+	const RGBQUAD* c1 = (RGBQUAD*)elem1;
+	const RGBQUAD* c2 = (RGBQUAD*)elem2;
 
-  int g1 = (int)RGB2GRAY(c1->rgbRed,c1->rgbGreen,c1->rgbBlue);
-  int g2 = (int)RGB2GRAY(c2->rgbRed,c2->rgbGreen,c2->rgbBlue);
+	const int g1 = (int)RGB2GRAY(c1->rgbRed,c1->rgbGreen,c1->rgbBlue);
+	const int g2 = (int)RGB2GRAY(c2->rgbRed,c2->rgbGreen,c2->rgbBlue);
   
   return (g1-g2);
 }

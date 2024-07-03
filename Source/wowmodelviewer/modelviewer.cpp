@@ -264,7 +264,7 @@ void ModelViewer::InitMenu()
 	if (GetStatusBar() == nullptr)
 	{
 		CreateStatusBar(5);
-		int widths[] = {-1, 100, 50, 125, 125};
+		const int widths[] = {-1, 100, 50, 125, 125};
 		SetStatusWidths(5, widths);
 		SetStatusText(wxT("Initializing File Menu..."));
 	}
@@ -294,7 +294,7 @@ void ModelViewer::InitMenu()
 	int subMenuId = 10000;
 	for (; it != PLUGINMANAGER.end(); ++it, subMenuId++)
 	{
-		ExporterPlugin* plugin = dynamic_cast<ExporterPlugin*>(*it);
+		const ExporterPlugin* plugin = dynamic_cast<ExporterPlugin*>(*it);
 
 		if (plugin)
 		{
@@ -399,7 +399,7 @@ void ModelViewer::InitMenu()
 		{
 			if (charControl->model->cd.eyeGlowType)
 			{
-				size_t egt = charControl->model->cd.eyeGlowType;
+				const size_t egt = charControl->model->cd.eyeGlowType;
 				if (egt == EGT_NONE)
 					charGlowMenu->Check(ID_CHAREYEGLOW_NONE, true);
 				else if (egt == EGT_DEATHKNIGHT)
@@ -527,7 +527,7 @@ void ModelViewer::InitMenu()
 	entries[keys++].Set(wxACCEL_CTRL, WXK_F3, ID_LOAD_TEMP3);
 	entries[keys++].Set(wxACCEL_CTRL, WXK_F4, ID_LOAD_TEMP4);
 
-	wxAcceleratorTable accel(keys, entries);
+	const wxAcceleratorTable accel(keys, entries);
 	this->SetAcceleratorTable(accel);
 }
 
@@ -757,7 +757,7 @@ void ModelViewer::LoadSession()
 {
 	LOG_INFO << "Loading Session settings from:" << QString::fromWCharArray(cfgPath.c_str());
 
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
 	// Application Config Settings
 	useRandomLooks = config.value("Session/RandomLooks", true).toBool();
@@ -834,7 +834,7 @@ void ModelViewer::SaveSession()
 		canvas->GetClientSize(&canvx, &canvy);
 		if (charControl->IsShown() == true)
 		{
-			wxAuiPaneInfo info = interfaceManager.GetPane(wxT("charControl"));
+			const wxAuiPaneInfo info = interfaceManager.GetPane(wxT("charControl"));
 			if (info.IsFloating() == false)
 			{
 				if (info.IsDocked() == true && (info.dock_direction == wxAUI_DOCK_RIGHT || info.dock_direction ==
@@ -872,14 +872,14 @@ void ModelViewer::SaveSession()
 
 void ModelViewer::LoadLayout()
 {
-	QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
+	const QSettings config(QString::fromWCharArray(cfgPath.c_str()), QSettings::IniFormat);
 
-	int posx = config.value("Session/PositionX", "").toInt();
-	int posy = config.value("Session/PositionY", "").toInt();
+	const int posx = config.value("Session/PositionX", "").toInt();
+	const int posy = config.value("Session/PositionY", "").toInt();
 
 	SetPosition(wxPoint(posx, posy));
 
-	wxString layout = config.value("Session/Layout", "").toString().toStdWString();
+	const wxString layout = config.value("Session/Layout", "").toString().toStdWString();
 
 	// if the layout data exists,  load it.
 	if (!layout.IsNull() // something goes wrong
@@ -908,8 +908,8 @@ void ModelViewer::LoadLayout()
 	// Restore saved canvas size:
 	if (canvas)
 	{
-		int canvx = config.value("Session/CanvasWidth", 800).toInt();
-		int canvy = config.value("Session/CanvasHeight", 600).toInt();
+		const int canvx = config.value("Session/CanvasWidth", 800).toInt();
+		const int canvy = config.value("Session/CanvasHeight", 600).toInt();
 		SetCanvasSize(canvx, canvy);
 	}
 }
@@ -920,7 +920,7 @@ void ModelViewer::SaveLayout()
 
 	config.setValue("Session/Layout", QString::fromWCharArray(interfaceManager.SavePerspective().c_str()));
 
-	wxPoint pos = GetPosition();
+	const wxPoint pos = GetPosition();
 	config.setValue("Session/PositionX", pos.x);
 	config.setValue("Session/PositionY", pos.y);
 
@@ -1091,7 +1091,7 @@ void ModelViewer::LoadNPC(unsigned int modelid)
 
 	if (r.valid && !r.empty())
 	{
-		int extraId = r.values[0][4].toInt();
+		const int extraId = r.values[0][4].toInt();
 		// if npc is a simple one (no extra info CreatureDisplayInfoExtra)
 		if (extraId == 0)
 		{
@@ -1164,7 +1164,7 @@ void ModelViewer::LoadItem(unsigned int id)
 
 	try
 	{
-		QString query = QString(
+		const QString query = QString(
 			"SELECT ModelFileData.FileDataID, TextureFileData.FileDataID, ItemDisplayInfo.ID FROM ItemDisplayInfo "
 			"LEFT JOIN ModelFileData ON ItemDisplayInfo.ModelResourcesID1 = ModelFileData.ModelResourcesID "
 			"LEFT JOIN TextureFileData ON ItemDisplayInfo.ModelMaterialResourcesID1 = TextureFileData.MaterialResourcesID "
@@ -1325,7 +1325,7 @@ ModelViewer::~ModelViewer()
 // Menu button press events
 void ModelViewer::OnToggleDock(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	// wxAUI Stuff
 	if (id == ID_SHOW_FILE_LIST)
@@ -1364,7 +1364,7 @@ void ModelViewer::OnToggleDock(wxCommandEvent& event)
 // Menu button press events
 void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	//switch 
 	switch (id)
@@ -1520,7 +1520,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 
 void ModelViewer::OnLightMenu(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	switch (id)
 	{
@@ -1530,7 +1530,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent& event)
 			                    wxT("Scene Lighting (*.lit)|*.lit"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 			if (dialog.ShowModal() == wxID_OK)
 			{
-				wxString fn = dialog.GetPath();
+				const wxString fn = dialog.GetPath();
 
 				// FIXME: ofstream is not compatible with multibyte path name
 				std::ofstream f(fn.fn_str(), ios_base::out | ios_base::trunc);
@@ -1564,7 +1564,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent& event)
 
 			if (dialog.ShowModal() == wxID_OK)
 			{
-				wxString fn = dialog.GetFilename();
+				const wxString fn = dialog.GetFilename();
 				// FIXME: ifstream is not compitable with multibyte path name
 				ifstream f(fn.fn_str());
 
@@ -1696,7 +1696,7 @@ void ModelViewer::OnCamMenu(wxCommandEvent& event)
 // Menu button press events
 void ModelViewer::OnSetColor(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 	if (id == ID_BG_COLOR)
 	{
 		canvas->vecBGColor = DoSetColor(canvas->vecBGColor);
@@ -1709,7 +1709,7 @@ void ModelViewer::OnSetColor(wxCommandEvent& event)
 // Menu button press events
 void ModelViewer::OnEffects(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_ENCHANTS)
 		enchants->Display();
@@ -1717,7 +1717,7 @@ void ModelViewer::OnEffects(wxCommandEvent& event)
 
 glm::vec3 ModelViewer::DoSetColor(const glm::vec3& defColor)
 {
-	wxColour dcol(roundf(defColor.x * 255.0f), roundf(defColor.y * 255.0f), roundf(defColor.z * 255.0f));
+	const wxColour dcol(roundf(defColor.x * 255.0f), roundf(defColor.y * 255.0f), roundf(defColor.z * 255.0f));
 	bgDialogData.SetChooseFull(true);
 	bgDialogData.SetColour(dcol);
 
@@ -1726,7 +1726,7 @@ glm::vec3 ModelViewer::DoSetColor(const glm::vec3& defColor)
 	if (dialog.ShowModal() == wxID_OK)
 	{
 		bgDialogData = dialog.GetColourData();
-		wxColour col = bgDialogData.GetColour();
+		const wxColour col = bgDialogData.GetColour();
 		return glm::vec3(col.Red() / 255.0f, col.Green() / 255.0f, col.Blue() / 255.0f);
 	}
 	return defColor;
@@ -1742,7 +1742,7 @@ void ModelViewer::OnSetEquipment(wxCommandEvent& event)
 
 void ModelViewer::OnViewLog(wxCommandEvent& event)
 {
-	int ID = event.GetId();
+	const int ID = event.GetId();
 	if (ID == ID_FILE_VIEWLOG)
 	{
 		wxString logPath = cfgPath.BeforeLast(SLASH) + SLASH + wxT("log.txt");
@@ -1756,7 +1756,7 @@ void ModelViewer::OnViewLog(wxCommandEvent& event)
 
 void ModelViewer::OnGameToggle(wxCommandEvent& event)
 {
-	int ID = event.GetId();
+	const int ID = event.GetId();
 	if (ID == ID_LOAD_WOW)
 		LoadWoW();
 }
@@ -1774,11 +1774,11 @@ void ModelViewer::LoadWoW()
 		                            new wow::WoWDatabase());
 
 	// init game config
-	std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
+	const std::vector<core::GameConfig> configsFound = GAMEDIRECTORY.configsFound();
 
 	if (configsFound.empty())
 	{
-		wxString message = wxString::Format(
+		const wxString message = wxString::Format(
 			wxT("Fatal Error: Could not find any locale from your World of Warcraft folder"));
 		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft No locale found"),
 		                                            wxOK | wxICON_ERROR);
@@ -1788,7 +1788,7 @@ void ModelViewer::LoadWoW()
 
 	core::GameConfig config = configsFound[0];
 
-	unsigned int nbConfigs = configsFound.size();
+	const unsigned int nbConfigs = configsFound.size();
 
 	if (nbConfigs > 1)
 	{
@@ -1801,7 +1801,7 @@ void ModelViewer::LoadWoW()
 			availableConfigs[i] = wxString(label.toStdWString().c_str());
 		}
 
-		long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
+		const long id = wxGetSingleChoiceIndex(_("Please select a locale:"), _("Locale"), nbConfigs, availableConfigs);
 		if (id != -1)
 			config = configsFound[id];
 		else
@@ -1810,7 +1810,7 @@ void ModelViewer::LoadWoW()
 
 	if (!GAMEDIRECTORY.setConfig(config))
 	{
-		wxString message = wxString::Format(
+		const wxString message = wxString::Format(
 			wxT("Fatal Error: Could not load your World of Warcraft Data folder (error %d)."),
 			GAMEDIRECTORY.lastError());
 		wxMessageDialog* dial = new wxMessageDialog(nullptr, message, wxT("World of Warcraft Not Found"),
@@ -1823,7 +1823,7 @@ void ModelViewer::LoadWoW()
 	// check if we are loading a 9.x version of WoW
 	if (~GAMEDIRECTORY.majorVersion() >= 9)
 	{
-		wxString message = wxString::Format(wxT(
+		const wxString message = wxString::Format(wxT(
 			"This version of WoW Model Viewer is intended to be used with WoW Shadowlands(9.x.x) or above only\n"
 			"For older WoW versions support, please refer to this page to pick the right WoW Model Viewer version:\n"
 			"https://download.wowmodelviewer.net"));
@@ -1843,7 +1843,7 @@ void ModelViewer::LoadWoW()
 	// init file list
 	QStringList ver = GAMEDIRECTORY.version().split('.');
 
-	QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
+	const QString baseConfigFolder = "games/wow/" + ver[0] + "." + ver[1] + "/";
 
 	LOG_INFO << "Using following folder to read game info" << baseConfigFolder;
 	core::Game::instance().setConfigFolder(baseConfigFolder);
@@ -1888,7 +1888,7 @@ void ModelViewer::LoadWoW()
 
 void ModelViewer::OnCharToggle(wxCommandEvent& event)
 {
-	int ID = event.GetId();
+	const int ID = event.GetId();
 	if (ID == ID_VIEW_NPC)
 		charControl->selectNPC(UPDATE_NPC);
 	if (ID == ID_VIEW_ITEM)
@@ -2046,7 +2046,7 @@ void ModelViewer::OnBackground(wxCommandEvent& event)
 {
 	static wxFileName dir = cfgPath;
 
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_BACKGROUND)
 	{
@@ -2131,7 +2131,7 @@ void ModelViewer::SaveChar(QString fn, bool equipmentOnly /*= false*/)
 	// then save equipment
 	stream.writeStartElement("equipment");
 
-	for (auto it : *m)
+	for (const auto it : *m)
 		it->save(stream);
 
 	stream.writeEndElement(); // equipment
@@ -2236,7 +2236,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
 			lineIndex++;
 
-			CharSlots legacySlots[15] = {
+			const CharSlots legacySlots[15] = {
 				CS_HEAD, NUM_CHAR_SLOTS, CS_SHOULDER, CS_BOOTS, CS_BELT, CS_SHIRT, CS_PANTS, CS_CHEST, CS_BRACERS,
 				CS_GLOVES, CS_HAND_RIGHT,
 				CS_HAND_LEFT, CS_CAPE, CS_TABARD, NUM_CHAR_SLOTS
@@ -2253,7 +2253,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 			// read tabard customization (if needed)
 			if (lineIndex < values.size())
 			{
-				WoWItem* tabard = charControl->model->getItem(CS_TABARD);
+				const WoWItem* tabard = charControl->model->getItem(CS_TABARD);
 				// 5976 is the ID value for the Guild Tabard, 69209 for the Illustrious Guild Tabard, and 69210 for the Renowned Guild Tabard
 				if (tabard && (tabard->id() == 5976 || tabard->id() == 69209 || tabard->id() == 69210))
 				{
@@ -2295,7 +2295,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 
 				if (reader.name() == "file")
 				{
-					QString modelname = reader.attributes().value("name").toString();
+					const QString modelname = reader.attributes().value("name").toString();
 					LoadModel(GAMEDIRECTORY.getFile(modelname));
 					WoWModel* m = const_cast<WoWModel*>(canvas->model());
 					if (loadCharDetails)
@@ -2311,7 +2311,7 @@ void ModelViewer::LoadChar(QString fn, bool equipmentOnly /* = false */)
 			if (reader.name() == "equipment")
 			{
 				WoWModel* m = const_cast<WoWModel*>(canvas->model());
-				for (auto it : *m)
+				for (const auto it : *m)
 					it->load(fn);
 			}
 		}
@@ -2348,8 +2348,8 @@ void ModelViewer::OnLanguage(wxCommandEvent& event)
 		// the arrays should be in sync
 		wxCOMPILE_TIME_ASSERT(WXSIZEOF(langNames) == WXSIZEOF(langIds), LangArraysMismatch);
 
-		long lng = wxGetSingleChoiceIndex(_("Please select a language:"), _("Language"), WXSIZEOF(langNames),
-		                                  langNames);
+		const long lng = wxGetSingleChoiceIndex(_("Please select a language:"), _("Language"), WXSIZEOF(langNames),
+		                                        langNames);
 
 		if (lng != -1 && lng != interfaceID)
 		{
@@ -2394,7 +2394,7 @@ void ModelViewer::OnAbout(wxCommandEvent& event)
 	info.SetDescription(wxT(
 		"WoW Model Viewer is a 3D model viewer for World of Warcraft.\nIt uses the data files included with the game to display\nthe 3D models from the game: creatures, characters, spell\neffects, objects and so forth.\n\nCredits To: Linghuye,  nSzAbolcs,  Sailesh, Terran and Cryect\nfor their contributions either directly or indirectly."));
 
-	wxBitmap* bitmap = createBitmapFromResource(L"ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128);
+	const wxBitmap* bitmap = createBitmapFromResource(L"ABOUTICON", wxBITMAP_TYPE_XPM, 128, 128);
 	wxIcon icon;
 	icon.CopyFromBitmap(*bitmap);
 
@@ -2473,8 +2473,8 @@ void ModelViewer::ModelInfo()
 {
 	if (!canvas->model())
 		return;
-	WoWModel* m = const_cast<WoWModel*>(canvas->model());
-	wxString fn = wxT("ModelInfo.xml");
+	const WoWModel* m = const_cast<WoWModel*>(canvas->model());
+	const wxString fn = wxT("ModelInfo.xml");
 	// FIXME: ofstream is not compatible with multibyte path name
 	std::ofstream xml(fn.fn_str(), ios_base::out | ios_base::trunc);
 
@@ -2492,7 +2492,7 @@ void ModelViewer::ModelInfo()
 // Other things to export...
 void ModelViewer::OnExportOther(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 	if (id == ID_FILE_MODEL_INFO)
 	{
 		ModelInfo();
@@ -2510,7 +2510,7 @@ void ModelViewer::UpdateControls()
 	else
 	{
 		//refresh equipment
-		for (auto it : *m)
+		for (const auto it : *m)
 			it->refresh();
 	}
 	modelControl->RefreshModel(canvas->root);
@@ -2520,10 +2520,10 @@ void ModelViewer::ImportArmoury(wxString strURL)
 {
 	CharInfos* result = nullptr;
 
-	QString url = strURL.utf8_str();
+	const QString url = strURL.utf8_str();
 	LOG_INFO << "Importing character from the Armory:" << url;
 
-	for (auto it : PLUGINMANAGER)
+	for (const auto it : PLUGINMANAGER)
 	{
 		const auto* plugin = dynamic_cast<ImporterPlugin*>(it);
 		if (plugin && plugin->acceptURL(url))
@@ -2608,7 +2608,7 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 		return;
 	}
 
-	std::wstring exporterLabel = fileMenu->GetLabel(event.GetId());
+	const std::wstring exporterLabel = fileMenu->GetLabel(event.GetId());
 
 	PluginManager::iterator it = PLUGINMANAGER.begin();
 	for (; it != PLUGINMANAGER.end(); ++it)

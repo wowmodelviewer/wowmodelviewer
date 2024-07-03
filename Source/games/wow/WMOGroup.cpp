@@ -461,7 +461,7 @@ void WMOGroup::initLighting(int nLR, short* useLights)
 			{
 				WMOLight& l = wmo->lights[j];
 				glm::vec3 dir = l.pos - mi.pos;
-				float ll = glm::length(dir) * glm::length(dir);
+				const float ll = glm::length(dir) * glm::length(dir);
 				if (ll < lenmin)
 				{
 					lenmin = ll;
@@ -525,7 +525,7 @@ void WMOGroup::drawDoodads(int doodadset)
 	glColor4f(1, 1, 1, 1);
 	for (size_t i = 0; i < nDoodads; i++)
 	{
-		short dd = ddr[i];
+		const short dd = ddr[i];
 
 		bool inSet;
 		if (doodadset == -1)
@@ -542,7 +542,7 @@ void WMOGroup::drawDoodads(int doodadset)
 
 		if (inSet)
 		{
-			WMOModelInstance& mi = wmo->modelis[dd];
+			const WMOModelInstance& mi = wmo->modelis[dd];
 
 			if (!outdoorLights)
 			{
@@ -646,7 +646,7 @@ void WMOGroup::updateModels(bool load)
 
 	for (size_t i = 0; i < nDoodads; i++)
 	{
-		short dd = ddr[i];
+		const short dd = ddr[i];
 
 		bool inSet;
 

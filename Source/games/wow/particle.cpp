@@ -534,7 +534,7 @@ void CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
 
 	SpreadMat = SpreadMat * Temp;
 
-	float Size = abs(c[0]) * l + abs(s[0]) * w;
+	const float Size = abs(c[0]) * l + abs(s[0]) * w;
 	for (i = 0; i < 3; i++)
 		for (int j = 0; j < 3; j++)
 			SpreadMat[i][j] *= Size;
@@ -748,7 +748,7 @@ void RibbonEmitter::init(GameFile* f, ModelRibbonEmitterDef& mta, std::vector<ui
 	below.init(mta.below, f, globals);
 
 	parent = &(model->bones[mta.bone]);
-	int* texlist = reinterpret_cast<int*>(f->getBuffer() + mta.ofsTextures);
+	const int* texlist = reinterpret_cast<int*>(f->getBuffer() + mta.ofsTextures);
 	// just use the first texture for now; most models I've checked only had one
 	texture = model->getGLTexture(texlist[0]);
 
@@ -770,11 +770,11 @@ void RibbonEmitter::init(GameFile* f, ModelRibbonEmitterDef& mta, std::vector<ui
 
 void RibbonEmitter::setup(size_t anim, size_t time)
 {
-	glm::vec3 ntpos = glm::vec3(parent->mat * glm::vec4(pos, 1.0f));
+	const glm::vec3 ntpos = glm::vec3(parent->mat * glm::vec4(pos, 1.0f));
 	glm::vec3 ntup = glm::vec3(parent->mat * (glm::vec4(pos, 1.f) + glm::vec4(0, 0, 1, 1)));
 	ntup -= ntpos;
 	glm::normalize(ntup);
-	float dlen = (ntpos - tpos).length();
+	const float dlen = (ntpos - tpos).length();
 
 	manim = anim;
 	mtime = time;
@@ -858,7 +858,7 @@ void RibbonEmitter::draw()
 	float l = 0;
 	for (; it != segs.end(); ++it)
 	{
-		float u = l / length;
+		const float u = l / length;
 
 		glTexCoord2f(u, 0);
 		glVertex3fv(glm::value_ptr(it->pos + tabove * it->up));
