@@ -32,7 +32,7 @@ void ExportSettings::Update()
 
 void ExportSettings::OnCheck(wxCommandEvent& event)
 {
-	int id = event.GetId();
+	const int id = event.GetId();
 
 	if (id == ID_SETTINGS_INIT_POSE_ONLY_EXPORT)
 	{

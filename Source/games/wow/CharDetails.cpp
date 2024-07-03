@@ -28,7 +28,7 @@ void CharDetails::save(QXmlStreamWriter& stream)
 {
 	stream.writeStartElement("CharDetails");
 
-	for (auto& opt : currentCustomization_)
+	for (const auto& opt : currentCustomization_)
 	{
 		stream.writeStartElement("customization");
 		stream.writeAttribute("id", QString::number(opt.first));

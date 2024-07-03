@@ -32,8 +32,8 @@ void wow::WoWDatabase::readSpecificTableAttributes(QDomElement& e, core::TableSt
 	if (!tbl)
 		return;
 
-	QDomNamedNodeMap attributes = e.attributes();
-	QDomNode hash = attributes.namedItem("layoutHash");
+	const QDomNamedNodeMap attributes = e.attributes();
+	const QDomNode hash = attributes.namedItem("layoutHash");
 
 	if (!hash.isNull())
 		tbl->hash = hash.nodeValue().toUInt();
@@ -46,9 +46,9 @@ void wow::WoWDatabase::readSpecificFieldAttributes(QDomElement& e, core::FieldSt
 	if (!field)
 		return;
 
-	QDomNamedNodeMap attributes = e.attributes();
+	const QDomNamedNodeMap attributes = e.attributes();
 
-	QDomNode pos = attributes.namedItem("pos");
+	const QDomNode pos = attributes.namedItem("pos");
 	QDomNode commonData = attributes.namedItem("commonData");
 	QDomNode relationshipData = attributes.namedItem("relationshipData");
 

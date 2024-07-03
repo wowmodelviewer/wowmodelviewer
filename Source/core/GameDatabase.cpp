@@ -45,7 +45,7 @@ sqlResult core::GameDatabase::sqlQuery(const QString& query)
 	sqlResult result;
 
 	char* zErrMsg = nullptr;
-	int rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, (void*)&result, &zErrMsg);
+	const int rc = sqlite3_exec(m_db, query.toStdString().c_str(), core::GameDatabase::treatQuery, (void*)&result, &zErrMsg);
 	if (rc != SQLITE_OK)
 	{
 		LOG_ERROR << "Querying in database" << query;

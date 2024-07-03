@@ -51,7 +51,7 @@ void WoWItem::setId(int id)
 			return;
 		}
 
-		auto itemlevels = GAMEDATABASE.sqlQuery(
+		const auto itemlevels = GAMEDATABASE.sqlQuery(
 			QString(
 				"SELECT OrderIndex, ItemAppearanceID, ItemAppearanceModifierID FROM ItemModifiedAppearance WHERE ItemID = %1")
 			.arg(id));

@@ -32,7 +32,7 @@ void Observable::attach(Observer* observer)
 
 void Observable::detach(Observer* observer)
 {
-	std::list<Observer*>::iterator l_it = observerAttached(observer);
+	const std::list<Observer*>::iterator l_it = observerAttached(observer);
 
 	if (l_it != m_observerList.end())
 	{

@@ -7,7 +7,7 @@ size_t GameFile::read(void* dest, size_t bytes)
 	if (eof)
 		return 0;
 
-	size_t rpos = pointer + bytes;
+	const size_t rpos = pointer + bytes;
 	if (rpos > size)
 	{
 		bytes = size - pointer;

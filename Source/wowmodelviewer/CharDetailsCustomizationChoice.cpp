@@ -13,12 +13,12 @@ END_EVENT_TABLE()
 CharDetailsCustomizationChoice::CharDetailsCustomizationChoice(wxWindow* parent, CharDetails& details, uint chrCustomizationChoiceID)
 	: wxWindow(parent, wxID_ANY), ID_(chrCustomizationChoiceID), details_(details)
 {
-	auto top = new wxFlexGridSizer(2, 0, 5);
+	const auto top = new wxFlexGridSizer(2, 0, 5);
 	top->AddGrowableCol(2);
 
 	details_.attach(this);
 
-	auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
+	const auto option = GAMEDATABASE.sqlQuery(QString("SELECT Name_Lang FROM ChrCustomizationOption WHERE ID = %1").arg(ID_));
 
 	if (option.valid && !option.values.empty())
 	{

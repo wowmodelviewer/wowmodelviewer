@@ -14,7 +14,7 @@ void Bone::calcMatrix(std::vector<Bone>& allbones, ssize_t anim, size_t time, bo
 	glm::mat4 m(1.0f);
 	glm::fquat q;
 
-	bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
+	const bool tr = rot.uses(anim) || scale.uses(anim) || trans.uses(anim) || billboard;
 	if (tr)
 	{
 		m = glm::translate(m, pivot);
@@ -34,7 +34,7 @@ void Bone::calcMatrix(std::vector<Bone>& allbones, ssize_t anim, size_t time, bo
 			glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
 			glm::vec3 vRight = glm::vec3(modelview[0], modelview[4], modelview[8]);
-			glm::vec3 vUp = glm::vec3(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
+			const glm::vec3 vUp = glm::vec3(modelview[1], modelview[5], modelview[9]); // Spherical billboarding
 			//glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
 			vRight = vRight * -1.f;
 			m[0][2] = vRight.x;

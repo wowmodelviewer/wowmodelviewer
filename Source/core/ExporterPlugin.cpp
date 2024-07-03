@@ -26,7 +26,7 @@ void ExporterPlugin::exportGLTexture(GLuint id, std::wstring filename) const
 	}
 	else
 	{
-		QImage texture(pixels, width, height, QImage::Format_ARGB32);
+		const QImage texture(pixels, width, height, QImage::Format_ARGB32);
 		texture.save(QString::fromStdWString(filename));
 	}
 	glBindTexture(GL_TEXTURE_2D, 0);

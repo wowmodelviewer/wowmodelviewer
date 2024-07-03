@@ -29,10 +29,10 @@ TabardDetails::TabardDetails()
 GameFile* TabardDetails::GetBackgroundTex(int slot)
 {
 	GameFile* result = nullptr;
-	QString query = QString("SELECT FileDataID FROM GuildTabardBackground WHERE Color=%1 AND Tier=%2 AND Component=%3")
-	                .arg(backgroundId).arg(tier).arg(slot);
+	const QString query = QString("SELECT FileDataID FROM GuildTabardBackground WHERE Color=%1 AND Tier=%2 AND Component=%3")
+	                      .arg(backgroundId).arg(tier).arg(slot);
 
-	sqlResult r = GAMEDATABASE.sqlQuery(query);
+	const sqlResult r = GAMEDATABASE.sqlQuery(query);
 
 	if (r.valid && !r.values.empty())
 		result = GAMEDIRECTORY.getFile(r.values[0][0].toInt());

@@ -35,7 +35,7 @@ void Observer::treatEvent(Event* event)
 
 void Observer::addObservable(Observable* obs)
 {
-	std::list<Observable*>::iterator l_toRemove = findObservable(obs);
+	const std::list<Observable*>::iterator l_toRemove = findObservable(obs);
 	if (l_toRemove == m_observableList.end())
 	{
 		m_observableList.push_back(obs);

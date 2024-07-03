@@ -46,7 +46,7 @@ void UserSkins::LoadFile(const wxString& filename)
 	// parse the file
 	// See the comment at the end of this file for the exact format
 	std::string line;
-	size_t lineNr = 0;
+	const size_t lineNr = 0;
 	while (readline(in, line, lineNr, true))
 	{
 		TextureSet set;

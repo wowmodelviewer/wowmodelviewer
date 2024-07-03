@@ -9,7 +9,7 @@ core::GameFolder::GameFolder(QString path) : m_path(std::move(path))
 QString core::GameFolder::getFullPathForFile(QString file)
 {
 	file = file.toLower();
-	for (auto it : *this)
+	for (const auto it : *this)
 	{
 		if (it->name() == file)
 			return it->fullname();
@@ -32,7 +32,7 @@ void core::GameFolder::getFilesForFolder(std::vector<GameFile*>& fileNames, QStr
 
 void core::GameFolder::getFilteredFiles(std::set<GameFile*>& dest, QString& filter)
 {
-	QRegularExpression regex(filter);
+	const QRegularExpression regex(filter);
 
 	if (!regex.isValid())
 	{
@@ -54,7 +54,7 @@ GameFile* core::GameFolder::getFile(QString filename)
 
 	GameFile* result = nullptr;
 
-	auto it = m_nameMap.find(filename);
+	const auto it = m_nameMap.find(filename);
 	if (it != m_nameMap.end())
 		result = it->second;
 

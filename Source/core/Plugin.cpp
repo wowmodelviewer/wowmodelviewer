@@ -17,7 +17,7 @@ Plugin::Plugin() : Component(), m_internalName(""), m_category(""), m_version(""
 // Private Qt application
 Plugin* Plugin::load(std::string path, core::GlobalSettings& settings, core::Game& Game)
 {
-	QString pluginToLoad = QString::fromStdString(path);
+	const QString pluginToLoad = QString::fromStdString(path);
 	Plugin* newPlugin = nullptr;
 
 	QPluginLoader loader(pluginToLoad);
@@ -25,7 +25,7 @@ Plugin* Plugin::load(std::string path, core::GlobalSettings& settings, core::Gam
 	if (QObject* plugin = loader.instance())
 	{
 		newPlugin = dynamic_cast<Plugin*>(plugin);
-		QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
+		const QJsonObject metaInfos = loader.metaData().value("MetaData").toObject();
 		newPlugin->setName(metaInfos.value("name").toString());
 		newPlugin->m_version = metaInfos.value("version").toString().toStdString();
 		newPlugin->m_coreVersionNeeded = metaInfos.value("coreVersion").toString().toStdString();

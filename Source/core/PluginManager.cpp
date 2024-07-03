@@ -12,8 +12,8 @@ PluginManager::PluginManager() = default;
 
 void PluginManager::init(const std::string& dir)
 {
-	QString directory = QString::fromStdString(dir);
-	QDir pluginDir(directory);
+	const QString directory = QString::fromStdString(dir);
+	const QDir pluginDir(directory);
 	QStringList plugins = pluginDir.entryList(QDir::Files);
 	for (int i = 0; i < plugins.size(); i++)
 	{

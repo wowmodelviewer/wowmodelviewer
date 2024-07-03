@@ -21,8 +21,8 @@ void Logger::init()
 
 void Logger::writeLog(QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
-	QString message = Logger::formatLog(type, context, msg);
-	for (auto it : LOGGER)
+	const QString message = Logger::formatLog(type, context, msg);
+	for (const auto it : LOGGER)
 		it->write(message);
 }
 

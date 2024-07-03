@@ -13,7 +13,7 @@ GLuint TextureManager::add(GameFile* file)
 	if (!file)
 		return 0;
 
-	QString name = file->fullname();
+	const QString name = file->fullname();
 
 	// if the item already exists, return the existing ID
 	if (names.find(name) != names.end())

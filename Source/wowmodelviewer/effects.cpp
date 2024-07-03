@@ -29,7 +29,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 {
 	if (event.GetId() == ID_ENCHANTSOK)
 	{
-		std::wstring sel = effectsListbox->GetStringSelection().c_str();
+		const std::wstring sel = effectsListbox->GetStringSelection().c_str();
 
 		if (sel == L"")
 		{
@@ -51,7 +51,7 @@ void EnchantsDialog::OnClick(wxCommandEvent& event)
 		{
 			if (it.second.name == sel)
 			{
-				EnchantsRec enchant = it.second;
+				const EnchantsRec enchant = it.second;
 				int s = slot->GetSelection();
 				s += 10;
 

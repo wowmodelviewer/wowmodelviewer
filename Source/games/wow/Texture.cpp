@@ -43,8 +43,8 @@ void Texture::load()
 	file->read(offsets, 4 * 16);
 	file->read(sizes, 4 * 16);
 
-	bool hasmipmaps = (attr[3] > 0);
-	size_t mipmax = hasmipmaps ? 16 : 1;
+	const bool hasmipmaps = (attr[3] > 0);
+	const size_t mipmax = hasmipmaps ? 16 : 1;
 
 	w = width;
 	h = height;

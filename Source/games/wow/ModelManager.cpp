@@ -21,7 +21,7 @@ int ModelManager::add(GameFile* file)
 // Resets the animation back to default.
 void ModelManager::resetAnim()
 {
-	for (auto& item : items)
+	for (const auto& item : items)
 	{
 		static_cast<WoWModel*>(item.second)->animcalc = false;
 	}
@@ -30,7 +30,7 @@ void ModelManager::resetAnim()
 // same as other updateEmitter except does it for the all the models being managed - for WMO's
 void ModelManager::updateEmitters(float dt)
 {
-	for (auto& item : items)
+	for (const auto& item : items)
 	{
 		static_cast<WoWModel*>(item.second)->updateEmitters(dt);
 	}
@@ -38,7 +38,7 @@ void ModelManager::updateEmitters(float dt)
 
 void ModelManager::clear()
 {
-	for (auto& item : items)
+	for (const auto& item : items)
 	{
 		doDelete(item.first);
 		delete item.second;

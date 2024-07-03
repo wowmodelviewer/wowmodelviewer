@@ -18,7 +18,7 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent) : wxWindow(parent, wxID_ANY
 {
 	LOG_INFO << "Creating CharDetailsFrame...";
 
-	auto top = new wxFlexGridSizer(1);
+	const auto top = new wxFlexGridSizer(1);
 	top->AddGrowableCol(0);
 
 	charCustomizationGS_ = new wxFlexGridSizer(1);

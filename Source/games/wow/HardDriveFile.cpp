@@ -50,7 +50,7 @@ unsigned long HardDriveFile::readFile()
 	if (!file && !file->isOpen())
 		return 0;
 
-	unsigned long s = file->read(reinterpret_cast<char*>(buffer), size);
+	const unsigned long s = file->read(reinterpret_cast<char*>(buffer), size);
 	file->close();
 	delete file;
 	file = nullptr;

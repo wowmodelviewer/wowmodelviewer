@@ -29,7 +29,7 @@ void WMOModelInstance::init(char* fname, GameFile& f)
 
 void glQuaternionRotate(const glm::vec3& vdir, float w)
 {
-	glm::fquat q(w, vdir);
+	const glm::fquat q(w, vdir);
 	glm::mat4 m = glm::inverse(glm::toMat4(q));
 	glMultMatrixf(glm::value_ptr(m));
 }
@@ -41,7 +41,7 @@ void WMOModelInstance::draw()
 	glPushMatrix();
 
 	glTranslatef(pos.x, pos.y, pos.z);
-	glm::vec3 vdir(-dir.z, dir.x, dir.y);
+	const glm::vec3 vdir(-dir.z, dir.x, dir.y);
 	glQuaternionRotate(vdir, w);
 	glScalef(sc, -sc, -sc);
 

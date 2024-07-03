@@ -45,7 +45,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 	LOG_INFO << "Initating AVI class object for writing.";
 
 	// Step 0 : Let's make sure we are running on 1.1 
-	DWORD wVer = HIWORD(VideoForWindowsVersion());
+	const DWORD wVer = HIWORD(VideoForWindowsVersion());
 	if (wVer < 0x010a)
 	{
 		// oops, we are too old, blow out of here 

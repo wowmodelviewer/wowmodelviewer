@@ -4,7 +4,7 @@
 
 bool CHECK_FRAMEBUFFER_STATUS()
 {
-	GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+	const GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
 
 	switch (status)
 	{

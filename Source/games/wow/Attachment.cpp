@@ -36,7 +36,7 @@ void Attachment::draw()
 	}
 
 	// children
-	for (auto& c : children)
+	for (const auto& c : children)
 		c->draw();
 
 	glPopMatrix();
@@ -62,7 +62,7 @@ void Attachment::drawParticles()
 	}
 
 	// children:
-	for (auto& i : children)
+	for (const auto& i : children)
 		i->drawParticles();
 
 	glPopMatrix();
@@ -72,7 +72,7 @@ void Attachment::tick(float dt)
 {
 	if (model_)
 		model_->update(dt);
-	for (auto& i : children)
+	for (const auto& i : children)
 		i->tick(dt);
 }
 

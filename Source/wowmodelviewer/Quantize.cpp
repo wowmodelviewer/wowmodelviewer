@@ -29,9 +29,9 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 
 	BITMAPINFOHEADER ds;
 	memcpy(&ds, (void*)hImage, sizeof(ds));
-	int effwdt = ((((ds.biBitCount * ds.biWidth) + 31) / 32) * 4);
+	const int effwdt = ((((ds.biBitCount * ds.biWidth) + 31) / 32) * 4);
 
-	int nPad = effwdt - (((ds.biWidth * ds.biBitCount) + 7) / 8);
+	const int nPad = effwdt - (((ds.biWidth * ds.biBitCount) + 7) / 8);
 
 	BYTE* pbBits = static_cast<BYTE*>(hImage) + *static_cast<DWORD*>(hImage) + ds.biClrUsed * sizeof(RGBQUAD);
 
@@ -44,9 +44,9 @@ BOOL CQuantizer::ProcessImage(HANDLE hImage)
 		{
 			for (j = 0; j < ds.biWidth; j++)
 			{
-				BYTE idx = GetPixelIndex(j, i, ds.biBitCount, effwdt, pbBits);
-				BYTE* pal = static_cast<BYTE*>(hImage) + sizeof(BITMAPINFOHEADER);
-				long ldx = idx * sizeof(RGBQUAD);
+				const BYTE idx = GetPixelIndex(j, i, ds.biBitCount, effwdt, pbBits);
+				const BYTE* pal = static_cast<BYTE*>(hImage) + sizeof(BITMAPINFOHEADER);
+				const long ldx = idx * sizeof(RGBQUAD);
 				b = pal[ldx];
 				g = pal[ldx + 1];
 				r = pal[ldx + 2];

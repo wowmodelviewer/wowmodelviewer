@@ -55,7 +55,7 @@ std::vector<std::string> CSVFile::get(unsigned int recordIndex, const core::Tabl
 {
 	std::vector<std::string> result;
 
-	for (auto it : structure->fields)
+	for (const auto it : structure->fields)
 	{
 		uint fieldIndex = 0;
 

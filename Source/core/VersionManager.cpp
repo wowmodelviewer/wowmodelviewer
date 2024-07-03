@@ -25,7 +25,7 @@ void VersionManager::updateCurrentVersionInfo()
 	m_currentVersionsMap.insert(std::make_pair(appName, appVersion));
 
 	// init plugins infos
-	for (auto it : PLUGINMANAGER)
+	for (const auto it : PLUGINMANAGER)
 	{
 		QString pluginName(it->name());
 		QString pluginVersion(it->version().c_str());

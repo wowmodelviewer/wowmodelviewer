@@ -8,9 +8,9 @@ FileDownloader::~FileDownloader() = default;
 
 void FileDownloader::get(QUrl url)
 {
-	QNetworkRequest request(url);
+	const QNetworkRequest request(url);
 	m_fileName = url.toString();
-	QNetworkReply* reply = m_manager.get(request);
+	const QNetworkReply* reply = m_manager.get(request);
 	connect(reply, &QNetworkReply::finished, this, &FileDownloader::fileDownloaded);
 	connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
 	        this, SLOT(downloadError(QNetworkReply::NetworkError)));
