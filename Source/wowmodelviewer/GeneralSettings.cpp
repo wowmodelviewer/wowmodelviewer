@@ -167,7 +167,6 @@ void GeneralSettings::OnButton(wxCommandEvent& event)
 			wxMessageBox(wxT("Settings changed.\nYou need to restart WoW Model Viewer to take them into account"),
 			             wxT("Settings Changed"), wxICON_INFORMATION);
 			g_modelViewer->SaveSession();
-			settingsChanged = false;
 		}
 	}
 

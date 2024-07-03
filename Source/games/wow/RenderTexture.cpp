@@ -263,7 +263,7 @@ void RenderTexture::Init(int width, int height, bool fboMode)
 
 		if (!wglShareLists(canvas_hRC, m_hRC))
 		{
-			err = glGetError();
+			//err = glGetError();
 			LOG_ERROR << "Call to wglShareLists() failed for our PixelBuffer.";
 		}
 
