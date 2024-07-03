@@ -1515,6 +1515,7 @@ void ModelViewer::OnToggleCommand(wxCommandEvent& event)
 	case ID_LOAD_TEMP4:
 		canvas->LoadSceneState(4);
 		break;
+	default: ;
 	}
 }
 
@@ -1685,6 +1686,7 @@ void ModelViewer::OnLightMenu(wxCommandEvent& event)
 	case ID_LT_MODEL:
 		canvas->lightType = LIGHT_MODEL_ONLY;
 		return;
+	default: ;
 	}
 }
 
@@ -2445,6 +2447,7 @@ void ModelViewer::OnCanvasSize(wxCommandEvent& event)
 		break;
 	case ID_CANVASM1200: SetCanvasSize(1900, 1200);
 		break;
+	default: ;
 	}
 }
 

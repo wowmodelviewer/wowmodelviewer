@@ -1065,6 +1065,7 @@ void AnimControl::OnButton(wxCommandEvent& event)
 	case ID_SHOW_BLP_SKINLIST:
 		ActivateBLPSkinList();
 		break;
+	default: ;
 	}
 }
 

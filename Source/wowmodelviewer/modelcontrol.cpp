@@ -554,6 +554,7 @@ void ModelControl::OnCheck(wxCommandEvent& event)
 		else
 			animControl->SetSkin(-1); // reset to the current skin to use default particles
 		break;
+	default: ;
 	}
 }
 
@@ -748,6 +749,7 @@ void ModelControl::OnColourChange(wxColourPickerEvent& event)
 		pcr[2][2] = col;
 		cpc = PC13E;
 		break;
+	default: ;
 	}
 
 	if (cpc)

@@ -953,6 +953,7 @@ void CharControl::OnUpdateItem(int type, int id)
 	case UPDATE_SINGLE_ITEM:
 		g_modelViewer->LoadItem(numbers[id]);
 		break;
+	default: ;
 	}
 
 	//  Update controls associated
@@ -998,6 +999,7 @@ void CharControl::OnTabardSpin(wxSpinEvent& event)
 		LOG_INFO << "Tabard Notice: Background Color Change.";
 		model->td.setBackground(event.GetPosition());
 		break;
+	default: ;
 	}
 
 	for (size_t i = 0; i < NUM_TABARD_BTNS; i++)

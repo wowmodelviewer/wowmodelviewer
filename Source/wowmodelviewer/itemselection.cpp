@@ -41,6 +41,7 @@ wxColour ItemQualityColour(int quality)
 	case 7:
 		c = wxColour(0xe5, 0xcc, 0x80);
 		break;
+	default: ;
 	}
 	return c;
 }

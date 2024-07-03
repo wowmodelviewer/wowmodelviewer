@@ -43,6 +43,7 @@ QString Logger::formatLog(QtMsgType type, const QMessageLogContext& context, con
 	case QtFatalMsg:
 		msgType = "FATAL";
 		break;
+	default: ;
 	}
 
 	return msgType + "\t| " +

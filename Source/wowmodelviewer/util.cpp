@@ -203,6 +203,7 @@ bool correctType(ssize_t type, ssize_t slot)
 	case CS_CAPE: return (type == IT_CAPE);
 	case CS_TABARD: return (type == IT_TABARD);
 	case CS_QUIVER: return (type == IT_QUIVER);
+	default: ;
 	}
 	return false;
 }

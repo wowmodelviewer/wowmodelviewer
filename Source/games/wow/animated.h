@@ -302,6 +302,7 @@ public:
 					out[j].push_back(Conv::conv(keys[i * 3 + 2]));
 				}
 				break;
+			default: ;
 			}
 		}
 	}
@@ -396,6 +397,7 @@ public:
 					out[j].push_back(Conv::conv(keys[i * 3 + 2]));
 				}
 				break;
+			default: ;
 			}
 		}
 	}

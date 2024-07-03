@@ -85,6 +85,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 			LOG_ERROR <<
 				"According to the registry, the type of file specified in AVIFileOpen does not have a handler to process it";
 			break;
+		default: ;
 		}
 
 		return hr;
@@ -146,6 +147,7 @@ HRESULT CAVIGenerator::InitEngineForWrite(HWND parent)
 			LOG_ERROR <<
 				"Compression is not supported for this type of data. This error might be returned if you try to compress data that is not audio or video.";
 			break;
+		default: ;
 		}
 
 		return hr;
