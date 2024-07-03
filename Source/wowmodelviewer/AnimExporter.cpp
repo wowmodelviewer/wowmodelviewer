@@ -517,7 +517,7 @@ void CAnimationExporter::CreateAvi(wxString fn)
 		return;
 	}
 
-	const ssize_t timeStep = (m_iTotalAnimFrames / m_iTotalFrames);
+	//const ssize_t timeStep = (m_iTotalAnimFrames / m_iTotalFrames);
 	const ssize_t bufSize = m_iWidth * m_iHeight * 3; // (width*height*bytesPerPixel - only 3 for RGB, no alpha)  
 
 	CAVIGenerator AviGen;

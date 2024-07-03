@@ -189,7 +189,6 @@ void FBXExporter::createMeshes()
 
 				const int l = m_p_model->attLookup[It.first];
 				glm::mat4 m;
-				glm::vec3 pos;
 				if (l > -1)
 				{
 					m = m_p_model->bones[m_p_model->atts[l].bone].mat;
@@ -304,7 +303,7 @@ void FBXExporter::createAnimations()
 // Creates separate FBX files for each animation, in a folder with the original FBX file's name.
 bool FBXExporter::createAnimationFiles()
 {
-	int maxThreads = QThread::idealThreadCount();
+	//int maxThreads = QThread::idealThreadCount();
 	// Get the ideal number of threads we can run at once. This usually equals the total number of threads in a CPU.
 	std::map<int, std::wstring> animsMap = m_p_model->getAnimsMap();
 

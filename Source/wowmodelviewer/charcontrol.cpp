@@ -426,7 +426,7 @@ void CharControl::RefreshModel()
 
 	// Eye Glow Geosets are ID 1701, 1702, etc.
 	const size_t egt = model->cd.eyeGlowType;
-	int egtId = CG_EYEGLOW * 100 + egt + 1; // CG_EYEGLOW = 17
+	//int egtId = CG_EYEGLOW * 100 + egt + 1; // CG_EYEGLOW = 17
 
 	// Update Eye Glow Menu
 	if (egt == EGT_NONE)

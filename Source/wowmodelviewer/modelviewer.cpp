@@ -2637,7 +2637,6 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 				wxArrayInt selection;
 				std::vector<int> ids;
 				ids.resize(animsMap.size());
-				unsigned int i = 0;
 
 				for (size_t I = 0; I < canvas->model()->anims.size(); I++)
 				{
