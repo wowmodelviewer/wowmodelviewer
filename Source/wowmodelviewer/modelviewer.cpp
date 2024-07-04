@@ -2523,7 +2523,7 @@ void ModelViewer::ImportArmoury(wxString strURL)
 {
 	CharInfos* result = nullptr;
 
-	const QString url = strURL.utf8_str();
+	const QString url{strURL.utf8_str()};
 	LOG_INFO << "Importing character from the Armory:" << url;
 
 	for (const auto it : PLUGINMANAGER)
@@ -2611,7 +2611,7 @@ void ModelViewer::OnExport(wxCommandEvent& event)
 		return;
 	}
 
-	const std::wstring exporterLabel = fileMenu->GetLabel(event.GetId());
+	const std::wstring exporterLabel{fileMenu->GetLabel(event.GetId())};
 
 	PluginManager::iterator it = PLUGINMANAGER.begin();
 	for (; it != PLUGINMANAGER.end(); ++it)

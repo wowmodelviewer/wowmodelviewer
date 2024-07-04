@@ -62,7 +62,7 @@ static wxString chos[] =
 void beautifyFileName(QString& file)
 {
 	file = file.toLower().replace('/', '\\');
-	QString firstLetter = file[0];
+	QString firstLetter{file[0]};
 	firstLetter = firstLetter.toUpper();
 	file[0] = firstLetter[0];
 	const int ret = file.indexOf('\\');

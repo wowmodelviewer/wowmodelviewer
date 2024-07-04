@@ -95,7 +95,7 @@ void NPCimporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		const QString url = m_URLname->GetValue().utf8_str();
+		const QString url{m_URLname->GetValue().utf8_str()};
 
 		const NPCInfos* result = nullptr;
 		for (const auto it : PLUGINMANAGER)

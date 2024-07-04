@@ -100,7 +100,7 @@ void ItemImporterDialog::OnImportButtonClicked(wxCommandEvent& event)
 	}
 	else
 	{
-		const QString url = m_URLname->GetValue().utf8_str();
+		const QString url{m_URLname->GetValue().utf8_str()};
 
 		for (const auto it : PLUGINMANAGER)
 		{
