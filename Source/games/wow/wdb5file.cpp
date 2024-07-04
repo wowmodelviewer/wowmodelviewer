@@ -6,7 +6,7 @@
 
 #define WDB5_READ_DEBUG 0
 
-WDB5File::WDB5File(const QString& file) : DBFile(), CASCFile(file), m_isSparseTable(false)
+WDB5File::WDB5File(const QString& file) : CASCFile(file), m_isSparseTable(false)
 {
 }
 

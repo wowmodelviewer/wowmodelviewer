@@ -10,7 +10,7 @@ core::Game* Plugin::game = nullptr;
 QCoreApplication* Plugin::app = nullptr;
 QThread* Plugin::thread = nullptr;
 
-Plugin::Plugin() : Component(), m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
+Plugin::Plugin() : m_internalName(""), m_category(""), m_version(""), m_coreVersionNeeded("")
 {
 }
 

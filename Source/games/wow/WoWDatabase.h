@@ -22,8 +22,7 @@ namespace wow
 	class TableStructure : public core::TableStructure
 	{
 	public:
-		TableStructure() :
-			core::TableStructure(), hash(0)
+		TableStructure() : hash(0)
 		{
 		}
 
@@ -35,8 +34,7 @@ namespace wow
 	class FieldStructure : public core::FieldStructure
 	{
 	public:
-		FieldStructure() :
-			core::FieldStructure(), pos(-1), isCommonData(false), isRelationshipData(false)
+		FieldStructure() : pos(-1), isCommonData(false), isRelationshipData(false)
 		{
 		}
 

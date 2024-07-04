@@ -11,7 +11,7 @@
 
 const std::vector<QString> POSSIBLE_DB_EXT = {".db2", ".dbc"};
 
-wow::WoWDatabase::WoWDatabase() : GameDatabase()
+wow::WoWDatabase::WoWDatabase()
 {
 }
 

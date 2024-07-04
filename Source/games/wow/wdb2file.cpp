@@ -3,7 +3,7 @@
 #include "logger/Logger.h"
 #include <sstream>
 
-WDB2File::WDB2File(const QString& file) : DBFile(), CASCFile(file)
+WDB2File::WDB2File(const QString& file) : CASCFile(file)
 {
 }
 
