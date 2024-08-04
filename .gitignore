@@ -11,3 +11,9 @@ VisualStudio2013/*
 build
 .vs
 .vscode
+.idea/editor.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/workspace.xml
+.idea/.name
+.idea/wowmodelviewer.iml
