@@ -459,12 +459,8 @@ void ModelViewer::InitMenu()
 		charMenu->Enable(ID_CHAR_RANDOMISE, false);
 		charMenu->Enable(ID_AUTOHIDE_GEOSETS_FOR_HEAD_ITEMS, false);
 
-		wxMenu* effectsMenu = new wxMenu;
-		effectsMenu->Append(ID_ENCHANTS, _("Apply Enchants"));
-
 		// Options menu
 		optMenu = new wxMenu;
-		optMenu->AppendCheckItem(ID_DEFAULT_DOODADS, _("Always show default doodads in WMOs"));
 		optMenu->Check(ID_DEFAULT_DOODADS, true);
 		optMenu->AppendSeparator();
 		optMenu->Append(ID_SHOW_SETTINGS, _("Settings..."));
@@ -482,7 +478,6 @@ void ModelViewer::InitMenu()
 		menuBar->Append(charMenu, _("&Character"));
 		menuBar->Append(lightMenu, _("&Lighting"));
 		menuBar->Append(optMenu, _("&Options"));
-		menuBar->Append(effectsMenu, _("&Effects"));
 		menuBar->Append(aboutMenu, _("&About"));
 		SetMenuBar(menuBar);
 	}
