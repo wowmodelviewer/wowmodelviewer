@@ -27,6 +27,10 @@ CharDetailsFrame::CharDetailsFrame(wxWindow* parent) : wxWindow(parent, wxID_ANY
 	         wxSizerFlags().Border(wxBOTTOM, 5).Align(wxALIGN_CENTER));
 
 	top->Add(charCustomizationGS_, wxSizerFlags().Border(wxBOTTOM, 5).Expand().Align(wxALIGN_CENTER));
+	top->Add(new wxButton(this, wxID_ANY, wxT("Randomise"), wxDefaultPosition, wxDefaultSize),
+	         wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
+	dhMode_ = new wxCheckBox(this, wxID_ANY, wxT("Demon Hunter"), wxDefaultPosition, wxDefaultSize);
+	top->Add(dhMode_, wxSizerFlags().Align(wxALIGN_CENTER).Border(wxALL, 2));
 	SetAutoLayout(true);
 	top->SetSizeHints(this);
 	SetSizer(top);
@@ -57,6 +61,13 @@ void CharDetailsFrame::setModel(WoWModel* model)
 			charCustomizationGS_->Add(new CharDetailsCustomizationChoice(this, model_->cd, option[0].toUInt()),
 			                          wxSizerFlags(1).Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
 	}
+
+	if (infos.raceID == RACE_NIGHTELF || infos.raceID == RACE_BLOODELF)
+		dhMode_->Enable(true);
+	else
+		dhMode_->Enable(false);
+
+	dhMode_->SetValue(model->cd.isDemonHunter());
 
 	SetAutoLayout(true);
 	GetSizer()->SetSizeHints(this);
