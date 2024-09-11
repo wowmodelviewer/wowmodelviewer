@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 project(WoWModelViewer)
 
 # Dependencies.
-# Qt5
+# Qt5.
 SET(QT_LOCATION C:/Qt/5.13.2/msvc2017)
 SET(CMAKE_PREFIX_PATH ${QT_LOCATION}/lib/cmake)
 find_package(Qt5 5.13.2 COMPONENTS Core Network Widgets Xml Gui REQUIRED)
