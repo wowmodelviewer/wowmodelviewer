@@ -15,4 +15,5 @@ Found a bug? Report it [here](https://wowmodelviewer.net:8443/secure/CreateIssue
 Need some help? Want to show off your work? Do it here:
 
 * [Visit our official forums](https://wowmodelviewer.net/new/community/)
-* Join the [Official Warcraft Machinima Discord](https://discord.gg/GgNtecj)
+
+* Join the [Official Warcraft Machinima Discord](https://discord.gg/GgNtecj) 
